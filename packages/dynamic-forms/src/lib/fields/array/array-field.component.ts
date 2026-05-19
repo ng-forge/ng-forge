@@ -59,7 +59,9 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          @if (!field.hidden()) {
+            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          }
         }
       </div>
     }

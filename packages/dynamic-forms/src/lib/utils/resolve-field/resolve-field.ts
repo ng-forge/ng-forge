@@ -15,6 +15,15 @@ export interface ResolvedField {
   injector: Injector;
   inputs: Signal<Record<string, unknown>>;
   renderReady: Signal<boolean>;
+  /**
+   * Whether the field is currently hidden. Sourced from the FieldTree's
+   * `state.hidden()` for value-bearing fields (set by Angular Signal Forms in
+   * response to `hidden(path, …)` calls), or from the mapper's explicit
+   * `hidden` input for non-value fields (button, text, container, …). Consumers
+   * must `@if (!field.hidden())` around `*dfFieldOutlet` so hidden fields are
+   * removed from the DOM — Angular Signal Forms warns (NG01916) otherwise.
+   */
+  hidden: Signal<boolean>;
 }
 
 export function createRenderReadySignal(
@@ -31,6 +40,24 @@ export function createRenderReadySignal(
   return computed(() => {
     const currentInputs = inputs();
     return requiredInputs.every((inputName) => currentInputs[inputName] !== undefined);
+  });
+}
+
+/**
+ * Reads the current hidden state from mapper inputs. Prefers the FieldTree
+ * (`inputs.field`) when present — that's where Angular Signal Forms
+ * propagates the cascading `hidden(path, …)` result — otherwise falls back
+ * to the explicit `hidden` input set by non-value mappers via `applyHiddenLogic`.
+ */
+export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Signal<boolean> {
+  return computed(() => {
+    const currentInputs = inputs();
+    const fieldCandidate = currentInputs['field'];
+    if (typeof fieldCandidate === 'function') {
+      const state = (fieldCandidate as () => { hidden?: () => boolean })();
+      return state?.hidden?.() === true;
+    }
+    return currentInputs['hidden'] === true;
   });
 }
 
@@ -94,6 +121,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
         injector: context.injector,
         inputs,
         renderReady: createRenderReadySignal(inputs, definition),
+        hidden: createHiddenSignal(inputs),
       };
     }),
     catchError((error) => {
@@ -149,6 +177,7 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
     injector: context.injector,
     inputs,
     renderReady: createRenderReadySignal(inputs, definition),
+    hidden: createHiddenSignal(inputs),
   };
 }
 
@@ -179,13 +208,14 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
 
       // Same component instance + injector, but the field definition changed.
       // Preserve component identity (so ngComponentOutlet keeps the same instance)
-      // while swapping in the freshly-mapped inputs/renderReady signals so prop
-      // updates (e.g. select options) reach the component.
+      // while swapping in the freshly-mapped inputs/renderReady/hidden signals
+      // so prop updates (e.g. select options) reach the component.
       return {
         ...existing,
         fieldDef: field.fieldDef,
         inputs: field.inputs,
         renderReady: field.renderReady,
+        hidden: field.hidden,
       };
     }
 

@@ -24,7 +24,9 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   imports: [DfFieldOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      @if (!field.hidden()) {
+        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      }
     }
   `,
   styleUrl: './page-field.component.scss',

@@ -7,7 +7,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { FieldTypeDefinition } from '../../models/field-type';
 import { ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
-import { createRenderReadySignal } from '../resolve-field/resolve-field';
+import { createHiddenSignal, createRenderReadySignal } from '../resolve-field/resolve-field';
 
 /**
  * Options for resolving an array item.
@@ -118,6 +118,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
           injector,
           inputs,
           renderReady: createRenderReadySignal(inputs, registry.get(template.type)),
+          hidden: createHiddenSignal(inputs),
         };
       }),
       catchError((error) => {

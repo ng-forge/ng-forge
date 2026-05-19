@@ -42,7 +42,9 @@ import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-
   template: `
     <ng-template #childrenTpl>
       @for (field of resolvedFields(); track field.key) {
-        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+        @if (!field.hidden()) {
+          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+        }
       }
     </ng-template>
     <ng-container #wrapperContainer></ng-container>

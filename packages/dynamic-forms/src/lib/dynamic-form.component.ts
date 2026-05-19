@@ -57,7 +57,9 @@ import { EventDispatcher } from './events/event-dispatcher';
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key) {
-            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+            @if (!field.hidden()) {
+              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+            }
           }
         }
         @default {

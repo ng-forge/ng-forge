@@ -42,7 +42,9 @@ import { SubmitEvent } from '../../events/constants/submit.event';
   imports: [DfFieldOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      @if (!field.hidden()) {
+        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      }
     }
   `,
   styleUrl: './group-field.component.scss',
