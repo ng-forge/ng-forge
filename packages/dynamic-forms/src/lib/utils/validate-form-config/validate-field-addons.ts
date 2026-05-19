@@ -60,13 +60,14 @@ export function validateFieldAddons(
       continue;
     }
 
-    // Kind registered?
-    const kindDef = kindRegistry.get((addon as { kind: string }).kind);
+    // Kind registered? `AnyAddon.kind` is already a string-literal union via
+    // DynamicFormAddonRegistry; no need to cast.
+    const kindDef = kindRegistry.get(addon.kind);
     if (!kindDef) {
       warnings.push({
         type: 'unknown-kind',
         fieldKey: field.key,
-        kind: (addon as { kind: string }).kind,
+        kind: addon.kind,
         registeredKinds,
       });
       continue;

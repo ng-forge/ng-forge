@@ -49,16 +49,33 @@ export class NgForgeAddonsBase {
     return map as ReadonlyMap<string, ReadonlyArray<AnyAddon>>;
   });
 
+  /** Secondary index keyed by `hidden` value identity. Catches the common case
+   *  where a FormConfig re-emit produces structurally-different-but-content-
+   *  identical addon objects — without this, every re-emit would spawn a new
+   *  `toSignal` subscription for each addon's hidden axis. */
+  private readonly _hiddenByValue = new WeakMap<object, Signal<boolean>>();
+
   constructor() {
     explicitEffect([this.addons], ([list]) => {
-      // Reuse signals from the previous map keyed by addon-reference identity
-      // so retained addons don't accumulate new `toSignal` subscriptions on
-      // every array swap. Only freshly-added addons resolve a new signal.
       const prev = this._hiddenSignalCache();
       const next = new Map<AnyAddon, Signal<boolean>>();
       for (const a of list ?? []) {
-        const cached = prev.get(a);
-        next.set(a, cached ?? resolveDynamicValue(a.hidden, false, this.hostInjector));
+        // Tier 1: reference identity — the cheapest hit when the same addon
+        // object is reused across emissions.
+        let resolved = prev.get(a);
+        if (!resolved) {
+          // Tier 2: hidden-value identity — when `hidden` is an object
+          // (Signal / Observable / function), the same instance can be passed
+          // through multiple new addon objects on FormConfig re-emit.
+          const h = a.hidden;
+          const valueKey = typeof h === 'object' && h !== null ? h : null;
+          resolved = valueKey ? this._hiddenByValue.get(valueKey) : undefined;
+          if (!resolved) {
+            resolved = resolveDynamicValue(a.hidden, false, this.hostInjector);
+            if (valueKey) this._hiddenByValue.set(valueKey, resolved);
+          }
+        }
+        next.set(a, resolved);
       }
       this._hiddenSignalCache.set(next);
     });

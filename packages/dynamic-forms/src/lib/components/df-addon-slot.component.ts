@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, Signal, signal, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, linkedSignal, Signal, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { AnyAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
@@ -81,14 +81,26 @@ export class DfAddonSlot {
   protected readonly className = computed(() => this.addon().className ?? null);
 
   /**
+   * Locally-resolved `hidden` signal (one-shot per addon-reference change).
+   * Built via `linkedSignal` so the underlying `resolveDynamicValue` call —
+   * which may invoke `toSignal()` for Observable-typed hidden values — runs
+   * exactly once per addon, NOT inside a reactive context. Reading the
+   * signal inside `isHidden` is then cheap and leak-free.
+   */
+  private readonly resolvedHidden = linkedSignal<AnyAddon, Signal<boolean>>({
+    source: () => this.addon(),
+    computation: (addon) => resolveDynamicValue(addon.hidden, false, this.hostInjector),
+  });
+
+  /**
    * `hidden` resolved from `DynamicValue<boolean>` to a flat `Signal<boolean>`.
    * Uses the host-supplied signal when present (avoids duplicate `toSignal`
-   * subscriptions for Observable-typed `hidden`); otherwise resolves the
-   * addon's own `hidden` field with the component's injector.
+   * subscriptions for Observable-typed `hidden`); otherwise reads the
+   * locally-resolved signal computed once per addon reference.
    */
   protected readonly isHidden = computed(() => {
     const pre = this.hidden();
-    return pre ? pre() : resolveDynamicValue(this.addon().hidden, false, this.hostInjector)();
+    return pre ? pre() : this.resolvedHidden()();
   });
 
   /** Kind component, resolved asynchronously from the registry. */
