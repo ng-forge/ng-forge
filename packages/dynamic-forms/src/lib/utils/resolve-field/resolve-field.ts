@@ -1,4 +1,5 @@
-import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
+import { computed, DestroyRef, Injector, isSignal, runInInjectionContext, Signal, Type } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -53,8 +54,8 @@ export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Sig
   return computed(() => {
     const currentInputs = inputs();
     const fieldCandidate = currentInputs['field'];
-    if (typeof fieldCandidate === 'function') {
-      const state = (fieldCandidate as () => { hidden?: () => boolean })();
+    if (isSignal(fieldCandidate)) {
+      const state = (fieldCandidate as FieldTree<unknown>)();
       return state?.hidden?.() === true;
     }
     return currentInputs['hidden'] === true;

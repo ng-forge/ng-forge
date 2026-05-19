@@ -1,14 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
-import { delay } from '@ng-forge/utils';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
-import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
+import { SimpleTestUtils, TestFormConfig } from '../../testing/src/simple-test-utils';
 import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { WRAPPER_REGISTRY } from './models/wrapper-type';
-import { FormConfig } from './models/form-config';
+import type { FieldDef } from './definitions/base/field-def';
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
@@ -52,22 +51,21 @@ describe('DynamicForm — hidden field rendering (NG01916)', () => {
     TestBed.resetTestingModule();
   });
 
-  const waitForRender = async (fixture: { detectChanges: () => void }): Promise<void> => {
-    await delay(10);
+  const waitForRender = async (fixture: ComponentFixture<unknown>): Promise<void> => {
     fixture.detectChanges();
     TestBed.flushEffects();
-    await delay(10);
+    await fixture.whenStable();
     fixture.detectChanges();
     TestBed.flushEffects();
   };
 
   it('does not emit any console.warn when a field has static hidden: true', async () => {
-    const config = {
+    const config: TestFormConfig = {
       fields: [
-        { key: 'name', type: 'input', value: '' },
-        { key: 'secret', type: 'input', value: 'x', hidden: true },
+        { key: 'name', type: 'input', value: '' } as FieldDef<unknown>,
+        { key: 'secret', type: 'input', value: 'x', hidden: true } as FieldDef<unknown>,
       ],
-    } as unknown as FormConfig;
+    };
 
     const { fixture } = SimpleTestUtils.createComponent(config);
     await waitForRender(fixture);
@@ -76,9 +74,9 @@ describe('DynamicForm — hidden field rendering (NG01916)', () => {
   });
 
   it('does not emit any console.warn when a field becomes hidden via logic', async () => {
-    const config = {
+    const config: TestFormConfig = {
       fields: [
-        { key: 'contactMethod', type: 'input', value: 'mail' },
+        { key: 'contactMethod', type: 'input', value: 'mail' } as FieldDef<unknown>,
         {
           key: 'phone',
           type: 'input',
@@ -89,9 +87,9 @@ describe('DynamicForm — hidden field rendering (NG01916)', () => {
               condition: { type: 'fieldValue', fieldPath: 'contactMethod', operator: 'notEquals', value: 'phone' },
             },
           ],
-        },
+        } as FieldDef<unknown>,
       ],
-    } as unknown as FormConfig;
+    };
 
     const { fixture } = SimpleTestUtils.createComponent(config);
     await waitForRender(fixture);
