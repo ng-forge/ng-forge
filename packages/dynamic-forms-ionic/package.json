@@ -26,6 +26,9 @@
   ],
   "sideEffects": true,
   "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
     "./styles/defaults": "./styles/_defaults.scss"
   },
   "engines": {
