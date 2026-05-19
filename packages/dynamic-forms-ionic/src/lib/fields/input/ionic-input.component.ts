@@ -139,23 +139,44 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       }
       /* ion-input projects shadow-DOM slots start and end. The default gap
          between the slot wrapper and the input text is too tight for icons.
-         Padding (not margin) on the slot wrapper survives Ionic's shadow-DOM
-         flex layout reliably. Exposed as a CSS custom property so consumers
-         can override; default 0.5rem matches Ionic's padding-medium scale. */
+         Per-side padding on each slot wrapper — each knob is independent so
+         consumers can tune the prefix's gap from the field border (outer)
+         and from the input text (inner) without affecting the suffix.
+         Padding (not margin) on the slot wrapper survives Ionic's shadow-
+         DOM flex layout reliably. */
       :host {
-        --df-ion-addon-padding: 0.5rem;
+        --df-ion-addon-prefix-outer-padding: 0;
+        --df-ion-addon-prefix-inner-padding: 0.5rem;
+        --df-ion-addon-suffix-inner-padding: 0.5rem;
+        --df-ion-addon-suffix-outer-padding: 0;
       }
+      /* The slot wrapper itself centers correctly via align-self, but the
+         icon glyph inside is baseline-pinned at the top of an inline line-
+         box (df-addon-slot defaults to display: block; line-height: normal).
+         Force the entire wrapper chain into inline-flex so the icon centers
+         on its own midline, not the inline baseline. */
       :host ::ng-deep ion-input [slot='start'],
       :host ::ng-deep ion-input [slot='end'] {
         display: inline-flex;
         align-items: center;
         align-self: center;
+        line-height: 1;
+      }
+      :host ::ng-deep ion-input [slot='start'] df-addon-slot,
+      :host ::ng-deep ion-input [slot='end'] df-addon-slot,
+      :host ::ng-deep ion-input [slot='start'] df-ion-icon-addon,
+      :host ::ng-deep ion-input [slot='end'] df-ion-icon-addon {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
       }
       :host ::ng-deep ion-input [slot='start'] {
-        padding-inline-end: var(--df-ion-addon-padding);
+        padding-inline-start: var(--df-ion-addon-prefix-outer-padding);
+        padding-inline-end: var(--df-ion-addon-prefix-inner-padding);
       }
       :host ::ng-deep ion-input [slot='end'] {
-        padding-inline-start: var(--df-ion-addon-padding);
+        padding-inline-start: var(--df-ion-addon-suffix-inner-padding);
+        padding-inline-end: var(--df-ion-addon-suffix-outer-padding);
       }
       /* Make sure ion-icon inside addon-slots is readable on dark surfaces.
          Ionic medium (low-contrast grey) is the default for icon buttons,

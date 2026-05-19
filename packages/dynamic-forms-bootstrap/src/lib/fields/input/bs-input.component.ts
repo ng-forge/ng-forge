@@ -163,6 +163,24 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
       :host([hidden]) {
         display: none !important;
       }
+      /* Per-side padding on the .input-group-text addon containers — each
+         side is its own knob so consumers can tune the prefix's gap from
+         the border (outer-left), the prefix's gap to the input text
+         (inner-right), and the symmetric suffix counterparts independently. */
+      :host {
+        --df-bs-addon-prefix-outer-padding: 0.75rem;
+        --df-bs-addon-prefix-inner-padding: 0.75rem;
+        --df-bs-addon-suffix-inner-padding: 0.75rem;
+        --df-bs-addon-suffix-outer-padding: 0.75rem;
+      }
+      :host ::ng-deep .input-group > .input-group-text:first-child {
+        padding-left: var(--df-bs-addon-prefix-outer-padding);
+        padding-right: var(--df-bs-addon-prefix-inner-padding);
+      }
+      :host ::ng-deep .input-group > .input-group-text:last-child {
+        padding-left: var(--df-bs-addon-suffix-inner-padding);
+        padding-right: var(--df-bs-addon-suffix-outer-padding);
+      }
       /* bs-button addons live inside .input-group-text for visual parity with
          bs-icon (shared grey container). Strip the inner .btn's own visual
          chrome (border, background, focus ring) so the button blends with

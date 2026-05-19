@@ -56,7 +56,13 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
       @for (a of ngfa.prefixAddons(); track $index) {
-        <df-addon-slot matPrefix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        <df-addon-slot
+          matPrefix
+          [class.df-mat-addon-text]="a.kind === 'text'"
+          [addon]="a"
+          [fieldInputs]="fieldInputs()"
+          [hidden]="ngfa.hiddenSignalCache().get(a)"
+        />
       }
       <input
         matInput
@@ -68,7 +74,13 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         [attr.tabindex]="ngf.tabIndex()"
       />
       @for (a of ngfa.suffixAddons(); track $index) {
-        <df-addon-slot matSuffix [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        <df-addon-slot
+          matSuffix
+          [class.df-mat-addon-text]="a.kind === 'text'"
+          [addon]="a"
+          [fieldInputs]="fieldInputs()"
+          [hidden]="ngfa.hiddenSignalCache().get(a)"
+        />
       }
       @if (ngf.errorsToDisplay()[0]; as error) {
         <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
@@ -87,21 +99,41 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         display: none !important;
       }
       /* matPrefix/matSuffix elements have no default Material spacing.
-         OUTER padding pushes the addon away from the form-field border;
-         INNER padding spaces it from the input text. Both exposed as CSS
-         custom properties so consumers can override symmetrically or per-
-         side. Em-based so they scale with the form-field's typography. */
+         All four sides + the text-kind variants are independent CSS custom
+         properties so consumers can tune each individually:
+           prefix-outer = prefix slot's left (border-facing) padding
+           prefix-inner = prefix slot's right (text-facing) padding
+           suffix-inner = suffix slot's left (text-facing) padding
+           suffix-outer = suffix slot's right (border-facing) padding
+         Text variants override only the INNER side because <mat-icon> has
+         ~4-6px optical padding inside its glyph box (so it looks "padded"
+         even with a small CSS value) while text glyphs sit flush against
+         their bounding box and need the extra room to match. */
       :host {
-        --df-mat-addon-outer-padding: 0.5em;
-        --df-mat-addon-inner-padding: 0.5em;
+        --df-mat-addon-prefix-outer-padding: 0.75em;
+        --df-mat-addon-prefix-inner-padding: 0.5em;
+        --df-mat-addon-suffix-inner-padding: 0.5em;
+        --df-mat-addon-suffix-outer-padding: 0.75em;
+        --df-mat-addon-prefix-text-outer-padding: 1em;
+        --df-mat-addon-prefix-text-inner-padding: 1em;
+        --df-mat-addon-suffix-text-inner-padding: 1em;
+        --df-mat-addon-suffix-text-outer-padding: 1em;
       }
       df-addon-slot[matprefix] {
-        padding-left: var(--df-mat-addon-outer-padding);
-        padding-right: var(--df-mat-addon-inner-padding);
+        padding-left: var(--df-mat-addon-prefix-outer-padding);
+        padding-right: var(--df-mat-addon-prefix-inner-padding);
       }
       df-addon-slot[matsuffix] {
-        padding-left: var(--df-mat-addon-inner-padding);
-        padding-right: var(--df-mat-addon-outer-padding);
+        padding-left: var(--df-mat-addon-suffix-inner-padding);
+        padding-right: var(--df-mat-addon-suffix-outer-padding);
+      }
+      df-addon-slot[matprefix].df-mat-addon-text {
+        padding-left: var(--df-mat-addon-prefix-text-outer-padding);
+        padding-right: var(--df-mat-addon-prefix-text-inner-padding);
+      }
+      df-addon-slot[matsuffix].df-mat-addon-text {
+        padding-left: var(--df-mat-addon-suffix-text-inner-padding);
+        padding-right: var(--df-mat-addon-suffix-text-outer-padding);
       }
     `,
   ],

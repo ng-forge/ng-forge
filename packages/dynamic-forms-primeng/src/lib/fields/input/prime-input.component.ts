@@ -145,14 +145,42 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         flex: 1 1 auto;
         width: 1%;
       }
+      /* Per-side padding on the addon containers (independent knobs). The
+         vertical axis still inherits PrimeNG's --p-inputgroup-addon-padding
+         when defined. */
+      :host {
+        --df-prime-addon-prefix-outer-padding: 0.75rem;
+        --df-prime-addon-prefix-inner-padding: 0.75rem;
+        --df-prime-addon-suffix-inner-padding: 0.75rem;
+        --df-prime-addon-suffix-outer-padding: 0.75rem;
+      }
+      /* Border + background fallbacks chain: prefer PrimeNG's addon tokens
+         (loaded when providePrimeNG() runs); fall back to the input-text
+         tokens; fall back to a tinted currentColor that always resolves so
+         the chrome stays visible even when PrimeNG's runtime CSS isn't
+         present in this sub-app's shadow root (multi-demo pages can race
+         the style injection — one shadow root wins, the other ends up
+         without the inputgroup-addon stylesheet). */
+      :host {
+        --df-prime-addon-fallback-border-color: color-mix(in srgb, currentColor 20%, transparent);
+        --df-prime-addon-fallback-background: color-mix(in srgb, currentColor 4%, transparent);
+      }
       :host ::ng-deep p-inputgroup-addon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: var(--p-inputgroup-addon-padding, 0 0.75rem);
-        background: var(--p-inputgroup-addon-background, var(--p-content-background));
-        color: var(--p-inputgroup-addon-color, var(--p-inputtext-color));
-        border: 1px solid var(--p-inputgroup-addon-border-color, var(--p-inputtext-border-color));
+        background: var(--p-inputgroup-addon-background, var(--p-content-background, var(--df-prime-addon-fallback-background)));
+        color: var(--p-inputgroup-addon-color, var(--p-inputtext-color, currentColor));
+        border: 1px solid
+          var(--p-inputgroup-addon-border-color, var(--p-inputtext-border-color, var(--df-prime-addon-fallback-border-color)));
+      }
+      :host ::ng-deep p-inputgroup > p-inputgroup-addon:first-child {
+        padding-left: var(--df-prime-addon-prefix-outer-padding);
+        padding-right: var(--df-prime-addon-prefix-inner-padding);
+      }
+      :host ::ng-deep p-inputgroup > p-inputgroup-addon:last-child {
+        padding-left: var(--df-prime-addon-suffix-inner-padding);
+        padding-right: var(--df-prime-addon-suffix-outer-padding);
       }
       /* prime-button addons sit inside a p-inputgroup-addon for visual parity
          with prime-icon (shared grey container). Flatten the inner p-button
