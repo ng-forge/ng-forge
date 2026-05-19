@@ -1,5 +1,6 @@
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
+import { RegisteredFieldTypes } from '../../models/registry/field-registry';
 import { DynamicText } from '../../models/types/dynamic-text';
 import { WrapperConfig } from '../../models/wrapper-type';
 import { FieldMeta } from './field-meta';
@@ -71,18 +72,23 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
   /**
    * Field type identifier for component selection.
    *
-   * Determines which component will be rendered for this field.
-   * Must match a registered field type name in the field registry.
+   * Determines which component will be rendered for this field. Names
+   * registered through module augmentation of `DynamicFormFieldRegistry`
+   * are surfaced as IDE autocomplete suggestions via `RegisteredFieldTypes`;
+   * the `(string & {})` branch keeps arbitrary custom identifiers accepted
+   * as an escape hatch for fields that haven't been augmented into the
+   * registry.
    *
    * @example
    * ```typescript
-   * type: 'input'     // Text input field
-   * type: 'select'    // Dropdown selection
-   * type: 'checkbox'  // Boolean checkbox
-   * type: 'group'     // Field group container
+   * type: 'input'     // Text input field (registered)
+   * type: 'select'    // Dropdown selection (registered)
+   * type: 'checkbox'  // Boolean checkbox  (registered)
+   * type: 'group'     // Field group container (registered)
+   * type: 'my-custom' // Unregistered — still accepted, no autocomplete
    * ```
    */
-  type: string;
+  type: RegisteredFieldTypes['type'] | (string & {});
 
   /**
    * Human-readable field label displayed to users.
