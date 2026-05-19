@@ -1,19 +1,19 @@
-// ============================================
-// BOOTSTRAP FORM DEFAULTS
-// ============================================
-// Opinionated host-framework defaults for Bootstrap apps.
-//
-// Library SCSS uses `var(--df-name, structural-fallback)` for layout-essential
-// vars so forms render usefully without any opt-in. These mixins layer in
-// the rest — color, typography, focus accent — that a Bootstrap app expects.
-//
-// Usage (in your app's global stylesheet):
-//
-//   @use '@ng-forge/dynamic-forms-bootstrap/styles/defaults' as df;
-//
-//   :root {
-//     @include df.apply-bootstrap-form-defaults;
-//   }
+/*
+ * Bootstrap form defaults.
+ *
+ * Opinionated host-framework defaults for Bootstrap apps. Library SCSS uses
+ * `var(--df-name, structural-fallback)` for layout-essential vars so forms
+ * render usefully without any opt-in. These mixins layer in the rest —
+ * color, typography, focus accent — that a Bootstrap app expects.
+ *
+ * Usage (in your app's global stylesheet):
+ *
+ *   @use '@ng-forge/dynamic-forms-bootstrap/styles/defaults' as df;
+ *
+ *   :root {
+ *     @include df.apply-bootstrap-form-defaults;
+ *   }
+ */
 
 @mixin form-grid-defaults {
   --df-grid-columns: 12;

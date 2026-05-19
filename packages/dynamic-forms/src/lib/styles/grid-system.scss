@@ -185,8 +185,8 @@
 /* Responsive Behavior */
 @media (max-width: 576px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-sm);
-    --df-grid-row-gap: var(--df-grid-row-gap-sm);
+    --df-grid-gap: var(--df-grid-gap-sm, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-sm, 0.5rem);
   }
 
   .df-row {
@@ -200,7 +200,7 @@
 
   /* Mobile-specific overrides */
   .df-row.df-row-mobile-keep-cols {
-    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+    grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
 
     > * {
       grid-column: revert !important;
@@ -210,8 +210,8 @@
 
 @media (min-width: 577px) and (max-width: 768px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-md);
-    --df-grid-row-gap: var(--df-grid-row-gap-md);
+    --df-grid-gap: var(--df-grid-gap-md, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-md, 0.5rem);
   }
 
   .df-row {
@@ -245,8 +245,8 @@
 
 @media (min-width: 769px) and (max-width: 992px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-lg);
-    --df-grid-row-gap: var(--df-grid-row-gap-lg);
+    --df-grid-gap: var(--df-grid-gap-lg, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-lg, 0.5rem);
   }
 
   /* Medium-specific column spans */
@@ -293,8 +293,8 @@
 
 @media (min-width: 993px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-xl);
-    --df-grid-row-gap: var(--df-grid-row-gap-xl);
+    --df-grid-gap: var(--df-grid-gap-xl, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-xl, 0.5rem);
   }
 
   /* Large-specific column spans */
