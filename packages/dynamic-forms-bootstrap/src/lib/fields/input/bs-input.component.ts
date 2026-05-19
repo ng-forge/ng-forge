@@ -95,23 +95,15 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         @if (ngfa.hasAddons()) {
           <div class="input-group">
             @for (a of ngfa.prefixAddons(); track $index) {
-              @if (a.kind === 'bs-button') {
+              <span class="input-group-text">
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              } @else {
-                <span class="input-group-text">
-                  <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-                </span>
-              }
+              </span>
             }
             <ng-container *ngTemplateOutlet="control" />
             @for (a of ngfa.suffixAddons(); track $index) {
-              @if (a.kind === 'bs-button') {
+              <span class="input-group-text">
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              } @else {
-                <span class="input-group-text">
-                  <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-                </span>
-              }
+              </span>
             }
           </div>
         } @else {
@@ -170,6 +162,30 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
     `
       :host([hidden]) {
         display: none !important;
+      }
+      /* bs-button addons live inside .input-group-text for visual parity with
+         bs-icon (shared grey container). Strip the inner .btn's own visual
+         chrome (border, background, focus ring) so the button blends with
+         the addon container — done via Bootstrap's own CSS variables so the
+         cascade reaches the rendered <button> in any theme. No !important. */
+      :host ::ng-deep .input-group-text df-bs-button-addon .btn {
+        --bs-btn-bg: transparent;
+        --bs-btn-color: var(--bs-body-color);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-bg: rgba(127, 127, 127, 0.12);
+        --bs-btn-hover-color: var(--bs-body-color);
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-bg: rgba(127, 127, 127, 0.18);
+        --bs-btn-active-border-color: transparent;
+        --bs-btn-focus-shadow-rgb: 0, 0, 0;
+        --bs-btn-padding-x: 0;
+        --bs-btn-padding-y: 0;
+        box-shadow: none;
+      }
+      :host ::ng-deep .input-group-text df-bs-button-addon .btn:focus-visible {
+        box-shadow: none;
+        outline: 1px dashed currentColor;
+        outline-offset: 2px;
       }
     `,
   ],

@@ -145,14 +145,16 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       :host {
         --df-ion-addon-padding: 0.5rem;
       }
-      :host ::ng-deep ion-input [slot='start'] {
-        display: inline-flex;
-        align-items: center;
-        padding-inline-end: var(--df-ion-addon-padding);
-      }
+      :host ::ng-deep ion-input [slot='start'],
       :host ::ng-deep ion-input [slot='end'] {
         display: inline-flex;
         align-items: center;
+        align-self: center;
+      }
+      :host ::ng-deep ion-input [slot='start'] {
+        padding-inline-end: var(--df-ion-addon-padding);
+      }
+      :host ::ng-deep ion-input [slot='end'] {
         padding-inline-start: var(--df-ion-addon-padding);
       }
       /* Make sure ion-icon inside addon-slots is readable on dark surfaces.

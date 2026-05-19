@@ -129,10 +129,30 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
          PrimeNG's default tokens for inputgroup-addon don't always track the
          input's surface — explicit binding via input-text vars keeps them
          visually unified. */
+      /* PrimeNG ships its inputgroup CSS via runtime style injection (requires
+         providePrimeNG()). When the host app doesn't wire that — like an
+         embedded live-example renderer — fall back to layout primitives so
+         the input group still flexes horizontally and the addon containers
+         have their own chrome. Uses PrimeNG's dedicated inputgroup-addon
+         tokens; idempotent if PrimeNG's runtime CSS later loads on top. */
+      :host ::ng-deep p-inputgroup {
+        display: flex;
+        align-items: stretch;
+        width: 100%;
+      }
+      :host ::ng-deep p-inputgroup > input,
+      :host ::ng-deep p-inputgroup > .p-inputtext {
+        flex: 1 1 auto;
+        width: 1%;
+      }
       :host ::ng-deep p-inputgroup-addon {
-        background: var(--p-inputtext-background);
-        color: var(--p-inputtext-color);
-        border-color: var(--p-inputtext-border-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--p-inputgroup-addon-padding, 0 0.75rem);
+        background: var(--p-inputgroup-addon-background, var(--p-content-background));
+        color: var(--p-inputgroup-addon-color, var(--p-inputtext-color));
+        border: 1px solid var(--p-inputgroup-addon-border-color, var(--p-inputtext-border-color));
       }
       /* prime-button addons sit inside a p-inputgroup-addon for visual parity
          with prime-icon (shared grey container). Flatten the inner p-button
