@@ -20,11 +20,6 @@
   --df-grid-gap: 0.5rem;
   --df-grid-row-gap: 0.5rem;
 
-  --df-breakpoint-sm: 576px;
-  --df-breakpoint-md: 768px;
-  --df-breakpoint-lg: 992px;
-  --df-breakpoint-xl: 1200px;
-
   --df-grid-gap-sm: 0.5rem;
   --df-grid-gap-md: 0.5rem;
   --df-grid-gap-lg: 0.5rem;
@@ -36,10 +31,7 @@
   --df-grid-row-gap-xl: 0.5rem;
 
   --df-array-item-gap: var(--df-grid-row-gap);
-  --df-group-gap: var(--df-grid-gap);
-  --df-group-padding: var(--df-grid-gap);
 
-  --df-disabled-opacity: 0.6;
   --df-focus-color: var(--p-primary-color, #6366f1);
 }
 

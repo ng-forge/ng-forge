@@ -15,6 +15,10 @@
   @include df.apply-ionic-form-defaults;
 }
 
+// Sandbox opts into withLegacyStatusClasses(); pair it with the matching
+// SCSS so Ionic components color in error state when .ng-invalid.ng-touched.
+@include df.apply-ionic-legacy-error-styles;
+
 // Ionic CSS imports
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
