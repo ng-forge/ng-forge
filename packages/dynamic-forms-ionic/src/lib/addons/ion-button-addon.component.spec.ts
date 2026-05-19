@@ -30,7 +30,7 @@ describe('IonButtonAddonComponent', () => {
     expect(button.color).toBe('danger');
   });
 
-  it('defaults color to "medium" when none configured', () => {
+  it('omits the color attribute when none configured (button inherits theme text color)', () => {
     const fixture = setup({
       kind: 'ion-button',
       slot: 'suffix',
@@ -38,7 +38,12 @@ describe('IonButtonAddonComponent', () => {
       ariaLabel: 'Clear',
     });
     const button = fixture.nativeElement.querySelector('ion-button') as HTMLElement & { color?: string };
-    expect(button.color).toBe('medium');
+    // Default is undefined so <ion-button> inherits the theme's text color via
+    // currentColor (dropping the previous 'medium' default which fails WCAG
+    // contrast on dark surfaces). The template binds [attr.color]="color() ?? null"
+    // so the attribute is removed entirely when unset.
+    expect(button.color).toBeFalsy();
+    expect(button.getAttribute('color')).toBeNull();
   });
 
   it('uses slot="icon-only" when the addon has only an icon', () => {
