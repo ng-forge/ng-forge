@@ -62,23 +62,15 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
       @if (ngfa.hasAddons()) {
         <p-inputgroup>
           @for (a of ngfa.prefixAddons(); track $index) {
-            @if (a.kind === 'prime-button') {
+            <p-inputgroup-addon>
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-            } @else {
-              <p-inputgroup-addon>
-                <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              </p-inputgroup-addon>
-            }
+            </p-inputgroup-addon>
           }
           <ng-container *ngTemplateOutlet="control" />
           @for (a of ngfa.suffixAddons(); track $index) {
-            @if (a.kind === 'prime-button') {
+            <p-inputgroup-addon>
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-            } @else {
-              <p-inputgroup-addon>
-                <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-              </p-inputgroup-addon>
-            }
+            </p-inputgroup-addon>
           }
         </p-inputgroup>
       } @else {
@@ -137,10 +129,32 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
          PrimeNG's default tokens for inputgroup-addon don't always track the
          input's surface — explicit binding via input-text vars keeps them
          visually unified. */
-      :host ::ng-deep .p-inputgroup-addon {
+      :host ::ng-deep p-inputgroup-addon {
         background: var(--p-inputtext-background);
         color: var(--p-inputtext-color);
         border-color: var(--p-inputtext-border-color);
+      }
+      /* prime-button addons sit inside a p-inputgroup-addon for visual parity
+         with prime-icon (shared grey container). Flatten the inner p-button
+         so it doesn't render its own background/border on top of the addon
+         chrome — done via PrimeNG's own button CSS variables so the cascade
+         reaches the actual <button> element inside <p-button> (selector-
+         based overrides hit specificity ties with PrimeNG's own rules).
+         Consumers can override these vars if they want a different look. */
+      :host ::ng-deep p-inputgroup-addon df-prime-button-addon {
+        --p-button-secondary-background: transparent;
+        --p-button-secondary-border-color: transparent;
+        --p-button-secondary-color: var(--p-inputtext-color);
+        --p-button-secondary-hover-background: var(--p-content-hover-background, rgba(127, 127, 127, 0.08));
+        --p-button-secondary-hover-border-color: transparent;
+        --p-button-secondary-hover-color: var(--p-inputtext-color);
+        --p-button-secondary-active-background: var(--p-content-hover-background, rgba(127, 127, 127, 0.16));
+        --p-button-secondary-active-border-color: transparent;
+        --p-focus-ring-color: transparent;
+        --p-focus-ring-shadow: none;
+      }
+      :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button {
+        box-shadow: none;
       }
     `,
   ],

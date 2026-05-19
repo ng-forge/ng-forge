@@ -88,14 +88,20 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       }
       /* matPrefix/matSuffix elements have no default Material spacing.
          Pad the addon away from the form-field border (outer) and the input
-         text (inner). Em-based so it scales with the form-field's typography. */
+         text (inner). Exposed as CSS custom properties so consumers can
+         override; defaults are em-based so they scale with the form-field's
+         typography tokens. */
+      :host {
+        --df-mat-addon-outer-padding: 0.5em;
+        --df-mat-addon-inner-padding: 0.75em;
+      }
       df-addon-slot[matprefix] {
-        margin-left: 0.25em;
-        margin-right: 0.75em;
+        padding-left: var(--df-mat-addon-outer-padding);
+        padding-right: var(--df-mat-addon-inner-padding);
       }
       df-addon-slot[matsuffix] {
-        margin-left: 0.75em;
-        margin-right: 0.25em;
+        padding-left: var(--df-mat-addon-inner-padding);
+        padding-right: var(--df-mat-addon-outer-padding);
       }
     `,
   ],

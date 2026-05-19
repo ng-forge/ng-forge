@@ -139,21 +139,21 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       }
       /* ion-input projects shadow-DOM slots start and end. The default gap
          between the slot wrapper and the input text is too tight for icons.
-         Exposed as a CSS custom property so consumers can override; default
-         tracks Ionic's --ion-padding when present, otherwise falls back to 8px
-         (matches Ionic's own padding-medium scale). */
+         Padding (not margin) on the slot wrapper survives Ionic's shadow-DOM
+         flex layout reliably. Exposed as a CSS custom property so consumers
+         can override; default 0.5rem matches Ionic's padding-medium scale. */
       :host {
-        --df-ion-addon-gap: 8px;
+        --df-ion-addon-padding: 0.5rem;
       }
-      :host ::ng-deep ion-input > [slot='start'] {
+      :host ::ng-deep ion-input [slot='start'] {
         display: inline-flex;
         align-items: center;
-        margin-inline-end: var(--df-ion-addon-gap);
+        padding-inline-end: var(--df-ion-addon-padding);
       }
-      :host ::ng-deep ion-input > [slot='end'] {
+      :host ::ng-deep ion-input [slot='end'] {
         display: inline-flex;
         align-items: center;
-        margin-inline-start: var(--df-ion-addon-gap);
+        padding-inline-start: var(--df-ion-addon-padding);
       }
       /* Make sure ion-icon inside addon-slots is readable on dark surfaces.
          Ionic medium (low-contrast grey) is the default for icon buttons,
