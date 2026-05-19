@@ -3,7 +3,8 @@ import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fix
 setupTestLogging();
 setupConsoleCheck();
 
-// Ionic-specific limitation flagged for follow-up:
+// Ionic-specific limitation tracked in issue #411:
+// https://github.com/ng-forge/ng-forge/issues/411
 //
 // `<ion-input>` exposes shadow-DOM slots `start` / `end`, but they are
 // designed for decorative inline content (`<ion-icon>`). When `<ion-button>`
@@ -13,6 +14,9 @@ setupConsoleCheck();
 // logic; the e2e suite covers the icon/text/decorative paths that do work.
 // Interactive button addons need to render OUTSIDE <ion-input> (sibling
 // flex layout) — tracked as a follow-up enhancement.
+//
+// Every test.fixme() below relates to this limitation; remove all 8 once
+// issue #411 lands.
 
 test.describe('Addons', () => {
   test.describe('Icon prefix', () => {
