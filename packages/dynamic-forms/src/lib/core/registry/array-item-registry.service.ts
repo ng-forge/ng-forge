@@ -109,9 +109,8 @@ function createSlot(): ArraySlot {
  * schema swap by the `formSetup` effect in `FormStateManager`.
  *
  * `ArrayFieldComponent` injects this service and obtains its slot via
- * `slotFor(arrayPath)` on mount. Existing component-scoped tokens
- * (`ARRAY_TEMPLATE_REGISTRY`, `ARRAY_ITEM_ID_GENERATOR`) are deprecated in
- * favor of this service.
+ * `slotFor(arrayPath)` on mount. Replaces the prior per-component
+ * `ARRAY_TEMPLATE_REGISTRY` + `ARRAY_ITEM_ID_GENERATOR` providers.
  */
 @Injectable()
 export class ArrayItemRegistryService {
