@@ -13,7 +13,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FieldDef } from './definitions/base/field-def';
-import { DfFieldOutlet } from './directives/df-field-outlet.directive';
+import { DfFieldOutlet } from './directives/df-field-outlet/df-field-outlet.directive';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';

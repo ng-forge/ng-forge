@@ -14,11 +14,11 @@ import {
 } from '@angular/core';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DfFieldOutlet } from './df-field-outlet.directive';
-import { ResolvedField } from '../utils/resolve-field/resolve-field';
-import { FieldWrapper, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../models/wrapper-type';
-import { DEFAULT_WRAPPERS } from '../models/field-signal-context.token';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
-import { NoopLogger } from '../providers/features/logger/noop-logger';
+import { ResolvedField } from '../../utils/resolve-field/resolve-field';
+import { FieldWrapper, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { NoopLogger } from '../../providers/features/logger/noop-logger';
 import { delay } from '@ng-forge/utils';
 
 @Component({

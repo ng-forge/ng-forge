@@ -11,7 +11,7 @@ import {
   viewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';

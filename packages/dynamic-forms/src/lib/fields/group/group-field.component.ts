@@ -11,7 +11,7 @@ import {
   runInInjectionContext,
   untracked,
 } from '@angular/core';
-import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';

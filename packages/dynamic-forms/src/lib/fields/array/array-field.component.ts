@@ -11,7 +11,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
