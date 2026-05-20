@@ -1,6 +1,7 @@
 import { computed, Provider, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { EventBus } from '../events/event.bus';
+import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
@@ -72,6 +73,7 @@ function coreProviders(): Provider[] {
       deps: [FormStateManager],
     },
     FieldContextRegistryService,
+    ArrayItemRegistryService,
     {
       provide: DEFAULT_PROPS,
       useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.defaultProps),

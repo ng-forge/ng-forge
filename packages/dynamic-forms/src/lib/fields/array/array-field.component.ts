@@ -25,12 +25,8 @@ import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
-import {
-  ARRAY_ITEM_ID_GENERATOR,
-  ARRAY_TEMPLATE_REGISTRY,
-  createArrayItemIdGenerator,
-  FIELD_SIGNAL_CONTEXT,
-} from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
@@ -74,12 +70,6 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  providers: [
-    // Each array gets its own template registry to track templates used for dynamically added items
-    { provide: ARRAY_TEMPLATE_REGISTRY, useFactory: () => new Map<string, FieldDef<unknown>[]>() },
-    // Each array gets its own ID generator for SSR hydration compatibility
-    { provide: ARRAY_ITEM_ID_GENERATOR, useFactory: createArrayItemIdGenerator },
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ArrayFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
@@ -94,8 +84,19 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly templateRegistry = inject(ARRAY_TEMPLATE_REGISTRY);
-  private readonly generateItemId = inject(ARRAY_ITEM_ID_GENERATOR);
+  private readonly arrayItemRegistry = inject(ArrayItemRegistryService);
+  // Form-scoped slot keyed by the array's path. Survives this component's lifecycle so that
+  // `@if`-gated arrays can be destroyed and recreated without losing dynamically-added items.
+  // NOTE: keyed by `field().key` for now — nested arrays with the same key in different scopes
+  // would currently collide. Today's per-component-provider model has the same constraint
+  // (no nested-array hide/show tests exist). Path-aware keying is a follow-up.
+  // `field()` is `input.required`, so the slot reference is resolved lazily.
+  private readonly slot = computed(() => this.arrayItemRegistry.slotFor(this.field().key));
+  /** @deprecated Use `slot().templates` directly. Kept as a shim while the rest of the file migrates. */
+  private get templateRegistry(): Map<string, FieldDef<unknown>[]> {
+    return this.slot().templates;
+  }
+  private generateItemId = (): string => this.slot().nextId();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs

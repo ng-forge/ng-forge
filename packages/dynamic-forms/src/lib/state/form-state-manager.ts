@@ -35,6 +35,7 @@ import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { detectFormMode, FormMode } from '../models/types/form-mode';
 import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
@@ -196,6 +197,10 @@ export class FormStateManager<
   private readonly eventBus = inject(EventBus);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
+  // Optional so unit-test setups that drive FormStateManager directly without provideDynamicFormDI()
+  // (e.g. mocked RootFormRegistryService specs) don't have to manually wire the registry.
+  // In real DynamicForm usage it's always provided by coreProviders.
+  private readonly arrayItemRegistry = inject(ArrayItemRegistryService, { optional: true });
 
   /** Host component dependencies (config, formOptions, value). */
   private readonly deps = (() => {
@@ -992,12 +997,14 @@ export class FormStateManager<
     });
 
     // Schema change resets the saved store + transition tracker so values from a stale schema
-    // can't leak into the new one.
+    // can't leak into the new one. Also drops every per-array slot in the registry so a fresh
+    // schema starts with an empty template/itemOrder/id-counter state.
     explicitEffect([this.formSetup], () => {
       this.prevFieldStateSnapshot.set({});
       if (Object.keys(this.excludedValueStore()).length > 0) {
         this.excludedValueStore.set({});
       }
+      this.arrayItemRegistry?.clearAll();
     });
 
     // Outward sync uses boundFormValue (honors only explicit excludeValueIf* opt-ins) so

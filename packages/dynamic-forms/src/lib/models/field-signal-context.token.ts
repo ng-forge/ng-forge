@@ -224,6 +224,11 @@ export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unk
  * const originalTemplate = registry.get(existingItemId);
  * ```
  */
+/**
+ * @deprecated Internal use only. Replaced by `ArrayItemRegistryService` (form-scoped) so that
+ * `@if`-gated arrays can be destroyed and recreated without losing their dynamically-added items.
+ * This token is no longer consumed by `ArrayFieldComponent` and will be removed in a future major.
+ */
 export const ARRAY_TEMPLATE_REGISTRY = new InjectionToken<ArrayTemplateRegistry>('ARRAY_TEMPLATE_REGISTRY');
 
 /**
@@ -255,6 +260,11 @@ export type ArrayTemplateRegistry = Map<string, import('../definitions/base/fiel
  * const generateId = inject(ARRAY_ITEM_ID_GENERATOR);
  * const itemId = generateId(); // 'item-0', 'item-1', etc.
  * ```
+ */
+/**
+ * @deprecated Internal use only. Replaced by `ArrayItemRegistryService` (form-scoped) so that ids
+ * persist across an `@if`-gated array's destroy/recreate. No longer consumed by `ArrayFieldComponent`;
+ * will be removed in a future major.
  */
 export const ARRAY_ITEM_ID_GENERATOR = new InjectionToken<() => string>('ARRAY_ITEM_ID_GENERATOR');
 
