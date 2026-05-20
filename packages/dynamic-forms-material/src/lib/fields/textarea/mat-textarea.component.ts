@@ -1,4 +1,4 @@
-import { afterRenderEffect, ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
@@ -27,7 +27,6 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
       <textarea
         ngForgeControl
-        #textareaRef
         matInput
         [id]="textareaId"
         [formField]="ngf.field()"
@@ -59,46 +58,6 @@ export default class MatTextareaFieldComponent {
   protected readonly ngf = injectNgForgeField<string>();
 
   readonly props = input<MatTextareaProps>();
-
-  /**
-   * Reference to the native textarea element.
-   * Used to imperatively sync the readonly attribute since Angular Signal Forms'
-   * [field] directive doesn't sync FieldState.readonly() to the DOM.
-   */
-  private readonly textareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('textareaRef');
-
-  /**
-   * Computed signal that extracts the readonly state from the field.
-   * Used by the effect to reactively sync the readonly attribute to the DOM.
-   */
-  private readonly isReadonly = computed(() => this.ngf.field()().readonly());
-
-  /**
-   * Workaround: Angular Signal Forms' [field] directive does NOT sync the readonly
-   * attribute to the DOM, even though FieldState.readonly() returns the correct value.
-   * This effect imperatively sets/removes the readonly attribute on the native textarea
-   * element whenever the readonly state changes.
-   *
-   * Note: We cannot use [readonly] or [attr.readonly] bindings because Angular throws
-   * NG8022: "Binding to '[readonly]' is not allowed on nodes using the '[field]' directive"
-   *
-   * Uses afterRenderEffect to ensure DOM is ready before manipulating attributes.
-   *
-   * @see https://github.com/angular/angular/issues/65897
-   */
-  private readonly syncReadonlyToDom = afterRenderEffect({
-    write: () => {
-      const textareaRef = this.textareaRef();
-      const isReadonly = this.isReadonly();
-      if (textareaRef?.nativeElement) {
-        if (isReadonly) {
-          textareaRef.nativeElement.setAttribute('readonly', '');
-        } else {
-          textareaRef.nativeElement.removeAttribute('readonly');
-        }
-      }
-    },
-  });
 
   readonly appearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
   readonly subscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');

@@ -47,13 +47,20 @@ import { CssWrapper, RowWrapper } from '../definitions/default';
  * ```
  */
 /**
- * Base field type definitions for fields that don't use the `field` input.
- * Used by display-only fields like `text` that render immediately without
+ * Base for container field types that consume the mapper-emitted `field` input
+ * (row, group, array, page, container).
+ */
+const CONTAINER_FIELD_TYPES_BASE = {
+  renderReadyWhen: ['field'],
+} as const;
+
+/**
+ * Base for display-only fields (`text`) that render immediately without
  * waiting for form value integration.
  */
 const DISPLAY_FIELD_TYPES_BASE = {
-  renderReadyWhen: [] as string[],
-};
+  renderReadyWhen: [],
+} as const;
 
 /**
  * Built-in field types provided by the dynamic form library.
@@ -71,24 +78,28 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/container/container-field.component'),
     mapper: rowFieldMapper,
     valueHandling: 'flatten',
+    ...CONTAINER_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<RowField>,
   {
     name: 'group',
     loadComponent: () => import('../fields/group/group-field.component'),
     mapper: groupFieldMapper,
     valueHandling: 'include',
+    ...CONTAINER_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<GroupField>,
   {
     name: 'array',
     loadComponent: () => import('../fields/array/array-field.component'),
     mapper: arrayFieldMapper,
     valueHandling: 'include',
+    ...CONTAINER_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<ArrayField>,
   {
     name: 'page',
     loadComponent: () => import('../fields/page/page-field.component'),
     mapper: pageFieldMapper,
     valueHandling: 'flatten',
+    ...CONTAINER_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<PageField>,
   {
     name: 'text',
@@ -107,6 +118,7 @@ export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/container/container-field.component'),
     mapper: containerFieldMapper,
     valueHandling: 'flatten',
+    ...CONTAINER_FIELD_TYPES_BASE,
   } satisfies FieldTypeDefinition<ContainerField>,
 ];
 

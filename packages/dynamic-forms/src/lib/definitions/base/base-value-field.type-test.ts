@@ -2,6 +2,7 @@
  * Exhaustive type tests for BaseValueField interface.
  */
 import { expectTypeOf } from 'vitest';
+import type { RegisteredFieldTypes } from '../../models/registry/field-registry';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { BaseValueField, ValueType, ValueFieldComponent } from './base-value-field';
 import type { FieldDef } from './field-def';
@@ -141,7 +142,7 @@ describe('BaseValueField - Property Types', () => {
 
   it('should inherit all FieldDef properties', () => {
     expectTypeOf<TestField['key']>().toEqualTypeOf<string>();
-    expectTypeOf<TestField['type']>().toEqualTypeOf<string>();
+    expectTypeOf<TestField['type']>().toEqualTypeOf<RegisteredFieldTypes['type'] | (string & {})>();
     expectTypeOf<TestField['label']>().toEqualTypeOf<DynamicText | undefined>();
   });
 

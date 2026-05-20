@@ -15,9 +15,14 @@ import { IonicField } from '../types/types';
 import { buttonFieldMapper } from '../fields/button/ionic-button.mapper';
 import { nextButtonFieldMapper, previousButtonFieldMapper, submitButtonFieldMapper } from '../fields/button/ionic-specific-button.mapper';
 
+const VALUE_FIELD_TYPES_BASE = {
+  renderReadyWhen: ['field'],
+} as const;
+
 const BUTTON_FIELD_TYPES_BASE = {
-  renderReadyWhen: [] as string[],
-};
+  renderReadyWhen: [],
+  valueHandling: 'exclude',
+} as const;
 
 /**
  * Ionic field type definitions
@@ -33,87 +38,80 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     addons: {
       slots: ['prefix', 'suffix'],
     },
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Select,
     loadComponent: () => import('../fields/select/ionic-select.component'),
     mapper: optionsFieldMapper,
     scope: 'single-select',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Checkbox,
     loadComponent: () => import('../fields/checkbox/ionic-checkbox.component'),
     mapper: checkboxFieldMapper,
     scope: 'boolean',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Button,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: buttonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Submit,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: submitButtonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Next,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: nextButtonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Previous,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: previousButtonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.AddArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: addArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.PrependArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: prependArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.InsertArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: insertArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.RemoveArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: removeArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.PopArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: popArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.ShiftArrayItem,
     loadComponent: () => import('../fields/button/ionic-button.component'),
     mapper: shiftArrayItemButtonMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
@@ -122,35 +120,41 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[] = [
     mapper: valueFieldMapper,
     propsToMeta: ['rows'],
     scope: 'text-input',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Radio,
     loadComponent: () => import('../fields/radio/ionic-radio.component'),
     mapper: optionsFieldMapper,
     scope: 'single-select',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.MultiCheckbox,
     loadComponent: () => import('../fields/multi-checkbox/ionic-multi-checkbox.component'),
     mapper: optionsFieldMapper,
     scope: 'multi-select',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Datepicker,
     loadComponent: () => import('../fields/datepicker/ionic-datepicker.component'),
     mapper: datepickerFieldMapper,
     scope: 'date',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Slider,
     loadComponent: () => import('../fields/slider/ionic-slider.component'),
     mapper: valueFieldMapper,
     scope: 'numeric',
+    ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: IonicField.Toggle,
     loadComponent: () => import('../fields/toggle/ionic-toggle.component'),
     mapper: checkboxFieldMapper,
     scope: 'boolean',
+    ...VALUE_FIELD_TYPES_BASE,
   },
 ];

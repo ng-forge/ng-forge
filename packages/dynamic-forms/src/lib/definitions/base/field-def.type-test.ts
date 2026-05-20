@@ -2,6 +2,7 @@
  * Exhaustive type tests for FieldDef interface.
  */
 import { expectTypeOf } from 'vitest';
+import type { RegisteredFieldTypes } from '../../models/registry/field-registry';
 import type { DynamicText } from '../../models/types/dynamic-text';
 import type { WrapperConfig } from '../../models/wrapper-type';
 import type { FieldDef, FieldComponent } from './field-def';
@@ -48,8 +49,10 @@ describe('FieldDef - Exhaustive Whitelist', () => {
       expectTypeOf<FieldDef<TestProps>['key']>().toEqualTypeOf<string>();
     });
 
-    it('type is required', () => {
-      expectTypeOf<FieldDef<TestProps>['type']>().toEqualTypeOf<string>();
+    it('type accepts known field types and any string', () => {
+      // The string & {} branch preserves IDE suggestions for known types
+      // (RegisteredFieldTypes['type']) while still accepting arbitrary strings.
+      expectTypeOf<FieldDef<TestProps>['type']>().toEqualTypeOf<RegisteredFieldTypes['type'] | (string & {})>();
     });
   });
 

@@ -1147,22 +1147,35 @@ Register with `valueHandling: 'exclude'` and `renderReadyWhen: []` since action 
 
 `NgForgeField` declares `field` and `key` as `input.required()`. The form engine guarantees both are bound before the component renders, but the contract is enforced via the `renderReadyWhen` mechanism on the `FieldTypeDefinition`.
 
-For value-bearing fields (`valueFieldMapper`, `checkboxFieldMapper`, etc.), `renderReadyWhen: ['field']` is the implicit default — no need to declare it. The renderer waits for the mapper to emit `field` before instantiating the component, so the required-input contract is satisfied on first CD.
+The renderer resolves the effective `renderReadyWhen` per registration in this order:
 
-For fields that don't bind to a form value (buttons, display-only text), declare `renderReadyWhen: []` to opt out of the default wait:
+1. `FieldTypeDefinition.renderReadyWhen` — explicit on the registration. Always wins (escape hatch).
+2. `valueHandling: 'exclude'` — short-circuits to `[]`. Display / action / layout fields don't bind to a form value, so they never wait.
+3. Default `['field']`. In dev mode the renderer also emits a one-time warning via `DynamicFormLogger` so adapter authors learn to declare the contract explicitly.
+
+Every registration in your adapter should declare `renderReadyWhen` (directly or via a shared base constant) so the contract is visible at the registration site. The convention the built-in adapters follow:
 
 ```typescript
+const VALUE_FIELD_TYPES_BASE = {
+  renderReadyWhen: ['field'],
+} as const;
+
 const BUTTON_FIELD_TYPES_BASE = {
-  renderReadyWhen: [] as string[],
-};
+  renderReadyWhen: [],
+  valueHandling: 'exclude',
+} as const;
 
 export const ADAPTER_FIELD_TYPES: FieldTypeDefinition[] = [
-  // ...
+  {
+    name: 'input',
+    loadComponent: () => import('./input/input.component'),
+    mapper: valueFieldMapper,
+    ...VALUE_FIELD_TYPES_BASE,
+  },
   {
     name: 'submit',
     loadComponent: () => import('./buttons/submit-button.component'),
     mapper: submitButtonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
 ];
