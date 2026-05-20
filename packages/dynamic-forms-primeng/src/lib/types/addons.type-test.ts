@@ -6,6 +6,10 @@
  * discriminated union with `?: never` on each variant's other slots. These
  * `@ts-expect-error` lines fail the build if the XOR ever regresses.
  *
+ * Each `@ts-expect-error` sits on the line BEFORE the offending `const`
+ * declaration: TypeScript reports the union-incompatibility error against
+ * the object literal as a whole, not against the property line within it.
+ *
  * Type-only file: no runtime emit. Vitest is happy to skip it.
  */
 import type { PrimeButtonAddon } from './addons';
@@ -50,35 +54,35 @@ const _noClickVariant: PrimeButtonAddon = {
 };
 
 // Invalid: preset + actionRef.
+// @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _presetPlusActionRef: PrimeButtonAddon = {
   kind: 'prime-button',
   slot: 'suffix',
   icon: 'times',
   ariaLabel: 'Clear',
   preset: 'clear',
-  // @ts-expect-error XOR: actionRef cannot coexist with preset.
   actionRef: 'somehandler',
 };
 
 // Invalid: preset + action.
+// @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _presetPlusAction: PrimeButtonAddon = {
   kind: 'prime-button',
   slot: 'suffix',
   icon: 'times',
   ariaLabel: 'Clear',
   preset: 'clear',
-  // @ts-expect-error XOR: action cannot coexist with preset.
   action: () => undefined,
 };
 
 // Invalid: actionRef + action.
+// @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _actionRefPlusAction: PrimeButtonAddon = {
   kind: 'prime-button',
   slot: 'suffix',
   icon: 'send',
   ariaLabel: 'Send',
   actionRef: 'mySendHandler',
-  // @ts-expect-error XOR: action cannot coexist with actionRef.
   action: () => undefined,
 };
 
@@ -87,10 +91,10 @@ const _actionRefPlusAction: PrimeButtonAddon = {
 // ============================================================================
 
 // Invalid: icon without label OR ariaLabel.
+// @ts-expect-error icon-only buttons must carry an accessible label.
 const _iconWithoutLabelOrAria: PrimeButtonAddon = {
   kind: 'prime-button',
   slot: 'suffix',
-  // @ts-expect-error icon-only buttons must carry an accessible label.
   icon: 'times',
 };
 
