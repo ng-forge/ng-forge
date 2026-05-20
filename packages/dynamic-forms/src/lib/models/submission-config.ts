@@ -71,7 +71,6 @@ export type SubmissionActionResult = Promise<TreeValidationResult> | Observable<
  * @typeParam TValue - The form value type
  *
  * @public
- * @experimental
  */
 export interface SubmissionConfig<TValue = unknown> {
   /**

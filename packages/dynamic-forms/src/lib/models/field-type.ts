@@ -99,7 +99,7 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /** Semantic scope for tooling to discover interchangeable field alternatives */
   scope?: FieldScope | FieldScope[];
   /** Mapped component inputs that must exist before the renderer instantiates the component */
-  renderReadyWhen?: RenderReadyInput[];
+  renderReadyWhen?: readonly RenderReadyInput[];
 }
 
 /**
