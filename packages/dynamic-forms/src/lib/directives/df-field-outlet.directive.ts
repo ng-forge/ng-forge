@@ -90,7 +90,13 @@ export class DfFieldOutlet {
   private lastPushedInputs: Record<string, unknown> | undefined;
 
   private readonly componentIdentity: Signal<Type<unknown>> = computed(() => this.dfFieldOutlet().component);
-  private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());
+  /**
+   * Gate for the wrapper chain controller: only true when required inputs are populated AND the
+   * field isn't hidden. Combining the two prevents an initial-mount race where the chain mounts
+   * during the brief window between `renderReady` flipping true and `hidden()` settling — that
+   * window is exactly where Angular Signal Forms' `[formField]` directive emits NG01916.
+   */
+  private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady() && !this.dfFieldOutlet().hidden());
   private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
   /**

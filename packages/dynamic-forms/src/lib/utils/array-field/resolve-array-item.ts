@@ -40,6 +40,12 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
    */
   generateItemId: () => string;
   /**
+   * Optional pre-existing id to reuse for this item instead of calling `generateItemId`.
+   * Used by the recovery path on component recreate so that templates stored under the
+   * surviving id in `ArrayItemRegistryService` continue to map cleanly.
+   */
+  existingItemId?: string;
+  /**
    * For primitive array items, the key of the value field in the template.
    * Passed through to createArrayItemInjectorAndInputs for form context wrapping.
    */
@@ -67,6 +73,7 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     destroyRef,
     loadTypeComponent,
     generateItemId,
+    existingItemId,
     primitiveFieldKey,
   } = options;
 
@@ -74,8 +81,10 @@ export function resolveArrayItem<TModel extends Record<string, unknown>>(
     return of(undefined);
   }
 
-  // Generate ONE id for this array item (shared by all fields for tracking)
-  const itemId = generateItemId();
+  // Generate ONE id for this array item (shared by all fields for tracking), unless
+  // the caller is rehydrating an existing item — in which case reuse its id so the
+  // form-scoped template registry continues to map cleanly.
+  const itemId = existingItemId ?? generateItemId();
 
   // O(1) position lookup via Map instead of O(n) indexOf()
   const indexSignal = linkedSignal(() => {

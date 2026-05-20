@@ -1,4 +1,4 @@
-import { computed, DestroyRef, Injector, isSignal, runInInjectionContext, Signal, Type } from '@angular/core';
+import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
@@ -45,27 +45,37 @@ export function createRenderReadySignal(
 }
 
 /**
- * Reads the current hidden state from mapper inputs. Returns true only for
- * value-bearing leaf fields whose `FieldTree` reports `hidden()` — that's
- * where Angular Signal Forms' `[formField]` directive emits NG01916.
+ * Reads the current hidden state from mapper inputs. Uniform across all field
+ * types — value-bearing leaves source from the `FieldTree`'s `state.hidden()`
+ * (where Angular Signal Forms cascades `hidden(path, …)`), and non-field outputs
+ * (button/text/containers) source from the mapper's explicit `inputs.hidden`.
  *
- * Containers (group, page, row, container, array) and non-field outputs
- * (button, text) always return `false`. Those components handle their own
- * visual hiding via host bindings (`[attr.hidden]` / `[class.df-*-hidden]`),
- * and gating them with `@if` would destroy them on hide — losing the array's
- * item state, focus, and any other in-component state across hide↔show
- * cycles. Leaves nested inside a hidden container still get gated through
- * the cascading `state.hidden()` on their own `FieldTree`.
+ * The `@if (!field.hidden())` gate at every `*dfFieldOutlet` consumption site uses
+ * this signal, removing hidden fields from the DOM. That's required to silence
+ * Angular's `NG01916: Field 'X' is hidden but is being rendered` warning — and
+ * is the prescribed pattern from the
+ * [`hidden` API docs](https://angular.dev/api/forms/signals/hidden).
+ *
+ * Container internal state (e.g. an `ArrayFieldComponent`'s items + dynamic
+ * templates + id counter) survives this destroy/recreate via the form-scoped
+ * `ArrayItemRegistryService` keyed by array path.
  */
 export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Signal<boolean> {
   return computed(() => {
     const currentInputs = inputs();
     const fieldCandidate = currentInputs['field'];
-    if (isSignal(fieldCandidate)) {
+    // Value-bearing leaves expose `field` as a callable `FieldTree` whose invocation returns a
+    // `FieldState` with a `hidden` accessor. `isSignal()` doesn't recognise the Proxy-wrapped
+    // FieldTree (no SIGNAL symbol), so we duck-type the shape and call `state.hidden()` directly.
+    if (typeof fieldCandidate === 'function') {
       const state = (fieldCandidate as FieldTree<unknown>)();
-      return state?.hidden?.() === true;
+      if (state && typeof state.hidden === 'function') {
+        return state.hidden() === true;
+      }
     }
-    return false;
+    // Non-value fields (button, text, containers) carry an explicit `hidden` input set by
+    // `applyHiddenLogic` based on the mapper-side evaluation.
+    return currentInputs['hidden'] === true;
   });
 }
 

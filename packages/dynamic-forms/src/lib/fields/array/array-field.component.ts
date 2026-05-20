@@ -438,6 +438,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     // Store the template used for this item so it can be re-used during recreate operations
     this.templateRegistry.set(resolvedItem.id, templates);
+    // Mirror the insert into slot.itemOrder so survival across hide/show stays consistent.
+    this.slot().itemOrder.splice(insertIndex, 0, resolvedItem.id);
 
     // Insert resolved item at correct position
     this.resolvedItemsSignal.update((current) => {
@@ -479,8 +481,17 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         break;
       }
       case 'initial': {
+        // If the slot has surviving state from a prior ArrayFieldComponent instance (same
+        // form, same array path, just a different render cycle — e.g. an `@if`-gated array
+        // that was hidden then re-shown), reuse the stored templates AND ids so dynamically-
+        // added items rebuild correctly. When the slot is empty this collapses to a normal
+        // initial resolve via Priority 2/3.
+        const slot = this.slot();
+        const useSurvival = slot.itemOrder.length === fieldTrees.length && fieldTrees.length > 0;
+        const positionalTemplates = useSurvival ? slot.itemOrder.map((id) => slot.templates.get(id)) : undefined;
+        const existingItemIds = useSurvival ? slot.itemOrder.slice() : undefined;
         const run = this.fsm.dispatch({ kind: 'initial' });
-        void this.resolveAllItems(fieldTrees, run);
+        void this.resolveAllItems(fieldTrees, run, positionalTemplates, existingItemIds);
         break;
       }
       case 'append': {
@@ -510,6 +521,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     fieldTrees: readonly (FieldTree<unknown> | null)[],
     run: RunHandle,
     positionalTemplates?: (FieldDef<unknown>[] | undefined)[],
+    existingItemIds?: readonly (string | undefined)[],
   ): Promise<void> {
     if (fieldTrees.length === 0) {
       this.resolvedItemsSignal.set([]);
@@ -518,7 +530,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     // Wrap each item observable to catch individual errors
     const safeItemObservables = fieldTrees.map((_, i) =>
-      this.createResolveItemObservable(i, positionalTemplates?.[i]).pipe(
+      this.createResolveItemObservable(i, positionalTemplates?.[i], existingItemIds?.[i]).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${i}:`, error);
           return of(undefined);
@@ -548,6 +560,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
             }
           });
         }
+        // Mirror the resolved item ids into the slot's itemOrder so a future component
+        // recreate (e.g. after an @if hide cycle) can rehydrate via the survival path.
+        const slot = this.slot();
+        slot.itemOrder.length = 0;
+        for (const item of items) slot.itemOrder.push(item.id);
         this.resolvedItemsSignal.set(items);
         // Mark this run settled so the emit-effect can fire componentInitialized once allReady is true.
         run.resolve();
@@ -584,6 +601,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       );
 
       if (!run.isStale()) {
+        const slot = this.slot();
+        for (const item of newItems) slot.itemOrder.push(item.id);
         this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
       }
     } catch (err) {
@@ -604,7 +623,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    *    Priority 1.
    * 4. Return undefined (item cannot be resolved without a template)
    */
-  private createResolveItemObservable(index: number, overrideTemplate?: FieldDef<unknown>[]): Observable<ResolvedArrayItem | undefined> {
+  private createResolveItemObservable(
+    index: number,
+    overrideTemplate?: FieldDef<unknown>[],
+    existingItemId?: string,
+  ): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
     const primitiveKey = this.primitiveFieldKey();
 
@@ -621,6 +644,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       });
     }
@@ -639,6 +663,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       });
     }
@@ -658,6 +683,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       }).pipe(
         tap((item) => {
@@ -758,6 +784,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       newItems.splice(toIndex, 0, moved);
       return newItems;
     });
+    // Keep slot.itemOrder in sync so the post-recreate survival path sees the moved order.
+    this.slot().moveItem(fromIndex, toIndex);
 
     // Reorder form value array the same way
     const newArray = [...currentArray];
@@ -808,6 +836,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     if (removedItem) {
       this.templateRegistry.delete(removedItem.id);
     }
+    // Keep slot.itemOrder in sync so the post-recreate survival path doesn't try to
+    // restore an id that's no longer in the form value.
+    this.slot().removeAt(removeIndex);
     this.resolvedItemsSignal.update((current) => {
       const newItems = [...current];
       newItems.splice(removeIndex, 1);

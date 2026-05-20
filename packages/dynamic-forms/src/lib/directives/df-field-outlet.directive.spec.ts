@@ -70,6 +70,7 @@ function buildResolvedField(
     wrappers?: readonly WrapperConfig[] | null;
     inputs?: Signal<Record<string, unknown>>;
     renderReady?: Signal<boolean>;
+    hidden?: Signal<boolean>;
     injector: Injector;
   } = { injector: undefined as unknown as Injector },
 ): ResolvedField {
@@ -83,6 +84,7 @@ function buildResolvedField(
     injector: options.injector,
     inputs: options.inputs ?? signal({ label: key }),
     renderReady: options.renderReady ?? signal(true),
+    hidden: options.hidden ?? signal(false),
   };
 }
 
