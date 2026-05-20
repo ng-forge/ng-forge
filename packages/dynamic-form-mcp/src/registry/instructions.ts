@@ -38,7 +38,9 @@ const config: FormConfig = {
 
 Every field MUST have:
 
-- \`key\`: Unique identifier (except for \`row\` type which is layout-only)
+- \`key\`: Identifier, unique within its group scope (the same leaf key may repeat inside different groups, e.g. \`createA.name\` and \`createB.name\`). Page/row/array containers do not introduce a scope. Buttons (which don't bind to form values) don't need unique keys.
+  - **DOM id / data-testid composition:** keys are joined with \`_\` through group ancestors to form the rendered DOM id. A leaf \`street\` inside group \`address\` renders as \`id="address_street"\`. Inside an array item, the item index is appended after: \`id="address_street_0"\`. Use this exact form for \`for=\`, \`aria-describedby\`, \`aria-labelledby\`, or CSS selectors that target group-nested fields.
+  - **Avoid \`_\` in keys when they could collide with a group-prefixed id.** A top-level key \`foo_bar\` and a leaf \`bar\` inside group \`foo\` would both render as \`id="foo_bar"\`. The validator catches this collision at boot, but it's easier to just not put \`_\` in keys that share a name with an existing group + leaf pair.
 - \`type\`: One of the registered field types
 - \`label\`: Human-readable label (for accessibility)
 
@@ -305,6 +307,8 @@ Invokes a registered custom function by name:
 
 Register functions via \`customFnConfig.customFunctions\`.
 
+> **TypeScript-authored configs:** the same surface also accepts an inline \`fn: CustomFunction\` instead of \`functionName\` (XOR with \`functionName\`, code-only — not JSON-serializable). The MCP server emits \`functionName\` exclusively; consumers writing configs in TS may prefer \`fn\` when they don't need JSON round-tripping. Same caveat applies to async conditions (\`asyncFn\`), function derivations (\`fn\`), async function derivations (\`asyncFn\`), and validators (\`fn\`).
+
 #### Async Custom Condition
 
 Invokes a registered async function that returns \`Promise<boolean>\` or \`Observable<boolean>\`:
@@ -412,7 +416,7 @@ Available adapters:
 
 1. **Missing labels** - Always include labels for accessibility
 2. **Missing validation messages** - Users need clear feedback
-3. **Duplicate keys** - Each key must be unique within its scope
+3. **Duplicate keys within a group scope** - Keys must be unique within the same group. Same key in different groups is fine (different scoped paths). Buttons are exempt.
 4. **Select without options** - Select/radio fields must have options
 5. **Array without fields** - Array fields need a fields template
 6. **Group without fields** - Group fields need child fields

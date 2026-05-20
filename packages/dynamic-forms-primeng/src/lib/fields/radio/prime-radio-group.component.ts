@@ -35,6 +35,7 @@ export interface PrimeRadioGroupProps {
             [value]="option.value"
             [ngModel]="value()"
             (ngModelChange)="value.set($event)"
+            (onBlur)="onBlur()"
             [disabled]="disabled() || option.disabled || false"
             [inputId]="name() + '_' + i"
             [styleClass]="properties()?.styleClass"
@@ -80,6 +81,9 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
 
+  /** Tracks whether the field has been touched - used by Field directive */
+  readonly touched = model<boolean>(false);
+
   // Optional FormValueControl properties - Field directive will bind these
   readonly disabled = input<boolean>(false);
   readonly readonly = input<boolean>(false);
@@ -99,5 +103,10 @@ export class PrimeRadioGroupComponent implements FormValueControl<ValueType | un
       selector: 'input[type="radio"]',
       dependents: [this.options],
     });
+  }
+
+  /** Marks the field as touched when a radio button loses focus */
+  protected onBlur(): void {
+    this.touched.set(true);
   }
 }

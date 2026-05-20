@@ -307,9 +307,10 @@ test.describe('Array Fields E2E Tests', () => {
       await emailInput.focus();
       await emailInput.blur();
 
-      // Error messages should be visible for empty required fields
-      const nameErrors = scenario.locator('#name_0 mat-error');
-      const emailErrors = scenario.locator('#email_0 mat-error');
+      // Error messages should be visible for empty required fields.
+      // Items have group `member` inside each array entry → IDs scope as `member_{key}_{index}`.
+      const nameErrors = scenario.locator('#member_name_0 mat-error');
+      const emailErrors = scenario.locator('#member_email_0 mat-error');
       await expect(nameErrors).toBeVisible({ timeout: 5000 });
       await expect(emailErrors).toBeVisible({ timeout: 5000 });
 

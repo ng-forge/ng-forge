@@ -385,6 +385,29 @@ Advanced custom expressions with access to both field and form values.
 }
 ```
 
+#### Function-based forms (registered vs inline)
+
+For logic that doesn't fit cleanly into an expression — Angular service calls, complex predicates, closures over TS enums/constants — use the function form. Two mutually exclusive variants:
+
+- **Registered (`functionName`)** — JSON-serializable; references a function in `customFnConfig.customFunctions`. Use for configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)** — code-only, type-safe; the function reference is captured directly with no registry indirection. NOT JSON-serializable.
+
+```typescript
+// Registered — config can travel over the wire
+{
+  type: 'custom',
+  functionName: 'isAdmin',
+}
+
+// Inline — code-only, no registration needed
+{
+  type: 'custom',
+  fn: (ctx) => ctx.formValue.role === 'admin',
+}
+```
+
+TypeScript rejects setting both `fn` and `functionName` at compile time (`?: never` XOR). If a JSON-loaded config sneaks both through at runtime, the library logs a warning once and the inline `fn` wins.
+
 ### Field State in Expressions
 
 `javascript` and `custom` expressions have access to two additional variables for querying field interaction state:
@@ -603,12 +626,32 @@ const formConfig = {
 
 **Async condition properties:**
 
-| Property            | Type      | Required | Default | Description                                         |
-| ------------------- | --------- | -------- | ------- | --------------------------------------------------- |
-| `type`              | `'async'` | Yes      | —       | Identifies this as an async condition               |
-| `asyncFunctionName` | `string`  | Yes      | —       | Name registered in `customFnConfig.asyncConditions` |
-| `pendingValue`      | `boolean` | No       | `false` | Value returned while the function is resolving      |
-| `debounceMs`        | `number`  | No       | `300`   | Debounce delay before re-evaluating (ms)            |
+| Property            | Type                     | Required | Default | Description                                               |
+| ------------------- | ------------------------ | -------- | ------- | --------------------------------------------------------- |
+| `type`              | `'async'`                | Yes      | —       | Identifies this as an async condition                     |
+| `asyncFunctionName` | `string`                 | XOR\*    | —       | Name registered in `customFnConfig.asyncConditions`       |
+| `asyncFn`           | `AsyncConditionFunction` | XOR\*    | —       | Inline async function (code-only — not JSON-serializable) |
+| `pendingValue`      | `boolean`                | No       | `false` | Value returned while the function is resolving            |
+| `debounceMs`        | `number`                 | No       | `300`   | Debounce delay before re-evaluating (ms)                  |
+
+\* Exactly one of `asyncFunctionName` or `asyncFn` must be set. The two are mutually exclusive at the type level; if both keys appear at runtime (e.g. a JSON config that hand-edited both in), the library logs a warning and the inline `asyncFn` wins.
+
+**Inline `asyncFn` example (code-only):**
+
+```typescript
+import { inject } from '@angular/core';
+
+{
+  type: 'async',
+  asyncFn: async (context) => {
+    // Same Angular DI context as registered functions — `inject()` works here.
+    return inject(PermissionsService).canEdit(context.formValue.resourceId as string);
+  },
+  pendingValue: false,
+}
+```
+
+**See also:** the same XOR pattern applies to [sync](/dynamic-behavior/derivation/values#inline-alternative-fn) and [async derivations](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), and to [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for `customFnConfig` setup.
 
 **Choosing `pendingValue`:**
 
@@ -1092,25 +1135,33 @@ interface HttpCondition {
   debounceMs?: number; // Default: 300
 }
 
-interface AsyncCondition {
-  type: 'async';
-  asyncFunctionName: string;
-  pendingValue?: boolean; // Default: false
-  debounceMs?: number; // Default: 300
-}
+// AsyncCondition is a discriminated XOR — exactly one of asyncFunctionName / asyncFn must be set.
+type AsyncCondition =
+  | {
+      type: 'async';
+      asyncFunctionName: string;
+      pendingValue?: boolean; // Default: false
+      debounceMs?: number; // Default: 300
+    }
+  | {
+      type: 'async';
+      asyncFn: AsyncConditionFunction; // Inline (code-only, not JSON-serializable)
+      pendingValue?: boolean;
+      debounceMs?: number;
+    };
 ```
 
 **Expression types summary:**
 
-| Type         | Sync/Async | Key properties                   | Purpose                                                               |
-| ------------ | ---------- | -------------------------------- | --------------------------------------------------------------------- |
-| `fieldValue` | Sync       | `fieldPath`, `operator`, `value` | Compare a specific field's value                                      |
-| `formValue`  | Sync       | `operator`, `value`              | Compare entire form object                                            |
-| `javascript` | Sync       | `expression`                     | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
-| `custom`     | Sync       | `expression`                     | Inline expression with `fieldValue`/`formValue` (safe member access)  |
-| `and`/`or`   | Sync       | `conditions`                     | Combine multiple conditions                                           |
-| `http`       | Async      | `http`, `responseExpression`     | Server-driven condition via HTTP request                              |
-| `async`      | Async      | `asyncFunctionName`              | Custom async function registered in config                            |
+| Type         | Sync/Async | Key properties                         | Purpose                                                               |
+| ------------ | ---------- | -------------------------------------- | --------------------------------------------------------------------- |
+| `fieldValue` | Sync       | `fieldPath`, `operator`, `value`       | Compare a specific field's value                                      |
+| `formValue`  | Sync       | `operator`, `value`                    | Compare entire form object                                            |
+| `javascript` | Sync       | `expression`                           | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
+| `custom`     | Sync       | `functionName` \| `fn` (XOR)           | Registered or inline custom function                                  |
+| `and`/`or`   | Sync       | `conditions`                           | Combine multiple conditions                                           |
+| `http`       | Async      | `http`, `responseExpression`           | Server-driven condition via HTTP request                              |
+| `async`      | Async      | `asyncFunctionName` \| `asyncFn` (XOR) | Registered or inline async function                                   |
 
 ## Common Patterns
 

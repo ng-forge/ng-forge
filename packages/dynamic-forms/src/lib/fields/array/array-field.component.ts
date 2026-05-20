@@ -11,7 +11,7 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -25,12 +25,9 @@ import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
-import {
-  ARRAY_ITEM_ID_GENERATOR,
-  ARRAY_TEMPLATE_REGISTRY,
-  createArrayItemIdGenerator,
-  FIELD_SIGNAL_CONTEXT,
-} from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
+import { ArrayFieldStateMachine, RunHandle } from './array-field-state-machine';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
@@ -59,7 +56,9 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
         [attr.data-array-item-index]="i"
       >
         @for (field of item.fields; track $index) {
-          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          @if (!field.hidden()) {
+            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          }
         }
       </div>
     }
@@ -72,12 +71,6 @@ import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-a
     '[id]': '`${key()}`',
     '[attr.data-testid]': 'key()',
   },
-  providers: [
-    // Each array gets its own template registry to track templates used for dynamically added items
-    { provide: ARRAY_TEMPLATE_REGISTRY, useFactory: () => new Map<string, FieldDef<unknown>[]>() },
-    // Each array gets its own ID generator for SSR hydration compatibility
-    { provide: ARRAY_ITEM_ID_GENERATOR, useFactory: createArrayItemIdGenerator },
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ArrayFieldComponent<TModel extends Record<string, unknown> = Record<string, unknown>> {
@@ -92,8 +85,16 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
-  private readonly templateRegistry = inject(ARRAY_TEMPLATE_REGISTRY);
-  private readonly generateItemId = inject(ARRAY_ITEM_ID_GENERATOR);
+  private readonly arrayItemRegistry = inject(ArrayItemRegistryService);
+  // Form-scoped slot keyed by the array's path. Survives this component's lifecycle so that
+  // `@if`-gated arrays can be destroyed and recreated without losing dynamically-added items.
+  // NOTE: keyed by `field().key` for now — nested arrays with the same key in different scopes
+  // would currently collide. Today's per-component-provider model has the same constraint
+  // (no nested-array hide/show tests exist). Path-aware keying is a follow-up.
+  // `field()` is `input.required`, so the slot reference is resolved lazily.
+  private readonly slot = computed(() => this.arrayItemRegistry.slotFor(this.field().key));
+  /** Bound id-generator reference threaded to `resolveArrayItem` so callsites stay terse. */
+  private readonly generateItemId = (): string => this.slot().nextId();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -239,9 +240,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
-  private readonly updateVersion = signal(0);
-  private readonly pendingInitializationCycle = signal<number | null>(null);
-  private readonly settledInitializationCycle = signal<number | null>(null);
+  // Explicit state machine for async resolution + componentInitialized emission.
+  // Replaces the prior updateVersion + pendingInitializationCycle + settledInitializationCycle trio.
+  private readonly fsm = new ArrayFieldStateMachine();
 
   /**
    * Map of item IDs to their current positions. O(1) lookup vs O(n) indexOf().
@@ -303,15 +304,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       this.performDifferentialUpdate(fieldTrees);
     });
 
-    explicitEffect(
-      [this.pendingInitializationCycle, this.settledInitializationCycle, this.allResolvedFieldsRenderReady],
-      ([pending, settled, allReady]) => {
-        if (pending !== null && settled === pending && allReady) {
-          emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
-          this.pendingInitializationCycle.set(null);
-        }
-      },
-    );
+    explicitEffect([this.fsm.state, this.allResolvedFieldsRenderReady], ([, allReady]) => {
+      if (this.fsm.shouldEmit(allReady)) {
+        emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+      }
+    });
   }
 
   private setupEventHandlers(): void {
@@ -403,9 +400,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       }
     }
 
-    // Increment version and create resolved item BEFORE updating value
-    this.updateVersion.update((v) => v + 1);
-    const currentVersion = this.updateVersion();
+    // Dispatch an append run — bumps runId so any in-flight differential update
+    // becomes stale, but state stays in its current phase.
+    const run = this.fsm.dispatch({ kind: 'append' });
 
     // Append auto-remove button to resolution templates (for rendering only)
     const resolveTemplates = this.withAutoRemove(templates);
@@ -432,12 +429,14 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       ),
     );
 
-    if (currentVersion !== this.updateVersion() || !resolvedItem) {
+    if (run.isStale() || !resolvedItem) {
       return;
     }
 
     // Store the template used for this item so it can be re-used during recreate operations
-    this.templateRegistry.set(resolvedItem.id, templates);
+    this.slot().templates.set(resolvedItem.id, templates);
+    // Mirror the insert into slot.itemOrder so survival across hide/show stays consistent.
+    this.slot().itemOrder.splice(insertIndex, 0, resolvedItem.id);
 
     // Insert resolved item at correct position
     this.resolvedItemsSignal.update((current) => {
@@ -459,33 +458,44 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const resolvedItems = this.resolvedItemsSignal();
     const operation = determineDifferentialOperation(resolvedItems, fieldTrees.length);
 
-    // Only increment version for operations that do actual work.
-    // "none" operations (value-only changes) should not interfere with async add operations.
+    // "none" operations (value-only changes) don't kick the state machine — they shouldn't
+    // interfere with in-flight async resolutions.
     if (operation.type === 'none') {
       return;
     }
 
-    this.updateVersion.update((v) => v + 1);
-    const currentVersion = this.updateVersion();
-
     switch (operation.type) {
-      case 'clear':
+      case 'clear': {
         // Clean up template registry when all items are removed
-        this.templateRegistry.clear();
+        this.slot().templates.clear();
         this.resolvedItemsSignal.set([]);
-        if (resolvedItems.length === 0 && this.pendingInitializationCycle() === null && this.settledInitializationCycle() === null) {
-          this.pendingInitializationCycle.set(currentVersion);
-          this.settledInitializationCycle.set(currentVersion);
+        const run = this.fsm.dispatch({ kind: 'clear' });
+        // First-ever clear with no items: synthesize a resolve so the emit-effect fires
+        // the init pulse (matches the form-starts-empty case from the prior implementation).
+        if (resolvedItems.length === 0 && !this.fsm.hasEverEmitted) {
+          run.resolve();
         }
         break;
-      case 'initial':
-        this.pendingInitializationCycle.set(currentVersion);
-        this.settledInitializationCycle.set(null);
-        void this.resolveAllItems(fieldTrees, currentVersion);
+      }
+      case 'initial': {
+        // If the slot has surviving state from a prior ArrayFieldComponent instance (same
+        // form, same array path, just a different render cycle — e.g. an `@if`-gated array
+        // that was hidden then re-shown), reuse the stored templates AND ids so dynamically-
+        // added items rebuild correctly. When the slot is empty this collapses to a normal
+        // initial resolve via Priority 2/3.
+        const slot = this.slot();
+        const useSurvival = slot.itemOrder.length === fieldTrees.length && fieldTrees.length > 0;
+        const positionalTemplates = useSurvival ? slot.itemOrder.map((id) => slot.templates.get(id)) : undefined;
+        const existingItemIds = useSurvival ? slot.itemOrder.slice() : undefined;
+        const run = this.fsm.dispatch({ kind: 'initial' });
+        void this.resolveAllItems(fieldTrees, run, positionalTemplates, existingItemIds);
         break;
-      case 'append':
-        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, currentVersion);
+      }
+      case 'append': {
+        const run = this.fsm.dispatch({ kind: 'append' });
+        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, run);
         break;
+      }
       case 'recreate': {
         // Capture templates by item ID so each item is recreated with its original template,
         // even after move operations that change positions. Registry entries (from dynamic adds
@@ -493,13 +503,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         const positionalTemplates: (FieldDef<unknown>[] | undefined)[] = resolvedItems.map((item) => {
           // Registry entries (from dynamic adds or moves) take priority;
           // unmoved initial items return undefined → falls through to itemTemplates[idx] during resolve.
-          return this.templateRegistry.get(item.id);
+          return this.slot().templates.get(item.id);
         });
 
         this.resolvedItemsSignal.set([]);
-        this.pendingInitializationCycle.set(currentVersion);
-        this.settledInitializationCycle.set(null);
-        void this.resolveAllItems(fieldTrees, currentVersion, positionalTemplates);
+        const run = this.fsm.dispatch({ kind: 'recreate' });
+        void this.resolveAllItems(fieldTrees, run, positionalTemplates);
         break;
       }
     }
@@ -507,8 +516,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private async resolveAllItems(
     fieldTrees: readonly (FieldTree<unknown> | null)[],
-    updateId: number,
+    run: RunHandle,
     positionalTemplates?: (FieldDef<unknown>[] | undefined)[],
+    existingItemIds?: readonly (string | undefined)[],
   ): Promise<void> {
     if (fieldTrees.length === 0) {
       this.resolvedItemsSignal.set([]);
@@ -517,7 +527,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     // Wrap each item observable to catch individual errors
     const safeItemObservables = fieldTrees.map((_, i) =>
-      this.createResolveItemObservable(i, positionalTemplates?.[i]).pipe(
+      this.createResolveItemObservable(i, positionalTemplates?.[i], existingItemIds?.[i]).pipe(
         catchError((error) => {
           this.logger.error(`Failed to resolve array item at index ${i}:`, error);
           return of(undefined);
@@ -530,27 +540,31 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
       );
 
-      if (updateId === this.updateVersion()) {
+      if (!run.isStale()) {
         // Update template registry with new item IDs for dynamically added items
         if (positionalTemplates) {
           // Clean up old entries and add new ones
           const newItemIds = new Set(items.map((item) => item.id));
-          for (const existingId of this.templateRegistry.keys()) {
+          for (const existingId of this.slot().templates.keys()) {
             if (!newItemIds.has(existingId)) {
-              this.templateRegistry.delete(existingId);
+              this.slot().templates.delete(existingId);
             }
           }
           items.forEach((item, idx) => {
             const template = positionalTemplates[idx];
             if (template) {
-              this.templateRegistry.set(item.id, template);
+              this.slot().templates.set(item.id, template);
             }
           });
         }
+        // Mirror the resolved item ids into the slot's itemOrder so a future component
+        // recreate (e.g. after an @if hide cycle) can rehydrate via the survival path.
+        const slot = this.slot();
+        slot.itemOrder.length = 0;
+        for (const item of items) slot.itemOrder.push(item.id);
         this.resolvedItemsSignal.set(items);
-        if (this.pendingInitializationCycle() === updateId) {
-          this.settledInitializationCycle.set(updateId);
-        }
+        // Mark this run settled so the emit-effect can fire componentInitialized once allReady is true.
+        run.resolve();
       }
     } catch (err) {
       this.logger.error('Failed to resolve array items:', err);
@@ -562,7 +576,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     fieldTrees: readonly (FieldTree<unknown> | null)[],
     startIndex: number,
     endIndex: number,
-    updateId: number,
+    run: RunHandle,
   ): Promise<void> {
     const itemsToResolve = fieldTrees.slice(startIndex, endIndex);
     if (itemsToResolve.length === 0) return;
@@ -583,7 +597,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
       );
 
-      if (updateId === this.updateVersion()) {
+      if (!run.isStale()) {
+        const slot = this.slot();
+        for (const item of newItems) slot.itemOrder.push(item.id);
         this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
       }
     } catch (err) {
@@ -604,7 +620,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    *    Priority 1.
    * 4. Return undefined (item cannot be resolved without a template)
    */
-  private createResolveItemObservable(index: number, overrideTemplate?: FieldDef<unknown>[]): Observable<ResolvedArrayItem | undefined> {
+  private createResolveItemObservable(
+    index: number,
+    overrideTemplate?: FieldDef<unknown>[],
+    existingItemId?: string,
+  ): Observable<ResolvedArrayItem | undefined> {
     const itemTemplates = this.itemTemplates();
     const primitiveKey = this.primitiveFieldKey();
 
@@ -621,6 +641,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       });
     }
@@ -639,6 +660,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       });
     }
@@ -658,12 +680,13 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         destroyRef: this.destroyRef,
         loadTypeComponent: (type: string) => this.fieldRegistry.loadTypeComponent(type),
         generateItemId: this.generateItemId,
+        existingItemId,
         primitiveFieldKey: primitiveKey,
       }).pipe(
         tap((item) => {
           // Register the fallback template against the generated item id so subsequent
           // recreates hit Priority 1 instead of re-resolving via this branch.
-          if (item) this.templateRegistry.set(item.id, fallback);
+          if (item) this.slot().templates.set(item.id, fallback);
         }),
       );
     }
@@ -746,8 +769,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const hi = Math.max(fromIndex, toIndex);
     for (let i = lo; i <= hi; i++) {
       const item = currentItems[i];
-      if (item && !this.templateRegistry.has(item.id) && i < rawTemplates.length) {
-        this.templateRegistry.set(item.id, rawTemplates[i] as FieldDef<unknown>[]);
+      if (item && !this.slot().templates.has(item.id) && i < rawTemplates.length) {
+        this.slot().templates.set(item.id, rawTemplates[i] as FieldDef<unknown>[]);
       }
     }
 
@@ -758,6 +781,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       newItems.splice(toIndex, 0, moved);
       return newItems;
     });
+    // Keep slot.itemOrder in sync so the post-recreate survival path sees the moved order.
+    this.slot().moveItem(fromIndex, toIndex);
 
     // Reorder form value array the same way
     const newArray = [...currentArray];
@@ -806,8 +831,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     // no longer exists, params returns undefined, cancelling the pending validation automatically.
     const removedItem = this.resolvedItemsSignal()[removeIndex];
     if (removedItem) {
-      this.templateRegistry.delete(removedItem.id);
+      this.slot().templates.delete(removedItem.id);
     }
+    // Keep slot.itemOrder in sync so the post-recreate survival path doesn't try to
+    // restore an id that's no longer in the form value.
+    this.slot().removeAt(removeIndex);
     this.resolvedItemsSignal.update((current) => {
       const newItems = [...current];
       newItems.splice(removeIndex, 1);

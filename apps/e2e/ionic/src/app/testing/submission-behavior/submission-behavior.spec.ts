@@ -549,8 +549,9 @@ test.describe('Submission Behavior Tests', () => {
       await page.waitForSelector('[data-testid="submit-inside-group"] #email input', { state: 'visible', timeout: 10000 });
       await page.waitForSelector('[data-testid="submit-inside-group"] #name input', { state: 'visible', timeout: 10000 });
 
-      // Submit button inside group should be disabled initially (form is empty/invalid)
-      const submitButton = scenario.locator('#submitInGroup ion-button');
+      // Submit button inside group should be disabled initially (form is empty/invalid).
+      // The button lives inside `actionsGroup` — DOM ID is scoped.
+      const submitButton = scenario.locator('#actionsGroup_submitInGroup ion-button');
       await expect(submitButton).toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
       // Fill one field (still invalid)
@@ -569,7 +570,7 @@ test.describe('Submission Behavior Tests', () => {
       await ionBlur(nameInput);
 
       // Wait for submit button to be enabled
-      await page.waitForSelector('[data-testid="submit-inside-group"] #submitInGroup ion-button:not([aria-disabled="true"])', {
+      await page.waitForSelector('[data-testid="submit-inside-group"] #actionsGroup_submitInGroup ion-button:not([aria-disabled="true"])', {
         state: 'visible',
         timeout: 10000,
       });
@@ -605,7 +606,7 @@ test.describe('Submission Behavior Tests', () => {
       await expect(nameInput).toHaveValue('John Doe', { timeout: 5000 });
       await ionBlur(nameInput);
 
-      const descriptionInput = helpers.getInput(scenario, 'description');
+      const descriptionInput = helpers.getInput(scenario, 'metadata_description');
       await descriptionInput.fill('Test description');
       await expect(descriptionInput).toHaveValue('Test description', { timeout: 5000 });
       await ionBlur(descriptionInput);
@@ -616,9 +617,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
-      // Hidden fields inside groups should also not be visible
-      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
-      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
+      // Hidden fields inside `metadata` group also scope DOM IDs.
+      await expect(scenario.locator('[id="metadata_createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="metadata_source"]')).not.toBeVisible();
 
       // Wait for submit button to be enabled
       await page.waitForSelector('[data-testid="hidden-field"] #submitHidden ion-button:not([aria-disabled="true"])', {
@@ -660,8 +661,9 @@ test.describe('Submission Behavior Tests', () => {
 
       // Count visible field containers - should only have visible inputs and submit button
       // Ionic uses ion-input and ion-button
+      // description lives inside `metadata` group — DOM ID is scoped.
       const nameInput = scenario.locator('#name input');
-      const descriptionInput = scenario.locator('#description input');
+      const descriptionInput = scenario.locator('#metadata_description input');
       const visibleButtons = scenario.locator('#submitHidden ion-button');
 
       // We expect to see: 2 input fields (name + description) + 1 submit button

@@ -546,7 +546,7 @@ test.describe('Submission Behavior Tests', () => {
       await page.waitForSelector('[data-testid="submit-inside-group"] #name input', { state: 'visible', timeout: 10000 });
 
       // Submit button inside group should be disabled initially (form is empty/invalid)
-      const submitButton = scenario.locator('#submitInGroup button');
+      const submitButton = scenario.locator('#actionsGroup_submitInGroup button');
       await expect(submitButton).toBeDisabled({ timeout: 10000 });
 
       // Fill one field (still invalid)
@@ -565,7 +565,7 @@ test.describe('Submission Behavior Tests', () => {
       await nameInput.blur();
 
       // Wait for submit button to be enabled
-      await page.waitForSelector('[data-testid="submit-inside-group"] #submitInGroup button:not([disabled])', {
+      await page.waitForSelector('[data-testid="submit-inside-group"] #actionsGroup_submitInGroup button:not([disabled])', {
         state: 'visible',
         timeout: 10000,
       });
@@ -601,7 +601,7 @@ test.describe('Submission Behavior Tests', () => {
       await expect(nameInput).toHaveValue('John Doe', { timeout: 5000 });
       await nameInput.blur();
 
-      const descriptionInput = helpers.getInput(scenario, 'description');
+      const descriptionInput = helpers.getInput(scenario, 'metadata_description');
       await descriptionInput.fill('Test description');
       await expect(descriptionInput).toHaveValue('Test description', { timeout: 5000 });
       await descriptionInput.blur();
@@ -612,9 +612,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
-      // Hidden fields inside groups should also not be visible
-      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
-      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
+      // Hidden fields inside `metadata` group also scope DOM IDs.
+      await expect(scenario.locator('[id="metadata_createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="metadata_source"]')).not.toBeVisible();
 
       // Wait for submit button to be enabled
       await page.waitForSelector('[data-testid="hidden-field"] #submitHidden button:not([disabled])', {
@@ -657,7 +657,8 @@ test.describe('Submission Behavior Tests', () => {
       // Count visible field containers - should only have visible inputs and submit button
       // PrimeNG uses p-floatlabel for inputs and p-button for buttons
       const nameInput = scenario.locator('#name input');
-      const descriptionInput = scenario.locator('#description input');
+      // description lives inside `metadata` group → scoped ID.
+      const descriptionInput = scenario.locator('#metadata_description input');
       const visibleButtons = scenario.locator('#submitHidden button');
 
       // We expect to see: 2 input fields (name + description) + 1 submit button

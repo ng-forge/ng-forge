@@ -248,12 +248,12 @@ function warnAboutWildcardDependencies(logger: Logger, entries: PropertyDerivati
   const implicitWildcards = entries.filter(
     (entry) =>
       entry.dependsOn.includes('*') &&
-      entry.functionName &&
+      (entry.functionName || entry.fn) &&
       (!entry.originalConfig?.dependsOn || entry.originalConfig.dependsOn.length === 0),
   );
 
   if (implicitWildcards.length > 0) {
-    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey}.${e.targetProperty} (${e.functionName})`);
+    const derivationDescs = implicitWildcards.map((e) => `${e.fieldKey}.${e.targetProperty} (${e.functionName ?? '<inline fn>'})`);
     logger.warn(
       'PropertyDerivation: custom functions without explicit dependsOn detected. ' +
         `These run on EVERY form change, which may impact performance (form has ${fieldCount} fields). ` +

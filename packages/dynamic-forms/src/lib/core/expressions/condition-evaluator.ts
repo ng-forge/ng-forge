@@ -22,16 +22,29 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       return evaluateJavaScriptExpression(expression, context);
 
     case 'custom': {
-      const customFn = context.customFunctions?.[expression.functionName];
+      // Read both keys via cast — the XOR type narrows to `never` when both
+      // would be truthy, but JSON-loaded configs can produce that state at
+      // runtime. We accept it here, warn, and let inline win.
+      const bothSet = expression as { fn?: unknown; functionName?: string };
+      const inlineFn = bothSet.fn as ((ctx: EvaluationContext) => unknown) | undefined;
+      const registeredName = bothSet.functionName;
+
+      if (inlineFn && registeredName) {
+        context.logger.warn(
+          'Both "fn" and "functionName" are set on custom condition. Inline "fn" takes precedence; "functionName" is ignored.',
+        );
+      }
+
+      const customFn = inlineFn ?? (registeredName ? context.customFunctions?.[registeredName] : undefined);
       if (!customFn) {
-        context.logger.error('Custom function not found:', expression.functionName);
+        context.logger.error('Custom function not found:', registeredName);
         return false;
       }
 
       try {
         return !!customFn(context);
       } catch (error) {
-        context.logger.error('Error executing custom function:', expression.functionName, error);
+        context.logger.error('Error executing custom function:', registeredName ?? '<inline>', error);
         return false;
       }
     }
@@ -44,7 +57,7 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
 
     case 'http':
       context.logger.warn(
-        '[Dynamic Forms] HTTP conditions are resolved asynchronously via createHttpConditionLogicFunction(). ' +
+        'HTTP conditions are resolved asynchronously via createHttpConditionLogicFunction(). ' +
           'When used inside and/or composites, the HTTP result is not available synchronously. Returning false.',
       );
       return false;

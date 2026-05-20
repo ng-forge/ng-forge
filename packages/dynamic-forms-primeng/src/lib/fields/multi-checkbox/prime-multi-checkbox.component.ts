@@ -15,11 +15,12 @@ import { AsyncPipe } from '@angular/common';
   template: `
     @let f = ngf.field();
     @let checked = checkedValuesMap();
+    @let isInvalid = ngf.errorsToDisplay().length > 0;
     @if (ngf.label(); as label) {
       <div class="checkbox-group-label">{{ label | dynamicText | async }}</div>
     }
 
-    <div class="checkbox-group" [class]="groupClasses()" [attr.aria-describedby]="ngf.ariaDescribedBy()">
+    <div class="checkbox-group" [class]="props()?.styleClass" [attr.aria-describedby]="ngf.ariaDescribedBy()">
       @for (option of options(); track option.value) {
         <div class="checkbox-option">
           <p-checkbox
@@ -29,6 +30,7 @@ import { AsyncPipe } from '@angular/common';
             [ngModel]="checked['' + option.value] || false"
             (onChange)="onCheckboxChange(option, $event)"
             [disabled]="f().disabled() || option.disabled || false"
+            [invalid]="isInvalid"
           />
           <label [for]="ngf.key() + '-' + option.value" class="ml-2">{{ option.label | dynamicText | async }}</label>
         </div>
@@ -64,18 +66,6 @@ export default class PrimeMultiCheckboxFieldComponent {
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<PrimeMultiCheckboxProps>();
-
-  protected readonly groupClasses = computed(() => {
-    const classes: string[] = [];
-    const styleClass = this.props()?.styleClass;
-    if (styleClass) {
-      classes.push(styleClass);
-    }
-    if (this.ngf.errorsToDisplay().length > 0) {
-      classes.push('p-invalid');
-    }
-    return classes.join(' ');
-  });
 
   protected valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {

@@ -1,5 +1,5 @@
 import { InjectionToken, Signal } from '@angular/core';
-import type { FieldSignalContext, ArrayContext } from '../mappers/types';
+import type { FieldSignalContext, ArrayContext, GroupContext } from '../mappers/types';
 import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
@@ -79,6 +79,33 @@ export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIEL
  * ```
  */
 export const ARRAY_CONTEXT = new InjectionToken<ArrayContext>('ARRAY_CONTEXT');
+
+/**
+ * Injection token for providing group ancestry to mappers and components.
+ *
+ * Re-provided in two places:
+ * 1. `GroupFieldComponent` provides a context whose `groupPath()` is the
+ *    parent path extended by its own key (e.g. `'address'` or `'user.address'`).
+ * 2. `createArrayItemInjector` provides a sentinel with an empty `groupPath`,
+ *    resetting the chain at array boundaries — descendants of an array item
+ *    that re-enter a group compose paths INSIDE the array item, matching the
+ *    property-derivation collector's keying.
+ *
+ * `mapFieldToInputs` reads this to scope DOM IDs and override-store keys so
+ * the same leaf key can appear in different groups without colliding (#401).
+ *
+ * Inject with `{ optional: true }` because top-level fields with no group
+ * ancestor (and no enclosing array) won't have the token provided. The token
+ * IS present for fields inside an array even when no inner group exists — the
+ * array-boundary sentinel makes injection succeed with an empty `groupPath`.
+ */
+// No factory: GROUP_CONTEXT is optional-by-design — `GroupFieldComponent` and
+// `createArrayItemInjector` re-provide it where it makes sense, and consumers
+// inject with `{ optional: true }` to handle the top-level case. Mirrors the
+// ARRAY_CONTEXT pattern. Adding a throwing factory here fires even when
+// injected optionally (Angular still evaluates the tree-shakable factory
+// before honoring `optional`), so non-group fields would crash on every render.
+export const GROUP_CONTEXT = new InjectionToken<GroupContext>('GROUP_CONTEXT');
 
 /**
  * Injection token for form-level default props.
@@ -170,72 +197,3 @@ export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>(
  * and inherited by all children via Angular's hierarchical injector.
  */
 export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
-
-/**
- * Injection token for array-level template registry.
- *
- * This registry tracks which template was used to create each array item,
- * keyed by the item's unique ID. This is essential for "recreate" operations
- * (e.g., after removing items from the middle) where we need to re-resolve
- * items using their original templates, not a fallback.
- *
- * The token is provided by ArrayFieldComponent at its level and shared
- * across all items in that array. Each nested array gets its own registry.
- *
- * @example
- * ```typescript
- * // In ArrayFieldComponent
- * providers: [
- *   { provide: ARRAY_TEMPLATE_REGISTRY, useValue: new Map() }
- * ]
- *
- * // When adding items
- * const registry = inject(ARRAY_TEMPLATE_REGISTRY);
- * registry.set(itemId, templates);
- *
- * // During recreate, look up original template
- * const originalTemplate = registry.get(existingItemId);
- * ```
- */
-export const ARRAY_TEMPLATE_REGISTRY = new InjectionToken<ArrayTemplateRegistry>('ARRAY_TEMPLATE_REGISTRY');
-
-/**
- * Registry type for storing templates used to create array items.
- * Key is the item's unique ID, value is the template (array of field definitions).
- */
-export type ArrayTemplateRegistry = Map<string, import('../definitions/base/field-def').FieldDef<unknown>[]>;
-
-/**
- * Injection token for array-level item ID generator.
- *
- * Provides a function that generates unique IDs for array items. Each array
- * component instance gets its own generator (via useFactory), ensuring:
- * - SSR hydration compatibility (server and client generate same IDs for same array)
- * - No global state pollution between form instances
- * - Deterministic IDs within each array's lifecycle
- *
- * The token is provided by ArrayFieldComponent at its level with a factory
- * that creates a fresh counter for each array instance.
- *
- * @example
- * ```typescript
- * // In ArrayFieldComponent
- * providers: [
- *   { provide: ARRAY_ITEM_ID_GENERATOR, useFactory: createArrayItemIdGenerator }
- * ]
- *
- * // Usage
- * const generateId = inject(ARRAY_ITEM_ID_GENERATOR);
- * const itemId = generateId(); // 'item-0', 'item-1', etc.
- * ```
- */
-export const ARRAY_ITEM_ID_GENERATOR = new InjectionToken<() => string>('ARRAY_ITEM_ID_GENERATOR');
-
-/**
- * Factory function that creates a new array item ID generator.
- * Each invocation creates an independent counter starting at 0.
- */
-export function createArrayItemIdGenerator(): () => string {
-  let counter = 0;
-  return () => `item-${counter++}`;
-}

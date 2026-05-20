@@ -1,9 +1,9 @@
-import { computed, Injector, runInInjectionContext, Signal } from '@angular/core';
+import { computed, Injector, runInInjectionContext, signal, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { ArrayField } from '../../definitions/default/array-field';
 import { FieldDef } from '../../definitions/base/field-def';
-import { ArrayContext, FieldSignalContext } from '../../mappers/types';
-import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { ArrayContext, FieldSignalContext, GroupContext } from '../../mappers/types';
+import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
@@ -193,6 +193,20 @@ function createItemInjector<TModel extends Record<string, unknown>>(options: Cre
         deps: [Injector],
       },
       { provide: ARRAY_CONTEXT, useValue: arrayContext },
+      // Reset GROUP_CONTEXT at the array boundary: inner groups inside each
+      // item start their path fresh, matching how value-derivation and
+      // property-derivation collectors key entries
+      // (`{arrayKey}.$.{innerGroupPath}.{fieldKey}`). Without this, an outer
+      // group around the array would leak into descendants' DOM IDs and
+      // override-store keys, drifting from the collector.
+      { provide: GROUP_CONTEXT, useValue: EMPTY_GROUP_CONTEXT },
     ],
   });
 }
+
+/**
+ * Sentinel `GroupContext` provided at array item boundaries. Static `signal('')`
+ * means `applyGroupPrefix` no-ops (empty path) and any inner group composes its
+ * own path from this empty base.
+ */
+const EMPTY_GROUP_CONTEXT: GroupContext = { groupPath: signal('') };

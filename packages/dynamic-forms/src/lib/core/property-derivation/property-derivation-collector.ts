@@ -4,18 +4,27 @@ import { DerivationLogicConfig, isDerivationLogicConfig, hasTargetProperty } fro
 import { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import { extractDependenciesFromConfig } from '../derivation/extract-dependencies';
+import { extractInlineFn } from '../derivation/extract-inline-fn';
 import { traverseFieldsWithContext } from '../derivation/field-traversal';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 
 /**
- * Context for collecting property derivations, tracking array path for relative references.
+ * Context for collecting property derivations, tracking array and group ancestry.
  *
  * @internal
  */
 interface CollectionContext {
   /** Current array path for resolving relative field references. */
   arrayPath?: string;
+  /**
+   * Dot-joined ancestor group keys scoped to the current array item
+   * (or top-level when not inside an array). Reset at array boundaries —
+   * group ancestors OUTSIDE an array don't contribute to descendants'
+   * store keys because the array placeholder `{arrayKey}.$.` already
+   * encodes the field's location relative to each array item.
+   */
+  groupPath?: string;
   logger: Logger;
   tracker: WarningTracker;
 }
@@ -43,8 +52,15 @@ export function collectPropertyDerivations(
   const context: CollectionContext = { logger, tracker };
 
   traverseFieldsWithContext<CollectionContext>(fields, context, (field, ctx) => collectFromField(field, entries, ctx), {
-    onArrayChild: (_, field) => ({ arrayPath: field.key }),
-    // Group and layout containers do not affect property-derivation paths.
+    // Array boundary: each item is its own model root. Reset groupPath so
+    // ancestor groups OUTSIDE the array don't bleed into per-item keys.
+    onArrayChild: (_, field) => ({ arrayPath: field.key, groupPath: undefined }),
+    onGroupChild: (parent, field) => {
+      // Keyless groups (rare) act like layout containers — pass through.
+      if (!field.key) return {};
+      return { groupPath: parent.groupPath ? `${parent.groupPath}.${field.key}` : field.key };
+    },
+    // Layout containers (page, row, container) leave context unchanged.
   });
 
   return { entries };
@@ -84,7 +100,12 @@ function createPropertyDerivationEntryFromDerivation(
   config: DerivationLogicConfig & { targetProperty: string },
   context: CollectionContext,
 ): PropertyDerivationEntry {
-  const effectiveFieldKey = buildPropertyOverrideKey(context.arrayPath, context.arrayPath ? PLACEHOLDER_INDEX : undefined, fieldKey);
+  const effectiveFieldKey = buildPropertyOverrideKey(
+    context.arrayPath,
+    context.arrayPath ? PLACEHOLDER_INDEX : undefined,
+    fieldKey,
+    context.groupPath,
+  );
   const dependsOn = extractDependenciesFromConfig(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
@@ -98,6 +119,7 @@ function createPropertyDerivationEntryFromDerivation(
     value: config.value,
     expression: config.expression,
     functionName: config.functionName,
+    fn: extractInlineFn(config),
     trigger,
     debounceMs,
     debugName: config.debugName,

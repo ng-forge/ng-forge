@@ -395,7 +395,8 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario).toBeVisible();
 
       // Submit button inside group should be disabled initially (form is empty/invalid)
-      const submitButton = scenario.locator('#submitInGroup button');
+      // Submit button inside `actionsGroup` — DOM ID is scoped through the parent group.
+      const submitButton = scenario.locator('#actionsGroup_submitInGroup button');
       await expect(submitButton).toBeDisabled();
 
       // Fill one field (still invalid)
@@ -426,9 +427,9 @@ test.describe('Submission Behavior Tests', () => {
       const scenario = helpers.getScenario('hidden-field');
       await expect(scenario).toBeVisible();
 
-      // Fill the visible input fields
+      // Fill the visible input fields (description lives inside `metadata` group)
       await helpers.fillInput(helpers.getInput(scenario, 'name'), 'John Doe');
-      await helpers.fillInput(helpers.getInput(scenario, 'description'), 'Test description');
+      await helpers.fillInput(helpers.getInput(scenario, 'metadata_description'), 'Test description');
 
       // Hidden fields should not have any visible elements
       await expect(scenario.locator('[id="id"]')).not.toBeVisible();
@@ -436,9 +437,9 @@ test.describe('Submission Behavior Tests', () => {
       await expect(scenario.locator('[id="isActive"]')).not.toBeVisible();
       await expect(scenario.locator('[id="tagIds"]')).not.toBeVisible();
       await expect(scenario.locator('[id="labels"]')).not.toBeVisible();
-      // Hidden fields inside groups should also not be visible
-      await expect(scenario.locator('[id="createdBy"]')).not.toBeVisible();
-      await expect(scenario.locator('[id="source"]')).not.toBeVisible();
+      // Hidden fields inside `metadata` group also get scoped DOM IDs.
+      await expect(scenario.locator('[id="metadata_createdBy"]')).not.toBeVisible();
+      await expect(scenario.locator('[id="metadata_source"]')).not.toBeVisible();
 
       // Submit the form
       const submitButton = scenario.locator('#submitHidden button');
@@ -473,7 +474,8 @@ test.describe('Submission Behavior Tests', () => {
       // Count visible input fields
       // We expect to see: name input + description input (in group)
       const nameInput = scenario.locator('#name input');
-      const descriptionInput = scenario.locator('#description input');
+      // description lives inside `metadata` group → scoped ID.
+      const descriptionInput = scenario.locator('#metadata_description input');
       const visibleButtons = scenario.locator('#submitHidden button');
 
       await expect(nameInput).toHaveCount(1);

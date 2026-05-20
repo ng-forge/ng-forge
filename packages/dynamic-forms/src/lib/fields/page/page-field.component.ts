@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, EnvironmentInjector, inject, Injector, input } from '@angular/core';
-import { DfFieldOutlet } from '../../directives/df-field-outlet.directive';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
@@ -24,7 +24,9 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
   imports: [DfFieldOutlet],
   template: `
     @for (field of resolvedFields(); track field.key) {
-      <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      @if (!field.hidden()) {
+        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+      }
     }
   `,
   styleUrl: './page-field.component.scss',

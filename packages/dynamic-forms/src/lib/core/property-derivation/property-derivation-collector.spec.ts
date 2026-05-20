@@ -200,10 +200,74 @@ describe('property-derivation-collector', () => {
       const collection = collectPropertyDerivations(fields, logger, tracker);
 
       expect(collection.entries).toHaveLength(2);
-      expect(collection.entries[0].fieldKey).toBe('zipField');
+      // Group ancestors are folded into the store key so overlapping leaf keys
+      // in different groups stay distinct (issue #401). Layout containers
+      // (page, row) do not contribute.
+      expect(collection.entries[0].fieldKey).toBe('addressGroup.zipField');
       expect(collection.entries[0].targetProperty).toBe('placeholder');
       expect(collection.entries[1].fieldKey).toBe('citySelect');
       expect(collection.entries[1].targetProperty).toBe('options');
+    });
+
+    it('should distinguish overlapping leaf keys in different groups (issue #401)', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'createADto',
+          type: 'group',
+          fields: [
+            {
+              key: 'name',
+              type: 'input',
+              logic: [{ type: 'derivation', targetProperty: 'label', value: 'A Name' }],
+            } as unknown as FieldDef<unknown>,
+          ],
+        } as unknown as FieldDef<unknown>,
+        {
+          key: 'createBDto',
+          type: 'group',
+          fields: [
+            {
+              key: 'name',
+              type: 'input',
+              logic: [{ type: 'derivation', targetProperty: 'label', value: 'B Name' }],
+            } as unknown as FieldDef<unknown>,
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, tracker);
+
+      expect(collection.entries).toHaveLength(2);
+      expect(collection.entries[0].fieldKey).toBe('createADto.name');
+      expect(collection.entries[1].fieldKey).toBe('createBDto.name');
+    });
+
+    it('should combine arrayPath with inner groupPath (array > group > input)', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'contacts',
+          type: 'array',
+          fields: [
+            {
+              key: 'profile',
+              type: 'group',
+              fields: [
+                {
+                  key: 'email',
+                  type: 'input',
+                  logic: [{ type: 'derivation', targetProperty: 'placeholder', expression: 'formValue.x' }],
+                } as unknown as FieldDef<unknown>,
+              ],
+            } as unknown as FieldDef<unknown>,
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, tracker);
+
+      expect(collection.entries).toHaveLength(1);
+      // Array resets ancestor groupPath; the inner group contributes to the per-item key.
+      expect(collection.entries[0].fieldKey).toBe('contacts.$.profile.email');
     });
 
     it('should handle array field context by creating placeholder paths with $', () => {

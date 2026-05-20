@@ -1,4 +1,4 @@
-export type { ArrayContext, FieldSignalContext, MapperFn } from './types';
+export type { ArrayContext, FieldSignalContext, GroupContext, MapperFn } from './types';
 export { baseFieldMapper, buildBaseInputs } from './base/base-field-mapper';
 export { rowFieldMapper } from './row/row-field-mapper';
 export { groupFieldMapper } from './group/group-field-mapper';

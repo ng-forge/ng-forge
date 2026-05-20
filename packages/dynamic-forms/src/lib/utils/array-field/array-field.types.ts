@@ -20,6 +20,12 @@ export interface ResolvedArrayItemField {
   inputs: Signal<Record<string, unknown>>;
   /** Whether required mapped inputs are available for safe component instantiation. */
   renderReady: Signal<boolean>;
+  /**
+   * Whether the array-item field is currently hidden — mirrors `ResolvedField.hidden`
+   * so the same `@if (!field.hidden())` template gate works for top-level and
+   * array-item fields.
+   */
+  hidden: Signal<boolean>;
 }
 
 /**

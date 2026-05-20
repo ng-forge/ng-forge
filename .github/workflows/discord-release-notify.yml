@@ -1,8 +1,10 @@
 name: Discord Release Notification
 
 on:
-  release:
-    types: [published]
+  # release.yml dispatches this workflow at the end of a successful publish — see its
+  # "Notify Discord" step. We used to also listen for `release: published`, but App-
+  # token-created releases never propagated that event to this workflow, so the
+  # listener was dead weight and removed.
   workflow_run:
     # Fires whenever release.yml finishes; the notify-failure job below filters to failures.
     # Runs from main's copy of this file (workflow_run always uses the default branch),
@@ -12,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to (re)post (e.g. v0.8.0 or next/0.8.1-next.5). Used for backfill when an auto-fire was missed.'
+        description: 'Release tag to post (e.g. v0.8.0 or next/0.8.1-next.5). Fired automatically by release.yml on successful publish; can also be invoked manually to re-post.'
         required: true
         type: string
 
@@ -22,21 +24,21 @@ permissions:
 jobs:
   notify:
     name: Post release to Discord
-    # workflow_run firings are handled by notify-failure below; this job only handles
-    # the "release published" embed path.
-    if: github.event_name != 'workflow_run'
+    # Only fires from workflow_dispatch — release.yml dispatches us here after a
+    # successful publish. workflow_run firings are handled by notify-failure below.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Build payload and post to Discord
-        # Both triggers route through `gh release view` so the embed-building logic stays
-        # identical regardless of how we were fired. For release: published events we could
-        # use github.event.release.* directly, but going through the API also dodges subtle
-        # interpolation issues with bodies containing backticks or YAML-significant chars.
+        # Goes through `gh release view` (not raw event fields) so the embed renders
+        # release notes consistently regardless of how the workflow was fired, and
+        # dodges interpolation issues with bodies containing backticks or YAML-
+        # significant chars.
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
 

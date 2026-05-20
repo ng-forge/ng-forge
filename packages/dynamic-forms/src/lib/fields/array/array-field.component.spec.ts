@@ -25,6 +25,7 @@ import {
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
@@ -70,6 +71,7 @@ describe('ArrayFieldComponent', () => {
         provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
+        ArrayItemRegistryService,
         { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         {
@@ -427,6 +429,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(),
           EventBus,
           FunctionRegistryService,
+          ArrayItemRegistryService,
           { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
           { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
           {

@@ -7,7 +7,7 @@ import { extractExpressionDependencies, extractStringDependencies } from '../cro
  * Combines:
  * - Explicit `dependsOn` (when provided, it takes precedence over auto-detection)
  * - Expression-detected dependencies (only used when `dependsOn` is empty)
- * - `'*'` wildcard for `functionName` (only when `dependsOn` is empty)
+ * - `'*'` wildcard for `functionName` / inline `fn` (only when `dependsOn` is empty)
  * - Condition expression dependencies (always included)
  *
  * @internal
@@ -21,7 +21,9 @@ export function extractDependenciesFromConfig(config: DerivationLogicConfig): st
     if (config.expression) {
       extractStringDependencies(config.expression).forEach((dep) => deps.add(dep));
     }
-    if (config.functionName) {
+    // Inline `fn` mirrors `functionName` semantics: without explicit dependsOn,
+    // assume the function may depend on anything in the form.
+    if (config.functionName || (config as { fn?: unknown }).fn) {
       deps.add('*');
     }
   }

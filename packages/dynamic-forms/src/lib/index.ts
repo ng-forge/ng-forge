@@ -196,6 +196,9 @@ export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from 
 // Logic & Expression Types
 export type { ConditionalExpression, HttpCondition, AsyncCondition, EvaluationContext, LogicConfig, StateLogicConfig } from './models';
 
+// Custom Function Types (sync — for inline fn alternatives + customFnConfig)
+export type { CustomFunction } from './core/expressions/custom-function-types';
+
 // Async Custom Function Types
 export type { AsyncDerivationFunction, AsyncConditionFunction } from './core/expressions/async-custom-function-types';
 
@@ -279,7 +282,15 @@ export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './model
 export { FIELD_REGISTRY } from './models';
 
 // Signal Context - injection tokens for field components
-export { ARRAY_CONTEXT, DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, DEFAULT_WRAPPERS, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from './models';
+export {
+  ARRAY_CONTEXT,
+  DEFAULT_PROPS,
+  DEFAULT_VALIDATION_MESSAGES,
+  DEFAULT_WRAPPERS,
+  FIELD_SIGNAL_CONTEXT,
+  FORM_OPTIONS,
+  GROUP_CONTEXT,
+} from './models';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';

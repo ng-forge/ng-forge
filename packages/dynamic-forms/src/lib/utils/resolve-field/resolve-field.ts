@@ -1,4 +1,5 @@
 import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
+import { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
@@ -15,6 +16,15 @@ export interface ResolvedField {
   injector: Injector;
   inputs: Signal<Record<string, unknown>>;
   renderReady: Signal<boolean>;
+  /**
+   * Whether the field is currently hidden. Sourced from the FieldTree's
+   * `state.hidden()` for value-bearing fields (set by Angular Signal Forms in
+   * response to `hidden(path, …)` calls), or from the mapper's explicit
+   * `hidden` input for non-value fields (button, text, container, …). Consumers
+   * must `@if (!field.hidden())` around `*dfFieldOutlet` so hidden fields are
+   * removed from the DOM — Angular Signal Forms warns (NG01916) otherwise.
+   */
+  hidden: Signal<boolean>;
 }
 
 export function createRenderReadySignal(
@@ -31,6 +41,41 @@ export function createRenderReadySignal(
   return computed(() => {
     const currentInputs = inputs();
     return requiredInputs.every((inputName) => currentInputs[inputName] !== undefined);
+  });
+}
+
+/**
+ * Reads the current hidden state from mapper inputs. Uniform across all field
+ * types — value-bearing leaves source from the `FieldTree`'s `state.hidden()`
+ * (where Angular Signal Forms cascades `hidden(path, …)`), and non-field outputs
+ * (button/text/containers) source from the mapper's explicit `inputs.hidden`.
+ *
+ * The `@if (!field.hidden())` gate at every `*dfFieldOutlet` consumption site uses
+ * this signal, removing hidden fields from the DOM. That's required to silence
+ * Angular's `NG01916: Field 'X' is hidden but is being rendered` warning — and
+ * is the prescribed pattern from the
+ * [`hidden` API docs](https://angular.dev/api/forms/signals/hidden).
+ *
+ * Container internal state (e.g. an `ArrayFieldComponent`'s items + dynamic
+ * templates + id counter) survives this destroy/recreate via the form-scoped
+ * `ArrayItemRegistryService` keyed by array path.
+ */
+export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Signal<boolean> {
+  return computed(() => {
+    const currentInputs = inputs();
+    const fieldCandidate = currentInputs['field'];
+    // Value-bearing leaves expose `field` as a callable `FieldTree` whose invocation returns a
+    // `FieldState` with a `hidden` accessor. `isSignal()` doesn't recognise the Proxy-wrapped
+    // FieldTree (no SIGNAL symbol), so we duck-type the shape and call `state.hidden()` directly.
+    if (typeof fieldCandidate === 'function') {
+      const state = (fieldCandidate as FieldTree<unknown>)();
+      if (state && typeof state.hidden === 'function') {
+        return state.hidden() === true;
+      }
+    }
+    // Non-value fields (button, text, containers) carry an explicit `hidden` input set by
+    // `applyHiddenLogic` based on the mapper-side evaluation.
+    return currentInputs['hidden'] === true;
   });
 }
 
@@ -94,6 +139,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
         injector: context.injector,
         inputs,
         renderReady: createRenderReadySignal(inputs, definition),
+        hidden: createHiddenSignal(inputs),
       };
     }),
     catchError((error) => {
@@ -149,6 +195,7 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
     injector: context.injector,
     inputs,
     renderReady: createRenderReadySignal(inputs, definition),
+    hidden: createHiddenSignal(inputs),
   };
 }
 
@@ -179,13 +226,14 @@ export function reconcileFields(prev: ResolvedField[], curr: ResolvedField[]): R
 
       // Same component instance + injector, but the field definition changed.
       // Preserve component identity (so ngComponentOutlet keeps the same instance)
-      // while swapping in the freshly-mapped inputs/renderReady signals so prop
-      // updates (e.g. select options) reach the component.
+      // while swapping in the freshly-mapped inputs/renderReady/hidden signals
+      // so prop updates (e.g. select options) reach the component.
       return {
         ...existing,
         fieldDef: field.fieldDef,
         inputs: field.inputs,
         renderReady: field.renderReady,
+        hidden: field.hidden,
       };
     }
 

@@ -8,6 +8,7 @@ import { FIELD_REGISTRY } from '../../src/lib/models/field-type';
 import { FieldTypeDefinition } from '../../src/lib/models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../src/lib/models/field-signal-context.token';
 import { EventBus } from '../../src/lib/events/event.bus';
+import { ArrayItemRegistryService } from '../../src/lib/core/registry/array-item-registry.service';
 import { form } from '@angular/forms/signals';
 import { RegisteredFieldTypes } from '../../src/lib/models/registry/field-registry';
 
@@ -232,6 +233,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
     providers: [
       provideDynamicForm(),
       EventBus,
+      ArrayItemRegistryService,
       {
         provide: FIELD_REGISTRY,
         useValue: new Map([['test', mockFieldType]]),
