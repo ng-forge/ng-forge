@@ -45,10 +45,17 @@ export function createRenderReadySignal(
 }
 
 /**
- * Reads the current hidden state from mapper inputs. Prefers the FieldTree
- * (`inputs.field`) when present — that's where Angular Signal Forms
- * propagates the cascading `hidden(path, …)` result — otherwise falls back
- * to the explicit `hidden` input set by non-value mappers via `applyHiddenLogic`.
+ * Reads the current hidden state from mapper inputs. Returns true only for
+ * value-bearing leaf fields whose `FieldTree` reports `hidden()` — that's
+ * where Angular Signal Forms' `[formField]` directive emits NG01916.
+ *
+ * Containers (group, page, row, container, array) and non-field outputs
+ * (button, text) always return `false`. Those components handle their own
+ * visual hiding via host bindings (`[attr.hidden]` / `[class.df-*-hidden]`),
+ * and gating them with `@if` would destroy them on hide — losing the array's
+ * item state, focus, and any other in-component state across hide↔show
+ * cycles. Leaves nested inside a hidden container still get gated through
+ * the cascading `state.hidden()` on their own `FieldTree`.
  */
 export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Signal<boolean> {
   return computed(() => {
@@ -58,7 +65,7 @@ export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Sig
       const state = (fieldCandidate as FieldTree<unknown>)();
       return state?.hidden?.() === true;
     }
-    return currentInputs['hidden'] === true;
+    return false;
   });
 }
 
