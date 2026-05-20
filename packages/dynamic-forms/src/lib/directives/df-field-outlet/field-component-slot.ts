@@ -23,6 +23,9 @@ interface FocusSnapshot {
  * - `detached`  — the ref's host view has been pulled from its slot; held briefly
  *                 between `detach()` and the next `mountOrReuse()` so a same-class
  *                 reuse can re-insert it and replay focus.
+ *
+ * State objects are frozen at construction so any accidental mutation throws in
+ * strict mode rather than silently producing torn state.
  */
 export type FieldSlotState =
   | { readonly phase: 'empty' }
@@ -30,7 +33,6 @@ export type FieldSlotState =
       readonly phase: 'mounted';
       readonly ref: ComponentRef<unknown>;
       readonly slot: ViewContainerRef;
-      readonly lastInputs: Record<string, unknown> | null;
     }
   | {
       readonly phase: 'detached';
@@ -38,7 +40,7 @@ export type FieldSlotState =
       readonly focusSnapshot: FocusSnapshot | null;
     };
 
-const EMPTY_STATE: FieldSlotState = { phase: 'empty' };
+const EMPTY_STATE: FieldSlotState = Object.freeze({ phase: 'empty' });
 
 /**
  * Encapsulates the imperative `ViewContainerRef` / `ComponentRef` lifecycle
@@ -63,9 +65,19 @@ const EMPTY_STATE: FieldSlotState = { phase: 'empty' };
  */
 export class FieldComponentSlot {
   private readonly state = signal<FieldSlotState>(EMPTY_STATE);
+  /**
+   * Per-key cache for `pushInputs`. Lives outside the lifecycle state machine on
+   * purpose — it's a `setInput`-call optimization that changes on every keystroke,
+   * not a phase transition. Keeping it here means the `state` signal only emits
+   * on real `empty ⇄ mounted ⇄ detached` transitions (≈ once per
+   * mount/destroy cycle), not once per input emission.
+   */
+  private lastInputs: Record<string, unknown> | null = null;
 
-  /** Read-only view of the lifecycle state. Useful for tests and assertions. */
+  /** Read-only view of the lifecycle phase. Useful for tests and assertions. */
   readonly phase = () => this.state().phase;
+  /** Read-only view of the full state. Exposed so tests can assert ref stability. */
+  readonly snapshot = () => this.state();
 
   /**
    * Mount the field component into `slot`. Reuses the existing `ComponentRef`
@@ -84,7 +96,8 @@ export class FieldComponentSlot {
 
     if (current.phase !== 'empty' && current.ref.componentType === component) {
       slot.insert(current.ref.hostView);
-      this.state.set({ phase: 'mounted', ref: current.ref, slot, lastInputs: null });
+      this.lastInputs = null;
+      this.state.set(Object.freeze({ phase: 'mounted', ref: current.ref, slot }));
       this.pushInputs(rawInputs);
       if (current.phase === 'detached') this.replayFocus(current.focusSnapshot);
       return;
@@ -95,12 +108,13 @@ export class FieldComponentSlot {
     // throw inside the factory doesn't leave a dangling ref the next mount
     // would try to re-insert.
     if (current.phase !== 'empty') current.ref.destroy();
+    this.lastInputs = null;
     this.state.set(EMPTY_STATE);
     const ref = slot.createComponent(component, {
       environmentInjector,
       injector: createWrapperAwareInjector(fieldInjector, slot.injector),
     });
-    this.state.set({ phase: 'mounted', ref, slot, lastInputs: null });
+    this.state.set(Object.freeze({ phase: 'mounted', ref, slot }));
     this.pushInputs(rawInputs);
   }
 
@@ -111,6 +125,9 @@ export class FieldComponentSlot {
    * at runtime but warns); without the cache, every emission would re-warn
    * for every undeclared mapper key.
    *
+   * Updates the `lastInputs` cache (a plain field, not part of `state`) so the
+   * `state` signal doesn't churn its reference on every keystroke.
+   *
    * `reflectComponentType` does NOT include hostDirective-forwarded inputs
    * (angular/angular#49734), so a declared-input filter here would skip every
    * value flowing through `NgForgeFieldShell` / `NgForgeField` /
@@ -120,13 +137,13 @@ export class FieldComponentSlot {
   pushInputs(rawInputs: Record<string, unknown>): void {
     const current = this.state();
     if (current.phase !== 'mounted') return;
-    const prev = current.lastInputs;
+    const prev = this.lastInputs;
     if (prev === rawInputs) return;
     for (const [key, value] of Object.entries(rawInputs)) {
       if (prev && prev[key] === value) continue;
       current.ref.setInput(key, value);
     }
-    this.state.set({ ...current, lastInputs: rawInputs });
+    this.lastInputs = rawInputs;
   }
 
   /**
@@ -141,7 +158,8 @@ export class FieldComponentSlot {
     const focusSnapshot = this.captureFocus(current.ref);
     const idx = current.slot.indexOf(current.ref.hostView);
     if (idx >= 0) current.slot.detach(idx);
-    this.state.set({ phase: 'detached', ref: current.ref, focusSnapshot });
+    this.lastInputs = null;
+    this.state.set(Object.freeze({ phase: 'detached', ref: current.ref, focusSnapshot }));
   }
 
   /**
@@ -152,6 +170,7 @@ export class FieldComponentSlot {
   destroyOnTeardown(): void {
     const current = this.state();
     if (current.phase === 'detached') current.ref.destroy();
+    this.lastInputs = null;
     this.state.set(EMPTY_STATE);
   }
 

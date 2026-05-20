@@ -156,4 +156,38 @@ describe('FieldComponentSlot', () => {
     expect(() => slot.destroyOnTeardown()).not.toThrow();
     expect(slot.phase()).toBe('empty');
   });
+
+  it('state snapshot is frozen', () => {
+    const slot = new FieldComponentSlot();
+    const emptySnap = slot.snapshot();
+    expect(Object.isFrozen(emptySnap)).toBe(true);
+
+    slot.mountOrReuse(host.vcr(), LeafAComponent, host.fieldInjector, envInjector, {});
+    expect(Object.isFrozen(slot.snapshot())).toBe(true);
+
+    slot.detach();
+    expect(Object.isFrozen(slot.snapshot())).toBe(true);
+  });
+
+  it('state ref stays stable across pushInputs calls (lastInputs lives outside state)', () => {
+    const slot = new FieldComponentSlot();
+    slot.mountOrReuse(host.vcr(), LeafAComponent, host.fieldInjector, envInjector, { label: 'a' });
+    const mountedSnap = slot.snapshot();
+    expect(mountedSnap.phase).toBe('mounted');
+
+    // Push several different input bags — `state` should NOT churn because
+    // `lastInputs` is a side channel, not part of the discriminated union.
+    slot.pushInputs({ label: 'b' });
+    expect(slot.snapshot()).toBe(mountedSnap);
+
+    slot.pushInputs({ label: 'c' });
+    expect(slot.snapshot()).toBe(mountedSnap);
+
+    // Pushing the same reference twice also doesn't churn.
+    const bag = { label: 'd' };
+    slot.pushInputs(bag);
+    expect(slot.snapshot()).toBe(mountedSnap);
+    slot.pushInputs(bag);
+    expect(slot.snapshot()).toBe(mountedSnap);
+  });
 });
