@@ -107,6 +107,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getMaterialComponentsScenario('multi-checkbox-validation') },
   },
+  {
+    path: 'textarea-readonly-runtime',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getMaterialComponentsScenario('textarea-readonly-runtime') },
+  },
 ];
 
 export default routes;

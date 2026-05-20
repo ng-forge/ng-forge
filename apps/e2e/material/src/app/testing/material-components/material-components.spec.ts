@@ -400,4 +400,31 @@ test.describe('Material Components Tests', () => {
       await expect(option1).toHaveClass(/mat-mdc-checkbox-checked/);
     });
   });
+
+  test.describe('Textarea Readonly Sync', () => {
+    test('readonly() toggled at runtime syncs to the native textarea in both directions', async ({ page, helpers }) => {
+      await page.goto('/#/test/material-components/textarea-readonly-runtime');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('textarea-readonly-runtime');
+      await expect(scenario).toBeVisible();
+
+      const textarea = scenario.locator('#notes textarea');
+      const checkbox = scenario.locator('#lockEdit mat-checkbox');
+
+      // Asserting on the DOM `readOnly` property rather than the attribute string —
+      // Angular's [formField] writes `readonly="true"` rather than the canonical
+      // `readonly=""`, both of which the browser treats as readonly=true.
+      await expect(textarea).toBeVisible();
+      await expect(textarea).toHaveJSProperty('readOnly', false);
+
+      // Toggle ON: native readOnly must flip true.
+      await checkbox.click();
+      await expect(textarea).toHaveJSProperty('readOnly', true);
+
+      // Toggle OFF: native readOnly must flip back to false.
+      await checkbox.click();
+      await expect(textarea).toHaveJSProperty('readOnly', false);
+    });
+  });
 });

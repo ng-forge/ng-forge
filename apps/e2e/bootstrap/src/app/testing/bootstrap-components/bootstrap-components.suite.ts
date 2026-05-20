@@ -15,6 +15,7 @@ import { sliderBoundsScenario } from './scenarios/slider-bounds.scenario';
 import { sliderDisabledScenario } from './scenarios/slider-disabled.scenario';
 import { sliderStepsScenario } from './scenarios/slider-steps.scenario';
 import { sliderValueDisplayScenario } from './scenarios/slider-value-display.scenario';
+import { textareaReadonlyRuntimeScenario } from './scenarios/textarea-readonly-runtime.scenario';
 import { toggleBasicScenario } from './scenarios/toggle-basic.scenario';
 import { toggleDisabledScenario } from './scenarios/toggle-disabled.scenario';
 import { toggleKeyboardScenario } from './scenarios/toggle-keyboard.scenario';
@@ -42,6 +43,7 @@ export const bootstrapComponentsSuite: TestSuite = {
     sliderDisabledScenario,
     sliderStepsScenario,
     sliderValueDisplayScenario,
+    textareaReadonlyRuntimeScenario,
     toggleBasicScenario,
     toggleDisabledScenario,
     toggleKeyboardScenario,

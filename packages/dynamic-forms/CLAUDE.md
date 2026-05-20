@@ -80,56 +80,44 @@ Cannot call `mapFieldToInputs` inside a `computed` that IS `resolvedFields`. Map
 
 ### Required mapped inputs for adapter fields
 
-When a `FieldTypeDefinition` has a `mapper`, the renderer automatically waits for the `field` input before instantiating the component. This convention eliminates the need to explicitly declare `renderReadyWhen: ['field']` for standard value-bearing fields.
-
-```typescript
-// Automatic - no renderReadyWhen needed when mapper is present
-{
-  name: 'datepicker',
-  loadComponent: () => import('./my-datepicker.component'),
-  mapper: datepickerFieldMapper,
-}
-```
-
-**Fields that don't use `field` input need `renderReadyWhen: []`:**
-
-Button fields (button, submit, next, previous, addArrayItem, prependArrayItem, insertArrayItem, removeArrayItem, popArrayItem, shiftArrayItem) and display fields (text) don't use the `field` input. Their mappers provide other inputs directly (event, disabled, etc.). Use a shared base constant to apply `renderReadyWhen: []`:
+Every `FieldTypeDefinition` declares `renderReadyWhen` explicitly at the registration site (resolver cascade: explicit on the registration → `valueHandling: 'exclude'` short-circuit to `[]` → fallback `['field']` + one-shot dev warning via `DynamicFormLogger`). Both built-in and adapter registrations spread one of two shared base constants per file:
 
 ```typescript
 // In adapter config files (e.g., material-field-config.ts)
+const VALUE_FIELD_TYPES_BASE = {
+  renderReadyWhen: ['field'],
+} as const;
+
 const BUTTON_FIELD_TYPES_BASE = {
-  renderReadyWhen: [] as string[],
-};
+  renderReadyWhen: [],
+  valueHandling: 'exclude',
+} as const;
 
 export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
+  {
+    name: MatField.Input,
+    loadComponent: () => import('../fields/input/mat-input.component'),
+    mapper: valueFieldMapper,
+    ...VALUE_FIELD_TYPES_BASE,
+  },
   {
     name: MatField.Button,
     loadComponent: () => import('../fields/button/mat-button.component'),
     mapper: buttonFieldMapper,
-    valueHandling: 'exclude',
     ...BUTTON_FIELD_TYPES_BASE,
   },
-  // ... all other button types
+  // ...
 ];
 ```
 
-Similarly for display-only fields:
+Custom mappers that emit other required inputs should list them explicitly on the registration:
 
 ```typescript
-const DISPLAY_FIELD_TYPES_BASE = {
-  renderReadyWhen: [] as string[],
-};
-```
-
-Custom mappers that provide other reactive inputs should use explicit `renderReadyWhen` to declare which inputs the renderer should wait for:
-
-```typescript
-// Wait for custom input from your mapper
 {
   name: 'my-field',
   loadComponent: () => import('./my-field.component'),
   mapper: myCustomMapper,
-  renderReadyWhen: ['title', 'items'],  // Wait for multiple custom inputs
+  renderReadyWhen: ['field', 'allowedTypes'],
 }
 ```
 

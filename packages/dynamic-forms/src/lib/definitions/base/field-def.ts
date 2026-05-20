@@ -87,6 +87,9 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * type: 'group'     // Field group container (registered)
    * type: 'my-custom' // Unregistered — still accepted, no autocomplete
    * ```
+   *
+   * Wrapper types are intentionally excluded — wrappers are configured through
+   * `wrappers` / `withFormWrappers()` rather than via the field-type discriminant.
    */
   type: RegisteredFieldTypes['type'] | (string & {});
 
