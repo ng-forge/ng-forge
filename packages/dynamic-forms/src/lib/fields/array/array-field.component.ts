@@ -93,11 +93,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   // (no nested-array hide/show tests exist). Path-aware keying is a follow-up.
   // `field()` is `input.required`, so the slot reference is resolved lazily.
   private readonly slot = computed(() => this.arrayItemRegistry.slotFor(this.field().key));
-  /** @deprecated Use `slot().templates` directly. Kept as a shim while the rest of the file migrates. */
-  private get templateRegistry(): Map<string, FieldDef<unknown>[]> {
-    return this.slot().templates;
-  }
-  private generateItemId = (): string => this.slot().nextId();
+  /** Bound id-generator reference threaded to `resolveArrayItem` so callsites stay terse. */
+  private readonly generateItemId = (): string => this.slot().nextId();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -437,7 +434,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     }
 
     // Store the template used for this item so it can be re-used during recreate operations
-    this.templateRegistry.set(resolvedItem.id, templates);
+    this.slot().templates.set(resolvedItem.id, templates);
     // Mirror the insert into slot.itemOrder so survival across hide/show stays consistent.
     this.slot().itemOrder.splice(insertIndex, 0, resolvedItem.id);
 
@@ -470,7 +467,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     switch (operation.type) {
       case 'clear': {
         // Clean up template registry when all items are removed
-        this.templateRegistry.clear();
+        this.slot().templates.clear();
         this.resolvedItemsSignal.set([]);
         const run = this.fsm.dispatch({ kind: 'clear' });
         // First-ever clear with no items: synthesize a resolve so the emit-effect fires
@@ -506,7 +503,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         const positionalTemplates: (FieldDef<unknown>[] | undefined)[] = resolvedItems.map((item) => {
           // Registry entries (from dynamic adds or moves) take priority;
           // unmoved initial items return undefined → falls through to itemTemplates[idx] during resolve.
-          return this.templateRegistry.get(item.id);
+          return this.slot().templates.get(item.id);
         });
 
         this.resolvedItemsSignal.set([]);
@@ -548,15 +545,15 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         if (positionalTemplates) {
           // Clean up old entries and add new ones
           const newItemIds = new Set(items.map((item) => item.id));
-          for (const existingId of this.templateRegistry.keys()) {
+          for (const existingId of this.slot().templates.keys()) {
             if (!newItemIds.has(existingId)) {
-              this.templateRegistry.delete(existingId);
+              this.slot().templates.delete(existingId);
             }
           }
           items.forEach((item, idx) => {
             const template = positionalTemplates[idx];
             if (template) {
-              this.templateRegistry.set(item.id, template);
+              this.slot().templates.set(item.id, template);
             }
           });
         }
@@ -689,7 +686,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         tap((item) => {
           // Register the fallback template against the generated item id so subsequent
           // recreates hit Priority 1 instead of re-resolving via this branch.
-          if (item) this.templateRegistry.set(item.id, fallback);
+          if (item) this.slot().templates.set(item.id, fallback);
         }),
       );
     }
@@ -772,8 +769,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const hi = Math.max(fromIndex, toIndex);
     for (let i = lo; i <= hi; i++) {
       const item = currentItems[i];
-      if (item && !this.templateRegistry.has(item.id) && i < rawTemplates.length) {
-        this.templateRegistry.set(item.id, rawTemplates[i] as FieldDef<unknown>[]);
+      if (item && !this.slot().templates.has(item.id) && i < rawTemplates.length) {
+        this.slot().templates.set(item.id, rawTemplates[i] as FieldDef<unknown>[]);
       }
     }
 
@@ -834,7 +831,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     // no longer exists, params returns undefined, cancelling the pending validation automatically.
     const removedItem = this.resolvedItemsSignal()[removeIndex];
     if (removedItem) {
-      this.templateRegistry.delete(removedItem.id);
+      this.slot().templates.delete(removedItem.id);
     }
     // Keep slot.itemOrder in sync so the post-recreate survival path doesn't try to
     // restore an id that's no longer in the form value.
