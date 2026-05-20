@@ -27,6 +27,7 @@ import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
+import { ArrayFieldStateMachine, RunHandle } from './array-field-state-machine';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
@@ -242,9 +243,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   // ─────────────────────────────────────────────────────────────────────────────
 
   private readonly resolvedItemsSignal = signal<ResolvedArrayItem[]>([]);
-  private readonly updateVersion = signal(0);
-  private readonly pendingInitializationCycle = signal<number | null>(null);
-  private readonly settledInitializationCycle = signal<number | null>(null);
+  // Explicit state machine for async resolution + componentInitialized emission.
+  // Replaces the prior updateVersion + pendingInitializationCycle + settledInitializationCycle trio.
+  private readonly fsm = new ArrayFieldStateMachine();
 
   /**
    * Map of item IDs to their current positions. O(1) lookup vs O(n) indexOf().
@@ -306,15 +307,11 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       this.performDifferentialUpdate(fieldTrees);
     });
 
-    explicitEffect(
-      [this.pendingInitializationCycle, this.settledInitializationCycle, this.allResolvedFieldsRenderReady],
-      ([pending, settled, allReady]) => {
-        if (pending !== null && settled === pending && allReady) {
-          emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
-          this.pendingInitializationCycle.set(null);
-        }
-      },
-    );
+    explicitEffect([this.fsm.state, this.allResolvedFieldsRenderReady], ([, allReady]) => {
+      if (this.fsm.shouldEmit(allReady)) {
+        emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+      }
+    });
   }
 
   private setupEventHandlers(): void {
@@ -406,9 +403,9 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       }
     }
 
-    // Increment version and create resolved item BEFORE updating value
-    this.updateVersion.update((v) => v + 1);
-    const currentVersion = this.updateVersion();
+    // Dispatch an append run — bumps runId so any in-flight differential update
+    // becomes stale, but state stays in its current phase.
+    const run = this.fsm.dispatch({ kind: 'append' });
 
     // Append auto-remove button to resolution templates (for rendering only)
     const resolveTemplates = this.withAutoRemove(templates);
@@ -435,7 +432,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
       ),
     );
 
-    if (currentVersion !== this.updateVersion() || !resolvedItem) {
+    if (run.isStale() || !resolvedItem) {
       return;
     }
 
@@ -462,33 +459,35 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     const resolvedItems = this.resolvedItemsSignal();
     const operation = determineDifferentialOperation(resolvedItems, fieldTrees.length);
 
-    // Only increment version for operations that do actual work.
-    // "none" operations (value-only changes) should not interfere with async add operations.
+    // "none" operations (value-only changes) don't kick the state machine — they shouldn't
+    // interfere with in-flight async resolutions.
     if (operation.type === 'none') {
       return;
     }
 
-    this.updateVersion.update((v) => v + 1);
-    const currentVersion = this.updateVersion();
-
     switch (operation.type) {
-      case 'clear':
+      case 'clear': {
         // Clean up template registry when all items are removed
         this.templateRegistry.clear();
         this.resolvedItemsSignal.set([]);
-        if (resolvedItems.length === 0 && this.pendingInitializationCycle() === null && this.settledInitializationCycle() === null) {
-          this.pendingInitializationCycle.set(currentVersion);
-          this.settledInitializationCycle.set(currentVersion);
+        const run = this.fsm.dispatch({ kind: 'clear' });
+        // First-ever clear with no items: synthesize a resolve so the emit-effect fires
+        // the init pulse (matches the form-starts-empty case from the prior implementation).
+        if (resolvedItems.length === 0 && !this.fsm.hasEverEmitted) {
+          run.resolve();
         }
         break;
-      case 'initial':
-        this.pendingInitializationCycle.set(currentVersion);
-        this.settledInitializationCycle.set(null);
-        void this.resolveAllItems(fieldTrees, currentVersion);
+      }
+      case 'initial': {
+        const run = this.fsm.dispatch({ kind: 'initial' });
+        void this.resolveAllItems(fieldTrees, run);
         break;
-      case 'append':
-        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, currentVersion);
+      }
+      case 'append': {
+        const run = this.fsm.dispatch({ kind: 'append' });
+        void this.appendItems(fieldTrees, operation.startIndex, operation.endIndex, run);
         break;
+      }
       case 'recreate': {
         // Capture templates by item ID so each item is recreated with its original template,
         // even after move operations that change positions. Registry entries (from dynamic adds
@@ -500,9 +499,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         });
 
         this.resolvedItemsSignal.set([]);
-        this.pendingInitializationCycle.set(currentVersion);
-        this.settledInitializationCycle.set(null);
-        void this.resolveAllItems(fieldTrees, currentVersion, positionalTemplates);
+        const run = this.fsm.dispatch({ kind: 'recreate' });
+        void this.resolveAllItems(fieldTrees, run, positionalTemplates);
         break;
       }
     }
@@ -510,7 +508,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private async resolveAllItems(
     fieldTrees: readonly (FieldTree<unknown> | null)[],
-    updateId: number,
+    run: RunHandle,
     positionalTemplates?: (FieldDef<unknown>[] | undefined)[],
   ): Promise<void> {
     if (fieldTrees.length === 0) {
@@ -533,7 +531,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
       );
 
-      if (updateId === this.updateVersion()) {
+      if (!run.isStale()) {
         // Update template registry with new item IDs for dynamically added items
         if (positionalTemplates) {
           // Clean up old entries and add new ones
@@ -551,9 +549,8 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
           });
         }
         this.resolvedItemsSignal.set(items);
-        if (this.pendingInitializationCycle() === updateId) {
-          this.settledInitializationCycle.set(updateId);
-        }
+        // Mark this run settled so the emit-effect can fire componentInitialized once allReady is true.
+        run.resolve();
       }
     } catch (err) {
       this.logger.error('Failed to resolve array items:', err);
@@ -565,7 +562,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     fieldTrees: readonly (FieldTree<unknown> | null)[],
     startIndex: number,
     endIndex: number,
-    updateId: number,
+    run: RunHandle,
   ): Promise<void> {
     const itemsToResolve = fieldTrees.slice(startIndex, endIndex);
     if (itemsToResolve.length === 0) return;
@@ -586,7 +583,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
         forkJoin(safeItemObservables).pipe(map((items) => items.filter((item): item is ResolvedArrayItem => item !== undefined))),
       );
 
-      if (updateId === this.updateVersion()) {
+      if (!run.isStale()) {
         this.resolvedItemsSignal.update((current) => [...current, ...newItems]);
       }
     } catch (err) {
