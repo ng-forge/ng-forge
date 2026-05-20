@@ -130,6 +130,13 @@ pnpm run serve:docs
 
 See [Developer Guides](./guides/) for architecture docs, testing strategy, and creating UI adapters.
 
+## 🙌 Contributors
+
+Special thanks to the people who shaped this framework.
+
+<a href="https://github.com/dereekb"><img src="https://github.com/dereekb.png" width="60" height="60" alt="dereekb"></a>
+<a href="https://github.com/0xfraso"><img src="https://github.com/0xfraso.png" width="60" height="60" alt="0xfraso"></a>
+
 ## 🤝 Backers
 
 A huge thank you to the following supporters of ng-forge! 🙏
