@@ -35,6 +35,7 @@ import { RegisteredFieldTypes } from '../models/registry/field-registry';
 import { detectFormMode, FormMode } from '../models/types/form-mode';
 import { InferFormValue } from '../models/types/form-value-inference';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
@@ -49,6 +50,7 @@ import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field
 import { validateFormConfig } from '../utils/config-validation/config-validator';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
 import { filterFormValue } from '../utils/value-filter/value-filter';
+import { DEV_MODE } from '../utils/dev-mode';
 import { ValueExclusionConfig } from '../models/value-exclusion-config';
 
 import { Action, FieldLoadingError, FormSetup, isReadyState, isTransitioningState, LifecycleState, Phase } from './state-types';
@@ -196,6 +198,12 @@ export class FormStateManager<
   private readonly eventBus = inject(EventBus);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly schemaRegistry = inject(SchemaRegistryService);
+  // Optional so unit-test setups that drive FormStateManager directly without provideDynamicFormDI()
+  // (e.g. mocked RootFormRegistryService specs) don't have to manually wire the registry. Real
+  // DynamicForm usage always provides it via coreProviders; if you hit the dev warning below in
+  // your own setup, you're using DynamicForm without provideDynamicFormDI() — fix the providers
+  // chain rather than ignoring it.
+  private readonly arrayItemRegistry = inject(ArrayItemRegistryService, { optional: true });
 
   /** Host component dependencies (config, formOptions, value). */
   private readonly deps = (() => {
@@ -992,11 +1000,24 @@ export class FormStateManager<
     });
 
     // Schema change resets the saved store + transition tracker so values from a stale schema
-    // can't leak into the new one.
+    // can't leak into the new one. Also drops every per-array slot in the registry so a fresh
+    // schema starts with an empty template/itemOrder/id-counter state.
+    let warnedAboutMissingArrayRegistry = false;
     explicitEffect([this.formSetup], () => {
       this.prevFieldStateSnapshot.set({});
       if (Object.keys(this.excludedValueStore()).length > 0) {
         this.excludedValueStore.set({});
+      }
+      if (this.arrayItemRegistry) {
+        this.arrayItemRegistry.clearAll();
+      } else if (DEV_MODE && !warnedAboutMissingArrayRegistry) {
+        warnedAboutMissingArrayRegistry = true;
+        this.logger.warn(
+          'ArrayItemRegistryService was not provided to FormStateManager. ' +
+            'Array fields will lose dynamically-added item templates across hide/show cycles. ' +
+            'This usually means DynamicForm was bootstrapped without provideDynamicFormDI() — ' +
+            'check your providers chain.',
+        );
       }
     });
 

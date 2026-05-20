@@ -13,7 +13,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FieldDef } from './definitions/base/field-def';
-import { DfFieldOutlet } from './directives/df-field-outlet.directive';
+import { DfFieldOutlet } from './directives/df-field-outlet/df-field-outlet.directive';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
@@ -57,7 +57,13 @@ import { EventDispatcher } from './events/event-dispatcher';
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key) {
-            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+            <!-- @if + DfFieldOutlet's own renderReady-&-!hidden gate together silence NG01916:
+                 the template @if removes the host from the DOM (Angular's prescribed pattern), and
+                 the directive's gate stops a same-CD-pass mount before [formField] can warn.
+                 Don't dedupe one without the other — see DfFieldOutlet.renderReady. -->
+            @if (!field.hidden()) {
+              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+            }
           }
         }
         @default {

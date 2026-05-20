@@ -8,9 +8,6 @@ export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRA
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,
-  ARRAY_ITEM_ID_GENERATOR,
-  ARRAY_TEMPLATE_REGISTRY,
-  createArrayItemIdGenerator,
   DEFAULT_PROPS,
   DEFAULT_VALIDATION_MESSAGES,
   DEFAULT_WRAPPERS,
@@ -18,7 +15,6 @@ export {
   FORM_OPTIONS,
   GROUP_CONTEXT,
 } from './field-signal-context.token';
-export type { ArrayTemplateRegistry } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
