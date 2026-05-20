@@ -6,18 +6,19 @@ import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
 /**
  * Cache for resolved addon-kind components.
  *
- * SSR-safe via `providedIn: 'root'` — each SSR request gets a fresh root
- * injector so the cache is request-scoped, not module-scoped.
+ * Provided per-form by `provideDynamicFormDI()` so two `<df-dynamic-form>`
+ * instances with conflicting `loadComponent` factories for the same kind
+ * never share a stale entry. Has no `providedIn: 'root'` factory — the
+ * registry consumer is always inside a form scope, and a root fallback
+ * would only hide misconfiguration (an SSR cross-request hit if a future
+ * code path forgot to provide it locally).
  *
  * Mirrors `COMPONENT_CACHE` (field types) and `WRAPPER_COMPONENT_CACHE`
  * (wrappers).
  *
  * @internal
  */
-export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE', {
-  providedIn: 'root',
-  factory: () => new Map(),
-});
+export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE');
 
 /**
  * Public shape returned by {@link injectAddonKindRegistry}. Pinned explicitly
@@ -91,7 +92,9 @@ export function injectAddonKindRegistry(): AddonKindRegistryRef {
         throw new DynamicFormError(`Addon kind '${kind}' loadComponent resolved to null.`);
       } catch (error) {
         if (error instanceof DynamicFormError) throw error;
-        throw new DynamicFormError(`Failed to load component for addon kind '${kind}': ${String(error)}`);
+        throw new DynamicFormError(
+          `Failed to load component for addon kind '${kind}': ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     },
 

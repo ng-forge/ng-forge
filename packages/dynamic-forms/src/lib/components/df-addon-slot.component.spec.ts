@@ -5,6 +5,7 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
 import { AnyAddon, TextAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
 import { DfAddonSlot } from './df-addon-slot.component';
 
 @Component({ template: 'icon-rendered' })
@@ -34,6 +35,9 @@ function setup(opts: { kinds?: AddonKindDefinition[]; addon: AnyAddon }): {
     imports: [DfAddonSlot],
     providers: [
       { provide: ADDON_KIND_REGISTRY, useValue: map },
+      // Form-scoped cache: no providedIn-root default, so the test bed must
+      // supply its own — same as `provideDynamicFormDI()` does in real use.
+      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: DynamicFormLogger, useValue: logger },
     ],
   });
@@ -123,6 +127,47 @@ describe('DfAddonSlot — dispatcher', () => {
         addon: { kind: 'sync-throw', slot: 'prefix' } as unknown as AnyAddon,
       });
       await vi.waitFor(() => expect(logger.warn).toHaveBeenCalled());
+    });
+
+    it('stale loader result for a swapped-out kind does not flip resolvedComponent', async () => {
+      // Two kinds in the same registry, the first taking longer to load.
+      // The slot starts on `slow`, swaps to `fast` before `slow` resolves.
+      // The kind-tagged result must filter `slow`'s late component out so the
+      // renderer keeps showing `fast`.
+      @Component({ template: 'slow-rendered' })
+      class SlowStub {}
+      @Component({ template: 'fast-rendered' })
+      class FastStub {}
+
+      let releaseSlow: () => void = () => undefined;
+      const slowPromise = new Promise<Type<unknown>>((resolve) => {
+        releaseSlow = () => resolve(SlowStub);
+      });
+
+      const { fixture, el } = setup({
+        kinds: [
+          { kind: 'slow', loadComponent: () => slowPromise },
+          { kind: 'fast', loadComponent: () => Promise.resolve(FastStub) },
+        ],
+        addon: { kind: 'slow', slot: 'prefix' } as unknown as AnyAddon,
+      });
+
+      // Swap to `fast` BEFORE `slow` resolves.
+      fixture.componentRef.setInput('addon', { kind: 'fast', slot: 'prefix' } as unknown as AnyAddon);
+      await vi.waitFor(() => {
+        fixture.detectChanges();
+        expect(el.textContent).toContain('fast-rendered');
+      });
+
+      // Now release the slow loader. The late {kind:'slow'} result should NOT
+      // overwrite the displayed FastStub — `resolvedComponent` filters by
+      // current addon kind.
+      releaseSlow();
+      await Promise.resolve();
+      await Promise.resolve();
+      fixture.detectChanges();
+      expect(el.textContent).toContain('fast-rendered');
+      expect(el.textContent).not.toContain('slow-rendered');
     });
   });
 

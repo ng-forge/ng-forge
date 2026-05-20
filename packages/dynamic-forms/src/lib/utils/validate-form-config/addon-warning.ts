@@ -16,6 +16,34 @@ export type AddonWarning =
   | { type: 'code-only-action-in-json'; fieldKey: string; reason: string };
 
 /**
+ * Stable structural fingerprint for an `AddonWarning`, used by the
+ * FormStateManager dedup cache. Includes every distinguishing field
+ * (`type`, `fieldKey`, `kind`/`slot`/`reason` as relevant) so warnings
+ * for different fields or different kinds never collapse to one log
+ * line — independent of the human-readable format which may change.
+ */
+export function addonWarningKey(w: AddonWarning): string {
+  switch (w.type) {
+    case 'unknown-field-type':
+      return `${w.type}|${w.fieldKey}|${w.fieldType}`;
+    case 'field-type-no-addon-support':
+      return `${w.type}|${w.fieldKey}|${w.fieldType}`;
+    case 'unknown-slot':
+      return `${w.type}|${w.fieldKey}|${w.fieldType}|${w.slot}`;
+    case 'unknown-kind':
+      return `${w.type}|${w.fieldKey}|${w.kind}`;
+    case 'kind-not-allowed':
+      return `${w.type}|${w.fieldKey}|${w.fieldType}|${w.kind}`;
+    case 'shape-violation':
+      return `${w.type}|${w.fieldKey}|${w.kind}|${w.reason}`;
+    case 'code-only-kind-in-json':
+      return `${w.type}|${w.fieldKey}|${w.kind}`;
+    case 'code-only-action-in-json':
+      return `${w.type}|${w.fieldKey}|${w.reason}`;
+  }
+}
+
+/**
  * Render an `AddonWarning` to a developer-friendly message.
  *
  * Returns the bare message — the `[Dynamic Forms]` prefix is added by the

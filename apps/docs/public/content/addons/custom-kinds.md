@@ -4,7 +4,7 @@ slug: addons/custom-kinds
 description: 'Register a custom addon kind component with withCustomAddon() and make it type-safe per field via the InputAddonExtensions module-augmentation seam. Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
 ---
 
-When the shipped kinds — universal `text`, `template`, `component` plus the per-adapter icon and button kinds (`mat-icon` / `mat-button` for Material, `bs-icon` / `bs-button` for Bootstrap, `pi-icon` / `pi-button` for PrimeNG, `ion-icon` / `ion-button` for Ionic) — don't cover your case (a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling), register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
+When the shipped kinds — universal `text`, `template`, `component` plus the per-adapter icon and button kinds (`mat-icon` / `mat-button` for Material, `bs-icon` / `bs-button` for Bootstrap, `prime-icon` / `prime-button` for PrimeNG, `ion-icon` / `ion-button` for Ionic) — don't cover your case (a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling), register a custom kind. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
 
 ## 1. Define the addon shape
 

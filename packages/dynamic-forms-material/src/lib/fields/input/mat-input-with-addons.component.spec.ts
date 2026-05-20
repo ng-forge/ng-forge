@@ -2,12 +2,14 @@ import { Injector, signal } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   ADDON_ACTION_REGISTRY,
+  ADDON_KIND_COMPONENT_CACHE,
   ADDON_KIND_REGISTRY,
   type AddonKindDefinition,
   DynamicFormLogger,
   FIELD_SIGNAL_CONTEXT,
   type FieldSignalContext,
 } from '@ng-forge/dynamic-forms';
+import type { Type } from '@angular/core';
 import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import { MatButtonAddonComponent } from '../../addons/mat-button-addon.component';
@@ -54,6 +56,7 @@ function createFixture(addons: ReadonlyArray<MatInputAddon>) {
     providers: [
       provideAnimations(),
       { provide: ADDON_KIND_REGISTRY, useValue: makeKindRegistry() },
+      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
       { provide: FIELD_SIGNAL_CONTEXT, useFactory: stubFieldSignalContext },
       { provide: DynamicFormLogger, useValue: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() } },

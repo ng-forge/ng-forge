@@ -10,6 +10,13 @@ setupConsoleCheck();
 // accessibility tree (getByRole) because Ionic's <ion-button> forwards
 // aria-label into its shadow DOM rather than exposing it as an HTML
 // attribute on the host.
+//
+// Intentionally functional-only (no `toHaveScreenshot` calls): Ionic's
+// shadow-DOM rendering produces subtle anti-aliasing differences between
+// runs that don't reflect real UI changes. Material / Bootstrap / PrimeNG
+// rely on shadow-free DOM and stable pixels; Ionic relies on accessibility-
+// tree + behavior assertions instead. The /addons/ snapshots directory is
+// deliberately absent.
 
 test.describe('Addons', () => {
   test.describe('Icon prefix', () => {

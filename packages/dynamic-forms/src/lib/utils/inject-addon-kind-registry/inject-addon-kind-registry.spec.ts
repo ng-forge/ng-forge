@@ -18,7 +18,13 @@ function makeRegistryEntry<T extends AddonKindDefinition>(entry: T): T {
 function setupTestBed(kinds: AddonKindDefinition[]): Injector {
   const map = new Map<string, AddonKindDefinition>(kinds.map((k) => [k.kind, k]));
   TestBed.configureTestingModule({
-    providers: [{ provide: ADDON_KIND_REGISTRY, useValue: map }],
+    providers: [
+      { provide: ADDON_KIND_REGISTRY, useValue: map },
+      // The cache token is form-scoped (no `providedIn: 'root'` default), so
+      // the test bed must wire one explicitly — same as `provideDynamicFormDI`
+      // does in real usage.
+      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+    ],
   });
   return TestBed.inject(Injector);
 }
@@ -107,7 +113,7 @@ describe('injectAddonKindRegistry', () => {
       expect(r.getLoadedKindComponent('icon')).toBe(IconKindComponent);
     });
 
-    it('cache is scoped to the root injector (separate TestBeds get separate caches)', async () => {
+    it('cache is scoped to the providing injector (separate TestBeds get separate caches)', async () => {
       // First TestBed — load, populate cache.
       const def1 = makeRegistryEntry({ kind: 'icon', loadComponent: () => Promise.resolve(IconKindComponent) });
       const injector1 = setupTestBed([def1]);
@@ -131,6 +137,48 @@ describe('injectAddonKindRegistry', () => {
       expect(cmp).toBe(ButtonKindComponent);
       // Original cache is unaffected.
       expect(cache1.get('icon')).toBe(IconKindComponent);
+    });
+
+    it('two child injectors with conflicting loaders for the same kind never cross-contaminate', async () => {
+      // Single root injector; two child injectors each provide their own
+      // registry + cache, mirroring two simultaneously-mounted <df-dynamic-form>
+      // instances under one app. The form-scoped cache must guarantee one
+      // form's loaded component is never returned to the other.
+      const reg1 = new Map<string, AddonKindDefinition>([
+        ['icon', { kind: 'icon', loadComponent: () => Promise.resolve(IconKindComponent) }],
+      ]);
+      const reg2 = new Map<string, AddonKindDefinition>([
+        ['icon', { kind: 'icon', loadComponent: () => Promise.resolve(ButtonKindComponent) }],
+      ]);
+
+      TestBed.configureTestingModule({});
+      const root = TestBed.inject(Injector);
+      const child1 = Injector.create({
+        parent: root,
+        providers: [
+          { provide: ADDON_KIND_REGISTRY, useValue: reg1 },
+          { provide: ADDON_KIND_COMPONENT_CACHE, useValue: new Map<string, Type<unknown>>() },
+        ],
+      });
+      const child2 = Injector.create({
+        parent: root,
+        providers: [
+          { provide: ADDON_KIND_REGISTRY, useValue: reg2 },
+          { provide: ADDON_KIND_COMPONENT_CACHE, useValue: new Map<string, Type<unknown>>() },
+        ],
+      });
+
+      const r1 = runInInjectionContext(child1, () => injectAddonKindRegistry());
+      const r2 = runInInjectionContext(child2, () => injectAddonKindRegistry());
+
+      // Both forms request the same kind name concurrently.
+      const [c1, c2] = await Promise.all([r1.loadKindComponent('icon'), r2.loadKindComponent('icon')]);
+      expect(c1).toBe(IconKindComponent);
+      expect(c2).toBe(ButtonKindComponent);
+
+      // Synchronous cache hit on the second access also stays isolated.
+      expect(r1.getLoadedKindComponent('icon')).toBe(IconKindComponent);
+      expect(r2.getLoadedKindComponent('icon')).toBe(ButtonKindComponent);
     });
   });
 });

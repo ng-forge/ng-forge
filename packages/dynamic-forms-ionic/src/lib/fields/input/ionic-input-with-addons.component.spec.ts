@@ -1,4 +1,5 @@
-import { ADDON_ACTION_REGISTRY, ADDON_KIND_REGISTRY, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import type { Type } from '@angular/core';
+import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
 import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import { IonButtonAddonComponent } from '../../addons/ion-button-addon.component';
@@ -30,6 +31,7 @@ function createFixture(addons: ReadonlyArray<IonInputAddon>) {
     inputs: { addons },
     providers: [
       { provide: ADDON_KIND_REGISTRY, useValue: makeKindRegistry() },
+      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
     ],
   });

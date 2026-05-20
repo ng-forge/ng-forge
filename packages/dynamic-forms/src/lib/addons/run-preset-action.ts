@@ -33,7 +33,16 @@ export interface PresetCollaborators {
    * yet set.
    */
   readonly baselineType?: () => string | undefined;
-  /** Logger for warnings about presets that can't be fulfilled in this context. */
+  /**
+   * Logger for warnings about presets that can't be fulfilled in this context.
+   *
+   * Passed via collaborators (rather than injected) because `runPresetAction`
+   * is a DI-free pure function shared across adapters — each adapter's
+   * `ADDON_PRESET_HANDLER` factory injects `DynamicFormLogger` itself and
+   * forwards it here. The `[Dynamic Forms]` prefix comes from
+   * `ConsoleLogger`'s implementation, so the final console line is identical
+   * to one logged directly via `inject(DynamicFormLogger)`.
+   */
   readonly logger: Logger;
 }
 
@@ -93,7 +102,7 @@ export async function runPresetAction(
         const text = await navigator.clipboard.readText();
         collaborators.fieldValueSetter?.(text);
       } catch (error) {
-        collaborators.logger.warn(`preset 'paste' clipboard read failed: ${String(error)}`);
+        collaborators.logger.warn(`preset 'paste' clipboard read failed: ${error instanceof Error ? error.message : String(error)}`);
       }
       return;
     }
@@ -109,7 +118,7 @@ export async function runPresetAction(
         const v = ctx.value;
         await navigator.clipboard.writeText(v == null ? '' : String(v));
       } catch (error) {
-        collaborators.logger.warn(`preset 'copy' clipboard write failed: ${String(error)}`);
+        collaborators.logger.warn(`preset 'copy' clipboard write failed: ${error instanceof Error ? error.message : String(error)}`);
       }
       return;
     }

@@ -107,18 +107,35 @@ export class DfAddonSlot {
     return local ? local() : false;
   });
 
-  /** Kind component, resolved asynchronously from the registry. */
-  private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);
-  protected readonly resolvedComponent = this.resolvedComponentSignal.asReadonly();
+  /**
+   * Latest async-loaded `{ kind, component }` pair. Tagging the result with
+   * its kind lets `resolvedComponent` filter stale loads structurally — no
+   * monotonic token needed. When `addon.kind` changes mid-load, the prior
+   * load still completes and writes here, but the computed ignores it
+   * because the recorded kind no longer matches the current one.
+   */
+  private readonly asyncLoaded = signal<{ kind: string; component: Type<unknown> } | undefined>(undefined);
+
+  /**
+   * Resolved kind component — composed declaratively from two sources of
+   * truth: the registry's synchronous cache (warm hits, e.g., a second
+   * `<df-addon-slot>` for an already-loaded kind) and the kind-tagged async
+   * loader result. Reading `addon().kind` first makes the computed react to
+   * addon swaps and naturally invalidate stale async-load results.
+   */
+  protected readonly resolvedComponent = computed<Type<unknown> | undefined>(() => {
+    const kind = this.addon().kind;
+    const cached = this.registry.getLoadedKindComponent(kind);
+    if (cached) return cached;
+    const loaded = this.asyncLoaded();
+    return loaded?.kind === kind ? loaded.component : undefined;
+  });
 
   /** Inputs passed to the kind component — addon plus the wrapper-style host bag. */
   protected readonly kindInputs = computed(() => ({
     addon: this.addon(),
     fieldInputs: this.fieldInputs(),
   }));
-
-  /** Monotonic load-token guards against stale promises winning when addon.kind changes mid-load. */
-  private loadSeq = 0;
 
   constructor() {
     // Resolve `hidden` outside any reactive context. Skip when the host has
@@ -138,28 +155,19 @@ export class DfAddonSlot {
       this._resolvedHidden.set(resolved);
     });
 
+    // Kick off async loads on cache miss. `resolvedComponent` filters stale
+    // results by kind identity, so this effect is a pure side-effect dispatcher.
     explicitEffect([this.addon], ([addon]) => {
-      const cached = this.registry.getLoadedKindComponent(addon.kind);
-      if (cached) {
-        this.loadSeq++;
-        this.resolvedComponentSignal.set(cached);
-        return;
-      }
-
-      const seq = ++this.loadSeq;
+      const kind = addon.kind;
+      if (this.registry.getLoadedKindComponent(kind)) return; // sync path; computed picks it up
       this.registry
-        .loadKindComponent(addon.kind)
-        .then((cmp) => {
-          if (seq !== this.loadSeq) return;
-          this.resolvedComponentSignal.set(cmp);
-        })
+        .loadKindComponent(kind)
+        .then((component) => this.asyncLoaded.set({ kind, component }))
         .catch((error: unknown) => {
-          if (seq !== this.loadSeq) return;
           this.logger.warn(
-            `Failed to load addon kind '${addon.kind}': ${String(error)}. ` +
+            `Failed to load addon kind '${kind}': ${error instanceof Error ? error.message : String(error)}. ` +
               `Registered kinds: ${this.registry.getKindNames().join(', ') || '(none)'}.`,
           );
-          this.resolvedComponentSignal.set(undefined);
         });
     });
   }

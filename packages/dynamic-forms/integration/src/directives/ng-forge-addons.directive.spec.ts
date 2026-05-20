@@ -128,5 +128,26 @@ describe('NgForgeAddons', () => {
       expect(secondCache.has(PREFIX_TEXT)).toBe(false);
       expect(secondCache.has(SUFFIX_TEXT)).toBe(true);
     });
+
+    it('reuses the same resolved hidden signal when a new addon object reuses the same Observable identity', () => {
+      // Scenario: a `FormConfig` re-emit produces a structurally-different
+      // addon object that carries the SAME `hidden` Observable instance. Tier
+      // 1 (addon-reference identity) misses; tier 2 (`_hiddenByValue` WeakMap
+      // keyed on the Observable identity) must hit so we don't spawn a fresh
+      // `toSignal` subscription per re-emit.
+      const subject = new BehaviorSubject<boolean>(false);
+      const addonA: AnyAddon = { kind: 'text', slot: 'prefix', text: 'A', hidden: subject };
+      const { fixture, directive } = setupHost([addonA]);
+      const resolvedForA = directive.hiddenSignalCache().get(addonA);
+      expect(resolvedForA).toBeDefined();
+
+      // New addon object, same Observable instance.
+      const addonB: AnyAddon = { kind: 'text', slot: 'prefix', text: 'A', hidden: subject };
+      fixture.componentRef.setInput('addons', [addonB]);
+      fixture.detectChanges();
+
+      const resolvedForB = directive.hiddenSignalCache().get(addonB);
+      expect(resolvedForB).toBe(resolvedForA);
+    });
   });
 });

@@ -1,4 +1,5 @@
-import { computed, Directive, inject, Injector, input, Signal } from '@angular/core';
+import { computed, Directive, inject, Injector, input, Signal, signal } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
   ADDON_ACTION_REGISTRY,
   AddonActionContext,
@@ -38,7 +39,11 @@ interface ActionAddonShape extends BaseAddon {
  */
 @Directive({})
 export class NgForgeAddonActionBase {
-  private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY);
+  // The action registry is form-scoped. `optional: true` matches the
+  // preset handler so addons rendered outside a form that called
+  // `provideAddonActions(...)` degrade gracefully instead of throwing —
+  // `actionRef` dispatches then log an actionable warning and no-op.
+  private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY, { optional: true });
   private readonly presetHandler = inject(ADDON_PRESET_HANDLER, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
   private readonly hostInjector = inject(Injector);
@@ -46,8 +51,39 @@ export class NgForgeAddonActionBase {
   readonly addon = input.required<ActionAddonShape>();
   readonly fieldInputs = input<WrapperFieldInputs | undefined>(undefined);
 
-  readonly disabled: Signal<boolean> = computed(() => resolveDynamicValue(this.addon().disabled, false, this.hostInjector)());
-  readonly loading: Signal<boolean> = computed(() => resolveDynamicValue(this.addon().loading, false, this.hostInjector)());
+  /**
+   * Per-value caches for `disabled` / `loading` signal resolution. Keyed by
+   * the `DynamicValue` identity so a single `toSignal` subscription is
+   * shared across addon-reference swaps that pass the same Observable.
+   * Mirrors `NgForgeAddonsBase._hiddenByValue` — `resolveDynamicValue`
+   * cannot run inside `computed`/`linkedSignal.computation` because
+   * `toSignal` throws in reactive contexts (NG0602), and re-running it on
+   * every recomputation would leak subscriptions on each cycle.
+   */
+  private readonly _disabledByValue = new WeakMap<object, Signal<boolean>>();
+  private readonly _loadingByValue = new WeakMap<object, Signal<boolean>>();
+  private readonly _resolvedDisabled = signal<Signal<boolean> | undefined>(undefined);
+  private readonly _resolvedLoading = signal<Signal<boolean> | undefined>(undefined);
+
+  readonly disabled: Signal<boolean> = computed(() => this._resolvedDisabled()?.() ?? false);
+  readonly loading: Signal<boolean> = computed(() => this._resolvedLoading()?.() ?? false);
+
+  constructor() {
+    explicitEffect([this.addon], ([addon]) => {
+      this._resolvedDisabled.set(this._resolveAxis(addon.disabled, this._disabledByValue));
+      this._resolvedLoading.set(this._resolveAxis(addon.loading, this._loadingByValue));
+    });
+  }
+
+  private _resolveAxis(value: DynamicValue<boolean> | undefined, cache: WeakMap<object, Signal<boolean>>): Signal<boolean> {
+    const valueKey = typeof value === 'object' && value !== null ? value : null;
+    let resolved = valueKey ? cache.get(valueKey) : undefined;
+    if (!resolved) {
+      resolved = resolveDynamicValue(value, false, this.hostInjector);
+      if (valueKey) cache.set(valueKey, resolved);
+    }
+    return resolved;
+  }
 
   /**
    * Resolve the click handler from the addon's three-axis click variant and
@@ -78,12 +114,15 @@ export class NgForgeAddonActionBase {
     }
 
     if (addon.actionRef !== undefined) {
-      const handler = this.actionRegistry.get(addon.actionRef);
+      const handler = this.actionRegistry?.get(addon.actionRef);
       if (handler) {
         handler(ctx);
       } else {
         this.logger.warn(
-          `Addon button: actionRef '${addon.actionRef}' is not registered. Did you call provideAddonActions({ ${addon.actionRef}: ... })?`,
+          `Addon button: actionRef '${addon.actionRef}' is not registered. ` +
+            (this.actionRegistry
+              ? `Did you call provideAddonActions({ ${addon.actionRef}: ... })?`
+              : `No provideAddonActions(...) registry is reachable in this scope — was the addon rendered outside a form?`),
         );
       }
       return;

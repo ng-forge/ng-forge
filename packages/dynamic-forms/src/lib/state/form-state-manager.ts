@@ -48,7 +48,7 @@ import { FormModeValidator } from '../utils/form-validation/form-mode-validator'
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { validateFormConfig } from '../utils/config-validation/config-validator';
 import { walkAndValidateAddons } from '../utils/validate-form-config/validate-field-addons';
-import { formatAddonWarning } from '../utils/validate-form-config/addon-warning';
+import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
 import { ADDON_KIND_REGISTRY } from '../models/addon/addon-kind';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
 import { filterFormValue } from '../utils/value-filter/value-filter';
@@ -238,6 +238,11 @@ export class FormStateManager<
    * Used to skip re-logging warnings that already fired for the previous
    * config — avoids spam when the form swaps config repeatedly but the
    * addon issues haven't changed.
+   *
+   * Scoping: per-FormStateManager (i.e., per `<df-dynamic-form>` component
+   * instance). Replaced wholesale on every config setup — bounded by the
+   * current config's warning count, never grows unbounded across swaps.
+   * A warning that disappears and later returns re-logs as expected.
    */
   private lastAddonWarningKeys: Set<string> = new Set();
 
@@ -1109,10 +1114,13 @@ export class FormStateManager<
     );
     const nextKeys = new Set<string>();
     for (const w of addonWarnings) {
-      const key = formatAddonWarning(w);
+      // Dedup uses a structural fingerprint so different fields with the
+      // same warning category never collide; the rendered message is what
+      // we log.
+      const key = addonWarningKey(w);
       nextKeys.add(key);
       if (!this.lastAddonWarningKeys.has(key)) {
-        this.logger.warn(key);
+        this.logger.warn(formatAddonWarning(w));
       }
     }
     this.lastAddonWarningKeys = nextKeys;

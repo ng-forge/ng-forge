@@ -9,6 +9,12 @@ import { AddonSlot } from './addon-slot';
  * (`type`/`properties`/`required`/`enum`/etc.) without pulling in a full JSON
  * Schema dependency. Extra keys are allowed via the `[key: string]` index so
  * vendor-specific annotations (`x-foo`, `markdownDescription`) still typecheck.
+ *
+ * Tooling-only: the runtime addon validator does NOT consult `schema` — it
+ * relies on each kind's `validate?(addon, fieldKey)` callback for shape
+ * enforcement. `schema` exists exclusively so the MCP server (and any other
+ * AI-driven form authoring tool) can describe the kind to a model without
+ * hand-maintaining a parallel registry.
  */
 export interface AddonKindSchema {
   readonly $ref?: string;
