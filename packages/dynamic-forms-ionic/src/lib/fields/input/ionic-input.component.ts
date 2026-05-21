@@ -170,7 +170,7 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
          on both sides, hiding the suffix-side variable consumers can set. */
       .df-ion-input-row {
         display: flex;
-        align-items: center;
+        align-items: stretch;
       }
       .df-ion-input-row > ion-input {
         flex: 1 1 auto;
@@ -185,6 +185,23 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       }
       .df-ion-input-row > ion-input ~ df-addon-slot {
         margin-inline-start: var(--df-ion-addon-suffix-inner-padding);
+      }
+      /* Visually integrate the ion-button addons with the ion-input container.
+         Without this, the row reads as "input + chip", because <ion-input>'s
+         shadow border-radius / fill don't propagate to siblings. Match the
+         input's background + border tokens directly on the host so the row
+         reads as one widget. Consumers can opt back into the chip look by
+         setting fill explicitly via addon.fill. */
+      :host ::ng-deep .df-ion-input-row > df-addon-slot > df-ion-button-addon ion-button {
+        --background: var(--df-ion-addon-row-background, var(--ion-item-background, var(--ion-background-color)));
+        --border-radius: var(--df-ion-addon-row-radius, var(--ion-border-radius, 0.375rem));
+        --padding-start: 0.5rem;
+        --padding-end: 0.5rem;
+        --box-shadow: none;
+        margin: 0;
+        align-self: stretch;
+        height: auto;
+        min-height: 100%;
       }
       /* The slot wrapper itself centers correctly via align-self, but the
          icon glyph inside is baseline-pinned at the top of an inline line-

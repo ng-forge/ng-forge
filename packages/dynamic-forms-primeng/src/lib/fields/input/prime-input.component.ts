@@ -194,13 +194,18 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
          based overrides hit specificity ties with PrimeNG's own rules).
          Consumers can override these vars if they want a different look. */
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon {
+        /* Hover/active tints derive from currentColor via color-mix instead
+           of PrimeNG's --p-content-hover-background, which often resolves to
+           a near-white value on dark themes (harsh white flash over a dark
+           input group). currentColor tracks the input text color, so the
+           tint stays subtle on both light and dark themes. */
         --p-button-secondary-background: transparent;
         --p-button-secondary-border-color: transparent;
         --p-button-secondary-color: var(--p-inputtext-color);
-        --p-button-secondary-hover-background: var(--p-content-hover-background, rgba(127, 127, 127, 0.08));
+        --p-button-secondary-hover-background: color-mix(in srgb, currentColor 8%, transparent);
         --p-button-secondary-hover-border-color: transparent;
         --p-button-secondary-hover-color: var(--p-inputtext-color);
-        --p-button-secondary-active-background: var(--p-content-hover-background, rgba(127, 127, 127, 0.16));
+        --p-button-secondary-active-background: color-mix(in srgb, currentColor 16%, transparent);
         --p-button-secondary-active-border-color: transparent;
         /* Keep PrimeNG's native focus ring on addon buttons (WCAG 2.4.7).
            Earlier revisions zeroed --p-focus-ring-color / shadow for a flat
