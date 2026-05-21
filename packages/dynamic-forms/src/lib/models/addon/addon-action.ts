@@ -113,8 +113,15 @@ export interface DynamicFormAddonActionPresetRegistry {}
 /**
  * Union of every preset name an addon may reference — universal presets
  * plus any contributed via {@link DynamicFormAddonActionPresetRegistry}.
+ *
+ * The `(string & {})` escape hatch keeps autocomplete on the known +
+ * augmented presets while accepting arbitrary strings for one-off adapter
+ * presets that don't warrant a module-augmentation. The runtime preset
+ * runner already handles unknown names gracefully via its `default:` arm
+ * (logs a warning, no throw). Mirrors `FieldDef.type`'s
+ * `RegisteredFieldTypes['type'] | (string & {})` shape.
  */
-export type AddonActionPreset = CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry;
+export type AddonActionPreset = CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry | (string & {});
 
 /**
  * Module-augmentable registry of user-defined named action handlers.
