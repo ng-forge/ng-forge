@@ -127,7 +127,7 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('severity-variants');
       await expect(scenario).toBeVisible();
       // 9 colours → 9 inputs → 9 suffix buttons rendered outside ion-input.
-      await expect(scenario.locator('df-ion-button-addon ion-button')).toHaveCount(9);
+      await expect(scenario.locator('ion-button[df-ion-button-addon]')).toHaveCount(9);
     });
   });
 
@@ -137,7 +137,7 @@ test.describe('Addons', () => {
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('labelled-button');
-      const button = scenario.locator('df-ion-button-addon ion-button');
+      const button = scenario.locator('ion-button[df-ion-button-addon]');
       await expect(button).toBeVisible();
       // Labeled branch uses slot="start" for the icon (inside ion-button), label as text.
       await expect(button.locator('ion-icon[name="search-outline"][slot="start"]')).toBeVisible();
@@ -184,7 +184,7 @@ test.describe('Addons', () => {
       await page.waitForLoadState('networkidle');
 
       const scenario = helpers.getScenario('decorative-button');
-      const button = scenario.locator('df-ion-button-addon ion-button');
+      const button = scenario.locator('ion-button[df-ion-button-addon]');
       await expect(button).toBeVisible();
       await expect(button).toContainText('Info');
       await button.click();
