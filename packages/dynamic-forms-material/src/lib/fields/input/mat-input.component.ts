@@ -154,6 +154,11 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         const typeOverride = inject(MAT_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        // forwardRef is needed for `host.props()?.type` (read at preset
+        // dispatch time to gate `toggle-password-visibility` against
+        // non-password baselines). The actual writer is sourced from
+        // `ctx.setValue` (guaranteed populated by NgForgeAddonActionBase),
+        // so this dependency is read-only.
         const host = inject(forwardRef(() => MatInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {

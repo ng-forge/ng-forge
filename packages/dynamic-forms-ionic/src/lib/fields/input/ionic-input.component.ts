@@ -121,6 +121,9 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
         const typeOverride = inject(IONIC_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        // forwardRef is needed for `host.props()?.type` (baselineType
+        // guard for `toggle-password-visibility`). The writer comes from
+        // `ctx.setValue` — see `mat-input.component.ts` for details.
         const host = inject(forwardRef(() => IonicInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
@@ -162,15 +165,26 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       /* ion-button addons render OUTSIDE <ion-input> in a flex row — Ionic's
          shadow CSS forces ion-button projected through start/end slots to
          zero-size / non-interactable. Decorative addons (icon/text/template/
-         component) stay inside the slots. */
+         component) stay inside the slots. Gap is split per-side via
+         per-button margin: a single flex gap would force the same value
+         on both sides, hiding the suffix-side variable consumers can set. */
       .df-ion-input-row {
         display: flex;
         align-items: center;
-        gap: var(--df-ion-addon-prefix-inner-padding);
       }
       .df-ion-input-row > ion-input {
         flex: 1 1 auto;
         min-width: 0;
+      }
+      /* Prefix-side buttons: gap goes on the trailing edge (between button
+         and ion-input). Suffix-side buttons: gap goes on the leading edge.
+         :has(~ ion-input) selects buttons that appear before the input
+         in the row, i.e., prefix buttons. */
+      .df-ion-input-row > df-addon-slot:has(~ ion-input) {
+        margin-inline-end: var(--df-ion-addon-prefix-inner-padding);
+      }
+      .df-ion-input-row > ion-input ~ df-addon-slot {
+        margin-inline-start: var(--df-ion-addon-suffix-inner-padding);
       }
       /* The slot wrapper itself centers correctly via align-self, but the
          icon glyph inside is baseline-pinned at the top of an inline line-

@@ -14,7 +14,7 @@ import type { IonIconAddon } from '../types/addons';
 @Component({
   selector: 'df-ion-icon-addon',
   imports: [IonIcon, AsyncPipe, DynamicTextPipe],
-  template: `<ion-icon [name]="iconName()" [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"></ion-icon>`,
+  template: `<ion-icon [name]="iconName()" [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"></ion-icon>`,
   host: {
     '[attr.aria-hidden]': 'hasAriaLabel() ? null : "true"',
   },

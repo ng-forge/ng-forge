@@ -190,4 +190,105 @@ describe('runIonicPresetAction', () => {
     expect(h.spies.warn).toHaveBeenCalledOnce();
     expect(h.spies.warn.mock.calls[0][0]).toContain("preset 'not-a-real-preset'");
   });
+
+  describe('paste — clipboard error paths', () => {
+    it('logs a warning when navigator.clipboard is unavailable', async () => {
+      const h = makeHarness();
+      Object.defineProperty(globalThis.navigator, 'clipboard', { configurable: true, value: undefined });
+      await runIonicPresetAction('paste', h.context, {
+        fieldValueSetter: h.spies.setValue,
+        logger: h.logger,
+      });
+      expect(h.spies.setValue).not.toHaveBeenCalled();
+      expect(h.spies.warn).toHaveBeenCalled();
+      expect(String(h.spies.warn.mock.calls[0]?.[0])).toContain('paste');
+    });
+
+    it('logs the error message when clipboard readText rejects', async () => {
+      const h = makeHarness();
+      Object.defineProperty(globalThis.navigator, 'clipboard', {
+        configurable: true,
+        value: { readText: vi.fn().mockRejectedValue(new Error('denied')), writeText: vi.fn() },
+      });
+      await runIonicPresetAction('paste', h.context, {
+        fieldValueSetter: h.spies.setValue,
+        logger: h.logger,
+      });
+      expect(h.spies.setValue).not.toHaveBeenCalled();
+      expect(h.spies.warn).toHaveBeenCalled();
+      expect(String(h.spies.warn.mock.calls[0]?.[0])).toContain('denied');
+    });
+  });
+
+  describe('copy — clipboard error and coercion paths', () => {
+    it('coerces null/undefined ctx.value to empty string', async () => {
+      const h = makeHarness();
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(globalThis.navigator, 'clipboard', {
+        configurable: true,
+        value: { readText: vi.fn(), writeText },
+      });
+      (h.context as { value: unknown }).value = null;
+      await runIonicPresetAction('copy', h.context, { fieldValueSetter: h.spies.setValue, logger: h.logger });
+      expect(writeText).toHaveBeenCalledWith('');
+
+      (h.context as { value: unknown }).value = undefined;
+      await runIonicPresetAction('copy', h.context, { fieldValueSetter: h.spies.setValue, logger: h.logger });
+      expect(writeText).toHaveBeenLastCalledWith('');
+    });
+
+    it('logs a warning when navigator.clipboard is unavailable', async () => {
+      const h = makeHarness();
+      Object.defineProperty(globalThis.navigator, 'clipboard', { configurable: true, value: undefined });
+      await runIonicPresetAction('copy', h.context, { fieldValueSetter: h.spies.setValue, logger: h.logger });
+      expect(h.spies.warn).toHaveBeenCalled();
+      expect(String(h.spies.warn.mock.calls[0]?.[0])).toContain('copy');
+    });
+
+    it('logs the error message when clipboard writeText rejects', async () => {
+      const h = makeHarness();
+      Object.defineProperty(globalThis.navigator, 'clipboard', {
+        configurable: true,
+        value: { readText: vi.fn(), writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      });
+      (h.context as { value: unknown }).value = 'x';
+      await runIonicPresetAction('copy', h.context, { fieldValueSetter: h.spies.setValue, logger: h.logger });
+      expect(h.spies.warn).toHaveBeenCalled();
+      expect(String(h.spies.warn.mock.calls[0]?.[0])).toContain('denied');
+    });
+  });
+
+  describe('toggle-password-visibility — baselineType refusal', () => {
+    it('refuses to flip when baselineType reports a non-password type (initial state)', async () => {
+      const h = makeHarness();
+      await runIonicPresetAction('toggle-password-visibility', h.context, {
+        typeOverride: h.typeOverride,
+        baselineType: () => 'email',
+        logger: h.logger,
+      });
+      expect(h.typeOverride()).toBeUndefined();
+      expect(h.spies.warn).toHaveBeenCalled();
+      expect(String(h.spies.warn.mock.calls[0]?.[0])).toContain('email');
+    });
+
+    it('re-checks baselineType on every dispatch (refuses post-toggle when baseline mutates)', async () => {
+      const h = makeHarness();
+      let baseline: string | undefined = 'password';
+      await runIonicPresetAction('toggle-password-visibility', h.context, {
+        typeOverride: h.typeOverride,
+        baselineType: () => baseline,
+        logger: h.logger,
+      });
+      expect(h.typeOverride()).toBe('text');
+
+      baseline = 'email';
+      await runIonicPresetAction('toggle-password-visibility', h.context, {
+        typeOverride: h.typeOverride,
+        baselineType: () => baseline,
+        logger: h.logger,
+      });
+      expect(h.typeOverride()).toBe('text'); // unchanged
+      expect(h.spies.warn).toHaveBeenCalled();
+    });
+  });
 });

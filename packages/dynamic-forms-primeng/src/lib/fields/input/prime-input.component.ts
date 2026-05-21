@@ -100,6 +100,9 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         const typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        // forwardRef is needed for `host.props()?.type` (baselineType
+        // guard for `toggle-password-visibility`). The writer comes from
+        // `ctx.setValue` — see `mat-input.component.ts` for details.
         const host = inject(forwardRef(() => PrimeInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
@@ -199,11 +202,23 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         --p-button-secondary-hover-color: var(--p-inputtext-color);
         --p-button-secondary-active-background: var(--p-content-hover-background, rgba(127, 127, 127, 0.16));
         --p-button-secondary-active-border-color: transparent;
-        --p-focus-ring-color: transparent;
-        --p-focus-ring-shadow: none;
+        /* Keep PrimeNG's native focus ring on addon buttons (WCAG 2.4.7).
+           Earlier revisions zeroed --p-focus-ring-color / shadow for a flat
+           look, but that removed all keyboard-focus indication on the
+           interactive addon. */
       }
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button {
+        /* Default p-button box-shadow is removed to flatten the addon
+           inside the input group; focus ring lives in --p-focus-ring-* and
+           re-asserts itself on :focus-visible. */
         box-shadow: none;
+      }
+      :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button:focus-visible {
+        /* Explicit focus indicator — outline is theme-aware (matches the
+           text color so it works on both light and dark backgrounds) and
+           inset so it doesn't get clipped by the input-group border. */
+        outline: 2px solid var(--p-focus-ring-color, currentColor);
+        outline-offset: -2px;
       }
     `,
   ],

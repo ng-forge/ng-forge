@@ -147,4 +147,110 @@ describe('PrimeButtonAddonComponent', () => {
 
     expect(action).toHaveBeenCalledTimes(1);
   });
+
+  it('looks up actionRef in ADDON_ACTION_REGISTRY and dispatches the registered handler', async () => {
+    const handler = vi.fn();
+    const registry = new Map<string, (...args: unknown[]) => void>([['logClick', handler]]);
+    TestBed.configureTestingModule({
+      imports: [TestButtonHostComponent],
+      providers: [
+        { provide: DynamicFormLogger, useValue: makeLogger() },
+        { provide: ADDON_ACTION_REGISTRY, useValue: registry },
+      ],
+    });
+    const fixture = TestBed.createComponent(TestButtonHostComponent);
+    fixture.componentInstance.addon.set({
+      kind: 'prime-button',
+      slot: 'suffix',
+      label: 'Log',
+      actionRef: 'logClick',
+    } as PrimeButtonAddon);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    button.click();
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('warns when actionRef is configured but not registered', async () => {
+    const logger = makeLogger();
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Send', actionRef: 'missing' } as PrimeButtonAddon, {
+      logger,
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    button.click();
+    expect(logger.warn).toHaveBeenCalled();
+    expect(String(logger.warn.mock.calls[0]?.[0])).toContain('missing');
+  });
+
+  it('absorbs clicks as a no-op on decorative buttons (no preset/actionRef/action)', async () => {
+    // Decorative: just visually a button, no handler. The dispatcher
+    // should silently fall through — no warning, no throw.
+    const logger = makeLogger();
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Info' } as PrimeButtonAddon, { logger });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    expect(() => button.click()).not.toThrow();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('forwards static [disabled]=true to the rendered <p-button>', async () => {
+    const { fixture } = setup({
+      kind: 'prime-button',
+      slot: 'suffix',
+      label: 'Locked',
+      disabled: true,
+    } as PrimeButtonAddon);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+  });
+
+  it('renders [disabled]=false (default) without setting the disabled attribute', async () => {
+    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Active' } as PrimeButtonAddon);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+  });
+
+  it('disables the button when [loading]=true (PrimeNG ties loading→disabled internally)', async () => {
+    const { fixture } = setup({
+      kind: 'prime-button',
+      slot: 'suffix',
+      label: 'Submit',
+      loading: true,
+    } as PrimeButtonAddon);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button button') as HTMLButtonElement;
+    // PrimeNG sets disabled=true when loading; the explicit `[disabled]="action.disabled() || action.loading()"`
+    // binding makes this deterministic across PrimeNG versions.
+    expect(button.disabled).toBe(true);
+  });
+
+  it('renders aria-busy="true" while loading (assistive tech parity with bs/mat/ion)', async () => {
+    const { fixture } = setup({
+      kind: 'prime-button',
+      slot: 'suffix',
+      label: 'Submit',
+      loading: true,
+    } as PrimeButtonAddon);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector('p-button') as HTMLElement;
+    expect(button.getAttribute('aria-busy')).toBe('true');
+  });
 });

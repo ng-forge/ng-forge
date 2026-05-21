@@ -139,6 +139,9 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         const typeOverride = inject(BS_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
+        // forwardRef is needed for `host.props()?.type` (baselineType
+        // guard for `toggle-password-visibility`). The writer comes from
+        // `ctx.setValue` — see `mat-input.component.ts` for details.
         const host = inject(forwardRef(() => BsInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
@@ -202,8 +205,12 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         box-shadow: none;
       }
       :host ::ng-deep .input-group-text df-bs-button-addon .btn:focus-visible {
+        /* 2px solid for WCAG 2.4.11 (focus thickness/area). currentColor
+           keeps the indicator readable on both light and dark themes — the
+           addon button inherits the input's color, so contrast against the
+           input-group background is consistent. */
         box-shadow: none;
-        outline: 1px dashed currentColor;
+        outline: 2px solid currentColor;
         outline-offset: 2px;
       }
     `,

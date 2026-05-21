@@ -13,7 +13,7 @@ import type { PrimeIconAddon } from '../types/addons';
 @Component({
   selector: 'df-prime-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],
-  template: `<i [class]="iconClass()" [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"></i>`,
+  template: `<i [class]="iconClass()" [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"></i>`,
   host: {
     '[attr.aria-hidden]': 'hasAriaLabel() ? null : "true"',
   },
