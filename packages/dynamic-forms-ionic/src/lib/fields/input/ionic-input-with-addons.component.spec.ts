@@ -66,10 +66,12 @@ describe('IonicInputFieldComponent — addon rendering', () => {
     expect(ionInput.querySelector('span[slot="end"]')).toBeNull();
   });
 
-  it('renders ion-button suffix addons OUTSIDE <ion-input> as a flex sibling', async () => {
-    // Interactive ion-button addons render outside <ion-input> because Ionic's
-    // shadow CSS forces ion-button projected through start/end slots to
-    // zero-size / non-interactable. Decorative addons stay inside the slots.
+  it('renders ion-button suffix addons INSIDE <ion-input> as projected slot children', async () => {
+    // Interactive ion-button addons now render INSIDE <ion-input> as native
+    // <ion-button slot="end"> elements (via the `ion-button[df-ion-button-addon]`
+    // attribute-selector inline component). This satisfies Ionic's
+    // `::slotted(ion-button[slot=end])` shadow-CSS rule, which provides the
+    // native icon-only styling — no flex-sibling workaround needed.
     const suffix: IonButtonAddon = {
       kind: 'ion-button',
       slot: 'suffix',
@@ -84,18 +86,15 @@ describe('IonicInputFieldComponent — addon rendering', () => {
 
     const ionInput = fixture.nativeElement.querySelector('ion-input') as HTMLElement;
     expect(ionInput).toBeTruthy();
-    // The button isn't inside the ion-input slots.
-    expect(ionInput.querySelector('span[slot="end"]')).toBeNull();
-    expect(ionInput.querySelector('span[slot="start"]')).toBeNull();
-    // It IS rendered in the wrapping flex row as a sibling of ion-input.
-    const row = fixture.nativeElement.querySelector('.df-ion-input-row') as HTMLElement;
-    expect(row).toBeTruthy();
-    // df-addon-slot for the button is a direct child of the row, NOT nested inside ion-input.
-    const buttonSlots = Array.from(row.children).filter((el) => el.tagName.toLowerCase() === 'df-addon-slot');
-    expect(buttonSlots.length).toBe(1);
+    // The button is a direct child of <ion-input>, with slot="end".
+    const ionButton = ionInput.querySelector('ion-button[slot="end"]') as HTMLElement;
+    expect(ionButton).toBeTruthy();
+    expect(ionButton.hasAttribute('df-ion-button-addon')).toBe(true);
+    // No flex-sibling row wrapper any more.
+    expect(fixture.nativeElement.querySelector('.df-ion-input-row')).toBeNull();
   });
 
-  it('renders decorative addons inside <ion-input> and interactive button addons outside', async () => {
+  it('renders decorative addons in slot wrappers + button addons as direct ion-button children', async () => {
     const addons: IonInputAddon[] = [
       { kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonIconAddon,
       { kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonButtonAddon,
@@ -106,14 +105,10 @@ describe('IonicInputFieldComponent — addon rendering', () => {
     fixture.detectChanges();
 
     const ionInput = fixture.nativeElement.querySelector('ion-input') as HTMLElement;
-    // Decorative prefix icon stays inside the start slot.
+    // Decorative prefix icon stays inside a <span slot="start"> wrapper.
     expect(ionInput.querySelectorAll('span[slot="start"]').length).toBe(1);
-    // Interactive suffix button does NOT live in the end slot — it's outside.
-    expect(ionInput.querySelectorAll('span[slot="end"]').length).toBe(0);
-    // The button is a sibling of ion-input in the flex row.
-    const row = fixture.nativeElement.querySelector('.df-ion-input-row') as HTMLElement;
-    const buttonSlots = Array.from(row.children).filter((el) => el.tagName.toLowerCase() === 'df-addon-slot');
-    expect(buttonSlots.length).toBe(1);
+    // Interactive suffix button lives at the input as a direct <ion-button slot="end">.
+    expect(ionInput.querySelectorAll('ion-button[slot="end"]').length).toBe(1);
   });
 
   it('keeps the aria-describedby plumbing intact when addons are present', async () => {

@@ -3,7 +3,6 @@ import type { FieldSignalContext, ArrayContext, GroupContext } from '../mappers/
 import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
 import type { FormOptions } from './form-config';
-import { DynamicFormError } from '../errors/dynamic-form-error';
 
 /**
  * Injection token for form-level default wrappers.
@@ -47,17 +46,7 @@ export const DEFAULT_WRAPPERS = new InjectionToken<Signal<readonly WrapperConfig
  * }
  * ```
  */
-export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT', {
-  providedIn: null, // Not provided at root - must be provided by DynamicForm
-  factory: () => {
-    throw new DynamicFormError(
-      'FIELD_SIGNAL_CONTEXT was not provided. ' +
-        'This token must be provided by DynamicFormComponent or a container field component. ' +
-        'If you are calling a mapper function directly, ensure it runs within runInInjectionContext() ' +
-        'with an injector that provides FIELD_SIGNAL_CONTEXT.',
-    );
-  },
-});
+export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT');
 
 /**
  * Injection token for providing array context metadata to mappers and components.

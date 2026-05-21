@@ -22,6 +22,7 @@ import {
 } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { runIonicPresetAction } from '../../addons/preset-actions';
+import { IonInlineButtonAddonComponent } from '../../addons/ion-inline-button-addon.component';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
 import { IonInputAddon, IonicInputProps } from './ionic-input.type';
@@ -55,50 +56,54 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
 // inside the wrapper where its slot attribute is harmless.
 @Component({
   selector: 'df-ion-input',
-  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot],
+  // Note: IonButton (the Ionic Angular wrapper) is intentionally NOT imported.
+  // `IonInlineButtonAddonComponent`'s `ion-button[df-ion-button-addon]` selector
+  // matches `<ion-button>` elements here; importing IonButton would cause
+  // NG0300 (multiple components matching the same tag). The inline addon uses
+  // `[attr.*]` bindings which Stencil reflects to ion-button's properties, so
+  // the Angular wrapper isn't needed in this template.
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot, IonInlineButtonAddonComponent],
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let f = ngf.field();
     @let inputId = ngf.key() + '-input';
 
-    <div class="df-ion-input-row">
+    <ion-input
+      ngForgeControl
+      [id]="inputId"
+      [type]="type()"
+      [formField]="f"
+      [label]="(ngf.label() | dynamicText | async) ?? undefined"
+      [labelPlacement]="labelPlacement()"
+      [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+      [clearInput]="props()?.clearInput ?? false"
+      [counter]="props()?.counter ?? false"
+      [minlength]="f().minLength?.()"
+      [maxlength]="f().maxLength?.()"
+      [color]="color()"
+      [fill]="fill()"
+      [shape]="shape()"
+      [readonly]="f().readonly()"
+      [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
+      [attr.tabindex]="ngf.tabIndex()"
+    >
+      @for (a of decorativePrefixAddons(); track $index) {
+        <span slot="start">
+          <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        </span>
+      }
       @for (a of buttonPrefixAddons(); track $index) {
-        <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        <ion-button df-ion-button-addon slot="start" [addon]="a" [fieldInputs]="fieldInputs()"></ion-button>
       }
-      <ion-input
-        ngForgeControl
-        [id]="inputId"
-        [type]="type()"
-        [formField]="f"
-        [label]="(ngf.label() | dynamicText | async) ?? undefined"
-        [labelPlacement]="labelPlacement()"
-        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
-        [clearInput]="props()?.clearInput ?? false"
-        [counter]="props()?.counter ?? false"
-        [minlength]="f().minLength?.()"
-        [maxlength]="f().maxLength?.()"
-        [color]="color()"
-        [fill]="fill()"
-        [shape]="shape()"
-        [readonly]="f().readonly()"
-        [helperText]="ngf.errorsToDisplay().length === 0 ? ((props()?.hint | dynamicText | async) ?? undefined) : undefined"
-        [attr.tabindex]="ngf.tabIndex()"
-      >
-        @for (a of decorativePrefixAddons(); track $index) {
-          <span slot="start">
-            <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-          </span>
-        }
-        @for (a of decorativeSuffixAddons(); track $index) {
-          <span slot="end">
-            <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
-          </span>
-        }
-      </ion-input>
       @for (a of buttonSuffixAddons(); track $index) {
-        <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        <ion-button df-ion-button-addon slot="end" [addon]="a" [fieldInputs]="fieldInputs()"></ion-button>
       }
-    </div>
+      @for (a of decorativeSuffixAddons(); track $index) {
+        <span slot="end">
+          <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
+        </span>
+      }
+    </ion-input>
     @if (ngf.errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
     }
@@ -162,47 +167,17 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
         --df-ion-addon-suffix-inner-padding: 0.5rem;
         --df-ion-addon-suffix-outer-padding: 0;
       }
-      /* ion-button addons render OUTSIDE <ion-input> in a flex row — Ionic's
-         shadow CSS forces ion-button projected through start/end slots to
-         zero-size / non-interactable. Decorative addons (icon/text/template/
-         component) stay inside the slots. Gap is split per-side via
-         per-button margin: a single flex gap would force the same value
-         on both sides, hiding the suffix-side variable consumers can set. */
-      .df-ion-input-row {
-        display: flex;
-        align-items: stretch;
-      }
-      .df-ion-input-row > ion-input {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-      /* Prefix-side buttons: gap goes on the trailing edge (between button
-         and ion-input). Suffix-side buttons: gap goes on the leading edge.
-         :has(~ ion-input) selects buttons that appear before the input
-         in the row, i.e., prefix buttons. */
-      .df-ion-input-row > df-addon-slot:has(~ ion-input) {
-        margin-inline-end: var(--df-ion-addon-prefix-inner-padding);
-      }
-      .df-ion-input-row > ion-input ~ df-addon-slot {
-        margin-inline-start: var(--df-ion-addon-suffix-inner-padding);
-      }
-      /* Visually integrate the ion-button addons with the ion-input container.
-         Without this, the row reads as "input + chip", because <ion-input>'s
-         shadow border-radius / fill don't propagate to siblings. Match the
-         input's background + border tokens directly on the host so the row
-         reads as one widget. Consumers can opt back into the chip look by
-         setting fill explicitly via addon.fill. */
-      :host ::ng-deep .df-ion-input-row > df-addon-slot > df-ion-button-addon ion-button {
-        --background: var(--df-ion-addon-row-background, var(--ion-item-background, var(--ion-background-color)));
-        --border-radius: var(--df-ion-addon-row-radius, var(--ion-border-radius, 0.375rem));
-        --padding-start: 0.5rem;
-        --padding-end: 0.5rem;
-        --box-shadow: none;
-        margin: 0;
-        align-self: stretch;
-        height: auto;
-        min-height: 100%;
-      }
+      /* Interactive ion-button addons render INSIDE <ion-input> via
+         slot="start|end" directly on the <ion-button>. Ionic ships a
+         specific ::slotted(ion-button[slot=start|end].button-has-icon-only)
+         rule that natively styles icon-only buttons projected this way
+         (40x40, circular, themed). Earlier revisions wrapped the button in
+         <df-addon-slot>, which broke the ::slotted match because the
+         immediate slotted element became <df-addon-slot> instead of
+         <ion-button>; the workaround was to render outside in a flex row.
+         The ion-button[df-ion-button-addon] attribute selector lets the
+         dispatch logic ride on a native <ion-button> element directly,
+         restoring Ionic's intended slotted-button rendering. */
       /* The slot wrapper itself centers correctly via align-self, but the
          icon glyph inside is baseline-pinned at the top of an inline line-
          box (df-addon-slot defaults to display: block; line-height: normal).
@@ -272,9 +247,11 @@ export default class IonicInputFieldComponent {
   /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
   protected readonly type = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
-  /** Interactive `ion-button` addons render OUTSIDE <ion-input> because Ionic's
-   *  shadow CSS forces ion-button projected into the start/end slots to
-   *  zero-size / non-interactable. Decorative kinds stay inside the slots. */
+  /** Per-kind split: ion-button addons render inline via the attribute-
+   *  selector inline component (so the slotted element is a native
+   *  <ion-button> Ionic can style); everything else (icon/text/template/
+   *  component kinds) goes through the universal <df-addon-slot> dispatcher
+   *  wrapped in <span slot="start|end"> for safe shadow-DOM projection. */
   protected readonly buttonPrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.kind === 'ion-button'));
   protected readonly buttonSuffixAddons = computed(() => this.ngfa.suffixAddons().filter((a) => a.kind === 'ion-button'));
   protected readonly decorativePrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.kind !== 'ion-button'));
