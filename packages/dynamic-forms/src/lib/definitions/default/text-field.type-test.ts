@@ -107,6 +107,7 @@ describe('TextField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'logic';
 
   type ActualKeys = keyof TextField;

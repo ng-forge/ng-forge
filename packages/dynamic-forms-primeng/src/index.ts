@@ -13,7 +13,13 @@ export {
   PRIMENG_CONFIG,
   PrimeField,
   withPrimeNGFields,
+  withPrimeNGAddons,
+  PrimeIconAddonComponent,
+  PrimeButtonAddonComponent,
+  PRIME_INPUT_TYPE_OVERRIDE,
 } from './lib';
+
+export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon, PrimeInputAddon, PrimeAddonExtensions } from './lib';
 
 export type {
   PrimeButtonProps,

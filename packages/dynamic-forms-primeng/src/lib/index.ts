@@ -61,8 +61,19 @@ export { PRIMENG_CONFIG } from './models';
 export { PrimeField, type PrimeFieldType } from './types/types';
 export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 
-// Module augmentation for global types
+// IMPORTANT: side-effect imports — these augment global type registries
+// (DynamicFormFieldRegistry, DynamicFormAddonRegistry) so `type: 'input'`,
+// `kind: 'prime-icon'`, and similar resolve at the call site. Without these,
+// consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
+import './types/addons';
 
 // Providers
-export { withPrimeNGFields } from './providers/primeng-providers';
+export { withPrimeNGFields, withPrimeNGAddons } from './providers/primeng-providers';
+
+// Addon kinds
+export { PrimeIconAddonComponent } from './addons/prime-icon-addon.component';
+export { PrimeButtonAddonComponent } from './addons/prime-button-addon.component';
+export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon } from './types/addons';
+export type { PrimeInputAddon, PrimeAddonExtensions } from './fields/input/prime-input.type';
+export { PRIME_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

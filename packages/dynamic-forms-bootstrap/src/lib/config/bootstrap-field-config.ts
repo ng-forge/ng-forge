@@ -31,6 +31,9 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {

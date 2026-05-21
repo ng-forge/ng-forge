@@ -24,14 +24,38 @@ class PrimeNGRootComponent {}
 /**
  * Clears PrimeNG's module-scoped style caches so styles are re-injected in new shadow roots.
  * Both `Base` (component styles) and `Theme` (theme CSS variables) use module-level singletons
- * to track which styles have been injected. When multiple PrimeNG sandboxes coexist on a page,
- * the first one populates these caches and subsequent ones skip injection entirely.
+ * to track which styles have been injected.
  *
- * WARNING: `clearLoadedStyleNames()` is not a public PrimeNG API. Verified against PrimeNG v19.
- * If PrimeNG removes this method in a future version, sandbox style re-injection will break
- * silently (styles won't appear in new shadow roots). Check after PrimeNG major upgrades.
+ * Clearing alone isn't enough when multiple PrimeNG sandboxes mount concurrently: both
+ * bootstraps clear the cache, but as soon as demo #1's first component injects its style
+ * (and calls `setLoadedStyleName`), demo #2's parallel injection sees the cache populated
+ * and skips — so demo #2 never gets that component's styles in its own shadow root.
+ *
+ * The reliable fix is to permanently neutralise `isStyleNameLoaded` so every component
+ * style injection proceeds. The `setLoadedStyleName` calls still run (the Set still grows)
+ * but the gate they protect is always open. Per-shadow-root style elements are then handled
+ * by each sub-app's DocumentProxy redirecting `head.appendChild` into its shadow root.
+ *
+ * WARNING: `_loadedStyleNames` / `isStyleNameLoaded` / `clearLoadedStyleNames` are not
+ * public PrimeNG APIs. Verified against PrimeNG v21. If these change, sandbox style
+ * re-injection will break silently — check after PrimeNG major upgrades.
  */
+let isStyleNameLoadedNeutralised = false;
+function neutraliseIsStyleNameLoaded(): void {
+  if (isStyleNameLoadedNeutralised) return;
+  try {
+    // Cast to a record so we can override the method; Base is an object literal at runtime.
+    (Base as unknown as { isStyleNameLoaded: () => boolean }).isStyleNameLoaded = () => false;
+    (Theme as unknown as { isStyleNameLoaded: () => boolean }).isStyleNameLoaded = () => false;
+    isStyleNameLoadedNeutralised = true;
+  } catch (e) {
+    console.warn('[SandboxHarness] Failed to neutralise PrimeNG style-cache check — internal API may have changed.', e);
+  }
+}
+
 export function clearPrimeNGStyleCaches(): void {
+  // Permanent neutralisation runs on first call and stays — cheap and idempotent.
+  neutraliseIsStyleNameLoaded();
   try {
     Base.clearLoadedStyleNames();
     Theme.clearLoadedStyleNames();

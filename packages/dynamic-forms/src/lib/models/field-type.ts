@@ -1,6 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { FieldDef } from '../definitions/base/field-def';
 import { MapperFn } from '../mappers/types';
+import { FieldAddonSupport } from './addon/addon-kind';
 import { LazyComponentLoader } from './wrapper-type';
 
 /**
@@ -100,6 +101,24 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   scope?: FieldScope | FieldScope[];
   /** Mapped component inputs that must exist before the renderer instantiates the component */
   renderReadyWhen?: readonly RenderReadyInput[];
+
+  /**
+   * Declares which addon slots this field accepts and (optionally) the
+   * subset of kinds allowed.
+   *
+   * Source of truth for the runtime addon validator. Field types that
+   * omit this property are treated as Tier 3 — any `addons` configured
+   * on such a field are dropped with a warning at config init.
+   *
+   * @example
+   * ```typescript
+   * {
+   *   name: 'prime-input',
+   *   addons: { slots: ['prefix', 'suffix'] },
+   * }
+   * ```
+   */
+  addons?: FieldAddonSupport;
 }
 
 /**

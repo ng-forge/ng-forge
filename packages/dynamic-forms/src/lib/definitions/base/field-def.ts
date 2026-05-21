@@ -1,3 +1,4 @@
+import { AnyAddon } from '../../models/addon/addon-def';
 import { WithInputSignals } from '../../models/component-type';
 import { Prettify } from '../../models/prettify';
 import { RegisteredFieldTypes } from '../../models/registry/field-registry';
@@ -310,6 +311,25 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
    * and any field-level `wrappers`.
    */
   skipDefaultWrappers?: boolean;
+
+  /**
+   * Addons rendered inside this field's slots (typically `prefix` / `suffix`).
+   *
+   * Each addon declares its kind, slot, and kind-specific configuration.
+   * Whether a field type accepts addons — and which slots / kinds — is
+   * declared at registration via `FieldTypeDefinition.addons`. Field types
+   * without that registration ("Tier 3", e.g., toggle, radio) drop any
+   * `addons` value with a lenient warning at config init.
+   *
+   * @example
+   * ```typescript
+   * addons: [
+   *   { slot: 'prefix', kind: 'prime-icon', icon: 'search' },
+   *   { slot: 'suffix', kind: 'prime-button', preset: 'clear', ariaLabel: 'Clear' },
+   * ]
+   * ```
+   */
+  addons?: ReadonlyArray<AnyAddon>;
 }
 
 type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';

@@ -25,7 +25,7 @@ import { getFieldValueHandling } from '../../models/field-type';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
 import { FieldSignalContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { injectFieldSignalContext } from '../../models/field-signal-context.token';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { ArrayFieldStateMachine, RunHandle } from './array-field-state-machine';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
@@ -80,7 +80,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
-  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
+  private readonly parentFieldSignalContext = injectFieldSignalContext<TModel>();
   private readonly parentInjector = inject(Injector);
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);

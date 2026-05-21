@@ -11,10 +11,15 @@ describe('withPrimeNGFields', () => {
     TestBed.resetTestingModule();
   });
 
-  it('returns original field types when no config provided', () => {
+  it('returns field types with the addons feature appended when no config provided', () => {
     const fields = withPrimeNGFields();
 
-    expect(fields).toBe(PRIMENG_FIELD_TYPES);
+    // The addons feature is auto-included after the field defs.
+    expect(fields.length).toBe(PRIMENG_FIELD_TYPES.length + 1);
+    for (let i = 0; i < PRIMENG_FIELD_TYPES.length; i++) {
+      expect(fields[i]).toBe(PRIMENG_FIELD_TYPES[i]);
+    }
+    expect(fields.at(-1)).toMatchObject({ ɵkind: 'addons' });
   });
 
   it('adds primeng-config feature when config is provided', () => {

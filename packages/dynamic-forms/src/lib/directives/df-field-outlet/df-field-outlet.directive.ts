@@ -5,7 +5,8 @@ import { WRAPPER_AUTO_ASSOCIATIONS } from '../../models/wrapper-type';
 import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
-import { READONLY_FIELD_TREE_CACHE, toReadonlyFieldTreeCached } from '../../core/field-tree-utils';
+import { READONLY_FIELD_TREE_CACHE } from '../../core/field-tree-utils';
+import { buildFieldInputs } from '../../utils/build-field-inputs/build-field-inputs';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 import { FieldComponentSlot } from './field-component-slot';
 
@@ -87,11 +88,15 @@ export class DfFieldOutlet {
   );
 
   /**
-   * `fieldInputs` bag handed to every wrapper in the chain. Memoised on
-   * `rawInputs` identity so repeated emissions with the same underlying object
-   * return the same view and don't cascade OnPush re-evaluations.
+   * `fieldInputs` bag handed to every wrapper in the chain AND forwarded to
+   * the innermost field component (when it declares `fieldInputs` as an
+   * input). Memoised on `rawInputs` identity so repeated emissions with the
+   * same underlying object return the same view and don't cascade OnPush
+   * re-evaluations.
    */
-  private readonly fieldInputs = computed<WrapperFieldInputs>(() => this.buildFieldInputs(this.rawInputs()));
+  private readonly fieldInputs = computed<WrapperFieldInputs>(() =>
+    buildFieldInputs(this.rawInputs(), this.readonlyFieldCache, this.dfFieldOutlet().fieldDef.type),
+  );
 
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
   /** Environment injector for the innermost field component — `[environmentInjector]` input takes precedence over the directive's own DI. */
@@ -110,31 +115,25 @@ export class DfFieldOutlet {
       beforeRebuild: () => this.fieldComponent.detach(),
       renderInnermost: (slot) => {
         const resolved = this.dfFieldOutlet();
-        this.fieldComponent.mountOrReuse(slot, resolved.component, resolved.injector, this.fieldEnvInjector(), this.rawInputs());
+        this.fieldComponent.mountOrReuse(
+          slot,
+          resolved.component,
+          resolved.injector,
+          this.fieldEnvInjector(),
+          this.rawInputs(),
+          this.fieldInputs(),
+        );
       },
     });
 
-    // Push rawInputs to the innermost field on every change. The slot dedupes per-key, so the
-    // initial render's synchronous push from `renderInnermost` and the effect's first fire
+    // Push rawInputs (plus the wrapper-style fieldInputs bag) to the innermost
+    // field on every change. The slot dedupes per-key, so the initial render's
+    // synchronous push from `renderInnermost` and the effect's first fire
     // converge cleanly with no double-pushing.
-    explicitEffect([this.rawInputs], ([rawInputs]) => this.fieldComponent.pushInputs(rawInputs));
+    explicitEffect([this.rawInputs, this.fieldInputs], ([rawInputs, fieldInputs]) =>
+      this.fieldComponent.pushInputs(rawInputs, fieldInputs),
+    );
 
     this.destroyRef.onDestroy(() => this.fieldComponent.destroyOnTeardown());
-  }
-
-  private buildFieldInputs(rawInputs: Record<string, unknown>): WrapperFieldInputs {
-    const fieldTreeCandidate = rawInputs['field'];
-    // A FieldTree is a callable (() => FieldState). We expose it to wrappers via a narrow
-    // read-only view; raw FieldTree is still pushed to the innermost component for writes.
-    const readonlyField =
-      fieldTreeCandidate && typeof fieldTreeCandidate === 'function'
-        ? toReadonlyFieldTreeCached(this.readonlyFieldCache, fieldTreeCandidate as never)
-        : undefined;
-    // Shallow spread — relies on the mapper contract (see WrapperFieldInputs)
-    // that rawInputs are emitted as fresh snapshots, not mutated in place.
-    return {
-      ...(rawInputs as Record<string, unknown>),
-      field: readonlyField,
-    } as WrapperFieldInputs;
   }
 }

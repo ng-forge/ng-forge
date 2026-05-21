@@ -98,7 +98,13 @@ export class LiveExampleComponent {
     return raw.startsWith('examples/') ? raw.slice('examples/'.length) : raw;
   });
 
-  private readonly scenarioConfig = computed((): FormConfig | undefined => EXAMPLE_CONFIGS[this.scenarioKey()]);
+  private readonly scenarioConfig = computed((): FormConfig | undefined => {
+    const entry = EXAMPLE_CONFIGS[this.scenarioKey()];
+    // Per-adapter factory (e.g., addon configs that pick adapter-specific
+    // `kind` values) gets called with the resolved adapter; static configs
+    // pass through unchanged.
+    return typeof entry === 'function' ? entry(this.resolvedAdapter()) : entry;
+  });
 
   protected readonly resolvedConfig = computed(() => this.scenarioConfig());
 

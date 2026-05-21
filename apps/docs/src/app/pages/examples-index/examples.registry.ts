@@ -99,6 +99,27 @@ export const EXAMPLES_REGISTRY: ExampleItem[] = [
     tags: ['Layout', 'Arrays', 'Wrappers'],
     path: '/examples/wrapper-array-actions',
   },
+  {
+    id: 'addon-clear-button',
+    title: 'Addon Clear Button',
+    description: 'Canonical addon pattern — icon prefix + clear-preset button suffix, JSON-safe across all four adapters',
+    tags: ['Addons'],
+    path: '/examples/addon-clear-button',
+  },
+  {
+    id: 'addon-password-toggle',
+    title: 'Addon Password Toggle',
+    description: 'Toggle-password-visibility preset flips the input type between password and text',
+    tags: ['Addons'],
+    path: '/examples/addon-password-toggle',
+  },
+  {
+    id: 'addon-currency',
+    title: 'Addon Currency',
+    description: 'Universal text addons — dollar sign prefix and USD suffix on a numeric input',
+    tags: ['Addons'],
+    path: '/examples/addon-currency',
+  },
 ];
 
 export const ALL_TAGS = [...new Set(EXAMPLES_REGISTRY.flatMap((e) => e.tags))].sort();

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChildren,
   DestroyRef,
   EnvironmentInjector,
   inject,
@@ -10,6 +11,7 @@ import {
   input,
   model,
   Signal,
+  TemplateRef,
   WritableSignal,
 } from '@angular/core';
 import { FieldDef } from './definitions/base/field-def';
@@ -36,6 +38,8 @@ import { DynamicFormLogger } from './providers/features/logger/logger.token';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
 import { EventDispatcher } from './events/event-dispatcher';
+import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.directive';
+import { DF_FIELD_TEMPLATES } from './models/addon/df-field-templates.token';
 
 /**
  * Dynamic form component — renders a form based on configuration.
@@ -73,7 +77,11 @@ import { EventDispatcher } from './events/event-dispatcher';
     }
   `,
   styleUrl: './dynamic-form.component.scss',
-  providers: [provideDynamicFormDI()],
+  providers: [
+    provideDynamicFormDI(),
+    DfFieldTemplateRegistry,
+    { provide: DF_FIELD_TEMPLATES, useFactory: () => inject(DfFieldTemplateRegistry).map },
+  ],
   host: {
     class: 'df-dynamic-form df-form',
     novalidate: '', // Disable browser validation - Angular Signal Forms handles validation
@@ -102,6 +110,14 @@ export class DynamicForm<
   /** Form values for two-way data binding. */
   value = model<Partial<TModel> | undefined>(undefined);
 
+  /**
+   * How lenient the addon validator is on `config.fields[...].addons`.
+   * `'inline'` (default) keeps everything; `'json'` drops code-only kinds
+   * with a warning. Read at form init and on every config swap — change
+   * `source` AND the config to force re-validation mid-flight.
+   */
+  source = input<'inline' | 'json'>('inline');
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies
   // ─────────────────────────────────────────────────────────────────────────────
@@ -112,6 +128,14 @@ export class DynamicForm<
   private eventBus = inject(EventBus);
   private logger = inject(DynamicFormLogger);
   private dispatcher = inject(EventDispatcher, { optional: true });
+  private templateRegistry = inject(DfFieldTemplateRegistry);
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Projected templates — collected for the `template` addon kind via DI.
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /** All `<ng-template dfTemplate="...">` instances projected into this form. */
+  private readonly _projectedTemplates = contentChildren(DfTemplate);
 
   /** State manager that owns all form state. Initialized via connectDeps() to guarantee
    * FORM_STATE_DEPS is populated before FormStateManager is injected. */
@@ -312,6 +336,16 @@ export class DynamicForm<
         );
       }
     });
+
+    // Mirror projected `<ng-template dfTemplate="...">` into the template
+    // registry so `template` addons can resolve `templateKey` via DI.
+    explicitEffect([this._projectedTemplates], ([templates]) => {
+      const map = new Map<string, TemplateRef<unknown>>();
+      for (const t of templates) {
+        map.set(t.dfTemplate(), t.templateRef);
+      }
+      this.templateRegistry.set(map);
+    });
   }
 
   /**
@@ -325,6 +359,7 @@ export class DynamicForm<
     deps.config = this.config as Signal<FormConfig<RegisteredFieldTypes[]>>;
     deps.formOptions = this.formOptions;
     deps.value = this.value as WritableSignal<Partial<unknown> | undefined>;
+    deps.source = this.source;
     return inject(FormStateManager<TFields, TModel>);
   }
 

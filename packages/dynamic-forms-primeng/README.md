@@ -101,6 +101,12 @@ provideDynamicForm(
 
 Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Slider, Button, Submit, Next, Previous
 
+## Addons
+
+`prime-input` ships first-class `prefix` / `suffix` addon slots accepting the PrimeNG-specific `prime-icon` / `prime-button` kinds plus the universal `text` / `template` / `component` kinds. `withPrimeNGFields()` auto-registers them — no extra setup needed.
+
+See [Addons / Overview](https://ng-forge.com/addons/overview), [Presets and Actions](https://ng-forge.com/addons/presets-and-actions), and [Custom Kinds](https://ng-forge.com/addons/custom-kinds) for the full surface (slots, kinds, presets, `actionRef`, reactive `hidden` / `disabled`, custom kind registration).
+
 ## Documentation
 
 - [PrimeNG Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/primeng)

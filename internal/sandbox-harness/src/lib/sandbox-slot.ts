@@ -1,4 +1,5 @@
 import { DestroyRef, inject } from '@angular/core';
+import { FormConfig } from '@ng-forge/dynamic-forms';
 import { AdapterName, SandboxBootstrapOptions, SandboxRef } from './types';
 
 /**
@@ -46,7 +47,12 @@ export class SandboxSlot {
    * Abort semantics: if `signal` fires before an async step completes, the operation is
    * cancelled and an `AbortError` is thrown. Any partially-created app is cleaned up.
    */
-  async mount(adapter: AdapterName, route: string, signal: AbortSignal): Promise<SandboxRef> {
+  async mount(adapter: AdapterName, route: string, signal: AbortSignal, config?: FormConfig): Promise<SandboxRef> {
+    // `config` (per-mount) overrides the slot-level default. Adapter-specific
+    // factory configs need to evaluate against the destination adapter, so
+    // callers pass the freshly-resolved config each mount instead of relying
+    // on the value captured at slot construction.
+    const effectiveConfig = config ?? this.options.config;
     const cached = this.cache.get(adapter);
     if (cached) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -55,7 +61,7 @@ export class SandboxSlot {
       return cached;
     }
 
-    const ref = await this.bootstrapFn(adapter, this.container, { ...this.options, route }, signal);
+    const ref = await this.bootstrapFn(adapter, this.container, { ...this.options, route, config: effectiveConfig }, signal);
     // Post-bootstrap abort check: destroy the freshly-created ref if signal fired.
     if (signal.aborted) {
       ref.destroy();

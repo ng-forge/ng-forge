@@ -121,6 +121,22 @@ Custom mappers that emit other required inputs should list them explicitly on th
 }
 ```
 
+### Addon support declaration
+
+Field types that render addon slots must opt in via `addons: { slots: [...] }` on the registration. The addon validator (`walkAndValidateAddons`, run during `createFormSetupFromConfig`) drops addon configs from any field type that omits this declaration and logs a "field-type-no-addon-support" warning. The shape:
+
+```typescript
+{
+  name: MatField.Input,
+  loadComponent: () => import('../fields/input/mat-input.component'),
+  mapper: valueFieldMapper,
+  ...VALUE_FIELD_TYPES_BASE,
+  addons: { slots: ['prefix', 'suffix'], allowedKinds: ['mat-icon', 'mat-button', 'text'] },
+}
+```
+
+`slots` is required; `allowedKinds` is optional (omit to accept any registered kind). Adapter authors registering a new addon-supporting field type should declare both axes — `renderReadyWhen` for value-bearing render-ready gating AND `addons` for addon validation — at the same registration site.
+
 ### Teardown timing
 
 Teardown MUST use `requestAnimationFrame` (frame-boundary), NOT `afterNextRender`. The `derivedFromDeferred` pipeline needs CD + microtask + CD (~2 renders) to settle. `afterNextRender` fires after 1 render — too fast. `requestAnimationFrame` (~16ms) gives the pipeline time to process.

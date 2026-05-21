@@ -375,13 +375,20 @@ export class SandboxHarness implements OnDestroy {
 
     // Mirror data-theme from document.documentElement → shadow host so that
     // CSS selectors transformed to :host([data-theme='dark']) work correctly.
+    // Also mirror as data-bs-theme so Bootstrap 5.3+'s built-in dark theme
+    // (which scopes its CSS variables under [data-bs-theme="dark"]) applies
+    // to the bootstrap adapter — without this, .input-group-text, .btn, and
+    // other variable-driven components stay light in dark mode. The attribute
+    // is harmless for non-Bootstrap adapters.
     const syncTheme = (): void => {
       const isDark = resolveTheme() === 'dark';
       themeSignal.set(isDark ? 'dark' : 'light');
       if (isDark) {
         hostElement.setAttribute('data-theme', 'dark');
+        hostElement.setAttribute('data-bs-theme', 'dark');
       } else {
         hostElement.removeAttribute('data-theme');
+        hostElement.removeAttribute('data-bs-theme');
       }
     };
     syncTheme();
@@ -452,6 +459,54 @@ export class SandboxHarness implements OnDestroy {
     style.id = `${STYLESHEET_ID_PREFIX}${registration.name}`;
     style.textContent = this.transformCssForShadowDom(rawCss);
     shadowRoot.appendChild(style);
+
+    // Mirror extra stylesheets (icon fonts, CDN CSS) into the shadow root.
+    // The shadow boundary blocks document-scope class rules from cascading in,
+    // so icon-font CSS has to be re-injected per shadow root for glyphs to
+    // render. @font-face declarations are deduped by the browser, so injecting
+    // them again is cheap.
+    const extras = registration.extraStylesheetUrls ?? [];
+    for (const url of extras) {
+      if (!this.cssCache.has(url)) {
+        const load = fetch(url, { signal: abortSignal })
+          .then((r) => r.text())
+          .catch((err) => {
+            this.cssCache.delete(url);
+            throw err;
+          });
+        this.cssCache.set(url, load);
+      }
+      const css = await this.cssCache.get(url)!;
+      // Resolve relative font URLs (e.g. `url(./fonts/x.woff2)`) against the
+      // stylesheet's origin so font files still load from the CDN.
+      const resolved = this.resolveCssRelativeUrls(css, url);
+      const extraStyle = this.document.createElement('style');
+      extraStyle.textContent = resolved;
+      shadowRoot.appendChild(extraStyle);
+    }
+  }
+
+  /**
+   * Rewrites `url(...)` references in a CSS string so relative paths resolve
+   * against the stylesheet's origin instead of the host document. Needed when
+   * inlining a CDN stylesheet whose @font-face `src: url(...)` points at sibling
+   * files (e.g. `bootstrap-icons.woff2`).
+   */
+  private resolveCssRelativeUrls(css: string, baseUrl: string): string {
+    try {
+      const base = new URL(baseUrl, this.document.baseURI ?? 'http://localhost/');
+      return css.replace(/url\((['"]?)([^'")]+)\1\)/g, (full, quote: string, ref: string) => {
+        if (/^(?:https?:|data:|\/)/i.test(ref)) return full;
+        try {
+          const resolved = new URL(ref, base).toString();
+          return `url(${quote}${resolved}${quote})`;
+        } catch {
+          return full;
+        }
+      });
+    } catch {
+      return css;
+    }
   }
 
   /**
@@ -480,9 +535,11 @@ export class SandboxHarness implements OnDestroy {
         .replace(/(?<![.#[\w-])body(?![.#[\w(-])/g, ':host')
         // 5. bare :root — avoid matching :root-something
         .replace(/:root(?![\w(-])/g, ':host')
-        // 6. bare [data-theme=...] — not preceded by . # word-chars : - ( to avoid
-        //    re-transforming :host([data-theme=...]) or .element[data-theme=...]
-        .replace(/(?<![.#\w:\-(])\[data-theme([^\]]*)\]/g, ':host([data-theme$1])')
+        // 6. bare [data-theme=...] / [data-bs-theme=...] — not preceded by . # word-chars
+        //    : - ( to avoid re-transforming :host([data-theme=...]) or .x[data-theme=...].
+        //    Covers Bootstrap's own [data-bs-theme="dark"] dark-mode rules so they
+        //    fire when the harness sets data-bs-theme on the shadow host.
+        .replace(/(?<![.#\w:\-(])\[(data-(?:bs-)?theme)([^\]]*)\]/g, ':host([$1$2])')
     );
   }
 

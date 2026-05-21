@@ -1,5 +1,5 @@
 import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
+import type { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';

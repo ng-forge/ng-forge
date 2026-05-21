@@ -11,10 +11,14 @@ describe('withIonicFields', () => {
     TestBed.resetTestingModule();
   });
 
-  it('returns original field types when no config provided', () => {
+  it('returns original field types plus the addons feature when no config provided', () => {
     const fields = withIonicFields();
 
-    expect(fields).toBe(IONIC_FIELD_TYPES);
+    // First N entries are the IONIC_FIELD_TYPES; the trailing entry is the
+    // auto-included `withIonicAddons()` feature (kind === 'addons').
+    expect(fields.slice(0, IONIC_FIELD_TYPES.length)).toEqual([...IONIC_FIELD_TYPES]);
+    const last = fields[fields.length - 1] as { ɵkind?: string };
+    expect(last.ɵkind).toBe('addons');
   });
 
   it('adds ionic-config feature when config is provided', () => {

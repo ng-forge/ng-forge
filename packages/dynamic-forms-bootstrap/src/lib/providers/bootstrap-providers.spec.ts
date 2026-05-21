@@ -11,10 +11,13 @@ describe('withBootstrapFields', () => {
     TestBed.resetTestingModule();
   });
 
-  it('returns original field types when no config provided', () => {
+  it('returns field types + the auto-included addons feature when no config provided', () => {
     const fields = withBootstrapFields();
 
-    expect(fields).toBe(BOOTSTRAP_FIELD_TYPES);
+    // Field types come first; the addons feature is appended last.
+    expect(fields.slice(0, BOOTSTRAP_FIELD_TYPES.length)).toEqual(BOOTSTRAP_FIELD_TYPES);
+    const addonsFeature = fields[fields.length - 1];
+    expect(addonsFeature).toMatchObject({ ɵkind: 'addons' });
   });
 
   it('adds bootstrap-config feature when config is provided', () => {

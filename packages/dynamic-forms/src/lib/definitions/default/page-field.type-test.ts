@@ -63,6 +63,7 @@ describe('PageField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'fields'
     | 'logic';
 

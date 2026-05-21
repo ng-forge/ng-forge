@@ -32,7 +32,8 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'validateWhenHidden'
     | 'wrappers'
     | 'skipAutoWrappers'
-    | 'skipDefaultWrappers';
+    | 'skipDefaultWrappers'
+    | 'addons';
   type ActualKeys = keyof FieldDef<TestProps>;
 
   it('should have exactly the expected keys', () => {
@@ -74,6 +75,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'wrappers'
         | 'skipAutoWrappers'
         | 'skipDefaultWrappers'
+        | 'addons'
       >();
     });
 

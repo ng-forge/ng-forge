@@ -11,10 +11,14 @@ describe('withMaterialFields', () => {
     TestBed.resetTestingModule();
   });
 
-  it('returns original field types when no config provided', () => {
+  it('returns field types plus the auto-included addons feature when no config provided', () => {
     const fields = withMaterialFields();
 
-    expect(fields).toBe(MATERIAL_FIELD_TYPES);
+    // Field-type defs come first, the addons feature is appended for
+    // out-of-the-box `mat-icon` / `mat-button` support.
+    expect(fields.slice(0, MATERIAL_FIELD_TYPES.length)).toEqual(MATERIAL_FIELD_TYPES);
+    const addonsFeature = fields.find((f) => 'ɵkind' in f && f.ɵkind === 'addons');
+    expect(addonsFeature).toBeDefined();
   });
 
   it('adds material-config feature when config is provided', () => {

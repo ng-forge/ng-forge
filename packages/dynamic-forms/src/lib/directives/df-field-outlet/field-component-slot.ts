@@ -1,5 +1,6 @@
 import { ComponentRef, EnvironmentInjector, Injector, signal, Type, ViewContainerRef } from '@angular/core';
-import { createWrapperAwareInjector } from '../../utils/wrapper-chain/wrapper-chain';
+import { createWrapperAwareInjector, setInputIfDeclared } from '../../utils/wrapper-chain/wrapper-chain';
+import type { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**
  * Captured focus + caret for one detach/reinsert cycle. Tied to a single
@@ -91,6 +92,7 @@ export class FieldComponentSlot {
     fieldInjector: Injector,
     environmentInjector: EnvironmentInjector,
     rawInputs: Record<string, unknown>,
+    fieldInputs?: WrapperFieldInputs,
   ): void {
     const current = this.state();
 
@@ -98,7 +100,7 @@ export class FieldComponentSlot {
       slot.insert(current.ref.hostView);
       this.lastInputs = null;
       this.state.set(Object.freeze({ phase: 'mounted', ref: current.ref, slot }));
-      this.pushInputs(rawInputs);
+      this.pushInputs(rawInputs, fieldInputs);
       if (current.phase === 'detached') this.replayFocus(current.focusSnapshot);
       return;
     }
@@ -115,7 +117,7 @@ export class FieldComponentSlot {
       injector: createWrapperAwareInjector(fieldInjector, slot.injector),
     });
     this.state.set(Object.freeze({ phase: 'mounted', ref, slot }));
-    this.pushInputs(rawInputs);
+    this.pushInputs(rawInputs, fieldInputs);
   }
 
   /**
@@ -134,7 +136,7 @@ export class FieldComponentSlot {
    * `NgForgeAction`. Mapper-as-contract is enforced by the `*_INPUTS`
    * lockstep type assertions, not at runtime here.
    */
-  pushInputs(rawInputs: Record<string, unknown>): void {
+  pushInputs(rawInputs: Record<string, unknown>, fieldInputs?: WrapperFieldInputs): void {
     const current = this.state();
     if (current.phase !== 'mounted') return;
     const prev = this.lastInputs;
@@ -142,6 +144,14 @@ export class FieldComponentSlot {
     for (const [key, value] of Object.entries(rawInputs)) {
       if (prev && prev[key] === value) continue;
       current.ref.setInput(key, value);
+    }
+    // Side-channel forwarding for the `fieldInputs` bag — gated on
+    // `setInputIfDeclared` so leaf fields that don't declare it (most
+    // non-addon-aware components) skip silently rather than triggering
+    // NG0303 in dev. Pushed unconditionally on every emission since the bag
+    // changes identity when `rawInputs` does.
+    if (fieldInputs !== undefined) {
+      setInputIfDeclared(current.ref, 'fieldInputs', fieldInputs);
     }
     this.lastInputs = rawInputs;
   }

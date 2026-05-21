@@ -33,6 +33,7 @@ Reasons to stay on formly:
 | `expressionProperties` (deprecated v6)    | `logic` array + `derivation` for values                                 |
 | `validators` / `asyncValidators`          | `validators[]` on the field + `customFnConfig.{validators,asyncValidators,httpValidators}` on the form |
 | `wrappers: ['form-field']`                | `wrappers: [{ type: 'card', … }]` (config objects)                      |
+| `props.addonLeft` / `props.addonRight` (Bootstrap; demo-only on Material) | `addons: [{ slot, kind, … }]` (universal across all 4 adapters, JSON-safe, preset actions) |
 | `fieldGroup` (object)                     | `type: 'group'` with `fields: [...]`                                    |
 | `fieldArray` (custom `repeat` type)       | `type: 'array'` (built in; verbose form with explicit add/remove fields, or simplified form with `template` + auto-buttons) |
 | `hooks: { onInit, onChanges, … }`         | Angular component lifecycle inside custom field components, plus `EventBus` / `EventDispatcher` for cross-field events |
@@ -333,6 +334,71 @@ Formly wrappers are components that include a `<ng-container #fieldComponent>` t
 
 See [Writing a wrapper](/wrappers/writing-a-wrapper) and [Registering and applying](/wrappers/registering-and-applying).
 
+## Addons (prefix / suffix slots)
+
+Formly's addon story is **uneven across adapters** — Bootstrap ships first-class addons via `props.addonLeft` / `props.addonRight`; Material has a demo wrapper users copy into their app; PrimeNG and Ionic have nothing built-in.
+
+ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... }]`. The same `slot` vocabulary (`'prefix'` / `'suffix'`) works everywhere — adapters translate internally to their native projection mechanism. Buttons accept built-in `preset` actions (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`) so common patterns require no handler code.
+
+<docs-code-compare
+  title="Bootstrap addons"
+  formly="// ngx-formly (Bootstrap — first-class)
+{
+  key: 'amount',
+  type: 'input',
+  props: {
+    label: 'Amount',
+    addonLeft: { class: 'bi bi-currency-euro' },
+    addonRight: { text: 'EUR', onClick: (field, $event) => save(field) },
+  },
+}"
+  ngforge="{
+  key: 'amount',
+  type: 'input',
+  label: 'Amount',
+  addons: [
+    { slot: 'prefix', kind: 'bs-icon', icon: 'currency-euro' },
+    { slot: 'suffix', kind: 'text', text: 'EUR' },
+    // 'save' must be registered once via provideAddonActions({ save: (ctx) => ... }) — see /addons/presets-and-actions.
+    { slot: 'suffix', kind: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
+  ],
+}">
+</docs-code-compare>
+
+<docs-code-compare
+  title="Material addons"
+  formly="// ngx-formly (Material — demo wrapper only; users copy into their app)
+{
+  key: 'search',
+  type: 'input',
+  props: {
+    label: 'Search',
+    addonLeft:  { icon: 'search' },
+    addonRight: { icon: 'close', onClick: (field) => field.formControl.setValue('') },
+  },
+}"
+  ngforge="{
+  key: 'search',
+  type: 'input',
+  label: 'Search',
+  addons: [
+    { slot: 'prefix', kind: 'mat-icon', icon: 'search' },
+    { slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+  ],
+}">
+</docs-code-compare>
+
+**What's different:**
+
+- **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions — they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`provideAddonActions({...})`), so configs round-trip through JSON.
+- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
+- **Universal slot vocabulary.** ngx-formly mixes `addonLeft` / `addonRight` (Bootstrap, Material demo) with adapter-native slot names. ng-forge uses universal `slot: 'prefix' | 'suffix'` everywhere; the adapter translates that internally.
+- **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent — every action is a hand-written callback.
+- **First-class on all 4 adapters.** ngx-formly only ships addons for Bootstrap; Material is demo-only, PrimeNG / Ionic have nothing. ng-forge ships first-class addons for all four with a single config shape.
+- **Reactive `hidden` / `disabled` / `loading`.** Each axis accepts `boolean | Signal<boolean> | Observable<boolean>` (`DynamicValue<boolean>`). Neither ngx-formly's addon types nor its Material demo wrapper expose reactive visibility.
+
+See [Addons / Overview](/addons/overview) and [Presets and Actions](/addons/presets-and-actions) for the full surface.
+
 ## Repeating sections / arrays
 
 **Formly has no built-in `repeat` type** — apps register a custom `FieldArrayType` with `add()` / `remove()` handlers and a template. ng-forge ships `type: 'array'` directly.
@@ -560,7 +626,6 @@ const config = {
 - **Wrappers carry their own props.** Wrapper config objects own their props (`{ type: 'panel', title: 'Address' }`), so the wrapped field doesn't need to know it has a wrapper.
 - **`parsers`, `modelOptions.debounce`, `focus: true`.** No direct per-field knobs. Workarounds: a self-targeting `derivation` with `trigger: 'debounced'` covers `parsers`-style transforms; consumers (conditions, derivations) debounce via `debounceMs`; programmatic focus is a `viewChild` + `.nativeElement.focus()` in the host component.
 - **`modelOptions.updateOn: 'blur' | 'submit'`.** No equivalent today — `LogicTrigger` only exposes `'onChange' | 'debounced'`, and the Signal Forms substrate commits on every change. If formly's commit-on-blur was load-bearing for your form, debouncing the consumers (validators, derivations) is the closest workaround. This is a hard wall, not a knob.
-- **Bootstrap-style input addons (prefix / suffix slots).** Formly's `formly-bootstrap/addons` attaches text, icons, or buttons to an input via `props.addonLeft` / `props.addonRight`. ng-forge does not ship a built-in prefix/suffix slot today, but a first-class addon API is **WIP and is targeted for 0.9**. Until then, implement with a custom field type that wraps the adapter's input around your prefix/suffix elements (Material adapters can use `matPrefix` / `matSuffix` natively inside the custom component).
 
 ## What ng-forge does NOT have an equivalent for
 

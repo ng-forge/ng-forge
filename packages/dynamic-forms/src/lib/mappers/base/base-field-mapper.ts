@@ -13,10 +13,14 @@ import { getGridClassString } from '../../utils/grid-classes/grid-classes';
  * @returns Record of input names to values
  */
 export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Record<string, unknown>): Record<string, unknown> {
-  const { key, label, className, tabIndex, props, meta } = fieldDef;
+  const { key, label, className, tabIndex, props, meta, addons } = fieldDef;
   const inputs: Record<string, unknown> = {};
 
-  // Always include key - required by components for accessibility and identification
+  // Always include key — required by components for accessibility and identification.
+  // `type` is intentionally NOT propagated to the field component (it's the
+  // registry discriminant, not a component input); wrappers and addons read it
+  // from `WrapperFieldInputs.type` which is injected at the buildFieldInputs()
+  // boundary by `DfFieldOutlet`.
   inputs['key'] = key;
 
   if (label !== undefined) {
@@ -55,6 +59,14 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Reco
 
   if (meta !== undefined) {
     inputs['meta'] = meta;
+  }
+
+  // Forward addons. Field components that don't declare an `addons` input
+  // signal (Tier 3 — toggle, checkbox, radio, slider) ignore this key via
+  // Angular's `setInput` no-op-on-unknown behaviour, so it's safe to forward
+  // unconditionally.
+  if (addons !== undefined) {
+    inputs['addons'] = addons;
   }
 
   return inputs;

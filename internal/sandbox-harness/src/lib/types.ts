@@ -31,6 +31,18 @@ export interface AdapterRegistration {
   name: AdapterName;
   /** URL of the pre-built CSS bundle for this adapter (relative to the app's base). */
   stylesheetUrl: string;
+  /**
+   * Additional CSS URLs (icon fonts, CDN stylesheets) that need to be mirrored
+   * into the sandbox shadow root. The shadow-DOM boundary blocks document-scope
+   * class rules from cascading in, so icon-font CSS (Material Icons, Bootstrap
+   * Icons, PrimeIcons, etc.) must be re-injected per shadow root for the icons
+   * to render glyphs instead of plain text.
+   *
+   * The harness fetches each URL once and caches the response. Pure CSS only —
+   * no JS or HTML. Cross-origin CDN URLs are supported as long as they serve
+   * CSS with permissive CORS.
+   */
+  extraStylesheetUrls?: string[];
   /** Default route segment to navigate to after mount if none is specified. */
   defaultRoute: string;
   /**

@@ -4,12 +4,19 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { LiveExampleComponent } from '../components/live-example/live-example.component';
 import { DocsAdapterPropsComponent } from '../components/adapter-props/adapter-props.component';
+import { DocsAddonInfoComponent } from '../components/addon-info/addon-info.component';
 import { type ComponentRegistration, type ComponentSegment, type ContentSegment, parseContentSegments } from './content-segment-parser';
 
 const COMPONENT_REGISTRY: ComponentRegistration[] = [
   {
     selector: 'docs-adapter-props',
     component: DocsAdapterPropsComponent,
+    defer: false,
+    extractInputs: (attrs) => ({ field: attrs['field'] ?? '' }),
+  },
+  {
+    selector: 'docs-addon-info',
+    component: DocsAddonInfoComponent,
     defer: false,
     extractInputs: (attrs) => ({ field: attrs['field'] ?? '' }),
   },

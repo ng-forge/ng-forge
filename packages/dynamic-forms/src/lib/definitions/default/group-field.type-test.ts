@@ -35,6 +35,7 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
+    | 'addons'
     | 'fields'
     | 'logic';
 

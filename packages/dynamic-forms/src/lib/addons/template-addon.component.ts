@@ -1,0 +1,61 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { TemplateAddon } from '../models/addon/addon-def';
+import { DF_FIELD_TEMPLATES } from '../models/addon/df-field-templates.token';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
+
+/**
+ * Renderer for the universal `template` addon kind.
+ *
+ * Resolves the addon's `templateKey` against {@link DF_FIELD_TEMPLATES}
+ * (populated by `<df-dynamic-form>` from `<ng-template dfTemplate="...">`
+ * children) and renders via `NgTemplateOutlet`. The wrapper-style host bag
+ * (`fieldInputs`) is forwarded as the template's implicit context — author
+ * the template as `<ng-template dfTemplate="..." let-fi>{{ fi.key }}</ng-template>`.
+ *
+ * If the key is unresolved, logs a warning and renders nothing — keeps the
+ * form alive when a backend references a template the FE has not registered.
+ */
+@Component({
+  selector: 'df-template-addon',
+  imports: [NgTemplateOutlet],
+  template: `
+    @if (template(); as tpl) {
+      <ng-container *ngTemplateOutlet="tpl; context: outletContext()" />
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TemplateAddonComponent {
+  private readonly templates = inject(DF_FIELD_TEMPLATES, { optional: true });
+  private readonly logger = inject(DynamicFormLogger);
+
+  readonly addon = input.required<TemplateAddon>();
+  /** Forwarded by `df-addon-slot`; surfaced to the template as its implicit `$implicit` context. */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
+
+  // Pure computed: pure lookup, no side effects. Unresolved → null; the
+  // `@if` in the template skips the outlet and renders nothing.
+  protected readonly template = computed(() => {
+    const map = this.templates?.();
+    const key = this.addon().templateKey;
+    return map?.get(key) ?? null;
+  });
+
+  /** Implicit context payload — template authors bind via `let-fi`. */
+  protected readonly outletContext = computed(() => ({ $implicit: this.fieldInputs() }));
+
+  constructor() {
+    // Logging side effect lives in an effect, not the computed — keeps
+    // the computed pure so signal-graph evaluations don't duplicate warnings.
+    explicitEffect([this.template, this.addon], ([tpl, addon]) => {
+      if (!tpl) {
+        this.logger.warn(
+          `Template addon: no <ng-template dfTemplate="${addon.templateKey}"> found. Did you project it as a child of <df-dynamic-form>?`,
+        );
+      }
+    });
+  }
+}

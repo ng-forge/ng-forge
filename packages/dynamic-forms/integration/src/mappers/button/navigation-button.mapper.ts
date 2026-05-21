@@ -4,7 +4,7 @@ import {
   DEFAULT_PROPS,
   FieldDef,
   FieldWithValidation,
-  FIELD_SIGNAL_CONTEXT,
+  injectFieldSignalContext,
   FORM_OPTIONS,
   NextPageEvent,
   PreviousPageEvent,
@@ -77,7 +77,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 
 /** Mapper for next page button — preconfigures NextPageEvent. */
 export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
-  const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT);
+  const fieldSignalContext = injectFieldSignalContext();
   const rootFormRegistry = inject(RootFormRegistryService);
   const defaultProps = inject(DEFAULT_PROPS);
   const formOptions = inject(FORM_OPTIONS);

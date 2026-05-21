@@ -13,6 +13,12 @@ export default [
     loadChildren: () => import('./accessibility/accessibility.routes'),
   },
 
+  // Addons Tests - Prefix/suffix addon kinds on ion-input
+  {
+    path: 'addons',
+    loadChildren: () => import('./addons/addons.routes'),
+  },
+
   // Array Fields Tests
   {
     path: 'array-fields',

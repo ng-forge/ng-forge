@@ -65,4 +65,14 @@ export type { IonicFormProps, IonicFormConfig } from './types/form-config';
 import './types/registry-augmentation';
 
 // Providers
-export { withIonicFields } from './providers/ionic-providers';
+export { withIonicAddons, withIonicFields } from './providers/ionic-providers';
+
+// Addons
+export { IonButtonAddonComponent } from './addons/ion-button-addon.component';
+export { IonIconAddonComponent } from './addons/ion-icon-addon.component';
+export { IonInlineButtonAddonComponent } from './addons/ion-inline-button-addon.component';
+export type { IonAddon, IonButtonAddon, IonIconAddon } from './types/addons';
+export type { IonInputAddon, IonAddonExtensions } from './fields/input/ionic-input.type';
+
+// Tokens
+export { IONIC_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

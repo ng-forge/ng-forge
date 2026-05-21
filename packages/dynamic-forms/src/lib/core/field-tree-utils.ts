@@ -71,6 +71,21 @@ export function toReadonlyFieldTree<TValue>(field: FieldTree<TValue>): ReadonlyF
 }
 
 /**
+ * Write a value into a FieldTree's underlying signal. Signal Forms stores
+ * `FieldState.value` as a `WritableSignal`; this helper centralises the cast
+ * and warns if that contract ever changes (vs a silent no-op).
+ */
+export function writeToFieldValue<T>(value: Signal<T>, next: T, logger?: { warn: (msg: string) => void }): boolean {
+  const candidate = value as { set?: (v: T) => void };
+  if (typeof candidate.set !== 'function') {
+    logger?.warn('writeToFieldValue: FieldState.value is not a WritableSignal — Signal Forms contract changed.');
+    return false;
+  }
+  candidate.set(next);
+  return true;
+}
+
+/**
  * DI-scoped cache for `ReadonlyFieldTree` views, keyed on the source FieldTree
  * identity. A fresh WeakMap per root injector keeps renders isolated under SSR —
  * Angular creates a new root injector per request, so there's no shared state

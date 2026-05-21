@@ -15,9 +15,17 @@ export interface DynamicFormFeature<TKind extends string = string> {
 }
 
 /**
- * Known feature kinds for type safety
+ * Known feature kinds for type safety. Adapter feature modules (and the
+ * addon system) contribute their own discriminants via module augmentation.
  */
-export type DynamicFormFeatureKind = 'logger' | 'event-form-value' | 'value-exclusion' | 'validation-execution' | 'legacy-status-classes';
+export type DynamicFormFeatureKind =
+  | 'logger'
+  | 'event-form-value'
+  | 'value-exclusion'
+  | 'validation-execution'
+  | 'legacy-status-classes'
+  | 'addons'
+  | 'addon-actions';
 
 /**
  * Type guard to check if a value is a DynamicFormFeature
@@ -34,9 +42,13 @@ export function isDynamicFormFeature(value: unknown): value is DynamicFormFeatur
 }
 
 /**
- * Helper to create a feature with proper typing
+ * Helper to create a feature with proper typing.
+ *
+ * `kind` is the discriminant compared by string equality at the
+ * provider-resolution site (and in feature-specific type guards). Each
+ * feature module owns its own kind literal — no central registry.
  */
-export function createFeature<TKind extends DynamicFormFeatureKind>(kind: TKind, providers: Provider[]): DynamicFormFeature<TKind> {
+export function createFeature<TKind extends string>(kind: TKind, providers: Provider[]): DynamicFormFeature<TKind> {
   return {
     ɵkind: kind,
     ɵproviders: providers,

@@ -61,8 +61,19 @@ export type { MaterialConfig } from './models';
 export { MatField, type MatFieldType } from './types/types';
 export type { MatFormProps, MatFormConfig } from './types/form-config';
 
-// Module augmentation for global types
+// IMPORTANT: side-effect imports — these augment global type registries
+// (DynamicFormFieldRegistry, DynamicFormAddonRegistry) so `type: 'input'`,
+// `kind: 'mat-icon'`, and similar resolve at the call site. Without these,
+// consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
+import './types/addons';
 
 // Providers
-export { withMaterialFields } from './providers/material-providers';
+export { withMaterialFields, withMaterialAddons } from './providers/material-providers';
+
+// Addon kinds
+export { MatIconAddonComponent } from './addons/mat-icon-addon.component';
+export { MatButtonAddonComponent } from './addons/mat-button-addon.component';
+export type { MatIconAddon, MatButtonAddon, MatAddon } from './types/addons';
+export type { MatInputAddon, MatAddonExtensions } from './fields/input/mat-input.type';
+export { MAT_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

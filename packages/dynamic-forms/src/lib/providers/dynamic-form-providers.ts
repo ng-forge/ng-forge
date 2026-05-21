@@ -1,12 +1,22 @@
-import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider } from '@angular/core';
+import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider, Type } from '@angular/core';
+import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
+import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '../definitions/base/field-def';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
+import { ADDON_KIND_DEFINITIONS } from './features/addons/addon-kind-definitions.token';
 import { DynamicFormLogger } from './features/logger/logger.token';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
-import { isWrapperTypeDefinition, WrapperTypeDefinition, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY, WrapperConfig } from '../models';
+import {
+  isWrapperTypeDefinition,
+  WrapperTypeDefinition,
+  WRAPPER_AUTO_ASSOCIATIONS,
+  WRAPPER_REGISTRY,
+  WrapperConfig,
+} from '../models/wrapper-type';
 import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
 
 // Re-export global types for module augmentation
@@ -175,6 +185,31 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         return autoMap;
       },
     },
+    // Form-scoped addon kind registry. Built from BUILT_IN_ADDON_KINDS plus
+    // every kind contributed by `withCustomAddon(...)` features (via the
+    // ADDON_KIND_DEFINITIONS multi-provider). Overrides the empty
+    // `providedIn: 'root'` default so contributions from form-scoped
+    // providers are visible.
+    {
+      provide: ADDON_KIND_REGISTRY,
+      useFactory: () => {
+        const logger = inject(DynamicFormLogger);
+        const contributed = inject(ADDON_KIND_DEFINITIONS, { optional: true }) ?? [];
+        const registry = new Map<string, AddonKindDefinition>();
+        for (const def of BUILT_IN_ADDON_KINDS) {
+          registry.set(def.kind, def);
+        }
+        for (const def of contributed) {
+          if (registry.has(def.kind)) {
+            logger.warn(`Addon kind "${def.kind}" is already registered. Overwriting.`);
+          }
+          registry.set(def.kind, def);
+        }
+        return registry;
+      },
+    },
+    // Per-form addon-component cache (no root fallback — isolated by form scope).
+    { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
     ...featureProviders,
   ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 }
