@@ -143,11 +143,21 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
+            // Derive the writer from the host's own field as the source of
+            // truth — see `mat-input.component.ts` for the rationale. Keeps
+            // presets working when `ctx.setValue` arrives late via the
+            // forwarded fieldInputs bag.
+            const fieldValueSetter =
+              ctx.setValue ??
+              ((next: unknown) =>
+                host.ngf
+                  .field()()
+                  .value.set(next as never));
             // The handler contract is `preset: string`; cast back to the
             // narrow union at the runner's signature boundary.
             return runBsPresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
-              fieldValueSetter: ctx.setValue,
+              fieldValueSetter,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
               baselineType: () => host.props()?.type,

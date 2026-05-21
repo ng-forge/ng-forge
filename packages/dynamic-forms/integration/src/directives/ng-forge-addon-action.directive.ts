@@ -1,4 +1,5 @@
 import { computed, Directive, inject, Injector, input, Signal, signal } from '@angular/core';
+import type { FieldTree } from '@angular/forms/signals';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
   ADDON_ACTION_REGISTRY,
@@ -7,6 +8,7 @@ import {
   BaseAddon,
   DynamicFormLogger,
   DynamicValue,
+  FIELD_SIGNAL_CONTEXT,
   resolveDynamicValue,
   WrapperFieldInputs,
 } from '@ng-forge/dynamic-forms';
@@ -47,6 +49,25 @@ export class NgForgeAddonActionBase {
   private readonly presetHandler = inject(ADDON_PRESET_HANDLER, { optional: true });
   private readonly logger = inject(DynamicFormLogger);
   private readonly hostInjector = inject(Injector);
+  /**
+   * Form-scope field context — provides the root `FieldTree`. Used as a
+   * writer fallback when the wrapper-style `fieldInputs.setValue` bag didn't
+   * propagate in time (host-directive input forwarding through
+   * `*ngComponentOutlet` is known to lag click dispatch in production
+   * builds). Optional because addons may be rendered outside a form.
+   *
+   * The token's default factory throws; `optional: true` only bypasses
+   * missing-provider errors, not factory throws. Wrap in try/catch so
+   * orphan dispatches (no DynamicForm in the injector chain) just see
+   * `undefined`.
+   */
+  private readonly fieldSignalContext = (() => {
+    try {
+      return inject(FIELD_SIGNAL_CONTEXT, { optional: true });
+    } catch {
+      return null;
+    }
+  })();
 
   readonly addon = input.required<ActionAddonShape>();
   readonly fieldInputs = input<WrapperFieldInputs | undefined>(undefined);
@@ -139,25 +160,50 @@ export class NgForgeAddonActionBase {
   /**
    * Build an `AddonActionContext` for handlers from the wrapper-style
    * `fieldInputs` bag. Returns the field-bound variant when a host field
-   * is reachable, or the orphan variant otherwise. The discriminator is
-   * `form`: non-null implies a working `setValue`.
+   * is reachable, or the orphan variant otherwise.
+   *
+   * Resolution order for `setValue`:
+   * 1. `inputs.setValue` from the forwarded bag (preferred — populated by
+   *    `buildFieldInputs` in `DfFieldOutlet`).
+   * 2. Fallback constructed from `FIELD_SIGNAL_CONTEXT.form[key]` — covers
+   *    the production-build race where the bag's `setValue` arrives after
+   *    the user's click on certain `ngComponentOutlet` host-directive
+   *    forwarding paths. The form is injected from the field's scope, so
+   *    navigation by key is the same surface the field component uses.
    */
   buildActionContext(): AddonActionContext {
     const inputs = this.fieldInputs();
     const tree = inputs?.field;
-    if (tree && inputs?.setValue) {
+    const key = inputs?.key ?? '';
+    const type = inputs?.type ?? '';
+    const bagSetValue = inputs?.setValue;
+    const fallbackSetValue = key && this.fieldSignalContext ? this.resolveFieldWriter(key) : undefined;
+    const setValue = bagSetValue ?? fallbackSetValue;
+    if (tree && setValue) {
       return {
-        field: { key: inputs.key ?? '', type: inputs.type ?? '' },
+        field: { key, type },
         form: tree,
         value: tree.value() ?? undefined,
-        setValue: inputs.setValue,
+        setValue,
       };
     }
     return {
-      field: { key: inputs?.key ?? '', type: inputs?.type ?? '' },
+      field: { key, type },
       form: null,
       value: tree?.value() ?? undefined,
     };
+  }
+
+  private resolveFieldWriter(key: string): ((next: unknown) => void) | undefined {
+    const fsc = this.fieldSignalContext;
+    if (!fsc) return undefined;
+    // FieldTree is callable + per-key bracket-accessible. We cast to the
+    // record shape to navigate by key — same pattern used internally by
+    // `asFieldTreeRecord` in form-state-manager.ts.
+    const root = fsc.form as unknown as Record<string, FieldTree<unknown>>;
+    const fieldTree = root[key];
+    if (!fieldTree || typeof fieldTree !== 'function') return undefined;
+    return (next: unknown) => fieldTree().value.set(next as never);
   }
 }
 

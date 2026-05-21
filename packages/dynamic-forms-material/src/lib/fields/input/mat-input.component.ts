@@ -158,11 +158,25 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
+            // Derive the writer from the host's own field as the source of
+            // truth. `ctx.setValue` is the bag-forwarded variant (preferred
+            // when present), but Angular host-directive input propagation
+            // through `<ng-container *ngComponentOutlet>` lags click dispatch
+            // in production builds — the host-derived fallback keeps presets
+            // working regardless. Reading `host.ngf.field()` is safe at
+            // dispatch time: the field has been bound by the time the user
+            // can click any addon button.
+            const fieldValueSetter =
+              ctx.setValue ??
+              ((next: unknown) =>
+                host.ngf
+                  .field()()
+                  .value.set(next as never));
             // The handler contract is `preset: string`; cast back to the
             // narrow union at the runner's signature boundary.
             return runMatPresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
-              fieldValueSetter: ctx.setValue,
+              fieldValueSetter,
               fieldDefaultValueGetter:
                 fsc && fieldKey ? () => (fsc.defaultValues() as Record<string, unknown> | undefined)?.[fieldKey] : undefined,
               baselineType: () => host.props()?.type,
