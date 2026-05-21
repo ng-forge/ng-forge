@@ -30,7 +30,7 @@
         "tsConfig": "apps/examples/sandbox/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "stylePreprocessorOptions": {
-          "includePaths": ["internal/styling/src"]
+          "includePaths": ["internal/styling/src", "packages"]
         },
         "assets": [
           {

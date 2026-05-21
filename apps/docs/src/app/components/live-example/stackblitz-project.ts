@@ -19,11 +19,11 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     pkg: '@ng-forge/dynamic-forms-material',
     configImports: [
       "import { provideAnimations } from '@angular/platform-browser/animations';",
-      "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
+      "import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';",
       "import { withMaterialFields } from '@ng-forge/dynamic-forms-material';",
     ].join('\n'),
     configProviders:
-      "    provideAnimations(),\n    provideDynamicForm(...withMaterialFields({ appearance: 'outline', color: 'primary' })),",
+      "    provideAnimations(),\n    provideDynamicForm(...withMaterialFields({ appearance: 'outline', color: 'primary' }), withLegacyStatusClasses()),",
     extraDeps: {
       '@angular/material': '~21.2.0',
       '@angular/cdk': '~21.2.0',
@@ -34,10 +34,10 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
   bootstrap: {
     pkg: '@ng-forge/dynamic-forms-bootstrap',
     configImports: [
-      "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
+      "import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';",
       "import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';",
     ].join('\n'),
-    configProviders: '    provideDynamicForm(...withBootstrapFields()),',
+    configProviders: '    provideDynamicForm(...withBootstrapFields(), withLegacyStatusClasses()),',
     extraDeps: {
       bootstrap: '^5.3.0',
     },
@@ -50,11 +50,11 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
       "import { provideAnimations } from '@angular/platform-browser/animations';",
       "import { providePrimeNG } from 'primeng/config';",
       "import Aura from '@primeuix/themes/aura';",
-      "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
+      "import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';",
       "import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';",
     ].join('\n'),
     configProviders:
-      '    provideAnimations(),\n    providePrimeNG({ theme: { preset: Aura } }),\n    provideDynamicForm(...withPrimeNGFields()),',
+      '    provideAnimations(),\n    providePrimeNG({ theme: { preset: Aura } }),\n    provideDynamicForm(...withPrimeNGFields(), withLegacyStatusClasses()),',
     extraDeps: {
       primeng: '^21.0.0',
       '@primeuix/themes': '^2.0.0',
@@ -68,10 +68,11 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     configImports: [
       "import { provideAnimations } from '@angular/platform-browser/animations';",
       "import { provideIonicAngular } from '@ionic/angular/standalone';",
-      "import { provideDynamicForm } from '@ng-forge/dynamic-forms';",
+      "import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';",
       "import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';",
     ].join('\n'),
-    configProviders: "    provideAnimations(),\n    provideIonicAngular({ mode: 'md' }),\n    provideDynamicForm(...withIonicFields()),",
+    configProviders:
+      "    provideAnimations(),\n    provideIonicAngular({ mode: 'md' }),\n    provideDynamicForm(...withIonicFields(), withLegacyStatusClasses()),",
     componentImports: "import { IonApp } from '@ionic/angular/standalone';",
     templateWrapper: { open: '<ion-app><div class="container">', close: '</div></ion-app>' },
     extraDeps: {

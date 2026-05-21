@@ -1,49 +1,37 @@
 /**
  * Dynamic Form Grid System
- * 
+ *
  * A CSS Grid-based layout system with CSS variables for customization.
  * Provides responsive behavior and consistent spacing throughout the form.
+ *
+ * Recognized CSS variables (with structural fallbacks defined inline):
+ *
+ *   Layout:
+ *     --df-grid-columns        column count for .df-row (fallback: 12)
+ *     --df-grid-gap            inter-column gap (fallback: 0.5rem)
+ *     --df-grid-row-gap        inter-row gap (fallback: 0.5rem)
+ *
+ *   Responsive overrides:
+ *     --df-grid-gap-sm / -md / -lg / -xl
+ *     --df-grid-row-gap-sm / -md / -lg / -xl
+ *
+ *   Derived spacing:
+ *     --df-array-item-gap   array-field item gap (fallback: --df-grid-row-gap)
+ *     --df-group-gap        group-field gap (fallback: --df-grid-gap)
+ *     --df-group-padding    group-field padding (fallback: --df-grid-gap)
+ *
+ *   Focus accent:
+ *     --df-focus-color      focus outline color (fallback: #005fcc)
+ *
+ * For opinionated host-framework defaults (Material/Bootstrap/PrimeNG/Ionic),
+ * opt in via `@use '@ng-forge/dynamic-forms-<adapter>/styles/defaults'`.
  */
-
-/* CSS Variables for Grid System */
-:host,
-.df-form {
-  /* Grid Configuration */
-  --df-grid-columns: 12;
-  --df-grid-gap: 0.5rem;
-  --df-grid-row-gap: 0.5rem;
-
-  /* Responsive Breakpoints */
-  --df-breakpoint-sm: 576px;
-  --df-breakpoint-md: 768px;
-  --df-breakpoint-lg: 992px;
-  --df-breakpoint-xl: 1200px;
-
-  /* Responsive Gap Adjustments */
-  --df-grid-gap-sm: 0.5rem;
-  --df-grid-gap-md: 0.5rem;
-  --df-grid-gap-lg: 0.5rem;
-  --df-grid-gap-xl: 0.5rem;
-
-  /* Responsive Row Gap Adjustments */
-  --df-grid-row-gap-sm: 0.5rem;
-  --df-grid-row-gap-md: 0.5rem;
-  --df-grid-row-gap-lg: 0.5rem;
-  --df-grid-row-gap-xl: 0.5rem;
-
-  /* Array Item Spacing */
-  --df-array-item-gap: var(--df-grid-row-gap);
-
-  /* Group Field Styling Variables */
-  --df-group-gap: var(--df-grid-gap);
-  --df-group-padding: var(--df-grid-gap);
-}
 
 /* Base Form Grid Container */
 .df-form {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--df-grid-row-gap);
+  gap: var(--df-grid-row-gap, 0.5rem);
   width: 100%;
 
   /* Each field by default takes one row */
@@ -56,7 +44,7 @@
 .df-row {
   display: grid;
   grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
-  gap: var(--df-grid-gap);
+  gap: var(--df-grid-gap, 0.5rem);
   align-items: start;
   width: 100%;
 
@@ -197,8 +185,8 @@
 /* Responsive Behavior */
 @media (max-width: 576px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-sm);
-    --df-grid-row-gap: var(--df-grid-row-gap-sm);
+    --df-grid-gap: var(--df-grid-gap-sm, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-sm, 0.5rem);
   }
 
   .df-row {
@@ -212,7 +200,7 @@
 
   /* Mobile-specific overrides */
   .df-row.df-row-mobile-keep-cols {
-    grid-template-columns: repeat(var(--df-grid-columns), 1fr);
+    grid-template-columns: repeat(var(--df-grid-columns, 12), 1fr);
 
     > * {
       grid-column: revert !important;
@@ -222,8 +210,8 @@
 
 @media (min-width: 577px) and (max-width: 768px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-md);
-    --df-grid-row-gap: var(--df-grid-row-gap-md);
+    --df-grid-gap: var(--df-grid-gap-md, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-md, 0.5rem);
   }
 
   .df-row {
@@ -257,8 +245,8 @@
 
 @media (min-width: 769px) and (max-width: 992px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-lg);
-    --df-grid-row-gap: var(--df-grid-row-gap-lg);
+    --df-grid-gap: var(--df-grid-gap-lg, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-lg, 0.5rem);
   }
 
   /* Medium-specific column spans */
@@ -305,8 +293,8 @@
 
 @media (min-width: 993px) {
   .df-form {
-    --df-grid-gap: var(--df-grid-gap-xl);
-    --df-grid-row-gap: var(--df-grid-row-gap-xl);
+    --df-grid-gap: var(--df-grid-gap-xl, 0.5rem);
+    --df-grid-row-gap: var(--df-grid-row-gap-xl, 0.5rem);
   }
 
   /* Large-specific column spans */

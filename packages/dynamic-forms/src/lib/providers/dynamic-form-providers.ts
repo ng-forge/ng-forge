@@ -1,7 +1,4 @@
-import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider } from '@angular/core';
-import { provideSignalFormsConfig } from '@angular/forms/signals';
-import { NG_STATUS_CLASSES } from '@angular/forms/signals/compat';
-import { Type } from '@angular/core';
+import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider, Type } from '@angular/core';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
 import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
@@ -139,8 +136,6 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
 
   return makeEnvironmentProviders([
     ...defaultLoggerProvider,
-    // Always provide default Signal Forms classes (ng-touched, ng-invalid, etc.)
-    provideSignalFormsConfig({ classes: NG_STATUS_CLASSES }),
     {
       provide: FIELD_REGISTRY,
       useFactory: () => {

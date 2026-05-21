@@ -52,6 +52,9 @@ export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './model
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';
 export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from './models/validation-execution-config';
 
+// Legacy Status Classes Feature (opt-in for `.ng-touched` / `.ng-invalid` CSS classes)
+export { withLegacyStatusClasses } from './providers/features/legacy-status-classes';
+
 // Wrapper Types
 export type { WrapperTypeDefinition, FieldWrapper } from './models/wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';

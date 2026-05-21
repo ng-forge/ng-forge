@@ -18,7 +18,7 @@ const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
  */
 const stylesDir = resolve(__dirname, 'src/styles');
 const nodeModules = resolve(__dirname, '../../node_modules');
-const scssLoadPaths = [resolve(__dirname, '../../internal/styling/src'), nodeModules];
+const scssLoadPaths = [resolve(__dirname, '../../internal/styling/src'), resolve(__dirname, '../../packages'), nodeModules];
 
 /**
  * Sass passes through `@import` of `.css` files as native CSS imports.
@@ -226,7 +226,7 @@ export default defineConfig(({ mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          loadPaths: [resolve(__dirname, '../../internal/styling/src')],
+          loadPaths: [resolve(__dirname, '../../internal/styling/src'), resolve(__dirname, '../../packages')],
         },
       },
     },
@@ -284,7 +284,7 @@ export default defineConfig(({ mode }) => {
         vite: {
           inlineStylesExtension: 'scss',
           stylePreprocessorOptions: {
-            includePaths: [resolve(__dirname, '../../internal/styling/src')],
+            includePaths: [resolve(__dirname, '../../internal/styling/src'), resolve(__dirname, '../../packages')],
           },
         },
       }),
