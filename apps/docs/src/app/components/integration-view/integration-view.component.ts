@@ -20,14 +20,19 @@ const INTEGRATION_DATA: Record<AdapterName, IntegrationData> = {
     packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk',
     stylesCode: `// styles.scss — add a prebuilt Material theme (required)
 @import '@angular/material/prebuilt-themes/azure-blue.css';`,
-    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+    setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideDynamicForm(...withMaterialFields()),
+    provideDynamicForm(
+      ...withMaterialFields(),
+      // Opt into legacy .ng-touched / .ng-invalid CSS classes. Add if your
+      // theme or custom CSS targets those classes; safe to omit otherwise.
+      withLegacyStatusClasses(),
+    ),
   ],
 };`,
     featuresTitle: 'Notable Adapter Props',
@@ -45,14 +50,19 @@ export const appConfig: ApplicationConfig = {
     packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-bootstrap bootstrap',
     stylesCode: `// styles.scss
 @import 'bootstrap/dist/css/bootstrap.min.css';`,
-    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+    setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
-    provideDynamicForm(...withBootstrapFields()),
+    provideDynamicForm(
+      ...withBootstrapFields(),
+      // Recommended for Bootstrap: themes that pair .is-invalid with
+      // .ng-touched (the common "show errors after touch" UX) need this.
+      withLegacyStatusClasses(),
+    ),
   ],
 };`,
     featuresTitle: 'Notable Adapter Props',
@@ -68,7 +78,7 @@ export const appConfig: ApplicationConfig = {
     packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeng/themes primeicons',
     stylesCode: `// styles.scss
 @import 'primeicons/primeicons.css';`,
-    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+    setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
@@ -78,7 +88,13 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
     providePrimeNG({ theme: { preset: Aura } }),
-    provideDynamicForm(...withPrimeNGFields()),
+    provideDynamicForm(
+      ...withPrimeNGFields(),
+      // PrimeNG renders .p-invalid eagerly. Add this only if custom CSS
+      // targets .ng-* classes directly; PrimeNG's native styling fires
+      // either way.
+      withLegacyStatusClasses(),
+    ),
   ],
 };`,
     featuresTitle: 'Notable Adapter Props',
@@ -97,7 +113,7 @@ export const appConfig: ApplicationConfig = {
 @import '@ionic/angular/css/normalize.css';
 @import '@ionic/angular/css/structure.css';
 @import '@ionic/angular/css/typography.css';`,
-    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+    setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -106,7 +122,12 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
     provideIonicAngular({ mode: 'md' }),
-    provideDynamicForm(...withIonicFields()),
+    provideDynamicForm(
+      ...withIonicFields(),
+      // Required for invalid-state styling on Ionic components. Pair with
+      // the apply-ionic-legacy-error-styles SCSS mixin (see Styles section).
+      withLegacyStatusClasses(),
+    ),
   ],
 };`,
     featuresTitle: 'Notable Adapter Props',

@@ -7,7 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import { Base } from 'primeng/base';
 import { Theme } from '@primeuix/styled';
 import { PRIMENG_EMBER_THEME } from '@ng-forge/styling';
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { DEMO_WRAPPERS } from '@ng-forge/examples-shared-ui';
 import { SandboxAppFactory } from '@ng-forge/sandbox-harness';
@@ -48,7 +48,7 @@ export const createPrimeNGSandboxApp: SandboxAppFactory = (routes: Route[]) => (
       provideHttpClient(),
       provideRouter(routes),
       providePrimeNG({ theme: PRIMENG_EMBER_THEME }),
-      provideDynamicForm(...withPrimeNGFields(), ...DEMO_WRAPPERS),
+      provideDynamicForm(...withPrimeNGFields(), ...DEMO_WRAPPERS, withLegacyStatusClasses()),
       { provide: APP_ID, useValue: 'sandbox-primeng' },
     ],
   },

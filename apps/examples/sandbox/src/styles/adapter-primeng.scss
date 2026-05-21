@@ -6,7 +6,15 @@
 
 @use 'index' as *;
 @use 'examples' as examples;
+
+// End users: `@use '@ng-forge/dynamic-forms-primeng/styles/defaults' as df;`
+@use 'dynamic-forms-primeng/styles/defaults' as df;
 @import 'primeicons/primeicons.css';
+
+// Opinionated --df-* defaults for PrimeNG apps
+:root {
+  @include df.apply-primeng-form-defaults;
+}
 
 // ============================================
 // EXAMPLE APP STYLES

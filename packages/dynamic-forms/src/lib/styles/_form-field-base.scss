@@ -2,16 +2,19 @@
  * Dynamic Form Field Base Styles (Reference)
  *
  * This file documents the shared CSS variable conventions used across
- * all UI library implementations. Each UI library defines these variables
- * with framework-appropriate defaults.
+ * all UI library implementations. The library SCSS reads these variables
+ * with structural fallbacks (`var(--df-name, fallback)`) so forms render
+ * usefully without any opt-in. Each UI adapter ships an opt-in mixin at
+ * `@ng-forge/dynamic-forms-<adapter>/styles/defaults` that layers in
+ * adapter-themed colors and typography.
  *
  * CSS Variable Convention:
- * --df-field-gap: gap between label, input, and hint/error (default: 0.5rem)
- * --df-label-font-weight: label font weight (default: 500)
+ * --df-field-gap: gap between label, input, and hint/error (fallback: 0.5rem)
+ * --df-label-font-weight: label font weight (fallback: 500)
  * --df-hint-color: hint text color
- * --df-hint-font-size: hint text size (default: 0.875rem)
+ * --df-hint-font-size: hint text size (fallback: 0.875rem)
  * --df-error-color: error text color
- * --df-error-font-size: error text size (default: 0.875rem)
+ * --df-error-font-size: error text size (fallback: 0.875rem)
  *
  * Class Naming Convention:
  * - .df-{lib}-field: Main field container (flex column layout)
@@ -20,19 +23,17 @@
  * - .df-{lib}-error: Error message styling
  *
  * Error State Styling:
- * Angular Signal Forms applies ng-* classes via NG_STATUS_CLASSES:
- * - ng-invalid: Field has validation errors
- * - ng-valid: Field passes all validations
- * - ng-touched: Field has been blurred
- * - ng-pristine: Field value unchanged
- * - ng-dirty: Field value changed
+ * Angular Signal Forms uses its modern class strategy by default. To opt
+ * into the legacy `.ng-touched` / `.ng-invalid` / `.ng-dirty` / etc. compat
+ * classes, register `withLegacyStatusClasses()` from `@ng-forge/dynamic-forms`:
  *
- * Error styling is typically applied when both .ng-invalid and .ng-touched
- * are present, aligning with standard UX.
+ *   provideDynamicForm(...withMaterialFields(), withLegacyStatusClasses())
  *
- * UI Library Implementations:
- * - Bootstrap: Uses native Bootstrap classes (is-invalid, form-control)
- * - Ionic: Uses CSS custom properties on ion-* components
- * - PrimeNG: Uses ::ng-deep to override p-invalid styling until touched
- * - Material: Uses Angular Material's built-in form field styling
+ * Adapter notes (when compat classes are active):
+ * - Bootstrap: Uses Bootstrap's native is-invalid / form-control alongside .ng-*
+ * - Ionic: No auto-styling on .ng-invalid; consumers should also `@include`
+ *   `apply-ionic-legacy-error-styles` from the Ionic defaults partial
+ * - PrimeNG: Renders its native .p-invalid red borders on initial render;
+ *   write your own CSS if you want to hold styling until touched
+ * - Material: Angular Material's built-in form field styling handles error state
  */

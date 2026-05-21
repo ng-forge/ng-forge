@@ -4,7 +4,7 @@
   // Form grid layout
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--df-grid-row-gap);
+  gap: var(--df-grid-row-gap, 0.5rem);
   width: 100%;
 
   // Ensure each field takes full width by default
@@ -14,7 +14,7 @@
 
   // Allow custom spacing for dynamic forms
   &.df-form-spacing-custom {
-    --df-grid-row-gap: var(--form-custom-spacing, 1.5rem);
+    --df-grid-row-gap: var(--df-form-custom-spacing, 1.5rem);
   }
 
   // Form-specific gap overrides
@@ -39,7 +39,9 @@
 
   // Form mode specific styling
   &.df-form-paged {
-    // Paged forms handle their own spacing through page orchestrator
-    --df-grid-row-gap: 0;
+    // Paged forms handle their own spacing through page orchestrator.
+    // Set `gap` directly (not via --df-grid-row-gap) so children — including
+    // the page-field component — don't inherit a 0 row-gap.
+    gap: 0;
   }
 }

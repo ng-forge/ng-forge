@@ -1,0 +1,61 @@
+/*
+ * PrimeNG form defaults.
+ *
+ * Opinionated host-framework defaults for PrimeNG apps. Library SCSS uses
+ * `var(--df-name, structural-fallback)` for layout-essential vars so forms
+ * render usefully without any opt-in. These mixins layer in the rest —
+ * color, typography, focus accent — that a PrimeNG app expects.
+ *
+ * Usage (in your app's global stylesheet):
+ *
+ *   @use '@ng-forge/dynamic-forms-primeng/styles/defaults' as df;
+ *
+ *   :root {
+ *     @include df.apply-primeng-form-defaults;
+ *   }
+ */
+
+@mixin form-grid-defaults {
+  --df-grid-columns: 12;
+  --df-grid-gap: 0.5rem;
+  --df-grid-row-gap: 0.5rem;
+
+  --df-grid-gap-sm: 0.5rem;
+  --df-grid-gap-md: 0.5rem;
+  --df-grid-gap-lg: 0.5rem;
+  --df-grid-gap-xl: 0.5rem;
+
+  --df-grid-row-gap-sm: 0.5rem;
+  --df-grid-row-gap-md: 0.5rem;
+  --df-grid-row-gap-lg: 0.5rem;
+  --df-grid-row-gap-xl: 0.5rem;
+
+  --df-array-item-gap: var(--df-grid-row-gap);
+
+  --df-focus-color: var(--p-primary-color, #6366f1);
+}
+
+@mixin form-page-defaults {
+  --df-page-custom-spacing: 1.5rem;
+  --df-page-transition-duration: 0.3s;
+  --df-page-transition-timing: ease-in-out;
+  --df-page-slide-offset: -10px;
+}
+
+@mixin form-primeng-defaults {
+  --df-field-gap: 0.5rem;
+  --df-label-font-weight: 500;
+  --df-label-color: inherit;
+  --df-hint-color: var(--p-text-muted-color, #6c757d);
+  --df-hint-font-size: 0.875rem;
+  --df-error-color: var(--p-red-500, #ef4444);
+  --df-error-font-size: 0.875rem;
+
+  --df-prime-error-margin-top: 0.25rem;
+}
+
+@mixin apply-primeng-form-defaults {
+  @include form-grid-defaults;
+  @include form-page-defaults;
+  @include form-primeng-defaults;
+}

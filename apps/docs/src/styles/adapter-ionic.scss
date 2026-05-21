@@ -7,6 +7,17 @@
 @use 'examples' as examples;
 @use 'tokens' as *;
 
+// End users: `@use '@ng-forge/dynamic-forms-ionic/styles/defaults' as df;`
+@use 'dynamic-forms-ionic/styles/defaults' as df;
+
+// Opinionated --df-* defaults for Ionic apps
+:root {
+  @include df.apply-ionic-form-defaults;
+}
+
+// Docs opts into withLegacyStatusClasses(); pair it with the matching SCSS.
+@include df.apply-ionic-legacy-error-styles;
+
 // Ionic CSS imports
 @import '@ionic/angular/css/core.css';
 @import '@ionic/angular/css/normalize.css';
