@@ -14,11 +14,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import {
+  getAddonKind,
+  getAddonKinds,
   getFieldType,
   getFieldTypes,
   getUIAdapter,
   getWrapper,
   getWrappers,
+  type AddonKindInfo,
   type FieldTypeInfo,
   type UIAdapterFieldType,
   type WrapperInfo,
@@ -59,6 +62,7 @@ function getTopicList(): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
   const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
   const wrappers = ['wrappers', ...getWrappers().map((w) => w.type)];
+  const addons = ['addons', ...getAddonKinds().map((k) => k.kind)];
   const concepts = [
     'validation',
     'validation-messages',
@@ -97,6 +101,9 @@ ${containers.map(formatTopicItem).join('\n')}
 
 ## Wrappers
 ${wrappers.map(formatTopicItem).join('\n')}
+
+## Addons
+${addons.map(formatTopicItem).join('\n')}
 
 ## Concepts
 ${concepts.map(formatTopicItem).join('\n')}
@@ -305,6 +312,122 @@ const config = {
 }
 
 /**
+ * Format a single addon-kind registry entry.
+ */
+function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema'): string {
+  if (depth === 'brief') {
+    return [
+      `# ${addon.kind} addon`,
+      '',
+      `${addon.description.split('.')[0]}.`,
+      '',
+      '```typescript',
+      addon.minimalExample,
+      '```',
+      addon.jsonSafe ? '' : '**Code-only** — dropped by the lenient validator when the config came from JSON.',
+    ]
+      .filter(Boolean)
+      .join('\n');
+  }
+
+  const lines: string[] = [];
+  lines.push(`# ${addon.kind} addon`);
+  lines.push('');
+  lines.push(`**Category:** ${addon.category}`);
+  lines.push(`**Package:** \`${addon.package}\``);
+  if (addon.adapter) lines.push(`**Adapter:** ${addon.adapter}`);
+  lines.push(`**JSON-safe:** ${addon.jsonSafe ? 'Yes' : 'No (code-only)'}`);
+  lines.push(`**Description:** ${addon.description}`);
+
+  if (Object.keys(addon.props).length > 0) {
+    lines.push('');
+    lines.push('## Config Props');
+    for (const prop of Object.values(addon.props)) {
+      const req = prop.required ? ' **(required)**' : '';
+      lines.push(`- \`${prop.name}\`: ${prop.type}${req} — ${prop.description}`);
+    }
+  }
+
+  lines.push('');
+  lines.push('## Minimal Example');
+  lines.push('```typescript');
+  lines.push(addon.minimalExample);
+  lines.push('```');
+
+  lines.push('');
+  lines.push('## Full Example');
+  lines.push('```typescript');
+  lines.push(addon.example);
+  lines.push('```');
+
+  return lines.join('\n');
+}
+
+/**
+ * List every registered addon kind grouped by core vs adapter.
+ */
+function formatAddonsOverview(): string {
+  const kinds = getAddonKinds();
+  const lines: string[] = [];
+
+  lines.push('# Addons');
+  lines.push('');
+  lines.push(
+    'Addons render inside a field slot — icons, buttons, inline text, custom templates, or custom components. Multiple addons in the same slot render left-to-right (mirrored in RTL). `hidden` and `disabled` are reactive (signals, observables, or `FormStateCondition`).',
+  );
+  lines.push('');
+  lines.push('## Applying an addon');
+  lines.push('');
+  lines.push('```typescript');
+  lines.push(`{
+  key: 'q',
+  type: 'input',
+  label: 'Search',
+  addons: [
+    { slot: 'prefix', kind: 'mat-icon', icon: 'search', ariaLabel: 'Search' },
+    { slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+  ],
+}`);
+  lines.push('```');
+  lines.push('');
+  lines.push('## Registered Kinds');
+  lines.push('');
+
+  const core = kinds.filter((k) => k.category === 'core');
+  const adapter = kinds.filter((k) => k.category === 'adapter');
+
+  if (core.length > 0) {
+    lines.push('### Core (universal — ship from `@ng-forge/dynamic-forms`)');
+    for (const k of core) {
+      const json = k.jsonSafe ? '' : ' _(code-only)_';
+      lines.push(`- **${k.kind}**${json} — ${k.description.split('.')[0]}.`);
+    }
+    lines.push('');
+  }
+
+  if (adapter.length > 0) {
+    lines.push('### Adapter (provided by UI integration packages)');
+    for (const k of adapter) {
+      lines.push(`- **${k.kind}** (${k.adapter}, \`${k.package}\`) — ${k.description.split('.')[0]}.`);
+    }
+    lines.push('');
+  }
+
+  lines.push('Use `ngforge_lookup topic="<kind>"` (e.g., `mat-button`, `pi-icon`) for full details on any individual addon kind.');
+
+  lines.push('');
+  lines.push('## Click variants (mutually exclusive on button-like addons)');
+  lines.push('');
+  lines.push('- `preset`: built-in semantics — `clear` / `reset` / `paste` / `copy` / `toggle-password-visibility`.');
+  lines.push('- `actionRef`: named handler resolved via `provideAddonActions({ ... })`.');
+  lines.push('- `action`: inline function (code-only, dropped by JSON validator).');
+  lines.push('');
+  lines.push('Setting more than one logs a warning and applies the first (precedence: `preset` > `actionRef` > `action`).');
+
+  return lines.join('\n');
+}
+
+/**
  * Try to fetch live documentation for a topic, falling back to hardcoded content.
  *
  * Resolution order:
@@ -318,6 +441,32 @@ async function resolveTopicContent(
   depth: 'brief' | 'full' | 'schema',
   uiIntegration?: (typeof UI_INTEGRATIONS)[number],
 ): Promise<string | null> {
+  // Addon meta-topic: list every registered addon kind
+  if (resolvedTopic === 'addons' || resolvedTopic === 'addon' || resolvedTopic === 'addon-kinds') {
+    if (depth === 'brief') {
+      const kinds = getAddonKinds();
+      return [
+        '**Addons** render inside a field slot (prefix / suffix / adapter-specific): icons, buttons, inline text, templates, components.',
+        '',
+        'Registered kinds:',
+        ...kinds.map((k) => `- \`${k.kind}\` (${k.category}${k.adapter ? `, ${k.adapter}` : ''})${k.jsonSafe ? '' : ' — code-only'}`),
+        '',
+        'Use `addons: [{ slot: "suffix", kind: "<kind>", ... }]` on an addon-supporting field. See `ngforge_lookup topic="addons"` for full docs.',
+      ].join('\n');
+    }
+    return formatAddonsOverview();
+  }
+
+  // Addon-specific kind lookup (e.g., `mat-button`, `bs-icon`, `pi-button`, `ion-button`).
+  // Skipped when the kind name collides with a higher-priority topic (text, template,
+  // component are also field-type/wrapper concepts elsewhere — addon kind lookup falls
+  // through to those existing handlers).
+  const addonInfo = getAddonKind(resolvedTopic);
+  const collidesWithFieldOrWrapper = resolvedTopic === 'text' || !!getWrapper(resolvedTopic);
+  if (addonInfo && !collidesWithFieldOrWrapper) {
+    return formatAddonInfo(addonInfo, depth);
+  }
+
   // Wrapper meta-topic: list every registered wrapper
   if (resolvedTopic === 'wrappers' || resolvedTopic === 'wrapper') {
     if (depth === 'brief') {
@@ -509,6 +658,8 @@ Field types: input, select, slider, radio, checkbox, textarea, datepicker, toggl
 Containers: group, row, array, simplified-array, page
 
 Wrappers: wrappers (overview), css (shipping), section, arraySection (demo-only)
+
+Addons: addons (overview), text, template, component (core), mat-icon, mat-button, bs-icon, bs-button, pi-icon, pi-button, ion-icon, ion-button
 
 Concepts: validation, conditional, derivation, property-derivation, options-format, expression-variables, async-validators
 

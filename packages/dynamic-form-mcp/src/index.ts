@@ -9,7 +9,15 @@
 export { createServer, runStdioServer, SERVER_NAME, SERVER_VERSION } from './server.js';
 
 // Re-export registry types and functions for programmatic use
-export type { FieldTypeInfo, ValidatorInfo, UIAdapterInfo, UIAdapterFieldType, PropertyInfo } from './registry/index.js';
+export type {
+  FieldTypeInfo,
+  ValidatorInfo,
+  UIAdapterInfo,
+  UIAdapterFieldType,
+  PropertyInfo,
+  AddonKindInfo,
+  FieldAddonSupportInfo,
+} from './registry/index.js';
 
 export {
   getFieldTypes,
@@ -21,6 +29,10 @@ export {
   getUIAdapters,
   getUIAdapter,
   getUIAdapterFieldType,
+  getAddonKinds,
+  getAddonKind,
+  getAddonKindsByCategory,
+  getFieldAddonSupport,
 } from './registry/index.js';
 
 // Re-export validation from Zod package for direct use (e.g., Amplify AI tools)

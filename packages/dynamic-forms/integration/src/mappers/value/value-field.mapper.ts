@@ -2,7 +2,7 @@ import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
-import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
+import { injectFieldSignalContext } from '@ng-forge/dynamic-forms';
 import { omit } from '@ng-forge/dynamic-forms';
 
 /**
@@ -37,7 +37,7 @@ export interface ValueFieldContext {
  * @returns The value field context with reactive field tree accessor
  */
 export function resolveValueFieldContext(): ValueFieldContext {
-  const context = inject(FIELD_SIGNAL_CONTEXT);
+  const context = injectFieldSignalContext();
 
   return {
     getFieldTree: (fieldKey: string) => {

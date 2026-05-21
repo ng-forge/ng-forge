@@ -34,16 +34,17 @@ export const DEFAULT_WRAPPERS = new InjectionToken<Signal<readonly WrapperConfig
  *
  * @example
  * ```typescript
- * // In a mapper function
+ * // In a mapper function — prefer the helper for required access (descriptive error).
  * export function mapValueField(fieldDef: BaseValueField<any, any>): Binding[] {
- *   const context = inject(FIELD_SIGNAL_CONTEXT);
+ *   const context = injectFieldSignalContext();
  *   const form = context.form();
  *   // ... use context
  * }
  *
- * // In a component
- * export class MyFieldComponent {
- *   private context = inject(FIELD_SIGNAL_CONTEXT);
+ * // Optional access — token directly, returns null if not provided.
+ * const ctx = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
+ * if (ctx) {
+ *   // ...
  * }
  * ```
  */
