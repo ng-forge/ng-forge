@@ -106,7 +106,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     packageName: '@ng-forge/dynamic-forms-ionic',
     buttonShortName: 'ion-button',
     prefixSlotDescription:
-      'Addons render as <code>&lt;span slot=&quot;start&quot;&gt;</code> / <code>&lt;span slot=&quot;end&quot;&gt;</code> wrappers inside <code>&lt;ion-input&gt;</code> for shadow-DOM projection.',
+      "Decorative addons (icon/text/template/component) render as <code>&lt;span slot=&quot;start&quot;&gt;</code> / <code>&lt;span slot=&quot;end&quot;&gt;</code> wrappers; <code>ion-button</code> addons render as native <code>&lt;ion-button slot=&quot;start&quot;&gt;</code> inside <code>&lt;ion-input&gt;</code> via an attribute-selector component, so Ionic's shadow CSS sizes them natively.",
   },
 };
 

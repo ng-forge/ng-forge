@@ -148,6 +148,101 @@ describe('validateFieldAddons', () => {
     expect((result.addons[0] as { action?: unknown }).action).toBeUndefined();
     expect(result.warnings[0]).toMatchObject({ type: 'code-only-action-in-json' });
   });
+
+  it('strips inline `hidden`/`disabled`/`loading` functions in JSON mode but keeps the rest', () => {
+    const field = {
+      key: 'q',
+      type: 'unrestricted-input',
+      addons: [
+        {
+          slot: 'suffix',
+          kind: 'text',
+          text: 'hello',
+          hidden: () => false,
+          disabled: () => true,
+          loading: () => false,
+        },
+      ],
+    } as unknown as FieldDef<unknown>;
+    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'json');
+    expect(result.addons).toHaveLength(1);
+    const addon = result.addons[0] as { hidden?: unknown; disabled?: unknown; loading?: unknown; text?: string };
+    expect(addon.hidden).toBeUndefined();
+    expect(addon.disabled).toBeUndefined();
+    expect(addon.loading).toBeUndefined();
+    expect(addon.text).toBe('hello');
+    // One warning per stripped function (hidden, disabled, loading).
+    const fnWarnings = result.warnings.filter((w) => w.type === 'code-only-action-in-json');
+    expect(fnWarnings).toHaveLength(3);
+  });
+
+  it('keeps inline `hidden`/`disabled`/`loading` functions in inline mode', () => {
+    const field = {
+      key: 'q',
+      type: 'unrestricted-input',
+      addons: [
+        {
+          slot: 'suffix',
+          kind: 'text',
+          text: 'hello',
+          hidden: () => false,
+          disabled: () => true,
+          loading: () => false,
+        },
+      ],
+    } as unknown as FieldDef<unknown>;
+    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const addon = result.addons[0] as { hidden?: unknown; disabled?: unknown; loading?: unknown };
+    expect(typeof addon.hidden).toBe('function');
+    expect(typeof addon.disabled).toBe('function');
+    expect(typeof addon.loading).toBe('function');
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('multi-set XOR — keeps preset and warns when preset + actionRef + action are all set (inline)', () => {
+    const field = {
+      key: 'q',
+      type: 'unrestricted-input',
+      addons: [
+        {
+          slot: 'suffix',
+          kind: 'text',
+          text: 'go',
+          preset: 'clear',
+          actionRef: 'submit',
+          action: () => undefined,
+        },
+      ],
+    } as unknown as FieldDef<unknown>;
+    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const addon = result.addons[0] as { preset?: string; actionRef?: string; action?: unknown };
+    expect(addon.preset).toBe('clear');
+    expect(addon.actionRef).toBeUndefined();
+    expect(addon.action).toBeUndefined();
+    const warning = result.warnings.find((w) => String(w.reason).includes('multiple click variants'));
+    expect(warning).toBeDefined();
+    expect(String(warning?.reason)).toContain('preset, actionRef, action');
+  });
+
+  it('multi-set XOR — keeps actionRef and drops action when only those two are set', () => {
+    const field = {
+      key: 'q',
+      type: 'unrestricted-input',
+      addons: [
+        {
+          slot: 'suffix',
+          kind: 'text',
+          text: 'go',
+          actionRef: 'submit',
+          action: () => undefined,
+        },
+      ],
+    } as unknown as FieldDef<unknown>;
+    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const addon = result.addons[0] as { actionRef?: string; action?: unknown };
+    expect(addon.actionRef).toBe('submit');
+    expect(addon.action).toBeUndefined();
+  });
 });
 
 describe('walkAndValidateAddons', () => {

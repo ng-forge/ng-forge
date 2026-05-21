@@ -407,7 +407,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
     package: '@ng-forge/dynamic-forms-ionic',
     adapter: 'ionic',
     description:
-      'Renders `<ion-button>` with optional icon, label, color, fill, and reactive loading (renders an `<ion-spinner>`). Interactive `ion-button` addons render OUTSIDE `<ion-input>` as flex siblings because Ionic shadow CSS forces zero-size on buttons projected through start/end slots.',
+      'Renders `<ion-button>` with optional icon, label, color, fill, and reactive loading (renders an `<ion-spinner>`). `ion-button` addons render INSIDE `<ion-input>` as native `<ion-button slot="start|end">` via an attribute-selector component so Ionic\'s `::slotted(ion-button[slot=start|end])` shadow CSS sizes them natively.',
     jsonSafe: true,
     props: {
       ...UNIVERSAL_BASE_PROPS,

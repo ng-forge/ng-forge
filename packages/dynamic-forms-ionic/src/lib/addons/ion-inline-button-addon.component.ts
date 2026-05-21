@@ -20,6 +20,7 @@ import type { IonButtonAddon } from '../types/addons';
   template: `
     @if (action.loading()) {
       <ion-spinner [slot]="iconOnly() ? 'icon-only' : 'start'" name="dots"></ion-spinner>
+      <span class="df-ion-sr-only" role="status">Loading…</span>
     } @else if (icon(); as ic) {
       <ion-icon [name]="ic" [slot]="iconOnly() ? 'icon-only' : 'start'"></ion-icon>
     }
@@ -27,6 +28,21 @@ import type { IonButtonAddon } from '../types/addons';
       {{ lbl | dynamicText | async }}
     }
   `,
+  styles: [
+    `
+      .df-ion-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    `,
+  ],
   host: {
     // Stencil reflects [attr.*] to the underlying ion-button properties.
     '[attr.color]': 'color() ?? null',

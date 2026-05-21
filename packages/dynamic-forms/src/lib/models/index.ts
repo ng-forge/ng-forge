@@ -31,6 +31,7 @@ export {
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
   GROUP_CONTEXT,
+  injectFieldSignalContext,
 } from './field-signal-context.token';
 export type { ValidationError, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';

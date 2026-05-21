@@ -1,4 +1,4 @@
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import {
@@ -26,29 +26,12 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
 
 @Component({
   selector: 'df-bs-input',
-  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot, NgTemplateOutlet],
+  imports: [FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let f = ngf.field(); @let p = props(); @let inputId = ngf.key() + '-input';
-    <ng-template #control>
-      <input
-        ngForgeControl
-        [formField]="f"
-        [id]="inputId"
-        [type]="type()"
-        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="ngf.tabIndex()"
-        class="form-control"
-        [class.form-control-sm]="size() === 'sm'"
-        [class.form-control-lg]="size() === 'lg'"
-        [class.form-control-plaintext]="p?.plaintext"
-        [class.is-invalid]="f().invalid() && f().touched()"
-        [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
-      />
-    </ng-template>
     @if (floatingLabel()) {
-      <!-- Floating label variant -->
       <div class="mb-3">
         @if (ngfa.hasAddons()) {
           <div class="input-group">
@@ -58,7 +41,20 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
               </span>
             }
             <div class="form-floating">
-              <ng-container *ngTemplateOutlet="control" />
+              <input
+                ngForgeControl
+                [formField]="f"
+                [id]="inputId"
+                [type]="type()"
+                [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+                [attr.tabindex]="ngf.tabIndex()"
+                class="form-control"
+                [class.form-control-sm]="size() === 'sm'"
+                [class.form-control-lg]="size() === 'lg'"
+                [class.form-control-plaintext]="p?.plaintext"
+                [class.is-invalid]="f().invalid() && f().touched()"
+                [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+              />
               @if (ngf.label()) {
                 <label [for]="inputId">{{ ngf.label() | dynamicText | async }}</label>
               }
@@ -71,7 +67,20 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
           </div>
         } @else {
           <div class="form-floating">
-            <ng-container *ngTemplateOutlet="control" />
+            <input
+              ngForgeControl
+              [formField]="f"
+              [id]="inputId"
+              [type]="type()"
+              [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+              [attr.tabindex]="ngf.tabIndex()"
+              class="form-control"
+              [class.form-control-sm]="size() === 'sm'"
+              [class.form-control-lg]="size() === 'lg'"
+              [class.form-control-plaintext]="p?.plaintext"
+              [class.is-invalid]="f().invalid() && f().touched()"
+              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+            />
             @if (ngf.label()) {
               <label [for]="inputId">{{ ngf.label() | dynamicText | async }}</label>
             }
@@ -87,7 +96,6 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         }
       </div>
     } @else {
-      <!-- Standard variant -->
       <div class="mb-3">
         @if (ngf.label()) {
           <label [for]="inputId" class="form-label">{{ ngf.label() | dynamicText | async }}</label>
@@ -99,7 +107,20 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
               </span>
             }
-            <ng-container *ngTemplateOutlet="control" />
+            <input
+              ngForgeControl
+              [formField]="f"
+              [id]="inputId"
+              [type]="type()"
+              [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+              [attr.tabindex]="ngf.tabIndex()"
+              class="form-control"
+              [class.form-control-sm]="size() === 'sm'"
+              [class.form-control-lg]="size() === 'lg'"
+              [class.form-control-plaintext]="p?.plaintext"
+              [class.is-invalid]="f().invalid() && f().touched()"
+              [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+            />
             @for (a of ngfa.suffixAddons(); track $index) {
               <span class="input-group-text">
                 <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
@@ -107,7 +128,20 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
             }
           </div>
         } @else {
-          <ng-container *ngTemplateOutlet="control" />
+          <input
+            ngForgeControl
+            [formField]="f"
+            [id]="inputId"
+            [type]="type()"
+            [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="ngf.tabIndex()"
+            class="form-control"
+            [class.form-control-sm]="size() === 'sm'"
+            [class.form-control-lg]="size() === 'lg'"
+            [class.form-control-plaintext]="p?.plaintext"
+            [class.is-invalid]="f().invalid() && f().touched()"
+            [class.is-valid]="f().valid() && f().touched() && p?.validFeedback"
+          />
         }
         @if (p?.validFeedback && f().valid() && f().touched()) {
           <div class="valid-feedback d-block">

@@ -293,6 +293,7 @@ export {
   FIELD_SIGNAL_CONTEXT,
   FORM_OPTIONS,
   GROUP_CONTEXT,
+  injectFieldSignalContext,
 } from './models';
 
 // Dynamic Text utilities

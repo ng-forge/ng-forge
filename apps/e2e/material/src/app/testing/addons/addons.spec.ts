@@ -154,7 +154,6 @@ test.describe('Addons', () => {
 
       await expect(input).toHaveValue('locked');
       await expect(button).toBeDisabled();
-      await expect(input).toHaveValue('locked');
 
       await expect(scenario).toHaveScreenshot('disabled-addon.png');
     });
@@ -231,6 +230,53 @@ test.describe('Addons', () => {
       await expect(input).toHaveValue('!!');
 
       await expect(scenario).toHaveScreenshot('action-ref.png');
+    });
+  });
+
+  test.describe('Keyboard activation', () => {
+    test('suffix clear button activates on Enter when focused', async ({ page, helpers }) => {
+      await page.goto('/#/test/addons/clear-button');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('clear-button');
+      const input = scenario.locator('input[matInput]');
+      const clearButton = scenario.locator('df-addon-slot[matsuffix] button[aria-label="Clear"]').first();
+
+      await expect(input).toHaveValue('initial value');
+      await clearButton.focus();
+      await expect(clearButton).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(input).toHaveValue('');
+    });
+
+    test('suffix clear button activates on Space when focused', async ({ page, helpers }) => {
+      await page.goto('/#/test/addons/clear-button');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('clear-button');
+      const input = scenario.locator('input[matInput]');
+      const clearButton = scenario.locator('df-addon-slot[matsuffix] button[aria-label="Clear"]').first();
+
+      await expect(input).toHaveValue('initial value');
+      await clearButton.focus();
+      await page.keyboard.press('Space');
+      await expect(input).toHaveValue('');
+    });
+  });
+
+  test.describe('Focus order', () => {
+    test('Tab from input lands on the suffix button next', async ({ page, helpers }) => {
+      await page.goto('/#/test/addons/clear-button');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('clear-button');
+      const input = scenario.locator('input[matInput]');
+      const clearButton = scenario.locator('df-addon-slot[matsuffix] button[aria-label="Clear"]').first();
+
+      await input.focus();
+      await expect(input).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(clearButton).toBeFocused();
     });
   });
 });

@@ -205,6 +205,37 @@ describe('runPrimePresetAction', () => {
       expect(logger.warn).toHaveBeenCalled();
       expect(String(logger.warn.mock.calls[0][0])).toContain('toggle-password-visibility');
     });
+
+    it('refuses to flip when baselineType reports a non-password type (initial state)', async () => {
+      const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>(undefined);
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), {
+        typeOverride,
+        baselineType: () => 'email',
+        logger,
+      });
+      expect(typeOverride()).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('re-checks baselineType on every dispatch (refuses post-toggle when baseline mutates)', async () => {
+      const typeOverride: WritableSignal<string | undefined> = signal<string | undefined>('password');
+      let baseline = 'password';
+      // First flip: baseline === 'password', flip allowed.
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), {
+        typeOverride,
+        baselineType: () => baseline,
+        logger,
+      });
+      expect(typeOverride()).toBe('text');
+      // Baseline mutates (e.g., schema-driven type change) — next dispatch refused.
+      baseline = 'email';
+      await runPrimePresetAction('toggle-password-visibility', makeCtx(), {
+        typeOverride,
+        baselineType: () => baseline,
+        logger,
+      });
+      expect(typeOverride()).toBe('text');
+    });
   });
 
   describe('unknown preset', () => {

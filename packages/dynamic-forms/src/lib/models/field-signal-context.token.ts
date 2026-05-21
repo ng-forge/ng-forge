@@ -1,4 +1,5 @@
-import { InjectionToken, Signal } from '@angular/core';
+import { inject, InjectionToken, Signal } from '@angular/core';
+import { DynamicFormError } from '../errors/dynamic-form-error';
 import type { FieldSignalContext, ArrayContext, GroupContext } from '../mappers/types';
 import type { WrapperConfig } from './wrapper-type';
 import type { ValidationMessages } from './validation-types';
@@ -47,6 +48,25 @@ export const DEFAULT_WRAPPERS = new InjectionToken<Signal<readonly WrapperConfig
  * ```
  */
 export const FIELD_SIGNAL_CONTEXT = new InjectionToken<FieldSignalContext>('FIELD_SIGNAL_CONTEXT');
+
+/**
+ * Throwing accessor for {@link FIELD_SIGNAL_CONTEXT}.
+ *
+ * Use when the consumer requires the context — group/array containers and
+ * mappers that depend on form structure. Throws a descriptive
+ * `DynamicFormError` instead of Angular's generic `NullInjectorError` when
+ * the token isn't provided.
+ *
+ * Consumers that may legitimately run outside a `DynamicForm` should keep
+ * using `inject(FIELD_SIGNAL_CONTEXT, { optional: true })`.
+ */
+export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel> {
+  const ctx = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
+  if (!ctx) {
+    throw new DynamicFormError('FIELD_SIGNAL_CONTEXT is not provided. This consumer must run inside a <df-dynamic-form> component tree.');
+  }
+  return ctx as FieldSignalContext<TModel>;
+}
 
 /**
  * Injection token for providing array context metadata to mappers and components.

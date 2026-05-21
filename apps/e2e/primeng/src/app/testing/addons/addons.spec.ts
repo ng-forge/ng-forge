@@ -152,7 +152,6 @@ test.describe('Addons', () => {
 
       await expect(input).toHaveValue('locked');
       await expect(button).toBeDisabled();
-      await expect(input).toHaveValue('locked');
 
       await expect(scenario).toHaveScreenshot('disabled-addon.png');
     });

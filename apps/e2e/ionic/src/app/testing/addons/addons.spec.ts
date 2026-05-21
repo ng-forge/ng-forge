@@ -3,13 +3,14 @@ import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fix
 setupTestLogging();
 setupConsoleCheck();
 
-// Ionic projects shadow-DOM `start` / `end` slots designed for decorative
-// inline content (ion-icon). Interactive ion-button addons render OUTSIDE
-// <ion-input> as flex siblings (df-ion-input-row) so Ionic's shadow CSS
-// doesn't force them to zero-size / non-interactable. Selectors use the
-// accessibility tree (getByRole) because Ionic's <ion-button> forwards
-// aria-label into its shadow DOM rather than exposing it as an HTML
-// attribute on the host.
+// Ionic ion-button addons render INSIDE <ion-input> as native
+// ion-button[df-ion-button-addon slot=start|end] via an attribute-selector
+// component (IonInlineButtonAddonComponent), so Ionic's
+// `::slotted(ion-button[slot=start|end])` shadow CSS fires natively.
+// Decorative kinds (icon/text/template/component) render via the universal
+// df-addon-slot dispatcher wrapped in <span slot="start|end">. Selectors
+// use the accessibility tree (getByRole) because <ion-button> forwards
+// aria-label into shadow DOM rather than exposing it on the host.
 //
 // Intentionally functional-only (no `toHaveScreenshot` calls): Ionic's
 // shadow-DOM rendering produces subtle anti-aliasing differences between
@@ -103,8 +104,9 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('multi-addons');
       await expect(scenario).toBeVisible();
 
-      // Decorative addons (icon + text) stay inside ion-input slots; the
-      // interactive ion-button is rendered outside as a flex sibling.
+      // Decorative addons (icon + text) render via df-addon-slot wrapped in
+      // <span slot="start|end">; ion-button addons render as native
+      // <ion-button slot="start|end"> via the attribute-selector component.
       const prefixDecorative = scenario.locator('ion-input span[slot="start"]');
       const suffixDecorative = scenario.locator('ion-input span[slot="end"]');
 
@@ -126,7 +128,7 @@ test.describe('Addons', () => {
 
       const scenario = helpers.getScenario('severity-variants');
       await expect(scenario).toBeVisible();
-      // 9 colours → 9 inputs → 9 suffix buttons rendered outside ion-input.
+      // 9 colours → 9 inputs → 9 suffix ion-button addons rendered inline.
       await expect(scenario.locator('ion-button[df-ion-button-addon]')).toHaveCount(9);
     });
   });
@@ -156,7 +158,6 @@ test.describe('Addons', () => {
 
       await expect(input).toHaveValue('locked');
       await expect(button).toBeDisabled();
-      await expect(input).toHaveValue('locked');
     });
   });
 

@@ -32,6 +32,7 @@ import type { MatButtonAddon } from '../types/addons';
       >
         @if (action.loading()) {
           <mat-progress-spinner mode="indeterminate" diameter="18" aria-hidden="true" />
+          <span class="df-mat-sr-only" role="status">Loading…</span>
         } @else {
           <mat-icon aria-hidden="true">{{ addon().icon }}</mat-icon>
         }
@@ -48,6 +49,7 @@ import type { MatButtonAddon } from '../types/addons';
       >
         @if (action.loading()) {
           <mat-progress-spinner mode="indeterminate" diameter="18" aria-hidden="true" />
+          <span class="df-mat-sr-only" role="status">Loading…</span>
         } @else if (addon().icon; as icon) {
           <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
         }
@@ -55,6 +57,21 @@ import type { MatButtonAddon } from '../types/addons';
       </button>
     }
   `,
+  styles: [
+    `
+      .df-mat-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatButtonAddonComponent {

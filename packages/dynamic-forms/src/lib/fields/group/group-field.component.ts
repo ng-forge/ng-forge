@@ -25,7 +25,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { FieldTree, form } from '@angular/forms/signals';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldSignalContext, GroupContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
+import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT, injectFieldSignalContext } from '../../models/field-signal-context.token';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
@@ -69,7 +69,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly fieldRegistry = injectFieldRegistry();
-  private readonly parentFieldSignalContext = inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<TModel>;
+  private readonly parentFieldSignalContext = injectFieldSignalContext<TModel>();
   private readonly parentGroupContext = inject(GROUP_CONTEXT, { optional: true });
   private readonly injector = inject(Injector);
   protected readonly environmentInjector = inject(EnvironmentInjector);

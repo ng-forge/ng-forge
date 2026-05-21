@@ -18,7 +18,7 @@ import {
   NgForgeControl,
   NgForgeFieldHost,
 } from '@ng-forge/dynamic-forms/integration';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
@@ -29,32 +29,10 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
 
 @Component({
   selector: 'df-prime-input',
-  imports: [
-    InputText,
-    InputGroupModule,
-    InputGroupAddonModule,
-    DfAddonSlot,
-    DynamicTextPipe,
-    AsyncPipe,
-    FormField,
-    NgForgeControl,
-    NgTemplateOutlet,
-  ],
+  imports: [InputText, InputGroupModule, InputGroupAddonModule, DfAddonSlot, DynamicTextPipe, AsyncPipe, FormField, NgForgeControl],
   styleUrl: '../../styles/_form-field.scss',
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
-    <ng-template #control>
-      <input
-        pInputText
-        ngForgeControl
-        [id]="inputId()"
-        [formField]="ngf.field()"
-        [type]="type()"
-        [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
-        [attr.tabindex]="ngf.tabIndex()"
-        [class]="inputClasses()"
-      />
-    </ng-template>
     <div class="df-prime-field">
       @if (ngf.label()) {
         <label [for]="inputId()" class="df-prime-label">{{ ngf.label() | dynamicText | async }}</label>
@@ -66,7 +44,16 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
             </p-inputgroup-addon>
           }
-          <ng-container *ngTemplateOutlet="control" />
+          <input
+            pInputText
+            ngForgeControl
+            [id]="inputId()"
+            [formField]="ngf.field()"
+            [type]="type()"
+            [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+            [attr.tabindex]="ngf.tabIndex()"
+            [class]="inputClasses()"
+          />
           @for (a of ngfa.suffixAddons(); track $index) {
             <p-inputgroup-addon>
               <df-addon-slot [addon]="a" [fieldInputs]="fieldInputs()" [hidden]="ngfa.hiddenSignalCache().get(a)" />
@@ -74,7 +61,16 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
           }
         </p-inputgroup>
       } @else {
-        <ng-container *ngTemplateOutlet="control" />
+        <input
+          pInputText
+          ngForgeControl
+          [id]="inputId()"
+          [formField]="ngf.field()"
+          [type]="type()"
+          [placeholder]="(ngf.placeholder() | dynamicText | async) ?? ''"
+          [attr.tabindex]="ngf.tabIndex()"
+          [class]="inputClasses()"
+        />
       }
       @if (ngf.errorsToDisplay()[0]; as error) {
         <small class="p-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</small>
@@ -198,9 +194,9 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         box-shadow: none;
       }
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button:focus-visible {
-        /* 2px inset outline for WCAG 2.4.7 (theme-aware via currentColor). */
+        /* 2px outward outline for WCAG 2.4.7 / 2.4.11 — matches Bootstrap (+2). */
         outline: 2px solid var(--p-focus-ring-color, currentColor);
-        outline-offset: -2px;
+        outline-offset: 2px;
       }
     `,
   ],
