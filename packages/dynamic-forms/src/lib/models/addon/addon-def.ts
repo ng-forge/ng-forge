@@ -92,7 +92,7 @@ export interface TemplateAddon extends BaseAddon {
  *
  * @codeOnly The `component` loader is a function and cannot survive
  * `JSON.stringify`/`parse`. The lenient validator drops this kind when the
- * config originated from JSON (set via `validateFormConfig({ source: 'json' })`).
+ * config originated from JSON (set via `sanitizeFormConfig({ source: 'json' })`).
  */
 export interface ComponentAddon extends BaseAddon {
   readonly kind: 'component';

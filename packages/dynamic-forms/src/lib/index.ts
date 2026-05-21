@@ -117,12 +117,12 @@ export type { AddonActionHandler } from './providers/features/addons/addon-actio
 export {
   formatAddonWarning,
   logAddonWarnings,
+  sanitizeFormConfig,
+  sanitizeFormConfigPure,
   validateFieldAddons,
-  validateFormConfig,
-  validateFormConfigPure,
   walkAndValidateAddons,
 } from './utils/validate-form-config/validate-form-config';
-export type { AddonWarning, ValidatedFormConfig, ValidateFormConfigOptions } from './utils/validate-form-config/validate-form-config';
+export type { AddonWarning, SanitizedFormConfig, SanitizeFormConfigOptions } from './utils/validate-form-config/validate-form-config';
 
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from './models';

@@ -476,24 +476,30 @@ export interface FieldAddonSupportInfo {
   allowedKinds?: string[];
 }
 
+// Every adapter registers its input under the bare discriminant `'input'`
+// (see `MatField.Input` / `BsField.Input` / `PrimeField.Input` /
+// `IonicField.Input` — all resolve to `'input'`). Disambiguation is by
+// `adapter`. AI consumers shipping configs with `type: 'input'` for the
+// active adapter pass the runtime validator; this registry tells them
+// which adapter supports addons on that field type.
 export const FIELD_ADDON_SUPPORT: FieldAddonSupportInfo[] = [
   {
-    fieldType: 'prime-input',
+    fieldType: 'input',
     adapter: 'primeng',
     slots: ['prefix', 'suffix'],
   },
   {
-    fieldType: 'mat-input',
+    fieldType: 'input',
     adapter: 'material',
     slots: ['prefix', 'suffix'],
   },
   {
-    fieldType: 'bs-input',
+    fieldType: 'input',
     adapter: 'bootstrap',
     slots: ['prefix', 'suffix'],
   },
   {
-    fieldType: 'ionic-input',
+    fieldType: 'input',
     adapter: 'ionic',
     slots: ['prefix', 'suffix'],
   },

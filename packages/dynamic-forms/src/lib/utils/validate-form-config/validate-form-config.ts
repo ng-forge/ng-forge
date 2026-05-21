@@ -8,9 +8,9 @@ import { AddonWarning, formatAddonWarning } from './addon-warning';
 import { walkAndValidateAddons } from './validate-field-addons';
 
 /**
- * Options accepted by {@link validateFormConfig}.
+ * Options accepted by {@link sanitizeFormConfig}.
  */
-export interface ValidateFormConfigOptions {
+export interface SanitizeFormConfigOptions {
   /**
    * Whether the config originated from JSON (server-driven) or inline
    * TypeScript code.
@@ -28,9 +28,9 @@ export interface ValidateFormConfigOptions {
 }
 
 /**
- * Result of a `validateFormConfig` call.
+ * Result of a `sanitizeFormConfig` call.
  */
-export interface ValidatedFormConfig {
+export interface SanitizedFormConfig {
   /** Sanitized config — invalid addons stripped from the field tree. */
   sanitized: FormConfig;
   /** Structured list of every addon that was dropped, and why. */
@@ -41,6 +41,12 @@ export interface ValidatedFormConfig {
  * Walk a `FormConfig`, validate every field's addons against the active
  * `FIELD_REGISTRY` and `ADDON_KIND_REGISTRY`, and return a sanitized copy
  * plus a list of dropped-addon warnings.
+ *
+ * Distinct from the INTERNAL `validateFormConfig` in
+ * `utils/config-validation/config-validator.ts` (which throws on
+ * structural errors like duplicate keys / unknown field types). This
+ * helper is the PUBLIC, lenient addon-shape pass — renamed to
+ * `sanitizeFormConfig` to avoid the name collision.
  *
  * Lenient by design: invalid addons are dropped (with warnings) rather than
  * thrown. The form keeps rendering even when the backend ships an addon the
@@ -60,7 +66,7 @@ export interface ValidatedFormConfig {
  * @Component({ ... })
  * class AdminFormBuilder {
  *   private readonly check = (cfg: FormConfig) => {
- *     const { sanitized, warnings } = validateFormConfig(cfg, { source: 'json' });
+ *     const { sanitized, warnings } = sanitizeFormConfig(cfg, { source: 'json' });
  *     if (warnings.length > 0) {
  *       this.diagnostics.set(warnings);
  *     }
@@ -69,7 +75,7 @@ export interface ValidatedFormConfig {
  * }
  * ```
  */
-export function validateFormConfig(config: FormConfig, options: ValidateFormConfigOptions = {}): ValidatedFormConfig {
+export function sanitizeFormConfig(config: FormConfig, options: SanitizeFormConfigOptions = {}): SanitizedFormConfig {
   const fieldRegistry = inject(FIELD_REGISTRY);
   const kindRegistry = inject(ADDON_KIND_REGISTRY);
   const source = options.source ?? 'inline';
@@ -104,19 +110,19 @@ export function logAddonWarnings(warnings: readonly AddonWarning[], logger?: Log
 }
 
 /**
- * DI-free variant of {@link validateFormConfig} for tooling that lives
+ * DI-free variant of {@link sanitizeFormConfig} for tooling that lives
  * outside Angular's injector — build-time linters, MCP-side checks, CLI
  * scripts.
  *
  * Caller passes the registries explicitly; the result has the same shape
  * as the DI-bound version.
  */
-export function validateFormConfigPure(
+export function sanitizeFormConfigPure(
   config: FormConfig,
   fieldRegistry: ReadonlyMap<string, import('../../models/field-type').FieldTypeDefinition>,
   kindRegistry: ReadonlyMap<string, import('../../models/addon/addon-kind').AddonKindDefinition>,
-  options: ValidateFormConfigOptions = {},
-): ValidatedFormConfig {
+  options: SanitizeFormConfigOptions = {},
+): SanitizedFormConfig {
   const source = options.source ?? 'inline';
   const { fields, warnings } = walkAndValidateAddons(
     (config.fields ?? []) as readonly FieldDef<unknown>[],

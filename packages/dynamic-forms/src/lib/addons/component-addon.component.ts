@@ -1,10 +1,10 @@
 import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { ComponentAddon } from '../models/addon/addon-def';
+import type { ComponentAddon } from '../models/addon/addon-def';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
-import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
+import type { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Renderer for the universal `component` addon kind.
@@ -37,24 +37,33 @@ export class ComponentAddonComponent {
 
   protected readonly inputs = computed(() => (this.addon().inputs ?? {}) as Record<string, unknown>);
 
-  private readonly resolvedComponentSignal = signal<Type<unknown> | undefined>(undefined);
-  protected readonly resolvedComponent = this.resolvedComponentSignal.asReadonly();
+  /**
+   * Latest async-loaded `{ addon, component }` pair. Tagging the result with
+   * its source addon lets `resolvedComponent` filter stale loads structurally
+   * — same kind-tagging pattern `DfAddonSlot` uses. When `addon` swaps
+   * mid-load, the prior loader still completes and writes here, but the
+   * computed ignores it because the recorded addon no longer matches the
+   * current one.
+   */
+  private readonly asyncLoaded = signal<{ addon: ComponentAddon; component: Type<unknown> } | undefined>(undefined);
 
-  /** Monotonic load-token guards against stale promises winning when addon swaps mid-load. */
-  private loadSeq = 0;
+  protected readonly resolvedComponent = computed<Type<unknown> | undefined>(() => {
+    const current = this.addon();
+    const loaded = this.asyncLoaded();
+    return loaded?.addon === current ? loaded.component : undefined;
+  });
 
   constructor() {
     explicitEffect([this.addon], ([addon]) => {
-      const seq = ++this.loadSeq;
       Promise.resolve(addon.component())
         .then((mod) => {
-          if (seq !== this.loadSeq) return;
-          this.resolvedComponentSignal.set(resolveDefaultExport(mod) ?? undefined);
+          const component = resolveDefaultExport(mod);
+          if (component) this.asyncLoaded.set({ addon, component });
         })
         .catch((error: unknown) => {
-          if (seq !== this.loadSeq) return;
-          this.logger.warn(`Failed to load component addon (slot: '${addon.slot}'): ${String(error)}`);
-          this.resolvedComponentSignal.set(undefined);
+          this.logger.warn(
+            `Failed to load component addon (slot: '${addon.slot}'): ${error instanceof Error ? error.message : String(error)}`,
+          );
         });
     });
   }

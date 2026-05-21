@@ -21,7 +21,8 @@ import type { BsButtonAddon } from '../types/addons';
       type="button"
       [class]="buttonClass()"
       [disabled]="action.disabled() || action.loading()"
-      [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
+      [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"
+      [attr.aria-busy]="action.loading() || null"
       (click)="action.dispatch()"
     >
       @if (action.loading()) {

@@ -6,10 +6,12 @@ import {
   AddonActionContext,
   AddonActionHandler,
   BaseAddon,
+  DynamicFormError,
   DynamicFormLogger,
   DynamicValue,
   FIELD_SIGNAL_CONTEXT,
   resolveDynamicValue,
+  toReadonlyFieldTree,
   WrapperFieldInputs,
 } from '@ng-forge/dynamic-forms';
 import { ADDON_PRESET_HANDLER } from './addon-preset-handler.token';
@@ -56,16 +58,17 @@ export class NgForgeAddonActionBase {
    * `*ngComponentOutlet` is known to lag click dispatch in production
    * builds). Optional because addons may be rendered outside a form.
    *
-   * The token's default factory throws; `optional: true` only bypasses
-   * missing-provider errors, not factory throws. Wrap in try/catch so
-   * orphan dispatches (no DynamicForm in the injector chain) just see
-   * `undefined`.
+   * The token's default factory throws `DynamicFormError`; `optional: true`
+   * only bypasses missing-provider errors, not factory throws. Narrow the
+   * catch to that error type so unrelated exceptions (e.g., circular DI)
+   * bubble up instead of being silently swallowed.
    */
   private readonly fieldSignalContext = (() => {
     try {
       return inject(FIELD_SIGNAL_CONTEXT, { optional: true });
-    } catch {
-      return null;
+    } catch (e) {
+      if (e instanceof DynamicFormError) return null;
+      throw e;
     }
   })();
 
@@ -159,26 +162,26 @@ export class NgForgeAddonActionBase {
 
   /**
    * Build an `AddonActionContext` for handlers from the wrapper-style
-   * `fieldInputs` bag. Returns the field-bound variant when a host field
-   * is reachable, or the orphan variant otherwise.
+   * `fieldInputs` bag. Returns the field-bound variant whenever a host
+   * field is reachable EITHER through the bag (preferred) OR through the
+   * injected `FIELD_SIGNAL_CONTEXT` (fallback). The orphan variant fires
+   * only when neither path resolves.
    *
-   * Resolution order for `setValue`:
-   * 1. `inputs.setValue` from the forwarded bag (preferred — populated by
-   *    `buildFieldInputs` in `DfFieldOutlet`).
-   * 2. Fallback constructed from `FIELD_SIGNAL_CONTEXT.form[key]` — covers
-   *    the production-build race where the bag's `setValue` arrives after
-   *    the user's click on certain `ngComponentOutlet` host-directive
-   *    forwarding paths. The form is injected from the field's scope, so
-   *    navigation by key is the same surface the field component uses.
+   * The FSC fallback covers the production-build race where bag forwarding
+   * lags click dispatch through `ngComponentOutlet` → host-directive paths.
+   * Adapter preset handlers no longer need to inject their own writer —
+   * `ctx.setValue` and `ctx.form` are guaranteed populated whenever there's
+   * a field context, even when the bag was empty.
    */
   buildActionContext(): AddonActionContext {
     const inputs = this.fieldInputs();
-    const tree = inputs?.field;
     const key = inputs?.key ?? '';
     const type = inputs?.type ?? '';
-    const bagSetValue = inputs?.setValue;
-    const fallbackSetValue = key && this.fieldSignalContext ? this.resolveFieldWriter(key) : undefined;
-    const setValue = bagSetValue ?? fallbackSetValue;
+    const fscField = this.resolveFscField(key);
+    // Tree: bag's `field` (read-only view, preferred) → FSC-derived view.
+    const tree = inputs?.field ?? fscField?.readonly;
+    // Setter: bag's `setValue` (preferred) → FSC-derived writer.
+    const setValue = inputs?.setValue ?? fscField?.setValue;
     if (tree && setValue) {
       return {
         field: { key, type },
@@ -194,16 +197,24 @@ export class NgForgeAddonActionBase {
     };
   }
 
-  private resolveFieldWriter(key: string): ((next: unknown) => void) | undefined {
+  /**
+   * Resolve `{ readonly, setValue }` for a field by key from
+   * `FIELD_SIGNAL_CONTEXT.form`. Returns `undefined` when FSC is missing
+   * (orphan dispatch) or the key doesn't exist on the root tree.
+   */
+  private resolveFscField(key: string): { readonly: WrapperFieldInputs['field']; setValue: (next: unknown) => void } | undefined {
     const fsc = this.fieldSignalContext;
-    if (!fsc) return undefined;
-    // FieldTree is callable + per-key bracket-accessible. We cast to the
-    // record shape to navigate by key — same pattern used internally by
-    // `asFieldTreeRecord` in form-state-manager.ts.
+    if (!fsc || !key) return undefined;
+    // FieldTree is callable + per-key bracket-accessible. Cast to the
+    // record shape to navigate by key — same pattern as `asFieldTreeRecord`
+    // in form-state-manager.ts.
     const root = fsc.form as unknown as Record<string, FieldTree<unknown>>;
     const fieldTree = root[key];
     if (!fieldTree || typeof fieldTree !== 'function') return undefined;
-    return (next: unknown) => fieldTree().value.set(next as never);
+    return {
+      readonly: toReadonlyFieldTree(fieldTree),
+      setValue: (next: unknown) => fieldTree().value.set(next as never),
+    };
   }
 }
 

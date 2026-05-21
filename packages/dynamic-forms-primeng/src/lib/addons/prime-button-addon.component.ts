@@ -24,7 +24,8 @@ import type { PrimeButtonAddon } from '../types/addons';
       [severity]="addon().severity ?? 'secondary'"
       [loading]="action.loading()"
       [disabled]="action.disabled() || action.loading()"
-      [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
+      [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"
+      [attr.aria-busy]="action.loading() || null"
       (onClick)="action.dispatch()"
     />
   `,

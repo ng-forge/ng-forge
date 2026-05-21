@@ -80,7 +80,7 @@ export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
    * shape includes a function payload (e.g., the built-in `'component'`
    * loader, inline `prime-button` `action` handlers) declare `jsonSafe: false`
    * so the validator drops them when the config was loaded from a JSON
-   * source (`validateFormConfig(config, { source: 'json' })`). Defaults to
+   * source (`sanitizeFormConfig(config, { source: 'json' })`). Defaults to
    * `true` — kinds are JSON-safe unless explicitly opted out.
    */
   readonly jsonSafe?: boolean;

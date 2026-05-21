@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { MatButtonAddon } from '../types/addons';
@@ -16,7 +17,7 @@ import type { MatButtonAddon } from '../types/addons';
  */
 @Component({
   selector: 'df-mat-button-addon',
-  imports: [MatButton, MatIconButton, MatIcon, DynamicTextPipe, AsyncPipe],
+  imports: [MatButton, MatIconButton, MatIcon, MatProgressSpinner, DynamicTextPipe, AsyncPipe],
   hostDirectives: [NgForgeAddonAction],
   template: `
     @if (isIconOnly()) {
@@ -25,10 +26,15 @@ import type { MatButtonAddon } from '../types/addons';
         type="button"
         [color]="addon().color ?? null"
         [disabled]="action.disabled() || action.loading()"
-        [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
+        [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"
+        [attr.aria-busy]="action.loading() || null"
         (click)="action.dispatch()"
       >
-        <mat-icon aria-hidden="true">{{ addon().icon }}</mat-icon>
+        @if (action.loading()) {
+          <mat-progress-spinner mode="indeterminate" diameter="18" aria-hidden="true" />
+        } @else {
+          <mat-icon aria-hidden="true">{{ addon().icon }}</mat-icon>
+        }
       </button>
     } @else {
       <button
@@ -36,10 +42,13 @@ import type { MatButtonAddon } from '../types/addons';
         type="button"
         [color]="addon().color ?? null"
         [disabled]="action.disabled() || action.loading()"
-        [attr.aria-label]="(ariaLabel() | dynamicText | async) || null"
+        [attr.aria-label]="(ariaLabel() | dynamicText | async) ?? null"
+        [attr.aria-busy]="action.loading() || null"
         (click)="action.dispatch()"
       >
-        @if (addon().icon; as icon) {
+        @if (action.loading()) {
+          <mat-progress-spinner mode="indeterminate" diameter="18" aria-hidden="true" />
+        } @else if (addon().icon; as icon) {
           <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
         }
         {{ label() | dynamicText | async }}
