@@ -139,16 +139,11 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         const typeOverride = inject(BS_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
-        // forwardRef is needed for `host.props()?.type` (baselineType
-        // guard for `toggle-password-visibility`). The writer comes from
-        // `ctx.setValue` — see `mat-input.component.ts` for details.
+        // forwardRef for baselineType only — host.props()?.type gates toggle-password-visibility.
         const host = inject(forwardRef(() => BsInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
-            // `NgForgeAddonActionBase.buildActionContext` guarantees
-            // `ctx.setValue` is populated whenever a field context is
-            // reachable. See `mat-input.component.ts` for the rationale.
             return runBsPresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
               fieldValueSetter: ctx.setValue,
@@ -205,10 +200,7 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         box-shadow: none;
       }
       :host ::ng-deep .input-group-text df-bs-button-addon .btn:focus-visible {
-        /* 2px solid for WCAG 2.4.11 (focus thickness/area). currentColor
-           keeps the indicator readable on both light and dark themes — the
-           addon button inherits the input's color, so contrast against the
-           input-group background is consistent. */
+        /* 2px solid for WCAG 2.4.11; currentColor adapts to light/dark themes. */
         box-shadow: none;
         outline: 2px solid currentColor;
         outline-offset: 2px;

@@ -1,4 +1,4 @@
-import { computed, Directive, inject, Injector, input, Signal, signal, WritableSignal } from '@angular/core';
+import { computed, Directive, inject, Injector, input, Signal, signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
   ADDON_ACTION_REGISTRY,
@@ -9,6 +9,7 @@ import {
   DynamicValue,
   resolveDynamicValue,
   WrapperFieldInputs,
+  writeToFieldValue,
 } from '@ng-forge/dynamic-forms';
 import { ADDON_PRESET_HANDLER } from './addon-preset-handler.token';
 import type { AssertTupleLockstep } from './assert-input-lockstep';
@@ -163,9 +164,10 @@ export class NgForgeAddonActionBase {
     const type = inputs?.type ?? '';
     const tree = inputs?.field;
     if (tree) {
-      // `tree.value` is the same WritableSignal at runtime even though
-      // `ReadonlyFieldTree` types it as `Signal<T>`. Cast at the boundary.
-      const setValue = inputs?.setValue ?? ((next: unknown) => (tree.value as WritableSignal<unknown>).set(next));
+      // `writeToFieldValue` centralises the `Signal → WritableSignal` cast and
+      // warns at runtime if Signal Forms ever stops storing a writable signal
+      // here (the alternative — a silent no-op preset — is much worse).
+      const setValue = inputs?.setValue ?? ((next: unknown) => writeToFieldValue(tree.value, next, this.logger));
       return {
         field: { key, type },
         form: tree,

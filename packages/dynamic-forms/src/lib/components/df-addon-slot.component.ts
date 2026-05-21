@@ -81,24 +81,27 @@ export class DfAddonSlot {
   protected readonly className = computed(() => this.addon().className ?? null);
 
   /**
-   * Locally-resolved `hidden` signal — populated via `explicitEffect` so
-   * `resolveDynamicValue` (which may call `toSignal` for Observable-typed
-   * hidden values) does NOT run inside a reactive context (`computed` /
-   * `linkedSignal.computation` would throw NG0602). Mirrors the pattern in
-   * `NgForgeAddonsBase` for the array case.
+   * Locally-resolved `hidden` signal — always reflects `addon.hidden`
+   * regardless of whether the host supplied a pre-resolved signal.
+   * Populated via `explicitEffect` so `resolveDynamicValue` (which may call
+   * `toSignal` for Observable-typed values) does NOT run inside a reactive
+   * context (NG0602). The WeakMap caches per `hidden`-value identity, so
+   * swapping `addon` inputs that share the same Observable reuses the
+   * subscription instead of leaking a fresh one per swap.
    *
-   * The WeakMap dedupes by `hidden` value identity, so swapping addon
-   * objects that share the same Observable instance reuses one
-   * subscription instead of leaking a fresh one per emit.
+   * Resolved unconditionally (not gated on host `hidden()` presence) so a
+   * transition from `host hidden = Signal` → `undefined` doesn't expose a
+   * brief window where neither value is current — the upstream effect
+   * re-runs eventually, but the computed read can happen in between.
    */
   private readonly _hiddenByValue = new WeakMap<object, Signal<boolean>>();
   private readonly _resolvedHidden = signal<Signal<boolean> | undefined>(undefined);
 
   /**
    * `hidden` resolved from `DynamicValue<boolean>` to a flat `Signal<boolean>`.
-   * Uses the host-supplied signal when present (avoids duplicate `toSignal`
-   * subscriptions for Observable-typed `hidden`); otherwise reads the
-   * locally-resolved signal populated by the addon-tracking effect.
+   * Prefers the host-supplied signal when present (avoids duplicate `toSignal`
+   * subscriptions for Observable-typed `hidden`); falls back to the locally-
+   * resolved signal, which is always populated by the addon-tracking effect.
    */
   protected readonly isHidden = computed(() => {
     const pre = this.hidden();
@@ -138,13 +141,11 @@ export class DfAddonSlot {
   }));
 
   constructor() {
-    // Resolve `hidden` outside any reactive context. Skip when the host has
-    // already supplied a pre-resolved signal (typical for input adapters).
-    explicitEffect([this.addon, this.hidden], ([addon, hostHidden]) => {
-      if (hostHidden) {
-        this._resolvedHidden.set(undefined);
-        return;
-      }
+    // Resolve `addon.hidden` outside any reactive context AND unconditionally —
+    // the host-supplied signal is a perf hint, not a precondition. Keeping
+    // `_resolvedHidden` always-fresh closes a race where `isHidden` could
+    // return `false` between a host-`hidden` clear and the effect re-running.
+    explicitEffect([this.addon], ([addon]) => {
       const h = addon.hidden;
       const valueKey = typeof h === 'object' && h !== null ? h : null;
       let resolved = valueKey ? this._hiddenByValue.get(valueKey) : undefined;

@@ -3,14 +3,14 @@ import type { AddonActionContext } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { type PresetCollaborators, runMatPresetAction } from './preset-actions';
 
+// Field-bound stub — opaque form object; the runner discriminates on
+// `form !== null`, not on tree methods.
+const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+
 function makeCtx(value: unknown, setValue: (next: unknown) => void = () => undefined): AddonActionContext {
-  // Default ctx is field-bound (has `setValue`) so the preset orphan-guard
-  // does NOT fire. The `as unknown` cast bridges the discriminated union
-  // (form: null implies setValue?: undefined) — these tests deliberately
-  // exercise the writer in isolation from form-tree wiring.
   return {
     field: { key: 'q', type: 'input' },
-    form: null,
+    form: FORM_STUB,
     value,
     setValue,
   } as unknown as AddonActionContext;

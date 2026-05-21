@@ -68,15 +68,12 @@ export async function runPresetAction(
 ): Promise<void> {
   // Guard against orphan dispatches — none of the built-in presets do
   // anything useful without a host field, except `copy` and `paste` which
-  // only need the clipboard API. A dispatch counts as field-bound when
-  // EITHER `ctx.field.key` is non-empty (we know who the host is) OR
-  // `ctx.setValue` is callable (we have a writer). The actual write goes
-  // through `collaborators.fieldValueSetter`, which adapter preset handlers
-  // may inject from their own host scope as a fallback when the forwarded
-  // `ctx.setValue` arrives late (Angular host-directive input propagation
-  // through `ngComponentOutlet` lags click dispatch in production builds).
-  const hasFieldContext = ctx.field.key !== '' || typeof ctx.setValue === 'function';
-  if (!hasFieldContext && preset !== 'copy' && preset !== 'paste') {
+  // only need the clipboard API. The canonical discriminant per the
+  // `AddonActionContext` discriminated union is `ctx.form` — non-null on
+  // the field-bound variant, null on the orphan variant. `field.key` was
+  // unreliable for nested-array scenarios where keys can legitimately be
+  // empty strings.
+  if (ctx.form === null && preset !== 'copy' && preset !== 'paste') {
     collaborators.logger.warn(`preset '${String(preset)}' fired without a host field context — ignoring.`);
     return;
   }

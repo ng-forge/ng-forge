@@ -100,16 +100,11 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         const typeOverride = inject(PRIME_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
-        // forwardRef is needed for `host.props()?.type` (baselineType
-        // guard for `toggle-password-visibility`). The writer comes from
-        // `ctx.setValue` — see `mat-input.component.ts` for details.
+        // forwardRef for baselineType only — host.props()?.type gates toggle-password-visibility.
         const host = inject(forwardRef(() => PrimeInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
-            // `NgForgeAddonActionBase.buildActionContext` guarantees
-            // `ctx.setValue` is populated whenever a field context is
-            // reachable. See `mat-input.component.ts` for the rationale.
             return runPrimePresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
               fieldValueSetter: ctx.setValue,
@@ -186,19 +181,10 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         padding-left: var(--df-prime-addon-suffix-inner-padding);
         padding-right: var(--df-prime-addon-suffix-outer-padding);
       }
-      /* prime-button addons sit inside a p-inputgroup-addon for visual parity
-         with prime-icon (shared grey container). Flatten the inner p-button
-         so it doesn't render its own background/border on top of the addon
-         chrome — done via PrimeNG's own button CSS variables so the cascade
-         reaches the actual <button> element inside <p-button> (selector-
-         based overrides hit specificity ties with PrimeNG's own rules).
-         Consumers can override these vars if they want a different look. */
+      /* Flatten the inner p-button so it doesn't paint chrome over the addon
+         container; hover/active tints use currentColor (PrimeNG's
+         --p-content-hover-background goes near-white on dark themes). */
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon {
-        /* Hover/active tints derive from currentColor via color-mix instead
-           of PrimeNG's --p-content-hover-background, which often resolves to
-           a near-white value on dark themes (harsh white flash over a dark
-           input group). currentColor tracks the input text color, so the
-           tint stays subtle on both light and dark themes. */
         --p-button-secondary-background: transparent;
         --p-button-secondary-border-color: transparent;
         --p-button-secondary-color: var(--p-inputtext-color);
@@ -207,21 +193,12 @@ import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
         --p-button-secondary-hover-color: var(--p-inputtext-color);
         --p-button-secondary-active-background: color-mix(in srgb, currentColor 16%, transparent);
         --p-button-secondary-active-border-color: transparent;
-        /* Keep PrimeNG's native focus ring on addon buttons (WCAG 2.4.7).
-           Earlier revisions zeroed --p-focus-ring-color / shadow for a flat
-           look, but that removed all keyboard-focus indication on the
-           interactive addon. */
       }
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button {
-        /* Default p-button box-shadow is removed to flatten the addon
-           inside the input group; focus ring lives in --p-focus-ring-* and
-           re-asserts itself on :focus-visible. */
         box-shadow: none;
       }
       :host ::ng-deep p-inputgroup-addon df-prime-button-addon .p-button:focus-visible {
-        /* Explicit focus indicator — outline is theme-aware (matches the
-           text color so it works on both light and dark backgrounds) and
-           inset so it doesn't get clipped by the input-group border. */
+        /* 2px inset outline for WCAG 2.4.7 (theme-aware via currentColor). */
         outline: 2px solid var(--p-focus-ring-color, currentColor);
         outline-offset: -2px;
       }

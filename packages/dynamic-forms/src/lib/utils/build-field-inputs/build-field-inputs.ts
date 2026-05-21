@@ -1,5 +1,5 @@
 import { FieldTree } from '@angular/forms/signals';
-import { ReadonlyFieldTree, toReadonlyFieldTreeCached } from '../../core/field-tree-utils';
+import { ReadonlyFieldTree, toReadonlyFieldTreeCached, writeToFieldValue } from '../../core/field-tree-utils';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**
@@ -36,9 +36,12 @@ export function buildFieldInputs(
   const hasFieldTree = fieldTreeCandidate !== undefined && typeof fieldTreeCandidate === 'function';
   const readonlyField = hasFieldTree ? toReadonlyFieldTreeCached(cache, fieldTreeCandidate as FieldTree<unknown>) : undefined;
   // Lazy writer keyed on the raw FieldTree. Addons (e.g., `prime-button`
-  // presets) call this to mutate the host field without re-deriving the
-  // path or trafficking through an adapter-specific writer token.
-  const setValue = hasFieldTree ? (next: unknown) => (fieldTreeCandidate as FieldTree<unknown>)().value.set(next as never) : undefined;
+  // presets) call this to mutate the host field. `writeToFieldValue`
+  // centralises the `Signal → WritableSignal` cast and warns at runtime
+  // if Signal Forms ever changes the contract.
+  const setValue = hasFieldTree
+    ? (next: unknown) => writeToFieldValue((fieldTreeCandidate as FieldTree<unknown>)().value, next)
+    : undefined;
   // Shallow spread — relies on the mapper contract (see WrapperFieldInputs)
   // that rawInputs are emitted as fresh snapshots, not mutated in place.
   return {

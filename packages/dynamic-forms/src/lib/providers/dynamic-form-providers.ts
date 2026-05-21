@@ -208,11 +208,7 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         return registry;
       },
     },
-    // Form-scoped component cache. The token has no `providedIn: 'root'`
-    // factory — injecting it outside a `provideDynamicForm` scope is a
-    // configuration error. The per-form factory here keeps two forms that
-    // register different `loadComponent` factories for the same kind name
-    // (e.g., dev playgrounds) from poisoning each other.
+    // Per-form addon-component cache (no root fallback — isolated by form scope).
     { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
     ...featureProviders,
   ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;

@@ -310,7 +310,7 @@ export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
 // FieldTree Utilities
-export { getArrayLength, toReadonlyFieldTree } from './core/field-tree-utils';
+export { getArrayLength, toReadonlyFieldTree, writeToFieldValue } from './core/field-tree-utils';
 export type { ArrayFieldTree, ReadonlyFieldTree } from './core/field-tree-utils';
 export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
 

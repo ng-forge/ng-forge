@@ -19,13 +19,16 @@ function makeLogger(): LoggerStub {
   return { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 }
 
+// Minimal ReadonlyFieldTree stub — orphan-guard discriminates on `form !== null`.
+// The runner itself never invokes methods on `ctx.form`, so an opaque object
+// is sufficient.
+const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+
 function makeCtx(overrides: Partial<AddonActionContext> = {}): AddonActionContext {
-  // Default ctx is field-bound — non-empty key + callable setValue. The
-  // `as unknown` cast bridges the discriminated union (form: null + setValue
-  // is otherwise impossible).
+  // Default ctx is field-bound: non-null `form` + callable `setValue`.
   return {
     field: { key: 'q', type: 'input' },
-    form: null,
+    form: FORM_STUB,
     value: 'hello',
     setValue: () => undefined,
     ...overrides,
@@ -45,7 +48,7 @@ const FIELD_LABEL = 'test-input';
 
 describe('runPresetAction (core)', () => {
   describe('orphan guard', () => {
-    it('skips mutate-style presets (clear/reset/toggle) when ctx has no key and no setValue', async () => {
+    it('skips mutate-style presets (clear/reset/toggle) when ctx.form === null (orphan)', async () => {
       const fieldValueSetter = vi.fn();
       const { collab, logger } = makeCollaborators({ fieldValueSetter });
       const orphanCtx = { field: { key: '', type: 'input' }, form: null, value: '' } as unknown as AddonActionContext;
@@ -56,12 +59,13 @@ describe('runPresetAction (core)', () => {
       expect(String(logger.warn.mock.calls[0]?.[0])).toContain("preset 'clear'");
     });
 
-    it('allows clear when ctx has non-empty key even if setValue is missing (lenient discriminant)', async () => {
-      // Lenient guard: EITHER key truthy OR setValue callable. The writer
-      // comes from collaborators.fieldValueSetter in production wiring.
+    it('allows clear when ctx.form is set even if field.key is empty (canonical discriminant)', async () => {
+      // Per AddonActionContext, `form !== null` IS the field-bound variant —
+      // empty `field.key` can occur legitimately in nested-array scenarios
+      // and must NOT be treated as orphan.
       const fieldValueSetter = vi.fn();
       const { collab, logger } = makeCollaborators({ fieldValueSetter });
-      const ctx = { field: { key: 'q', type: 'input' }, form: null, value: 'x' } as unknown as AddonActionContext;
+      const ctx = { field: { key: '', type: 'input' }, form: FORM_STUB, value: 'x' } as unknown as AddonActionContext;
       await runPresetAction('clear', ctx, collab, ADAPTER, FIELD_LABEL);
       expect(fieldValueSetter).toHaveBeenCalledWith('');
       expect(logger.warn).not.toHaveBeenCalled();

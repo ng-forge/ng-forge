@@ -155,12 +155,7 @@ test.describe('Addons', () => {
       const button = scenario.getByRole('button', { name: 'Clear' });
 
       await expect(input).toHaveValue('locked');
-      // ion-button reflects disabled via the disabled attribute on the host.
       await expect(button).toBeDisabled();
-
-      await button.click({ force: true }).catch(() => {
-        /* disabled — click ignored */
-      });
       await expect(input).toHaveValue('locked');
     });
   });

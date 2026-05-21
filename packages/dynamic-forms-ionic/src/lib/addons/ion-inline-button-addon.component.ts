@@ -7,24 +7,11 @@ import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-
 import type { IonButtonAddon } from '../types/addons';
 
 /**
- * Inline renderer for `ion-button` addons projected through `<ion-input>`'s
- * shadow-DOM `start` / `end` slots.
- *
- * Critical difference from `IonButtonAddonComponent`: the selector is an
- * attribute on `<ion-button>` itself, so the rendered DOM element IS
- * `<ion-button>` (not a wrapper that contains one). Ionic's shadow CSS
- * ships specific `::slotted(ion-button[slot=start|end])` rules that
- * size + style icon-only buttons natively (40×40, circular, themed
- * colors). Those rules only fire when the slotted element matches
- * `ion-button` directly — wrapping the button in `<df-addon-slot>` or
- * `<df-ion-button-addon>` breaks the `::slotted` match and the button
- * ends up untargeted by Ionic's layout, hence the previous "render
- * outside the input" workaround.
- *
- * `IonButtonAddonComponent` is still used by `<df-addon-slot>` (the
- * universal dispatcher) for cases where the addon is rendered outside
- * an `<ion-input>` host — its tag-based selector keeps it compatible
- * with `NgComponentOutlet`.
+ * Inline `ion-button` addon — the host element IS `<ion-button>` so Ionic's
+ * `::slotted(ion-button[slot=start|end])` shadow CSS matches and applies its
+ * native icon-only sizing. `IonButtonAddonComponent` (tag selector) stays
+ * for the universal `<df-addon-slot>` dispatcher when the addon is rendered
+ * outside an `<ion-input>` host.
  */
 @Component({
   selector: 'ion-button[df-ion-button-addon]',
@@ -41,9 +28,7 @@ import type { IonButtonAddon } from '../types/addons';
     }
   `,
   host: {
-    // ion-button is a Stencil web component; host bindings don't know about
-    // its Angular input wrappers. Use `[attr.*]` for color/fill/disabled —
-    // Stencil reflects these attributes to the underlying property.
+    // Stencil reflects [attr.*] to the underlying ion-button properties.
     '[attr.color]': 'color() ?? null',
     '[attr.fill]': 'fill()',
     '[attr.disabled]': 'action.disabled() || action.loading() ? "true" : null',
@@ -65,14 +50,8 @@ export class IonInlineButtonAddonComponent {
   protected readonly fill = computed(() => this.addon().fill ?? 'clear');
   protected readonly iconOnly = computed(() => !!this.icon() && !this.label());
 
-  /**
-   * Pre-resolved aria-label as a signal — host bindings can't use template
-   * pipes (NG5001), so the `DynamicText` (string | Signal | Observable | i18n
-   * key) is materialised via `resolveDynamicValue` driven from an
-   * `explicitEffect`. `resolveDynamicValue` calls `toSignal` for Observable
-   * inputs, which would throw NG0602 if invoked inside `computed`; the
-   * effect-driven indirection runs it outside any reactive context.
-   */
+  // Host bindings can't use pipes (NG5001), so `DynamicText` is materialised
+  // via an effect (resolveDynamicValue's toSignal can't run inside computed).
   private readonly _ariaLabelSignal = signal<Signal<string | undefined> | undefined>(undefined);
   protected readonly resolvedAriaLabel = computed(() => this._ariaLabelSignal()?.() ?? undefined);
 

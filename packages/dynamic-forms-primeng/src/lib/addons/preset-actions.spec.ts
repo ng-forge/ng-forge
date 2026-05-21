@@ -14,14 +14,13 @@ function makeLogger(): LoggerStub {
   return { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 }
 
+const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+
 function makeCtx<T = unknown>(value: T = '' as T): AddonActionContext<T> {
-  // Default ctx is field-bound (has `setValue`) so the preset orphan-guard
-  // does NOT fire. The `as unknown` cast bridges the discriminated union
-  // (form: null implies setValue?: undefined) — these tests deliberately
-  // exercise the writer in isolation from form-tree wiring.
+  // Default ctx is field-bound: non-null `form` + callable `setValue`.
   return {
     field: { key: 'host', type: 'input' },
-    form: null,
+    form: FORM_STUB,
     value,
     setValue: () => undefined,
   } as unknown as AddonActionContext<T>;

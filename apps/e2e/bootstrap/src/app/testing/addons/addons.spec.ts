@@ -151,10 +151,6 @@ test.describe('Addons', () => {
 
       await expect(input).toHaveValue('locked');
       await expect(button).toBeDisabled();
-      await button.click({ force: true }).catch(() => {
-        /* disabled — click ignored by browser */
-      });
-      // Value unchanged.
       await expect(input).toHaveValue('locked');
 
       await expect(scenario).toHaveScreenshot('disabled-addon.png');

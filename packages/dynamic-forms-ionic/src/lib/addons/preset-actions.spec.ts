@@ -41,11 +41,12 @@ function makeHarness(overrides?: { value?: unknown; defaultValue?: unknown }): H
     defaultValue,
     defaultValueGetter: () => defaultValue,
     context: {
+      // Field-bound: opaque non-null form (orphan-guard discriminates on `form !== null`).
       field: { key: 'q', type: 'input' },
-      form: null,
+      form: {} as unknown as NonNullable<AddonActionContext['form']>,
       value: overrides?.value ?? '',
       setValue: spies.setValue,
-    },
+    } as unknown as AddonActionContext,
   };
 }
 

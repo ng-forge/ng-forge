@@ -27,41 +27,14 @@ import { IONIC_CONFIG } from '../../models/ionic-config.token';
 import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
 import { IonInputAddon, IonicInputProps } from './ionic-input.type';
 
-// Length-validator → DOM wiring (minlength/maxlength):
-//
-// On NATIVE form elements (<input>/<textarea>), Signal Forms's [formField] directive
-// auto-syncs minLength/maxLength HTML attributes via setNativeDomProperty (gated by
-// elementAcceptsNativeProperty). See the source in @angular/forms/signals.
-//
-// <ion-input> is a custom Ionic web component, not a native form element, so Signal
-// Forms's auto-sync does NOT apply here — it instead routes via setInputOnDirectives
-// looking up an exact camelCase input ('maxLength'). <ion-input>'s property is the
-// lowercase 'maxlength', which doesn't match. We therefore bind directly from the
-// FieldState signals.
-//
-// `f().maxLength?.()` — the optional `?.()` is required: FieldState.maxLength is
-// `Signal<number | undefined> | undefined` (the entire signal is missing if the
-// field has no maxLength validator). Same for minLength.
-//
-// PrimeNG textarea uses the alternate strategy: its control component declares
-// camelCase `maxLength` / `minLength` inputs so Signal Forms's setInputOnDirectives
-// auto-wires. See packages/dynamic-forms-primeng/src/lib/fields/textarea/.
-//
-// Addons (prefix / suffix):
-//
-// <ion-input> projects shadow-DOM slots `start` and `end`. We translate the
-// universal `prefix` / `suffix` slot model by rendering a wrapper element
-// with `slot="start"` / `slot="end"` as a direct child of <ion-input>; the
-// addon itself (carrying its own `slot` attribute via <df-addon-slot>) sits
-// inside the wrapper where its slot attribute is harmless.
+// minlength/maxlength bindings: Signal Forms auto-syncs these on NATIVE
+// inputs; <ion-input> is a Stencil web component so we bind directly from
+// FieldState (`f().maxLength?.()` — the signal itself is missing when no
+// validator is configured).
 @Component({
   selector: 'df-ion-input',
-  // Note: IonButton (the Ionic Angular wrapper) is intentionally NOT imported.
-  // `IonInlineButtonAddonComponent`'s `ion-button[df-ion-button-addon]` selector
-  // matches `<ion-button>` elements here; importing IonButton would cause
-  // NG0300 (multiple components matching the same tag). The inline addon uses
-  // `[attr.*]` bindings which Stencil reflects to ion-button's properties, so
-  // the Angular wrapper isn't needed in this template.
+  // IonButton intentionally NOT imported — it would collide with
+  // IonInlineButtonAddonComponent on `<ion-button>` (NG0300).
   imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot, IonInlineButtonAddonComponent],
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
@@ -126,16 +99,11 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
         const typeOverride = inject(IONIC_INPUT_TYPE_OVERRIDE);
         const fsc = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
         const logger = inject(DynamicFormLogger);
-        // forwardRef is needed for `host.props()?.type` (baselineType
-        // guard for `toggle-password-visibility`). The writer comes from
-        // `ctx.setValue` — see `mat-input.component.ts` for details.
+        // forwardRef for baselineType only — host.props()?.type gates toggle-password-visibility.
         const host = inject(forwardRef(() => IonicInputFieldComponent));
         return {
           run: (preset: string, ctx: AddonActionContext) => {
             const fieldKey = ctx.field.key;
-            // `NgForgeAddonActionBase.buildActionContext` guarantees
-            // `ctx.setValue` is populated whenever a field context is
-            // reachable. See `mat-input.component.ts` for the rationale.
             return runIonicPresetAction(preset as AddonActionPreset, ctx, {
               typeOverride,
               fieldValueSetter: ctx.setValue,
@@ -154,35 +122,14 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
       :host([hidden]) {
         display: none !important;
       }
-      /* ion-input projects shadow-DOM slots start and end. The default gap
-         between the slot wrapper and the input text is too tight for icons.
-         Per-side padding on each slot wrapper — each knob is independent so
-         consumers can tune the prefix's gap from the field border (outer)
-         and from the input text (inner) without affecting the suffix.
-         Padding (not margin) on the slot wrapper survives Ionic's shadow-
-         DOM flex layout reliably. */
+      /* Per-side padding knobs on each slot wrapper (independent prefix/suffix). */
       :host {
         --df-ion-addon-prefix-outer-padding: 0;
         --df-ion-addon-prefix-inner-padding: 0.5rem;
         --df-ion-addon-suffix-inner-padding: 0.5rem;
         --df-ion-addon-suffix-outer-padding: 0;
       }
-      /* Interactive ion-button addons render INSIDE <ion-input> via
-         slot="start|end" directly on the <ion-button>. Ionic ships a
-         specific ::slotted(ion-button[slot=start|end].button-has-icon-only)
-         rule that natively styles icon-only buttons projected this way
-         (40x40, circular, themed). Earlier revisions wrapped the button in
-         <df-addon-slot>, which broke the ::slotted match because the
-         immediate slotted element became <df-addon-slot> instead of
-         <ion-button>; the workaround was to render outside in a flex row.
-         The ion-button[df-ion-button-addon] attribute selector lets the
-         dispatch logic ride on a native <ion-button> element directly,
-         restoring Ionic's intended slotted-button rendering. */
-      /* The slot wrapper itself centers correctly via align-self, but the
-         icon glyph inside is baseline-pinned at the top of an inline line-
-         box (df-addon-slot defaults to display: block; line-height: normal).
-         Force the entire wrapper chain into inline-flex so the icon centers
-         on its own midline, not the inline baseline. */
+      /* inline-flex on slot wrappers prevents baseline-pinning of decorative addon glyphs. */
       :host ::ng-deep ion-input [slot='start'],
       :host ::ng-deep ion-input [slot='end'] {
         display: inline-flex;
@@ -206,11 +153,8 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
         padding-inline-start: var(--df-ion-addon-suffix-inner-padding);
         padding-inline-end: var(--df-ion-addon-suffix-outer-padding);
       }
-      /* Make sure ion-icon inside addon-slots is readable on dark surfaces.
-         Ionic medium (low-contrast grey) is the default for icon buttons,
-         which fails WCAG on dark inputs. Inherit the input text color so
-         icons match whatever foreground Ionic resolves for the current
-         theme. */
+      /* Inherit input text color so icons stay readable on dark themes
+         (Ionic's default "medium" greys out and fails WCAG on dark inputs). */
       :host ::ng-deep ion-input ion-icon {
         color: inherit;
       }

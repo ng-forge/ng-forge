@@ -26,10 +26,9 @@ import type { BsButtonAddon } from '../types/addons';
       (click)="action.dispatch()"
     >
       @if (action.loading()) {
-        <!-- aria-hidden hides this from AT; the host's aria-busy announces the
-             busy state. role="status" would declare a live region which
-             contradicts aria-hidden — kept removed. -->
+        <!-- Visually-hidden role=status text gives a reliable AT announcement (VO/JAWS/NVDA). -->
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span class="visually-hidden" role="status">Loading…</span>
       } @else if (iconClass(); as ic) {
         <i [class]="ic" aria-hidden="true"></i>
       }

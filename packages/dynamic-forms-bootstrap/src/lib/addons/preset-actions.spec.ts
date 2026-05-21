@@ -12,12 +12,13 @@ function makeLogger(): Logger {
   };
 }
 
+const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+
 function makeCtx(overrides: Partial<AddonActionContext> = {}): AddonActionContext {
-  // Default ctx is field-bound (has `setValue`) so preset orphan-guard does
-  // NOT fire. Tests that want orphan behavior pass `setValue: undefined`.
+  // Default ctx is field-bound: non-null `form` + callable `setValue`.
   return {
     field: { key: 'q', type: 'input' },
-    form: null,
+    form: FORM_STUB,
     value: 'hello',
     setValue: () => undefined,
     ...overrides,
