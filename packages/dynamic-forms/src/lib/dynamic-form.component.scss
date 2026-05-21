@@ -39,7 +39,9 @@
 
   // Form mode specific styling
   &.df-form-paged {
-    // Paged forms handle their own spacing through page orchestrator
-    --df-grid-row-gap: 0;
+    // Paged forms handle their own spacing through page orchestrator.
+    // Set `gap` directly (not via --df-grid-row-gap) so children — including
+    // the page-field component — don't inherit a 0 row-gap.
+    gap: 0;
   }
 }
