@@ -340,7 +340,7 @@ describe('mapSchemaToFields', () => {
     expect(result.fields[0].nullable).toBeUndefined();
   });
 
-  it('should NOT emit nullable on checkbox (boolean) fields — tri-state deferred', () => {
+  it('should emit nullable on checkbox (boolean) fields (issue #415)', () => {
     const schema: SchemaObject = {
       type: 'object',
       properties: {
@@ -350,7 +350,7 @@ describe('mapSchemaToFields', () => {
 
     const result = mapSchemaToFields(schema, []);
     expect(result.fields[0].type).toBe('checkbox');
-    expect(result.fields[0].nullable).toBeUndefined();
+    expect(result.fields[0].nullable).toBe(true);
   });
 
   it('should NOT emit nullable on container (group) fields', () => {
@@ -406,7 +406,7 @@ describe('mapSchemaToFields', () => {
     expect(template.nullable).toBe(true);
   });
 
-  it('should NOT propagate nullable onto array template when item type does not support it (boolean items)', () => {
+  it('should propagate nullable onto array template for boolean items (checkbox supports nullable since #415)', () => {
     const schema: SchemaObject = {
       type: 'object',
       properties: {
@@ -419,7 +419,7 @@ describe('mapSchemaToFields', () => {
 
     const result = mapSchemaToFields(schema, []);
     const template = result.fields[0].template as { type: string; nullable?: boolean };
-    expect(template.nullable).toBeUndefined();
+    expect(template.nullable).toBe(true);
   });
 
   it('should filter null out of select options when enum includes null (OpenAPI 3.1 nullable enum)', () => {

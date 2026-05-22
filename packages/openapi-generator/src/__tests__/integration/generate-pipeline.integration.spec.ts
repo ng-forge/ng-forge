@@ -509,17 +509,17 @@ describe('Nullable values', () => {
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   }, 30_000); // tsc program creation + type-check is slow in CI
 
-  it('should silently drop nullable:true for field types that do not support it', async () => {
+  it('should silently drop nullable:true for container field types that do not support it', async () => {
     await generate('nullable-edge-cases.yaml');
 
     const form = await readGenerated(outputDir, 'forms', 'create-entity.form.ts');
     // Nullable on value fields (select, datepicker, input) — emitted
     expect(form).toMatch(/key: 'status',[\s\S]+?type: 'select',[\s\S]+?nullable: true/);
     expect(form).toMatch(/key: 'startDate',[\s\S]+?type: 'datepicker',[\s\S]+?nullable: true/);
-    // Nullable on container/checked — NOT emitted
-    // (find the 'subscribed' block: checkbox field; it should NOT have `nullable: true` on that block)
+    // Nullable on checked fields (checkbox) — emitted since issue #415
     const subscribedBlock = form.substring(form.indexOf("key: 'subscribed'"));
-    expect(subscribedBlock.split('},')[0]).not.toContain('nullable: true');
+    expect(subscribedBlock.split('},')[0]).toContain('nullable: true');
+    // Nullable on container (group) — still NOT emitted
     const addressBlock = form.substring(form.indexOf("key: 'address'"), form.indexOf("key: 'tags'"));
     expect(addressBlock).not.toContain('nullable: true');
   });

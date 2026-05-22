@@ -1,12 +1,13 @@
 /**
- * Pins the nullable-restriction contract at the type level: container and checked
- * fields must NOT accept `nullable`. If a future refactor moves `nullable` into
+ * Pins the nullable-restriction contract at the type level: container fields
+ * must NOT accept `nullable`. If a future refactor moves `nullable` into
  * `FieldDef` (or a shared base), these `@ts-expect-error` assertions will stop
  * failing and break CI — drawing attention to the semantic expansion.
  *
  * Containers defer nullable because their "null" semantics are ambiguous
- * (see rationale in the PR for #341).
- * Checked fields defer because tri-state boolean requires UX design.
+ * (see rationale in the PR for #341). Checked fields (checkbox / toggle) now
+ * accept `nullable` via `BaseCheckedField<TProps, TMeta, TNullable>` — see
+ * `base-checked-field.ts` and issue #415.
  */
 import { expectTypeOf } from 'vitest';
 import type { GroupField } from './default/group-field';

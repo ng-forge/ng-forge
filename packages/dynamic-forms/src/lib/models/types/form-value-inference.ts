@@ -46,16 +46,30 @@ type Widen<T, D extends number = 5> = [D] extends [never]
             : T;
 
 /**
- * Infer value type based on field type and props.
- * - Slider fields: always number
- * - Input fields with props.type: 'number': number
- * - Other fields: widen the literal value type
+ * Resolves the "underlying" non-null value type for a field, based on its `type`
+ * discriminator and (where it matters) its `value` literal. Used when we need a
+ * base type independent of whether the literal happens to be `null` — i.e., when
+ * computing the nullable widening for `value: null, nullable: true`.
  */
-type InferValueType<T, V> = T extends { type: 'slider' }
+type ResolveBaseValueType<T, V> = T extends { type: 'slider' }
   ? number
   : T extends { type: 'input'; props: { type: 'number' } }
     ? number
-    : Widen<V>;
+    : T extends { type: 'checkbox' | 'toggle' }
+      ? boolean
+      : [V] extends [null]
+        ? string
+        : Widen<V>;
+
+/**
+ * Infer value type based on field type, value literal, and the `nullable` flag.
+ * - Slider fields: always number
+ * - Input fields with props.type: 'number': number
+ * - Checkbox / toggle fields: always boolean
+ * - Other fields: widen the literal value type (default to string when value is null)
+ * - When `nullable: true` is declared, widens the result to `T | null`.
+ */
+type InferValueType<T, V> = T extends { nullable: true } ? ResolveBaseValueType<T, V> | null : ResolveBaseValueType<T, V>;
 
 /**
  * Make type optional if field is not required.
@@ -65,17 +79,25 @@ type MaybeOptional<T, V> = T extends { type: 'hidden' } ? V : T extends { requir
 
 /**
  * Infers the value type from a single template field (for primitive arrays).
- * Mirrors InferValueType logic: slider → number, input[number] → number, else string.
+ * Mirrors InferValueType logic: slider → number, input[number] → number,
+ * checkbox/toggle → boolean, else widen `value` (string fallback). Widens to
+ * `T | null` when `nullable: true` is declared on the template field.
  */
-type InferSingleTemplateValue<T, D extends number> = T extends { type: 'slider' }
+type InferSingleTemplateValueBase<T, D extends number> = T extends { type: 'slider' }
   ? number
   : T extends { type: 'input'; props: { type: 'number' } }
     ? number
     : T extends { type: 'checkbox' | 'toggle' }
       ? boolean
       : T extends { value: infer V }
-        ? Widen<V, Depth[D]>
+        ? [V] extends [null]
+          ? string
+          : Widen<V, Depth[D]>
         : string;
+
+type InferSingleTemplateValue<T, D extends number> = T extends { nullable: true }
+  ? InferSingleTemplateValueBase<T, D> | null
+  : InferSingleTemplateValueBase<T, D>;
 
 /**
  * Infers the value type for an array field.
@@ -133,7 +155,7 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
               : // Value fields without explicit value: include as string (default input type)
                 T extends { key: infer K }
                 ? K extends string
-                  ? { [P in K]: MaybeOptional<T, string> }
+                  ? { [P in K]: MaybeOptional<T, T extends { nullable: true } ? string | null : string> }
                   : never
                 : never;
 

@@ -84,7 +84,8 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseCheckedField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof BsToggleField;
 
@@ -160,13 +161,48 @@ describe('BsToggleField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is boolean', () => {
-      expectTypeOf<BsToggleField['value']>().toEqualTypeOf<boolean | undefined>();
+    it('value is boolean | null when nullable defaults to boolean', () => {
+      // TNullable defaults to `boolean` (= true | false), distributing the conditional
+      // value type to `boolean | null`. See base-checked-field.ts.
+      expectTypeOf<BsToggleField['value']>().toEqualTypeOf<boolean | null | undefined>();
+    });
+
+    it('nullable accepts boolean', () => {
+      expectTypeOf<BsToggleField['nullable']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('placeholder', () => {
       expectTypeOf<BsToggleField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
+  });
+});
+
+// ============================================================================
+// Nullable - Issue #415
+// ============================================================================
+
+describe('BsToggleField - Nullable (issue #415)', () => {
+  it('should accept null value when nullable: true', () => {
+    const field = {
+      type: 'toggle',
+      key: 'notifications',
+      label: 'Notifications',
+      value: null,
+      nullable: true,
+    } as const satisfies BsToggleField;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept null value without explicit nullable flag', () => {
+    const field: BsToggleField = {
+      type: 'toggle',
+      key: 'notifications',
+      value: null,
+    };
+
+    expectTypeOf(field.value).toEqualTypeOf<boolean | null | undefined>();
   });
 });
 

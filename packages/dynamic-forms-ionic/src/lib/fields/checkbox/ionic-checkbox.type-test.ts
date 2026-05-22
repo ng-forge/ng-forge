@@ -86,7 +86,8 @@ describe('IonicCheckboxField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseCheckedField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof IonicCheckboxField;
 
@@ -186,13 +187,48 @@ describe('IonicCheckboxField - Exhaustive Whitelist', () => {
   });
 
   describe('checked field keys from BaseCheckedField', () => {
-    it('value is boolean', () => {
-      expectTypeOf<IonicCheckboxField['value']>().toEqualTypeOf<boolean | undefined>();
+    it('value is boolean | null when nullable defaults to boolean', () => {
+      // TNullable defaults to `boolean` (= true | false), distributing the conditional
+      // value type to `boolean | null`. See base-checked-field.ts.
+      expectTypeOf<IonicCheckboxField['value']>().toEqualTypeOf<boolean | null | undefined>();
+    });
+
+    it('nullable accepts boolean', () => {
+      expectTypeOf<IonicCheckboxField['nullable']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('placeholder', () => {
       expectTypeOf<IonicCheckboxField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
+  });
+});
+
+// ============================================================================
+// Nullable - Issue #415
+// ============================================================================
+
+describe('IonicCheckboxField - Nullable (issue #415)', () => {
+  it('should accept null value when nullable: true', () => {
+    const field = {
+      type: 'checkbox',
+      key: 'active',
+      label: 'Active',
+      value: null,
+      nullable: true,
+    } as const satisfies IonicCheckboxField;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept null value without explicit nullable flag', () => {
+    const field: IonicCheckboxField = {
+      type: 'checkbox',
+      key: 'active',
+      value: null,
+    };
+
+    expectTypeOf(field.value).toEqualTypeOf<boolean | null | undefined>();
   });
 });
 

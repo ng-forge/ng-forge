@@ -739,13 +739,15 @@ describe('getFieldDefaultValue', () => {
 
   describe('nullable across field types', () => {
     // Single parametrized smoke test — if nullable resolution ever gets special-cased
-    // per field type, this catches it. Only includes value-bearing types (BaseValueField);
-    // checkbox/toggle (BaseCheckedField) do not support nullable in this pass.
+    // per field type, this catches it. Covers value-bearing types (BaseValueField)
+    // and checked types (BaseCheckedField — checkbox/toggle, see issue #415).
     const FIELD_TYPES = [
       { type: 'input' },
       { type: 'input', props: { type: 'number' } }, // numeric input
       { type: 'select' },
       { type: 'array' },
+      { type: 'checkbox' },
+      { type: 'toggle' },
     ] as const;
 
     for (const config of FIELD_TYPES) {
