@@ -88,7 +88,8 @@ describe('PrimeCheckboxField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseCheckedField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof PrimeCheckboxField;
 
@@ -164,13 +165,48 @@ describe('PrimeCheckboxField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is boolean', () => {
-      expectTypeOf<PrimeCheckboxField['value']>().toEqualTypeOf<boolean | undefined>();
+    it('value is boolean | null when nullable defaults to boolean', () => {
+      // TNullable defaults to `boolean` (= true | false), distributing the conditional
+      // value type to `boolean | null`. See base-checked-field.ts.
+      expectTypeOf<PrimeCheckboxField['value']>().toEqualTypeOf<boolean | null | undefined>();
+    });
+
+    it('nullable accepts boolean', () => {
+      expectTypeOf<PrimeCheckboxField['nullable']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('placeholder', () => {
       expectTypeOf<PrimeCheckboxField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
+  });
+});
+
+// ============================================================================
+// Nullable - Issue #415
+// ============================================================================
+
+describe('PrimeCheckboxField - Nullable (issue #415)', () => {
+  it('should accept null value when nullable: true', () => {
+    const field = {
+      type: 'checkbox',
+      key: 'active',
+      label: 'Active',
+      value: null,
+      nullable: true,
+    } as const satisfies PrimeCheckboxField;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept null value without explicit nullable flag', () => {
+    const field: PrimeCheckboxField = {
+      type: 'checkbox',
+      key: 'active',
+      value: null,
+    };
+
+    expectTypeOf(field.value).toEqualTypeOf<boolean | null | undefined>();
   });
 });
 

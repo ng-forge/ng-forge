@@ -8,12 +8,23 @@ import { toLabel, toEnumLabel } from '../utils/naming.js';
 import { logger } from '../utils/logger.js';
 
 /**
- * Field types whose runtime `BaseValueField` accepts the `nullable` flag.
- * Container types (group, array, row, page), checked fields (checkbox, toggle)
- * and control/display fields do not support nullable in this release — the generator
- * silently drops nullable:true for those with a verbose log.
+ * Field types whose runtime `BaseValueField` / `BaseCheckedField` accepts the
+ * `nullable` flag. Container types (group, array, row, page) and control/display
+ * fields do not support nullable in this release — the generator silently drops
+ * `nullable: true` for those with a verbose log. Checkbox / toggle support
+ * nullable since issue #415.
  */
-const NULLABLE_SUPPORTED_FIELD_TYPES = new Set(['input', 'textarea', 'select', 'radio', 'multi-checkbox', 'slider', 'datepicker']);
+const NULLABLE_SUPPORTED_FIELD_TYPES = new Set([
+  'input',
+  'textarea',
+  'select',
+  'radio',
+  'multi-checkbox',
+  'slider',
+  'datepicker',
+  'checkbox',
+  'toggle',
+]);
 
 /**
  * Field types whose runtime definition declares `label?: never` and therefore

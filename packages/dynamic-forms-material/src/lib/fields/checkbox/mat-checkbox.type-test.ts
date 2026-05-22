@@ -89,7 +89,8 @@ describe('MatCheckboxField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseCheckedField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof MatCheckboxField;
 
@@ -165,13 +166,49 @@ describe('MatCheckboxField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is boolean', () => {
-      expectTypeOf<MatCheckboxField['value']>().toEqualTypeOf<boolean | undefined>();
+    it('value is boolean | null when nullable defaults to boolean', () => {
+      // TNullable defaults to `boolean` (= true | false), distributing the conditional
+      // value type to `boolean | null`. See base-checked-field.ts.
+      expectTypeOf<MatCheckboxField['value']>().toEqualTypeOf<boolean | null | undefined>();
+    });
+
+    it('nullable accepts boolean', () => {
+      expectTypeOf<MatCheckboxField['nullable']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('placeholder', () => {
       expectTypeOf<MatCheckboxField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
+  });
+});
+
+// ============================================================================
+// Nullable - Issue #415
+// ============================================================================
+
+describe('MatCheckboxField - Nullable (issue #415)', () => {
+  it('should accept null value when nullable: true', () => {
+    const field = {
+      type: 'checkbox',
+      key: 'active',
+      label: 'Active',
+      value: null,
+      nullable: true,
+    } as const satisfies MatCheckboxField;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept null value without explicit nullable flag', () => {
+    // Default TNullable resolves to `boolean`, so the value type accepts `null`.
+    const field: MatCheckboxField = {
+      type: 'checkbox',
+      key: 'active',
+      value: null,
+    };
+
+    expectTypeOf(field.value).toEqualTypeOf<boolean | null | undefined>();
   });
 });
 

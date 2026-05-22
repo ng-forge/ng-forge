@@ -88,7 +88,8 @@ describe('BsCheckboxField - Exhaustive Whitelist', () => {
     | 'schemas'
     // From BaseCheckedField
     | 'value'
-    | 'placeholder';
+    | 'placeholder'
+    | 'nullable';
 
   type ActualKeys = keyof BsCheckboxField;
 
@@ -164,13 +165,48 @@ describe('BsCheckboxField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is boolean', () => {
-      expectTypeOf<BsCheckboxField['value']>().toEqualTypeOf<boolean | undefined>();
+    it('value is boolean | null when nullable defaults to boolean', () => {
+      // TNullable defaults to `boolean` (= true | false), distributing the conditional
+      // value type to `boolean | null`. See base-checked-field.ts.
+      expectTypeOf<BsCheckboxField['value']>().toEqualTypeOf<boolean | null | undefined>();
+    });
+
+    it('nullable accepts boolean', () => {
+      expectTypeOf<BsCheckboxField['nullable']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('placeholder', () => {
       expectTypeOf<BsCheckboxField['placeholder']>().toEqualTypeOf<DynamicText | undefined>();
     });
+  });
+});
+
+// ============================================================================
+// Nullable - Issue #415
+// ============================================================================
+
+describe('BsCheckboxField - Nullable (issue #415)', () => {
+  it('should accept null value when nullable: true', () => {
+    const field = {
+      type: 'checkbox',
+      key: 'active',
+      label: 'Active',
+      value: null,
+      nullable: true,
+    } as const satisfies BsCheckboxField;
+
+    expectTypeOf(field.value).toEqualTypeOf<null>();
+    expectTypeOf(field.nullable).toEqualTypeOf<true>();
+  });
+
+  it('should accept null value without explicit nullable flag', () => {
+    const field: BsCheckboxField = {
+      type: 'checkbox',
+      key: 'active',
+      value: null,
+    };
+
+    expectTypeOf(field.value).toEqualTypeOf<boolean | null | undefined>();
   });
 });
 

@@ -197,12 +197,13 @@ Available shorthands: \`required\`, \`email\`, \`min\`, \`max\`, \`minLength\`, 
 
 ### Nullable Values
 
-Value fields accept a \`nullable?: boolean\` flag. When \`true\`:
+Value fields and checked fields (\`checkbox\`, \`toggle\`) accept a \`nullable?: boolean\` flag. When \`true\`:
 
 - \`value\` accepts \`null\` in addition to the field's normal value type.
-- An omitted \`value\` resolves to \`null\` (instead of the type-specific empty default like \`''\`, \`NaN\`, or \`[]\`).
+- An omitted \`value\` resolves to \`null\` (instead of the type-specific empty default like \`''\`, \`NaN\`, \`false\`, or \`[]\`).
 - Orthogonal to \`required\`. \`nullable\` declares that the **model** accepts \`null\`; \`required\` is a **validation** constraint. Angular's \`Validators.required\` treats \`null\` as invalid, so a field that is both \`nullable\` and \`required\` will fail required-validation when the value is \`null\` — the two flags describe different layers (data shape vs. validation), not conflicting semantics.
 - Map OpenAPI \`nullable: true\` (3.0) or \`type: [T, null]\` (3.1) to this flag.
+- Container fields (\`group\`, \`array\`, \`row\`, \`page\`) do NOT support \`nullable\` — their null semantics are ambiguous.
 
 \`\`\`typescript
 {
@@ -211,6 +212,14 @@ Value fields accept a \`nullable?: boolean\` flag. When \`true\`:
   label: 'Middle Name',
   nullable: true,
   value: null,  // valid; default-resolves to null
+}
+
+{
+  key: 'active',
+  type: 'checkbox',
+  label: 'Active',
+  nullable: true,
+  value: null,  // undecided checkbox state — model permits null, UI renders unchecked
 }
 \`\`\`
 

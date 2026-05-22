@@ -4,7 +4,7 @@ import { ExampleScenario } from '../shared/types';
 export const toggleScenario: ExampleScenario = {
   id: 'toggle',
   title: 'Toggle Demo',
-  description: 'Demonstrates toggle switch fields.',
+  description: 'Demonstrates toggle switch fields, including a nullable checkbox variant (issue #415).',
   config: {
     fields: [
       {
@@ -21,6 +21,13 @@ export const toggleScenario: ExampleScenario = {
         key: 'autoSave',
         type: 'toggle',
         label: 'Auto-save Changes',
+      },
+      {
+        key: 'newsletterOptIn',
+        type: 'checkbox',
+        label: 'Newsletter (undecided — model permits null)',
+        value: null,
+        nullable: true,
       },
     ],
   } as const satisfies FormConfig,
