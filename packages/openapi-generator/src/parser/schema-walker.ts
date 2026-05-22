@@ -18,71 +18,84 @@ export interface WalkedSchema {
   warnings: string[];
 }
 
-export function walkSchema(schema: SchemaObject, requiredFields: string[] = []): WalkedSchema {
+export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], seen: WeakSet<SchemaObject> = new WeakSet()): WalkedSchema {
   const warnings: string[] = [];
 
-  // Handle allOf — merge all schemas
-  if (schema.allOf) {
-    return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings);
+  // Cycle break: a hand-crafted spec like `A.allOf: [A]` would otherwise blow
+  // the stack here. Mapper / generator-level guards also catch this further
+  // out; this is the defensive innermost layer.
+  if (seen.has(schema)) {
+    return { properties: [], warnings: ['Circular schema reference detected during allOf merge — nested schema skipped'] };
   }
+  seen.add(schema);
+  try {
+    // Handle allOf — merge all schemas
+    if (schema.allOf) {
+      return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen);
+    }
 
-  // Handle oneOf with discriminator
-  if (schema.oneOf && schema.discriminator) {
-    return walkOneOfWithDiscriminator(
-      schema.oneOf as SchemaObject[],
-      schema.discriminator as OpenAPIV3.DiscriminatorObject,
-      requiredFields,
-      warnings,
-    );
+    // Handle oneOf with discriminator
+    if (schema.oneOf && schema.discriminator) {
+      return walkOneOfWithDiscriminator(
+        schema.oneOf as SchemaObject[],
+        schema.discriminator as OpenAPIV3.DiscriminatorObject,
+        requiredFields,
+        warnings,
+      );
+    }
+
+    // oneOf without discriminator — cannot generate conditional form groups
+    if (schema.oneOf && !schema.discriminator) {
+      warnings.push('oneOf without discriminator is not supported — add a discriminator to generate conditional form groups');
+      return { properties: [], warnings };
+    }
+
+    // Handle anyOf — skip with warning
+    if (schema.anyOf) {
+      warnings.push('anyOf schemas are not supported and were skipped');
+      return { properties: [], warnings };
+    }
+
+    // Handle if/then/else — skip with warning
+    if ('if' in schema) {
+      warnings.push('if/then/else schemas are not supported and were skipped');
+      return { properties: [], warnings };
+    }
+
+    // Handle additionalProperties warning
+    if (schema.additionalProperties && (schema.additionalProperties as unknown) !== false) {
+      warnings.push('additionalProperties are not supported and were skipped');
+    }
+
+    // Standard object with properties
+    const properties: WalkedProperty[] = [];
+    const required = new Set(schema.required ?? requiredFields);
+
+    for (const [name, propSchema] of Object.entries(schema.properties ?? {})) {
+      if (isReferenceObject(propSchema)) continue;
+      properties.push({
+        name,
+        schema: propSchema,
+        required: required.has(name),
+      });
+    }
+
+    return { properties, warnings };
+  } finally {
+    // Pop from the recursion path so sibling allOf branches that legitimately
+    // share a schema aren't falsely flagged as cycles.
+    seen.delete(schema);
   }
-
-  // oneOf without discriminator — cannot generate conditional form groups
-  if (schema.oneOf && !schema.discriminator) {
-    warnings.push('oneOf without discriminator is not supported — add a discriminator to generate conditional form groups');
-    return { properties: [], warnings };
-  }
-
-  // Handle anyOf — skip with warning
-  if (schema.anyOf) {
-    warnings.push('anyOf schemas are not supported and were skipped');
-    return { properties: [], warnings };
-  }
-
-  // Handle if/then/else — skip with warning
-  if ('if' in schema) {
-    warnings.push('if/then/else schemas are not supported and were skipped');
-    return { properties: [], warnings };
-  }
-
-  // Handle additionalProperties warning
-  if (schema.additionalProperties && (schema.additionalProperties as unknown) !== false) {
-    warnings.push('additionalProperties are not supported and were skipped');
-  }
-
-  // Standard object with properties
-  const properties: WalkedProperty[] = [];
-  const required = new Set(schema.required ?? requiredFields);
-
-  for (const [name, propSchema] of Object.entries(schema.properties ?? {})) {
-    if (isReferenceObject(propSchema)) continue;
-    properties.push({
-      name,
-      schema: propSchema,
-      required: required.has(name),
-    });
-  }
-
-  return { properties, warnings };
 }
 
-function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[]): WalkedSchema {
+function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[], seen: WeakSet<SchemaObject>): WalkedSchema {
   const mergedProperties = new Map<string, WalkedProperty>();
   const allRequired = new Set<string>(requiredFields);
 
   for (const schema of schemas) {
     if (isReferenceObject(schema)) continue;
 
-    const walked = walkSchema(schema, []);
+    const walked = walkSchema(schema, [], seen);
     warnings.push(...walked.warnings);
 
     for (const prop of walked.properties) {
