@@ -238,6 +238,31 @@ describe('Arrays', () => {
 
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   }, 30_000); // tsc program creation + type-check is slow in CI
+
+  it('should not emit validators on required array fields (regression for #416)', async () => {
+    await generate('array-required.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-geolocation.form.ts');
+    // Anchored regexes: outer array fields (phone, currency, languages) must NOT
+    // emit a `validators:` line — ArrayField/SimplifiedArrayField don't declare one,
+    // and `required` from the parent schema cannot be transferred to a container.
+    expect(form).toMatch(/key: 'phone',\s*type: 'array',\s*(?!validators:)/);
+    expect(form).toMatch(/key: 'languages',\s*type: 'array',\s*(?!validators:)/);
+    // The `currency` array carries minItems/maxItems → these must surface as direct
+    // minLength/maxLength properties on the field, not inside a `validators` array.
+    expect(form).toMatch(/key: 'currency',\s*type: 'array',\s*(?!validators:)/);
+    expect(form).toContain('minLength: 1,');
+    expect(form).toContain('maxLength: 3,');
+  });
+
+  it('should produce a form file that compiles against the published types (regression for #416)', async () => {
+    await generate('array-required.yaml');
+
+    const formPath = join(outputDir, 'forms', 'create-geolocation.form.ts');
+    const diagnostics = typecheckGeneratedForm(formPath);
+
+    expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
+  }, 30_000); // tsc program creation + type-check is slow in CI
 });
 
 // ─── F. allOf ────────────────────────────────────────────────────────

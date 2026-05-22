@@ -55,6 +55,10 @@ export interface FieldConfig {
   addButton?: { label: string; props?: Record<string, unknown> } | false;
   removeButton?: { label: string; props?: Record<string, unknown> } | false;
   logic?: LogicConfig[];
+  /** Direct property on array fields — translates OpenAPI `minItems`. Array fields do not accept `validators`. */
+  minLength?: number;
+  /** Direct property on array fields — translates OpenAPI `maxItems`. Array fields do not accept `validators`. */
+  maxLength?: number;
 }
 
 export interface MappingResult {
@@ -198,21 +202,23 @@ function mapPropertyToField(
 
   const validators = mapSchemaToValidators(prop.schema, prop.required);
 
-  // Array-level validators: minItems/maxItems → minLength/maxLength
-  const arraySchema = prop.schema as Record<string, unknown>;
-  if (typeResult.fieldType === 'array') {
-    if (arraySchema['minItems'] !== undefined) {
-      validators.push({ type: 'minLength', value: arraySchema['minItems'] as number });
-    }
-    if (arraySchema['maxItems'] !== undefined) {
-      validators.push({ type: 'maxLength', value: arraySchema['maxItems'] as number });
-    }
-  }
-
   const field: FieldConfig = {
     key: prop.name,
     type: finalType,
   };
+
+  // Array-level constraints: minItems/maxItems become direct minLength/maxLength
+  // properties on the array field. ArrayField/SimplifiedArrayField do NOT accept a
+  // `validators` array — the runtime reads these directly (see issue #416).
+  const arraySchema = prop.schema as Record<string, unknown>;
+  if (finalType === 'array') {
+    if (arraySchema['minItems'] !== undefined) {
+      field.minLength = arraySchema['minItems'] as number;
+    }
+    if (arraySchema['maxItems'] !== undefined) {
+      field.maxLength = arraySchema['maxItems'] as number;
+    }
+  }
 
   // Container types declare `label?: never` (issue #348) — only emit on value-bearing types.
   if (!CONTAINER_FIELD_TYPES.has(finalType)) {
@@ -284,9 +290,23 @@ function mapPropertyToField(
     }
   }
 
-  // Add validators
+  // Add validators. Container field types (group, array, row, page, container) declare
+  // `validators?: never` in their library types — emitting validators on them produces
+  // TS2353 in consumer code (issue #416). Drop them with a verbose log so users see why
+  // a `required` from the parent schema didn't translate.
   if (validators.length > 0) {
-    field.validators = validators;
+    if (CONTAINER_FIELD_TYPES.has(finalType)) {
+      if (prop.required) {
+        logger.verbose(
+          `Field '${fieldPath}': '${finalType}' container fields do not accept field-level validators — 'required' from parent schema was dropped. ` +
+            (finalType === 'array'
+              ? `Use \`minLength: 1\` on the array or add a \`required\` validator to the template field.`
+              : `Add \`required\` validators to individual child fields instead.`),
+        );
+      }
+    } else {
+      field.validators = validators;
+    }
   }
 
   // Disable for non-editable GET responses
