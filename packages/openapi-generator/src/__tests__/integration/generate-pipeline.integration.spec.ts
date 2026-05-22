@@ -243,14 +243,13 @@ describe('Arrays', () => {
     await generate('array-required.yaml');
 
     const form = await readGenerated(outputDir, 'forms', 'create-geolocation.form.ts');
-    // Anchored regexes: outer array fields (phone, currency, languages) must NOT
-    // emit a `validators:` line — ArrayField/SimplifiedArrayField don't declare one,
-    // and `required` from the parent schema cannot be transferred to a container.
-    expect(form).toMatch(/key: 'phone',\s*type: 'array',\s*(?!validators:)/);
-    expect(form).toMatch(/key: 'languages',\s*type: 'array',\s*(?!validators:)/);
+    // The fixture has only required primitive arrays with no item-level constraints,
+    // so the entire generated form must contain ZERO `validators: [` blocks. This is
+    // stronger than per-field regexes — even if the emitter ever reorders properties
+    // and pushes `validators:` further down a block, this assertion still fails.
+    expect(form).not.toContain('validators: [');
     // The `currency` array carries minItems/maxItems → these must surface as direct
     // minLength/maxLength properties on the field, not inside a `validators` array.
-    expect(form).toMatch(/key: 'currency',\s*type: 'array',\s*(?!validators:)/);
     expect(form).toContain('minLength: 1,');
     expect(form).toContain('maxLength: 3,');
   });

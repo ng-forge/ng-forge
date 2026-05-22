@@ -291,10 +291,11 @@ function mapPropertyToField(
     }
   }
 
-  // Add validators. Container field types (group, array, row, page, container) declare
-  // `validators?: never` in their library types — emitting validators on them produces
-  // TS2353 in consumer code (issue #416). Drop them with a verbose log so users see
-  // exactly what was dropped and how to recover the intent.
+  // Add validators. Container field types (group, array, row, page, container) do not
+  // declare a `validators` property in their library types — under `as const satisfies
+  // FormConfig`, TypeScript's excess-property check on the field union rejects it with
+  // TS2353 (issue #416). Drop with a verbose log so users see exactly what was dropped
+  // and how to recover the intent.
   if (validators.length > 0) {
     if (CONTAINER_FIELD_TYPES.has(finalType)) {
       const droppedTypes = validators.map((v) => v.type).join(', ');
