@@ -325,24 +325,25 @@ describe('array template rendering', () => {
     expect(result).toContain('removeButton: false,');
   });
 
-  it('should render array-level validators', () => {
+  it('should render array-level minLength/maxLength as direct properties', () => {
+    // ArrayField/SimplifiedArrayField don't accept a `validators` array — the
+    // emitter must render minLength/maxLength as direct field properties (issue #416).
     const fields: FieldConfig[] = [
       {
         key: 'tags',
         type: 'array',
         label: 'Tags',
         template: { key: 'value', type: 'input', label: 'Tag' },
-        validators: [
-          { type: 'minLength', value: 1 },
-          { type: 'maxLength', value: 10 },
-        ],
+        minLength: 1,
+        maxLength: 10,
         addButton: { label: 'Add Tag' },
       },
     ];
 
     const result = generateFormConfig(fields, defaultOptions);
-    expect(result).toContain("{ type: 'minLength', value: 1 }");
-    expect(result).toContain("{ type: 'maxLength', value: 10 }");
+    expect(result).toContain('minLength: 1,');
+    expect(result).toContain('maxLength: 10,');
+    expect(result).not.toContain('validators: [');
   });
 
   it('should render template with validators', () => {

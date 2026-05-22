@@ -724,7 +724,7 @@ describe('mapSchemaToFields', () => {
       expect(field.fields).toBeUndefined();
     });
 
-    it('should include minLength/maxLength validators from minItems/maxItems', () => {
+    it('should map minItems/maxItems to direct minLength/maxLength properties on array field', () => {
       const schema = {
         type: 'object',
         properties: {
@@ -739,8 +739,53 @@ describe('mapSchemaToFields', () => {
 
       const result = mapSchemaToFields(schema, []);
       const field = result.fields[0];
-      expect(field.validators).toContainEqual({ type: 'minLength', value: 1 });
-      expect(field.validators).toContainEqual({ type: 'maxLength', value: 5 });
+      // ArrayField/SimplifiedArrayField don't accept a `validators` property — array
+      // constraints live as direct properties (issue #416).
+      expect(field.minLength).toBe(1);
+      expect(field.maxLength).toBe(5);
+      expect(field.validators).toBeUndefined();
+    });
+
+    it('should not emit validators on required array fields (issue #416)', () => {
+      // Reproduces issue #416: array property listed in parent's `required` array
+      // previously emitted `validators: [{ type: 'required' }]`, which fails to
+      // type-check against ArrayField/SimplifiedArrayField (TS2353).
+      const schema = {
+        type: 'object',
+        required: ['phone'],
+        properties: {
+          phone: {
+            type: 'array',
+            items: { type: 'number' },
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, ['phone']);
+      const field = result.fields[0];
+      expect(field.type).toBe('array');
+      expect(field.validators).toBeUndefined();
+    });
+
+    it('should keep minItems/maxItems off validators even when array is required', () => {
+      const schema = {
+        type: 'object',
+        required: ['tags'],
+        properties: {
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            minItems: 2,
+            maxItems: 8,
+          },
+        },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, ['tags']);
+      const field = result.fields[0];
+      expect(field.minLength).toBe(2);
+      expect(field.maxLength).toBe(8);
+      expect(field.validators).toBeUndefined();
     });
 
     it('should apply item-level validators to primitive array template', () => {

@@ -55,6 +55,11 @@ export interface FieldConfig {
   addButton?: { label: string; props?: Record<string, unknown> } | false;
   removeButton?: { label: string; props?: Record<string, unknown> } | false;
   logic?: LogicConfig[];
+  // Direct properties on array fields — translate OpenAPI `minItems`/`maxItems`. Array
+  // fields do NOT accept a `validators` array (issue #416). Keep these in sync with
+  // ArrayField / SimplifiedArrayField in `packages/dynamic-forms/src/lib/definitions/default/array-field.ts`.
+  minLength?: number;
+  maxLength?: number;
 }
 
 export interface MappingResult {
@@ -198,21 +203,23 @@ function mapPropertyToField(
 
   const validators = mapSchemaToValidators(prop.schema, prop.required);
 
-  // Array-level validators: minItems/maxItems → minLength/maxLength
-  const arraySchema = prop.schema as Record<string, unknown>;
-  if (typeResult.fieldType === 'array') {
-    if (arraySchema['minItems'] !== undefined) {
-      validators.push({ type: 'minLength', value: arraySchema['minItems'] as number });
-    }
-    if (arraySchema['maxItems'] !== undefined) {
-      validators.push({ type: 'maxLength', value: arraySchema['maxItems'] as number });
-    }
-  }
-
   const field: FieldConfig = {
     key: prop.name,
     type: finalType,
   };
+
+  // Array-level constraints: minItems/maxItems become direct minLength/maxLength
+  // properties on the array field. ArrayField/SimplifiedArrayField do NOT accept a
+  // `validators` array — the runtime reads these directly (see issue #416).
+  const arraySchema = prop.schema as Record<string, unknown>;
+  if (finalType === 'array') {
+    if (arraySchema['minItems'] !== undefined) {
+      field.minLength = arraySchema['minItems'] as number;
+    }
+    if (arraySchema['maxItems'] !== undefined) {
+      field.maxLength = arraySchema['maxItems'] as number;
+    }
+  }
 
   // Container types declare `label?: never` (issue #348) — only emit on value-bearing types.
   if (!CONTAINER_FIELD_TYPES.has(finalType)) {
@@ -284,9 +291,24 @@ function mapPropertyToField(
     }
   }
 
-  // Add validators
+  // Add validators. Container field types (group, array, row, page, container) do not
+  // declare a `validators` property in their library types — under `as const satisfies
+  // FormConfig`, TypeScript's excess-property check on the field union rejects it with
+  // TS2353 (issue #416). Drop with a verbose log so users see exactly what was dropped
+  // and how to recover the intent.
   if (validators.length > 0) {
-    field.validators = validators;
+    if (CONTAINER_FIELD_TYPES.has(finalType)) {
+      const droppedTypes = validators.map((v) => v.type).join(', ');
+      const recovery =
+        finalType === 'array'
+          ? ` Use \`minLength: 1\` on the array or add validators to the template field.`
+          : ` Add validators to individual child fields instead.`;
+      logger.verbose(
+        `Field '${fieldPath}': '${finalType}' container fields do not accept field-level validators — dropped: ${droppedTypes}.${recovery}`,
+      );
+    } else {
+      field.validators = validators;
+    }
   }
 
   // Disable for non-editable GET responses

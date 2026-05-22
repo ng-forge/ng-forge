@@ -75,6 +75,14 @@ function generateFieldLines(field: FieldConfig, indent: string): string[] {
     lines.push(`${indent}  ],`);
   }
 
+  if (field.minLength !== undefined) {
+    lines.push(`${indent}  minLength: ${field.minLength},`);
+  }
+
+  if (field.maxLength !== undefined) {
+    lines.push(`${indent}  maxLength: ${field.maxLength},`);
+  }
+
   if (field.disabled) {
     lines.push(`${indent}  disabled: true,`);
   }

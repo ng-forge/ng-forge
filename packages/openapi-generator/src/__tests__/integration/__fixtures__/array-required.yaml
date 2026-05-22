@@ -1,0 +1,36 @@
+openapi: '3.0.3'
+info:
+  title: Issue #416 regression
+  version: '1.0.0'
+paths:
+  /geolocation:
+    post:
+      operationId: createGeolocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - currency
+                - languages
+              properties:
+                phone:
+                  type: array
+                  items:
+                    type: number
+                currency:
+                  type: array
+                  minItems: 1
+                  maxItems: 3
+                  items:
+                    type: string
+                languages:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Created

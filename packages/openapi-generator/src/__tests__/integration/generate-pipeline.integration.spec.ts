@@ -238,6 +238,30 @@ describe('Arrays', () => {
 
     expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
   }, 30_000); // tsc program creation + type-check is slow in CI
+
+  it('should not emit validators on required array fields (regression for #416)', async () => {
+    await generate('array-required.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-geolocation.form.ts');
+    // The fixture has only required primitive arrays with no item-level constraints,
+    // so the entire generated form must contain ZERO `validators: [` blocks. This is
+    // stronger than per-field regexes — even if the emitter ever reorders properties
+    // and pushes `validators:` further down a block, this assertion still fails.
+    expect(form).not.toContain('validators: [');
+    // The `currency` array carries minItems/maxItems → these must surface as direct
+    // minLength/maxLength properties on the field, not inside a `validators` array.
+    expect(form).toContain('minLength: 1,');
+    expect(form).toContain('maxLength: 3,');
+  });
+
+  it('should produce a form file that compiles against the published types (regression for #416)', async () => {
+    await generate('array-required.yaml');
+
+    const formPath = join(outputDir, 'forms', 'create-geolocation.form.ts');
+    const diagnostics = typecheckGeneratedForm(formPath);
+
+    expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
+  }, 30_000); // tsc program creation + type-check is slow in CI
 });
 
 // ─── F. allOf ────────────────────────────────────────────────────────
