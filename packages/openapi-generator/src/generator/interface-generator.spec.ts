@@ -614,5 +614,53 @@ describe('generateInterface', () => {
       expect(result).not.toContain('unknown');
       expect(result.match(/street/g)?.length).toBe(2);
     });
+
+    it('terminates on a oneOf cycle with discriminator (variant points back to parent)', () => {
+      const node: OpenAPIV3.SchemaObject = { type: 'object', properties: { kind: { type: 'string', enum: ['leaf'] } } };
+      const tree: OpenAPIV3.SchemaObject = {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          child: {
+            oneOf: [node],
+            discriminator: { propertyName: 'kind', mapping: { leaf: '#/components/schemas/Node' } },
+          } as unknown as OpenAPIV3.SchemaObject,
+        },
+      };
+      // Wire the back-edge: the Node variant has a property pointing back to Tree.
+      (node.properties as Record<string, OpenAPIV3.SchemaObject>)['parent'] = tree;
+
+      expect(() => generateInterface(tree, defaultOptions)).not.toThrow();
+      const result = generateInterface(tree, defaultOptions);
+      expect(result).toContain('unknown');
+    });
+
+    it('terminates on a oneOf cycle without discriminator (member points to itself)', () => {
+      // The cycle lives on a property's schema so schemaToTsType actually
+      // enters the oneOf branch — a top-level oneOf-only schema is handled by
+      // resolveSchemaProperties and never reaches schemaToTsType.
+      const cycle: OpenAPIV3.SchemaObject = { oneOf: [] } as unknown as OpenAPIV3.SchemaObject;
+      (cycle as unknown as { oneOf: OpenAPIV3.SchemaObject[] }).oneOf = [cycle];
+      const schema: OpenAPIV3.SchemaObject = {
+        type: 'object',
+        properties: { foo: cycle },
+      };
+
+      expect(() => generateInterface(schema, defaultOptions)).not.toThrow();
+      const result = generateInterface(schema, defaultOptions);
+      expect(result).toContain('unknown');
+    });
+
+    it('terminates on an allOf chain spanning >2 objects (A.allOf:[B], B.allOf:[A])', () => {
+      const a: OpenAPIV3.SchemaObject = { type: 'object', properties: { aName: { type: 'string' } } };
+      const b: OpenAPIV3.SchemaObject = { type: 'object', properties: { bName: { type: 'string' } } };
+      (a as unknown as { allOf: OpenAPIV3.SchemaObject[] }).allOf = [b];
+      (b as unknown as { allOf: OpenAPIV3.SchemaObject[] }).allOf = [a];
+
+      expect(() => generateInterface(a, defaultOptions)).not.toThrow();
+      const result = generateInterface(a, defaultOptions);
+      // Outer interface emitted; chain terminated without stack overflow.
+      expect(result).toContain('export interface');
+    });
   });
 });

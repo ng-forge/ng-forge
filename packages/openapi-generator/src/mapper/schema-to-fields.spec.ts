@@ -1201,5 +1201,42 @@ describe('mapSchemaToFields', () => {
       expect(result.fields[1].fields).toHaveLength(2);
       expect(result.warnings.some((w) => w.includes('Circular'))).toBe(false);
     });
+
+    it('terminates on a oneOf+discriminator cycle (variant references parent)', () => {
+      const node: SchemaObject = {
+        type: 'object',
+        properties: { kind: { type: 'string', enum: ['leaf'] } },
+      };
+      const tree: SchemaObject = {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          child: {
+            oneOf: [node],
+            discriminator: { propertyName: 'kind', mapping: { leaf: '#/components/schemas/Node' } },
+          } as unknown as SchemaObject,
+        },
+      };
+      (node.properties as Record<string, SchemaObject>)['parent'] = tree;
+
+      // Termination is the contract — the warning may or may not surface up
+      // depending on which container branch the back-edge takes (the group
+      // branch in mapPropertyToField doesn't propagate inner warnings).
+      expect(() => mapSchemaToFields(tree, [])).not.toThrow();
+      const result = mapSchemaToFields(tree, []);
+      expect(result.fields.length).toBeGreaterThan(0);
+    });
+
+    it('terminates on an allOf chain spanning >2 objects (A.allOf:[B], B.allOf:[A])', () => {
+      const a: SchemaObject = { type: 'object', properties: { aName: { type: 'string' } } };
+      const b: SchemaObject = { type: 'object', properties: { bName: { type: 'string' } } };
+      (a as unknown as { allOf: SchemaObject[] }).allOf = [b];
+      (b as unknown as { allOf: SchemaObject[] }).allOf = [a];
+
+      expect(() => mapSchemaToFields(a, [])).not.toThrow();
+      const result = mapSchemaToFields(a, []);
+      // Merged allOf walk terminates; result is well-formed (no stack overflow).
+      expect(result.fields).toBeInstanceOf(Array);
+    });
   });
 });

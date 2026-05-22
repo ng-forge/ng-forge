@@ -75,18 +75,20 @@ export interface MappingOptions {
   editable?: boolean;
   decisions?: Record<string, string>;
   schemaName?: string;
-  /**
-   * Internal: schemas currently being expanded on this recursion path. Used to
-   * break cycles produced by `SwaggerParser.dereference` on self-referencing
-   * specs (issue #419). Mutated with add-before-recurse / delete-after so
-   * sibling subtrees that reference the same shared schema aren't falsely
-   * flagged. Not part of the public contract.
-   */
-  _seen?: WeakSet<SchemaObject>;
 }
 
 export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[], options: MappingOptions = {}): MappingResult {
-  const seen = options._seen ?? new WeakSet<SchemaObject>();
+  // Cycle tracking lives on this internal recursion, not on MappingOptions, so
+  // downstream callers can't smuggle in arbitrary _seen values.
+  return mapSchemaToFieldsInternal(schema, requiredFields, options, new WeakSet<SchemaObject>());
+}
+
+function mapSchemaToFieldsInternal(
+  schema: SchemaObject,
+  requiredFields: string[],
+  options: MappingOptions,
+  seen: WeakSet<SchemaObject>,
+): MappingResult {
   if (seen.has(schema)) {
     return {
       fields: [],
@@ -97,7 +99,6 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
     };
   }
   seen.add(schema);
-  const optionsWithSeen: MappingOptions = { ...options, _seen: seen };
 
   try {
     const walked = walkSchema(schema, requiredFields);
@@ -112,10 +113,15 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
       for (const group of discConfig.conditionalGroups) {
         const variantSchema = walked.discriminator.mapping[group.discriminatorValue];
         if (variantSchema) {
-          const variantResult = mapSchemaToFields(variantSchema, variantSchema.required ?? [], {
-            ...optionsWithSeen,
-            schemaName: options.schemaName ? `${options.schemaName}.${group.discriminatorValue}` : group.discriminatorValue,
-          });
+          const variantResult = mapSchemaToFieldsInternal(
+            variantSchema,
+            variantSchema.required ?? [],
+            {
+              ...options,
+              schemaName: options.schemaName ? `${options.schemaName}.${group.discriminatorValue}` : group.discriminatorValue,
+            },
+            seen,
+          );
           const variantFields = variantResult.fields.filter((f) => (f as FieldConfig).key !== walked.discriminator!.propertyName);
           ambiguousFields.push(...variantResult.ambiguousFields);
           warnings.push(...variantResult.warnings);
@@ -150,7 +156,7 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
     const fields: FieldConfig[] = [];
 
     for (const prop of walked.properties) {
-      const field = mapPropertyToField(prop, optionsWithSeen, ambiguousFields, warnings);
+      const field = mapPropertyToField(prop, options, seen, ambiguousFields, warnings);
       if (field) {
         fields.push(field);
       }
@@ -167,6 +173,7 @@ export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[]
 function mapPropertyToField(
   prop: WalkedProperty,
   options: MappingOptions,
+  seen: WeakSet<SchemaObject>,
   ambiguousFields: AmbiguousField[],
   warnings: string[],
 ): FieldConfig | undefined {
@@ -180,10 +187,12 @@ function mapPropertyToField(
   if (prop.schema.oneOf && (prop.schema as Record<string, unknown>)['discriminator']) {
     const schemaPrefix = options.schemaName ?? '';
     const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
-    const innerResult = mapSchemaToFields(prop.schema, prop.schema.required ?? [], {
-      ...options,
-      schemaName: nestedSchemaName,
-    });
+    const innerResult = mapSchemaToFieldsInternal(
+      prop.schema,
+      prop.schema.required ?? [],
+      { ...options, schemaName: nestedSchemaName },
+      seen,
+    );
     ambiguousFields.push(...innerResult.ambiguousFields);
     warnings.push(...innerResult.warnings);
 
@@ -350,7 +359,7 @@ function mapPropertyToField(
     const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
     const nestedOptions: MappingOptions = { ...options, schemaName: nestedSchemaName };
     if (typeResult.fieldType === 'group' && prop.schema.properties) {
-      const innerResult = mapSchemaToFields(prop.schema, prop.schema.required ?? [], nestedOptions);
+      const innerResult = mapSchemaToFieldsInternal(prop.schema, prop.schema.required ?? [], nestedOptions, seen);
       field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
       // SchemaObject is a union; use bracket access for `items` on array schemas
@@ -360,7 +369,7 @@ function mapPropertyToField(
 
       if (items.type === 'object' || items.properties) {
         // Object array → template is an array of fields
-        const innerResult = mapSchemaToFields(items, items.required ?? [], nestedOptions);
+        const innerResult = mapSchemaToFieldsInternal(items, items.required ?? [], nestedOptions, seen);
         field.template = innerResult.fields;
         ambiguousFields.push(...innerResult.ambiguousFields);
         warnings.push(...innerResult.warnings);
