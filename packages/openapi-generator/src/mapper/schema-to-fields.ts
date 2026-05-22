@@ -55,9 +55,10 @@ export interface FieldConfig {
   addButton?: { label: string; props?: Record<string, unknown> } | false;
   removeButton?: { label: string; props?: Record<string, unknown> } | false;
   logic?: LogicConfig[];
-  /** Direct property on array fields — translates OpenAPI `minItems`. Array fields do not accept `validators`. */
+  // Direct properties on array fields — translate OpenAPI `minItems`/`maxItems`. Array
+  // fields do NOT accept a `validators` array (issue #416). Keep these in sync with
+  // ArrayField / SimplifiedArrayField in `packages/dynamic-forms/src/lib/definitions/default/array-field.ts`.
   minLength?: number;
-  /** Direct property on array fields — translates OpenAPI `maxItems`. Array fields do not accept `validators`. */
   maxLength?: number;
 }
 
@@ -292,18 +293,18 @@ function mapPropertyToField(
 
   // Add validators. Container field types (group, array, row, page, container) declare
   // `validators?: never` in their library types — emitting validators on them produces
-  // TS2353 in consumer code (issue #416). Drop them with a verbose log so users see why
-  // a `required` from the parent schema didn't translate.
+  // TS2353 in consumer code (issue #416). Drop them with a verbose log so users see
+  // exactly what was dropped and how to recover the intent.
   if (validators.length > 0) {
     if (CONTAINER_FIELD_TYPES.has(finalType)) {
-      if (prop.required) {
-        logger.verbose(
-          `Field '${fieldPath}': '${finalType}' container fields do not accept field-level validators — 'required' from parent schema was dropped. ` +
-            (finalType === 'array'
-              ? `Use \`minLength: 1\` on the array or add a \`required\` validator to the template field.`
-              : `Add \`required\` validators to individual child fields instead.`),
-        );
-      }
+      const droppedTypes = validators.map((v) => v.type).join(', ');
+      const recovery =
+        finalType === 'array'
+          ? ` Use \`minLength: 1\` on the array or add validators to the template field.`
+          : ` Add validators to individual child fields instead.`;
+      logger.verbose(
+        `Field '${fieldPath}': '${finalType}' container fields do not accept field-level validators — dropped: ${droppedTypes}.${recovery}`,
+      );
     } else {
       field.validators = validators;
     }
