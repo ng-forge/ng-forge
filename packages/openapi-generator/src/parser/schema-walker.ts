@@ -18,12 +18,20 @@ export interface WalkedSchema {
   warnings: string[];
 }
 
-export function walkSchema(schema: SchemaObject, requiredFields: string[] = []): WalkedSchema {
+export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], seen: WeakSet<SchemaObject> = new WeakSet()): WalkedSchema {
   const warnings: string[] = [];
+
+  // Cycle break: a hand-crafted spec like `A.allOf: [A]` would otherwise blow
+  // the stack here. Mapper / generator-level guards (issue #419) also catch
+  // this further out; this is the defensive innermost layer.
+  if (seen.has(schema)) {
+    return { properties: [], warnings: ['Circular schema reference detected during allOf merge — nested schema skipped'] };
+  }
+  seen.add(schema);
 
   // Handle allOf — merge all schemas
   if (schema.allOf) {
-    return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings);
+    return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen);
   }
 
   // Handle oneOf with discriminator
@@ -75,14 +83,14 @@ export function walkSchema(schema: SchemaObject, requiredFields: string[] = []):
   return { properties, warnings };
 }
 
-function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[]): WalkedSchema {
+function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[], seen: WeakSet<SchemaObject>): WalkedSchema {
   const mergedProperties = new Map<string, WalkedProperty>();
   const allRequired = new Set<string>(requiredFields);
 
   for (const schema of schemas) {
     if (isReferenceObject(schema)) continue;
 
-    const walked = walkSchema(schema, []);
+    const walked = walkSchema(schema, [], seen);
     warnings.push(...walked.warnings);
 
     for (const prop of walked.properties) {

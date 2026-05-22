@@ -1,0 +1,43 @@
+openapi: '3.0.3'
+info:
+  title: Circular refs test
+  version: '1.0.0'
+paths:
+  /banners/{id}:
+    get:
+      operationId: getBanner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Banner'
+components:
+  schemas:
+    Banner:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Log'
+    Log:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: number
+        banner:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/Banner'

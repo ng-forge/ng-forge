@@ -14,6 +14,9 @@ export function generateInterface(schema: SchemaObject, options: InterfaceGenera
   const interfaceName = toInterfaceName(options.method, options.path, options.operationId);
   const lines: string[] = [];
   const nestedInterfaces: string[] = [];
+  // Tracks schemas currently being expanded on this DFS path so cycles in
+  // dereferenced specs (issue #419) don't blow the stack.
+  const seen = new Set<SchemaObject>([schema]);
 
   // Resolve the effective properties + required set, handling allOf and oneOf+discriminator
   const { properties, required } = resolveSchemaProperties(schema);
@@ -24,7 +27,7 @@ export function generateInterface(schema: SchemaObject, options: InterfaceGenera
     if (isReferenceObject(propSchema)) continue;
 
     const optional = required.has(name) ? '' : '?';
-    const tsType = schemaToTsType(name, propSchema, interfaceName, nestedInterfaces);
+    const tsType = schemaToTsType(name, propSchema, interfaceName, nestedInterfaces, seen);
     lines.push(`  ${name}${optional}: ${tsType};`);
   }
 
@@ -135,7 +138,19 @@ function resolveSchemaProperties(schema: SchemaObject): { properties: Array<[str
   return { properties, required };
 }
 
-function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: string, nestedInterfaces: string[]): string {
+function schemaToTsType(
+  propertyName: string,
+  schema: SchemaObject,
+  parentName: string,
+  nestedInterfaces: string[],
+  seen: Set<SchemaObject>,
+): string {
+  // Cycle break: schema already on the recursion path. Emit `unknown` so the
+  // generated file still typechecks; consumers can replace with a proper named
+  // type if they later refactor the spec to avoid the cycle.
+  if (seen.has(schema)) {
+    return 'unknown';
+  }
   const rawType = (schema as Record<string, unknown>)['type'];
   // Normalize OpenAPI 3.1 `type: [T, 'null']` → `type: T` and remember nullability.
   let type: string | undefined;
@@ -160,7 +175,7 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
   // Handle nullable (OpenAPI 3.0 and 3.1 type:[T,null])
   if (isNullable) {
     const baseSchema = { ...schema, nullable: undefined, type } as SchemaObject;
-    const baseType = schemaToTsType(propertyName, baseSchema, parentName, nestedInterfaces);
+    const baseType = schemaToTsType(propertyName, baseSchema, parentName, nestedInterfaces, seen);
     return `${baseType} | null`;
   }
 
@@ -179,11 +194,11 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
         if ((s.type === 'object' || s.properties) && mappingKeys) {
           const variantName = mappingKeys[i] ? toPascalCase(mappingKeys[i]) : `Variant${i + 1}`;
           const nestedName = `${parentName}${toPascalCase(propertyName)}${variantName}`;
-          const nestedInterface = generateNestedInterface(nestedName, s);
+          const nestedInterface = generateNestedInterface(nestedName, s, seen);
           nestedInterfaces.push(nestedInterface);
           return nestedName;
         }
-        return schemaToTsType(propertyName, s, parentName, nestedInterfaces);
+        return schemaToTsType(propertyName, s, parentName, nestedInterfaces, seen);
       });
     return types.join(' | ');
   }
@@ -198,7 +213,7 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
     const types = (schema.allOf as SchemaObject[])
       .filter((s) => !isReferenceObject(s))
       .map((s) => {
-        const t = schemaToTsType(propertyName, s, parentName, nestedInterfaces);
+        const t = schemaToTsType(propertyName, s, parentName, nestedInterfaces, seen);
         return t.includes(' | ') ? `(${t})` : t;
       });
     return types.join(' & ');
@@ -217,19 +232,19 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
     const items = arrayItems;
     if (items.type === 'object' || items.properties) {
       const nestedName = `${parentName}${toPascalCase(propertyName)}Item`;
-      const nestedInterface = generateNestedInterface(nestedName, items);
+      const nestedInterface = generateNestedInterface(nestedName, items, seen);
       nestedInterfaces.push(nestedInterface);
       return `${nestedName}[]`;
     }
     if (items.enum) {
       return `(${items.enum.map((v: unknown) => (typeof v === 'string' ? `'${v}'` : String(v))).join(' | ')})[]`;
     }
-    return `${schemaToTsType(propertyName, items, parentName, nestedInterfaces)}[]`;
+    return `${schemaToTsType(propertyName, items, parentName, nestedInterfaces, seen)}[]`;
   }
 
   if (type === 'object' || schema.properties) {
     const nestedName = `${parentName}${toPascalCase(propertyName)}`;
-    const nestedInterface = generateNestedInterface(nestedName, schema);
+    const nestedInterface = generateNestedInterface(nestedName, schema, seen);
     nestedInterfaces.push(nestedInterface);
     return nestedName;
   }
@@ -237,25 +252,37 @@ function schemaToTsType(propertyName: string, schema: SchemaObject, parentName: 
   return 'unknown';
 }
 
-function generateNestedInterface(name: string, schema: SchemaObject): string {
-  const lines: string[] = [];
-  const nestedInterfaces: string[] = [];
-  const required = new Set(schema.required ?? []);
-
-  lines.push(`export interface ${name} {`);
-
-  for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
-    if (isReferenceObject(propSchema)) continue;
-    const optional = required.has(propName) ? '' : '?';
-    const tsType = schemaToTsType(propName, propSchema, name, nestedInterfaces);
-    lines.push(`  ${propName}${optional}: ${tsType};`);
+function generateNestedInterface(name: string, schema: SchemaObject, seen: Set<SchemaObject>): string {
+  // Cycle break: schema already on the recursion path. Emit a type alias so
+  // outer consumers can still reference `name` without TS errors.
+  if (seen.has(schema)) {
+    return `export type ${name} = unknown; // circular schema reference — see issue #419`;
   }
+  seen.add(schema);
+  try {
+    const lines: string[] = [];
+    const nestedInterfaces: string[] = [];
+    const required = new Set(schema.required ?? []);
 
-  lines.push(`}`);
+    lines.push(`export interface ${name} {`);
 
-  if (nestedInterfaces.length > 0) {
-    return [...nestedInterfaces, '', ...lines].join('\n');
+    for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
+      if (isReferenceObject(propSchema)) continue;
+      const optional = required.has(propName) ? '' : '?';
+      const tsType = schemaToTsType(propName, propSchema, name, nestedInterfaces, seen);
+      lines.push(`  ${propName}${optional}: ${tsType};`);
+    }
+
+    lines.push(`}`);
+
+    if (nestedInterfaces.length > 0) {
+      return [...nestedInterfaces, '', ...lines].join('\n');
+    }
+
+    return lines.join('\n');
+  } finally {
+    // Pop from the recursion path so sibling subtrees that legitimately
+    // reference the same shared schema still expand it.
+    seen.delete(schema);
   }
-
-  return lines.join('\n');
 }

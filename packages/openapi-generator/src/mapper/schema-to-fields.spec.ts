@@ -1155,4 +1155,51 @@ describe('mapSchemaToFields', () => {
       expect(result.fields[0].label).toBeUndefined();
     });
   });
+
+  // Issue #419: dereferenced specs with $ref cycles produce literal cyclic JS object
+  // graphs at runtime. Verify cycle detection terminates instead of blowing the stack.
+  describe('circular schema references (issue #419)', () => {
+    it('terminates on direct two-way array cycle (A.bs: B[]; B.as: A[])', () => {
+      const a: SchemaObject = { type: 'object', properties: {} };
+      const b: SchemaObject = { type: 'object', properties: {} };
+      (a.properties as Record<string, SchemaObject>)['bs'] = { type: 'array', items: b };
+      (b.properties as Record<string, SchemaObject>)['as'] = { type: 'array', items: a };
+
+      const result = mapSchemaToFields(a, []);
+
+      expect(result.fields).toHaveLength(1);
+      expect(result.fields[0]).toMatchObject({ key: 'bs', type: 'array' });
+      // The inner B template still expands, but B.as can't re-enter A.
+      expect(result.warnings.some((w) => w.includes('Circular schema reference'))).toBe(true);
+    });
+
+    it('terminates on self-referencing tree (Node.children: Node[])', () => {
+      const node: SchemaObject = { type: 'object', properties: { name: { type: 'string' } } };
+      (node.properties as Record<string, SchemaObject>)['children'] = { type: 'array', items: node };
+
+      const result = mapSchemaToFields(node, []);
+
+      expect(result.fields).toHaveLength(2);
+      expect(result.warnings.some((w) => w.includes('Circular schema reference'))).toBe(true);
+    });
+
+    it('still expands the same shared schema referenced from sibling subtrees', () => {
+      // Address is referenced by both `home` and `work` — not a cycle. Both should expand.
+      const address: SchemaObject = {
+        type: 'object',
+        properties: { street: { type: 'string' }, city: { type: 'string' } },
+      };
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: { home: address, work: address },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+
+      expect(result.fields).toHaveLength(2);
+      expect(result.fields[0].fields).toHaveLength(2);
+      expect(result.fields[1].fields).toHaveLength(2);
+      expect(result.warnings.some((w) => w.includes('Circular'))).toBe(false);
+    });
+  });
 });

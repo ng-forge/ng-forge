@@ -75,66 +75,93 @@ export interface MappingOptions {
   editable?: boolean;
   decisions?: Record<string, string>;
   schemaName?: string;
+  /**
+   * Internal: schemas currently being expanded on this recursion path. Used to
+   * break cycles produced by `SwaggerParser.dereference` on self-referencing
+   * specs (issue #419). Mutated with add-before-recurse / delete-after so
+   * sibling subtrees that reference the same shared schema aren't falsely
+   * flagged. Not part of the public contract.
+   */
+  _seen?: WeakSet<SchemaObject>;
 }
 
 export function mapSchemaToFields(schema: SchemaObject, requiredFields: string[], options: MappingOptions = {}): MappingResult {
-  const walked = walkSchema(schema, requiredFields);
-  const ambiguousFields: AmbiguousField[] = [];
-  const warnings = [...walked.warnings];
+  const seen = options._seen ?? new WeakSet<SchemaObject>();
+  if (seen.has(schema)) {
+    return {
+      fields: [],
+      ambiguousFields: [],
+      warnings: [
+        `Circular schema reference at '${options.schemaName ?? '<root>'}' — nested fields skipped. Use x-ng-forge-type to override how this field renders.`,
+      ],
+    };
+  }
+  seen.add(schema);
+  const optionsWithSeen: MappingOptions = { ...options, _seen: seen };
 
-  // Handle discriminator case
-  if (walked.discriminator) {
-    const discConfig = mapDiscriminator(walked.discriminator);
-    const fields: FieldConfig[] = [discConfig.discriminatorField];
+  try {
+    const walked = walkSchema(schema, requiredFields);
+    const ambiguousFields: AmbiguousField[] = [];
+    const warnings = [...walked.warnings];
 
-    for (const group of discConfig.conditionalGroups) {
-      const variantSchema = walked.discriminator.mapping[group.discriminatorValue];
-      if (variantSchema) {
-        const variantResult = mapSchemaToFields(variantSchema, variantSchema.required ?? [], {
-          ...options,
-          schemaName: options.schemaName ? `${options.schemaName}.${group.discriminatorValue}` : group.discriminatorValue,
-        });
-        const variantFields = variantResult.fields.filter((f) => (f as FieldConfig).key !== walked.discriminator!.propertyName);
-        ambiguousFields.push(...variantResult.ambiguousFields);
-        warnings.push(...variantResult.warnings);
+    // Handle discriminator case
+    if (walked.discriminator) {
+      const discConfig = mapDiscriminator(walked.discriminator);
+      const fields: FieldConfig[] = [discConfig.discriminatorField];
 
-        // Wrap variant fields in a group with logic for conditional visibility.
-        // Group fields declare `label?: never` (issue #348), so no label is emitted.
-        if (variantFields.length > 0) {
-          fields.push({
-            key: `${group.discriminatorValue}Variant`,
-            type: 'group',
-            fields: variantFields,
-            logic: [
-              {
-                type: 'hidden',
-                condition: {
-                  type: 'fieldValue',
-                  fieldPath: walked.discriminator.propertyName,
-                  operator: 'notEquals',
-                  value: group.discriminatorValue,
-                },
-              },
-            ],
+      for (const group of discConfig.conditionalGroups) {
+        const variantSchema = walked.discriminator.mapping[group.discriminatorValue];
+        if (variantSchema) {
+          const variantResult = mapSchemaToFields(variantSchema, variantSchema.required ?? [], {
+            ...optionsWithSeen,
+            schemaName: options.schemaName ? `${options.schemaName}.${group.discriminatorValue}` : group.discriminatorValue,
           });
+          const variantFields = variantResult.fields.filter((f) => (f as FieldConfig).key !== walked.discriminator!.propertyName);
+          ambiguousFields.push(...variantResult.ambiguousFields);
+          warnings.push(...variantResult.warnings);
+
+          // Wrap variant fields in a group with logic for conditional visibility.
+          // Group fields declare `label?: never` (issue #348), so no label is emitted.
+          if (variantFields.length > 0) {
+            fields.push({
+              key: `${group.discriminatorValue}Variant`,
+              type: 'group',
+              fields: variantFields,
+              logic: [
+                {
+                  type: 'hidden',
+                  condition: {
+                    type: 'fieldValue',
+                    fieldPath: walked.discriminator.propertyName,
+                    operator: 'notEquals',
+                    value: group.discriminatorValue,
+                  },
+                },
+              ],
+            });
+          }
         }
+      }
+
+      return { fields, ambiguousFields, warnings };
+    }
+
+    // Standard properties mapping
+    const fields: FieldConfig[] = [];
+
+    for (const prop of walked.properties) {
+      const field = mapPropertyToField(prop, optionsWithSeen, ambiguousFields, warnings);
+      if (field) {
+        fields.push(field);
       }
     }
 
     return { fields, ambiguousFields, warnings };
+  } finally {
+    // Pop from the recursion path so sibling subtrees that legitimately
+    // reference the same shared schema can still expand it.
+    seen.delete(schema);
   }
-
-  // Standard properties mapping
-  const fields: FieldConfig[] = [];
-
-  for (const prop of walked.properties) {
-    const field = mapPropertyToField(prop, options, ambiguousFields, warnings);
-    if (field) {
-      fields.push(field);
-    }
-  }
-
-  return { fields, ambiguousFields, warnings };
 }
 
 function mapPropertyToField(
