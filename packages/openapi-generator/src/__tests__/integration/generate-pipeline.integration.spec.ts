@@ -517,10 +517,13 @@ describe('Nullable values', () => {
     expect(form).toMatch(/key: 'status',[\s\S]+?type: 'select',[\s\S]+?nullable: true/);
     expect(form).toMatch(/key: 'startDate',[\s\S]+?type: 'datepicker',[\s\S]+?nullable: true/);
     // Nullable on checked fields (checkbox) — emitted since issue #415
-    const subscribedBlock = form.substring(form.indexOf("key: 'subscribed'"));
-    expect(subscribedBlock.split('},')[0]).toContain('nullable: true');
+    expect(form).toMatch(/key: 'subscribed',[\s\S]+?nullable:\s*true/);
     // Nullable on container (group) — still NOT emitted
-    const addressBlock = form.substring(form.indexOf("key: 'address'"), form.indexOf("key: 'tags'"));
+    const addressStart = form.indexOf("key: 'address'");
+    const tagsStart = form.indexOf("key: 'tags'");
+    expect(addressStart).toBeGreaterThanOrEqual(0);
+    expect(tagsStart).toBeGreaterThan(addressStart);
+    const addressBlock = form.slice(addressStart, tagsStart);
     expect(addressBlock).not.toContain('nullable: true');
   });
 

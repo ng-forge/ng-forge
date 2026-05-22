@@ -11,6 +11,7 @@ describe('getFieldDefaultValue', () => {
     registry = new Map<string, FieldTypeDefinition>([
       ['input', { component: {} as any, valueHandling: 'include' }],
       ['checkbox', { component: {} as any, valueHandling: 'include' }],
+      ['toggle', { component: {} as any, valueHandling: 'include' }],
       ['select', { component: {} as any, valueHandling: 'include' }],
       ['array', { component: {} as any, valueHandling: 'include' }],
       ['group', { component: {} as any, valueHandling: 'include' }],

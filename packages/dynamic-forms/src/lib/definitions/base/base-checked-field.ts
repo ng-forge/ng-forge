@@ -35,8 +35,8 @@ export interface BaseCheckedField<TProps, TMeta extends FieldMeta = FieldMeta, T
 
 export function isCheckedField<TProps, TMeta extends FieldMeta = FieldMeta>(
   field: FieldDef<TProps, TMeta>,
-): field is BaseCheckedField<TProps, TMeta> {
-  return field.type === 'checkbox';
+): field is BaseCheckedField<TProps, TMeta, boolean> {
+  return field.type === 'checkbox' || field.type === 'toggle';
 }
 
 // Note: 'meta' is NOT excluded - components must handle meta attributes

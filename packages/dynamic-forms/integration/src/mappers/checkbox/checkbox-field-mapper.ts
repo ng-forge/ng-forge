@@ -1,4 +1,4 @@
-import { BaseCheckedField } from '@ng-forge/dynamic-forms';
+import { BaseCheckedField, FieldMeta } from '@ng-forge/dynamic-forms';
 import { FieldDef } from '@ng-forge/dynamic-forms';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
@@ -15,7 +15,7 @@ import { omit } from '@ng-forge/dynamic-forms';
  * @param fieldDef The checkbox field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */
-export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown>): Signal<Record<string, unknown>> {
+export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown, FieldMeta, boolean>): Signal<Record<string, unknown>> {
   const context = injectFieldSignalContext();
   const defaultProps = inject(DEFAULT_PROPS);
 

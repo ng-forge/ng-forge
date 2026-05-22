@@ -152,7 +152,11 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
               ? K extends string
                 ? { [P in K]: MaybeOptional<T, InferValueType<T, V>> }
                 : never
-              : // Value fields without explicit value: include as string (default input type)
+              : // Value fields without explicit value: include as string (default input type).
+                // The naive `string` fallback is intentional — switching to a type-discriminated
+                // helper (e.g. boolean for checkbox/toggle) widens `InferFormValue<RegisteredFieldTypes[]>`,
+                // which cascades through `FormConfig`'s default `TValue` and breaks consumers that
+                // inject an abstract `FormConfig` (see demo-scenario.component.ts in adapter sandboxes).
                 T extends { key: infer K }
                 ? K extends string
                   ? { [P in K]: MaybeOptional<T, T extends { nullable: true } ? string | null : string> }
