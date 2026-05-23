@@ -20,6 +20,7 @@ PrimeNG field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/pac
 
 | @ng-forge/dynamic-forms-primeng | @ng-forge/dynamic-forms | Angular       |
 | ------------------------------- | ----------------------- | ------------- |
+| 0.9.x                           | 0.9.x                   | >=21.2.0      |
 | 0.8.x                           | 0.8.x                   | >=21.2.0      |
 | 0.7.x                           | 0.7.x                   | >=21.2.0      |
 | 0.6.x                           | 0.6.x                   | >=21.1.0      |

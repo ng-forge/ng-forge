@@ -4,6 +4,63 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.9.0](https://github.com/ng-forge/ng-forge/compare/v0.8.0...v0.9.0) (2026-05-23)
+
+### 🚀 Features
+
+- ⚠️ added validateWhenHidden ([#392](https://github.com/ng-forge/ng-forge/pull/392))
+- ⚠️ **dynamic-forms:** add NgForgeField/NgForgeAction directives + migrate all 4 adapters ([#381](https://github.com/ng-forge/ng-forge/pull/381))
+- **dynamic-forms:** inline function alternatives for conditions, derivations, validators ([#400](https://github.com/ng-forge/ng-forge/pull/400))
+- ⚠️ **dynamic-forms:** allow overlapping leaf keys in different groups ([#401](https://github.com/ng-forge/ng-forge/pull/401), [#403](https://github.com/ng-forge/ng-forge/pull/403))
+- **dynamic-forms:** narrow FieldDef.type against RegisteredFieldTypes ([b8d5e93f3](https://github.com/ng-forge/ng-forge/commit/b8d5e93f3))
+- **dynamic-forms:** make renderReadyWhen explicit at registration sites ([ba77b21ff](https://github.com/ng-forge/ng-forge/commit/ba77b21ff))
+- **dynamic-forms:** add typed addon system across all 4 UI adapters ([8513e1683](https://github.com/ng-forge/ng-forge/commit/8513e1683))
+
+### 🐛 Bug Fixes
+
+- emit array minLength/maxLength as direct properties in openapi-generator ([#416](https://github.com/ng-forge/ng-forge/pull/416), [#417](https://github.com/ng-forge/ng-forge/pull/417))
+- handle circular schema references in openapi-generator ([#419](https://github.com/ng-forge/ng-forge/pull/419), [#420](https://github.com/ng-forge/ng-forge/pull/420))
+- **docs:** serve prerendered html on clean urls and prerender api reference ([#375](https://github.com/ng-forge/ng-forge/pull/375))
+- **docs:** prevent double adapter prefix on routerLink-resolved hrefs ([#395](https://github.com/ng-forge/ng-forge/pull/395))
+- **docs:** use vite-root-relative entry script in index.html ([98b126d34](https://github.com/ng-forge/ng-forge/commit/98b126d34))
+- **dynamic-forms:** preserve nested group defaults on partial value ([#387](https://github.com/ng-forge/ng-forge/pull/387))
+- **dynamic-forms:** preserve nested array-item defaults on partial value ([#389](https://github.com/ng-forge/ng-forge/pull/389))
+- **dynamic-forms:** refresh field props on same-key config changes ([#393](https://github.com/ng-forge/ng-forge/pull/393))
+- **dynamic-forms:** stop excludeValueIfHidden from leaking defaults into bound value ([#398](https://github.com/ng-forge/ng-forge/pull/398))
+- **dynamic-forms:** drop stale readonly DOM sync workaround ([#65897](https://github.com/ng-forge/ng-forge/issues/65897))
+- **dynamic-forms:** support nullable on checkbox/toggle fields ([#418](https://github.com/ng-forge/ng-forge/pull/418), [#415](https://github.com/ng-forge/ng-forge/issues/415))
+- **primeng:** clean up radio-group and multi-checkbox ([#399](https://github.com/ng-forge/ng-forge/pull/399))
+
+### ♻️ Code Refactoring
+
+- remove obsolete readonly + indeterminate dom workarounds ([#380](https://github.com/ng-forge/ng-forge/pull/380))
+- ⚠️ **dynamic-forms:** remove hidden fields from DOM + array state machine + registry ([#410](https://github.com/ng-forge/ng-forge/pull/410), [#413](https://github.com/ng-forge/ng-forge/pull/413))
+- ⚠️ **dynamic-forms:** per-adapter style defaults + opt-in signal forms compat classes ([#412](https://github.com/ng-forge/ng-forge/pull/412))
+
+### 📚 Documentation
+
+- add contributors section to README ([e0416c56c](https://github.com/ng-forge/ng-forge/commit/e0416c56c))
+- **docs:** migration guide + feature overview rework ([#378](https://github.com/ng-forge/ng-forge/pull/378))
+
+### ✅ Tests
+
+- **docs:** unbreak vite-plugin-search-index spec ([#388](https://github.com/ng-forge/ng-forge/pull/388))
+
+### ⚠️ Breaking Changes
+
+- **dynamic-forms:** per-adapter style defaults + opt-in signal forms compat classes ([#412](https://github.com/ng-forge/ng-forge/pull/412))
+- **dynamic-forms:** remove hidden fields from DOM + array state machine + registry ([#410](https://github.com/ng-forge/ng-forge/pull/410), [#413](https://github.com/ng-forge/ng-forge/pull/413))
+- **dynamic-forms:** allow overlapping leaf keys in different groups ([#401](https://github.com/ng-forge/ng-forge/pull/401), [#403](https://github.com/ng-forge/ng-forge/pull/403))
+- **dynamic-forms:** add NgForgeField/NgForgeAction directives + migrate all 4 adapters ([#381](https://github.com/ng-forge/ng-forge/pull/381))
+- added validateWhenHidden ([#392](https://github.com/ng-forge/ng-forge/pull/392))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+- antimprisacaru @antimprisacaru
+- Derek Burgman
+- Francesco Raso @0xfraso
+
 ## [0.8.0](https://github.com/ng-forge/ng-forge/compare/v0.7.0...v0.8.0) (2026-04-29)
 
 ### 🚀 Features
