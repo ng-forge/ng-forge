@@ -12,14 +12,30 @@ function getGitLastmod(filePath: string): string {
     const date = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
     }).trim();
-    return date || todayISO();
+    return date || nowISO();
   } catch {
-    return todayISO();
+    return nowISO();
   }
 }
 
-function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
+/**
+ * API reference is generated at build time from packages/* source — there's no
+ * single content file to stat. Use the latest commit touching any adapter
+ * package src as the proxy for "API changed."
+ */
+function getApiReferenceLastmod(): string {
+  try {
+    const date = execSync(`git log -1 --format=%cI -- 'packages/dynamic-forms*/src/**'`, {
+      encoding: 'utf-8',
+    }).trim();
+    return date || nowISO();
+  } catch {
+    return nowISO();
+  }
+}
+
+function nowISO(): string {
+  return new Date().toISOString();
 }
 
 function contentFile(slug: string): string {
@@ -137,14 +153,25 @@ entries.push({ slug: 'material/ai-integration', filePath: contentFile('ai-integr
 // OpenAPI generator
 entries.push({ slug: 'material/openapi-generator', filePath: contentFile('openapi-generator') });
 
-// API reference (no content file — use today's date)
-entries.push({ slug: 'material/api-reference', filePath: '' });
+// API reference — derived at build time from packages/* sources.
+// Sentinel filePath '@api' selects the package-src lastmod resolver.
+entries.push({ slug: 'material/api-reference', filePath: '@api' });
 
-// Generate XML
+// Generate XML — root URL keeps trailing slash to match the canonical link
+// in index.html (https://ng-forge.com/dynamic-forms/); sub-pages stay
+// without a trailing slash to match the per-page canonical written by
+// DocPageComponent.
 const urlEntries = entries
   .map(({ slug, filePath }) => {
-    const loc = slug ? `${BASE_URL}/${slug}` : BASE_URL;
-    const lastmod = filePath ? getGitLastmod(filePath) : todayISO();
+    const loc = slug ? `${BASE_URL}/${slug}` : `${BASE_URL}/`;
+    let lastmod: string;
+    if (filePath === '@api') {
+      lastmod = getApiReferenceLastmod();
+    } else if (filePath) {
+      lastmod = getGitLastmod(filePath);
+    } else {
+      lastmod = nowISO();
+    }
     return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`;
   })
   .join('\n');

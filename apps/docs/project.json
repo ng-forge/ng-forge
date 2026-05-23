@@ -25,6 +25,14 @@
       },
       "outputs": ["{projectRoot}/public/llms-full.txt"]
     },
+    "generate-sitemap": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx apps/docs/scripts/generate-sitemap.ts",
+        "cwd": "{workspaceRoot}"
+      },
+      "outputs": ["{projectRoot}/public/sitemap.xml"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "executor": "@analogjs/platform:vite",

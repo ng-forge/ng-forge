@@ -375,6 +375,22 @@ jobs:
             exit 1
           fi
 
+      - name: Check sitemap.xml is up to date
+        run: |
+          pnpm nx run docs:generate-sitemap
+
+          if git diff --quiet apps/docs/public/sitemap.xml; then
+            echo "✅ sitemap.xml is up to date"
+          else
+            echo "❌ sitemap.xml is out of date!"
+            echo ""
+            echo "Run 'pnpm nx run docs:generate-sitemap' and commit the changes."
+            echo ""
+            echo "Diff:"
+            git diff --stat apps/docs/public/sitemap.xml
+            exit 1
+          fi
+
   e2e:
     name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
     needs: [lint-and-test, build-apps]
