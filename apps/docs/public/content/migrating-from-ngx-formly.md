@@ -1,7 +1,7 @@
 ---
 title: Migrating from ngx-formly to ng-forge
 slug: migrating-from-ngx-formly
-description: Concept-by-concept mapping from ngx-formly to ng-forge with side-by-side code and a list of gaps.
+description: Migrate an Angular dynamic-forms app from ngx-formly to ng-forge. Concept-by-concept mapping, side-by-side code for fields/validators/wrappers, and a Signal Forms migration checklist.
 ---
 
 # Migrating from ngx-formly to ng-forge
