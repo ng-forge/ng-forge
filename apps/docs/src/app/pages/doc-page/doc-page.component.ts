@@ -417,16 +417,6 @@ export class DocPageComponent {
     'ng-forge provides a configuration-driven dynamic forms library for Angular. Build complex, signal forms with minimal code using JSON/TypeScript configurations.';
 
   /**
-   * Per-slug OG image overrides. Slugs not present here fall back to the
-   * generic `og-image.png`. Add an entry only when the referenced PNG
-   * actually ships in `apps/docs/public/` — a missing asset breaks social
-   * previews on Twitter / LinkedIn / Discord.
-   */
-  private static readonly PER_PAGE_OG_IMAGES: Readonly<Record<string, string>> = {
-    // 'migrating-from-ngx-formly': 'og-migration.png',  // TODO: author asset
-  };
-
-  /**
    * False during SSR to preserve pre-rendered content during hydration.
    * Flips to true after hydration so subsequent navigations show skeleton.
    */
@@ -452,10 +442,8 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
-      // OG image — defaults to the shared asset; PER_PAGE_OG_IMAGES overrides per slug
-      // for high-share pages where a bespoke image lifts CTR (migration guide etc.).
-      const ogImageFile = DocPageComponent.PER_PAGE_OG_IMAGES[slug] ?? 'og-image.png';
-      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/${ogImageFile}`;
+      // OG image — single shared asset; per-page images can be wired when authored.
+      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og-image.png`;
       const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
       this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
