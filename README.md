@@ -88,6 +88,7 @@ export class LoginComponent {
 
 | @ng-forge/dynamic-forms | Angular       |
 | ----------------------- | ------------- |
+| 0.9.x                   | >=21.2.0      |
 | 0.8.x                   | >=21.2.0      |
 | 0.7.x                   | >=21.2.0      |
 | 0.6.x                   | >=21.1.0      |
