@@ -30,11 +30,15 @@ import { FieldComponentSlot } from './field-component-slot';
  * includes the field's mapper outputs and a `ReadonlyFieldTree` view of its
  * form state.
  *
- * Rendering is gated by `field.renderReady() && !field.hidden()` — the
- * directive waits until the mapper produces the required inputs AND the
- * field isn't hidden before instantiating the component. Once rendered, a
- * transient `renderReady → false` does *not* tear the chain down; the
- * controller keeps the mounted components alive and ignores the flicker.
+ * Initial rendering is gated by `field.renderReady() && !field.hidden()` —
+ * the directive waits until the mapper produces the required inputs AND the
+ * field isn't hidden before instantiating the component. Once rendered:
+ * - A transient `renderReady → false` does *not* tear the chain down; the
+ *   controller keeps the mounted components alive and ignores the flicker.
+ * - A `hidden → true` does *not* tear the chain down either; the controller
+ *   applies a hide-class + `display: none` to the outermost wrapper's host so
+ *   wrapper chrome (section headers, icons, hint copy) disappears alongside
+ *   the field. Focus/caret state survive a subsequent re-show.
  * Only a structural change (wrappers or component class) triggers a rebuild.
  *
  * Imperative `ComponentRef` / `ViewContainerRef` lifecycle is encapsulated
@@ -69,12 +73,16 @@ export class DfFieldOutlet {
 
   private readonly componentIdentity: Signal<Type<unknown>> = computed(() => this.dfFieldOutlet().component);
   /**
-   * Gate for the wrapper chain controller: true only when required inputs are populated AND the
-   * field isn't hidden. Combining the two prevents an initial-mount race where the chain mounts
-   * during the brief window between `renderReady` flipping true and `hidden()` settling — that
-   * window is exactly where Angular Signal Forms' `[formField]` directive emits NG01916.
+   * Forwarded straight to the controller. The controller combines `renderReady`
+   * (flicker tolerance — preserves chain on transient false) with `hidden`
+   * (post-mount hide via outermost-host class instead of unmount) — keeping
+   * them separate here lets the controller respond differently to each. The
+   * initial-mount gate behaves like `renderReady && !hidden` so we still don't
+   * mount during the window where Angular Signal Forms' `[formField]` directive
+   * would emit NG01916.
    */
-  private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady() && !this.dfFieldOutlet().hidden());
+  private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady());
+  private readonly hidden: Signal<boolean> = computed(() => this.dfFieldOutlet().hidden());
   private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
   /**
@@ -108,7 +116,8 @@ export class DfFieldOutlet {
     createWrapperChainController({
       vcr: this.vcr,
       wrappers: this.wrappers,
-      gate: this.renderReady,
+      renderReady: this.renderReady,
+      hidden: this.hidden,
       rebuildKey: this.componentIdentity,
       fieldInputs: this.fieldInputs,
       fieldInjector: this.fieldInjector,

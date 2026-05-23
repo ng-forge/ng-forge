@@ -8,12 +8,23 @@ interface FieldWithHiddenLogic {
   logic?: readonly (ContainerLogicConfig | LogicConfig)[];
 }
 
+function hasAnyHiddenSpec(fieldDef: FieldWithHiddenLogic): boolean {
+  return fieldDef.hidden === true || (fieldDef.logic?.some((l) => l.type === 'hidden') ?? false);
+}
+
 /**
  * Applies hidden logic to a mapper's input record.
  *
  * Evaluates the field's `hidden` property and `logic` array to determine
  * if the component should be hidden. Only runs evaluation when there's
  * actually something to evaluate (explicit `hidden: true` or logic with type 'hidden').
+ *
+ * Initial-render race: a mapper computed can fire before the root form has
+ * registered with `RootFormRegistryService` — `rootForm()` returns `null` for
+ * one emission while Angular runs the first CD pass. If the field declares
+ * any hidden logic, we DEFAULT to `hidden: true` for that single emission so
+ * wrapper chrome doesn't briefly leak before the condition is evaluable. As
+ * soon as the form registers, the computed re-fires with the real value.
  *
  * @param inputs The mutable input record to potentially add `hidden` to
  * @param fieldDef The field definition containing `hidden` and `logic`
@@ -24,8 +35,10 @@ export function applyHiddenLogic(
   fieldDef: FieldWithHiddenLogic,
   rootFormRegistry: RootFormRegistryService,
 ): void {
+  if (!hasAnyHiddenSpec(fieldDef)) return;
+
   const rootForm = rootFormRegistry.rootForm();
-  if (rootForm && (fieldDef.hidden === true || fieldDef.logic?.some((l) => l.type === 'hidden'))) {
+  if (rootForm) {
     // Cast is safe: evaluateNonFieldHidden only reads the array, never mutates it.
     // The readonly + union type from container/leaf field definitions is compatible at runtime.
     inputs['hidden'] = evaluateNonFieldHidden({
@@ -34,5 +47,11 @@ export function applyHiddenLogic(
       explicitValue: fieldDef.hidden,
       formValue: rootFormRegistry.formValue(),
     });
+    return;
   }
+
+  // No root form yet — assume hidden until the form registers and the
+  // condition can be evaluated. Prevents wrapper chrome flashing during the
+  // single mapper emission that fires before form registration.
+  inputs['hidden'] = true;
 }

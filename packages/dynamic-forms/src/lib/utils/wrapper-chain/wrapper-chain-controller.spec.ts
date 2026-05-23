@@ -19,7 +19,7 @@ import { FieldWrapper, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig,
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { NoopLogger } from '../../providers/features/logger/noop-logger';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
-import { createWrapperChainController } from './wrapper-chain-controller';
+import { CHAIN_HIDDEN_CLASS, createWrapperChainController } from './wrapper-chain-controller';
 
 @Component({
   selector: 'test-leaf-a',
@@ -100,7 +100,8 @@ interface ControllerFixture {
   slot: ViewContainerRef;
   wrappers: WritableSignal<readonly WrapperConfig[]>;
   rebuildKey: WritableSignal<unknown>;
-  gate: WritableSignal<boolean>;
+  renderReady: WritableSignal<boolean>;
+  hidden: WritableSignal<boolean>;
   fieldInputs: WritableSignal<WrapperFieldInputs | undefined>;
   innermostCalls: number;
   lastInnermostSlot: ViewContainerRef | undefined;
@@ -129,7 +130,8 @@ function setupController(
 
   const wrappers = signal<readonly WrapperConfig[]>([]);
   const rebuildKey = signal<unknown>(TestLeafA);
-  const gate = signal(true);
+  const renderReady = signal(true);
+  const hidden = signal(false);
   const fieldInputs = signal<WrapperFieldInputs | undefined>(undefined);
 
   const injector = TestBed.inject(Injector);
@@ -140,7 +142,8 @@ function setupController(
     slot,
     wrappers,
     rebuildKey,
-    gate,
+    renderReady,
+    hidden,
     fieldInputs,
     innermostCalls: 0,
     lastInnermostSlot: undefined,
@@ -152,9 +155,10 @@ function setupController(
     createWrapperChainController({
       vcr: slotSignal,
       wrappers,
-      gate,
+      renderReady,
+      hidden,
       rebuildKey,
-      fieldInputs,
+      fieldInputs: fieldInputs as unknown as import('@angular/core').Signal<WrapperFieldInputs>,
       renderInnermost: (s) => {
         ref.innermostCalls++;
         ref.lastInnermostSlot = s;
@@ -184,26 +188,26 @@ describe('createWrapperChainController', () => {
     f.destroy();
   });
 
-  it('blocks the initial render when gate=false, renders once gate flips true', async () => {
+  it('blocks the initial render when renderReady=false, renders once renderReady flips true', async () => {
     const f = setupController();
-    f.gate.set(false);
+    f.renderReady.set(false);
     await flush();
     expect(f.innermostCalls).toBe(0);
 
-    f.gate.set(true);
+    f.renderReady.set(true);
     await flush();
     expect(f.innermostCalls).toBe(1);
     f.destroy();
   });
 
-  it('ignores a gate flicker after mount — does NOT rebuild', async () => {
+  it('ignores a renderReady flicker after mount — does NOT rebuild', async () => {
     const f = setupController();
     await flush();
     expect(f.innermostCalls).toBe(1);
 
-    f.gate.set(false);
+    f.renderReady.set(false);
     await flush();
-    f.gate.set(true);
+    f.renderReady.set(true);
     await flush();
 
     expect(f.innermostCalls).toBe(1);
@@ -376,7 +380,7 @@ describe('createWrapperChainController', () => {
     let beforeRebuildCount = 0;
     const wrappers = signal<readonly WrapperConfig[]>([{ type: 'x' } as WrapperConfig]);
     const rebuildKey = signal<unknown>(TestLeafA);
-    const gate = signal(true);
+    const renderReady = signal(true);
 
     TestBed.configureTestingModule({
       providers: [
@@ -396,7 +400,7 @@ describe('createWrapperChainController', () => {
       createWrapperChainController({
         vcr: slotSignal,
         wrappers,
-        gate,
+        renderReady,
         rebuildKey,
         renderInnermost: (s) => {
           s.createComponent(rebuildKey() as Type<unknown>, { environmentInjector: envInjector, injector });
@@ -423,5 +427,125 @@ describe('createWrapperChainController', () => {
 
     f.destroy();
     expect(f.slot.length).toBe(0);
+  });
+
+  describe('hidden vs renderReady split', () => {
+    function setupWithWrapperX(): ControllerFixture {
+      const registry = new Map<string, WrapperTypeDefinition>([['x', def('x', () => TestWrapX)]]);
+      const cache = new Map<string, Type<unknown>>();
+      const f = setupController({ registry, cache });
+      f.wrappers.set([{ type: 'x' } as WrapperConfig]);
+      return f;
+    }
+
+    function getOuterWrapHost(slot: ViewContainerRef): HTMLElement | null {
+      // The outermost wrapper's HOST element is the `<test-wrap-x>` element
+      // (the component's selector tag), NOT the inner `.wrap-x` template div.
+      // `ComponentRef.location.nativeElement` is the host, so the hide-class
+      // lands on the host tag — assertions must query for it.
+      const parent = slot.element.nativeElement.parentElement;
+      return (parent?.querySelector('test-wrap-x') as HTMLElement | null) ?? null;
+    }
+
+    it('does NOT render the chain on initial mount when hidden=true (parity with renderReady=false)', async () => {
+      const f = setupController();
+      f.hidden.set(true);
+      await flush();
+      expect(f.innermostCalls).toBe(0);
+
+      // Flipping hidden back to false mounts the chain fresh.
+      f.hidden.set(false);
+      await flush();
+      expect(f.innermostCalls).toBe(1);
+      f.destroy();
+    });
+
+    it('preserves mounted wrappers when hidden flips true post-mount AND applies the hide effect', async () => {
+      const f = setupWithWrapperX();
+      await flush();
+      expect(f.innermostCalls).toBe(1);
+
+      const outer = getOuterWrapHost(f.slot);
+      expect(outer).toBeTruthy();
+      expect(outer!.classList.contains(CHAIN_HIDDEN_CLASS)).toBe(false);
+
+      f.hidden.set(true);
+      await flush();
+
+      // Chain stayed mounted — focus / caret survives a re-show.
+      expect(f.innermostCalls).toBe(1);
+      expect(f.beforeRebuildCalls).toBe(0);
+
+      // Visible chrome is suppressed by the controller's hide mechanism:
+      // class for diagnostic visibility, inline display:none for guaranteed effect.
+      const outerAfter = getOuterWrapHost(f.slot);
+      expect(outerAfter).toBeTruthy();
+      expect(outerAfter!.classList.contains(CHAIN_HIDDEN_CLASS)).toBe(true);
+      expect(outerAfter!.style.display).toBe('none');
+
+      f.destroy();
+    });
+
+    it('removes the hide effect when hidden flips back to false — chain stays mounted', async () => {
+      const f = setupWithWrapperX();
+      await flush();
+      f.hidden.set(true);
+      await flush();
+      f.hidden.set(false);
+      await flush();
+
+      const outer = getOuterWrapHost(f.slot);
+      expect(outer).toBeTruthy();
+      expect(outer!.classList.contains(CHAIN_HIDDEN_CLASS)).toBe(false);
+      expect(outer!.style.display).toBe('');
+      expect(f.innermostCalls).toBe(1); // never rebuilt
+      expect(f.beforeRebuildCalls).toBe(0);
+
+      f.destroy();
+    });
+
+    it('renderReady flicker (false → true) with hidden=false leaves the hide effect untouched', async () => {
+      // Mirrors the existing flicker-tolerance test but expressed under the
+      // split-signal API. The chain stays mounted; no hide class applied.
+      const f = setupWithWrapperX();
+      await flush();
+      expect(f.innermostCalls).toBe(1);
+
+      f.renderReady.set(false);
+      await flush();
+      f.renderReady.set(true);
+      await flush();
+
+      expect(f.innermostCalls).toBe(1);
+      expect(f.beforeRebuildCalls).toBe(0);
+      const outer = getOuterWrapHost(f.slot);
+      expect(outer!.classList.contains(CHAIN_HIDDEN_CLASS)).toBe(false);
+      expect(outer!.style.display).toBe('');
+
+      f.destroy();
+    });
+
+    it('no-op hide effect when there are no wrappers (innermost handles its own hidden state)', async () => {
+      // Sanity: when refs is empty (bare innermost field, no wrappers), the
+      // controller doesn't touch any host element — the innermost field is
+      // expected to manage its own host-binding hidden state.
+      const f = setupController();
+      await flush();
+      expect(f.innermostCalls).toBe(1);
+
+      // The leaf component's host is what's mounted at the slot.
+      const leafEl = f.slot.element.nativeElement.parentElement?.querySelector('test-leaf-a') as HTMLElement | null;
+      expect(leafEl).toBeTruthy();
+
+      f.hidden.set(true);
+      await flush();
+
+      // The controller didn't add the chain-hidden class to the leaf — refs
+      // tracks WRAPPER refs only, and there are no wrappers here.
+      expect(leafEl!.classList.contains(CHAIN_HIDDEN_CLASS)).toBe(false);
+      expect(leafEl!.style.display).toBe('');
+
+      f.destroy();
+    });
   });
 });

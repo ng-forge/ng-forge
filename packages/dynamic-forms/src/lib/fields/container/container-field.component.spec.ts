@@ -12,16 +12,23 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, schema, type SchemaPath } from '@angular/forms/signals';
+import { delay } from '@ng-forge/utils';
 import { ContainerFieldComponent } from './container-field.component';
 import { ContainerField } from '../../definitions/default/container-field';
 import { FieldDef } from '../../definitions/base/field-def';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
-import { baseFieldMapper, FieldSignalContext } from '../../mappers';
+import { baseFieldMapper, containerFieldMapper, FieldSignalContext } from '../../mappers';
 import { provideDynamicForm } from '../../providers';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { EventBus } from '../../events';
-import { FieldWrapper, WrapperTypeDefinition } from '../../models/wrapper-type';
+import {
+  FieldWrapper,
+  WRAPPER_AUTO_ASSOCIATIONS,
+  WRAPPER_COMPONENT_CACHE,
+  WRAPPER_REGISTRY,
+  WrapperTypeDefinition,
+} from '../../models/wrapper-type';
 import { applyValidator } from '../../core/validation/validator-factory';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
@@ -29,6 +36,9 @@ import { RootFormRegistryService } from '../../core/registry/root-form-registry.
 import { FormStateManager } from '../../state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
+import { NoopLogger } from '../../providers/features/logger/noop-logger';
+import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
+import { ResolvedField } from '../../utils/resolve-field/resolve-field';
 
 // ─── Mock Wrapper Components ──────────────────────────────────────────────────
 
@@ -418,6 +428,132 @@ describe('ContainerFieldComponent', () => {
 
       expect(wrapper.classList.contains('form-invalid')).toBe(true);
       expect(wrapper.classList.contains('form-valid')).toBe(false);
+    });
+  });
+
+  describe('empty fields + logic.hidden end-to-end (HelloSubs repro)', () => {
+    // Host that renders a ResolvedField through DfFieldOutlet — mirrors the
+    // production wiring (the parent form / row / array iterates and emits
+    // *dfFieldOutlet per child). Container fields with field-level `wrappers`
+    // route those wrappers through DfFieldOutlet (the mapper strips them off
+    // the inner ContainerFieldComponent input), so this is the surface area
+    // where the chrome-leak bug lives.
+    @Component({
+      imports: [DfFieldOutlet],
+      template: `<ng-container *dfFieldOutlet="field()" />`,
+      changeDetection: ChangeDetectionStrategy.OnPush,
+    })
+    class OutletHostComponent {
+      readonly field = input.required<ResolvedField>();
+    }
+
+    async function flush(fixture: { detectChanges: () => void; whenStable: () => Promise<void> }): Promise<void> {
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await delay(0);
+      fixture.detectChanges();
+      await delay(0);
+      fixture.detectChanges();
+    }
+
+    function buildContainerResolvedField(opts: { injector: Injector }): ResolvedField {
+      // Reproduce the HelloSubs setup: empty `fields`, one wrapper (`section`),
+      // and a `hidden` logic condition keyed off `formValue.fillType`. When
+      // fillType !== 'KEEP_PRIVATE', the container hides.
+      const containerField = {
+        key: 'requiredDetails',
+        type: 'container',
+        fields: [],
+        wrappers: [{ type: 'section', header: 'Private Job' }],
+        logic: [
+          {
+            type: 'hidden',
+            condition: { type: 'fieldValue', fieldPath: 'fillType', operator: 'notEquals', value: 'KEEP_PRIVATE' },
+          },
+        ],
+      } as unknown as ContainerField;
+
+      // Drive the inputs signal through the real containerFieldMapper so
+      // applyHiddenLogic is exercised end-to-end. The mapper's `inject` calls
+      // resolve through the TestBed injector (which provides RootFormRegistryService).
+      const inputs = runInInjectionContext(opts.injector, () => containerFieldMapper(containerField));
+
+      // Use a no-op test leaf as the innermost component — the bug lives in
+      // wrapper chrome leakage, not the container's own rendering. This keeps
+      // the test focused on mapper → outlet → hide-effect integration without
+      // pulling in ContainerFieldComponent's full DI dependency set.
+      return {
+        key: containerField.key,
+        fieldDef: containerField,
+        component: TestFieldComponent,
+        injector: opts.injector,
+        inputs,
+        renderReady: computed(() => true),
+        hidden: computed(() => inputs()['hidden'] === true),
+      };
+    }
+
+    it('hides the wrapper chrome (section header) when logic.hidden flips true post-mount', async () => {
+      // Stub RootFormRegistryService: a writable formValue signal that we
+      // mutate to flip the hidden condition. The "rootForm" itself is a
+      // callable stub matching the FieldTree shape that evaluateNonFieldHidden
+      // probes (`form().value()` is the fallback path; we satisfy it for safety
+      // even though `ctx.formValue` is the primary signal-driven path).
+      const formValue = signal<Record<string, unknown>>({ fillType: 'KEEP_PRIVATE' });
+      const stubFieldTree = (() => ({ value: () => formValue() })) as never;
+      const stubRootForm = signal<never>(stubFieldTree);
+
+      const wrapperRegistry = new Map<string, WrapperTypeDefinition>([
+        ['section', { wrapperName: 'section', loadComponent: async () => TestSectionWrapperComponent }],
+      ]);
+      const wrapperCache = new Map<string, typeof TestSectionWrapperComponent>();
+
+      TestBed.configureTestingModule({
+        imports: [OutletHostComponent],
+        providers: [
+          { provide: WRAPPER_REGISTRY, useValue: wrapperRegistry },
+          { provide: WRAPPER_COMPONENT_CACHE, useValue: wrapperCache },
+          { provide: WRAPPER_AUTO_ASSOCIATIONS, useValue: new Map() },
+          { provide: RootFormRegistryService, useValue: new RootFormRegistryService(formValue, stubRootForm) },
+          { provide: DynamicFormLogger, useValue: new NoopLogger() },
+        ],
+      });
+
+      const fixture = TestBed.createComponent(OutletHostComponent);
+      const injector = TestBed.inject(Injector);
+
+      const resolved = buildContainerResolvedField({ injector });
+
+      fixture.componentRef.setInput('field', resolved);
+      fixture.detectChanges();
+      await flush(fixture);
+
+      // Initial state: fillType === 'KEEP_PRIVATE' → hidden=false → chrome visible.
+      const section = fixture.nativeElement.querySelector('test-section-wrapper') as HTMLElement | null;
+      expect(section).toBeTruthy();
+      expect(section!.classList.contains('df-chain-hidden')).toBe(false);
+      expect(section!.style.display).toBe('');
+
+      // Flip the form value so the `notEquals KEEP_PRIVATE` condition is true.
+      formValue.set({ fillType: 'ALLOW_ANYONE_TO_APPLY' });
+      fixture.detectChanges();
+      await flush(fixture);
+
+      // Wrapper component instance survives — same DOM node.
+      const sectionAfter = fixture.nativeElement.querySelector('test-section-wrapper') as HTMLElement | null;
+      expect(sectionAfter).toBe(section);
+      expect(sectionAfter!.classList.contains('df-chain-hidden')).toBe(true);
+      expect(sectionAfter!.style.display).toBe('none');
+
+      // Flip back — chrome re-appears without rebuilding.
+      formValue.set({ fillType: 'KEEP_PRIVATE' });
+      fixture.detectChanges();
+      await flush(fixture);
+
+      const sectionRestored = fixture.nativeElement.querySelector('test-section-wrapper') as HTMLElement | null;
+      expect(sectionRestored).toBe(section);
+      expect(sectionRestored!.classList.contains('df-chain-hidden')).toBe(false);
+      expect(sectionRestored!.style.display).toBe('');
     });
   });
 });

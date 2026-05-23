@@ -290,6 +290,62 @@ describe('DfFieldOutlet', () => {
     expect(leaf?.getAttribute('data-label')).toBe('A');
   });
 
+  it('hides wrapped chrome when hidden flips true post-mount WITHOUT unmounting the wrapper', async () => {
+    // Mirrors the HelloSubs reproduction: when a wrapped field flips from
+    // visible to hidden after the chain has mounted, the wrapper component
+    // instance survives (so focus/caret/scroll re-show is cheap) but its host
+    // is visually suppressed via the controller's hide effect. Without the
+    // split-signal fix, the inner field would `display: none` itself while the
+    // wrapper chrome (section header etc.) stayed on screen.
+    const sectionDef: WrapperTypeDefinition = {
+      wrapperName: 'section',
+      loadComponent: () => Promise.resolve({ default: TestSectionWrapper }),
+    };
+    TestBed.overrideProvider(WRAPPER_REGISTRY, { useValue: new Map([['section', sectionDef]]) });
+
+    const envInjector = TestBed.inject(EnvironmentInjector);
+    fixture = TestBed.createComponent(OutletHostComponent);
+    const hiddenSignal = signal(false);
+    fixture.componentRef.setInput(
+      'field',
+      buildResolvedField({
+        wrappers: [{ type: 'section', title: 'Primary' }] as readonly WrapperConfig[],
+        hidden: hiddenSignal,
+        injector: envInjector,
+      }),
+    );
+    fixture.detectChanges();
+    await flush();
+
+    const sectionInitial = fixture.nativeElement.querySelector('test-section');
+    expect(sectionInitial).toBeTruthy();
+    expect(sectionInitial.classList.contains('df-chain-hidden')).toBe(false);
+    expect(sectionInitial.style.display).toBe('');
+
+    hiddenSignal.set(true);
+    fixture.detectChanges();
+    await flush();
+
+    // Wrapper component instance is still in the DOM — same node, just hidden.
+    const sectionAfterHide = fixture.nativeElement.querySelector('test-section');
+    expect(sectionAfterHide).toBe(sectionInitial);
+    expect(sectionAfterHide.classList.contains('df-chain-hidden')).toBe(true);
+    expect(sectionAfterHide.style.display).toBe('none');
+
+    // The field component was likewise not torn down.
+    expect(TestLeafComponent.instances).toBe(1);
+
+    hiddenSignal.set(false);
+    fixture.detectChanges();
+    await flush();
+
+    const sectionAfterShow = fixture.nativeElement.querySelector('test-section');
+    expect(sectionAfterShow).toBe(sectionInitial); // never re-created
+    expect(sectionAfterShow.classList.contains('df-chain-hidden')).toBe(false);
+    expect(sectionAfterShow.style.display).toBe('');
+    expect(TestLeafComponent.instances).toBe(1);
+  });
+
   it('destroys the field + wrappers when the host is destroyed (vcr.clear cascade)', async () => {
     const sectionDef: WrapperTypeDefinition = {
       wrapperName: 'section',

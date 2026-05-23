@@ -407,14 +407,14 @@ describe('wrapper-chain perf baseline', () => {
       const chainB: WrapperConfig[] = [{ type: 'c' } as WrapperConfig, { type: 'a' } as WrapperConfig, { type: 'b' } as WrapperConfig];
 
       const wrappersSig: WritableSignal<readonly WrapperConfig[]> = signal(chainA);
-      const gate = signal(true);
+      const renderReady = signal(true);
       const slotSig = signal(host.slot()).asReadonly();
 
       runInInjectionContext(fixture.componentRef.injector, () => {
         createWrapperChainController({
           vcr: slotSig,
           wrappers: wrappersSig,
-          gate,
+          renderReady,
           renderInnermost: (s) => s.createComponent(BenchLeaf, { environmentInjector: envInjector, injector }),
         });
       });
@@ -437,12 +437,13 @@ describe('wrapper-chain perf baseline', () => {
       });
       results.push(rebuildStat);
 
-      // (b) Gate flicker: off → on. Should NOT rebuild (controller preserves
-      // the mounted chain). This is the path the comment promises is "free".
-      const flickerStat = await benchAsync('flicker (gate false→true)', async () => {
-        gate.set(false);
+      // (b) renderReady flicker: off → on. Should NOT rebuild (controller
+      // preserves the mounted chain). This is the path the comment promises
+      // is "free".
+      const flickerStat = await benchAsync('flicker (renderReady false→true)', async () => {
+        renderReady.set(false);
         await microFlush();
-        gate.set(true);
+        renderReady.set(true);
         await microFlush();
       });
       results.push(flickerStat);
