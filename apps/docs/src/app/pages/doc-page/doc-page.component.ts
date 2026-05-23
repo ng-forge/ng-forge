@@ -17,7 +17,12 @@ import { ApiDetailComponent } from '../api-detail/api-detail.component';
 import { NotFoundComponent } from '../../components/not-found/not-found.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
-import { FEATURE_OVERVIEW_FAQ, MIGRATION_CHECKLIST } from '../../components/feature-overview/feature-overview.data';
+import {
+  FEATURE_OVERVIEW_FAQ,
+  MIGRATION_CHECKLIST,
+  MIGRATION_FAQ,
+  MIGRATION_GUIDE_META,
+} from '../../components/feature-overview/feature-overview.data';
 import { findTabGroup } from '../../layout/tabs.config';
 import { decodeHtmlEntities } from '../../utils/decode-html-entities';
 
@@ -412,6 +417,16 @@ export class DocPageComponent {
     'ng-forge provides a configuration-driven dynamic forms library for Angular. Build complex, signal forms with minimal code using JSON/TypeScript configurations.';
 
   /**
+   * Per-slug OG image overrides. Slugs not present here fall back to the
+   * generic `og-image.png`. Add an entry only when the referenced PNG
+   * actually ships in `apps/docs/public/` — a missing asset breaks social
+   * previews on Twitter / LinkedIn / Discord.
+   */
+  private static readonly PER_PAGE_OG_IMAGES: Readonly<Record<string, string>> = {
+    // 'migrating-from-ngx-formly': 'og-migration.png',  // TODO: author asset
+  };
+
+  /**
    * False during SSR to preserve pre-rendered content during hydration.
    * Flips to true after hydration so subsequent navigations show skeleton.
    */
@@ -437,9 +452,10 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
-      // OG image — single shared asset until per-route PNGs are authored.
-      // Per-route paths (`/og/${slug}.png`) 404 today and break Twitter / LinkedIn / Discord previews.
-      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og-image.png`;
+      // OG image — defaults to the shared asset; PER_PAGE_OG_IMAGES overrides per slug
+      // for high-share pages where a bespoke image lifts CTR (migration guide etc.).
+      const ogImageFile = DocPageComponent.PER_PAGE_OG_IMAGES[slug] ?? 'og-image.png';
+      const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/${ogImageFile}`;
       const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
       this.metaService.updateTag({ property: 'og:image:width', content: '1200' });
@@ -468,6 +484,7 @@ export class DocPageComponent {
       this.removeJsonLd('jsonld-breadcrumb');
       this.removeJsonLd('jsonld-faq');
       this.removeJsonLd('jsonld-howto');
+      this.removeJsonLd('jsonld-article');
     });
   }
 
@@ -476,9 +493,10 @@ export class DocPageComponent {
    *
    * - Always: `BreadcrumbList` based on the visible breadcrumb trail. Helps
    *   Google show the right hierarchy in SERP.
-   * - On `/feature-overview`: `FAQPage` with the visible FAQ entries
-   *   (question + plain-text answer). Eligible for FAQ rich-results.
-   * - On `/migrating-from-ngx-formly`: `HowTo` for the migration checklist.
+   * - On `/feature-overview`: `FAQPage` from FEATURE_OVERVIEW_FAQ.
+   * - On `/migrating-from-ngx-formly`: `FAQPage` from MIGRATION_FAQ, `HowTo`
+   *   for the checklist, and `TechArticle` wrapping the page with author /
+   *   publish / modify metadata. Multiple types are valid per Google's docs.
    */
   private updateJsonLd(slug: string, adapter: string, pageUrl: string): void {
     const trail = this.breadcrumbs();
@@ -497,11 +515,12 @@ export class DocPageComponent {
       this.removeJsonLd('jsonld-breadcrumb');
     }
 
-    if (slug === 'feature-overview') {
+    const faqEntries = slug === 'feature-overview' ? FEATURE_OVERVIEW_FAQ : slug === 'migrating-from-ngx-formly' ? MIGRATION_FAQ : null;
+    if (faqEntries) {
       this.setJsonLd('jsonld-faq', {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: FEATURE_OVERVIEW_FAQ.map((entry) => ({
+        mainEntity: faqEntries.map((entry) => ({
           '@type': 'Question',
           name: entry.q,
           acceptedAnswer: {
@@ -528,8 +547,27 @@ export class DocPageComponent {
           text: s.text,
         })),
       });
+      this.setJsonLd('jsonld-article', {
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: 'Migrating from ngx-formly to ng-forge',
+        description:
+          'Concept-by-concept migration reference for moving an Angular dynamic-forms app from ngx-formly onto ng-forge and Angular Signal Forms.',
+        url: pageUrl,
+        datePublished: MIGRATION_GUIDE_META.datePublished,
+        dateModified: MIGRATION_GUIDE_META.dateModified,
+        author: { '@type': 'Organization', name: 'ng-forge', url: 'https://github.com/ng-forge' },
+        publisher: { '@type': 'Organization', name: 'ng-forge', url: 'https://github.com/ng-forge' },
+        proficiencyLevel: 'Intermediate',
+        about: [
+          { '@type': 'SoftwareSourceCode', name: 'ngx-formly' },
+          { '@type': 'SoftwareSourceCode', name: 'ng-forge' },
+          { '@type': 'Thing', name: 'Angular Signal Forms' },
+        ],
+      });
     } else {
       this.removeJsonLd('jsonld-howto');
+      this.removeJsonLd('jsonld-article');
     }
   }
 
