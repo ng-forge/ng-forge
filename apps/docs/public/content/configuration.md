@@ -4,6 +4,9 @@ slug: configuration
 description: 'Configure ng-forge at the provider, form, and field level. Learn the configuration cascade and how to set global defaults and per-field props.'
 ---
 
+> [!TIP]
+> **Coming from ngx-formly?** The [migration guide](/migrating-from-ngx-formly) maps `defaultProps`, `extends`, and the formly `extensions` API to their ng-forge equivalents.
+
 Configure global defaults for all forms at provider level, or per-form via `defaultProps`.
 
 ## The Cascade
