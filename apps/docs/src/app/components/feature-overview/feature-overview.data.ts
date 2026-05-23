@@ -122,7 +122,7 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
  */
 export const MIGRATION_GUIDE_META = {
   datePublished: '2026-05-01',
-  dateModified: '2026-05-22',
+  dateModified: '2026-05-23',
 } as const;
 
 /**

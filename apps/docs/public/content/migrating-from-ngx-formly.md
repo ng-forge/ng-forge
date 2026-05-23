@@ -6,22 +6,18 @@ description: Migrate an Angular dynamic-forms app from ngx-formly to ng-forge. C
 
 # Migrating from ngx-formly to ng-forge
 
-A migration reference for moving an Angular dynamic-forms app from **ngx-formly** to **ng-forge**. Both libraries share the same shape — a config object describes the form, the library renders it — so most concepts map directly.
+A migration reference for moving an Angular dynamic-forms app from **ngx-formly** to **ng-forge**. Angular **Signal Forms** (`@angular/forms/signals`) is the new built-in forms substrate as of Angular 21; ng-forge is built on it, ngx-formly is built on Reactive Forms. That substrate change is the load-bearing difference everything else here flows from. The surface shape is similar — a config object describes the form, the library renders it — so most concepts map directly.
 
-## Who this guide is for
+## Should you migrate?
 
-Strong reasons to migrate:
-
-- You're standardising on Angular **Signal Forms** as your form substrate. ng-forge is built on Signal Forms (`@angular/forms/signals`); formly is built on Reactive Forms.
-- You want schema-validation-first design (Zod / Valibot / ArkType) or built-in async value derivation.
-- You're hitting performance limits with large forms or array sections — see [Performance](#performance) below for the substrate-level reasons.
-
-Reasons to stay on formly:
-
-- You depend on community formly extensions or a deep ecosystem of custom types you'd have to re-port.
-- You need a stable, low-churn API today, and the migration cost outweighs the substrate-level benefits for your codebase.
-
-(Using a UI library ng-forge does not ship today — Kendo, NG-ZORRO, NativeScript — is **not** a reason to stay. See [Building an Adapter](/building-an-adapter).)
+| Your situation                                                          | What to do                                                                  |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Standardising on Angular Signal Forms as the form substrate             | Migrate — formly is Reactive Forms, ng-forge is Signal Forms                |
+| Want schema-validation-first design (Zod, Valibot, ArkType)             | Migrate — built in via Standard Schema                                      |
+| Hitting performance limits on large forms or array sections             | Migrate — see [Performance](#performance) below for the substrate reasons   |
+| Heavy reliance on community formly extensions or custom field types     | Evaluate — the porting cost may outweigh the substrate benefits             |
+| Need a stable, low-churn API today                                      | Stay — ng-forge is younger; formly is mature                                |
+| Use a UI library ng-forge does not ship (Kendo, NG-ZORRO, NativeScript) | Build an adapter — see [Building an Adapter](/building-an-adapter)          |
 
 ## At a glance
 
