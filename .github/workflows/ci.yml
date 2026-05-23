@@ -244,6 +244,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # Full history needed so generate-sitemap can resolve per-file
+          # `git log -1 --format=%cI` lastmod values deterministically.
+          fetch-depth: 0
 
       - name: Setup Node and restore cache
         uses: ./.github/actions/setup-node-restore
