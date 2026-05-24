@@ -78,6 +78,10 @@ export function docsMetaPlugin(): Plugin {
         this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: generateSitemap() });
         this.emitFile({ type: 'asset', fileName: 'llms-full.txt', source: generateLlmsFull() });
       } catch (err) {
+        // Intentionally abort the whole build via this.error — shipping a
+        // deploy without sitemap / llms-full is worse than a loud build
+        // failure, since the missing artefacts only surface as crawler /
+        // AI-ingest regressions days later.
         this.error(`[docs-meta] Failed to emit: ${(err as Error).message}`);
       }
     },

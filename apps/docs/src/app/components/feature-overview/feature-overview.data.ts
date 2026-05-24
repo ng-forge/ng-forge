@@ -4,6 +4,7 @@
  * can read it for JSON-LD emission (FAQPage / HowTo rich results) without
  * forcing the much-larger feature-overview component into the eager bundle.
  */
+import { MIGRATION_GUIDE_DATE_MODIFIED } from 'virtual:docs-meta/migration-modified';
 
 export interface FaqEntry {
   /** Question text. Plain string, no markdown. */
@@ -114,8 +115,6 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
     a: 'Open an issue at github.com/ng-forge/ng-forge or join the Discord. For evaluation help, the ng-forge MCP server lets an LLM in your IDE scaffold configs from a description of the old formly form.',
   },
 ];
-
-import { MIGRATION_GUIDE_DATE_MODIFIED } from 'virtual:docs-meta/migration-modified';
 
 /**
  * Dates for the migration guide's TechArticle JSON-LD.

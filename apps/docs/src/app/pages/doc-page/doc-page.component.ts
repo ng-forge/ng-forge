@@ -25,7 +25,13 @@ import {
 } from '../../components/feature-overview/feature-overview.data';
 import { findTabGroup } from '../../layout/tabs.config';
 import { decodeHtmlEntities } from '../../utils/decode-html-entities';
-import { buildBreadcrumbJsonLd, buildFaqJsonLd, buildMigrationArticleJsonLd, buildMigrationHowtoJsonLd } from '../../utils/jsonld-builders';
+import {
+  buildBreadcrumbJsonLd,
+  buildFaqJsonLd,
+  buildMigrationArticleJsonLd,
+  buildMigrationHowtoJsonLd,
+  type JsonLdPayload,
+} from '../../utils/jsonld-builders';
 
 /**
  * Generic documentation page component.
@@ -499,7 +505,7 @@ export class DocPageComponent {
     }
   }
 
-  private setJsonLd(id: string, payload: Record<string, unknown>): void {
+  private setJsonLd(id: string, payload: JsonLdPayload): void {
     let el = this.document.getElementById(id) as HTMLScriptElement | null;
     if (!el) {
       el = this.document.createElement('script') as HTMLScriptElement;

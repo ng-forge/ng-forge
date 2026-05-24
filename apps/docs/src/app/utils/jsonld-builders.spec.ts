@@ -25,6 +25,31 @@ describe('stripInlineMarkdown', () => {
   it('composes across all three transforms in one call', () => {
     expect(stripInlineMarkdown('See [the **`config`** docs](/configuration).')).toBe('See the config docs.');
   });
+
+  it('handles nested code-in-link without leaving stray punctuation', () => {
+    expect(stripInlineMarkdown('Call [`provideDynamicForm`](/getting-started) once.')).toBe('Call provideDynamicForm once.');
+  });
+
+  it('is a no-op on plain prose (no markdown to strip)', () => {
+    expect(stripInlineMarkdown('Plain sentence with no markup at all.')).toBe('Plain sentence with no markup at all.');
+  });
+
+  it('is a no-op on the empty string', () => {
+    expect(stripInlineMarkdown('')).toBe('');
+  });
+
+  it('leaves orphan markdown characters untouched (no greedy matching)', () => {
+    // A lone `**` or backtick without its closing pair must not produce a partial replacement.
+    expect(stripInlineMarkdown('Use ** for bold and ` for code.')).toBe('Use ** for bold and ` for code.');
+  });
+});
+
+describe('buildFaqJsonLd with an empty entries array', () => {
+  it('still emits a valid FAQPage with an empty mainEntity', () => {
+    const payload = buildFaqJsonLd([]);
+    expect(payload['@type']).toBe('FAQPage');
+    expect(payload.mainEntity).toEqual([]);
+  });
 });
 
 describe('buildBreadcrumbJsonLd', () => {
@@ -54,8 +79,7 @@ describe('buildBreadcrumbJsonLd', () => {
 
   it('routes URLs through the active adapter parameter, not a hardcoded one', () => {
     const payload = buildBreadcrumbJsonLd(trail, 'bootstrap', 'https://ng-forge.com/dynamic-forms');
-    const items = payload.itemListElement as Array<{ item: string }>;
-    expect(items.every((i) => i.item.includes('/bootstrap/'))).toBe(true);
+    expect(payload.itemListElement.every((i) => i.item.includes('/bootstrap/'))).toBe(true);
   });
 });
 
@@ -108,8 +132,7 @@ describe('buildMigrationArticleJsonLd', () => {
 
   it('declares the about[] entities so the page links to ngx-formly, ng-forge, and Signal Forms', () => {
     const payload = buildMigrationArticleJsonLd(pageUrl, meta);
-    const names = (payload.about as Array<{ name: string }>).map((a) => a.name);
-    expect(names).toEqual(['ngx-formly', 'ng-forge', 'Angular Signal Forms']);
+    expect(payload.about.map((a) => a.name)).toEqual(['ngx-formly', 'ng-forge', 'Angular Signal Forms']);
   });
 
   it('sets TechArticle as the @type (HowTo + FAQPage stack alongside, not under, this)', () => {

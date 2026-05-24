@@ -7,6 +7,73 @@
 import type { BreadcrumbEntry } from '../layout/nav.config';
 import type { FaqEntry, MigrationStep } from '../components/feature-overview/feature-overview.data';
 
+type SchemaOrgContext = 'https://schema.org';
+
+interface SchemaOrgOrganization {
+  readonly '@type': 'Organization';
+  readonly name: string;
+  readonly url: string;
+}
+
+interface SchemaOrgAboutEntity {
+  readonly '@type': 'SoftwareSourceCode' | 'Thing';
+  readonly name: string;
+}
+
+export interface BreadcrumbListLd {
+  readonly '@context': SchemaOrgContext;
+  readonly '@type': 'BreadcrumbList';
+  readonly itemListElement: readonly {
+    readonly '@type': 'ListItem';
+    readonly position: number;
+    readonly name: string;
+    readonly item: string;
+  }[];
+}
+
+export interface FaqPageLd {
+  readonly '@context': SchemaOrgContext;
+  readonly '@type': 'FAQPage';
+  readonly mainEntity: readonly {
+    readonly '@type': 'Question';
+    readonly name: string;
+    readonly acceptedAnswer: {
+      readonly '@type': 'Answer';
+      readonly text: string;
+    };
+  }[];
+}
+
+export interface HowToLd {
+  readonly '@context': SchemaOrgContext;
+  readonly '@type': 'HowTo';
+  readonly name: string;
+  readonly description: string;
+  readonly url: string;
+  readonly step: readonly {
+    readonly '@type': 'HowToStep';
+    readonly position: number;
+    readonly name: string;
+    readonly text: string;
+  }[];
+}
+
+export interface TechArticleLd {
+  readonly '@context': SchemaOrgContext;
+  readonly '@type': 'TechArticle';
+  readonly headline: string;
+  readonly description: string;
+  readonly url: string;
+  readonly datePublished: string;
+  readonly dateModified: string;
+  readonly author: SchemaOrgOrganization;
+  readonly publisher: SchemaOrgOrganization;
+  readonly proficiencyLevel: string;
+  readonly about: readonly SchemaOrgAboutEntity[];
+}
+
+export type JsonLdPayload = BreadcrumbListLd | FaqPageLd | HowToLd | TechArticleLd;
+
 /**
  * Drop `[label](url)` link wrappers, ` `code` ` chips, and `**bold**`
  * markers — Google's structured-data validator wants prose, not markdown.
@@ -18,7 +85,7 @@ export function stripInlineMarkdown(text: string): string {
     .replace(/\*\*([^*]+)\*\*/g, '$1');
 }
 
-export function buildBreadcrumbJsonLd(trail: readonly BreadcrumbEntry[], adapter: string, siteOrigin: string): Record<string, unknown> {
+export function buildBreadcrumbJsonLd(trail: readonly BreadcrumbEntry[], adapter: string, siteOrigin: string): BreadcrumbListLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -31,7 +98,7 @@ export function buildBreadcrumbJsonLd(trail: readonly BreadcrumbEntry[], adapter
   };
 }
 
-export function buildFaqJsonLd(entries: readonly FaqEntry[]): Record<string, unknown> {
+export function buildFaqJsonLd(entries: readonly FaqEntry[]): FaqPageLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -46,7 +113,7 @@ export function buildFaqJsonLd(entries: readonly FaqEntry[]): Record<string, unk
   };
 }
 
-export function buildMigrationHowtoJsonLd(steps: readonly MigrationStep[], pageUrl: string): Record<string, unknown> {
+export function buildMigrationHowtoJsonLd(steps: readonly MigrationStep[], pageUrl: string): HowToLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
@@ -65,7 +132,7 @@ export function buildMigrationHowtoJsonLd(steps: readonly MigrationStep[], pageU
 export function buildMigrationArticleJsonLd(
   pageUrl: string,
   meta: { readonly datePublished: string; readonly dateModified: string },
-): Record<string, unknown> {
+): TechArticleLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',

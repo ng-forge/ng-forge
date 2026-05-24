@@ -20,25 +20,31 @@ const CONTENT_DIR = resolve(DOCS_ROOT, 'public/content');
 /**
  * Resolve the last-modified timestamp of a file from git history.
  *
- * Returns full ISO-8601 (`2026-05-22T01:05:14+03:00`). Falls back to
- * current time (`nowISO()`) on git failure or empty output, with a warning.
+ * Returns full ISO-8601 normalised to UTC (`2026-05-21T22:05:14.000Z`). Git's
+ * `%cI` emits offset form (`+03:00`); normalising means every sitemap entry
+ * uses the same `Z`-suffixed shape regardless of where it was generated.
+ * Falls back to current time on git failure / empty output, with a warning.
  * Also exported for the docs-meta plugin's virtual module that derives
  * MIGRATION_GUIDE_META.dateModified the same way.
  */
 export function getGitLastmod(filePath: string): string {
   try {
-    const date = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
+    const raw = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
     }).trim();
-    if (!date) {
+    if (!raw) {
       console.warn(`[docs-meta] git log returned empty for ${filePath} — repo may be shallow; using build time as lastmod.`);
       return nowISO();
     }
-    return date;
+    return toUtcIso(raw);
   } catch (err) {
     console.warn(`[docs-meta] git log failed for ${filePath}, using build time as lastmod:`, err);
     return nowISO();
   }
+}
+
+function toUtcIso(iso: string): string {
+  return new Date(iso).toISOString();
 }
 
 function nowISO(): string {

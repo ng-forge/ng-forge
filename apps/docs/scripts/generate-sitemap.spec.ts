@@ -1,8 +1,15 @@
-import { describe, expect, it } from 'vitest';
-import { generateSitemap } from './generate-sitemap';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { generateSitemap, getGitLastmod } from './generate-sitemap';
 
 describe('generateSitemap', () => {
-  const xml = generateSitemap();
+  let xml: string;
+
+  // Run the generator inside the test lifecycle so an exception (missing
+  // content dir, broken git invocation, etc.) surfaces as a named test
+  // failure rather than a module-load stack trace.
+  beforeAll(() => {
+    xml = generateSitemap();
+  });
 
   it('produces a well-formed sitemap document', () => {
     expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
@@ -26,7 +33,35 @@ describe('generateSitemap', () => {
     expect(apiBlock).not.toBeNull();
   });
 
-  it('is deterministic across consecutive invocations within the same process', () => {
+  it('normalises all lastmod values to UTC Z form (no mixed timezone offsets)', () => {
+    // Every <lastmod> we emit should end with `Z` — git's offset form is converted via toUtcIso().
+    const lastmods = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+    expect(lastmods.length).toBeGreaterThan(0);
+    for (const ts of lastmods) {
+      expect(ts).toMatch(/Z$/);
+    }
+  });
+
+  // Note: this only guarantees the factory is in-process pure. Real cross-run
+  // stability depends on git history not changing between invocations, which
+  // is outside what a unit test can pin down.
+  it('produces identical output across two in-process invocations', () => {
     expect(generateSitemap()).toBe(xml);
+  });
+});
+
+describe('getGitLastmod — fallback behaviour', () => {
+  it('warns and returns a UTC ISO timestamp when git rejects the path', () => {
+    // Triggers the catch branch: git exits non-zero for an absolute path outside
+    // the working tree, so getGitLastmod swallows the error and falls through to
+    // nowISO(). The warning is the only on-failure signal a Vercel build with a
+    // half-fetched repo will leave in logs, so we pin it down here.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const result = getGitLastmod('/path/git/has/never/seen.md');
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T.+Z$/);
+    expect(warn).toHaveBeenCalledOnce();
+    const [message] = warn.mock.calls[0];
+    expect(message).toContain('git log failed');
+    warn.mockRestore();
   });
 });
