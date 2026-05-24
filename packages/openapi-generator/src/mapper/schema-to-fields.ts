@@ -309,9 +309,18 @@ function mapPropertyToField(
     field.props = typeResult.props;
   }
 
-  // description → hint (descriptions can be paragraphs, not suitable as placeholders)
+  // description → hint (descriptions can be paragraphs, not suitable as placeholders).
+  // Container field types declare `props?: never` — under `as const satisfies FormConfig`,
+  // emitting any `props` on these types triggers TS2322 (issue #425). Drop with a verbose
+  // log telling users how to recover the intent manually.
   if (prop.schema.description) {
-    field.props = { ...field.props, hint: prop.schema.description };
+    if (CONTAINER_FIELD_TYPES.has(finalType)) {
+      logger.verbose(
+        `Field '${fieldPath}': '${finalType}' container fields do not accept props — dropped description hint. Add a sibling 'text' field manually if you want to render this description.`,
+      );
+    } else {
+      field.props = { ...field.props, hint: prop.schema.description };
+    }
   }
 
   // Add enum options for select/radio/multi-checkbox.

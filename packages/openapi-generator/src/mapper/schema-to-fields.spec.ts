@@ -1201,6 +1201,81 @@ describe('mapSchemaToFields', () => {
     });
   });
 
+  // Container types declare `props?: never`. Emitting any `props` (including the
+  // `description → hint` mapping) trips TS2322 under `as const satisfies FormConfig`.
+  describe('container types: no props.hint emitted (#425)', () => {
+    it('should not emit props on array fields with description (object items)', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          fields: {
+            type: 'array',
+            description: 'Form fields of the form.',
+            items: {
+              type: 'object',
+              properties: { id: { type: 'string' } },
+            },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('array');
+      expect(result.fields[0].props).toBeUndefined();
+    });
+
+    it('should not emit props on array fields with description (primitive items)', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: {
+            type: 'array',
+            description: 'Free-form tags.',
+            items: { type: 'string' },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('array');
+      expect(result.fields[0].props).toBeUndefined();
+    });
+
+    it('should not emit props on group fields with description', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          address: {
+            type: 'object',
+            description: 'Mailing address block.',
+            properties: { street: { type: 'string' } },
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('group');
+      expect(result.fields[0].props).toBeUndefined();
+    });
+
+    it('should not emit props when x-ng-forge-type overrides to a container type with description', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          custom: {
+            type: 'string',
+            description: 'Custom container.',
+            'x-ng-forge-type': 'container',
+          } as unknown as SchemaObject,
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].type).toBe('container');
+      expect(result.fields[0].props).toBeUndefined();
+    });
+  });
+
   // Issue #419: dereferenced specs with $ref cycles produce literal cyclic JS object
   // graphs at runtime. Verify cycle detection terminates instead of blowing the stack.
   describe('circular schema references (issue #419)', () => {
