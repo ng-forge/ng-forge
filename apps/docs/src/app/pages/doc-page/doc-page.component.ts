@@ -17,21 +17,21 @@ import { ApiDetailComponent } from '../api-detail/api-detail.component';
 import { NotFoundComponent } from '../../components/not-found/not-found.component';
 import { EXAMPLES_REGISTRY } from '../examples-index/examples.registry';
 import { findBreadcrumbTrail } from '../../layout/nav.config';
-import { FEATURE_OVERVIEW_FAQ, MIGRATION_CHECKLIST } from '../../components/feature-overview/feature-overview.data';
+import {
+  FEATURE_OVERVIEW_FAQ,
+  MIGRATION_CHECKLIST,
+  MIGRATION_FAQ,
+  MIGRATION_GUIDE_META,
+} from '../../components/feature-overview/feature-overview.data';
 import { findTabGroup } from '../../layout/tabs.config';
 import { decodeHtmlEntities } from '../../utils/decode-html-entities';
-
-/**
- * Plain-text rendering for FAQ / HowTo answers shipped to JSON-LD.
- * Drops `[label](url)` link wrappers, ` `code` ` chips, and `**bold**`
- * markers — Google's structured-data validator wants prose, not markdown.
- */
-function stripInlineMarkdown(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1');
-}
+import {
+  buildBreadcrumbJsonLd,
+  buildFaqJsonLd,
+  buildMigrationArticleJsonLd,
+  buildMigrationHowtoJsonLd,
+  type JsonLdPayload,
+} from '../../utils/jsonld-builders';
 
 /**
  * Generic documentation page component.
@@ -437,8 +437,7 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:title', content: fullTitle });
       this.metaService.updateTag({ name: 'twitter:description', content: desc });
 
-      // OG image — single shared asset until per-route PNGs are authored.
-      // Per-route paths (`/og/${slug}.png`) 404 today and break Twitter / LinkedIn / Discord previews.
+      // OG image — single shared asset; per-page images can be wired when authored.
       const ogImageUrl = `${DocPageComponent.SITE_ORIGIN}/og-image.png`;
       const ogImageAlt = title ? `${title} — ng-forge Dynamic Forms for Angular` : 'ng-forge — Dynamic Forms for Angular';
       this.metaService.updateTag({ property: 'og:image', content: ogImageUrl });
@@ -448,26 +447,31 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:image', content: ogImageUrl });
       this.metaService.updateTag({ name: 'twitter:image:alt', content: ogImageAlt });
 
-      // Canonical URL for the current page
+      // Adapter-specific URL (what the user sees in the address bar) — used
+      // for og:url / twitter:url so social previews show the variant the
+      // sharer is on.
       const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
       this.metaService.updateTag({ property: 'og:url', content: pageUrl });
       this.metaService.updateTag({ name: 'twitter:url', content: pageUrl });
 
-      // Update <link rel="canonical"> — points to the material version for duplicate content prevention
-      const canonicalSlug = slug || '';
-      const canonicalUrl = canonicalSlug ? `${DocPageComponent.SITE_ORIGIN}/material/${canonicalSlug}` : DocPageComponent.SITE_ORIGIN + '/';
+      // Canonical URL — always the material variant so the four adapter
+      // renderings de-duplicate. Used for <link rel="canonical"> AND for the
+      // `url` field in HowTo / TechArticle JSON-LD; mixing canonical-pointing-
+      // to-material with adapter-specific JSON-LD weakens consolidation.
+      const canonicalUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/material/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
       const link = this.document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (link) {
         link.href = canonicalUrl;
       }
 
-      this.updateJsonLd(slug, adapter, pageUrl);
+      this.updateJsonLd(slug, adapter, canonicalUrl);
     });
 
     this.destroyRef.onDestroy(() => {
       this.removeJsonLd('jsonld-breadcrumb');
       this.removeJsonLd('jsonld-faq');
       this.removeJsonLd('jsonld-howto');
+      this.removeJsonLd('jsonld-article');
     });
   }
 
@@ -476,64 +480,40 @@ export class DocPageComponent {
    *
    * - Always: `BreadcrumbList` based on the visible breadcrumb trail. Helps
    *   Google show the right hierarchy in SERP.
-   * - On `/feature-overview`: `FAQPage` with the visible FAQ entries
-   *   (question + plain-text answer). Eligible for FAQ rich-results.
-   * - On `/migrating-from-ngx-formly`: `HowTo` for the migration checklist.
+   * - On `/feature-overview`: `FAQPage` from FEATURE_OVERVIEW_FAQ.
+   * - On `/migrating-from-ngx-formly`: `FAQPage` from MIGRATION_FAQ, `HowTo`
+   *   for the checklist, and `TechArticle` wrapping the page with author /
+   *   publish / modify metadata. Multiple types are valid per Google's docs.
+   *
+   * `canonicalUrl` (not the adapter-specific page URL) is used for the JSON-LD
+   * `url` fields so all four adapter variants consolidate under the same
+   * entity — matching `<link rel="canonical">`.
    */
-  private updateJsonLd(slug: string, adapter: string, pageUrl: string): void {
+  private updateJsonLd(slug: string, adapter: string, canonicalUrl: string): void {
     const trail = this.breadcrumbs();
     if (trail.length > 0) {
-      this.setJsonLd('jsonld-breadcrumb', {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: trail.map((c, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: c.label,
-          item: `${DocPageComponent.SITE_ORIGIN}/${adapter}/${c.path}`,
-        })),
-      });
+      this.setJsonLd('jsonld-breadcrumb', buildBreadcrumbJsonLd(trail, adapter, DocPageComponent.SITE_ORIGIN));
     } else {
       this.removeJsonLd('jsonld-breadcrumb');
     }
 
-    if (slug === 'feature-overview') {
-      this.setJsonLd('jsonld-faq', {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: FEATURE_OVERVIEW_FAQ.map((entry) => ({
-          '@type': 'Question',
-          name: entry.q,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: stripInlineMarkdown(entry.a),
-          },
-        })),
-      });
+    const faqEntries = slug === 'feature-overview' ? FEATURE_OVERVIEW_FAQ : slug === 'migrating-from-ngx-formly' ? MIGRATION_FAQ : null;
+    if (faqEntries) {
+      this.setJsonLd('jsonld-faq', buildFaqJsonLd(faqEntries));
     } else {
       this.removeJsonLd('jsonld-faq');
     }
 
     if (slug === 'migrating-from-ngx-formly') {
-      this.setJsonLd('jsonld-howto', {
-        '@context': 'https://schema.org',
-        '@type': 'HowTo',
-        name: 'Migrate from ngx-formly to ng-forge',
-        description: 'A pragmatic order to port a non-trivial Angular dynamic-forms app from ngx-formly to ng-forge.',
-        url: `${pageUrl}#migration-checklist`,
-        step: MIGRATION_CHECKLIST.map((s, i) => ({
-          '@type': 'HowToStep',
-          position: i + 1,
-          name: s.name,
-          text: s.text,
-        })),
-      });
+      this.setJsonLd('jsonld-howto', buildMigrationHowtoJsonLd(MIGRATION_CHECKLIST, canonicalUrl));
+      this.setJsonLd('jsonld-article', buildMigrationArticleJsonLd(canonicalUrl, MIGRATION_GUIDE_META));
     } else {
       this.removeJsonLd('jsonld-howto');
+      this.removeJsonLd('jsonld-article');
     }
   }
 
-  private setJsonLd(id: string, payload: Record<string, unknown>): void {
+  private setJsonLd(id: string, payload: JsonLdPayload): void {
     let el = this.document.getElementById(id) as HTMLScriptElement | null;
     if (!el) {
       el = this.document.createElement('script') as HTMLScriptElement;

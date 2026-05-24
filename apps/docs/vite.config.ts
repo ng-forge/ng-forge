@@ -9,6 +9,7 @@ import * as sass from 'sass';
 import { apiDocsPlugin, getApiPackages } from './plugins/vite-plugin-api-docs';
 import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
 import { ogImagePlugin } from './plugins/vite-plugin-og-images';
+import { docsMetaPlugin } from './plugins/vite-plugin-docs-meta';
 
 const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
@@ -267,6 +268,7 @@ export default defineConfig(({ mode }) => {
       apiDocsPlugin(),
       searchIndexPlugin(),
       ogImagePlugin(),
+      docsMetaPlugin(),
       analog({
         ssr: true,
         static: true,

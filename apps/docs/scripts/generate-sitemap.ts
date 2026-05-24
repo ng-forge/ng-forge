@@ -1,25 +1,58 @@
-import { execSync } from 'child_process';
-import { readdirSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+/**
+ * Build the sitemap.xml content for the docs site.
+ *
+ * Returns the XML as a string — callers (the docs-meta Vite plugin) are
+ * responsible for emitting or serving it. There is no on-disk artifact.
+ *
+ * `lastmod` values are derived from `git log -1 --format=%cI` per file. The
+ * Vercel build environment needs full git history for this to be accurate
+ * (the root vercel.json `buildCommand` prepends `git fetch --unshallow`);
+ * locally the dev server picks up the working-tree state.
+ */
+import { execFileSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const BASE_URL = 'https://ng-forge.com/dynamic-forms';
 const DOCS_ROOT = resolve(import.meta.dirname, '..');
 const CONTENT_DIR = resolve(DOCS_ROOT, 'public/content');
-const OUTPUT_PATH = resolve(DOCS_ROOT, 'public/sitemap.xml');
 
-function getGitLastmod(filePath: string): string {
+/**
+ * Resolve the last-modified timestamp of a file from git history.
+ *
+ * Returns full ISO-8601 normalised to UTC (`2026-05-21T22:05:14.000Z`). Git's
+ * `%cI` emits offset form (`+03:00`); normalising means every sitemap entry
+ * uses the same `Z`-suffixed shape regardless of where it was generated.
+ * Falls back to current time on git failure / empty output, with a warning.
+ * Also exported for the docs-meta plugin's virtual module that derives
+ * MIGRATION_GUIDE_META.dateModified the same way.
+ */
+export function getGitLastmod(filePath: string): string {
   try {
-    const date = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
+    // execFileSync (no shell) avoids any quoting / injection concern around
+    // filePath. Today every caller passes a controlled constant, but per
+    // CLAUDE.md we treat command-injection surface area as a smell to fix
+    // preemptively rather than rely on the inputs staying trusted.
+    const raw = execFileSync('git', ['log', '-1', '--format=%cI', '--', filePath], {
       encoding: 'utf-8',
     }).trim();
-    return date || todayISO();
-  } catch {
-    return todayISO();
+    if (!raw) {
+      console.warn(`[docs-meta] git log returned empty for ${filePath} — repo may be shallow; using build time as lastmod.`);
+      return nowISO();
+    }
+    return toUtcIso(raw);
+  } catch (err) {
+    console.warn(`[docs-meta] git log failed for ${filePath}, using build time as lastmod:`, err);
+    return nowISO();
   }
 }
 
-function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
+function toUtcIso(iso: string): string {
+  return new Date(iso).toISOString();
+}
+
+function nowISO(): string {
+  return new Date().toISOString();
 }
 
 function contentFile(slug: string): string {
@@ -28,132 +61,103 @@ function contentFile(slug: string): string {
 
 interface SitemapEntry {
   slug: string;
+  /** Absolute path used to resolve `lastmod` via git. Empty string omits lastmod. */
   filePath: string;
 }
 
-// Build the full list of pages
-const entries: SitemapEntry[] = [];
+function collectEntries(): SitemapEntry[] {
+  const entries: SitemapEntry[] = [];
 
-// Landing page
-entries.push({
-  slug: '',
-  filePath: resolve(DOCS_ROOT, 'index.html'),
-});
+  // Landing page
+  entries.push({ slug: '', filePath: resolve(DOCS_ROOT, 'index.html') });
 
-// Getting started & configuration
-entries.push({ slug: 'material/getting-started', filePath: contentFile('getting-started') });
-entries.push({ slug: 'material/feature-overview', filePath: contentFile('feature-overview') });
-entries.push({ slug: 'material/configuration', filePath: contentFile('configuration') });
+  // Top-level pages
+  entries.push({ slug: 'material/getting-started', filePath: contentFile('getting-started') });
+  entries.push({ slug: 'material/feature-overview', filePath: contentFile('feature-overview') });
+  entries.push({ slug: 'material/configuration', filePath: contentFile('configuration') });
+  entries.push({ slug: 'material/migrating-from-ngx-formly', filePath: contentFile('migrating-from-ngx-formly') });
+  entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });
+  entries.push({ slug: 'custom/building-an-adapter', filePath: contentFile('building-an-adapter') });
 
-// Migration guide
-entries.push({ slug: 'material/migrating-from-ngx-formly', filePath: contentFile('migrating-from-ngx-formly') });
+  // Examples — discover from directory
+  for (const file of readdirSync(resolve(CONTENT_DIR, 'examples'))
+    .filter((f) => f.endsWith('.md'))
+    .sort()) {
+    const name = file.replace('.md', '');
+    entries.push({ slug: `material/examples/${name}`, filePath: resolve(CONTENT_DIR, 'examples', file) });
+  }
 
-// API-Driven Forms
-entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });
+  // Field types
+  for (const page of ['text-inputs', 'selection', 'buttons', 'utility', 'advanced-controls']) {
+    entries.push({ slug: `material/field-types/${page}`, filePath: contentFile(`field-types/${page}`) });
+  }
 
-// Building an adapter (custom adapter, not material)
-entries.push({ slug: 'custom/building-an-adapter', filePath: contentFile('building-an-adapter') });
+  // Validation
+  for (const page of ['basics', 'advanced', 'custom-validators', 'reference']) {
+    entries.push({ slug: `material/validation/${page}`, filePath: contentFile(`validation/${page}`) });
+  }
 
-// Examples — discover from directory
-const exampleFiles = readdirSync(resolve(CONTENT_DIR, 'examples'))
-  .filter((f) => f.endsWith('.md'))
-  .sort();
-for (const file of exampleFiles) {
-  const name = file.replace('.md', '');
-  entries.push({
-    slug: `material/examples/${name}`,
-    filePath: resolve(CONTENT_DIR, 'examples', file),
-  });
+  // Schema validation
+  for (const page of ['overview', 'angular-schema', 'zod']) {
+    entries.push({ slug: `material/schema-validation/${page}`, filePath: contentFile(`schema-validation/${page}`) });
+  }
+
+  // Dynamic behavior
+  for (const page of ['conditional-logic', 'derivation/values', 'derivation/property', 'derivation/async', 'i18n', 'submission']) {
+    entries.push({ slug: `material/dynamic-behavior/${page}`, filePath: contentFile(`dynamic-behavior/${page}`) });
+  }
+
+  // Layout / prebuilt
+  for (const page of [
+    'form-groups',
+    'form-pages',
+    'form-rows',
+    'form-arrays/simplified',
+    'form-arrays/complete',
+    'container-field',
+    'hidden-fields',
+    'text-components',
+  ]) {
+    entries.push({ slug: `material/prebuilt/${page}`, filePath: contentFile(`prebuilt/${page}`) });
+  }
+
+  // Wrappers
+  for (const page of ['overview', 'writing-a-wrapper', 'registering-and-applying']) {
+    entries.push({ slug: `material/wrappers/${page}`, filePath: contentFile(`wrappers/${page}`) });
+  }
+
+  // Recipes
+  for (const page of ['custom-fields', 'expression-parser', 'type-safety', 'events', 'value-exclusion']) {
+    entries.push({ slug: `material/recipes/${page}`, filePath: contentFile(`recipes/${page}`) });
+  }
+
+  // AI integration / OpenAPI generator
+  entries.push({ slug: 'material/ai-integration', filePath: contentFile('ai-integration') });
+  entries.push({ slug: 'material/openapi-generator', filePath: contentFile('openapi-generator') });
+
+  // API reference — content is generated at build time from packages/* sources,
+  // so there's no single content file to derive lastmod from. Omitting <lastmod>
+  // is valid per the sitemap spec.
+  entries.push({ slug: 'material/api-reference', filePath: '' });
+
+  return entries;
 }
 
-// Field types
-for (const page of ['text-inputs', 'selection', 'buttons', 'utility', 'advanced-controls']) {
-  entries.push({
-    slug: `material/field-types/${page}`,
-    filePath: contentFile(`field-types/${page}`),
-  });
-}
+export function generateSitemap(): string {
+  // Root URL keeps trailing slash to match the canonical link in index.html
+  // (https://ng-forge.com/dynamic-forms/); sub-pages stay without a trailing
+  // slash to match the per-page canonical written by DocPageComponent.
+  const urlEntries = collectEntries()
+    .map(({ slug, filePath }) => {
+      const loc = slug ? `${BASE_URL}/${slug}` : `${BASE_URL}/`;
+      const lastmod = filePath ? `\n    <lastmod>${getGitLastmod(filePath)}</lastmod>` : '';
+      return `  <url>\n    <loc>${loc}</loc>${lastmod}\n  </url>`;
+    })
+    .join('\n');
 
-// Validation
-for (const page of ['basics', 'advanced', 'custom-validators', 'reference']) {
-  entries.push({
-    slug: `material/validation/${page}`,
-    filePath: contentFile(`validation/${page}`),
-  });
-}
-
-// Schema validation
-for (const page of ['overview', 'angular-schema', 'zod']) {
-  entries.push({
-    slug: `material/schema-validation/${page}`,
-    filePath: contentFile(`schema-validation/${page}`),
-  });
-}
-
-// Dynamic behavior
-for (const page of ['conditional-logic', 'derivation/values', 'derivation/property', 'derivation/async', 'i18n', 'submission']) {
-  entries.push({
-    slug: `material/dynamic-behavior/${page}`,
-    filePath: contentFile(`dynamic-behavior/${page}`),
-  });
-}
-
-// Layout / prebuilt
-for (const page of [
-  'form-groups',
-  'form-pages',
-  'form-rows',
-  'form-arrays/simplified',
-  'form-arrays/complete',
-  'container-field',
-  'hidden-fields',
-  'text-components',
-]) {
-  entries.push({
-    slug: `material/prebuilt/${page}`,
-    filePath: contentFile(`prebuilt/${page}`),
-  });
-}
-
-// Wrappers
-for (const page of ['overview', 'writing-a-wrapper', 'registering-and-applying']) {
-  entries.push({
-    slug: `material/wrappers/${page}`,
-    filePath: contentFile(`wrappers/${page}`),
-  });
-}
-
-// Recipes
-for (const page of ['custom-fields', 'expression-parser', 'type-safety', 'events', 'value-exclusion']) {
-  entries.push({
-    slug: `material/recipes/${page}`,
-    filePath: contentFile(`recipes/${page}`),
-  });
-}
-
-// AI integration
-entries.push({ slug: 'material/ai-integration', filePath: contentFile('ai-integration') });
-
-// OpenAPI generator
-entries.push({ slug: 'material/openapi-generator', filePath: contentFile('openapi-generator') });
-
-// API reference (no content file — use today's date)
-entries.push({ slug: 'material/api-reference', filePath: '' });
-
-// Generate XML
-const urlEntries = entries
-  .map(({ slug, filePath }) => {
-    const loc = slug ? `${BASE_URL}/${slug}` : BASE_URL;
-    const lastmod = filePath ? getGitLastmod(filePath) : todayISO();
-    return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`;
-  })
-  .join('\n');
-
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urlEntries}
 </urlset>
 `;
-
-writeFileSync(OUTPUT_PATH, xml, 'utf-8');
-console.log(`Sitemap written to ${OUTPUT_PATH} (${entries.length} URLs)`);
+}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "NX_DAEMON=false pnpm run deploy:prep",
+  "buildCommand": "git fetch --unshallow --quiet 2>/dev/null || true && NX_DAEMON=false pnpm run deploy:prep",
   "outputDirectory": "dist/deploy",
   "cleanUrls": true,
   "trailingSlash": false,

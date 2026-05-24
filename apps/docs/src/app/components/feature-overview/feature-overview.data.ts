@@ -4,6 +4,7 @@
  * can read it for JSON-LD emission (FAQPage / HowTo rich results) without
  * forcing the much-larger feature-overview component into the eager bundle.
  */
+import { MIGRATION_GUIDE_DATE_MODIFIED } from 'virtual:docs-meta/migration-modified';
 
 export interface FaqEntry {
   /** Question text. Plain string, no markdown. */
@@ -87,6 +88,51 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
     a: 'Angular 21+ (signal-native APIs depend on it). Browser-wise, ng-forge supports the same matrix as Angular 21 — modern evergreen browsers (Chrome / Edge / Firefox / Safari current and previous major). No IE 11.',
   },
 ];
+
+/**
+ * FAQ entries mirrored from the FAQ section of the migration guide. Emitted as
+ * schema.org/FAQPage JSON-LD on /migrating-from-ngx-formly so the same Q&A
+ * is eligible for rich-result display in Google SERP.
+ *
+ * Keep this in sync with the FAQ section of
+ * apps/docs/public/content/migrating-from-ngx-formly.md.
+ */
+export const MIGRATION_FAQ: readonly FaqEntry[] = [
+  {
+    q: 'Can I run ngx-formly and ng-forge side by side during a migration?',
+    a: 'Yes. They do not conflict — different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports @ngx-formly/*.',
+  },
+  {
+    q: 'Does ng-forge support Angular 21?',
+    a: 'Yes — ng-forge requires Angular 21+ as its baseline (signal-native APIs depend on it). If you are on Angular 20 or earlier, migrating to ng-forge implies an Angular upgrade first.',
+  },
+  {
+    q: 'Does ng-forge use Reactive Forms (FormGroup / FormControl)?',
+    a: 'No. ng-forge is built on Angular Signal Forms (@angular/forms/signals), a separate system with a different primitive — FieldTree<T> — that holds value, validity, dirty/touched state, and errors as signals. There is no FormGroup or FormControl involved. If your formly app exposes a formGroup to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.',
+  },
+  {
+    q: 'How do I report bugs or get help migrating?',
+    a: 'Open an issue at github.com/ng-forge/ng-forge or join the Discord. For evaluation help, the ng-forge MCP server lets an LLM in your IDE scaffold configs from a description of the old formly form.',
+  },
+];
+
+interface MigrationGuideMeta {
+  readonly datePublished: string;
+  readonly dateModified: string;
+}
+
+/**
+ * Dates for the migration guide's TechArticle JSON-LD.
+ *
+ * `datePublished` is hand-set (initial publication is stable).
+ * `dateModified` is derived from git history of the markdown source by the
+ * docs-meta Vite plugin — no maintenance burden, no drift from the
+ * actual content state.
+ */
+export const MIGRATION_GUIDE_META = {
+  datePublished: '2026-05-01',
+  dateModified: MIGRATION_GUIDE_DATE_MODIFIED,
+} as const satisfies MigrationGuideMeta;
 
 /**
  * Six-step checklist mirrored from /migrating-from-ngx-formly#migration-checklist.

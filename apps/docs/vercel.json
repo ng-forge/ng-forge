@@ -29,6 +29,7 @@
     { "source": "/getting-started", "destination": "/material/getting-started", "permanent": true },
     { "source": "/ui-libs-integrations", "destination": "/material/configuration", "permanent": true },
     { "source": "/configuration", "destination": "/material/configuration", "permanent": true },
+    { "source": "/migrating-from-ngx-formly", "destination": "/material/migrating-from-ngx-formly", "permanent": true },
     { "source": "/examples", "destination": "/material/examples", "permanent": true },
     { "source": "/examples/:path*", "destination": "/material/examples/:path*", "permanent": true },
     { "source": "/schema-fields/:path*", "destination": "/material/field-types/:path*", "permanent": true },

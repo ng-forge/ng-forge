@@ -4,6 +4,9 @@ slug: getting-started
 description: 'Install ng-forge, pick a UI adapter (Material, Bootstrap, PrimeNG, or Ionic), and render your first dynamic Angular form from a single config object.'
 ---
 
+> [!TIP]
+> **Coming from ngx-formly?** The [migration guide](/migrating-from-ngx-formly) maps every concept side-by-side and includes a checklist for porting a non-trivial app.
+
 ng-forge generates fully working Angular forms from a single configuration object — validation, conditional logic, and multi-step wizards included. Here's how to set it up.
 
 ## 1. Choose Your UI Library
