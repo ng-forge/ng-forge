@@ -6,8 +6,8 @@
  *
  * `lastmod` values are derived from `git log -1 --format=%cI` per file. The
  * Vercel build environment needs full git history for this to be accurate
- * (see vercel.json `installCommand`); locally the dev server picks up the
- * working-tree state.
+ * (the root vercel.json `buildCommand` prepends `git fetch --unshallow`);
+ * locally the dev server picks up the working-tree state.
  */
 import { execSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
@@ -22,8 +22,13 @@ function getGitLastmod(filePath: string): string {
     const date = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
     }).trim();
-    return date || nowISO();
-  } catch {
+    if (!date) {
+      console.warn(`[docs-meta] git log returned empty for ${filePath} — repo may be shallow; using build time as lastmod.`);
+      return nowISO();
+    }
+    return date;
+  } catch (err) {
+    console.warn(`[docs-meta] git log failed for ${filePath}, using build time as lastmod:`, err);
     return nowISO();
   }
 }

@@ -20,14 +20,16 @@ export function docsMetaPlugin(): Plugin {
 
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
+        // Strip the query string so `/sitemap.xml?nocache=1` still matches.
+        const path = req.url?.split('?')[0];
         try {
-          if (req.url === '/sitemap.xml') {
+          if (path === '/sitemap.xml') {
             res.setHeader('Content-Type', 'application/xml');
             res.setHeader('Cache-Control', 'no-cache');
             res.end(generateSitemap());
             return;
           }
-          if (req.url === '/llms-full.txt') {
+          if (path === '/llms-full.txt') {
             res.setHeader('Content-Type', 'text/plain; charset=utf-8');
             res.setHeader('Cache-Control', 'no-cache');
             res.end(generateLlmsFull());
