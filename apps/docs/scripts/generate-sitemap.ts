@@ -9,7 +9,7 @@
  * (the root vercel.json `buildCommand` prepends `git fetch --unshallow`);
  * locally the dev server picks up the working-tree state.
  */
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -29,7 +29,11 @@ const CONTENT_DIR = resolve(DOCS_ROOT, 'public/content');
  */
 export function getGitLastmod(filePath: string): string {
   try {
-    const raw = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
+    // execFileSync (no shell) avoids any quoting / injection concern around
+    // filePath. Today every caller passes a controlled constant, but per
+    // CLAUDE.md we treat command-injection surface area as a smell to fix
+    // preemptively rather than rely on the inputs staying trusted.
+    const raw = execFileSync('git', ['log', '-1', '--format=%cI', '--', filePath], {
       encoding: 'utf-8',
     }).trim();
     if (!raw) {

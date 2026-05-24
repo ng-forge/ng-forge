@@ -447,20 +447,24 @@ export class DocPageComponent {
       this.metaService.updateTag({ name: 'twitter:image', content: ogImageUrl });
       this.metaService.updateTag({ name: 'twitter:image:alt', content: ogImageAlt });
 
-      // Canonical URL for the current page
+      // Adapter-specific URL (what the user sees in the address bar) — used
+      // for og:url / twitter:url so social previews show the variant the
+      // sharer is on.
       const pageUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/${adapter}/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
       this.metaService.updateTag({ property: 'og:url', content: pageUrl });
       this.metaService.updateTag({ name: 'twitter:url', content: pageUrl });
 
-      // Update <link rel="canonical"> — points to the material version for duplicate content prevention
-      const canonicalSlug = slug || '';
-      const canonicalUrl = canonicalSlug ? `${DocPageComponent.SITE_ORIGIN}/material/${canonicalSlug}` : DocPageComponent.SITE_ORIGIN + '/';
+      // Canonical URL — always the material variant so the four adapter
+      // renderings de-duplicate. Used for <link rel="canonical"> AND for the
+      // `url` field in HowTo / TechArticle JSON-LD; mixing canonical-pointing-
+      // to-material with adapter-specific JSON-LD weakens consolidation.
+      const canonicalUrl = slug ? `${DocPageComponent.SITE_ORIGIN}/material/${slug}` : DocPageComponent.SITE_ORIGIN + '/';
       const link = this.document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (link) {
         link.href = canonicalUrl;
       }
 
-      this.updateJsonLd(slug, adapter, pageUrl);
+      this.updateJsonLd(slug, adapter, canonicalUrl);
     });
 
     this.destroyRef.onDestroy(() => {
@@ -480,8 +484,12 @@ export class DocPageComponent {
    * - On `/migrating-from-ngx-formly`: `FAQPage` from MIGRATION_FAQ, `HowTo`
    *   for the checklist, and `TechArticle` wrapping the page with author /
    *   publish / modify metadata. Multiple types are valid per Google's docs.
+   *
+   * `canonicalUrl` (not the adapter-specific page URL) is used for the JSON-LD
+   * `url` fields so all four adapter variants consolidate under the same
+   * entity — matching `<link rel="canonical">`.
    */
-  private updateJsonLd(slug: string, adapter: string, pageUrl: string): void {
+  private updateJsonLd(slug: string, adapter: string, canonicalUrl: string): void {
     const trail = this.breadcrumbs();
     if (trail.length > 0) {
       this.setJsonLd('jsonld-breadcrumb', buildBreadcrumbJsonLd(trail, adapter, DocPageComponent.SITE_ORIGIN));
@@ -497,8 +505,8 @@ export class DocPageComponent {
     }
 
     if (slug === 'migrating-from-ngx-formly') {
-      this.setJsonLd('jsonld-howto', buildMigrationHowtoJsonLd(MIGRATION_CHECKLIST, pageUrl));
-      this.setJsonLd('jsonld-article', buildMigrationArticleJsonLd(pageUrl, MIGRATION_GUIDE_META));
+      this.setJsonLd('jsonld-howto', buildMigrationHowtoJsonLd(MIGRATION_CHECKLIST, canonicalUrl));
+      this.setJsonLd('jsonld-article', buildMigrationArticleJsonLd(canonicalUrl, MIGRATION_GUIDE_META));
     } else {
       this.removeJsonLd('jsonld-howto');
       this.removeJsonLd('jsonld-article');

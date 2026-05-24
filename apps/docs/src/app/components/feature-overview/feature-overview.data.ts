@@ -116,6 +116,11 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
   },
 ];
 
+interface MigrationGuideMeta {
+  readonly datePublished: string;
+  readonly dateModified: string;
+}
+
 /**
  * Dates for the migration guide's TechArticle JSON-LD.
  *
@@ -127,7 +132,7 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
 export const MIGRATION_GUIDE_META = {
   datePublished: '2026-05-01',
   dateModified: MIGRATION_GUIDE_DATE_MODIFIED,
-} as const;
+} as const satisfies MigrationGuideMeta;
 
 /**
  * Six-step checklist mirrored from /migrating-from-ngx-formly#migration-checklist.
