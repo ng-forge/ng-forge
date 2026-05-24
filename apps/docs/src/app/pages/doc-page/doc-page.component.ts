@@ -25,18 +25,7 @@ import {
 } from '../../components/feature-overview/feature-overview.data';
 import { findTabGroup } from '../../layout/tabs.config';
 import { decodeHtmlEntities } from '../../utils/decode-html-entities';
-
-/**
- * Plain-text rendering for FAQ / HowTo answers shipped to JSON-LD.
- * Drops `[label](url)` link wrappers, ` `code` ` chips, and `**bold**`
- * markers — Google's structured-data validator wants prose, not markdown.
- */
-function stripInlineMarkdown(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/\*\*([^*]+)\*\*/g, '$1');
-}
+import { buildBreadcrumbJsonLd, buildFaqJsonLd, buildMigrationArticleJsonLd, buildMigrationHowtoJsonLd } from '../../utils/jsonld-builders';
 
 /**
  * Generic documentation page component.
@@ -489,70 +478,21 @@ export class DocPageComponent {
   private updateJsonLd(slug: string, adapter: string, pageUrl: string): void {
     const trail = this.breadcrumbs();
     if (trail.length > 0) {
-      this.setJsonLd('jsonld-breadcrumb', {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: trail.map((c, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: c.label,
-          item: `${DocPageComponent.SITE_ORIGIN}/${adapter}/${c.path}`,
-        })),
-      });
+      this.setJsonLd('jsonld-breadcrumb', buildBreadcrumbJsonLd(trail, adapter, DocPageComponent.SITE_ORIGIN));
     } else {
       this.removeJsonLd('jsonld-breadcrumb');
     }
 
     const faqEntries = slug === 'feature-overview' ? FEATURE_OVERVIEW_FAQ : slug === 'migrating-from-ngx-formly' ? MIGRATION_FAQ : null;
     if (faqEntries) {
-      this.setJsonLd('jsonld-faq', {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faqEntries.map((entry) => ({
-          '@type': 'Question',
-          name: entry.q,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: stripInlineMarkdown(entry.a),
-          },
-        })),
-      });
+      this.setJsonLd('jsonld-faq', buildFaqJsonLd(faqEntries));
     } else {
       this.removeJsonLd('jsonld-faq');
     }
 
     if (slug === 'migrating-from-ngx-formly') {
-      this.setJsonLd('jsonld-howto', {
-        '@context': 'https://schema.org',
-        '@type': 'HowTo',
-        name: 'Migrate from ngx-formly to ng-forge',
-        description: 'A pragmatic order to port a non-trivial Angular dynamic-forms app from ngx-formly to ng-forge.',
-        url: `${pageUrl}#migration-checklist`,
-        step: MIGRATION_CHECKLIST.map((s, i) => ({
-          '@type': 'HowToStep',
-          position: i + 1,
-          name: s.name,
-          text: s.text,
-        })),
-      });
-      this.setJsonLd('jsonld-article', {
-        '@context': 'https://schema.org',
-        '@type': 'TechArticle',
-        headline: 'Migrating from ngx-formly to ng-forge',
-        description:
-          'Concept-by-concept migration reference for moving an Angular dynamic-forms app from ngx-formly onto ng-forge and Angular Signal Forms.',
-        url: pageUrl,
-        datePublished: MIGRATION_GUIDE_META.datePublished,
-        dateModified: MIGRATION_GUIDE_META.dateModified,
-        author: { '@type': 'Organization', name: 'ng-forge', url: 'https://github.com/ng-forge' },
-        publisher: { '@type': 'Organization', name: 'ng-forge', url: 'https://github.com/ng-forge' },
-        proficiencyLevel: 'Intermediate',
-        about: [
-          { '@type': 'SoftwareSourceCode', name: 'ngx-formly' },
-          { '@type': 'SoftwareSourceCode', name: 'ng-forge' },
-          { '@type': 'Thing', name: 'Angular Signal Forms' },
-        ],
-      });
+      this.setJsonLd('jsonld-howto', buildMigrationHowtoJsonLd(MIGRATION_CHECKLIST, pageUrl));
+      this.setJsonLd('jsonld-article', buildMigrationArticleJsonLd(pageUrl, MIGRATION_GUIDE_META));
     } else {
       this.removeJsonLd('jsonld-howto');
       this.removeJsonLd('jsonld-article');

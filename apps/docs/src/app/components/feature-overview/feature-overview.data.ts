@@ -115,14 +115,19 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
   },
 ];
 
+import { MIGRATION_GUIDE_DATE_MODIFIED } from 'virtual:docs-meta/migration-modified';
+
 /**
- * Dates for the migration guide's TechArticle JSON-LD. Update `dateModified`
- * when the guide receives a substantive content edit (new section, large
- * rewrite). Trivial typo fixes do not need to touch this.
+ * Dates for the migration guide's TechArticle JSON-LD.
+ *
+ * `datePublished` is hand-set (initial publication is stable).
+ * `dateModified` is derived from git history of the markdown source by the
+ * docs-meta Vite plugin — no maintenance burden, no drift from the
+ * actual content state.
  */
 export const MIGRATION_GUIDE_META = {
   datePublished: '2026-05-01',
-  dateModified: '2026-05-23',
+  dateModified: MIGRATION_GUIDE_DATE_MODIFIED,
 } as const;
 
 /**

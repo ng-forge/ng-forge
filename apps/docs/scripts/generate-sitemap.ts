@@ -17,7 +17,15 @@ const BASE_URL = 'https://ng-forge.com/dynamic-forms';
 const DOCS_ROOT = resolve(import.meta.dirname, '..');
 const CONTENT_DIR = resolve(DOCS_ROOT, 'public/content');
 
-function getGitLastmod(filePath: string): string {
+/**
+ * Resolve the last-modified timestamp of a file from git history.
+ *
+ * Returns full ISO-8601 (`2026-05-22T01:05:14+03:00`). Falls back to
+ * current time (`nowISO()`) on git failure or empty output, with a warning.
+ * Also exported for the docs-meta plugin's virtual module that derives
+ * MIGRATION_GUIDE_META.dateModified the same way.
+ */
+export function getGitLastmod(filePath: string): string {
   try {
     const date = execSync(`git log -1 --format=%cI -- "${filePath}"`, {
       encoding: 'utf-8',
