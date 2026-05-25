@@ -52,7 +52,7 @@ Use the `chrome-devtools` MCP to verify (preferred over Playwright MCP because i
 
 1. **Navigate** to each affected page via `navigate_page`
 2. **Take a screenshot** with `take_screenshot`
-3. **Check both light and dark mode** if styling was changed — toggle via the theme switcher or by running `document.documentElement.classList.toggle('dark')` through `evaluate`
+3. **Check both light and dark mode** if styling was changed — toggle via the theme switcher or by running `document.documentElement.classList.toggle('dark')` through `evaluate_script`
 4. **Check mobile viewport** if layout/responsive changes were made — resize to 375px width
 5. **Inspect console** with `list_console_messages` for hydration warnings or runtime errors
 6. **Look for regressions** on related pages (e.g., if sidebar was changed, check multiple doc pages)

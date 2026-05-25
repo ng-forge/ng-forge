@@ -19,7 +19,7 @@
 - **Simplest solution that works.** No speculative abstractions, no "while I'm here" cleanup, no designing for hypothetical futures. If asked to simplify, actually simplify. Don't rewrite with similar complexity
 - **No verification claims without evidence.** Never say "verified", "tested", "ready to merge", or "CI green" unless you ran the command this session. Paste the actual output, or say "not verified"
 - **No direct push to `main`.** Always a feature branch or worktree. Show the commit message for review before pushing
-- **No AI-style prose in PRs, replies, or docs.** No em-dashes, no arrows (→), no "It's not X, it's Y" constructions. Don't post unsolicited PR comments. Don't cross-reference external repos' issues in PR descriptions (creates permanent backlinks)
+- **No AI-style prose in user-facing output** (PR descriptions and comments, code review replies, commit messages, docs site content, announcements). No em-dashes, no arrows, no "It's not X, it's Y" constructions. Don't post unsolicited PR comments. Don't cross-reference external repos' issues in PR descriptions (creates permanent backlinks). This rule does not apply to internal config files like CLAUDE.md or skills, which predate it
 
 ## Working Style
 
