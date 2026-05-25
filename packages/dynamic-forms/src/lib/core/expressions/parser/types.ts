@@ -38,10 +38,16 @@ export enum TokenType {
   // Punctuation
   DOT = 'DOT',
   COMMA = 'COMMA',
+  COLON = 'COLON',
   LPAREN = 'LPAREN',
   RPAREN = 'RPAREN',
   LBRACKET = 'LBRACKET',
   RBRACKET = 'RBRACKET',
+  LBRACE = 'LBRACE',
+  RBRACE = 'RBRACE',
+  ARROW = 'ARROW',
+  QUESTION = 'QUESTION',
+  OPTIONAL_DOT = 'OPTIONAL_DOT',
 
   // Special
   EOF = 'EOF',
@@ -59,7 +65,18 @@ export interface Token {
 /**
  * AST Node types
  */
-export type ASTNode = LiteralNode | IdentifierNode | MemberAccessNode | BinaryOpNode | UnaryOpNode | CallExpressionNode | ArrayLiteralNode;
+export type ASTNode =
+  | LiteralNode
+  | IdentifierNode
+  | MemberAccessNode
+  | ComputedMemberAccessNode
+  | BinaryOpNode
+  | UnaryOpNode
+  | CallExpressionNode
+  | ConditionalNode
+  | ArrayLiteralNode
+  | ObjectLiteralNode
+  | ArrowFunctionNode;
 
 export interface LiteralNode {
   type: 'Literal';
@@ -75,6 +92,24 @@ export interface MemberAccessNode {
   type: 'MemberAccess';
   object: ASTNode;
   property: string;
+  /** True when this access used `?.` (optional chaining). */
+  optional?: boolean;
+}
+
+export interface ComputedMemberAccessNode {
+  type: 'ComputedMemberAccess';
+  object: ASTNode;
+  /** Expression evaluated at runtime to produce the property key. */
+  property: ASTNode;
+  /** True when this access used `?.[ ... ]` (optional chaining). */
+  optional?: boolean;
+}
+
+export interface ConditionalNode {
+  type: 'Conditional';
+  test: ASTNode;
+  consequent: ASTNode;
+  alternate: ASTNode;
 }
 
 export interface BinaryOpNode {
@@ -94,11 +129,24 @@ export interface CallExpressionNode {
   type: 'CallExpression';
   callee: ASTNode;
   arguments: ASTNode[];
+  /** True when this call used `?.( ... )` (optional chaining). */
+  optional?: boolean;
 }
 
 export interface ArrayLiteralNode {
   type: 'ArrayLiteral';
   elements: ASTNode[];
+}
+
+export interface ObjectLiteralNode {
+  type: 'ObjectLiteral';
+  properties: Array<{ key: string; value: ASTNode }>;
+}
+
+export interface ArrowFunctionNode {
+  type: 'ArrowFunction';
+  params: string[];
+  body: ASTNode;
 }
 
 /**

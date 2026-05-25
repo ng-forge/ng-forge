@@ -1,11 +1,14 @@
+import { HttpClient } from '@angular/common/http';
 import { computed, DestroyRef, inject, InjectionToken, Injector, Signal, untracked } from '@angular/core';
 import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
   auditTime,
+  catchError,
   combineLatestWith,
   debounceTime,
+  EMPTY,
   exhaustMap,
   filter,
   map,
@@ -27,12 +30,15 @@ import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
 import { getDebouncePeriods } from '../derivation/debounce-period-utils';
+import { buildEntryStreamPipeline } from '../derivation/entry-set-utils';
 import { resolveExternalData } from '../derivation/external-data-resolver';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
 import { collectPropertyDerivations } from './property-derivation-collector';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 import { PropertyOverrideStore } from './property-override-store';
+import { createHttpPropertyDerivationStream } from './http-property-derivation-stream';
+import { createAsyncPropertyDerivationStream } from './async-property-derivation-stream';
 
 /**
  * Configuration for creating a PropertyDerivationOrchestrator.
@@ -72,6 +78,7 @@ export class PropertyDerivationOrchestrator {
   private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
+  private readonly httpClient = inject(HttpClient, { optional: true });
 
   /**
    * Computed signal containing the collected property derivations.
@@ -118,6 +125,8 @@ export class PropertyDerivationOrchestrator {
 
     this.setupOnChangeStream();
     this.setupDebouncedStream();
+    this.setupHttpStreams();
+    this.setupAsyncFunctionStreams();
   }
 
   private setupOnChangeStream(): void {
@@ -218,6 +227,118 @@ export class PropertyDerivationOrchestrator {
 
     applyPropertyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext, changedFields);
   }
+
+  /**
+   * Declarative pipeline for HTTP property-derivation entries. Delegates the
+   * collection-watching / dedup / cancellation plumbing to
+   * {@link buildEntryStreamPipeline} so both orchestrators share one
+   * implementation.
+   *
+   * Errors inside `createStream` invocations are isolated via the inner
+   * stream's own `catchError`; we additionally wrap the outer pipeline so a
+   * synchronous throw during stream construction (e.g., evaluation of a
+   * `condition`) doesn't tear the whole pipeline down for the lifetime of
+   * the form.
+   */
+  private setupHttpStreams(): void {
+    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
+
+    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
+      entrySignature: httpEntrySignature,
+      createStream: (entry) => {
+        if (!this.httpClient) {
+          this.logger.error(
+            'HTTP Property Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
+          );
+          return null;
+        }
+        return createHttpPropertyDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          store: this.config.store,
+          httpClient: this.httpClient,
+          logger: this.logger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+        });
+      },
+    })
+      .pipe(
+        catchError((err) => {
+          this.logger.error('HTTP Property Derivation: outer stream error', err);
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
+  private setupAsyncFunctionStreams(): void {
+    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
+
+    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
+      entrySignature: asyncEntrySignature,
+      createStream: (entry) =>
+        createAsyncPropertyDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          store: this.config.store,
+          logger: this.logger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+        }),
+    })
+      .pipe(
+        catchError((err) => {
+          this.logger.error('Async Property Derivation: outer stream error', err);
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+}
+
+/**
+ * Identity signature for an HTTP property-derivation entry. Includes every
+ * field that drives the inner stream's behavior — changing any of them must
+ * tear down and rebuild the stream. Stable across topological reorderings
+ * because the consumer ({@link entrySetsEqual}) compares as a multiset.
+ */
+function httpEntrySignature(entry: PropertyDerivationEntry): string {
+  const config = {
+    http: entry.http,
+    responseExpression: entry.responseExpression,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+  };
+  return `${entry.fieldKey}.${entry.targetProperty}:${JSON.stringify(config)}`;
+}
+
+/**
+ * Identity signature for an async-function property-derivation entry. Same
+ * principle as {@link httpEntrySignature}: include every field the inner
+ * stream closes over so changes force a rebuild. Inline `asyncFn`s use the
+ * `fieldKey.targetProperty` path as a stable identifier — function identity
+ * isn't JSON-serializable.
+ */
+function asyncEntrySignature(entry: PropertyDerivationEntry): string {
+  const config = {
+    asyncFunctionName: entry.asyncFunctionName,
+    asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}.${entry.targetProperty}` : undefined,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+  };
+  return `${entry.fieldKey}.${entry.targetProperty}:${JSON.stringify(config)}`;
 }
 
 /**

@@ -5,8 +5,10 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import {
   auditTime,
+  catchError,
   combineLatestWith,
   debounceTime,
+  EMPTY,
   exhaustMap,
   filter,
   map,
@@ -16,7 +18,6 @@ import {
   queueScheduler,
   scheduled,
   startWith,
-  Subscription,
   switchMap,
   timer,
 } from 'rxjs';
@@ -33,7 +34,8 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { createHttpDerivationStream, createStreamGuard, HttpDerivationStreamContext } from './http-derivation-stream';
+import { buildEntryStreamPipeline } from './entry-set-utils';
+import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 import { getDebouncePeriods } from './debounce-period-utils';
 import { resolveExternalData } from './external-data-resolver';
@@ -82,25 +84,6 @@ export class DerivationOrchestrator {
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS);
   private readonly httpClient = inject(HttpClient, { optional: true });
-
-  /** Active HTTP derivation stream subscriptions */
-  private httpSubscriptions: Subscription[] = [];
-
-  /** Identity keys of current HTTP entries for smart teardown comparison */
-  private lastHttpEntryKeys: Set<string> | null = null;
-
-  /** Active async function derivation stream subscriptions */
-  private asyncFunctionSubscriptions: Subscription[] = [];
-
-  /** Identity keys of current async entries for smart teardown comparison */
-  private lastAsyncEntryKeys: Set<string> | null = null;
-
-  /**
-   * Guard for detecting stale HTTP responses. Call `invalidate()` on teardown to cancel
-   * in-flight requests from the previous generation. Each HTTP stream subscribes via
-   * `takeUntil(guard$)` — when `invalidate()` fires, all in-flight requests are discarded.
-   */
-  private readonly streamGuard = createStreamGuard();
 
   /**
    * Computed signal containing the collected and validated derivations.
@@ -326,184 +309,126 @@ export class DerivationOrchestrator {
   }
 
   /**
-   * Sets up reactive HTTP derivation streams that react to collection changes.
+   * Builds a declarative stream that reacts to changes in the set of HTTP
+   * derivation entries and emits per-entry streams merged together.
    *
-   * Subscribes to derivationCollection changes and creates per-entry HTTP streams.
-   * Uses smart teardown: only recreates streams when HTTP entries actually change.
+   * - `distinctUntilChanged` over the set of entry signatures skips rebuilds
+   *   when the HTTP entries haven't actually changed. The comparison is
+   *   order-insensitive — `topologicalSort` in the collector can reorder
+   *   existing entries when unrelated entries are added/removed, and we
+   *   don't want to tear down healthy streams in that case.
+   * - `switchMap` cancels the previous merged stream when entries change,
+   *   which propagates into each `createHttpDerivationStream` and cancels
+   *   any in-flight HTTP requests via ordinary RxJS unsubscribe semantics.
+   *
+   * No mutable subscription bookkeeping or stream guard — `takeUntilDestroyed`
+   * on the outer subscription handles unmount.
    */
   private setupHttpStreams(): void {
-    toObservable(this.derivationCollection, { injector: this.injector })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((collection) => {
-        const httpEntries = collection?.entries.filter((entry) => entry.http) ?? [];
+    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
 
-        if (httpEntries.length === 0) {
-          this.teardownHttpStreams();
-          this.lastHttpEntryKeys = null;
-          return;
-        }
-
-        // Smart teardown: compare entry identity keys to avoid redundant stream recreation
-        const newKeys = this.computeHttpEntryKeys(httpEntries);
-        if (this.lastHttpEntryKeys && this.setsEqual(this.lastHttpEntryKeys, newKeys)) {
-          return; // No change in HTTP entries — keep existing streams
-        }
-
-        // Validate HttpClient availability
+    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
+      entrySignature: httpEntrySignature,
+      createStream: (entry) => {
         if (!this.httpClient) {
           this.logger.error(
-            'HTTP Derivation: HttpClient is not available. ' + 'Ensure provideHttpClient() is included in your application providers.',
+            'HTTP Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
           );
-          return;
+          return null;
         }
-
-        // Tear down previous streams and create new ones
-        this.teardownHttpStreams();
-        this.lastHttpEntryKeys = newKeys;
-
-        const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-
-        for (const entry of httpEntries) {
-          const context: HttpDerivationStreamContext = {
-            formValue: this.config.formValue,
-            form: this.config.form,
-            httpClient: this.httpClient,
-            logger: this.logger,
-            derivationLogger: this.config.derivationLogger,
-            customFunctions: () => this.functionRegistry.getCustomFunctions(),
-            externalData: () => resolveExternalData(this.config.externalData),
-            warningTracker: this.warningTracker,
-            guard$: this.streamGuard.guard$,
-          };
-
-          const stream = createHttpDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
-
-          this.httpSubscriptions.push(
-            stream.subscribe({
-              error: (err) => this.logger.error(`HTTP Derivation: Stream error for '${entry.fieldKey}'`, err),
-            }),
-          );
-        }
-      });
-  }
-
-  /**
-   * Tears down all active HTTP derivation streams. Invalidating the stream guard
-   * cancels any in-flight HTTP responses from the old generation via `takeUntil`.
-   */
-  private teardownHttpStreams(): void {
-    this.streamGuard.invalidate();
-    for (const sub of this.httpSubscriptions) {
-      sub.unsubscribe();
-    }
-    this.httpSubscriptions = [];
-  }
-
-  /**
-   * Computes a set of identity keys for HTTP entries.
-   * Used for smart teardown comparison.
-   */
-  private computeHttpEntryKeys(entries: DerivationEntry[]): Set<string> {
-    return new Set(entries.map((entry) => `${entry.fieldKey}:${JSON.stringify(entry.http, Object.keys(entry.http ?? {}).sort())}`));
-  }
-
-  /**
-   * Compares two sets for equality.
-   */
-  private setsEqual(a: Set<string>, b: Set<string>): boolean {
-    if (a.size !== b.size) return false;
-    for (const item of a) {
-      if (!b.has(item)) return false;
-    }
-    return true;
-  }
-
-  /**
-   * Sets up reactive async function derivation streams that react to collection changes.
-   *
-   * Subscribes to derivationCollection changes and creates per-entry async streams.
-   * Uses smart teardown: only recreates streams when async entries actually change.
-   */
-  private setupAsyncFunctionStreams(): void {
-    toObservable(this.derivationCollection, { injector: this.injector })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((collection) => {
-        const asyncEntries = collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [];
-
-        if (asyncEntries.length === 0) {
-          this.teardownAsyncFunctionStreams();
-          this.lastAsyncEntryKeys = null;
-          return;
-        }
-
-        // Smart teardown: compare entry identity keys to avoid redundant stream recreation
-        const newKeys = this.computeAsyncEntryKeys(asyncEntries);
-        if (this.lastAsyncEntryKeys && this.setsEqual(this.lastAsyncEntryKeys, newKeys)) {
-          return; // No change in async entries — keep existing streams
-        }
-
-        // Tear down previous streams and create new ones
-        this.teardownAsyncFunctionStreams();
-        this.lastAsyncEntryKeys = newKeys;
-
-        const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-
-        for (const entry of asyncEntries) {
-          const context = {
-            formValue: this.config.formValue,
-            form: this.config.form,
-            logger: this.logger,
-            derivationLogger: this.config.derivationLogger,
-            customFunctions: () => this.functionRegistry.getCustomFunctions(),
-            asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
-            externalData: () => resolveExternalData(this.config.externalData),
-            warningTracker: this.warningTracker,
-          };
-
-          const stream = createAsyncDerivationStream(entry, formValue$, context).pipe(takeUntilDestroyed(this.destroyRef));
-
-          this.asyncFunctionSubscriptions.push(
-            stream.subscribe({
-              error: (err) => this.logger.error(`Async Derivation: Stream error for '${entry.fieldKey}'`, err),
-            }),
-          );
-        }
-      });
-  }
-
-  /**
-   * Tears down all active async function derivation streams.
-   */
-  private teardownAsyncFunctionStreams(): void {
-    for (const sub of this.asyncFunctionSubscriptions) {
-      sub.unsubscribe();
-    }
-    this.asyncFunctionSubscriptions = [];
-  }
-
-  /**
-   * Computes a set of identity keys for async entries.
-   * Used for smart teardown comparison.
-   */
-  private computeAsyncEntryKeys(entries: DerivationEntry[]): Set<string> {
-    // For inline `asyncFn` entries we tag the key with the field path (the real
-    // identity, since derivations are self-targeting) rather than the array
-    // index. Index-based tagging churned identities whenever topologicalSort
-    // reordered entries, causing unnecessary teardown + re-subscribe.
-    return new Set(
-      entries.map((entry) => {
-        const config = {
-          asyncFunctionName: entry.asyncFunctionName,
-          asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}` : undefined,
-          dependsOn: entry.dependsOn,
-          debounceMs: entry.debounceMs,
-          stopOnUserOverride: entry.stopOnUserOverride,
-          reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+        const context: HttpDerivationStreamContext = {
+          formValue: this.config.formValue,
+          form: this.config.form,
+          httpClient: this.httpClient,
+          logger: this.logger,
+          derivationLogger: this.config.derivationLogger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+          warningTracker: this.warningTracker,
         };
-        return `${entry.fieldKey}:${JSON.stringify(config, Object.keys(config).sort())}`;
-      }),
-    );
+        return createHttpDerivationStream(entry, formValue$, context);
+      },
+    })
+      .pipe(
+        catchError((err) => {
+          this.logger.error('HTTP Derivation: outer stream error', err);
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
+
+  private setupAsyncFunctionStreams(): void {
+    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
+
+    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
+      entrySignature: asyncEntrySignature,
+      createStream: (entry) =>
+        createAsyncDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          form: this.config.form,
+          logger: this.logger,
+          derivationLogger: this.config.derivationLogger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+          warningTracker: this.warningTracker,
+        }),
+    })
+      .pipe(
+        catchError((err) => {
+          this.logger.error('Async Derivation: outer stream error', err);
+          return EMPTY;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+}
+
+/**
+ * Identity signature for an HTTP derivation entry. Includes every field that
+ * drives the inner stream's behavior — changing any of them must tear down
+ * and rebuild the stream. Stable across topological reorderings because the
+ * consumer ({@link entrySetsEqual}) compares as a multiset.
+ */
+function httpEntrySignature(entry: DerivationEntry): string {
+  const config = {
+    http: entry.http,
+    responseExpression: entry.responseExpression,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+    stopOnUserOverride: entry.stopOnUserOverride,
+    reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+  };
+  return `${entry.fieldKey}:${JSON.stringify(config)}`;
+}
+
+function asyncEntrySignature(entry: DerivationEntry): string {
+  // For inline `asyncFn` entries we tag the signature with the field path (the
+  // real identity, since derivations are self-targeting) rather than the array
+  // index. Index-based tagging churned identities whenever topologicalSort
+  // reordered entries, causing unnecessary teardown + re-subscribe.
+  const config = {
+    asyncFunctionName: entry.asyncFunctionName,
+    asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}` : undefined,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+    stopOnUserOverride: entry.stopOnUserOverride,
+    reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+  };
+  return `${entry.fieldKey}:${JSON.stringify(config)}`;
 }
 
 /**

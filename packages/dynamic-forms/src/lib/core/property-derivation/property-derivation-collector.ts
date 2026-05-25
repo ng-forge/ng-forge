@@ -1,10 +1,11 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, isDerivationLogicConfig, hasTargetProperty } from '../../models/logic/logic-config';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import { extractDependenciesFromConfig } from '../derivation/extract-dependencies';
-import { extractInlineFn } from '../derivation/extract-inline-fn';
+import { extractInlineAsyncFn, extractInlineFn } from '../derivation/extract-inline-fn';
 import { traverseFieldsWithContext } from '../derivation/field-traversal';
 import { buildPropertyOverrideKey, PLACEHOLDER_INDEX } from './property-override-key';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
@@ -106,6 +107,105 @@ function createPropertyDerivationEntryFromDerivation(
     fieldKey,
     context.groupPath,
   );
+
+  // HTTP and async function property derivations require explicit, non-wildcard
+  // dependencies — mirrors the same guards on value-derivation HTTP/async sources.
+  //
+  // Type-level discriminants require these fields, but JSON-loaded configs can
+  // bypass that — so we defensively guard against missing arrays and missing
+  // HTTP fields here to fail fast with `DynamicFormError` instead of throwing
+  // an opaque `TypeError` later.
+  //
+  // `targetProperty` is captured up front and `untypedConfig` is used inside
+  // the source-narrowed blocks because TypeScript narrows `config` to `never`
+  // once we negate a discriminant-required field (e.g. `!config.http` when
+  // `source: 'http'` requires `http`).
+  const errorLocation = `'${effectiveFieldKey}.${config.targetProperty}'`;
+  const untypedConfig = config as {
+    source?: string;
+    value?: unknown;
+    expression?: unknown;
+    functionName?: unknown;
+    fn?: unknown;
+    http?: unknown;
+    responseExpression?: string;
+    asyncFunctionName?: string;
+    asyncFn?: unknown;
+    dependsOn?: unknown;
+  };
+
+  // Reject configs that mix value-source fields with an explicit async source.
+  // TypeScript's discriminated union already enforces this XOR for inline
+  // configs; the runtime check guards JSON-loaded configs (API/OpenAPI/MCP)
+  // where the wrong combination would silently degrade — async entries are
+  // routed to the stream pipeline while sync fields would be ignored.
+  if (untypedConfig.source === 'http' || untypedConfig.source === 'asyncFunction') {
+    const conflictingSyncSources: string[] = [];
+    if (untypedConfig.value !== undefined) conflictingSyncSources.push('value');
+    if (untypedConfig.expression !== undefined) conflictingSyncSources.push('expression');
+    if (untypedConfig.functionName !== undefined) conflictingSyncSources.push('functionName');
+    if (untypedConfig.fn !== undefined) conflictingSyncSources.push('fn');
+    if (conflictingSyncSources.length > 0) {
+      throw new DynamicFormError(
+        `Property derivation for ${errorLocation} sets 'source: ${JSON.stringify(untypedConfig.source)}' alongside ` +
+          `sync value source(s) [${conflictingSyncSources.join(', ')}]. These are mutually exclusive — remove either ` +
+          `the sync fields or the async source.`,
+      );
+    }
+  }
+
+  // Reject HTTP + asyncFunction-field combinations as well (TS already
+  // enforces this; runtime guard for JSON-loaded configs).
+  if (untypedConfig.source === 'http' && (untypedConfig.asyncFunctionName !== undefined || untypedConfig.asyncFn !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "http"' alongside an async function — these are mutually exclusive.`,
+    );
+  }
+  if (untypedConfig.source === 'asyncFunction' && (untypedConfig.http !== undefined || untypedConfig.responseExpression !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "asyncFunction"' alongside HTTP fields — these are mutually exclusive.`,
+    );
+  }
+
+  if (untypedConfig.source === 'http') {
+    if (!untypedConfig.http) {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires an 'http' config object.`);
+    }
+    if (typeof untypedConfig.responseExpression !== 'string' || untypedConfig.responseExpression.trim() === '') {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires a non-empty 'responseExpression'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `HTTP property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger HTTP requests on every form change.`,
+      );
+    }
+    if (untypedConfig.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `HTTP property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+  }
+
+  if (untypedConfig.source === 'asyncFunction') {
+    if (!untypedConfig.asyncFunctionName && !untypedConfig.asyncFn) {
+      throw new DynamicFormError(`Async property derivation for ${errorLocation} requires either 'asyncFunctionName' or 'asyncFn'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `Async property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger async functions on every form change.`,
+      );
+    }
+    if (untypedConfig.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `Async property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger async functions on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+  }
+
   const dependsOn = extractDependenciesFromConfig(config);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
@@ -120,6 +220,10 @@ function createPropertyDerivationEntryFromDerivation(
     expression: config.expression,
     functionName: config.functionName,
     fn: extractInlineFn(config),
+    http: config.http,
+    responseExpression: config.responseExpression,
+    asyncFunctionName: config.asyncFunctionName,
+    asyncFn: extractInlineAsyncFn(config),
     trigger,
     debounceMs,
     debugName: config.debugName,

@@ -27,7 +27,7 @@ When `startDate` changes, the `minDate` property on `endDate`'s datepicker compo
 
 ## Derivation Sources
 
-Property derivations support three mutually exclusive ways to compute a value.
+Property derivations support five mutually exclusive ways to compute a value: synchronous (`value`, `expression`, `functionName`/`fn`) and asynchronous (`source: 'http'`, `source: 'asyncFunction'`).
 
 ### Expression-Based
 
@@ -106,6 +106,96 @@ fields: [
   },
 ],
 ```
+
+### HTTP
+
+Use `source: 'http'` to derive a property from an HTTP response — typically used to populate a select's `options` from a backend search endpoint. The request fires when any `dependsOn` field changes, with automatic in-flight cancellation when dependencies change again.
+
+```typescript
+{
+  key: 'streetDropdown',
+  type: 'select',
+  options: [],
+  label: 'Street Suggestions',
+  logic: [{
+    type: 'derivation',
+    source: 'http',
+    targetProperty: 'options',
+    http: {
+      url: '/api/address/streets/search',
+      method: 'GET',
+      queryParams: { q: 'formValue.street' },
+    },
+    responseExpression: 'response.map(d => ({ value: d.id, label: d.streetNameShort }))',
+    dependsOn: ['street'],
+    trigger: 'debounced',
+    debounceMs: 300,
+  }],
+}
+```
+
+- `source: 'http'` is required.
+- `dependsOn` is required and must be non-empty — wildcards (`'*'`) are rejected.
+- `responseExpression` is evaluated against `{ response }`. Object literals and arrow functions are supported, so you can map response rows into the `FieldOption` shape inline.
+- `trigger: 'debounced'` with a `debounceMs` is strongly recommended for autocomplete-style inputs to avoid spamming the server on every keystroke.
+- Requires `provideHttpClient()` in your application providers.
+
+See [Async Derivations → HTTP](/dynamic-behavior/derivation/async#http-derivations) for the full request configuration (path params, headers, POST bodies, conditional firing).
+
+### Async Function
+
+Use `source: 'asyncFunction'` when you need custom client-side logic — Angular service injection, complex transformations, or any async computation that's not a plain HTTP call. The function receives the full `EvaluationContext` and can return a `Promise` or `Observable`.
+
+```typescript
+import { inject } from '@angular/core';
+import { map } from 'rxjs';
+import type { AsyncDerivationFunction, FormConfig } from '@ng-forge/dynamic-forms';
+
+const fetchCities: AsyncDerivationFunction = (context) =>
+  inject(CityService)
+    .search(context.formValue.country as string)
+    .pipe(map((rows) => rows.map((r) => ({ value: r.code, label: r.name }))));
+
+const config = {
+  fields: [
+    {
+      key: 'city',
+      type: 'select',
+      options: [],
+      label: 'City',
+      logic: [
+        {
+          type: 'derivation',
+          source: 'asyncFunction',
+          targetProperty: 'options',
+          asyncFn: fetchCities,
+          dependsOn: ['country'],
+        },
+      ],
+    },
+  ],
+} as const satisfies FormConfig;
+```
+
+For JSON-serializable configs (API/OpenAPI/MCP), register the function in `customFnConfig.asyncDerivations` and reference it by name:
+
+```typescript
+customFnConfig: {
+  asyncDerivations: {
+    fetchCities: (ctx) => inject(CityService).search(ctx.formValue.country as string),
+  },
+},
+// then on the field:
+logic: [{
+  type: 'derivation',
+  source: 'asyncFunction',
+  targetProperty: 'options',
+  asyncFunctionName: 'fetchCities',
+  dependsOn: ['country'],
+}],
+```
+
+The same XOR rule applies as elsewhere in the library: `asyncFn` and `asyncFunctionName` are mutually exclusive.
 
 ## Target Properties
 

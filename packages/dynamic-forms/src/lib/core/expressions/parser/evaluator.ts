@@ -158,6 +158,9 @@ export class Evaluator {
       case 'MemberAccess':
         return this.evaluateMemberAccess(node);
 
+      case 'ComputedMemberAccess':
+        return this.evaluateComputedMemberAccess(node);
+
       case 'BinaryOp':
         return this.evaluateBinaryOp(node);
 
@@ -167,8 +170,17 @@ export class Evaluator {
       case 'CallExpression':
         return this.evaluateCallExpression(node);
 
+      case 'Conditional':
+        return this.evaluate(node.test) ? this.evaluate(node.consequent) : this.evaluate(node.alternate);
+
       case 'ArrayLiteral':
         return this.evaluateArrayLiteral(node);
+
+      case 'ObjectLiteral':
+        return this.evaluateObjectLiteral(node);
+
+      case 'ArrowFunction':
+        return this.evaluateArrowFunction(node);
 
       default:
         throw new ExpressionParserError(`Unknown node type: ${(node as { type: string }).type}`, 0, this.expression);
@@ -197,6 +209,32 @@ export class Evaluator {
     // Allow property access on plain objects and primitives
     if (typeof obj === 'object' || typeof obj === 'string' || typeof obj === 'number') {
       return (obj as Record<string, unknown>)[node.property];
+    }
+
+    return undefined;
+  }
+
+  private evaluateComputedMemberAccess(node: { object: ASTNode; property: ASTNode; optional?: boolean }): unknown {
+    const obj = this.evaluate(node.object);
+
+    if (obj === null || obj === undefined) {
+      // Both `obj?.[expr]` and `obj[expr]` short-circuit on null/undefined —
+      // matches the safe-access behavior of dotted member access above.
+      return undefined;
+    }
+
+    const rawKey = this.evaluate(node.property);
+    if (rawKey === null || rawKey === undefined) return undefined;
+    const key = String(rawKey);
+
+    // Same blocklist as dotted access — `obj['__proto__']` must be rejected
+    // even though the property name was computed.
+    if (BLOCKED_PROPERTIES.has(key)) {
+      throw new ExpressionParserError(`Property "${key}" is not accessible for security reasons`, 0, this.expression);
+    }
+
+    if (typeof obj === 'object' || typeof obj === 'string' || typeof obj === 'number') {
+      return (obj as Record<string, unknown>)[key];
     }
 
     return undefined;
@@ -270,13 +308,25 @@ export class Evaluator {
     }
   }
 
-  private evaluateCallExpression(node: { callee: ASTNode; arguments: ASTNode[] }): unknown {
-    // Only allow method calls (member access), not arbitrary function calls
+  private evaluateCallExpression(node: { callee: ASTNode; arguments: ASTNode[]; optional?: boolean }): unknown {
+    // Only allow method calls (member access). Computed access (`obj['method']()`)
+    // is also rejected — the security model whitelists method names statically.
     if (node.callee.type !== 'MemberAccess') {
       throw new ExpressionParserError('Only method calls are allowed, not arbitrary function calls', 0, this.expression);
     }
 
     const obj = this.evaluate(node.callee.object);
+
+    // Calling a method on a nullish receiver silently returns undefined —
+    // consistent with how dotted member access (`obj.prop`) treats nullish
+    // receivers above. This means `a?.b()`, `a?.b.c()`, and `nullable.method()`
+    // all short-circuit to undefined rather than tripping the whitelist check
+    // with a misleading "method not allowed" error. The whitelist still
+    // enforces strictly on non-nullish receivers.
+    if (obj === null || obj === undefined) {
+      return undefined;
+    }
+
     const methodName = node.callee.property;
 
     // Block access to dangerous properties (must check before method call)
@@ -304,6 +354,30 @@ export class Evaluator {
 
   private evaluateArrayLiteral(node: { elements: ASTNode[] }): unknown {
     return node.elements.map((element) => this.evaluate(element));
+  }
+
+  private evaluateObjectLiteral(node: { properties: Array<{ key: string; value: ASTNode }> }): unknown {
+    const result: Record<string, unknown> = {};
+    for (const { key, value } of node.properties) {
+      if (BLOCKED_PROPERTIES.has(key)) {
+        throw new ExpressionParserError(`Property "${key}" is not allowed in object literals for security reasons`, 0, this.expression);
+      }
+      result[key] = this.evaluate(value);
+    }
+    return result;
+  }
+
+  private evaluateArrowFunction(node: { params: string[]; body: ASTNode }): unknown {
+    const parentScope = this.scope;
+    const expression = this.expression;
+    return (...args: unknown[]) => {
+      const childScope: EvaluationScope = { ...parentScope };
+      for (let i = 0; i < node.params.length; i++) {
+        childScope[node.params[i]] = args[i];
+      }
+      const childEvaluator = new Evaluator(childScope, expression);
+      return childEvaluator.evaluate(node.body);
+    };
   }
 
   private isMethodSafe(obj: unknown, methodName: string): boolean {

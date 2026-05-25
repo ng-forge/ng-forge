@@ -10,7 +10,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import { computeValueFromEntry } from '../derivation/compute-derived-value';
 import { getParentPathInScope, resolveArrayItemScope } from '../derivation/evaluation-scope';
-import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
+import { isAsyncPropertyDerivationEntry, PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 import { PropertyOverrideStore } from './property-override-store';
 
 /**
@@ -81,7 +81,10 @@ export function applyPropertyDerivations(
   let skippedCount = 0;
   let errorCount = 0;
 
-  const entriesToProcess = changedFields ? getEntriesForChangedFields(collection.entries, changedFields) : collection.entries;
+  const baseEntries = changedFields ? getEntriesForChangedFields(collection.entries, changedFields) : collection.entries;
+  // Async entries (HTTP / asyncFn / asyncFunctionName) are processed by dedicated
+  // stream subscriptions in the orchestrator, not by this synchronous applicator.
+  const entriesToProcess = baseEntries.filter((entry) => !isAsyncPropertyDerivationEntry(entry));
 
   for (const entry of entriesToProcess) {
     try {

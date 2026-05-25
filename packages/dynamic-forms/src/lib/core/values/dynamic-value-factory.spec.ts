@@ -174,7 +174,10 @@ describe('dynamic-value-factory', () => {
     it('should handle expression errors gracefully', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => void 0);
 
-      const expression = 'invalidExpression.does.not.exist()';
+      // Accessing a blocked property (`constructor`) throws via the parser's
+      // security check — a stable way to force an error after method calls on
+      // nullish receivers became null-safe.
+      const expression = 'fieldValue.constructor';
       const result = runDynamicValueFunctionTest<string, string>(expression, 'test');
 
       expect(result).toBeUndefined();
