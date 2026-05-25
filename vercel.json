@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "git fetch --unshallow --quiet 2>/dev/null || true && NX_DAEMON=false NODE_OPTIONS=--max-old-space-size=8192 pnpm run deploy:prep",
+  "buildCommand": "bash scripts/vercel-build.sh",
   "outputDirectory": "dist/deploy",
   "cleanUrls": true,
   "trailingSlash": false,
