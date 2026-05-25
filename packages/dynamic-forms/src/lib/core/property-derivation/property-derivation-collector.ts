@@ -110,31 +110,60 @@ function createPropertyDerivationEntryFromDerivation(
 
   // HTTP and async function property derivations require explicit, non-wildcard
   // dependencies — mirrors the same guards on value-derivation HTTP/async sources.
-  if (config.source === 'http') {
-    if (config.dependsOn.length === 0) {
+  //
+  // Type-level discriminants require these fields, but JSON-loaded configs can
+  // bypass that — so we defensively guard against missing arrays and missing
+  // HTTP fields here to fail fast with `DynamicFormError` instead of throwing
+  // an opaque `TypeError` later.
+  //
+  // `targetProperty` is captured up front and `untypedConfig` is used inside
+  // the source-narrowed blocks because TypeScript narrows `config` to `never`
+  // once we negate a discriminant-required field (e.g. `!config.http` when
+  // `source: 'http'` requires `http`).
+  const errorLocation = `'${effectiveFieldKey}.${config.targetProperty}'`;
+  const untypedConfig = config as {
+    source?: string;
+    http?: unknown;
+    responseExpression?: string;
+    asyncFunctionName?: string;
+    asyncFn?: unknown;
+    dependsOn?: unknown;
+  };
+
+  if (untypedConfig.source === 'http') {
+    if (!untypedConfig.http) {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires an 'http' config object.`);
+    }
+    if (typeof untypedConfig.responseExpression !== 'string' || untypedConfig.responseExpression.trim() === '') {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires a non-empty 'responseExpression'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
       throw new DynamicFormError(
-        `HTTP property derivation for '${effectiveFieldKey}.${config.targetProperty}' requires explicit 'dependsOn'. ` +
+        `HTTP property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
           `Wildcard dependencies would trigger HTTP requests on every form change.`,
       );
     }
-    if (config.dependsOn.includes('*')) {
+    if (untypedConfig.dependsOn.includes('*')) {
       throw new DynamicFormError(
-        `HTTP property derivation for '${effectiveFieldKey}.${config.targetProperty}' cannot use wildcard ('*') in 'dependsOn'. ` +
+        `HTTP property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
           `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
       );
     }
   }
 
-  if (config.source === 'asyncFunction') {
-    if (config.dependsOn.length === 0) {
+  if (untypedConfig.source === 'asyncFunction') {
+    if (!untypedConfig.asyncFunctionName && !untypedConfig.asyncFn) {
+      throw new DynamicFormError(`Async property derivation for ${errorLocation} requires either 'asyncFunctionName' or 'asyncFn'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
       throw new DynamicFormError(
-        `Async property derivation for '${effectiveFieldKey}.${config.targetProperty}' requires explicit 'dependsOn'. ` +
+        `Async property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
           `Wildcard dependencies would trigger async functions on every form change.`,
       );
     }
-    if (config.dependsOn.includes('*')) {
+    if (untypedConfig.dependsOn.includes('*')) {
       throw new DynamicFormError(
-        `Async property derivation for '${effectiveFieldKey}.${config.targetProperty}' cannot use wildcard ('*') in 'dependsOn'. ` +
+        `Async property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
           `Wildcards would trigger async functions on every form change. Specify explicit field dependencies instead.`,
       );
     }

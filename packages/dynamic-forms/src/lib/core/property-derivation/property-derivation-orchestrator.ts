@@ -320,12 +320,41 @@ export class PropertyDerivationOrchestrator {
   }
 }
 
+/**
+ * Identity signature for an HTTP property-derivation entry. Includes every
+ * field that drives the inner stream's behavior — changing any of them must
+ * tear down and rebuild the stream. Stable across topological reorderings
+ * because the consumer ({@link entrySetsEqual}) compares as a multiset.
+ */
 function httpEntrySignature(entry: PropertyDerivationEntry): string {
-  return `${entry.fieldKey}.${entry.targetProperty}:${JSON.stringify(entry.http, Object.keys(entry.http ?? {}).sort())}`;
+  const config = {
+    http: entry.http,
+    responseExpression: entry.responseExpression,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+  };
+  return `${entry.fieldKey}.${entry.targetProperty}:${JSON.stringify(config)}`;
 }
 
+/**
+ * Identity signature for an async-function property-derivation entry. Same
+ * principle as {@link httpEntrySignature}: include every field the inner
+ * stream closes over so changes force a rebuild. Inline `asyncFn`s use the
+ * `fieldKey.targetProperty` path as a stable identifier — function identity
+ * isn't JSON-serializable.
+ */
 function asyncEntrySignature(entry: PropertyDerivationEntry): string {
-  return `${entry.fieldKey}.${entry.targetProperty}:${entry.asyncFunctionName ?? '<inline>'}`;
+  const config = {
+    asyncFunctionName: entry.asyncFunctionName,
+    asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}.${entry.targetProperty}` : undefined,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+  };
+  return `${entry.fieldKey}.${entry.targetProperty}:${JSON.stringify(config)}`;
 }
 
 /**

@@ -412,8 +412,24 @@ export class DerivationOrchestrator {
   }
 }
 
+/**
+ * Identity signature for an HTTP derivation entry. Includes every field that
+ * drives the inner stream's behavior — changing any of them must tear down
+ * and rebuild the stream. Stable across topological reorderings because the
+ * consumer ({@link entrySetsEqual}) compares as a multiset.
+ */
 function httpEntrySignature(entry: DerivationEntry): string {
-  return `${entry.fieldKey}:${JSON.stringify(entry.http, Object.keys(entry.http ?? {}).sort())}`;
+  const config = {
+    http: entry.http,
+    responseExpression: entry.responseExpression,
+    dependsOn: entry.dependsOn,
+    debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
+    stopOnUserOverride: entry.stopOnUserOverride,
+    reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
+  };
+  return `${entry.fieldKey}:${JSON.stringify(config)}`;
 }
 
 function asyncEntrySignature(entry: DerivationEntry): string {
@@ -426,10 +442,12 @@ function asyncEntrySignature(entry: DerivationEntry): string {
     asyncFnId: entry.asyncFn ? `inline:${entry.fieldKey}` : undefined,
     dependsOn: entry.dependsOn,
     debounceMs: entry.debounceMs,
+    trigger: entry.trigger,
+    condition: entry.condition,
     stopOnUserOverride: entry.stopOnUserOverride,
     reEngageOnDependencyChange: entry.reEngageOnDependencyChange,
   };
-  return `${entry.fieldKey}:${JSON.stringify(config, Object.keys(config).sort())}`;
+  return `${entry.fieldKey}:${JSON.stringify(config)}`;
 }
 
 /**

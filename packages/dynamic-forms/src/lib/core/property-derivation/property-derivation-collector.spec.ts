@@ -533,5 +533,107 @@ describe('property-derivation-collector', () => {
 
       expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/cannot use wildcard/);
     });
+
+    it('should throw with DynamicFormError when HTTP source omits the http config', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              responseExpression: 'response',
+              dependsOn: ['street'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires an 'http' config/);
+    });
+
+    it('should throw with DynamicFormError when HTTP source omits responseExpression', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets' },
+              dependsOn: ['street'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/non-empty 'responseExpression'/);
+    });
+
+    it('should throw with DynamicFormError when HTTP source dependsOn is undefined (not just empty)', () => {
+      // JSON-loaded configs can bypass the TS discriminant. We want a DynamicFormError,
+      // not an opaque TypeError, when `dependsOn` is missing entirely.
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets' },
+              responseExpression: 'response',
+              // dependsOn deliberately omitted
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+    });
+
+    it('should throw when async source omits both asyncFunctionName and asyncFn', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'city',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'asyncFunction',
+              targetProperty: 'options',
+              dependsOn: ['country'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires either 'asyncFunctionName' or 'asyncFn'/);
+    });
+
+    it('should throw with DynamicFormError when async source dependsOn is undefined', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'city',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'asyncFunction',
+              targetProperty: 'options',
+              asyncFunctionName: 'fetchCities',
+              // dependsOn omitted
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+    });
   });
 });

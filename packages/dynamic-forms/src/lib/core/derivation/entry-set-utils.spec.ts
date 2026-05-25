@@ -69,10 +69,7 @@ describe('entrySetsEqual', () => {
     expect(entrySetsEqual(a, b, sig)).toBe(false);
   });
 
-  it('returns true when two entries share the same signature (Set dedups but length guard catches it)', () => {
-    // Defense: if two entries happen to produce the same signature, the set has
-    // size 1 but the lists have length 2. The length pre-check rejects this case
-    // even when both lists have the duplicate.
+  it('treats duplicate signatures as a multiset (identical lists compare equal)', () => {
     const a: FakeEntry[] = [
       { fieldKey: 'x', payload: '1' },
       { fieldKey: 'x', payload: '1' },
@@ -81,10 +78,24 @@ describe('entrySetsEqual', () => {
       { fieldKey: 'x', payload: '1' },
       { fieldKey: 'x', payload: '1' },
     ];
-    // Length matches AND every `next` signature exists in `prev`'s set — so this
-    // returns true. Duplicate signatures shouldn't occur in practice (entries are
-    // self-targeting and field keys are unique), but documenting the actual behavior.
     expect(entrySetsEqual(a, b, sig)).toBe(true);
+  });
+
+  it('distinguishes [A, B] from [A, A] (multiset, not set)', () => {
+    // Regression: a Set-based comparison would falsely report these equal
+    // (same length, both contain "x:1"). Multiset semantics catches the
+    // duplicate so streams rebuild when an entry is added or replaced with a
+    // duplicate of another.
+    const ab: FakeEntry[] = [
+      { fieldKey: 'x', payload: '1' },
+      { fieldKey: 'y', payload: '1' },
+    ];
+    const aa: FakeEntry[] = [
+      { fieldKey: 'x', payload: '1' },
+      { fieldKey: 'x', payload: '1' },
+    ];
+    expect(entrySetsEqual(ab, aa, sig)).toBe(false);
+    expect(entrySetsEqual(aa, ab, sig)).toBe(false);
   });
 
   it('uses the provided signature function for comparison', () => {
