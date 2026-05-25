@@ -5,15 +5,14 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import {
   auditTime,
+  catchError,
   combineLatestWith,
   debounceTime,
-  distinctUntilChanged,
   EMPTY,
   exhaustMap,
   filter,
   map,
   merge,
-  Observable,
   of,
   pairwise,
   queueScheduler,
@@ -31,7 +30,7 @@ import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
 import { getDebouncePeriods } from '../derivation/debounce-period-utils';
-import { entrySetsEqual } from '../derivation/entry-set-utils';
+import { buildEntryStreamPipeline } from '../derivation/entry-set-utils';
 import { resolveExternalData } from '../derivation/external-data-resolver';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
@@ -230,93 +229,78 @@ export class PropertyDerivationOrchestrator {
   }
 
   /**
-   * Builds a declarative stream that reacts to changes in the set of HTTP
-   * property-derivation entries and emits per-entry streams merged together.
+   * Declarative pipeline for HTTP property-derivation entries. Delegates the
+   * collection-watching / dedup / cancellation plumbing to
+   * {@link buildEntryStreamPipeline} so both orchestrators share one
+   * implementation.
    *
-   * - `distinctUntilChanged` on a content-addressed signature skips rebuilds
-   *   when the HTTP entries haven't actually changed.
-   * - `switchMap` cancels the previous merged stream when entries change,
-   *   which propagates to the inner `createHttpPropertyDerivationStream`s
-   *   and cancels any in-flight HTTP requests (no manual guard needed).
-   *
-   * No mutable subscription bookkeeping — `takeUntilDestroyed` on the outer
-   * subscription handles unmount.
+   * Errors inside `createStream` invocations are isolated via the inner
+   * stream's own `catchError`; we additionally wrap the outer pipeline so a
+   * synchronous throw during stream construction (e.g., evaluation of a
+   * `condition`) doesn't tear the whole pipeline down for the lifetime of
+   * the form.
    */
   private setupHttpStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
 
-    toObservable(this.propertyDerivationCollection, { injector: this.injector })
+    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
+      entrySignature: httpEntrySignature,
+      createStream: (entry) => {
+        if (!this.httpClient) {
+          this.logger.error(
+            'HTTP Property Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
+          );
+          return null;
+        }
+        return createHttpPropertyDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          store: this.config.store,
+          httpClient: this.httpClient,
+          logger: this.logger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+        });
+      },
+    })
       .pipe(
-        map((collection) => collection?.entries.filter((entry) => entry.http) ?? []),
-        distinctUntilChanged((prev, next) => entrySetsEqual(prev, next, httpEntrySignature)),
-        switchMap((entries) => this.mergeHttpEntryStreams(entries, formValue$)),
+        catchError((err) => {
+          this.logger.error('HTTP Property Derivation: outer stream error', err);
+          return EMPTY;
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
-        error: (err) => this.logger.error('HTTP Property Derivation: outer stream error', err),
-      });
+      .subscribe();
   }
 
-  private mergeHttpEntryStreams(entries: PropertyDerivationEntry[], formValue$: Observable<Record<string, unknown>>): Observable<void> {
-    if (entries.length === 0) return EMPTY;
-
-    if (!this.httpClient) {
-      this.logger.error(
-        'HTTP Property Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
-      );
-      return EMPTY;
-    }
-
-    const httpClient = this.httpClient;
-
-    const streams = entries.map((entry) =>
-      createHttpPropertyDerivationStream(entry, formValue$, {
-        formValue: this.config.formValue,
-        store: this.config.store,
-        httpClient,
-        logger: this.logger,
-        customFunctions: () => this.functionRegistry.getCustomFunctions(),
-        externalData: () => resolveExternalData(this.config.externalData),
-      }),
-    );
-
-    return merge(...streams);
-  }
-
-  /**
-   * Declarative counterpart of {@link setupHttpStreams} for async-function
-   * property derivations.
-   */
   private setupAsyncFunctionStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
 
-    toObservable(this.propertyDerivationCollection, { injector: this.injector })
+    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
+      entrySignature: asyncEntrySignature,
+      createStream: (entry) =>
+        createAsyncPropertyDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          store: this.config.store,
+          logger: this.logger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+        }),
+    })
       .pipe(
-        map((collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? []),
-        distinctUntilChanged((prev, next) => entrySetsEqual(prev, next, asyncEntrySignature)),
-        switchMap((entries) => this.mergeAsyncEntryStreams(entries, formValue$)),
+        catchError((err) => {
+          this.logger.error('Async Property Derivation: outer stream error', err);
+          return EMPTY;
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
-        error: (err) => this.logger.error('Async Property Derivation: outer stream error', err),
-      });
-  }
-
-  private mergeAsyncEntryStreams(entries: PropertyDerivationEntry[], formValue$: Observable<Record<string, unknown>>): Observable<void> {
-    if (entries.length === 0) return EMPTY;
-
-    const streams = entries.map((entry) =>
-      createAsyncPropertyDerivationStream(entry, formValue$, {
-        formValue: this.config.formValue,
-        store: this.config.store,
-        logger: this.logger,
-        customFunctions: () => this.functionRegistry.getCustomFunctions(),
-        asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
-        externalData: () => resolveExternalData(this.config.externalData),
-      }),
-    );
-
-    return merge(...streams);
+      .subscribe();
   }
 }
 

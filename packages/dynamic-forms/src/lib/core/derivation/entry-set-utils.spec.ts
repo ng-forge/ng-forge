@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { entrySetsEqual } from './entry-set-utils';
+import { BehaviorSubject, Subject, of } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
+import { buildEntryStreamPipeline, entrySetsEqual } from './entry-set-utils';
 
 interface FakeEntry {
   fieldKey: string;
@@ -106,5 +107,117 @@ describe('entrySetsEqual', () => {
 
     expect(entrySetsEqual(a, b, fieldKeyOnly)).toBe(true);
     expect(entrySetsEqual(a, b, sig)).toBe(false);
+  });
+});
+
+describe('buildEntryStreamPipeline', () => {
+  it('only re-invokes createStream for entries that actually changed', () => {
+    // Simulates the orchestrator's behavior: when the collection changes,
+    // entries whose signature is unchanged should not be re-built. Verifies
+    // distinctUntilChanged + multiset comparison + switchMap.
+    const collection$ = new BehaviorSubject<FakeEntry[] | null>([
+      { fieldKey: 'a', payload: '1' },
+      { fieldKey: 'b', payload: '1' },
+    ]);
+
+    const createStream = vi.fn().mockImplementation((entry: FakeEntry) => of(`built:${sig(entry)}`));
+
+    const pipeline$ = buildEntryStreamPipeline<FakeEntry[] | null, FakeEntry>({
+      collection$,
+      selectEntries: (c) => c ?? [],
+      entrySignature: sig,
+      createStream,
+    });
+
+    const emissions: unknown[] = [];
+    const sub = pipeline$.subscribe((v) => emissions.push(v));
+
+    expect(createStream).toHaveBeenCalledTimes(2);
+    expect(createStream).toHaveBeenCalledWith({ fieldKey: 'a', payload: '1' });
+    expect(createStream).toHaveBeenCalledWith({ fieldKey: 'b', payload: '1' });
+    expect(emissions).toEqual(['built:a:1', 'built:b:1']);
+
+    // Same content, reordered — should NOT recreate streams (multiset equality).
+    createStream.mockClear();
+    emissions.length = 0;
+    collection$.next([
+      { fieldKey: 'b', payload: '1' },
+      { fieldKey: 'a', payload: '1' },
+    ]);
+    expect(createStream).not.toHaveBeenCalled();
+    expect(emissions).toEqual([]);
+
+    // Change 'b' content only — switchMap tears down the whole merged inner
+    // stream and re-creates BOTH entries (this is the documented behavior of
+    // the orchestrator's switchMap-based pipeline). The fact that the multiset
+    // signature changed at all is what triggers the rebuild; per-entry-diff
+    // re-use is out of scope.
+    createStream.mockClear();
+    emissions.length = 0;
+    collection$.next([
+      { fieldKey: 'a', payload: '1' },
+      { fieldKey: 'b', payload: '2' },
+    ]);
+    expect(createStream).toHaveBeenCalledTimes(2);
+    expect(emissions).toEqual(['built:a:1', 'built:b:2']);
+
+    sub.unsubscribe();
+  });
+
+  it('returns EMPTY (no emissions) when the entry list is empty', () => {
+    const collection$ = of<FakeEntry[]>([]);
+    const createStream = vi.fn();
+    const pipeline$ = buildEntryStreamPipeline<FakeEntry[], FakeEntry>({
+      collection$,
+      selectEntries: (c) => c,
+      entrySignature: sig,
+      createStream,
+    });
+
+    const emissions: unknown[] = [];
+    pipeline$.subscribe((v) => emissions.push(v));
+
+    expect(createStream).not.toHaveBeenCalled();
+    expect(emissions).toEqual([]);
+  });
+
+  it('skips entries when createStream returns null (e.g., missing prerequisite)', () => {
+    const collection$ = of<FakeEntry[]>([
+      { fieldKey: 'a', payload: '1' },
+      { fieldKey: 'b', payload: '1' },
+    ]);
+    const createStream = vi.fn().mockImplementation((entry: FakeEntry) => (entry.fieldKey === 'a' ? null : of(`built:${sig(entry)}`)));
+
+    const pipeline$ = buildEntryStreamPipeline<FakeEntry[], FakeEntry>({
+      collection$,
+      selectEntries: (c) => c,
+      entrySignature: sig,
+      createStream,
+    });
+
+    const emissions: unknown[] = [];
+    pipeline$.subscribe((v) => emissions.push(v));
+
+    expect(createStream).toHaveBeenCalledTimes(2);
+    expect(emissions).toEqual(['built:b:1']);
+  });
+
+  it('treats null collection as empty (no emissions)', () => {
+    const collection$ = new Subject<FakeEntry[] | null>();
+    const createStream = vi.fn();
+
+    const pipeline$ = buildEntryStreamPipeline<FakeEntry[] | null, FakeEntry>({
+      collection$,
+      selectEntries: (c) => c ?? [],
+      entrySignature: sig,
+      createStream,
+    });
+
+    const emissions: unknown[] = [];
+    pipeline$.subscribe((v) => emissions.push(v));
+
+    collection$.next(null);
+    expect(createStream).not.toHaveBeenCalled();
+    expect(emissions).toEqual([]);
   });
 });

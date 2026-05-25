@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
-import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap, takeUntil } from 'rxjs';
+import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { getChangedKeys, isEqual } from '../../utils/object-utils';
@@ -48,13 +48,6 @@ export interface HttpDerivationStreamContext {
 
   /** Warning tracker to suppress duplicate missing-field warnings */
   warningTracker?: WarningTracker;
-
-  /**
-   * Observable that emits when the current generation of streams should be torn down.
-   * Pipe HTTP requests through `takeUntil(context.guard$)` to automatically discard
-   * in-flight responses when the config changes.
-   */
-  guard$: Observable<void>;
 }
 
 const LOG_PREFIX = 'HTTP Derivation -';
@@ -205,15 +198,16 @@ export function createHttpDerivationStream(
           return;
         }
 
-        // Make the HTTP request. takeUntil(guard$) automatically discards responses
-        // that arrive after the config has changed and the guard has been invalidated.
+        // Cancellation is handled declaratively by the orchestrator's outer
+        // switchMap: when the entry set changes, the outer stream unsubscribes
+        // from this inner observable, the cleanup callback below runs, and
+        // the in-flight HTTP request is cancelled.
         const method = (resolvedRequest.method ?? 'GET').toUpperCase();
         const httpSub = context.httpClient
           .request(method, resolvedRequest.url, {
             body: resolvedRequest.body,
             headers: resolvedRequest.headers as Record<string, string>,
           })
-          .pipe(takeUntil(context.guard$))
           .subscribe({
             next: (response) => {
               try {

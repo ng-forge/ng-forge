@@ -635,5 +635,70 @@ describe('property-derivation-collector', () => {
 
       expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
     });
+
+    it('rejects HTTP source combined with a sync value source (XOR enforcement)', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              value: ['fallback'], // <- conflicting sync source
+              http: { url: '/api/streets' },
+              responseExpression: 'response',
+              dependsOn: ['street'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+    });
+
+    it('rejects asyncFunction source combined with expression (XOR enforcement)', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'city',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'asyncFunction',
+              targetProperty: 'options',
+              expression: 'formValue.fallback',
+              asyncFunctionName: 'fetchCities',
+              dependsOn: ['country'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+    });
+
+    it('rejects HTTP source combined with async fields', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets' },
+              responseExpression: 'response',
+              asyncFunctionName: 'mixedUp',
+              dependsOn: ['street'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+    });
   });
 });

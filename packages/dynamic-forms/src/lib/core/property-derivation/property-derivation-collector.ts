@@ -123,12 +123,49 @@ function createPropertyDerivationEntryFromDerivation(
   const errorLocation = `'${effectiveFieldKey}.${config.targetProperty}'`;
   const untypedConfig = config as {
     source?: string;
+    value?: unknown;
+    expression?: unknown;
+    functionName?: unknown;
+    fn?: unknown;
     http?: unknown;
     responseExpression?: string;
     asyncFunctionName?: string;
     asyncFn?: unknown;
     dependsOn?: unknown;
   };
+
+  // Reject configs that mix value-source fields with an explicit async source.
+  // TypeScript's discriminated union already enforces this XOR for inline
+  // configs; the runtime check guards JSON-loaded configs (API/OpenAPI/MCP)
+  // where the wrong combination would silently degrade — async entries are
+  // routed to the stream pipeline while sync fields would be ignored.
+  if (untypedConfig.source === 'http' || untypedConfig.source === 'asyncFunction') {
+    const conflictingSyncSources: string[] = [];
+    if (untypedConfig.value !== undefined) conflictingSyncSources.push('value');
+    if (untypedConfig.expression !== undefined) conflictingSyncSources.push('expression');
+    if (untypedConfig.functionName !== undefined) conflictingSyncSources.push('functionName');
+    if (untypedConfig.fn !== undefined) conflictingSyncSources.push('fn');
+    if (conflictingSyncSources.length > 0) {
+      throw new DynamicFormError(
+        `Property derivation for ${errorLocation} sets 'source: ${JSON.stringify(untypedConfig.source)}' alongside ` +
+          `sync value source(s) [${conflictingSyncSources.join(', ')}]. These are mutually exclusive — remove either ` +
+          `the sync fields or the async source.`,
+      );
+    }
+  }
+
+  // Reject HTTP + asyncFunction-field combinations as well (TS already
+  // enforces this; runtime guard for JSON-loaded configs).
+  if (untypedConfig.source === 'http' && (untypedConfig.asyncFunctionName !== undefined || untypedConfig.asyncFn !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "http"' alongside an async function — these are mutually exclusive.`,
+    );
+  }
+  if (untypedConfig.source === 'asyncFunction' && (untypedConfig.http !== undefined || untypedConfig.responseExpression !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "asyncFunction"' alongside HTTP fields — these are mutually exclusive.`,
+    );
+  }
 
   if (untypedConfig.source === 'http') {
     if (!untypedConfig.http) {

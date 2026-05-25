@@ -5,16 +5,14 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
 import {
   auditTime,
+  catchError,
   combineLatestWith,
   debounceTime,
-  distinctUntilChanged,
   EMPTY,
   exhaustMap,
   filter,
   map,
   merge,
-  NEVER,
-  Observable,
   of,
   pairwise,
   queueScheduler,
@@ -36,7 +34,7 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { entrySetsEqual } from './entry-set-utils';
+import { buildEntryStreamPipeline } from './entry-set-utils';
 import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 import { getDebouncePeriods } from './debounce-period-utils';
@@ -328,87 +326,70 @@ export class DerivationOrchestrator {
    */
   private setupHttpStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
 
-    toObservable(this.derivationCollection, { injector: this.injector })
+    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
+      entrySignature: httpEntrySignature,
+      createStream: (entry) => {
+        if (!this.httpClient) {
+          this.logger.error(
+            'HTTP Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
+          );
+          return null;
+        }
+        const context: HttpDerivationStreamContext = {
+          formValue: this.config.formValue,
+          form: this.config.form,
+          httpClient: this.httpClient,
+          logger: this.logger,
+          derivationLogger: this.config.derivationLogger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+          warningTracker: this.warningTracker,
+        };
+        return createHttpDerivationStream(entry, formValue$, context);
+      },
+    })
       .pipe(
-        map((collection) => collection?.entries.filter((entry) => entry.http) ?? []),
-        distinctUntilChanged((prev, next) => entrySetsEqual(prev, next, httpEntrySignature)),
-        switchMap((entries) => this.mergeHttpEntryStreams(entries, formValue$)),
+        catchError((err) => {
+          this.logger.error('HTTP Derivation: outer stream error', err);
+          return EMPTY;
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
-        error: (err) => this.logger.error('HTTP Derivation: outer stream error', err),
-      });
+      .subscribe();
   }
 
-  private mergeHttpEntryStreams(entries: DerivationEntry[], formValue$: Observable<Record<string, unknown>>): Observable<void> {
-    if (entries.length === 0) return EMPTY;
-
-    if (!this.httpClient) {
-      this.logger.error(
-        'HTTP Derivation: HttpClient is not available. Ensure provideHttpClient() is included in your application providers.',
-      );
-      return EMPTY;
-    }
-
-    const httpClient = this.httpClient;
-
-    const streams = entries.map((entry) => {
-      const context: HttpDerivationStreamContext = {
-        formValue: this.config.formValue,
-        form: this.config.form,
-        httpClient,
-        logger: this.logger,
-        derivationLogger: this.config.derivationLogger,
-        customFunctions: () => this.functionRegistry.getCustomFunctions(),
-        externalData: () => resolveExternalData(this.config.externalData),
-        warningTracker: this.warningTracker,
-        // Inner cancellation is now handled by the outer switchMap unsubscribing
-        // this entire branch when the entry set changes — no external guard needed.
-        guard$: NEVER,
-      };
-      return createHttpDerivationStream(entry, formValue$, context);
-    });
-
-    return merge(...streams);
-  }
-
-  /**
-   * Declarative counterpart of {@link setupHttpStreams} for async-function
-   * derivations.
-   */
   private setupAsyncFunctionStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
+    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
 
-    toObservable(this.derivationCollection, { injector: this.injector })
+    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
+      collection$,
+      selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
+      entrySignature: asyncEntrySignature,
+      createStream: (entry) =>
+        createAsyncDerivationStream(entry, formValue$, {
+          formValue: this.config.formValue,
+          form: this.config.form,
+          logger: this.logger,
+          derivationLogger: this.config.derivationLogger,
+          customFunctions: () => this.functionRegistry.getCustomFunctions(),
+          asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
+          externalData: () => resolveExternalData(this.config.externalData),
+          warningTracker: this.warningTracker,
+        }),
+    })
       .pipe(
-        map((collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? []),
-        distinctUntilChanged((prev, next) => entrySetsEqual(prev, next, asyncEntrySignature)),
-        switchMap((entries) => this.mergeAsyncEntryStreams(entries, formValue$)),
+        catchError((err) => {
+          this.logger.error('Async Derivation: outer stream error', err);
+          return EMPTY;
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
-        error: (err) => this.logger.error('Async Derivation: outer stream error', err),
-      });
-  }
-
-  private mergeAsyncEntryStreams(entries: DerivationEntry[], formValue$: Observable<Record<string, unknown>>): Observable<void> {
-    if (entries.length === 0) return EMPTY;
-
-    const streams = entries.map((entry) =>
-      createAsyncDerivationStream(entry, formValue$, {
-        formValue: this.config.formValue,
-        form: this.config.form,
-        logger: this.logger,
-        derivationLogger: this.config.derivationLogger,
-        customFunctions: () => this.functionRegistry.getCustomFunctions(),
-        asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
-        externalData: () => resolveExternalData(this.config.externalData),
-        warningTracker: this.warningTracker,
-      }),
-    );
-
-    return merge(...streams);
+      .subscribe();
   }
 }
 

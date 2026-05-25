@@ -120,4 +120,35 @@ describe('createAsyncPropertyDerivationStream', () => {
 
     expect(asyncFn).not.toHaveBeenCalled();
   });
+
+  it('logs a warning and does not write to the store when asyncFn rejects', async () => {
+    const asyncFn: AsyncDerivationFunction = vi.fn().mockRejectedValue(new Error('downstream failure'));
+    const formValueSignal = signal<Record<string, unknown>>({ country: '' });
+    const stream$ = createAsyncPropertyDerivationStream(createEntry({ asyncFn }), formValue$, buildContext(formValueSignal));
+
+    stream$.subscribe();
+    formValue$.next({ country: 'US' });
+    vi.advanceTimersByTime(300);
+    await vi.runAllTimersAsync();
+
+    expect(asyncFn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Async function failed'));
+    expect(store.getOverrides('cityField')()).toEqual({});
+  });
+
+  it('logs a warning when asyncFn throws synchronously and does not write to the store', () => {
+    const asyncFn: AsyncDerivationFunction = vi.fn().mockImplementation(() => {
+      throw new Error('sync throw');
+    });
+    const formValueSignal = signal<Record<string, unknown>>({ country: '' });
+    const stream$ = createAsyncPropertyDerivationStream(createEntry({ asyncFn }), formValue$, buildContext(formValueSignal));
+
+    stream$.subscribe();
+    formValue$.next({ country: 'US' });
+    vi.advanceTimersByTime(300);
+
+    expect(asyncFn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Unexpected stream error'));
+    expect(store.getOverrides('cityField')()).toEqual({});
+  });
 });

@@ -179,6 +179,15 @@ describe('ExpressionParser', () => {
       expect(ExpressionParser.evaluate('arr?.map(x => x + 1)', scope)).toBeUndefined();
       expect(ExpressionParser.evaluate('real?.map(x => x + 1)', scope)).toEqual([2, 3, 4]);
     });
+
+    it('short-circuits a method call when an earlier link in the chain is nullish', () => {
+      // Cascading: even though `.method(...)` isn't an optional call itself, the
+      // earlier `?.bar` returned undefined, and method calls on null/undefined
+      // silently return undefined to match dotted-access semantics.
+      const scope = { obj: { foo: null }, real: { foo: { bar: [1, 2] } } };
+      expect(ExpressionParser.evaluate('obj.foo?.bar.map(x => x + 1)', scope)).toBeUndefined();
+      expect(ExpressionParser.evaluate('real.foo?.bar.map(x => x + 1)', scope)).toEqual([2, 3]);
+    });
   });
 
   describe('ternary', () => {
@@ -200,6 +209,27 @@ describe('ExpressionParser', () => {
       const scope = { x: 0 };
       expect(ExpressionParser.evaluate('x === 1 ? "one" : x === 2 ? "two" : "other"', scope)).toBe('other');
       expect(ExpressionParser.evaluate('x === 1 ? "one" : x === 0 ? "zero" : "other"', scope)).toBe('zero');
+    });
+
+    it('handles deep right-associative chains (4+ levels)', () => {
+      const scope = { x: 4 };
+      // `a ? b : c ? d : e ? f : g ? h : i` === `a ? b : (c ? d : (e ? f : (g ? h : i)))`
+      expect(ExpressionParser.evaluate('x === 1 ? "one" : x === 2 ? "two" : x === 3 ? "three" : x === 4 ? "four" : "other"', scope)).toBe(
+        'four',
+      );
+      expect(ExpressionParser.evaluate('x === 1 ? "one" : x === 2 ? "two" : x === 3 ? "three" : x === 5 ? "five" : "other"', scope)).toBe(
+        'other',
+      );
+    });
+
+    it('parses an arrow function as a ternary consequent', () => {
+      const scope = { useDouble: true, items: [1, 2, 3] };
+      // `cond ? (x => x * 2) : (x => x)` — the consequent and alternate are arrow functions
+      // that get passed to `.map`. Tests that the ternary parser doesn't get confused by
+      // the arrow's `=>` in the consequent position.
+      const fn = ExpressionParser.evaluate('useDouble ? x => x * 2 : x => x', scope) as (n: number) => number;
+      expect(typeof fn).toBe('function');
+      expect(scope.items.map(fn)).toEqual([2, 4, 6]);
     });
 
     it('only evaluates the selected branch (short-circuit)', () => {

@@ -155,4 +155,22 @@ describe('createHttpPropertyDerivationStream', () => {
     vi.advanceTimersByTime(500);
     expect(httpClient.request).toHaveBeenCalledTimes(1);
   });
+
+  it('logs a warning when responseExpression fails to parse and does not write to the store', () => {
+    const formValueSignal = signal<Record<string, unknown>>({ street: 'Main' });
+    const stream$ = createHttpPropertyDerivationStream(
+      // Intentionally malformed expression — should throw inside ExpressionParser.
+      createEntry({ responseExpression: 'response.map(' }),
+      formValue$,
+      buildContext(formValueSignal),
+    );
+
+    stream$.subscribe();
+    formValue$.next({ street: 'Main' });
+    vi.advanceTimersByTime(300);
+
+    expect(httpClient.request).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to process response'));
+    expect(store.getOverrides('streetDropdown')()).toEqual({});
+  });
 });
