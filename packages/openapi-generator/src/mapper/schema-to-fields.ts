@@ -304,14 +304,32 @@ function mapPropertyToField(
     field.value = prop.schema.default;
   }
 
-  // Add props if present (only when not using x-ng-forge-type and type wasn't overridden by a decision)
-  if (!ngForgeType && finalType === typeResult.fieldType && typeResult.props && Object.keys(typeResult.props).length > 0) {
+  // Add props if present (only when not using x-ng-forge-type and type wasn't overridden by a decision).
+  // Container types are guarded explicitly: today `mapSchemaToFieldType` never returns props for
+  // container branches, but the extra check keeps the invariant local so a future addition of a
+  // container-applicable prop in type-mapping.ts can't silently emit `props` on a container field.
+  if (
+    !ngForgeType &&
+    finalType === typeResult.fieldType &&
+    typeResult.props &&
+    Object.keys(typeResult.props).length > 0 &&
+    !CONTAINER_FIELD_TYPES.has(finalType)
+  ) {
     field.props = typeResult.props;
   }
 
-  // description → hint (descriptions can be paragraphs, not suitable as placeholders)
+  // description → hint (descriptions can be paragraphs, not suitable as placeholders).
+  // Container field types declare `props?: never` — under `as const satisfies FormConfig`,
+  // emitting any `props` on these types triggers TS2322 (issue #425). Drop with a verbose
+  // log telling users how to recover the intent manually.
   if (prop.schema.description) {
-    field.props = { ...field.props, hint: prop.schema.description };
+    if (CONTAINER_FIELD_TYPES.has(finalType)) {
+      logger.verbose(
+        `Field '${fieldPath}': '${finalType}' container fields do not accept props — dropped description hint. Add a sibling 'text' field manually if you want to render this description.`,
+      );
+    } else {
+      field.props = { ...field.props, hint: prop.schema.description };
+    }
   }
 
   // Add enum options for select/radio/multi-checkbox.
