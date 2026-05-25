@@ -48,13 +48,16 @@ Wait for the server to be ready before proceeding.
 
 ### 3. Visual inspection
 
-Use Playwright MCP tools to verify:
+Use the `chrome-devtools` MCP to verify (preferred over Playwright MCP because it does not auto-dump a full a11y tree on every step, keeping token use lower):
 
-1. **Navigate** to each affected page
-2. **Take a snapshot** and inspect the DOM state
-3. **Check both light and dark mode** if styling was changed (toggle via the theme switcher or by evaluating `document.documentElement.classList.toggle('dark')`)
-4. **Check mobile viewport** if layout/responsive changes were made (resize to 375px width)
-5. **Look for regressions** on related pages (e.g., if sidebar was changed, check multiple doc pages)
+1. **Navigate** to each affected page via `navigate_page`
+2. **Take a screenshot** with `take_screenshot`
+3. **Check both light and dark mode** if styling was changed — toggle via the theme switcher or by running `document.documentElement.classList.toggle('dark')` through `evaluate`
+4. **Check mobile viewport** if layout/responsive changes were made — resize to 375px width
+5. **Inspect console** with `list_console_messages` for hydration warnings or runtime errors
+6. **Look for regressions** on related pages (e.g., if sidebar was changed, check multiple doc pages)
+
+For scripted, repeatable verification of behavior (not just visuals), use `/verify-e2e` instead.
 
 ### 4. Report findings
 
