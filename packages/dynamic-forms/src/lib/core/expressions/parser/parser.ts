@@ -41,7 +41,93 @@ export class Parser {
   }
 
   private parseExpression(): ASTNode {
-    return this.parseLogicalOr();
+    // Try arrow function first — it has the lowest precedence and would otherwise
+    // be ambiguous with grouped expressions / bare identifiers.
+    const arrow = this.tryParseArrowFunction();
+    if (arrow) return arrow;
+    return this.parseConditional();
+  }
+
+  /**
+   * Ternary `test ? consequent : alternate` — right-associative, sits between
+   * the arrow-function check and logical-or in precedence.
+   */
+  private parseConditional(): ASTNode {
+    const test = this.parseLogicalOr();
+    if (!this.match(TokenType.QUESTION)) return test;
+
+    const consequent = this.parseExpression();
+    this.consume(TokenType.COLON, 'Expected ":" between ternary branches');
+    const alternate = this.parseExpression();
+    return { type: 'Conditional', test, consequent, alternate };
+  }
+
+  /**
+   * Attempts to parse an arrow function. Returns null and leaves position
+   * unchanged if the next tokens don't form an arrow function head.
+   *
+   * Supported shapes:
+   *   x => body
+   *   () => body
+   *   (x) => body
+   *   (x, y, ...) => body
+   *
+   * Body returning an object literal must be wrapped in parens: `d => ({...})`.
+   */
+  private tryParseArrowFunction(): ASTNode | null {
+    const savedPos = this.current;
+
+    // Single unparenthesized param: IDENTIFIER =>
+    if (this.check(TokenType.IDENTIFIER) && this.checkAt(this.current + 1, TokenType.ARROW)) {
+      const param = this.advance().value;
+      this.advance(); // consume =>
+      const body = this.parseExpression();
+      return { type: 'ArrowFunction', params: [param], body };
+    }
+
+    // Parenthesized params: ( ) => or ( id (, id)* ) =>
+    if (this.check(TokenType.LPAREN)) {
+      this.advance(); // tentatively consume (
+      const params: string[] = [];
+
+      if (this.check(TokenType.RPAREN)) {
+        this.advance(); // )
+      } else if (this.check(TokenType.IDENTIFIER)) {
+        params.push(this.advance().value);
+        while (this.check(TokenType.COMMA)) {
+          this.advance(); // ,
+          if (!this.check(TokenType.IDENTIFIER)) {
+            this.current = savedPos;
+            return null;
+          }
+          params.push(this.advance().value);
+        }
+        if (!this.check(TokenType.RPAREN)) {
+          this.current = savedPos;
+          return null;
+        }
+        this.advance(); // )
+      } else {
+        this.current = savedPos;
+        return null;
+      }
+
+      if (!this.check(TokenType.ARROW)) {
+        this.current = savedPos;
+        return null;
+      }
+      this.advance(); // =>
+
+      const body = this.parseExpression();
+      return { type: 'ArrowFunction', params, body };
+    }
+
+    return null;
+  }
+
+  private checkAt(index: number, type: TokenType): boolean {
+    if (index < 0 || index >= this.tokens.length) return false;
+    return this.tokens[index].type === type;
   }
 
   private parseLogicalOr(): ASTNode {
@@ -137,6 +223,27 @@ export class Parser {
         }
         const property = this.advance().value;
         node = { type: 'MemberAccess', object: node, property };
+      } else if (this.match(TokenType.OPTIONAL_DOT)) {
+        // Optional chain — supports `?.prop`, `?.[expr]`, and `?.(args)`.
+        if (this.match(TokenType.LBRACKET)) {
+          const property = this.parseExpression();
+          this.consume(TokenType.RBRACKET, 'Expected "]" after computed property');
+          node = { type: 'ComputedMemberAccess', object: node, property, optional: true };
+        } else if (this.match(TokenType.LPAREN)) {
+          const args = this.parseArgumentList();
+          this.consume(TokenType.RPAREN, 'Expected ")" after arguments');
+          node = { type: 'CallExpression', callee: node, arguments: args, optional: true };
+        } else if (this.check(TokenType.IDENTIFIER)) {
+          const property = this.advance().value;
+          node = { type: 'MemberAccess', object: node, property, optional: true };
+        } else {
+          throw new ExpressionParserError('Expected property name, "[", or "(" after "?."', this.peek().position, this.expression);
+        }
+      } else if (this.match(TokenType.LBRACKET)) {
+        // Computed member access: obj[expr]
+        const property = this.parseExpression();
+        this.consume(TokenType.RBRACKET, 'Expected "]" after computed property');
+        node = { type: 'ComputedMemberAccess', object: node, property };
       } else if (this.match(TokenType.LPAREN)) {
         // Function call: func()
         const args = this.parseArgumentList();
@@ -183,6 +290,13 @@ export class Parser {
       return { type: 'ArrayLiteral', elements };
     }
 
+    // Object literal
+    if (this.match(TokenType.LBRACE)) {
+      const properties = this.parseObjectProperties();
+      this.consume(TokenType.RBRACE, 'Expected "}" after object properties');
+      return { type: 'ObjectLiteral', properties };
+    }
+
     // Identifier
     if (this.match(TokenType.IDENTIFIER)) {
       return { type: 'Identifier', name: this.previous().value };
@@ -220,6 +334,36 @@ export class Parser {
     }
 
     return elements;
+  }
+
+  private parseObjectProperties(): Array<{ key: string; value: ASTNode }> {
+    const properties: Array<{ key: string; value: ASTNode }> = [];
+
+    if (this.check(TokenType.RBRACE)) {
+      return properties;
+    }
+
+    do {
+      // Trailing comma support: `{ a: 1, }`
+      if (this.check(TokenType.RBRACE)) break;
+
+      let key: string;
+      if (this.check(TokenType.IDENTIFIER) || this.check(TokenType.STRING)) {
+        key = this.advance().value;
+      } else {
+        throw new ExpressionParserError(
+          `Expected property name (identifier or string) in object literal, got '${this.peek().value}'`,
+          this.peek().position,
+          this.expression,
+        );
+      }
+
+      this.consume(TokenType.COLON, 'Expected ":" after property name in object literal');
+      const value = this.parseExpression();
+      properties.push({ key, value });
+    } while (this.match(TokenType.COMMA));
+
+    return properties;
   }
 
   private match(...types: TokenType[]): boolean {

@@ -688,9 +688,15 @@ describe('Parser', () => {
     });
 
     it('should throw on unexpected token', () => {
-      const parser = new Parser('}');
+      const parser = new Parser('@');
 
       expect(() => parser.parse()).toThrow('Unexpected character');
+    });
+
+    it('should throw on a stray closing brace at start of expression', () => {
+      const parser = new Parser('}');
+
+      expect(() => parser.parse()).toThrow('Unexpected token');
     });
 
     it('should throw on incomplete binary operation', () => {

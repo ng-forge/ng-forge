@@ -189,6 +189,12 @@ export class Tokenizer {
       case '||':
         this.position += 2;
         return { type: TokenType.OR, value: '||', position: start };
+      case '=>':
+        this.position += 2;
+        return { type: TokenType.ARROW, value: '=>', position: start };
+      case '?.':
+        this.position += 2;
+        return { type: TokenType.OPTIONAL_DOT, value: '?.', position: start };
     }
 
     // Single-character operators and punctuation
@@ -214,6 +220,8 @@ export class Tokenizer {
         return { type: TokenType.DOT, value: '.', position: start };
       case ',':
         return { type: TokenType.COMMA, value: ',', position: start };
+      case ':':
+        return { type: TokenType.COLON, value: ':', position: start };
       case '(':
         return { type: TokenType.LPAREN, value: '(', position: start };
       case ')':
@@ -222,6 +230,12 @@ export class Tokenizer {
         return { type: TokenType.LBRACKET, value: '[', position: start };
       case ']':
         return { type: TokenType.RBRACKET, value: ']', position: start };
+      case '{':
+        return { type: TokenType.LBRACE, value: '{', position: start };
+      case '}':
+        return { type: TokenType.RBRACE, value: '}', position: start };
+      case '?':
+        return { type: TokenType.QUESTION, value: '?', position: start };
       default:
         throw new ExpressionParserError(`Unexpected character: ${char}`, start, this.expression);
     }

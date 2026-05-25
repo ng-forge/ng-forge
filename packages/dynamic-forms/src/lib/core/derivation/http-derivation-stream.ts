@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
-import { EMPTY, Observable, Subject, debounceTime, filter, map, pairwise, startWith, switchMap, take, takeUntil } from 'rxjs';
+import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap, takeUntil } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { getChangedKeys, isEqual } from '../../utils/object-utils';
@@ -55,21 +55,6 @@ export interface HttpDerivationStreamContext {
    * in-flight responses when the config changes.
    */
   guard$: Observable<void>;
-}
-
-/**
- * Creates a staleness guard for HTTP/async derivation streams.
- *
- * - Call `invalidate()` when tearing down the current generation of streams.
- * - Pipe HTTP requests through `takeUntil(guard$)` to automatically discard
- *   in-flight responses that arrive after the generation has been invalidated.
- */
-export function createStreamGuard(): { invalidate: () => void; guard$: Observable<void> } {
-  const subject = new Subject<void>();
-  return {
-    invalidate: () => subject.next(),
-    guard$: subject.asObservable().pipe(take(1)),
-  };
 }
 
 const LOG_PREFIX = 'HTTP Derivation -';

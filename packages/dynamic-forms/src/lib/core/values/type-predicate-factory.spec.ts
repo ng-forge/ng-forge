@@ -131,7 +131,10 @@ describe('createTypePredicateFunction', () => {
     });
 
     it('should return false when predicate throws at runtime', () => {
-      const throwingPredicate = createTypePredicateFunction('value.nonExistent.method()', mockLogger);
+      // Accessing a blocked property (`constructor`) throws via the parser's
+      // security check — a stable way to force a runtime error after method
+      // calls on nullish receivers became null-safe.
+      const throwingPredicate = createTypePredicateFunction('value.constructor', mockLogger);
 
       const result = throwingPredicate({});
 

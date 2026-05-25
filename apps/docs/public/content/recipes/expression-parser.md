@@ -315,14 +315,19 @@ functionRegistry.registerCustomFunction('logValue', (ctx) => {
 
 In JavaScript expressions (`type: 'javascript'`), you can use:
 
-| Feature               | Examples                                                        |
-| --------------------- | --------------------------------------------------------------- |
-| **Property access**   | `formValue.name`, `formValue.user.profile.email`                |
-| **Comparisons**       | `===`, `!==`, `>`, `<`, `>=`, `<=`                              |
-| **Logical operators** | `&&`, `\|\|`, `!`                                               |
-| **Arithmetic**        | `+`, `-`, `*`, `/`, `%`                                         |
-| **String methods**    | See [Whitelisted Methods](#whitelisted-methods-reference) above |
-| **Array methods**     | See [Whitelisted Methods](#whitelisted-methods-reference) above |
+| Feature               | Examples                                                           |
+| --------------------- | ------------------------------------------------------------------ |
+| **Property access**   | `formValue.name`, `formValue.user.profile.email`                   |
+| **Computed access**   | `items[0]`, `obj["key"]`, `response.items[0].value`                |
+| **Optional chaining** | `formValue.user?.name`, `formValue.items?.[0]`, `arr?.map(x => x)` |
+| **Ternary**           | `formValue.kind === 'a' ? formValue.x : formValue.y`               |
+| **Object literals**   | `{ value: d.id, label: d.name }` (handy inside arrow bodies)       |
+| **Arrow functions**   | `arr.map(x => x * 2)`, `arr.filter(x => x.active)`                 |
+| **Comparisons**       | `===`, `!==`, `>`, `<`, `>=`, `<=`                                 |
+| **Logical operators** | `&&`, `\|\|`, `!`                                                  |
+| **Arithmetic**        | `+`, `-`, `*`, `/`, `%`                                            |
+| **String methods**    | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
+| **Array methods**     | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
 
 **Example**:
 
@@ -330,7 +335,7 @@ In JavaScript expressions (`type: 'javascript'`), you can use:
 expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
 ```
 
-**Not Supported**: Object literals `{}`, ternary `a ? b : c`, assignment `x = 5`, `new` keyword, function declarations
+**Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only — arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
 
 ## Summary
 

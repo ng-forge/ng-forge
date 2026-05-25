@@ -1470,6 +1470,38 @@ logic: [{
 }]
 \`\`\`
 
+## Async Sources (HTTP / async functions)
+
+Property derivations also support \`source: 'http'\` and \`source: 'asyncFunction'\` for server-driven property values — typically to populate a select's \`options\` from a backend endpoint.
+
+\`\`\`typescript
+// HTTP-driven options
+logic: [{
+  type: 'derivation',
+  source: 'http',
+  targetProperty: 'options',
+  http: {
+    url: '/api/streets/search',
+    queryParams: { q: 'formValue.street' },
+  },
+  responseExpression: 'response.map(d => ({ value: d.id, label: d.name }))',
+  dependsOn: ['street'],          // required for HTTP
+  trigger: 'debounced',
+  debounceMs: 300,
+}]
+
+// Async-function-driven options
+logic: [{
+  type: 'derivation',
+  source: 'asyncFunction',
+  targetProperty: 'options',
+  asyncFunctionName: 'fetchCities',
+  dependsOn: ['country'],         // required for asyncFunction
+}]
+\`\`\`
+
+\`dependsOn\` is required (non-empty, no \`'*'\` wildcards) for both HTTP and asyncFunction sources — the collector throws otherwise to prevent runaway requests.
+
 ## Array Field Support
 
 Inside arrays, \`formValue\` is scoped to the current array item:

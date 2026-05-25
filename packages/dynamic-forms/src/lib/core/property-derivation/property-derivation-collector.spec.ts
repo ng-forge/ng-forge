@@ -423,5 +423,115 @@ describe('property-derivation-collector', () => {
       expect(collection.entries[1].trigger).toBe('onChange');
       expect(collection.entries[1].debounceMs).toBeUndefined();
     });
+
+    it('should forward http + responseExpression for HTTP property derivations', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets', queryParams: { q: 'formValue.street' } },
+              responseExpression: 'response.map(d => ({ value: d.id, label: d.name }))',
+              dependsOn: ['street'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, tracker);
+
+      expect(collection.entries).toHaveLength(1);
+      const entry = collection.entries[0];
+      expect(entry.fieldKey).toBe('streetDropdown');
+      expect(entry.targetProperty).toBe('options');
+      expect(entry.http).toEqual({ url: '/api/streets', queryParams: { q: 'formValue.street' } });
+      expect(entry.responseExpression).toBe('response.map(d => ({ value: d.id, label: d.name }))');
+      expect(entry.dependsOn).toEqual(['street']);
+    });
+
+    it('should forward asyncFunctionName and asyncFn for async property derivations', () => {
+      const inlineFn = async () => [{ value: '1', label: 'a' }];
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'cityRegistered',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'asyncFunction',
+              targetProperty: 'options',
+              asyncFunctionName: 'fetchCities',
+              dependsOn: ['country'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+        {
+          key: 'cityInline',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'asyncFunction',
+              targetProperty: 'options',
+              asyncFn: inlineFn,
+              dependsOn: ['country'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const collection = collectPropertyDerivations(fields, logger, tracker);
+
+      expect(collection.entries[0].asyncFunctionName).toBe('fetchCities');
+      expect(collection.entries[0].asyncFn).toBeUndefined();
+      expect(collection.entries[1].asyncFunctionName).toBeUndefined();
+      expect(collection.entries[1].asyncFn).toBe(inlineFn);
+    });
+
+    it('should throw when HTTP property derivation has empty dependsOn', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets' },
+              responseExpression: 'response',
+              dependsOn: [],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+    });
+
+    it("should throw when HTTP property derivation uses wildcard '*' in dependsOn", () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'streetDropdown',
+          type: 'select',
+          logic: [
+            {
+              type: 'derivation',
+              source: 'http',
+              targetProperty: 'options',
+              http: { url: '/api/streets' },
+              responseExpression: 'response',
+              dependsOn: ['*'],
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/cannot use wildcard/);
+    });
   });
 });

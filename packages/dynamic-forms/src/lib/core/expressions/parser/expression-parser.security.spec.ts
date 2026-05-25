@@ -150,17 +150,21 @@ describe('ExpressionParser - Security Tests', () => {
   });
 
   describe('Dangerous Syntax Prevention', () => {
-    it('should not support object literals', () => {
-      expect(() => ExpressionParser.evaluate('{}', {})).toThrow();
-      expect(() => ExpressionParser.evaluate('{a: 1}', {})).toThrow();
+    it('should not allow dangerous keys in object literals', () => {
+      expect(() => ExpressionParser.evaluate('{ __proto__: 1 }', {})).toThrow();
+      expect(() => ExpressionParser.evaluate('{ constructor: 1 }', {})).toThrow();
+      expect(() => ExpressionParser.evaluate('{ prototype: 1 }', {})).toThrow();
     });
 
     it('should not support function declarations', () => {
       expect(() => ExpressionParser.evaluate('function() {}', {})).toThrow();
     });
 
-    it('should not support arrow functions', () => {
-      expect(() => ExpressionParser.evaluate('() => 1', {})).toThrow();
+    it('arrow function bodies are subject to the same whitelist as top-level expressions', () => {
+      // Cannot call non-whitelisted methods inside an arrow body
+      expect(() => ExpressionParser.evaluate('[1, 2].map(x => x.constructor)', {})).toThrow();
+      // Cannot reach for blocked properties via arrow body
+      expect(() => ExpressionParser.evaluate('[1].map(x => x.__proto__)', {})).toThrow();
     });
 
     it('should not support class declarations', () => {
