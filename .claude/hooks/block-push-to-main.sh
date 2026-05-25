@@ -6,19 +6,31 @@
 # yourself rather than via Claude, or temporarily disable this hook.
 set -uo pipefail
 
+# Fail-closed if jq is missing. Without it the tool_input is unparseable and a
+# silent pass would give a false sense of safety.
+if ! command -v jq >/dev/null 2>&1; then
+  echo "BLOCKED: push-to-main hook requires jq. Install jq or remove this hook from .claude/settings.json." >&2
+  exit 2
+fi
+
 input=$(cat)
-cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""' 2>/dev/null || true)
+cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
 
 # Only fire when the command actually invokes `git push` at a command position
-# (start of line or after a shell separator). This avoids false positives when
-# "git push" or "main" appear inside argument strings (heredocs, PR bodies, etc).
+# (start of line or after a shell separator). Prevents false positives when
+# "git push" appears inside argument strings (heredocs, PR bodies, etc).
 if ! printf '%s' "$cmd" | grep -qE '(^|[;&|][[:space:]]*)git[[:space:]]+push\b'; then
   exit 0
 fi
 
-# Case 1: explicit `main` destination in the push command (e.g. `git push origin main`,
-# `git push origin HEAD:main`, `git push --force origin +main`).
-if printf '%s' "$cmd" | grep -qE 'git[[:space:]]+push[^;&|]*\b(\+|[^[:space:]]+:)?main([[:space:]]|$|[;&|])'; then
+# Strip trailing inline shell comments. Best-effort: does not parse quote context,
+# so `git push origin "topic#1"` would be truncated. Rare enough to accept.
+cmd=$(printf '%s' "$cmd" | sed -E 's/[[:space:]]+#.*$//')
+
+# Case 1: explicit `main` as a refspec destination. The prefix must be
+# whitespace, `:`, or `+` so we do not match slashed/hyphenated/dotted branch
+# names (`release/main`, `feature-main`, `topic.main`, `user/main`).
+if printf '%s' "$cmd" | grep -qE 'git[[:space:]]+push[^;&|]*([[:space:]]|:)\+?main([[:space:]]|$|[;&|])'; then
   echo "BLOCKED: direct push to main. Create a feature branch (or worktree) first." >&2
   exit 2
 fi
