@@ -35,6 +35,8 @@ export default {
         'ionic',
         // MCP server
         'mcp',
+        // OpenAPI generator
+        'openapi-generator',
         // Apps
         'docs',
         'examples',

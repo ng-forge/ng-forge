@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mapSchemaToFields } from './schema-to-fields.js';
 import type { SchemaObject } from '../parser/schema-walker.js';
+import { logger } from '../utils/logger.js';
 
 describe('mapSchemaToFields', () => {
   it('should map a simple flat object schema', () => {
@@ -1204,6 +1205,10 @@ describe('mapSchemaToFields', () => {
   // Container types declare `props?: never`. Emitting any `props` (including the
   // `description → hint` mapping) trips TS2322 under `as const satisfies FormConfig`.
   describe('container types: no props.hint emitted (#425)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     it('should not emit props on array fields with description (object items)', () => {
       const schema: SchemaObject = {
         type: 'object',
@@ -1258,21 +1263,56 @@ describe('mapSchemaToFields', () => {
       expect(result.fields[0].props).toBeUndefined();
     });
 
-    it('should not emit props when x-ng-forge-type overrides to a container type with description', () => {
-      const schema: SchemaObject = {
-        type: 'object',
-        properties: {
-          custom: {
-            type: 'string',
-            description: 'Custom container.',
-            'x-ng-forge-type': 'container',
-          } as unknown as SchemaObject,
-        },
-      };
+    // Cover every member of CONTAINER_FIELD_TYPES so adding/removing one without
+    // updating the description-hint guard fails loudly here.
+    it.each(['group', 'array', 'row', 'page', 'container'] as const)(
+      'should not emit props on %s fields when description is set via x-ng-forge-type override',
+      (containerType) => {
+        const schema: SchemaObject = {
+          type: 'object',
+          properties: {
+            custom: {
+              type: 'string',
+              description: `Custom ${containerType}.`,
+              'x-ng-forge-type': containerType,
+            } as unknown as SchemaObject,
+          },
+        };
 
-      const result = mapSchemaToFields(schema, []);
-      expect(result.fields[0].type).toBe('container');
-      expect(result.fields[0].props).toBeUndefined();
+        const result = mapSchemaToFields(schema, []);
+        expect(result.fields[0].type).toBe(containerType);
+        expect(result.fields[0].props).toBeUndefined();
+      },
+    );
+
+    // Pin the recovery message — users rely on it to discover the manual workaround
+    // (sibling 'text' field). Wording changes here should be intentional.
+    it('should log a verbose message naming the field, the container type, and the recovery workaround', () => {
+      const verboseSpy = vi.spyOn(logger, 'verbose').mockImplementation(() => {
+        // suppress console output in tests
+      });
+
+      mapSchemaToFields(
+        {
+          type: 'object',
+          properties: {
+            fields: {
+              type: 'array',
+              description: 'Form fields of the form.',
+              items: { type: 'string' },
+            } as unknown as SchemaObject,
+          },
+        },
+        [],
+      );
+
+      const matching = verboseSpy.mock.calls.find(([msg]) => typeof msg === 'string' && msg.includes('dropped description hint'));
+      expect(matching, 'expected a verbose log mentioning the dropped description hint').toBeDefined();
+      const message = matching![0] as string;
+      expect(message).toContain("Field 'fields'");
+      expect(message).toContain("'array'");
+      expect(message).toContain('container fields do not accept props');
+      expect(message).toContain("sibling 'text' field");
     });
   });
 
