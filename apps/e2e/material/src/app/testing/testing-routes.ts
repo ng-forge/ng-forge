@@ -13,6 +13,12 @@ export default [
     loadChildren: () => import('./accessibility/accessibility.routes'),
   },
 
+  // Property derivation — HTTP source
+  {
+    path: 'property-derivation-http',
+    loadChildren: () => import('./property-derivation-http/property-derivation-http.routes'),
+  },
+
   // Addons Tests - prefix/suffix addon kinds (mat-icon, mat-button, text, presets)
   {
     path: 'addons',
