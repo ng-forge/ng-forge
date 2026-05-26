@@ -43,6 +43,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@ampproject/remapping": "^2.3.0",
     "@analogjs/platform": "2.5.0",
     "@analogjs/vite-plugin-angular": "2.5.0",
     "@analogjs/vitest-angular": "2.5.0",

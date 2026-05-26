@@ -11,14 +11,20 @@
 // deletion. Terser was rejected because it cannot preserve /*#__PURE__*/
 // annotations attached to the correct AST position when compress is disabled
 // (verified: places them on the parent statement, breaking tree-shaking).
+//
+// Pipeline: each library's `nx build` is a wrapper that depends on `compile`
+// (which runs @nx/angular:package) and then invokes this script in place. The
+// `compile` target's dist output is therefore the UNSTRIPPED FESM — anything
+// downstream should depend on `build`, not `compile`, to get the final
+// artifact. Today nothing in the workspace depends on `compile` directly.
 
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, basename } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { Parser } from 'acorn';
 import MagicString from 'magic-string';
+import remapping from '@ampproject/remapping';
 
-const JSDOC_RE = /\/\*\*[\s\S]*?\*\//g;
 const PURE_RE = /__PURE__/g;
 const LEGAL_MARKER_RE = /@(?:license|preserve)\b/;
 const SOURCEMAPPING_URL_RE = /^#\s*sourceMappingURL=/;
@@ -61,26 +67,17 @@ function shouldKeepComment(comment) {
  * Parse the FESM source with acorn, collect comment positions, then delete
  * the ones `shouldKeepComment` rejects via magic-string.
  *
- * The delete-only transform makes sourcemap composition trivial: we only ever
- * shrink the output, so magic-string's mapping can be layered on top of the
- * upstream rollup map without re-walking segments.
+ * The delete-only transform pairs cleanly with sourcemap composition: we only
+ * ever shrink the output, so magic-string emits a fresh `output → FESM`
+ * mapping that we later layer on top of the upstream `FESM → TS` rollup map
+ * via @ampproject/remapping.
  *
  * @param {string} source - Raw FESM `.mjs` contents.
- * @returns {{ code: string, map: import('magic-string').SourceMap, dropped: number }}
+ * @returns {{ code: string, map: ReturnType<MagicString['generateMap']> }}
  */
 function stripComments(source) {
-  const comments = [];
-  Parser.parse(source, {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    allowHashBang: true,
-    onComment: (block, text, start, end) => {
-      comments.push({ type: block ? 'Block' : 'Line', value: text, start, end });
-    },
-  });
-
+  const comments = collectComments(source);
   const s = new MagicString(source);
-  let dropped = 0;
   for (const c of comments) {
     if (shouldKeepComment(c)) continue;
     // Eat the trailing newline so the file doesn't end up with cosmetic
@@ -90,22 +87,58 @@ function stripComments(source) {
     if (source[end] === '\n') end += 1;
     else if (source[end] === '\r' && source[end + 1] === '\n') end += 2;
     s.remove(c.start, end);
-    dropped++;
   }
-  return { code: s.toString(), map: s.generateMap({ hires: false }), dropped };
+  return { code: s.toString(), map: s.generateMap({ hires: false }) };
 }
 
 /**
- * Count occurrences of a global RegExp without allocating the match array
- * twice. Used for the pre/post integrity audit (JSDoc must hit zero; PURE
- * count must not drop).
+ * Tokenize JS with acorn and return the full comment list. Used both by the
+ * strip pass and by the post-strip audit so the JSDoc count is tokenizer-
+ * correct (a `/** ... *\/` substring inside a string or template literal
+ * doesn't false-positive a regex check).
  *
- * @param {RegExp} re - Must have the `g` flag.
+ * @param {string} source
+ * @returns {Array<{ type: 'Block' | 'Line', value: string, start: number, end: number }>}
+ */
+function collectComments(source) {
+  const comments = [];
+  Parser.parse(source, {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    allowHashBang: true,
+    onComment: (block, text, start, end) => {
+      comments.push({ type: block ? 'Block' : 'Line', value: text, start, end });
+    },
+  });
+  return comments;
+}
+
+/**
+ * Count surviving JSDoc blocks (`/** ... *\/` source) using acorn so the
+ * audit doesn't false-positive on string/template-literal contents.
+ *
+ * @param {string} source
+ * @returns {number}
+ */
+function countJsdocBlocks(source) {
+  let n = 0;
+  for (const c of collectComments(source)) {
+    if (c.type === 'Block' && c.value.startsWith('*')) n++;
+  }
+  return n;
+}
+
+/**
+ * Count `__PURE__` occurrences via plain regex — the literal substring is
+ * distinctive enough that string-context false positives don't happen in
+ * practice (and a false POSITIVE here would only over-report preservation,
+ * not under-report, so it's safe direction).
+ *
  * @param {string} src
  * @returns {number}
  */
-function countMatches(re, src) {
-  return (src.match(re) || []).length;
+function countPure(src) {
+  return (src.match(PURE_RE) || []).length;
 }
 
 /**
@@ -153,8 +186,8 @@ async function processFesm(fesmDir) {
     const sourceCode = await readFile(filePath, 'utf8');
     totals.rawBefore += sourceCode.length;
     totals.gzBefore += gzipSync(sourceCode).length;
-    totals.jsdocBefore += countMatches(JSDOC_RE, sourceCode);
-    totals.pureBefore += countMatches(PURE_RE, sourceCode);
+    totals.jsdocBefore += countJsdocBlocks(sourceCode);
+    totals.pureBefore += countPure(sourceCode);
 
     const { code, map } = stripComments(sourceCode);
 
@@ -173,31 +206,38 @@ async function processFesm(fesmDir) {
 
     await writeFile(filePath, finalCode);
 
-    // Compose the upstream rollup map with our delete-only mapping so debug
-    // tools end up at the original `.ts` files instead of the FESM text.
-    // magic-string emits a fresh `mappings` table relative to the FESM; we
-    // graft on the upstream `sources` / `sourcesContent` / `names`.
+    // Compose maps so debuggers land on the original `.ts` sources.
+    // magic-string produces `output → FESM`; the upstream rollup map is
+    // `FESM → TS`. @ampproject/remapping chains them by walking each output
+    // segment, resolving its FESM position through the upstream map, and
+    // emitting a final `output → TS` map. Just stitching `sources` from
+    // upstream onto the magic-string map (what we did before) leaves
+    // mappings still pointing at FESM offsets — debuggers would land on
+    // wrong .ts lines.
     try {
       const upstreamRaw = await readFile(mapPath, 'utf8');
       const upstream = JSON.parse(upstreamRaw);
-      const composed = {
+      const ourMap = {
         version: 3,
-        file: map.file ?? file,
-        sources: upstream.sources,
-        sourcesContent: upstream.sourcesContent,
-        names: upstream.names,
+        file,
+        sources: [file],
+        sourcesContent: [sourceCode],
+        names: [],
         mappings: map.mappings,
       };
-      await writeFile(mapPath, JSON.stringify(composed));
+      const composed = remapping(ourMap, (source) => (source === file ? upstream : null));
+      await writeFile(mapPath, composed.toString());
     } catch {
-      // No upstream map — write magic-string's map as-is.
+      // No upstream map — write magic-string's own map as-is. This points at
+      // the pre-strip FESM text rather than `.ts`, which is honest about
+      // what's available rather than synthesizing a wrong-looking TS map.
       await writeFile(mapPath, map.toString());
     }
 
     totals.rawAfter += finalCode.length;
     totals.gzAfter += gzipSync(finalCode).length;
-    totals.jsdocAfter += countMatches(JSDOC_RE, finalCode);
-    totals.pureAfter += countMatches(PURE_RE, finalCode);
+    totals.jsdocAfter += countJsdocBlocks(finalCode);
+    totals.pureAfter += countPure(finalCode);
   }
 
   return totals;
