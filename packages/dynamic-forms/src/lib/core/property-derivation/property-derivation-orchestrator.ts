@@ -1,37 +1,19 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, DestroyRef, inject, InjectionToken, Injector, Signal, untracked } from '@angular/core';
+import { computed, DestroyRef, inject, InjectionToken, Injector, Signal } from '@angular/core';
 import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import {
-  auditTime,
-  catchError,
-  combineLatestWith,
-  debounceTime,
-  EMPTY,
-  exhaustMap,
-  filter,
-  map,
-  merge,
-  of,
-  pairwise,
-  queueScheduler,
-  scheduled,
-  startWith,
-  switchMap,
-  timer,
-} from 'rxjs';
+import { catchError, EMPTY } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
-import { getDebouncePeriods } from '../derivation/debounce-period-utils';
 import { buildEntryStreamPipeline } from '../derivation/entry-set-utils';
 import { resolveExternalData } from '../derivation/external-data-resolver';
+import { setupDebouncedStream, setupOnChangeStream } from '../derivation/pipeline-setup-utils';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
 import { collectPropertyDerivations } from './property-derivation-collector';
@@ -123,73 +105,34 @@ export class PropertyDerivationOrchestrator {
       }
     });
 
-    this.setupOnChangeStream();
-    this.setupDebouncedStream();
+    setupOnChangeStream<PropertyDerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Property derivation onChange stream error',
+      collectionSignal: this.propertyDerivationCollection,
+      formValueSignal: this.config.formValue,
+      // Property-derivation's onChange path historically ignored the changedFields set
+      // (it always re-runs all 'onChange'-triggered entries). The helper computes one
+      // anyway — the cost is negligible and keeping the behavior intact requires only
+      // dropping the second argument here.
+      applyOnChange: (collection) => this.applyOnChangePropertyDerivations(collection),
+    });
+
+    setupDebouncedStream<PropertyDerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Property derivation debounced stream error',
+      collectionSignal: this.propertyDerivationCollection,
+      formValueSignal: this.config.formValue,
+      applyDebouncedForPeriod: (debounceMs, collection, changedFields) => {
+        this.applyDebouncedEntriesForPeriod(debounceMs, collection, changedFields);
+      },
+    });
+
     this.setupHttpStreams();
     this.setupAsyncFunctionStreams();
-  }
-
-  private setupOnChangeStream(): void {
-    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
-    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-
-    collection$
-      .pipe(
-        filter((collection): collection is PropertyDerivationCollection => collection !== null),
-        combineLatestWith(formValue$),
-        auditTime(0),
-        exhaustMap(([collection]) => {
-          this.applyOnChangePropertyDerivations(collection);
-          return scheduled([null], queueScheduler);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        error: (err) => this.logger.error('Property derivation onChange stream error', err),
-      });
-  }
-
-  private setupDebouncedStream(): void {
-    toObservable(this.config.formValue, { injector: this.injector })
-      .pipe(
-        debounceTime(DEFAULT_DEBOUNCE_MS),
-        startWith(null as Record<string, unknown> | null),
-        pairwise(),
-        filter((pair): pair is [Record<string, unknown> | null, Record<string, unknown>] => pair[1] !== null),
-        map(([previous, current]) => ({
-          current,
-          changedFields: getChangedKeys(previous, current),
-        })),
-        filter(({ changedFields }) => changedFields.size > 0),
-        switchMap(({ changedFields }) => {
-          const collection = untracked(() => this.propertyDerivationCollection());
-          if (!collection) return of(null);
-
-          const debouncePeriods = getDebouncePeriods(collection.entries);
-          if (debouncePeriods.length === 0) return of(null);
-
-          const periodStreams = debouncePeriods.map((debounceMs) => this.createPeriodStream(debounceMs, collection, changedFields));
-
-          return merge(...periodStreams);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        error: (err) => this.logger.error('Property derivation debounced stream error', err),
-      });
-  }
-
-  private createPeriodStream(debounceMs: number, collection: PropertyDerivationCollection, changedFields: Set<string>) {
-    const additionalWait = Math.max(0, debounceMs - DEFAULT_DEBOUNCE_MS);
-
-    return timer(additionalWait).pipe(
-      map(() => {
-        // For periods beyond DEFAULT_DEBOUNCE_MS, re-read collection as it may have changed during the wait.
-        // For zero-wait periods, use the original collection directly since no time has elapsed.
-        const currentCollection = additionalWait > 0 ? (untracked(() => this.propertyDerivationCollection()) ?? collection) : collection;
-        this.applyDebouncedEntriesForPeriod(debounceMs, currentCollection, changedFields);
-      }),
-    );
   }
 
   private applyOnChangePropertyDerivations(collection: PropertyDerivationCollection): void {

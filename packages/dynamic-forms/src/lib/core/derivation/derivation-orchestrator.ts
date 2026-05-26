@@ -3,30 +3,12 @@ import { computed, DestroyRef, inject, InjectionToken, Injector, Signal, untrack
 import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
-import {
-  auditTime,
-  catchError,
-  combineLatestWith,
-  debounceTime,
-  EMPTY,
-  exhaustMap,
-  filter,
-  map,
-  merge,
-  of,
-  pairwise,
-  queueScheduler,
-  scheduled,
-  startWith,
-  switchMap,
-  timer,
-} from 'rxjs';
+import { catchError, EMPTY } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { getChangedKeys } from '../../utils/object-utils';
 import { FunctionRegistryService } from '../registry';
 import { applyDerivationsForTrigger } from './derivation-applicator';
 import { collectDerivations } from './derivation-collector';
@@ -37,8 +19,8 @@ import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
 import { buildEntryStreamPipeline } from './entry-set-utils';
 import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
-import { getDebouncePeriods } from './debounce-period-utils';
 import { resolveExternalData } from './external-data-resolver';
+import { setupDebouncedStream, setupOnChangeStream } from './pipeline-setup-utils';
 
 /**
  * Minimal configuration for creating a DerivationOrchestrator.
@@ -116,130 +98,42 @@ export class DerivationOrchestrator {
       return collection;
     });
 
-    this.setupOnChangeStream();
-    this.setupDebouncedStream();
+    setupOnChangeStream<DerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Derivation onChange stream error',
+      collectionSignal: this.derivationCollection,
+      formValueSignal: this.config.formValue,
+      // The form accessor signal must also wake the stream so that config swaps
+      // (which produce a new FieldTree) trigger a re-application of derivations
+      // against the freshly-built form.
+      additionalAwakeners: [this.config.form],
+      applyOnChange: (collection, changedFields) => {
+        this.applyOnChangeDerivations(
+          collection,
+          untracked(() => this.config.form()),
+          changedFields,
+        );
+      },
+    });
+
+    setupDebouncedStream<DerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Derivation debounced stream error',
+      collectionSignal: this.derivationCollection,
+      formValueSignal: this.config.formValue,
+      applyDebouncedForPeriod: (debounceMs, collection, changedFields) => {
+        const formAccessor = untracked(() => this.config.form());
+        if (!formAccessor) return;
+        this.applyDebouncedEntriesForPeriod(debounceMs, collection, formAccessor, changedFields);
+      },
+    });
+
     this.setupHttpStreams();
     this.setupAsyncFunctionStreams();
-  }
-
-  private setupOnChangeStream(): void {
-    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
-    const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-    const form$ = toObservable(this.config.form, { injector: this.injector });
-
-    collection$
-      .pipe(
-        filter((collection): collection is DerivationCollection => collection !== null),
-        combineLatestWith(formValue$, form$),
-
-        // auditTime(0): Batch synchronous emissions from Angular's change detection.
-        // When a single user action triggers multiple signal updates, this ensures
-        // we only process derivations once after all updates complete (microtask timing).
-        auditTime(0),
-
-        // startWith + pairwise: Track previous and current values to detect changed fields.
-        // This enables reEngageOnDependencyChange for onChange derivations.
-        startWith(null as [DerivationCollection, Record<string, unknown>, FieldTree<unknown>] | null),
-        pairwise(),
-        filter((pair): pair is [(typeof pair)[0], [DerivationCollection, Record<string, unknown>, FieldTree<unknown>]] => pair[1] !== null),
-        map(([previous, current]) => ({
-          collection: current[0],
-          formAccessor: current[2],
-          changedFields: getChangedKeys(previous?.[1] ?? null, current[1]),
-        })),
-
-        // exhaustMap: Prevents re-entry while processing derivations.
-        // If form value changes DURING derivation processing (from our own setValue calls),
-        // we ignore those emissions and complete the current cycle first.
-        // switchMap would cancel mid-processing, causing incomplete derivation chains.
-        exhaustMap(({ collection, formAccessor, changedFields }) => {
-          this.applyOnChangeDerivations(collection, formAccessor, changedFields);
-
-          // scheduled with queueScheduler: Ensures the observable completes
-          // in the next microtask, allowing exhaustMap to accept new emissions.
-          // Without this, exhaustMap would block indefinitely.
-          return scheduled([null], queueScheduler);
-        }),
-
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        error: (err) => this.logger.error('Derivation onChange stream error', err),
-      });
-  }
-
-  private setupDebouncedStream(): void {
-    toObservable(this.config.formValue, { injector: this.injector })
-      .pipe(
-        // debounceTime: Wait for value to stabilize before detecting changes.
-        // Uses DEFAULT_DEBOUNCE_MS as the minimum debounce period.
-        debounceTime(DEFAULT_DEBOUNCE_MS),
-
-        // startWith + pairwise: Track previous and current values to detect changes.
-        // startWith(null) ensures pairwise has an initial value to pair with.
-        startWith(null as Record<string, unknown> | null),
-        pairwise(),
-        filter((pair): pair is [Record<string, unknown> | null, Record<string, unknown>] => pair[1] !== null),
-        map(([previous, current]) => ({
-          current,
-          changedFields: getChangedKeys(previous, current),
-        })),
-        filter(({ changedFields }) => changedFields.size > 0),
-
-        // switchMap: For debounced derivations, it's OK to cancel pending work
-        // if new changes come in - we want the latest debounced values.
-        // (Unlike onChange which uses exhaustMap to prevent cancellation)
-        switchMap(({ changedFields }) => {
-          const collection = untracked(() => this.derivationCollection());
-          const formAccessor = untracked(() => this.config.form());
-
-          if (!collection || !formAccessor) return of(null);
-
-          // Get unique debounce periods from entries with trigger 'debounced'
-          const debouncePeriods = getDebouncePeriods(collection.entries);
-          if (debouncePeriods.length === 0) return of(null);
-
-          // merge: Process multiple debounce periods concurrently.
-          // Each period stream handles its own timing independently.
-          const periodStreams = debouncePeriods.map((debounceMs) =>
-            this.createPeriodStream(debounceMs, collection, formAccessor, changedFields),
-          );
-
-          return merge(...periodStreams);
-        }),
-
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        error: (err) => this.logger.error('Derivation debounced stream error', err),
-      });
-  }
-
-  private createPeriodStream(
-    debounceMs: number,
-    collection: DerivationCollection,
-    formAccessor: FieldTree<unknown>,
-    changedFields: Set<string>,
-  ) {
-    const additionalWait = Math.max(0, debounceMs - DEFAULT_DEBOUNCE_MS);
-
-    if (additionalWait === 0) {
-      return of(null).pipe(
-        map(() => {
-          this.applyDebouncedEntriesForPeriod(debounceMs, collection, formAccessor, changedFields);
-        }),
-      );
-    }
-
-    return timer(additionalWait).pipe(
-      map(() => {
-        const currentCollection = untracked(() => this.derivationCollection());
-        const currentFormAccessor = untracked(() => this.config.form());
-        if (currentCollection && currentFormAccessor) {
-          this.applyDebouncedEntriesForPeriod(debounceMs, currentCollection, currentFormAccessor, changedFields);
-        }
-      }),
-    );
   }
 
   private applyOnChangeDerivations(collection: DerivationCollection, formAccessor: FieldTree<unknown>, changedFields?: Set<string>): void {
