@@ -10,7 +10,6 @@ import type { FormOptions } from '../../models/form-config';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { FunctionRegistryService } from '../registry';
 import { applyDerivationsForTrigger } from './derivation-applicator';
 import { collectAllDerivations, collectDerivations } from './derivation-collector';
@@ -127,30 +126,31 @@ export class DerivationOrchestrator {
     this.config = config;
 
     const valueEnabled = !!(config.form && config.derivationLogger);
-    const propertyEnabled = !!config.propertyStore;
+    const propertyStore = config.propertyStore;
+    const propertyEnabled = !!propertyStore;
 
     // Shared single-traversal collector — built only when BOTH pipelines are
-    // active. With one pipeline active, that pipeline's setup method runs the
-    // slice-specific collector directly so the unused pipeline's dependency
-    // tokens (e.g. DEPRECATION_WARNING_TRACKER) don't need providers.
+    // active. When only one pipeline is active that pipeline's setup runs the
+    // slice-specific collector directly. The memoization assumption: in the
+    // common case where both pipeline signals are pulled in the same Angular
+    // change-detection cycle, the shared computed runs once and both
+    // consumers reuse the result. If only one consumer pulls within a frame,
+    // the work is identical to the slice-collector path — no extra cost.
     const sharedAllDerivations =
       valueEnabled && propertyEnabled
-        ? (() => {
-            const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
-            return computed(() => {
-              const fields = config.schemaFields();
-              if (!fields || fields.length === 0) return null;
-              return collectAllDerivations(fields, this.logger, deprecationTracker);
-            });
-          })()
+        ? computed(() => {
+            const fields = config.schemaFields();
+            if (!fields || fields.length === 0) return null;
+            return collectAllDerivations(fields);
+          })
         : null;
 
     this.derivationCollection = valueEnabled
       ? this.setupValuePipeline(sharedAllDerivations)
       : computed<DerivationCollection | null>(() => null);
 
-    this.propertyDerivationCollection = propertyEnabled
-      ? this.setupPropertyPipeline(config.propertyStore!, sharedAllDerivations)
+    this.propertyDerivationCollection = propertyStore
+      ? this.setupPropertyPipeline(propertyStore, sharedAllDerivations)
       : computed<PropertyDerivationCollection | null>(() => null);
   }
 
@@ -235,11 +235,6 @@ export class DerivationOrchestrator {
     propertyStore: PropertyOverrideStore,
     sharedAllDerivations: Signal<{ value: DerivationCollection; property: PropertyDerivationCollection } | null> | null,
   ): Signal<PropertyDerivationCollection | null> {
-    // Lazily injected only when this pipeline runs without the shared
-    // traversal — the shared computed already injected its own tracker at
-    // construction time when both pipelines are active.
-    const deprecationTracker = sharedAllDerivations ? null : inject(DEPRECATION_WARNING_TRACKER);
-
     const collection = computed<PropertyDerivationCollection | null>(() => {
       const fields = this.config.schemaFields();
 
@@ -247,9 +242,9 @@ export class DerivationOrchestrator {
         return null;
       }
 
-      const collected = sharedAllDerivations
-        ? (sharedAllDerivations()?.property ?? null)
-        : collectPropertyDerivations(fields, this.logger, deprecationTracker!);
+      // When both pipelines run, reuse the shared traversal; otherwise this
+      // pipeline owns the walk.
+      const collected = sharedAllDerivations ? (sharedAllDerivations()?.property ?? null) : collectPropertyDerivations(fields);
 
       if (!collected || collected.entries.length === 0) {
         return null;

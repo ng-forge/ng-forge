@@ -2,8 +2,6 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import type { WarningTracker } from '../../utils/warning-tracker';
 import { extractStringDependencies } from '../cross-field/cross-field-detector';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from '../property-derivation/property-derivation-types';
 import { topologicalSort } from './derivation-sorter';
@@ -11,19 +9,10 @@ import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { extractDependenciesFromConfig } from './extract-dependencies';
 import { extractInlineAsyncFn, extractInlineFn } from './extract-inline-fn';
 import { traverseFieldsWithContext } from './field-traversal';
-import {
-  buildEffectiveFieldKey,
-  CollectionContext,
-  CONTEXT_TRAVERSAL_OPTIONS,
-  resolveTokenDependencies,
-  SELF_DEPENDENCY_TOKEN as _SELF_DEPENDENCY_TOKEN,
-  GROUP_DEPENDENCY_TOKEN as _GROUP_DEPENDENCY_TOKEN,
-} from './collection-context';
+import { buildEffectiveFieldKey, CollectionContext, CONTEXT_TRAVERSAL_OPTIONS, resolveTokenDependencies } from './collection-context';
 
-/** Re-exported for back-compat. See `./collection-context.ts` for the canonical declaration. */
-export const SELF_DEPENDENCY_TOKEN = _SELF_DEPENDENCY_TOKEN;
-/** Re-exported for back-compat. See `./collection-context.ts` for the canonical declaration. */
-export const GROUP_DEPENDENCY_TOKEN = _GROUP_DEPENDENCY_TOKEN;
+// Re-export the dependency tokens for back-compat with external imports.
+export { SELF_DEPENDENCY_TOKEN, GROUP_DEPENDENCY_TOKEN } from './collection-context';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public collectors
@@ -66,26 +55,25 @@ export function collectDerivations(fields: FieldDef<unknown>[]): DerivationColle
  * Single traversal that emits both value derivations (sorted topologically)
  * and property derivations (no sort — they don't chain among themselves).
  *
- * Replaces the previous pattern of calling {@link collectDerivations} and the
- * standalone `collectPropertyDerivations` separately — those walked the tree
- * twice and re-derived the array/group path tracking each time. This walks
- * once, dispatching each `type: 'derivation'` logic entry to the right
- * collection based on whether it carries a `targetProperty`.
+ * Walks the field tree once, dispatching each `type: 'derivation'` logic
+ * entry to the right collection based on whether it carries a
+ * `targetProperty`. Used internally by the `DerivationOrchestrator` when
+ * both pipelines are active to share one walk across both collection
+ * signals; external callers should use {@link collectDerivations} or
+ * `collectPropertyDerivations` instead.
  *
- * @public
+ * @internal
  */
-export function collectAllDerivations(
-  fields: FieldDef<unknown>[],
-  logger: Logger,
-  tracker: WarningTracker,
-): { value: DerivationCollection; property: PropertyDerivationCollection } {
+export function collectAllDerivations(fields: FieldDef<unknown>[]): {
+  value: DerivationCollection;
+  property: PropertyDerivationCollection;
+} {
   const valueEntries: DerivationEntry[] = [];
   const propertyEntries: PropertyDerivationEntry[] = [];
-  const ctx: CollectionContext = { logger, tracker };
 
   traverseFieldsWithContext<CollectionContext>(
     fields,
-    ctx,
+    {},
     (field, context) => {
       collectValueEntriesFromField(field, valueEntries, context);
       collectPropertyEntriesFromField(field, propertyEntries, context);

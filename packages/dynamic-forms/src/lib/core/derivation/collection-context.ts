@@ -1,6 +1,4 @@
 import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import type { WarningTracker } from '../../utils/warning-tracker';
 
 /**
  * Tokens recognised by the dependency resolver. Exported so the few callers
@@ -24,10 +22,6 @@ export const GROUP_DEPENDENCY_TOKEN = '$group';
  * collection. Tracks array + group ancestry so absolute field paths and
  * `$self` / `$group` tokens can be resolved without re-walking the tree.
  *
- * `logger` + `tracker` are present only because the property-derivation
- * variant historically needed them inline; both fields are optional so the
- * value-only call site (which doesn't need either) can pass `{}`.
- *
  * @internal
  */
 export interface CollectionContext {
@@ -40,10 +34,6 @@ export interface CollectionContext {
    * array don't contribute to descendants' entry keys.
    */
   groupPath?: string;
-  /** Available for diagnostics by handlers that emit warnings. */
-  logger?: Logger;
-  /** Available for de-duplicated warnings by handlers that need it. */
-  tracker?: WarningTracker;
 }
 
 /**
