@@ -30,5 +30,10 @@ export {
 // App port configuration - use this to derive baseURL in fixtures
 export { APP_PORTS, type ExampleApp } from './app-config';
 
+// Cross-adapter performance fixtures are NOT re-exported from the top-level barrel.
+// Apps importing perf utilities should use the dedicated subpath to avoid pulling in
+// Playwright (loaded via base-fixtures), which doesn't bundle for the browser:
+//   import { standardStressConfig, perfMockHttpInterceptor } from '@ng-forge/examples-shared-testing/perf';
+
 // Note: Full Playwright configuration is NOT exported here to avoid Angular compilation issues.
 // Import directly from '@ng-forge/examples-shared-testing/playwright-config' in playwright.config.ts files.

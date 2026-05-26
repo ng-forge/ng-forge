@@ -78,4 +78,10 @@ export default [
     path: 'wrapper-fields',
     loadChildren: () => import('./wrapper-fields/wrapper-fields.routes'),
   },
+
+  // Cross-adapter performance benchmarks
+  {
+    path: 'performance',
+    loadChildren: () => import('./performance/performance.routes'),
+  },
 ] satisfies Route[];

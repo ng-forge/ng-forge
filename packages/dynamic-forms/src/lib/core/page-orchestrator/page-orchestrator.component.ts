@@ -50,25 +50,34 @@ import { isRowField } from '../../definitions/default/row-field';
   imports: [PageFieldComponent],
   template: `
     @for (pageField of pageFields(); track pageField.key; let i = $index) {
-      @if (i === state().currentPageIndex || i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
-        <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
-        @defer (on immediate) {
-          <section
-            page-field
-            [field]="pageField"
-            [key]="pageField.key"
-            [pageIndex]="i"
-            [isVisible]="i === state().currentPageIndex"
-          ></section>
-        } @placeholder {
-          <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
-        }
-      } @else {
-        <!-- Distant pages: defer until browser is idle for memory savings -->
-        @defer (on idle) {
-          <section page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="false"></section>
-        } @placeholder {
-          <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+      <!--
+        Skip pages hidden by 'hidden' logic conditions entirely. FormStateManager
+        derives schema/value/validators from config (not from mounted components),
+        so unmounting a hidden page has no effect on form state — only on render +
+        CD cost. This is the page-level equivalent of the existing field-level
+        \`@if (!field.hidden())\` gate in page-field.component.ts.
+      -->
+      @if (!pageHiddenStates()[i]) {
+        @if (i === state().currentPageIndex || i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
+          <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
+          @defer (on immediate) {
+            <section
+              page-field
+              [field]="pageField"
+              [key]="pageField.key"
+              [pageIndex]="i"
+              [isVisible]="i === state().currentPageIndex"
+            ></section>
+          } @placeholder {
+            <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+          }
+        } @else {
+          <!-- Distant pages: defer until browser is idle for memory savings -->
+          @defer (on idle) {
+            <section page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="false"></section>
+          } @placeholder {
+            <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+          }
         }
       }
     }
