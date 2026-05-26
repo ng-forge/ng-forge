@@ -14,6 +14,20 @@
   "tags": [],
   "targets": {
     "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "dependsOn": [{ "target": "compile", "params": "forward" }],
+      "options": {
+        "command": "node scripts/strip-fesm-comments.mjs dist/packages/dynamic-forms",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "production": {},
+        "development": {}
+      },
+      "defaultConfiguration": "production"
+    },
+    "compile": {
       "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
