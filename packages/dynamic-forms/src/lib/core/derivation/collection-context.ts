@@ -113,8 +113,24 @@ export function resolveTokenDependencies(deps: string[], effectiveFieldKey: stri
 
 /**
  * Standard `traverseFieldsWithContext` step handlers for derivation
- * collection. Array boundary resets `groupPath`; group descent appends the
- * field's key; layout containers leave context unchanged.
+ * collection.
+ *
+ * **Array boundary intentionally drops enclosing `groupPath`.** Arrays act
+ * as their own model root in the derivation key scheme: entries inside an
+ * array item are keyed `<arrayKey>.$.<...>` regardless of whether the array
+ * itself was nested under one or more groups. The `<arrayKey>` is the
+ * array's own key alone, not a path prefixed with ancestor groups.
+ * Downstream consumers (applicators, store, derivation sorter — see
+ * `derivation-sorter.ts` for the `.$.` split logic) rely on this shape to
+ * identify which array a per-item entry belongs to.
+ *
+ * Locked in by `derivation-collector.spec.ts`'s "should reset ancestor
+ * groupPath at array boundaries" case. CodeRabbit flagged this on #438 as
+ * potentially missing parent ancestry; the asymmetry is real but
+ * load-bearing for the placeholder-key contract.
+ *
+ * Group descent appends the field's key to the ancestor `groupPath`;
+ * layout containers leave context unchanged.
  *
  * @internal
  */
