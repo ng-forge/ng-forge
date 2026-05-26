@@ -12,7 +12,7 @@ import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tra
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createWarningTracker } from '../../utils/warning-tracker';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';
-import { PropertyDerivationOrchestrator, PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
+import { DerivationOrchestrator, DerivationOrchestratorConfig } from '../derivation/derivation-orchestrator';
 
 /**
  * Helper to create a minimal FieldDef with propertyDerivation logic.
@@ -77,7 +77,7 @@ async function flushAndSettle(ms = 50): Promise<void> {
   TestBed.flushEffects();
 }
 
-describe('PropertyDerivationOrchestrator', () => {
+describe('DerivationOrchestrator (property pipeline)', () => {
   let mockLogger: MockLogger;
   let store: PropertyOverrideStore;
   let schemaFields: WritableSignal<FieldDef<unknown>[] | undefined>;
@@ -103,15 +103,15 @@ describe('PropertyDerivationOrchestrator', () => {
     functionRegistry = TestBed.inject(FunctionRegistryService);
   });
 
-  function createOrchestrator(configOverrides: Partial<PropertyDerivationOrchestratorConfig> = {}): PropertyDerivationOrchestrator {
-    const config: PropertyDerivationOrchestratorConfig = {
+  function createOrchestrator(configOverrides: Partial<DerivationOrchestratorConfig> = {}): DerivationOrchestrator {
+    const config: DerivationOrchestratorConfig = {
       schemaFields,
       formValue,
-      store,
+      propertyStore: store,
       ...configOverrides,
     };
 
-    return TestBed.runInInjectionContext(() => new PropertyDerivationOrchestrator(config));
+    return TestBed.runInInjectionContext(() => new DerivationOrchestrator(config));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
