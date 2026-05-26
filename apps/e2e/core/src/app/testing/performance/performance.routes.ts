@@ -41,6 +41,21 @@ const routes: Routes = [
     path: 'perf-config-swap',
     loadComponent: () => import('./scenarios/perf-config-swap.component').then((m) => m.PerfConfigSwapComponent),
   },
+  {
+    path: 'perf-stress-50-pages',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getPerformanceScenario('perf-stress-50-pages') },
+  },
+  {
+    path: 'perf-stress-full-surface-flat',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getPerformanceScenario('perf-stress-full-surface-flat') },
+  },
+  {
+    path: 'perf-stress-full-surface-paged',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getPerformanceScenario('perf-stress-full-surface-paged') },
+  },
 ];
 
 export default routes;

@@ -6,6 +6,8 @@ import { perf50WithConditionalsScenario } from './scenarios/perf-50-with-conditi
 import { perfArray20ItemsScenario } from './scenarios/perf-array-20-items.scenario';
 import { perf10Pages10FieldsScenario } from './scenarios/perf-10-pages-10-fields.scenario';
 import { perfConfigSwapScenario } from './scenarios/perf-config-swap.scenario';
+import { perfStress50PagesScenario } from './scenarios/perf-stress-50-pages.scenario';
+import { perfStressFullSurfaceFlatScenario, perfStressFullSurfacePagedScenario } from './scenarios/perf-stress-full-surface.scenario';
 
 export const performanceSuite: TestSuite = {
   id: 'performance',
@@ -20,6 +22,9 @@ export const performanceSuite: TestSuite = {
     perfArray20ItemsScenario,
     perf10Pages10FieldsScenario,
     perfConfigSwapScenario,
+    perfStress50PagesScenario,
+    perfStressFullSurfaceFlatScenario,
+    perfStressFullSurfacePagedScenario,
   ],
 };
 
