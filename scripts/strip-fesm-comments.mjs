@@ -17,6 +17,18 @@
 // `compile` target's dist output is therefore the UNSTRIPPED FESM — anything
 // downstream should depend on `build`, not `compile`, to get the final
 // artifact. Today nothing in the workspace depends on `compile` directly.
+//
+// Idempotency: a second invocation on already-stripped output is a no-op
+// (the fast path in processFesm short-circuits when no removable comments
+// remain). This matters because Nx may re-run the script on a cache-warm
+// dist if only the build target's inputs change.
+//
+// Cost: on a cold strip the parse + magic-string + remapping runs roughly
+// 100ms per file, totalling ~1–2 seconds across the 5-library build. The
+// idempotent fast path (parse only, no rewrite) is ~10ms per file — so a
+// re-run on already-stripped output costs ~100ms total across all libs.
+// Trivial vs ng-packagr's compile time but documented here so CI profilers
+// can attribute the delta.
 
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, basename } from 'node:path';
@@ -75,10 +87,10 @@ function shouldKeepComment(comment) {
  * @param {string} source - Raw FESM `.mjs` contents.
  * @returns {{ code: string, map: ReturnType<MagicString['generateMap']> }}
  */
-function stripComments(source) {
-  const comments = collectComments(source);
+function stripComments(source, comments) {
+  const list = comments ?? collectComments(source);
   const s = new MagicString(source);
-  for (const c of comments) {
+  for (const c of list) {
     if (shouldKeepComment(c)) continue;
     // Eat the trailing newline so the file doesn't end up with cosmetic
     // blank lines where docblocks used to be (those would compress less well
@@ -89,6 +101,21 @@ function stripComments(source) {
     s.remove(c.start, end);
   }
   return { code: s.toString(), map: s.generateMap({ hires: false }) };
+}
+
+/**
+ * Return true if `comments` contains nothing the strip pass would remove.
+ * Used as an idempotency fast-path so re-running the script on already-
+ * stripped output skips the parse-rewrite-emit cycle entirely.
+ *
+ * @param {ReturnType<typeof collectComments>} comments
+ * @returns {boolean}
+ */
+function nothingToStrip(comments) {
+  for (const c of comments) {
+    if (!shouldKeepComment(c)) return false;
+  }
+  return true;
 }
 
 /**
@@ -114,25 +141,51 @@ function collectComments(source) {
 }
 
 /**
- * Count surviving JSDoc blocks (`/** ... *\/` source) using acorn so the
- * audit doesn't false-positive on string/template-literal contents.
+ * Count JSDoc blocks (source `/** ... *\/`) using acorn so the audit doesn't
+ * false-positive on a `/**` substring inside a string/template literal.
  *
  * @param {string} source
+ * @param {ReturnType<typeof collectComments>} [comments] - Pre-collected to avoid re-parsing.
  * @returns {number}
  */
-function countJsdocBlocks(source) {
+function countJsdocBlocks(source, comments) {
+  const list = comments ?? collectComments(source);
   let n = 0;
-  for (const c of collectComments(source)) {
+  for (const c of list) {
     if (c.type === 'Block' && c.value.startsWith('*')) n++;
   }
   return n;
 }
 
 /**
- * Count `__PURE__` occurrences via plain regex — the literal substring is
- * distinctive enough that string-context false positives don't happen in
- * practice (and a false POSITIVE here would only over-report preservation,
- * not under-report, so it's safe direction).
+ * Count `__PURE__` occurrences *expected to survive the strip*. The naive
+ * `(src.match(PURE_RE) || []).length` would over-count when JSDoc contains
+ * literal `__PURE__` substrings (e.g., an @example demonstrating the
+ * annotation). Pre-strip the over-count makes pureBefore larger than the
+ * legitimate output count, and `pureAfter < pureBefore` would false-positive
+ * the integrity assertion.
+ *
+ * Subtract PURE occurrences inside ranges that *will be* stripped (JSDoc and
+ * dropped line comments) from the total.
+ *
+ * @param {string} source
+ * @param {ReturnType<typeof collectComments>} comments
+ * @returns {number}
+ */
+function countSurvivingPure(source, comments) {
+  let total = (source.match(PURE_RE) || []).length;
+  for (const c of comments) {
+    if (shouldKeepComment(c)) continue;
+    const inside = source.slice(c.start, c.end).match(PURE_RE);
+    if (inside) total -= inside.length;
+  }
+  return total;
+}
+
+/**
+ * Count `__PURE__` in any string. Used post-strip (where everything in the
+ * output is by definition "surviving" code, so no comment-range subtraction
+ * is needed).
  *
  * @param {string} src
  * @returns {number}
@@ -184,12 +237,31 @@ async function processFesm(fesmDir) {
     const filePath = join(fesmDir, file);
     const mapPath = `${filePath}.map`;
     const sourceCode = await readFile(filePath, 'utf8');
-    totals.rawBefore += sourceCode.length;
-    totals.gzBefore += gzipSync(sourceCode).length;
-    totals.jsdocBefore += countJsdocBlocks(sourceCode);
-    totals.pureBefore += countPure(sourceCode);
 
-    const { code, map } = stripComments(sourceCode);
+    // One acorn parse, reused for: integrity counts, idempotency check,
+    // and the strip pass itself.
+    const comments = collectComments(sourceCode);
+
+    const sourceRaw = sourceCode.length;
+    const sourceGz = gzipSync(sourceCode).length;
+    const sourceJsdoc = countJsdocBlocks(sourceCode, comments);
+    const sourcePureExpected = countSurvivingPure(sourceCode, comments);
+    totals.rawBefore += sourceRaw;
+    totals.gzBefore += sourceGz;
+    totals.jsdocBefore += sourceJsdoc;
+    totals.pureBefore += sourcePureExpected;
+
+    // Fast path: already-stripped FESM (or one that never needed stripping).
+    // Skips parse-rewrite-emit + sourcemap recomposition entirely.
+    if (nothingToStrip(comments)) {
+      totals.rawAfter += sourceRaw;
+      totals.gzAfter += sourceGz;
+      totals.jsdocAfter += sourceJsdoc;
+      totals.pureAfter += countPure(sourceCode);
+      continue;
+    }
+
+    const { code, map } = stripComments(sourceCode, comments);
 
     // If the original file's `//# sourceMappingURL=` line was retained (it
     // matches our keep rule), there's nothing to do. Otherwise re-attach it

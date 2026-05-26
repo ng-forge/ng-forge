@@ -14,6 +14,7 @@
   "tags": [],
   "targets": {
     "build": {
+      "//": "Empty configurations propagate to compile via dependsOn (Nx 22). See scripts/strip-fesm-comments.mjs header for the full pipeline.",
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "inputs": ["production", "^production"],
