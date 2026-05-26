@@ -3,247 +3,150 @@ import { FieldWithValidation } from '../../definitions/base/field-with-validatio
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
 import { extractStringDependencies } from '../cross-field/cross-field-detector';
+import { PropertyDerivationCollection, PropertyDerivationEntry } from '../property-derivation/property-derivation-types';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { extractDependenciesFromConfig } from './extract-dependencies';
 import { extractInlineAsyncFn, extractInlineFn } from './extract-inline-fn';
 import { traverseFieldsWithContext } from './field-traversal';
+import { buildEffectiveFieldKey, CollectionContext, CONTEXT_TRAVERSAL_OPTIONS, resolveTokenDependencies } from './collection-context';
+
+// Re-export the dependency tokens for back-compat with external imports.
+export { SELF_DEPENDENCY_TOKEN, GROUP_DEPENDENCY_TOKEN } from './collection-context';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public collectors
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Token in `dependsOn` arrays that resolves to the current field's own
- * absolute path at collection time. Useful for self-derivations on fields
- * nested under groups, where the absolute path depends on ancestor keys
- * the config author may not know (e.g. factory-built field shapes).
+ * Collects all VALUE derivation entries from field definitions.
  *
- * @public
- */
-export const SELF_DEPENDENCY_TOKEN = '$self';
-
-/**
- * Token in `dependsOn` arrays that resolves to the absolute path of the
- * field's nearest parent container (group or array) at collection time.
- *
- * Useful when a derivation should fire whenever any sibling under the
- * same parent container changes (e.g. "compute when anything in the
- * address group is edited") without enumerating each sibling explicitly.
- *
- * Resolution rules:
- * - Inside group(s) only: resolves to the dotted ancestor group path
- *   (e.g. `'address'` or `'org.address'`).
- * - Inside an array (no group between): resolves to the array key
- *   (e.g. `'items'`). Fires whenever any item changes.
- * - Inside group(s) inside an array: resolves to the array placeholder
- *   form including the inner groups (e.g. `'items.$.address'`).
- * - At form root: throws `DynamicFormError` (no parent to target).
- *
- * @public
- */
-export const GROUP_DEPENDENCY_TOKEN = '$group';
-
-/**
- * Context for collecting derivations, tracking the current array and group
- * paths so absolute field paths can be reconstructed for entries.
- *
- * @internal
- */
-interface CollectionContext {
-  /**
-   * Current array path for resolving relative field references.
-   *
-   * When inside an array field, this contains the path to the array item
-   * (e.g., 'items[0]' or 'orders[1].lineItems[2]').
-   */
-  arrayPath?: string;
-
-  /**
-   * Dot-joined ancestor group keys for fields nested inside one or more
-   * groups (e.g., 'address' or 'org.address'). Layout containers
-   * (page, row, container) do not contribute to this path. Reset at
-   * array boundaries — the array placeholder path takes over.
-   */
-  groupPath?: string;
-}
-
-/**
- * Collects all derivation entries from field definitions.
- *
- * This function traverses the field definition tree and extracts:
+ * Traverses the field definition tree and extracts:
  * - Shorthand `derivation` properties on fields
- * - Full `logic` array entries with `type: 'derivation'`
+ * - Full `logic` array entries with `type: 'derivation'` *without* `targetProperty`
+ *   (entries WITH `targetProperty` are property derivations; see {@link collectAllDerivations}).
  *
- * The collected entries include dependency information for cycle detection
- * and reactive evaluation. Entries are sorted topologically so derivations
- * are processed in dependency order.
+ * The collected entries are sorted topologically so downstream processing
+ * applies them in dependency order.
  *
- * Lookup maps (byTarget, byDependency, etc.) are NOT built here to
- * reduce the size of the returned collection.
+ * Thin wrapper over {@link collectAllDerivations} that returns the value
+ * slice. For forms that have both kinds of derivations, prefer the unified
+ * collector — it walks the field tree once instead of twice.
  *
  * @param fields - Array of field definitions to traverse
  * @returns Collection containing sorted derivation entries
- *
- * @example
- * ```typescript
- * const fields = [
- *   { key: 'quantity', type: 'number' },
- *   { key: 'unitPrice', type: 'number' },
- *   {
- *     key: 'total',
- *     type: 'number',
- *     derivation: 'formValue.quantity * formValue.unitPrice',
- *   },
- * ];
- *
- * const collection = collectDerivations(fields);
- * // collection.entries has 1 entry for the 'total' field derivation
- * ```
  *
  * @public
  */
 export function collectDerivations(fields: FieldDef<unknown>[]): DerivationCollection {
   const entries: DerivationEntry[] = [];
 
-  traverseFieldsWithContext<CollectionContext>(fields, {}, (field, context) => collectFromField(field, entries, context), {
-    // Array boundary: the array placeholder path takes over and any
-    // ancestor groupPath is reset for descendants (entries inside
-    // array items use `arrayPath.$.fieldKey` form).
-    onArrayChild: (_, field) => ({ arrayPath: field.key, groupPath: undefined }),
-    onGroupChild: (parent, field) => {
-      // Group establishes a model boundary; descend with the field's
-      // key appended to the ancestor groupPath. Groups without a key
-      // (rare) act like layout containers — leave context unchanged.
-      if (!field.key) return {};
-      return { groupPath: parent.groupPath ? `${parent.groupPath}.${field.key}` : field.key };
+  traverseFieldsWithContext<CollectionContext>(
+    fields,
+    {},
+    (field, context) => collectValueEntriesFromField(field, entries, context),
+    CONTEXT_TRAVERSAL_OPTIONS,
+  );
+
+  return { entries: topologicalSort(entries) };
+}
+
+/**
+ * Single traversal that emits both value derivations (sorted topologically)
+ * and property derivations (no sort — they don't chain among themselves).
+ *
+ * Walks the field tree once, dispatching each `type: 'derivation'` logic
+ * entry to the right collection based on whether it carries a
+ * `targetProperty`. Used internally by the `DerivationOrchestrator` when
+ * both pipelines are active to share one walk across both collection
+ * signals; external callers should use {@link collectDerivations} or
+ * `collectPropertyDerivations` instead.
+ *
+ * @internal
+ */
+export function collectAllDerivations(fields: FieldDef<unknown>[]): {
+  value: DerivationCollection;
+  property: PropertyDerivationCollection;
+} {
+  const valueEntries: DerivationEntry[] = [];
+  const propertyEntries: PropertyDerivationEntry[] = [];
+
+  traverseFieldsWithContext<CollectionContext>(
+    fields,
+    {},
+    (field, context) => {
+      collectValueEntriesFromField(field, valueEntries, context);
+      collectPropertyEntriesFromField(field, propertyEntries, context);
     },
-    // Layout containers (page, row, container) leave context unchanged.
-  });
+    CONTEXT_TRAVERSAL_OPTIONS,
+  );
 
-  // Sort entries in topological order for efficient processing.
-  // This ensures derivations are processed in dependency order,
-  // reducing the number of iterations needed in the applicator.
-  const sortedEntries = topologicalSort(entries);
-
-  return { entries: sortedEntries };
+  return {
+    value: { entries: topologicalSort(valueEntries) },
+    property: { entries: propertyEntries },
+  };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Per-field handlers
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Builds the absolute field path for a derivation entry from the field's
- * key and the current collection context.
- *
- * - Inside an array AND inside one or more groups (groups nested under
- *   the array item): combines both as `${arrayPath}.$.${groupPath}.${fieldKey}`.
- * - Inside an array only: returns `${arrayPath}.$.${fieldKey}`.
- * - Inside one or more groups: returns `${groupPath}.${fieldKey}`.
- * - Otherwise returns `fieldKey` unchanged.
- *
- * `groupPath` is reset when entering an array (each array item is its own
- * model root); ancestor groups OUTSIDE the array are not part of the
- * entry path. Groups INSIDE the array are tracked via `groupPath` and
- * combined here.
+ * Collects value-derivation entries (shorthand + `logic[]` without
+ * `targetProperty`) from a single field.
  *
  * @internal
  */
-function buildEffectiveFieldKey(fieldKey: string, context: CollectionContext): string {
-  if (context.arrayPath && context.groupPath) {
-    return `${context.arrayPath}.$.${context.groupPath}.${fieldKey}`;
-  }
-  if (context.arrayPath) {
-    return `${context.arrayPath}.$.${fieldKey}`;
-  }
-  if (context.groupPath) {
-    return `${context.groupPath}.${fieldKey}`;
-  }
-  return fieldKey;
-}
-
-/**
- * Resolves the absolute path of the field's nearest parent container
- * (group or array). Returns `undefined` when the field is at the form
- * root with no parent container.
- *
- * @internal
- */
-function buildNearestGroupPath(context: CollectionContext): string | undefined {
-  if (context.arrayPath && context.groupPath) {
-    return `${context.arrayPath}.$.${context.groupPath}`;
-  }
-  return context.arrayPath ?? context.groupPath;
-}
-
-/**
- * Substitutes special tokens in a `dependsOn` array with their resolved
- * absolute paths. Currently supports:
- *
- * - `SELF_DEPENDENCY_TOKEN` ('$self') → the field's own absolute path
- * - `'$self.X'` → the field's own path joined with `.X` (e.g. for object-valued
- *   fields where you want to depend on a sub-property)
- * - `GROUP_DEPENDENCY_TOKEN` ('$group') → the field's nearest parent
- *   container path; throws if the field has no parent group/array.
- * - `'$group.sibling'` → the parent path joined with `.sibling`, useful to
- *   target a specific sibling without naming the parent group key.
- *
- * Non-token strings are passed through unchanged.
- *
- * @internal
- */
-function resolveTokenDependencies(deps: string[], effectiveFieldKey: string, context: CollectionContext): string[] {
-  return deps.map((dep) => {
-    if (dep === SELF_DEPENDENCY_TOKEN) {
-      return effectiveFieldKey;
-    }
-    if (dep.startsWith(`${SELF_DEPENDENCY_TOKEN}.`)) {
-      return effectiveFieldKey + dep.slice(SELF_DEPENDENCY_TOKEN.length);
-    }
-    if (dep === GROUP_DEPENDENCY_TOKEN || dep.startsWith(`${GROUP_DEPENDENCY_TOKEN}.`)) {
-      const groupPath = buildNearestGroupPath(context);
-      if (!groupPath) {
-        throw new DynamicFormError(
-          `Derivation for '${effectiveFieldKey}' uses '${dep}' but the field has no parent group or array. ` +
-            `'${GROUP_DEPENDENCY_TOKEN}' is only valid for fields nested inside a group or array container.`,
-        );
-      }
-      if (dep === GROUP_DEPENDENCY_TOKEN) return groupPath;
-      return groupPath + dep.slice(GROUP_DEPENDENCY_TOKEN.length);
-    }
-    return dep;
-  });
-}
-
-/**
- * Collects derivation entries from a single field.
- *
- * @internal
- */
-function collectFromField(field: FieldDef<unknown>, entries: DerivationEntry[], context: CollectionContext): void {
+function collectValueEntriesFromField(field: FieldDef<unknown>, entries: DerivationEntry[], context: CollectionContext): void {
   const fieldKey = field.key;
   if (!fieldKey) return;
 
   const validationField = field as FieldDef<unknown> & FieldWithValidation;
 
-  // Collect shorthand derivation property
   if (validationField.derivation) {
-    const entry = createShorthandEntry(fieldKey, validationField.derivation, context);
-    entries.push(entry);
+    entries.push(createShorthandEntry(fieldKey, validationField.derivation, context));
   }
 
-  // Collect logic array derivations
   if (validationField.logic) {
     for (const logicConfig of validationField.logic) {
-      if (isDerivationLogicConfig(logicConfig)) {
-        if (hasTargetProperty(logicConfig)) continue;
-        const entry = createLogicEntry(fieldKey, logicConfig, context);
-        entries.push(entry);
-      }
+      if (!isDerivationLogicConfig(logicConfig)) continue;
+      if (hasTargetProperty(logicConfig)) continue; // property entries handled by collectPropertyEntriesFromField
+      entries.push(createValueLogicEntry(fieldKey, logicConfig, context));
     }
   }
 }
 
 /**
- * Creates a derivation entry from the shorthand `derivation` property.
+ * Collects property-derivation entries (`logic[]` with `targetProperty`) from
+ * a single field.
  *
- * Shorthand derivations:
- * - Target the same field they're defined on (self-targeting)
- * - Always apply (condition defaults to true)
- * - Always trigger on change
+ * @internal
+ */
+function collectPropertyEntriesFromField(field: FieldDef<unknown>, entries: PropertyDerivationEntry[], context: CollectionContext): void {
+  const fieldKey = field.key;
+  if (!fieldKey) return;
+
+  const validationField = field as FieldDef<unknown> & FieldWithValidation;
+
+  if (!validationField.logic) return;
+
+  for (const logicConfig of validationField.logic) {
+    if (!isDerivationLogicConfig(logicConfig)) continue;
+    if (!hasTargetProperty(logicConfig)) continue;
+    entries.push(createPropertyLogicEntry(fieldKey, logicConfig, context));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Entry builders
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Creates a value-derivation entry from a field's shorthand `derivation`
+ * property.
+ *
+ * Shorthand derivations target the same field they're defined on, always
+ * apply (condition `true`), and always trigger on change.
  *
  * @internal
  */
@@ -261,21 +164,12 @@ function createShorthandEntry(fieldKey: string, expression: string, context: Col
 }
 
 /**
- * Creates a derivation entry from a full `DerivationLogicConfig`.
- *
- * All derivations are self-targeting: the derivation is defined on and targets
- * the same field (fieldKey). For array fields, the context is used to build
- * the array placeholder path.
- *
- * Handles:
- * - Condition extraction and dependency analysis
- * - Array field context for placeholder paths
- * - Multiple value source types (static, expression, function)
- * - Trigger and debounce configuration
+ * Creates a value-derivation entry from a `logic[]` `DerivationLogicConfig`
+ * that does NOT have `targetProperty`.
  *
  * @internal
  */
-function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, context: CollectionContext): DerivationEntry {
+function createValueLogicEntry(fieldKey: string, config: DerivationLogicConfig, context: CollectionContext): DerivationEntry {
   const effectiveFieldKey = buildEffectiveFieldKey(fieldKey, context);
 
   // Runtime guards for HTTP and async derivations.
@@ -320,9 +214,6 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
   const dependsOn = resolveTokenDependencies(extractDependenciesFromConfig(config), effectiveFieldKey, context);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
-
-  // Extract debounceMs from debounced configs
-  // The type system ensures debounceMs is only present when trigger is 'debounced'
   const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
 
   return {
@@ -344,5 +235,141 @@ function createLogicEntry(fieldKey: string, config: DerivationLogicConfig, conte
     debugName: config.debugName,
     stopOnUserOverride: config.stopOnUserOverride,
     reEngageOnDependencyChange: config.reEngageOnDependencyChange,
+  };
+}
+
+/**
+ * Creates a property-derivation entry from a `logic[]` `DerivationLogicConfig`
+ * that has `targetProperty`. Effective key uses the same array/group ancestry
+ * encoding as value entries via {@link buildEffectiveFieldKey} —
+ * `buildPropertyOverrideKey` in the original property collector produced the
+ * same shape.
+ *
+ * Includes the property-pipeline-specific runtime validation: source-vs-sync
+ * field conflicts, HTTP/async cross-bleed, missing required HTTP fields, and
+ * wildcard dependency guards. Mirrors the original
+ * `createPropertyDerivationEntryFromDerivation` helper.
+ *
+ * @internal
+ */
+function createPropertyLogicEntry(
+  fieldKey: string,
+  config: DerivationLogicConfig & { targetProperty: string },
+  context: CollectionContext,
+): PropertyDerivationEntry {
+  const effectiveFieldKey = buildEffectiveFieldKey(fieldKey, context);
+  const errorLocation = `'${effectiveFieldKey}.${config.targetProperty}'`;
+
+  // `targetProperty` is captured up front and `untypedConfig` is used inside
+  // the source-narrowed blocks because TypeScript narrows `config` to `never`
+  // once we negate a discriminant-required field (e.g. `!config.http` when
+  // `source: 'http'` requires `http`).
+  const untypedConfig = config as {
+    source?: string;
+    value?: unknown;
+    expression?: unknown;
+    functionName?: unknown;
+    fn?: unknown;
+    http?: unknown;
+    responseExpression?: string;
+    asyncFunctionName?: string;
+    asyncFn?: unknown;
+    dependsOn?: unknown;
+  };
+
+  // Reject configs that mix value-source fields with an explicit async source.
+  if (untypedConfig.source === 'http' || untypedConfig.source === 'asyncFunction') {
+    const conflictingSyncSources: string[] = [];
+    if (untypedConfig.value !== undefined) conflictingSyncSources.push('value');
+    if (untypedConfig.expression !== undefined) conflictingSyncSources.push('expression');
+    if (untypedConfig.functionName !== undefined) conflictingSyncSources.push('functionName');
+    if (untypedConfig.fn !== undefined) conflictingSyncSources.push('fn');
+    if (conflictingSyncSources.length > 0) {
+      throw new DynamicFormError(
+        `Property derivation for ${errorLocation} sets 'source: ${JSON.stringify(untypedConfig.source)}' alongside ` +
+          `sync value source(s) [${conflictingSyncSources.join(', ')}]. These are mutually exclusive — remove either ` +
+          `the sync fields or the async source.`,
+      );
+    }
+  }
+
+  if (untypedConfig.source === 'http' && (untypedConfig.asyncFunctionName !== undefined || untypedConfig.asyncFn !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "http"' alongside an async function — these are mutually exclusive.`,
+    );
+  }
+  if (untypedConfig.source === 'asyncFunction' && (untypedConfig.http !== undefined || untypedConfig.responseExpression !== undefined)) {
+    throw new DynamicFormError(
+      `Property derivation for ${errorLocation} sets 'source: "asyncFunction"' alongside HTTP fields — these are mutually exclusive.`,
+    );
+  }
+
+  if (untypedConfig.source === 'http') {
+    if (!untypedConfig.http) {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires an 'http' config object.`);
+    }
+    if (typeof untypedConfig.responseExpression !== 'string' || untypedConfig.responseExpression.trim() === '') {
+      throw new DynamicFormError(`HTTP property derivation for ${errorLocation} requires a non-empty 'responseExpression'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `HTTP property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger HTTP requests on every form change.`,
+      );
+    }
+    if (untypedConfig.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `HTTP property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger HTTP requests on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+  }
+
+  if (untypedConfig.source === 'asyncFunction') {
+    if (!untypedConfig.asyncFunctionName && !untypedConfig.asyncFn) {
+      throw new DynamicFormError(`Async property derivation for ${errorLocation} requires either 'asyncFunctionName' or 'asyncFn'.`);
+    }
+    if (!Array.isArray(untypedConfig.dependsOn) || untypedConfig.dependsOn.length === 0) {
+      throw new DynamicFormError(
+        `Async property derivation for ${errorLocation} requires explicit 'dependsOn'. ` +
+          `Wildcard dependencies would trigger async functions on every form change.`,
+      );
+    }
+    if (untypedConfig.dependsOn.includes('*')) {
+      throw new DynamicFormError(
+        `Async property derivation for ${errorLocation} cannot use wildcard ('*') in 'dependsOn'. ` +
+          `Wildcards would trigger async functions on every form change. Specify explicit field dependencies instead.`,
+      );
+    }
+  }
+
+  // Resolve `$self` / `$group` tokens against this entry's effective key so
+  // property derivations track absolute paths the same way value derivations
+  // do. The value-collector path has done this since #436; doing it here
+  // closes the parity gap. `resolveTokenDependencies` throws if `$group` is
+  // used on a root-level field (no parent container) — same contract as the
+  // value path.
+  const dependsOn = resolveTokenDependencies(extractDependenciesFromConfig(config), effectiveFieldKey, context);
+  const condition = config.condition ?? true;
+  const trigger = config.trigger ?? 'onChange';
+  const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;
+
+  return {
+    fieldKey: effectiveFieldKey,
+    targetProperty: config.targetProperty,
+    dependsOn,
+    condition,
+    value: config.value,
+    expression: config.expression,
+    functionName: config.functionName,
+    fn: extractInlineFn(config),
+    http: config.http,
+    responseExpression: config.responseExpression,
+    asyncFunctionName: config.asyncFunctionName,
+    asyncFn: extractInlineAsyncFn(config),
+    trigger,
+    debounceMs,
+    debugName: config.debugName,
+    originalConfig: config,
   };
 }

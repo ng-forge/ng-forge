@@ -10,10 +10,10 @@ import type { FormOptions } from '../../models/form-config';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { FunctionRegistryService } from '../registry';
 import { applyDerivationsForTrigger } from './derivation-applicator';
-import { collectDerivations } from './derivation-collector';
+import { collectAllDerivations, collectDerivations } from './derivation-collector';
+import { collectPropertyDerivations } from '../property-derivation/property-derivation-collector';
 import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
@@ -23,7 +23,6 @@ import { createAsyncDerivationStream } from './async-derivation-stream';
 import { resolveExternalData } from './external-data-resolver';
 import { setupDebouncedStream, setupEntryAsyncStream, setupOnChangeStream } from './pipeline-setup-utils';
 import { applyPropertyDerivationsForTrigger } from '../property-derivation/property-derivation-applicator';
-import { collectPropertyDerivations } from '../property-derivation/property-derivation-collector';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from '../property-derivation/property-derivation-types';
 import { PropertyOverrideStore } from '../property-derivation/property-override-store';
 import { createHttpPropertyDerivationStream } from '../property-derivation/http-property-derivation-stream';
@@ -126,11 +125,32 @@ export class DerivationOrchestrator {
   constructor(config: DerivationOrchestratorConfig) {
     this.config = config;
 
-    this.derivationCollection =
-      config.form && config.derivationLogger ? this.setupValuePipeline() : computed<DerivationCollection | null>(() => null);
+    const valueEnabled = !!(config.form && config.derivationLogger);
+    const propertyStore = config.propertyStore;
+    const propertyEnabled = !!propertyStore;
 
-    this.propertyDerivationCollection = config.propertyStore
-      ? this.setupPropertyPipeline(config.propertyStore)
+    // Shared single-traversal collector — built only when BOTH pipelines are
+    // active. When only one pipeline is active that pipeline's setup runs the
+    // slice-specific collector directly. The memoization assumption: in the
+    // common case where both pipeline signals are pulled in the same Angular
+    // change-detection cycle, the shared computed runs once and both
+    // consumers reuse the result. If only one consumer pulls within a frame,
+    // the work is identical to the slice-collector path — no extra cost.
+    const sharedAllDerivations =
+      valueEnabled && propertyEnabled
+        ? computed(() => {
+            const fields = config.schemaFields();
+            if (!fields || fields.length === 0) return null;
+            return collectAllDerivations(fields);
+          })
+        : null;
+
+    this.derivationCollection = valueEnabled
+      ? this.setupValuePipeline(sharedAllDerivations)
+      : computed<DerivationCollection | null>(() => null);
+
+    this.propertyDerivationCollection = propertyStore
+      ? this.setupPropertyPipeline(propertyStore, sharedAllDerivations)
       : computed<PropertyDerivationCollection | null>(() => null);
   }
 
@@ -138,7 +158,9 @@ export class DerivationOrchestrator {
   // Value pipeline — setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private setupValuePipeline(): Signal<DerivationCollection | null> {
+  private setupValuePipeline(
+    sharedAllDerivations: Signal<{ value: DerivationCollection; property: PropertyDerivationCollection } | null> | null,
+  ): Signal<DerivationCollection | null> {
     this.formOptions = inject(FORM_OPTIONS);
 
     const collection = computed<DerivationCollection | null>(() => {
@@ -148,9 +170,11 @@ export class DerivationOrchestrator {
         return null;
       }
 
-      const collected = collectDerivations(fields);
+      // When both pipelines run, reuse the shared traversal; otherwise this
+      // pipeline owns the walk (no property tracker needed).
+      const collected = sharedAllDerivations ? (sharedAllDerivations()?.value ?? null) : collectDerivations(fields);
 
-      if (collected.entries.length === 0) {
+      if (!collected || collected.entries.length === 0) {
         return null;
       }
 
@@ -207,9 +231,10 @@ export class DerivationOrchestrator {
   // Property pipeline — setup
   // ─────────────────────────────────────────────────────────────────────────────
 
-  private setupPropertyPipeline(propertyStore: PropertyOverrideStore): Signal<PropertyDerivationCollection | null> {
-    const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
-
+  private setupPropertyPipeline(
+    propertyStore: PropertyOverrideStore,
+    sharedAllDerivations: Signal<{ value: DerivationCollection; property: PropertyDerivationCollection } | null> | null,
+  ): Signal<PropertyDerivationCollection | null> {
     const collection = computed<PropertyDerivationCollection | null>(() => {
       const fields = this.config.schemaFields();
 
@@ -217,9 +242,11 @@ export class DerivationOrchestrator {
         return null;
       }
 
-      const collected = collectPropertyDerivations(fields, this.logger, deprecationTracker);
+      // When both pipelines run, reuse the shared traversal; otherwise this
+      // pipeline owns the walk.
+      const collected = sharedAllDerivations ? (sharedAllDerivations()?.property ?? null) : collectPropertyDerivations(fields);
 
-      if (collected.entries.length === 0) {
+      if (!collected || collected.entries.length === 0) {
         return null;
       }
 
