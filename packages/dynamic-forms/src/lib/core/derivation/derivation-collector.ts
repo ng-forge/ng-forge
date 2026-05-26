@@ -343,7 +343,13 @@ function createPropertyLogicEntry(
     }
   }
 
-  const dependsOn = extractDependenciesFromConfig(config);
+  // Resolve `$self` / `$group` tokens against this entry's effective key so
+  // property derivations track absolute paths the same way value derivations
+  // do. The value-collector path has done this since #436; doing it here
+  // closes the parity gap. `resolveTokenDependencies` throws if `$group` is
+  // used on a root-level field (no parent container) — same contract as the
+  // value path.
+  const dependsOn = resolveTokenDependencies(extractDependenciesFromConfig(config), effectiveFieldKey, context);
   const condition = config.condition ?? true;
   const trigger = config.trigger ?? 'onChange';
   const debounceMs = trigger === 'debounced' ? (config as { debounceMs?: number }).debounceMs : undefined;

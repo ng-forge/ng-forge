@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { collectPropertyDerivations } from './property-derivation-collector';
 import { FieldDef } from '../../definitions/base/field-def';
-import { createMockLogger } from '../../../../testing/src/mock-logger';
-import { createWarningTracker } from '../../utils/warning-tracker';
 
 describe('property-derivation-collector', () => {
-  const logger = createMockLogger();
-  const tracker = createWarningTracker();
-
   describe('collectPropertyDerivations', () => {
     it('should return empty collection when no fields have propertyDerivation logic', () => {
       const fields: FieldDef<unknown>[] = [
@@ -20,7 +15,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(0);
     });
@@ -40,7 +35,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('endDate');
@@ -65,7 +60,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('endDate');
@@ -93,7 +88,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('myField');
@@ -145,7 +140,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(3);
       expect(collection.entries[0].fieldKey).toBe('endDate');
@@ -197,7 +192,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(2);
       // Group ancestors are folded into the store key so overlapping leaf keys
@@ -235,7 +230,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(2);
       expect(collection.entries[0].fieldKey).toBe('createADto.name');
@@ -263,7 +258,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       // Array resets ancestor groupPath; the inner group contributes to the per-item key.
@@ -291,7 +286,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       expect(collection.entries[0].fieldKey).toBe('items.$.endDate');
@@ -313,7 +308,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].dependsOn).toContain('quantity');
       expect(collection.entries[0].dependsOn).toContain('unitPrice');
@@ -335,7 +330,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].dependsOn).toEqual(['country']);
       expect(collection.entries[0].dependsOn).not.toContain('*');
@@ -356,7 +351,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].dependsOn).toContain('*');
     });
@@ -382,7 +377,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].dependsOn).toContain('contactType');
     });
@@ -416,7 +411,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].trigger).toBe('debounced');
       expect(collection.entries[0].debounceMs).toBe(300);
@@ -442,7 +437,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries).toHaveLength(1);
       const entry = collection.entries[0];
@@ -484,7 +479,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      const collection = collectPropertyDerivations(fields, logger, tracker);
+      const collection = collectPropertyDerivations(fields);
 
       expect(collection.entries[0].asyncFunctionName).toBe('fetchCities');
       expect(collection.entries[0].asyncFn).toBeUndefined();
@@ -510,7 +505,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
     });
 
     it("should throw when HTTP property derivation uses wildcard '*' in dependsOn", () => {
@@ -531,7 +526,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/cannot use wildcard/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/cannot use wildcard/);
     });
 
     it('should throw with DynamicFormError when HTTP source omits the http config', () => {
@@ -551,7 +546,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires an 'http' config/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/requires an 'http' config/);
     });
 
     it('should throw with DynamicFormError when HTTP source omits responseExpression', () => {
@@ -571,7 +566,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/non-empty 'responseExpression'/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/non-empty 'responseExpression'/);
     });
 
     it('should throw with DynamicFormError when HTTP source dependsOn is undefined (not just empty)', () => {
@@ -594,7 +589,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
     });
 
     it('should throw when async source omits both asyncFunctionName and asyncFn', () => {
@@ -613,7 +608,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires either 'asyncFunctionName' or 'asyncFn'/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/requires either 'asyncFunctionName' or 'asyncFn'/);
     });
 
     it('should throw with DynamicFormError when async source dependsOn is undefined', () => {
@@ -633,7 +628,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/requires explicit 'dependsOn'/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/requires explicit 'dependsOn'/);
     });
 
     it('rejects HTTP source combined with a sync value source (XOR enforcement)', () => {
@@ -655,7 +650,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/mutually exclusive/);
     });
 
     it('rejects asyncFunction source combined with expression (XOR enforcement)', () => {
@@ -676,7 +671,7 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/mutually exclusive/);
     });
 
     it('rejects HTTP source combined with async fields', () => {
@@ -698,7 +693,94 @@ describe('property-derivation-collector', () => {
         } as unknown as FieldDef<unknown>,
       ];
 
-      expect(() => collectPropertyDerivations(fields, logger, tracker)).toThrow(/mutually exclusive/);
+      expect(() => collectPropertyDerivations(fields)).toThrow(/mutually exclusive/);
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // $self / $group token resolution
+  //
+  // Pre-fix: property derivations passed dependsOn through unchanged, so
+  // `$self` and `$group` tokens stayed as literal strings — the entries never
+  // tracked their resolved field paths and root-level `$group` silently
+  // succeeded instead of throwing.
+  // ───────────────────────────────────────────────────────────────────────────
+  describe('$self / $group token resolution', () => {
+    it("resolves $self to the field's absolute path inside an array", () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'items',
+          type: 'array',
+          fields: [
+            [
+              {
+                key: 'price',
+                type: 'input',
+                logic: [
+                  {
+                    type: 'derivation',
+                    targetProperty: 'hidden',
+                    dependsOn: ['$self'],
+                    expression: 'fieldValue == null',
+                  },
+                ],
+              } as unknown as FieldDef<unknown>,
+            ],
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const { entries } = collectPropertyDerivations(fields);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].dependsOn).toEqual(['items.$.price']);
+    });
+
+    it('resolves $group to the nearest parent container path', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'items',
+          type: 'array',
+          fields: [
+            [
+              {
+                key: 'price',
+                type: 'input',
+                logic: [
+                  {
+                    type: 'derivation',
+                    targetProperty: 'hidden',
+                    dependsOn: ['$group'],
+                    expression: 'fieldValue == null',
+                  },
+                ],
+              } as unknown as FieldDef<unknown>,
+            ],
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      const { entries } = collectPropertyDerivations(fields);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].dependsOn).toEqual(['items']);
+    });
+
+    it('throws when $group is used on a root-level field with no parent container', () => {
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'email',
+          type: 'input',
+          logic: [
+            {
+              type: 'derivation',
+              targetProperty: 'hidden',
+              dependsOn: ['$group'],
+              expression: 'fieldValue == null',
+            },
+          ],
+        } as unknown as FieldDef<unknown>,
+      ];
+
+      expect(() => collectPropertyDerivations(fields)).toThrow(/has no parent group or array/);
     });
   });
 });
