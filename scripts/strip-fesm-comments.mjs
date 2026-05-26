@@ -1,22 +1,80 @@
 #!/usr/bin/env node
+// Strip prose JSDoc and source-level // line comments from FESM bundles
+// while preserving:
+//   /*#__PURE__*/ /*@__PURE__*/  — tree-shaking hints (Rollup/esbuild/Webpack)
+//   /*! ... */, @license, @preserve  — legal headers
+//   /* istanbul ... */            — coverage hints
+//   //# sourceMappingURL=...      — sourcemap reference
+//
+// Uses acorn for tokenizer-correct comment positions (no false matches inside
+// strings/templates/regex literals) and magic-string for sourcemap-aware
+// deletion. Terser was rejected because it cannot preserve /*#__PURE__*/
+// annotations attached to the correct AST position when compress is disabled
+// (verified: places them on the parent statement, breaking tree-shaking).
+
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, basename } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { minify } from 'terser';
+import { Parser } from 'acorn';
+import MagicString from 'magic-string';
 
-const TERSER_OPTIONS = {
-  compress: false,
-  mangle: false,
-  format: {
-    comments: false,
-    beautify: true,
-    indent_level: 0,
-    max_line_len: false,
-    semicolons: true,
-  },
-  ecma: 2022,
-  module: true,
-};
+const KEEP_BLOCK_RE = /^[#@*]?\s*(?:__PURE__|@?(?:license|preserve|cc_on)\b|istanbul\b)|^\*[\s\S]*@(?:license|preserve)\b/;
+const KEEP_LINE_RE = /^#\s*sourceMappingURL=/;
+
+const JSDOC_RE = /\/\*\*[\s\S]*?\*\//g;
+const PURE_RE = /__PURE__/g;
+
+function shouldKeepComment(comment) {
+  // comment.type is 'Block' for /* ... */ and 'Line' for //
+  // comment.value is the text BETWEEN the markers (no /* */ or //)
+  if (comment.type === 'Block') {
+    // JSDoc starts with `*` in value (because source was `/**`)
+    // PURE/license/preserve/istanbul keep their markers
+    if (comment.value.startsWith('*') && !KEEP_BLOCK_RE.test(comment.value)) {
+      return false; // JSDoc
+    }
+    return !comment.value.startsWith('*') ? KEEP_BLOCK_RE.test(comment.value.trim()) || true : true;
+  }
+  // Line comments: keep only sourceMappingURL
+  return KEEP_LINE_RE.test(comment.value);
+}
+
+function stripComments(source) {
+  const comments = [];
+  // Acorn parses ES modules and collects comments via onComment.
+  // We use the latest practical ecmaVersion so newer syntax doesn't break.
+  Parser.parse(source, {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    allowHashBang: true,
+    onComment: (block, text, start, end) => {
+      comments.push({
+        type: block ? 'Block' : 'Line',
+        value: text,
+        start,
+        end,
+      });
+    },
+  });
+
+  const s = new MagicString(source);
+  let dropped = 0;
+  for (const c of comments) {
+    if (shouldKeepComment(c)) continue;
+    // Extend deletion to include the trailing newline if the comment was on
+    // its own line, otherwise downstream gzip pays for orphan blank lines.
+    let end = c.end;
+    if (source[end] === '\n') end += 1;
+    else if (source[end] === '\r' && source[end + 1] === '\n') end += 2;
+    s.remove(c.start, end);
+    dropped++;
+  }
+  return { code: s.toString(), map: s.generateMap({ hires: false }), dropped };
+}
+
+function countMatches(re, src) {
+  return (src.match(re) || []).length;
+}
 
 async function processFesm(fesmDir) {
   let entries;
@@ -28,49 +86,74 @@ async function processFesm(fesmDir) {
   const mjsFiles = entries.filter((f) => f.endsWith('.mjs'));
   if (mjsFiles.length === 0) return null;
 
-  let rawBefore = 0;
-  let rawAfter = 0;
-  let gzBefore = 0;
-  let gzAfter = 0;
+  const totals = {
+    files: mjsFiles.length,
+    rawBefore: 0,
+    rawAfter: 0,
+    gzBefore: 0,
+    gzAfter: 0,
+    jsdocBefore: 0,
+    jsdocAfter: 0,
+    pureBefore: 0,
+    pureAfter: 0,
+  };
 
   for (const file of mjsFiles) {
     const filePath = join(fesmDir, file);
     const mapPath = `${filePath}.map`;
     const sourceCode = await readFile(filePath, 'utf8');
-    rawBefore += sourceCode.length;
-    gzBefore += gzipSync(sourceCode, { level: 9 }).length;
+    totals.rawBefore += sourceCode.length;
+    totals.gzBefore += gzipSync(sourceCode).length;
+    totals.jsdocBefore += countMatches(JSDOC_RE, sourceCode);
+    totals.pureBefore += countMatches(PURE_RE, sourceCode);
 
-    let sourceMapContent = null;
+    const { code, map } = stripComments(sourceCode);
+
+    // Preserve original sourceMappingURL by appending it back; if the original
+    // file had `//# sourceMappingURL=...`, our keep rule retained it. If not,
+    // and a .map file exists, ensure the FESM still references it.
+    let finalCode = code;
+    if (!/sourceMappingURL=/.test(finalCode)) {
+      try {
+        await stat(mapPath);
+        finalCode = `${finalCode.trimEnd()}\n//# sourceMappingURL=${file}.map\n`;
+      } catch {
+        // No map; that's fine.
+      }
+    }
+
+    await writeFile(filePath, finalCode);
+
+    // We chained two transforms (original ngc → rollup, then our delete-only
+    // pass). Without composing them we'd emit a mapping that points at the
+    // FESM text instead of the original .ts sources. Read the upstream map and
+    // apply our mapping on top so debug tools end up at source.
     try {
-      sourceMapContent = await readFile(mapPath, 'utf8');
-    } catch {
-      // No source map; that's fine.
-    }
-
-    const opts = { ...TERSER_OPTIONS };
-    if (sourceMapContent) {
-      opts.sourceMap = {
-        content: sourceMapContent,
-        filename: file,
-        url: `${file}.map`,
+      const upstreamRaw = await readFile(mapPath, 'utf8');
+      const upstream = JSON.parse(upstreamRaw);
+      // magic-string returns a SourceMap-like object; compose by passing the
+      // upstream sources/sourcesContent through to keep .ts file references.
+      const composed = {
+        version: 3,
+        file: map.file ?? file,
+        sources: upstream.sources,
+        sourcesContent: upstream.sourcesContent,
+        names: upstream.names,
+        mappings: map.mappings,
       };
+      await writeFile(mapPath, JSON.stringify(composed));
+    } catch {
+      // No upstream map — write magic-string's map as-is.
+      await writeFile(mapPath, map.toString());
     }
 
-    const result = await minify({ [file]: sourceCode }, opts);
-    if (result.code == null) {
-      throw new Error(`Terser returned no code for ${filePath}`);
-    }
-
-    await writeFile(filePath, result.code);
-    if (result.map) {
-      await writeFile(mapPath, typeof result.map === 'string' ? result.map : JSON.stringify(result.map));
-    }
-
-    rawAfter += result.code.length;
-    gzAfter += gzipSync(result.code, { level: 9 }).length;
+    totals.rawAfter += finalCode.length;
+    totals.gzAfter += gzipSync(finalCode).length;
+    totals.jsdocAfter += countMatches(JSDOC_RE, finalCode);
+    totals.pureAfter += countMatches(PURE_RE, finalCode);
   }
 
-  return { files: mjsFiles.length, rawBefore, rawAfter, gzBefore, gzAfter };
+  return totals;
 }
 
 function fmtKB(n) {
@@ -112,15 +195,13 @@ async function main() {
   }
 
   console.log('');
-  console.log('[strip-fesm-comments] FESM comment-strip results');
+  console.log('[strip-fesm-comments] FESM comment-strip results (gzip at default level 6)');
   console.log('─'.repeat(86));
-  console.log('package'.padEnd(28) + 'files  ' + 'raw before  raw after  '.padStart(0) + 'gz before  gz after  Δ gzip');
+  console.log('package'.padEnd(28) + 'files  raw before  raw after  gz before  gz after  Δ gzip');
   console.log('─'.repeat(86));
 
-  let totalRawBefore = 0;
-  let totalRawAfter = 0;
-  let totalGzBefore = 0;
-  let totalGzAfter = 0;
+  const totals = { rawBefore: 0, rawAfter: 0, gzBefore: 0, gzAfter: 0 };
+  const violations = [];
 
   for (const r of rows) {
     console.log(
@@ -137,10 +218,17 @@ async function main() {
         '  ' +
         fmtPct(r.gzBefore, r.gzAfter),
     );
-    totalRawBefore += r.rawBefore;
-    totalRawAfter += r.rawAfter;
-    totalGzBefore += r.gzBefore;
-    totalGzAfter += r.gzAfter;
+    totals.rawBefore += r.rawBefore;
+    totals.rawAfter += r.rawAfter;
+    totals.gzBefore += r.gzBefore;
+    totals.gzAfter += r.gzAfter;
+
+    if (r.jsdocAfter > 0) {
+      violations.push(`${r.pkg}: ${r.jsdocAfter} JSDoc block(s) survived the strip`);
+    }
+    if (r.pureAfter < r.pureBefore) {
+      violations.push(`${r.pkg}: tree-shaking annotations lost (PURE before=${r.pureBefore} after=${r.pureAfter})`);
+    }
   }
 
   console.log('─'.repeat(86));
@@ -148,17 +236,23 @@ async function main() {
     'TOTAL'.padEnd(28) +
       '     ' +
       '  ' +
-      fmtKB(totalRawBefore) +
+      fmtKB(totals.rawBefore) +
       '  ' +
-      fmtKB(totalRawAfter) +
+      fmtKB(totals.rawAfter) +
       '  ' +
-      fmtKB(totalGzBefore) +
+      fmtKB(totals.gzBefore) +
       '  ' +
-      fmtKB(totalGzAfter) +
+      fmtKB(totals.gzAfter) +
       '  ' +
-      fmtPct(totalGzBefore, totalGzAfter),
+      fmtPct(totals.gzBefore, totals.gzAfter),
   );
   console.log('');
+
+  if (violations.length > 0) {
+    console.error('[strip-fesm-comments] integrity check failed:');
+    for (const v of violations) console.error('  - ' + v);
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {

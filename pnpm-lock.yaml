@@ -276,6 +276,9 @@ importers:
       '@vitest/ui':
         specifier: 4.1.7
         version: 4.1.7(vitest@4.1.7)
+      acorn:
+        specifier: ^8.16.0
+        version: 8.16.0
       angular-eslint:
         specifier: 21.4.0
         version: 21.4.0(@angular/cli@21.2.12(@types/node@25.9.1)(chokidar@5.0.0))(chokidar@5.0.0)(eslint@9.39.4(jiti@2.7.0))(typescript-eslint@8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(typescript@5.9.3)
@@ -309,6 +312,9 @@ importers:
       lefthook:
         specifier: ^2.1.8
         version: 2.1.8
+      magic-string:
+        specifier: ^0.30.21
+        version: 0.30.21
       ng-packagr:
         specifier: ~21.2.3
         version: 21.2.3(@angular/compiler-cli@21.2.14(@angular/compiler@21.2.14)(typescript@5.9.3))(tailwindcss@4.3.0)(tslib@2.8.1)(typescript@5.9.3)
@@ -348,9 +354,6 @@ importers:
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
-      terser:
-        specifier: ^5.47.1
-        version: 5.48.0
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.15.33(@swc/helpers@0.5.21))(@types/node@25.9.1)(typescript@5.9.3)
