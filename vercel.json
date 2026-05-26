@@ -9,11 +9,88 @@
   },
   "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" = \"main\" ]",
   "redirects": [
+    { "source": "/", "destination": "/dynamic-forms/", "permanent": true },
+
     {
-      "source": "/",
-      "destination": "/dynamic-forms/",
+      "source": "/dynamic-forms/material/api-reference/RowFieldComponent",
+      "destination": "/dynamic-forms/material/api-reference",
       "permanent": true
-    }
+    },
+    { "source": "/dynamic-forms/what-is-dynamic-forms", "destination": "/dynamic-forms/material/feature-overview", "permanent": true },
+    {
+      "source": "/dynamic-forms/material/what-is-dynamic-forms",
+      "destination": "/dynamic-forms/material/feature-overview",
+      "permanent": true
+    },
+    { "source": "/dynamic-forms/app-wrappers", "destination": "/dynamic-forms/material/wrappers/overview", "permanent": true },
+    {
+      "source": "/dynamic-forms/floating-label-wrapper.component",
+      "destination": "/dynamic-forms/material/wrappers/overview",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/rich-text-field.component",
+      "destination": "/dynamic-forms/material/field-types/advanced-controls",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/generated/schemas",
+      "destination": "/dynamic-forms/material/schema-validation/overview",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/ui-libs-integrations/bootstrap",
+      "destination": "/dynamic-forms/bootstrap/configuration",
+      "permanent": true
+    },
+    { "source": "/dynamic-forms/examples/material", "destination": "/dynamic-forms/material/examples", "permanent": true },
+    {
+      "source": "/dynamic-behavior/overview",
+      "destination": "/dynamic-forms/material/dynamic-behavior/conditional-logic",
+      "permanent": true
+    },
+    { "source": "/material/schema-validation", "destination": "/dynamic-forms/material/schema-validation/overview", "permanent": true },
+    { "source": "/material/wrappers", "destination": "/dynamic-forms/material/wrappers/overview", "permanent": true },
+    { "source": "/form-configs", "destination": "/dynamic-forms/material/configuration", "permanent": true },
+    { "source": "/forgot-password", "destination": "/dynamic-forms/", "permanent": true },
+    { "source": "/path/to/form.config.ts", "destination": "/dynamic-forms/", "permanent": true },
+    { "source": "/examples", "destination": "/dynamic-forms/material/examples", "permanent": true },
+
+    { "source": "/api/:kind/core/:symbol", "destination": "/dynamic-forms/material/api-reference/:symbol", "permanent": true },
+    { "source": "/api/:kind/material/:symbol", "destination": "/dynamic-forms/material/api-reference/:symbol", "permanent": true },
+    { "source": "/api/:kind/bootstrap/:symbol", "destination": "/dynamic-forms/bootstrap/api-reference/:symbol", "permanent": true },
+    { "source": "/api/:kind/primeng/:symbol", "destination": "/dynamic-forms/primeng/api-reference/:symbol", "permanent": true },
+    { "source": "/api/:kind/ionic/:symbol", "destination": "/dynamic-forms/ionic/api-reference/:symbol", "permanent": true },
+    {
+      "source": "/dynamic-forms/api/:kind/core/:symbol",
+      "destination": "/dynamic-forms/material/api-reference/:symbol",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/api/:kind/material/:symbol",
+      "destination": "/dynamic-forms/material/api-reference/:symbol",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/api/:kind/bootstrap/:symbol",
+      "destination": "/dynamic-forms/bootstrap/api-reference/:symbol",
+      "permanent": true
+    },
+    {
+      "source": "/dynamic-forms/api/:kind/primeng/:symbol",
+      "destination": "/dynamic-forms/primeng/api-reference/:symbol",
+      "permanent": true
+    },
+    { "source": "/dynamic-forms/api/:kind/ionic/:symbol", "destination": "/dynamic-forms/ionic/api-reference/:symbol", "permanent": true },
+    { "source": "/api/:path*", "destination": "/dynamic-forms/material/api-reference", "permanent": true },
+    { "source": "/dynamic-forms/api/:path*", "destination": "/dynamic-forms/material/api-reference", "permanent": true },
+
+    { "source": "/dynamic-forms/examples/:path*", "destination": "/dynamic-forms/material/examples/:path*", "permanent": true },
+    { "source": "/dynamic-forms/prebuilt/:path*", "destination": "/dynamic-forms/material/prebuilt/:path*", "permanent": true },
+    { "source": "/material/:path*", "destination": "/dynamic-forms/material/:path*", "permanent": true },
+    { "source": "/prebuilt/:path*", "destination": "/dynamic-forms/material/prebuilt/:path*", "permanent": true },
+    { "source": "/wrappers/:path*", "destination": "/dynamic-forms/material/wrappers/:path*", "permanent": true },
+    { "source": "/dynamic-behavior/:path*", "destination": "/dynamic-forms/material/dynamic-behavior/:path*", "permanent": true }
   ],
   "rewrites": [
     {
