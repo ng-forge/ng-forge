@@ -150,6 +150,9 @@ importers:
         specifier: ^3.25.2
         version: 3.25.2(zod@3.25.76)
     devDependencies:
+      '@ampproject/remapping':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@analogjs/platform':
         specifier: 2.5.0
         version: 2.5.0(@angular-devkit/build-angular@21.2.12(0c3664a87cbf9fb78716b73c23c4da5c))(@angular/build@21.2.12(97f318328d09da3408fc58e4566ac3c8))(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@nx/angular@22.7.3(e91790523aa363215174dd95f7ee136c))(@nx/devkit@22.7.3(nx@22.7.3(@swc-node/register@1.11.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@swc/core@1.15.33(@swc/helpers@0.5.21))(@swc/types@0.1.26)(typescript@5.9.3))(@swc/core@1.15.33(@swc/helpers@0.5.21))))(@nx/vite@22.7.3(c31f535e6ecc892e23fb4b3421c8903c))(encoding@0.1.13)(marked-gfm-heading-id@4.1.4(marked@18.0.4))(marked-highlight@2.2.4(marked@18.0.4))(marked-mangle@1.1.13(marked@18.0.4))(marked@18.0.4)(oxc-parser@0.121.0(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0))(prismjs@1.30.0)(shiki@4.1.0)(vite@7.3.3(@types/node@25.9.1)(jiti@2.7.0)(less@4.6.4)(sass-embedded@1.100.0)(sass@1.99.0)(terser@5.48.0)(yaml@2.9.0))
@@ -276,6 +279,9 @@ importers:
       '@vitest/ui':
         specifier: 4.1.7
         version: 4.1.7(vitest@4.1.7)
+      acorn:
+        specifier: ^8.16.0
+        version: 8.16.0
       angular-eslint:
         specifier: 21.4.0
         version: 21.4.0(@angular/cli@21.2.12(@types/node@25.9.1)(chokidar@5.0.0))(chokidar@5.0.0)(eslint@9.39.4(jiti@2.7.0))(typescript-eslint@8.59.4(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(typescript@5.9.3)
@@ -309,6 +315,9 @@ importers:
       lefthook:
         specifier: ^2.1.8
         version: 2.1.8
+      magic-string:
+        specifier: ^0.30.21
+        version: 0.30.21
       ng-packagr:
         specifier: ~21.2.3
         version: 21.2.3(@angular/compiler-cli@21.2.14(@angular/compiler@21.2.14)(typescript@5.9.3))(tailwindcss@4.3.0)(tslib@2.8.1)(typescript@5.9.3)
@@ -9113,11 +9122,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  terser@5.47.1:
-    resolution: {integrity: sha512-tPbLXTI6ohPASb/1YViL428oEHu6/qv1OxqYnfaonVCFHqx4+wCd95pHrQWsL5X4pl90CTyW9piSAsS2L0VoMw==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   terser@5.48.0:
     resolution: {integrity: sha512-J/9An6vs9Us6wKRriSFXBWdRZapREHqFzdNUKk0pmu804EMR6dr6winwo7e5JDxN4xahxQsuysyYFwlwj4XN/Q==}
     engines: {node: '>=10'}
@@ -14117,7 +14121,7 @@ snapshots:
     dependencies:
       serialize-javascript: 7.0.5
       smob: 1.6.2
-      terser: 5.47.1
+      terser: 5.48.0
     optionalDependencies:
       rollup: 4.60.4
 
@@ -20008,13 +20012,6 @@ snapshots:
       postcss: 8.5.15
 
   terser@5.46.0:
-    dependencies:
-      '@jridgewell/source-map': 0.3.11
-      acorn: 8.16.0
-      commander: 2.20.3
-      source-map-support: 0.5.21
-
-  terser@5.47.1:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.16.0

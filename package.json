@@ -43,6 +43,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@ampproject/remapping": "^2.3.0",
     "@analogjs/platform": "2.5.0",
     "@analogjs/vite-plugin-angular": "2.5.0",
     "@analogjs/vitest-angular": "2.5.0",
@@ -85,6 +86,7 @@
     "@vitest/coverage-istanbul": "4.1.7",
     "@vitest/coverage-v8": "4.1.7",
     "@vitest/ui": "4.1.7",
+    "acorn": "^8.16.0",
     "angular-eslint": "21.4.0",
     "autoprefixer": "^10.5.0",
     "esbuild": "^0.28.0",
@@ -96,6 +98,7 @@
     "jsdom": "^27.4.0",
     "jsonc-eslint-parser": "^3.1.0",
     "lefthook": "^2.1.8",
+    "magic-string": "^0.30.21",
     "ng-packagr": "~21.2.3",
     "nx": "22.7.3",
     "openapi-types": "^12.1.3",

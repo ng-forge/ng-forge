@@ -15,6 +15,22 @@
   "tags": [],
   "targets": {
     "build": {
+      "//": "Empty configurations propagate to compile via dependsOn (Nx 22). See scripts/strip-fesm-comments.mjs header for the full pipeline.",
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "inputs": ["production", "^production"],
+      "dependsOn": ["compile"],
+      "options": {
+        "command": "node scripts/strip-fesm-comments.mjs dist/packages/dynamic-forms-bootstrap",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "production": {},
+        "development": {}
+      },
+      "defaultConfiguration": "production"
+    },
+    "compile": {
       "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
