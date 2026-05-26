@@ -221,22 +221,27 @@ export const BENCH_HARNESS_SOURCE = `(async () => {
 })()`;
 
 /**
- * Loose default thresholds for CI regression detection. These are generous (~50%+
- * over current observed values) so they catch catastrophic regressions without
- * flapping on the ~5-10% run-to-run variance the harness exhibits.
+ * Loose default thresholds for CI regression detection. These are generous so
+ * they catch catastrophic regressions without flapping on run-to-run variance.
  *
- * Numbers calibrated against 2026-05-26 baseline (50 pages × full API surface):
- * - per-keystroke wall-clock: 16.4–16.7ms median, 16.8–18.7ms p95 (paint floor)
- * - LoAF: 0 / trial
- * - LongTasks: 0 / trial
- * - Total CD per trial: 9.0–14.6ms depending on adapter+variant
+ * Numbers calibrated against 2026-05-26 baseline (50 pages × full API surface).
+ * Two reference points are used because GitHub Actions runners are noticeably
+ * slower than a developer laptop — the per-keystroke wall-clock measurement
+ * tracks the rAF cadence, which throttles to 2 frames (~33.3ms) under CI load.
+ *
+ *   Metric                       Local (mac)    CI (gha+docker)   Threshold
+ *   per-keystroke median        16.4–16.7ms     33.3ms             50ms
+ *   per-keystroke p95           16.8–18.7ms     33.4ms             65ms
+ *   LoAF count / trial          0               0                  0
+ *   LongTask count / trial      0               0                  0
+ *   Total CD time / trial       9.0–14.6ms      21.7ms             60ms
  */
 export const PERF_THRESHOLDS = {
-  perKeystrokeMedianMs: 25,
-  perKeystrokeP95Ms: 35,
+  perKeystrokeMedianMs: 50,
+  perKeystrokeP95Ms: 65,
   loafCountPerTrial: 0,
   longTasksCountPerTrial: 0,
-  totalCDPerTrialMs: 30,
+  totalCDPerTrialMs: 60,
 } as const;
 
 export type BenchResult = {
