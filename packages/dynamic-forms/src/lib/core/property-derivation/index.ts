@@ -19,10 +19,9 @@ export { applyPropertyDerivations, applyPropertyDerivationsForTrigger } from './
 // Apply overrides
 export { applyPropertyOverrides } from './apply-property-overrides';
 
-// Orchestrator
-export type { PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
-export {
-  PropertyDerivationOrchestrator,
-  createPropertyDerivationOrchestrator,
-  PROPERTY_DERIVATION_ORCHESTRATOR,
-} from './property-derivation-orchestrator';
+// Orchestrator — the property-derivation pipeline is now wired by the unified
+// `DerivationOrchestrator` in `core/derivation/`. Only the legacy DI token is
+// retained for back-compat (it resolves to the same unified instance via
+// `useExisting`). Construct `DerivationOrchestrator` with `propertyStore` set
+// to wire the property pipeline.
+export { PROPERTY_DERIVATION_ORCHESTRATOR } from '../derivation/derivation-orchestrator';

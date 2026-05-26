@@ -1,5 +1,6 @@
 import { signal, Signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { FieldTree } from '@angular/forms/signals';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { delay } from '@ng-forge/utils';
 import { FieldDef } from '../../definitions/base/field-def';
@@ -12,7 +13,8 @@ import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tra
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createWarningTracker } from '../../utils/warning-tracker';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';
-import { PropertyDerivationOrchestrator, PropertyDerivationOrchestratorConfig } from './property-derivation-orchestrator';
+import { DerivationOrchestrator, DerivationOrchestratorConfig } from '../derivation/derivation-orchestrator';
+import { createDerivationLogger, DerivationLogger } from '../derivation/derivation-logger.service';
 
 /**
  * Helper to create a minimal FieldDef with propertyDerivation logic.
@@ -77,7 +79,7 @@ async function flushAndSettle(ms = 50): Promise<void> {
   TestBed.flushEffects();
 }
 
-describe('PropertyDerivationOrchestrator', () => {
+describe('DerivationOrchestrator (property pipeline)', () => {
   let mockLogger: MockLogger;
   let store: PropertyOverrideStore;
   let schemaFields: WritableSignal<FieldDef<unknown>[] | undefined>;
@@ -103,15 +105,15 @@ describe('PropertyDerivationOrchestrator', () => {
     functionRegistry = TestBed.inject(FunctionRegistryService);
   });
 
-  function createOrchestrator(configOverrides: Partial<PropertyDerivationOrchestratorConfig> = {}): PropertyDerivationOrchestrator {
-    const config: PropertyDerivationOrchestratorConfig = {
+  function createOrchestrator(configOverrides: Partial<DerivationOrchestratorConfig> = {}): DerivationOrchestrator {
+    const config: DerivationOrchestratorConfig = {
       schemaFields,
       formValue,
-      store,
+      propertyStore: store,
       ...configOverrides,
     };
 
-    return TestBed.runInInjectionContext(() => new PropertyDerivationOrchestrator(config));
+    return TestBed.runInInjectionContext(() => new DerivationOrchestrator(config));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -732,6 +734,112 @@ describe('PropertyDerivationOrchestrator', () => {
 
       expect(orchestrator.propertyDerivationCollection()).toBeNull();
       expect(store.hasField('endDate')).toBe(false);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Combined value + property pipelines on a single orchestrator instance
+  //
+  // Production wiring (see provideDynamicFormDI) constructs ONE
+  // DerivationOrchestrator with both `form`/`derivationLogger` and
+  // `propertyStore` set. These tests guard the unification: both pipelines
+  // share a constructor and dependency surface, so a regression in one branch
+  // could quietly disable the other.
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  describe('combined pipelines (value + property on one instance)', () => {
+    function createValueDerivationField(key: string, expression: string, dependsOn: string[]): FieldDef<unknown> {
+      return {
+        key,
+        type: 'input',
+        logic: [
+          {
+            type: 'derivation',
+            expression,
+            dependsOn,
+            trigger: 'onChange',
+          },
+        ],
+      } as FieldDef<unknown>;
+    }
+
+    // FieldTree is opaque from a unit-test perspective; an empty record is enough
+    // for the value-pipeline applicator to short-circuit via `warnMissingField`
+    // without throwing. We only care that both pipelines coexist on the same
+    // orchestrator — not that the value pipeline actually writes to a form.
+    function createStubFormSignal(): Signal<FieldTree<unknown>> {
+      return signal({} as FieldTree<unknown>);
+    }
+
+    function createStubDerivationLoggerSignal(): Signal<DerivationLogger> {
+      const logger = createDerivationLogger({ level: 'none' }, mockLogger);
+      return signal(logger);
+    }
+
+    it('wires both pipelines on a single orchestrator and exposes both collections', () => {
+      schemaFields.set([
+        // value derivation: fullName = formValue.firstName
+        createValueDerivationField('fullName', 'formValue.firstName', ['firstName']),
+        // property derivation: endDate.minDate = formValue.startDate
+        createFieldWithPropertyDerivation('endDate', 'minDate', {
+          expression: 'formValue.startDate',
+          dependsOn: ['startDate'],
+        }),
+      ]);
+
+      const orchestrator = createOrchestrator({
+        form: createStubFormSignal(),
+        derivationLogger: createStubDerivationLoggerSignal(),
+      });
+
+      const valueCollection = orchestrator.derivationCollection();
+      const propertyCollection = orchestrator.propertyDerivationCollection();
+
+      expect(valueCollection).not.toBeNull();
+      expect(valueCollection!.entries).toHaveLength(1);
+      expect(valueCollection!.entries[0].fieldKey).toBe('fullName');
+
+      expect(propertyCollection).not.toBeNull();
+      expect(propertyCollection!.entries).toHaveLength(1);
+      expect(propertyCollection!.entries[0].fieldKey).toBe('endDate');
+      expect(propertyCollection!.entries[0].targetProperty).toBe('minDate');
+    });
+
+    it('property pipeline still applies overrides when value pipeline is also wired', async () => {
+      schemaFields.set([
+        createValueDerivationField('fullName', 'formValue.firstName', ['firstName']),
+        createFieldWithPropertyDerivation('endDate', 'minDate', {
+          expression: 'formValue.startDate',
+          dependsOn: ['startDate'],
+        }),
+      ]);
+      formValue.set({ firstName: 'Ada', startDate: '2024-01-15', endDate: '' });
+
+      createOrchestrator({
+        form: createStubFormSignal(),
+        derivationLogger: createStubDerivationLoggerSignal(),
+      });
+      await flushAndSettle();
+
+      // Property pipeline applied — store reflects the derived minDate
+      expect(store.hasField('endDate')).toBe(true);
+      expect(store.getOverrides('endDate')()).toEqual({ minDate: '2024-01-15' });
+    });
+
+    it('disables value pipeline when only propertyStore is provided (existing behavior preserved)', () => {
+      schemaFields.set([
+        createValueDerivationField('fullName', 'formValue.firstName', ['firstName']),
+        createFieldWithPropertyDerivation('endDate', 'minDate', {
+          expression: 'formValue.startDate',
+          dependsOn: ['startDate'],
+        }),
+      ]);
+
+      const orchestrator = createOrchestrator(); // no form / derivationLogger
+
+      // Value collection is the dormant null-computed; property collection still active
+      expect(orchestrator.derivationCollection()).toBeNull();
+      expect(orchestrator.propertyDerivationCollection()).not.toBeNull();
     });
   });
 });

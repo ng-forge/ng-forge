@@ -6,18 +6,35 @@ import { BaseDerivationEntry } from './derivation-entry-base';
 /**
  * Entry representing a collected derivation from field definitions.
  *
- * Created during form initialization when traversing field definitions
- * to collect all derivation rules (both shorthand and full logic configs).
+ * Unified across both write targets: when `targetProperty` is absent the entry
+ * writes the derived value into the form's FieldTree (value derivation); when
+ * `targetProperty` is set it writes into the PropertyOverrideStore under
+ * `[fieldKey, targetProperty]` (property derivation — hidden/disabled/readonly).
+ * The collectors emit entries of the appropriate shape; the orchestrator's
+ * apply step routes by inspecting `targetProperty`.
  *
  * All derivations are self-targeting: the `fieldKey` is both where the
  * derivation is defined AND where the computed value will be set.
  *
- * Extends {@link BaseDerivationEntry} with derivation-pipeline specific fields
- * (HTTP/async sources, shorthand flag, user-override controls).
+ * Extends {@link BaseDerivationEntry} with the async source variants (HTTP,
+ * async function) and value-pipeline-only authoring controls (shorthand flag,
+ * user-override behavior). Property-pipeline entries simply leave the
+ * value-only fields unset; see {@link PropertyDerivationEntry} for the
+ * property-only variant.
  *
  * @public
  */
 export interface DerivationEntry extends BaseDerivationEntry {
+  /**
+   * Target property name when this entry feeds the property-override store
+   * (one of `'hidden'`, `'disabled'`, `'readonly'`, ...). When absent, the
+   * entry is a value derivation and writes into the FieldTree.
+   *
+   * Property derivations are distinguished from value derivations purely by
+   * the presence of this field.
+   */
+  targetProperty?: string;
+
   /**
    * HTTP request configuration for server-driven derivations.
    *
@@ -50,14 +67,17 @@ export interface DerivationEntry extends BaseDerivationEntry {
 
   /**
    * Whether this derivation was created from the shorthand `derivation` property.
+   * Value-pipeline-only — property derivations are always created from full
+   * logic configs and leave this unset.
    *
    * Shorthand derivations use a string expression directly on the field.
    */
-  isShorthand: boolean;
+  isShorthand?: boolean;
 
   /**
    * When true, the derivation stops running after the user manually
-   * edits the target field.
+   * edits the target field. Value-pipeline-only — property derivations
+   * always recompute on dependency change.
    *
    * Uses the field's `dirty()` signal — derivations write directly to
    * `value.set()` which does not trigger `markAsDirty()`, so
@@ -68,7 +88,7 @@ export interface DerivationEntry extends BaseDerivationEntry {
   /**
    * When true (and `stopOnUserOverride` is also true), clears the
    * user-override flag when any dependency of this derivation changes,
-   * allowing the derivation to run again.
+   * allowing the derivation to run again. Value-pipeline-only.
    */
   reEngageOnDependencyChange?: boolean;
 }

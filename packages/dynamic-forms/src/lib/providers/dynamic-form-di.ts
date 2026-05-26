@@ -39,11 +39,7 @@ import { LogicFunctionCacheService } from '../core/expressions/logic-function-ca
 import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
 import { AsyncConditionFunctionCacheService } from '../core/expressions/async-condition-function-cache.service';
 import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
-import {
-  createPropertyDerivationOrchestrator,
-  PROPERTY_DERIVATION_ORCHESTRATOR,
-  PropertyDerivationOrchestratorConfig,
-} from '../core/property-derivation/property-derivation-orchestrator';
+import { PROPERTY_DERIVATION_ORCHESTRATOR } from '../core/derivation/derivation-orchestrator';
 import { FORM_INITIALIZER } from './form-initializer.token';
 import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';
 
@@ -125,55 +121,50 @@ function derivationProviders(): Provider[] {
         logger: Logger,
         logConfig: DerivationLogConfig,
         externalData: Signal<Record<string, Signal<unknown>> | undefined>,
+        propertyStore: PropertyOverrideStore,
       ) => {
         // FormStateManager is injected without type parameters, so its generic defaults
         // to Record<string, unknown>. The casts widen the type to match DerivationOrchestratorConfig
         // which uses unknown — safe because the orchestrator only reads values.
+        // Both value AND property pipelines are wired on the same instance. When
+        // propertyDerivationProviders() is moved behind a withPropertyDerivations()
+        // feature factory, callers who omit it will get a no-op PROPERTY_OVERRIDE_STORE
+        // and the orchestrator's property pipeline will stay dormant.
         const config: DerivationOrchestratorConfig = {
           schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
           formValue: stateManager.formValue as Signal<Record<string, unknown>>,
           form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
           derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
+          propertyStore,
           externalData,
         };
         return createDerivationOrchestrator(config);
       },
-      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA],
+      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
     },
     // Wake the orchestrator at form bootstrap without DynamicForm needing a static
-    // reference to the token. Keeps the orchestrator module reachable only from
-    // this provider group, which a future PR can lift to a secondary entry point.
+    // reference to the token.
     { provide: FORM_INITIALIZER, useExisting: DERIVATION_ORCHESTRATOR, multi: true },
   ];
 }
 
 /**
- * Providers for the property-derivation engine (writes to property override store).
- * Future: opt-in via withPropertyDerivations() — separate from value derivations.
+ * Providers for the property-derivation pipeline: the override store consumed
+ * by the unified `DerivationOrchestrator` plus the back-compat alias token.
+ *
+ * Kept separate from {@link derivationProviders} so a future
+ * `withPropertyDerivations()` feature factory can drop this group when callers
+ * don't use property derivations — at which point the orchestrator's property
+ * branch stays dormant (no `propertyStore` in its config).
  *
  * @internal
  */
 function propertyDerivationProviders(): Provider[] {
   return [
     { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
-    {
-      provide: PROPERTY_DERIVATION_ORCHESTRATOR,
-      useFactory: (
-        stateManager: FormStateManager,
-        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
-        store: PropertyOverrideStore,
-      ) => {
-        const config: PropertyDerivationOrchestratorConfig = {
-          schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
-          formValue: stateManager.formValue as Signal<Record<string, unknown>>,
-          store,
-          externalData,
-        };
-        return createPropertyDerivationOrchestrator(config);
-      },
-      deps: [FormStateManager, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
-    },
-    { provide: FORM_INITIALIZER, useExisting: PROPERTY_DERIVATION_ORCHESTRATOR, multi: true },
+    // PROPERTY_DERIVATION_ORCHESTRATOR is a back-compat alias for any caller
+    // that still injects the legacy token. Resolves to the same instance.
+    { provide: PROPERTY_DERIVATION_ORCHESTRATOR, useExisting: DERIVATION_ORCHESTRATOR },
   ];
 }
 
@@ -234,7 +225,7 @@ export function provideDynamicFormDI(): Provider[] {
     ...dynamicValueProviders(),
     ...httpExpressionProviders(),
     ...asyncExpressionProviders(),
-    ...derivationProviders(),
     ...propertyDerivationProviders(),
+    ...derivationProviders(),
   ];
 }
