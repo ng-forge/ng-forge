@@ -3,7 +3,6 @@ import { computed, DestroyRef, inject, InjectionToken, Injector, Signal } from '
 import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { catchError, EMPTY } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
@@ -11,9 +10,8 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { FunctionRegistryService } from '../registry';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';
-import { buildEntryStreamPipeline } from '../derivation/entry-set-utils';
 import { resolveExternalData } from '../derivation/external-data-resolver';
-import { setupDebouncedStream, setupOnChangeStream } from '../derivation/pipeline-setup-utils';
+import { setupDebouncedStream, setupEntryAsyncStream, setupOnChangeStream } from '../derivation/pipeline-setup-utils';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
 import { collectPropertyDerivations } from './property-derivation-collector';
@@ -174,21 +172,18 @@ export class PropertyDerivationOrchestrator {
   /**
    * Declarative pipeline for HTTP property-derivation entries. Delegates the
    * collection-watching / dedup / cancellation plumbing to
-   * {@link buildEntryStreamPipeline} so both orchestrators share one
+   * {@link setupEntryAsyncStream} so both orchestrators share one
    * implementation.
-   *
-   * Errors inside `createStream` invocations are isolated via the inner
-   * stream's own `catchError`; we additionally wrap the outer pipeline so a
-   * synchronous throw during stream construction (e.g., evaluation of a
-   * `condition`) doesn't tear the whole pipeline down for the lifetime of
-   * the form.
    */
   private setupHttpStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
 
-    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
-      collection$,
+    setupEntryAsyncStream<PropertyDerivationCollection, PropertyDerivationEntry>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'HTTP Property Derivation: outer stream error',
+      collectionSignal: this.propertyDerivationCollection,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
       entrySignature: httpEntrySignature,
       createStream: (entry) => {
@@ -207,23 +202,18 @@ export class PropertyDerivationOrchestrator {
           externalData: () => resolveExternalData(this.config.externalData),
         });
       },
-    })
-      .pipe(
-        catchError((err) => {
-          this.logger.error('HTTP Property Derivation: outer stream error', err);
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
+    });
   }
 
   private setupAsyncFunctionStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-    const collection$ = toObservable(this.propertyDerivationCollection, { injector: this.injector });
 
-    buildEntryStreamPipeline<PropertyDerivationCollection, PropertyDerivationEntry>({
-      collection$,
+    setupEntryAsyncStream<PropertyDerivationCollection, PropertyDerivationEntry>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Async Property Derivation: outer stream error',
+      collectionSignal: this.propertyDerivationCollection,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
       entrySignature: asyncEntrySignature,
       createStream: (entry) =>
@@ -235,15 +225,7 @@ export class PropertyDerivationOrchestrator {
           asyncDerivationFunctions: () => this.functionRegistry.getAsyncDerivationFunctions(),
           externalData: () => resolveExternalData(this.config.externalData),
         }),
-    })
-      .pipe(
-        catchError((err) => {
-          this.logger.error('Async Property Derivation: outer stream error', err);
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
+    });
   }
 }
 

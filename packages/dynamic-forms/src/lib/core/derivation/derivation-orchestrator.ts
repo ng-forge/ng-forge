@@ -3,7 +3,6 @@ import { computed, DestroyRef, inject, InjectionToken, Injector, Signal, untrack
 import { DEV_MODE } from '../../utils/dev-mode';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
-import { catchError, EMPTY } from 'rxjs';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
@@ -16,11 +15,10 @@ import { validateNoCycles } from './cycle-detector';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
 import { DERIVATION_WARNING_TRACKER } from './derivation-warning-tracker';
-import { buildEntryStreamPipeline } from './entry-set-utils';
 import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { createAsyncDerivationStream } from './async-derivation-stream';
 import { resolveExternalData } from './external-data-resolver';
-import { setupDebouncedStream, setupOnChangeStream } from './pipeline-setup-utils';
+import { setupDebouncedStream, setupEntryAsyncStream, setupOnChangeStream } from './pipeline-setup-utils';
 
 /**
  * Minimal configuration for creating a DerivationOrchestrator.
@@ -204,26 +202,19 @@ export class DerivationOrchestrator {
 
   /**
    * Builds a declarative stream that reacts to changes in the set of HTTP
-   * derivation entries and emits per-entry streams merged together.
-   *
-   * - `distinctUntilChanged` over the set of entry signatures skips rebuilds
-   *   when the HTTP entries haven't actually changed. The comparison is
-   *   order-insensitive — `topologicalSort` in the collector can reorder
-   *   existing entries when unrelated entries are added/removed, and we
-   *   don't want to tear down healthy streams in that case.
-   * - `switchMap` cancels the previous merged stream when entries change,
-   *   which propagates into each `createHttpDerivationStream` and cancels
-   *   any in-flight HTTP requests via ordinary RxJS unsubscribe semantics.
-   *
-   * No mutable subscription bookkeeping or stream guard — `takeUntilDestroyed`
-   * on the outer subscription handles unmount.
+   * derivation entries and emits per-entry streams merged together. See
+   * {@link setupEntryAsyncStream} for the shared outer-pipeline shape;
+   * this method only supplies the value-pipeline createStream callback.
    */
   private setupHttpStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
 
-    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
-      collection$,
+    setupEntryAsyncStream<DerivationCollection, DerivationEntry>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'HTTP Derivation: outer stream error',
+      collectionSignal: this.derivationCollection,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
       entrySignature: httpEntrySignature,
       createStream: (entry) => {
@@ -245,23 +236,18 @@ export class DerivationOrchestrator {
         };
         return createHttpDerivationStream(entry, formValue$, context);
       },
-    })
-      .pipe(
-        catchError((err) => {
-          this.logger.error('HTTP Derivation: outer stream error', err);
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
+    });
   }
 
   private setupAsyncFunctionStreams(): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
-    const collection$ = toObservable(this.derivationCollection, { injector: this.injector });
 
-    buildEntryStreamPipeline<DerivationCollection, DerivationEntry>({
-      collection$,
+    setupEntryAsyncStream<DerivationCollection, DerivationEntry>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Async Derivation: outer stream error',
+      collectionSignal: this.derivationCollection,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
       entrySignature: asyncEntrySignature,
       createStream: (entry) =>
@@ -275,15 +261,7 @@ export class DerivationOrchestrator {
           externalData: () => resolveExternalData(this.config.externalData),
           warningTracker: this.warningTracker,
         }),
-    })
-      .pipe(
-        catchError((err) => {
-          this.logger.error('Async Derivation: outer stream error', err);
-          return EMPTY;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe();
+    });
   }
 }
 

@@ -2,8 +2,10 @@ import { DestroyRef, Injector, Signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   auditTime,
+  catchError,
   combineLatestWith,
   debounceTime,
+  EMPTY,
   exhaustMap,
   filter,
   map,
@@ -22,6 +24,7 @@ import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { getChangedKeys } from '../../utils/object-utils';
 import { getDebouncePeriods } from './debounce-period-utils';
 import { BaseDerivationEntry } from './derivation-entry-base';
+import { buildEntryStreamPipeline } from './entry-set-utils';
 
 /**
  * Minimum shape a derivation collection must expose for the reactive setup
@@ -192,4 +195,61 @@ export function setupDebouncedStream<TCollection extends ReactiveDerivationColle
     .subscribe({
       error: (err) => opts.logger.error(opts.errorLabel, err),
     });
+}
+
+/**
+ * Options for setting up an entry-keyed async stream (HTTP derivations or
+ * registered async-function derivations). Both orchestrators previously
+ * hand-rolled this pattern: subscribe to the collection signal via
+ * {@link buildEntryStreamPipeline}, filter to entries of the relevant kind,
+ * key each emission by a stable signature so unrelated topological reorderings
+ * don't churn subscriptions, and per-entry call the caller's `createStream`.
+ *
+ * The outer pipeline (filter + signature dedup + merge) is the same in all
+ * four call sites (value/property × http/async). The `selectEntries`,
+ * `entrySignature`, and `createStream` callbacks carry the only differences.
+ *
+ * @internal
+ */
+export interface EntryAsyncStreamOptions<TCollection extends ReactiveDerivationCollection, TEntry> {
+  injector: Injector;
+  destroyRef: DestroyRef;
+  logger: Logger;
+  /** Human-readable label included in outer-pipeline error logs. */
+  errorLabel: string;
+  collectionSignal: Signal<TCollection | null>;
+  /** Return only the entries this stream cares about (HTTP-bearing, async-bearing, …). */
+  selectEntries: (collection: TCollection | null) => TEntry[];
+  /** Stable identity for an entry. Used by `entrySetsEqual` to skip rebuild when the set is unchanged. */
+  entrySignature: (entry: TEntry) => string;
+  /** Build the inner per-entry stream. Returning `null` suppresses the entry (e.g., HttpClient missing). */
+  createStream: (entry: TEntry) => Observable<unknown> | null;
+}
+
+/**
+ * Subscribe to an entry-keyed async stream. Both HTTP and async-function
+ * variants of both pipelines share this exact wrapping; only the
+ * caller-supplied callbacks change.
+ *
+ * @internal
+ */
+export function setupEntryAsyncStream<TCollection extends ReactiveDerivationCollection, TEntry>(
+  opts: EntryAsyncStreamOptions<TCollection, TEntry>,
+): void {
+  const collection$ = toObservable(opts.collectionSignal, { injector: opts.injector });
+
+  buildEntryStreamPipeline<TCollection, TEntry>({
+    collection$,
+    selectEntries: opts.selectEntries,
+    entrySignature: opts.entrySignature,
+    createStream: opts.createStream,
+  })
+    .pipe(
+      catchError((err) => {
+        opts.logger.error(opts.errorLabel, err);
+        return EMPTY;
+      }),
+      takeUntilDestroyed(opts.destroyRef),
+    )
+    .subscribe();
 }
