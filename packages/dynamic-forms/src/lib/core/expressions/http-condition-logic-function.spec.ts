@@ -463,6 +463,55 @@ describe('createHttpConditionLogicFunction', () => {
     }
   });
 
+  it('should re-fetch on same logical key after cache invalidation following a cache-hit returnEarly', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'queueMicrotask'] });
+    try {
+      httpClient.request.mockReturnValue(of(true));
+
+      const condition: HttpCondition = {
+        type: 'http',
+        http: { url: '/api/check' },
+        debounceMs: 0,
+        pendingValue: false,
+      };
+
+      let fn!: ReturnType<typeof createHttpConditionLogicFunction>;
+      let ctx!: FieldContext<string>;
+
+      runInInjectionContext(injector, () => {
+        fn = createHttpConditionLogicFunction(condition);
+        ctx = createMockFieldContext('test');
+        fn(ctx);
+      });
+
+      TestBed.flushEffects();
+      await vi.advanceTimersByTimeAsync(0);
+      TestBed.flushEffects();
+      await vi.advanceTimersByTimeAsync(0);
+      TestBed.flushEffects();
+
+      expect(httpClient.request).toHaveBeenCalledTimes(1);
+      expect(runInInjectionContext(injector, () => fn(ctx))).toBe(true);
+
+      conditionCache.clear();
+      httpClient.request.mockClear();
+      httpClient.request.mockReturnValue(of(false));
+
+      runInInjectionContext(injector, () => fn(ctx));
+
+      TestBed.flushEffects();
+      await vi.advanceTimersByTimeAsync(0);
+      TestBed.flushEffects();
+      await vi.advanceTimersByTimeAsync(0);
+      TestBed.flushEffects();
+
+      expect(httpClient.request).toHaveBeenCalledTimes(1);
+      expect(runInInjectionContext(injector, () => fn(ctx))).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('should handle cacheDurationMs of 0 (effectively disables cache)', () => {
     vi.useFakeTimers();
     try {

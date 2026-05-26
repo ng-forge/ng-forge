@@ -66,6 +66,13 @@ export interface DebouncedResourceLogicFnConfig<TValue, TPayload, TResult> {
 interface ResourceHandle<TPayload, TResult> {
   trigger: WritableSignal<Trigger<TPayload> | undefined>;
   resultResource: Resource<TResult>;
+  /**
+   * Bumped on every `returnEarly` so the next `trigger.set` carries a fresh dedup key.
+   * Without this, a cache hit → cache expiry → same-key recall would be dropped by
+   * both the helper's same-key check and the downstream `distinctUntilChanged`, and
+   * the resource would never re-fetch.
+   */
+  refetchVersion: number;
 }
 
 /**
@@ -131,19 +138,21 @@ export function createDebouncedResourceLogicFn<TValue, TPayload, TResult>(
         return withPreviousValue(resource);
       });
 
-      handle = { trigger, resultResource };
+      handle = { trigger, resultResource, refetchVersion: 0 };
       perFunctionSignalStore.set(contextKey, handle);
     }
 
     const resolved = config.resolve(ctx);
     if (resolved.kind === 'returnEarly') {
+      handle.refetchVersion++;
       return resolved.value;
     }
     if (resolved.kind === 'holdPrevious') {
       return handle.resultResource.value();
     }
 
-    const newTrigger: Trigger<TPayload> = { key: resolved.key, payload: resolved.payload };
+    const dedupKey = `${resolved.key}::${handle.refetchVersion}`;
+    const newTrigger: Trigger<TPayload> = { key: dedupKey, payload: resolved.payload };
     untracked(() => {
       const current = handle!.trigger();
       // Key-only dedup assumes same key implies equivalent payload — true for both current callers.

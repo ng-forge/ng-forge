@@ -96,7 +96,7 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     buildStream: (request) => {
       const method = request.method ?? 'GET';
       const options: Record<string, unknown> = {};
-      if (request.body) options['body'] = request.body;
+      if (request.body !== undefined) options['body'] = request.body;
       if (request.headers) options['headers'] = request.headers;
 
       return httpClient.request(method, request.url, options).pipe(
