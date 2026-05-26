@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injector, Resource, signal, untracked, WritableSignal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { catchError, debounceTime, distinctUntilChanged, map, of, pipe, tap } from 'rxjs';
+import { inject, Injector } from '@angular/core';
+import { LogicFn } from '@angular/forms/signals';
+import { catchError, map, of, tap } from 'rxjs';
 import { HttpCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { HttpResourceRequest } from '../validation/validator-types';
@@ -15,9 +14,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { resolveHttpRequest } from '../http/http-request-resolver';
 import { ExpressionParser } from './parser/expression-parser';
 import { HttpConditionFunctionCacheService } from './http-condition-function-cache.service';
-import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
-import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
-import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { createDebouncedResourceLogicFn } from './debounced-resource-logic-fn';
 
 /**
  * Extracts a boolean from an HTTP response using an optional expression.
@@ -48,10 +45,11 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
 /**
  * Creates a logic function for an HTTP condition.
  *
- * Uses Angular's `rxResource()` API with snapshot composition for async resolution:
- * the LogicFn updates a `resolvedRequest` signal, a debounced version feeds into
- * an `rxResource()` that manages the HTTP lifecycle, and `withPreviousValue()` preserves
- * the last resolved boolean during re-fetching to prevent UI flicker.
+ * Delegates lifecycle (per-field signal store, debouncing, rxResource +
+ * withPreviousValue) to {@link createDebouncedResourceLogicFn}; this function
+ * just supplies the HTTP-specific bits: the trigger payload is the resolved
+ * `HttpResourceRequest`, the stream fires the request, and the resolver
+ * short-circuits via the response-cache before the resource gets touched.
  *
  * Must be called in injection context (same as `createLogicFunction`).
  */
@@ -71,109 +69,49 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
   const cacheDurationMs = condition.cacheDurationMs ?? 30000;
   const debounceMs = condition.debounceMs ?? 300;
 
-  // Check function cache
+  // Function cache: across-condition reuse for identical condition shapes.
   const cacheKey = stableStringify(condition);
-
   const cached = cacheService.httpConditionFunctionCache.get(cacheKey);
   if (cached) {
     return cached as LogicFn<TValue, boolean>;
   }
 
-  // Each condition needs its own per-field signal store. A shared store would collide
-  // when multiple HTTP conditions exist on the same field (same FieldContext / path).
-  const perFunctionSignalStore = new Map<
-    string,
-    { resolvedRequest: WritableSignal<HttpResourceRequest | undefined>; resultResource: Resource<boolean> }
-  >();
+  const fn = createDebouncedResourceLogicFn<TValue, HttpResourceRequest, boolean>({
+    pendingValue,
+    debounceMs,
+    injector,
+    resolve: (ctx) => {
+      const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      const resolved = resolveHttpRequest(condition.http, evaluationContext);
+      // Unresolvable request template (path param missing, etc.) — fall back
+      // to pending value. The resource stays in its prior state.
+      if (!resolved) return { kind: 'returnEarly', value: pendingValue };
 
-  const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
-    const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
-    let signalPair = perFunctionSignalStore.get(contextKey);
+      const requestKey = stableStringify(resolved);
+      const cachedResult = cache.get(requestKey);
+      if (cachedResult !== undefined) return { kind: 'returnEarly', value: cachedResult };
 
-    if (!signalPair) {
-      const resolvedRequest = signal<HttpResourceRequest | undefined>(undefined);
+      return { kind: 'trigger', key: requestKey, payload: resolved };
+    },
+    buildStream: (request) => {
+      const method = request.method ?? 'GET';
+      const options: Record<string, unknown> = {};
+      if (request.body) options['body'] = request.body;
+      if (request.headers) options['headers'] = request.headers;
 
-      // Wrap in untracked() to avoid NG0602: resource() internally creates effects,
-      // which cannot be created inside a reactive context (computed). The LogicFn runs
-      // inside Angular Signal Forms' BooleanOrLogic.compute (a computed), so we must
-      // clear the active reactive consumer before creating the resource pipeline.
-      const resultResource = untracked(() => {
-        // Create a debounced, stabilized version of the request signal.
-        // This prevents rapid re-fetches when form values change quickly.
-        const debouncedRequest = derivedFromDeferred(
-          resolvedRequest,
-          pipe(
-            debounceTime(debounceMs),
-            distinctUntilChanged((prev, curr) => stableStringify(prev) === stableStringify(curr)),
-          ),
-          { initialValue: undefined as HttpResourceRequest | undefined, injector },
-        );
-
-        // rxResource() manages the HTTP lifecycle natively with Observables:
-        // auto-cancellation via unsubscription, loading/resolved/error status tracking,
-        // and signal-based reactivity.
-        const httpResource = rxResource({
-          params: () => debouncedRequest() ?? undefined,
-          // When params() returns undefined, rxResource() enters idle state and skips the stream.
-          stream: ({ params: request }) => {
-            const method = request.method ?? 'GET';
-            const options: Record<string, unknown> = {};
-            if (request.body) options['body'] = request.body;
-            if (request.headers) options['headers'] = request.headers;
-
-            return httpClient.request(method, request.url, options).pipe(
-              map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
-              tap((value) => {
-                const requestKey = stableStringify(request);
-                cache.set(requestKey, value, cacheDurationMs);
-              }),
-              catchError((error) => {
-                logger.warn('HTTP condition request failed:', error);
-                return of(pendingValue);
-              }),
-            );
-          },
-          defaultValue: pendingValue,
-          injector,
-        });
-
-        // Snapshot composition: preserve the previous boolean result during re-fetching.
-        // Without this, the condition would briefly flash to pendingValue when params change,
-        // causing visible UI flicker (e.g., a conditionally visible field briefly disappearing).
-        return withPreviousValue(httpResource);
-      });
-
-      signalPair = { resolvedRequest, resultResource };
-      perFunctionSignalStore.set(contextKey, signalPair);
-    }
-
-    // Build reactive evaluation context (creates signal dependencies on form values)
-    const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
-
-    // Returns null when a path param is undefined — skip the request and return pending value
-    const resolved = resolveHttpRequest(condition.http, evaluationContext);
-    if (!resolved) {
-      return signalPair.resultResource.value();
-    }
-    const requestKey = stableStringify(resolved);
-
-    // Check response cache first
-    const cachedResult = cache.get(requestKey);
-    if (cachedResult !== undefined) {
-      return cachedResult;
-    }
-
-    // Update the resolved request signal (triggers resource if request changed)
-    const { resolvedRequest, resultResource } = signalPair;
-    untracked(() => {
-      const current = resolvedRequest();
-      if (stableStringify(current) !== requestKey) {
-        resolvedRequest.set(resolved);
-      }
-    });
-
-    return resultResource.value();
-  };
+      return httpClient.request(method, request.url, options).pipe(
+        map((response) => extractBoolean(response, condition.responseExpression, pendingValue, logger)),
+        tap((value) => {
+          const requestKey = stableStringify(request);
+          cache.set(requestKey, value, cacheDurationMs);
+        }),
+        catchError((error) => {
+          logger.warn('HTTP condition request failed:', error);
+          return of(pendingValue);
+        }),
+      );
+    },
+  });
 
   cacheService.httpConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   return fn;
