@@ -25,6 +25,12 @@ export function assertPerf(result: BenchResult, opts: AssertPerfOpts = {}): void
     throw new Error(`[${label}] ${msg}\nFull result: ${JSON.stringify(result, null, 2)}`);
   };
 
+  // Guard: without profiler slices, allTemplatesTotalMedian falls to 0 and the
+  // CD-threshold check silently passes regardless of how slow the form is.
+  if (result.topAngularProfilerSlices.length === 0) {
+    fail('Angular ɵsetProfiler slices missing — cannot validate CD regression thresholds (is window.ng.ɵsetProfiler available?)');
+  }
+
   const ks = result.keystrokes.perKeystrokeMs;
   if (!ks) fail('keystrokes.perKeystrokeMs missing');
   else {
