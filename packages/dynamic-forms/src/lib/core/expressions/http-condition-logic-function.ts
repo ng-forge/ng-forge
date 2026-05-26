@@ -83,9 +83,9 @@ export function createHttpConditionLogicFunction<TValue>(condition: HttpConditio
     resolve: (ctx) => {
       const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
       const resolved = resolveHttpRequest(condition.http, evaluationContext);
-      // Unresolvable request template (path param missing, etc.) — fall back
-      // to pending value. The resource stays in its prior state.
-      if (!resolved) return { kind: 'returnEarly', value: pendingValue };
+      // Hold the previous resolved value rather than flicker to pendingValue while a path
+      // param is temporarily undefined between two valid states.
+      if (!resolved) return { kind: 'holdPrevious' };
 
       const requestKey = stableStringify(resolved);
       const cachedResult = cache.get(requestKey);
