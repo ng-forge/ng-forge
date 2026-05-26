@@ -18,7 +18,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "inputs": ["production", "^production"],
-      "dependsOn": [{ "target": "compile", "params": "forward" }],
+      "dependsOn": ["compile"],
       "options": {
         "command": "node scripts/strip-fesm-comments.mjs dist/packages/dynamic-forms-bootstrap",
         "cwd": "{workspaceRoot}"

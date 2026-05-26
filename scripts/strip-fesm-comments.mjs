@@ -18,42 +18,64 @@ import { gzipSync } from 'node:zlib';
 import { Parser } from 'acorn';
 import MagicString from 'magic-string';
 
-const KEEP_BLOCK_RE = /^[#@*]?\s*(?:__PURE__|@?(?:license|preserve|cc_on)\b|istanbul\b)|^\*[\s\S]*@(?:license|preserve)\b/;
-const KEEP_LINE_RE = /^#\s*sourceMappingURL=/;
-
 const JSDOC_RE = /\/\*\*[\s\S]*?\*\//g;
 const PURE_RE = /__PURE__/g;
+const LEGAL_MARKER_RE = /@(?:license|preserve)\b/;
+const SOURCEMAPPING_URL_RE = /^#\s*sourceMappingURL=/;
 
+/**
+ * Decide whether a parsed comment should survive the strip pass.
+ *
+ * Acorn's `onComment` callback gives the comment value WITHOUT the surrounding
+ * `/*`/`*\/` or `//` markers, so we inspect the inner text to classify:
+ *
+ *   source           comment.type   comment.value (excerpt)
+ *   ---------------  -------------  -----------------------
+ *   /** ... *\/      'Block'        '* ...' (note leading *)
+ *   /*! @license *\/ 'Block'        '! @license '
+ *   /*#__PURE__*\/   'Block'        '#__PURE__'
+ *   /* istanbul *\/  'Block'        ' istanbul '
+ *   // ...           'Line'         ' ...'
+ *
+ * Default policy: drop JSDoc and prose line comments; keep everything else.
+ * The single exception for line comments is `//# sourceMappingURL=...` so
+ * `magic-string`-emitted output still references the rewritten map.
+ *
+ * @param {{ type: 'Block' | 'Line', value: string }} comment
+ * @returns {boolean} true if the comment must be retained verbatim.
+ */
 function shouldKeepComment(comment) {
-  // comment.type is 'Block' for /* ... */ and 'Line' for //
-  // comment.value is the text BETWEEN the markers (no /* */ or //)
-  if (comment.type === 'Block') {
-    // JSDoc starts with `*` in value (because source was `/**`)
-    // PURE/license/preserve/istanbul keep their markers
-    if (comment.value.startsWith('*') && !KEEP_BLOCK_RE.test(comment.value)) {
-      return false; // JSDoc
-    }
-    return !comment.value.startsWith('*') ? KEEP_BLOCK_RE.test(comment.value.trim()) || true : true;
+  if (comment.type === 'Line') {
+    return SOURCEMAPPING_URL_RE.test(comment.value);
   }
-  // Line comments: keep only sourceMappingURL
-  return KEEP_LINE_RE.test(comment.value);
+  // Block comments: only JSDoc `*...` is dropped, and only when it doesn't
+  // carry a legal marker. Everything else (PURE, license headers, istanbul
+  // hints, third-party banners) survives untouched in its original position.
+  if (comment.value.startsWith('*')) {
+    return LEGAL_MARKER_RE.test(comment.value);
+  }
+  return true;
 }
 
+/**
+ * Parse the FESM source with acorn, collect comment positions, then delete
+ * the ones `shouldKeepComment` rejects via magic-string.
+ *
+ * The delete-only transform makes sourcemap composition trivial: we only ever
+ * shrink the output, so magic-string's mapping can be layered on top of the
+ * upstream rollup map without re-walking segments.
+ *
+ * @param {string} source - Raw FESM `.mjs` contents.
+ * @returns {{ code: string, map: import('magic-string').SourceMap, dropped: number }}
+ */
 function stripComments(source) {
   const comments = [];
-  // Acorn parses ES modules and collects comments via onComment.
-  // We use the latest practical ecmaVersion so newer syntax doesn't break.
   Parser.parse(source, {
     ecmaVersion: 'latest',
     sourceType: 'module',
     allowHashBang: true,
     onComment: (block, text, start, end) => {
-      comments.push({
-        type: block ? 'Block' : 'Line',
-        value: text,
-        start,
-        end,
-      });
+      comments.push({ type: block ? 'Block' : 'Line', value: text, start, end });
     },
   });
 
@@ -61,8 +83,9 @@ function stripComments(source) {
   let dropped = 0;
   for (const c of comments) {
     if (shouldKeepComment(c)) continue;
-    // Extend deletion to include the trailing newline if the comment was on
-    // its own line, otherwise downstream gzip pays for orphan blank lines.
+    // Eat the trailing newline so the file doesn't end up with cosmetic
+    // blank lines where docblocks used to be (those would compress less well
+    // and add visual noise when consumers inspect the published bundle).
     let end = c.end;
     if (source[end] === '\n') end += 1;
     else if (source[end] === '\r' && source[end + 1] === '\n') end += 2;
@@ -72,10 +95,36 @@ function stripComments(source) {
   return { code: s.toString(), map: s.generateMap({ hires: false }), dropped };
 }
 
+/**
+ * Count occurrences of a global RegExp without allocating the match array
+ * twice. Used for the pre/post integrity audit (JSDoc must hit zero; PURE
+ * count must not drop).
+ *
+ * @param {RegExp} re - Must have the `g` flag.
+ * @param {string} src
+ * @returns {number}
+ */
 function countMatches(re, src) {
   return (src.match(re) || []).length;
 }
 
+/**
+ * Strip every `.mjs` in `<distDir>/fesm2022/`, compose a new sourcemap
+ * (carrying the upstream `sources` / `sourcesContent` so debug tools resolve
+ * to original `.ts` files), and return totals for reporting.
+ *
+ * Returns `null` if the directory doesn't exist or contains no `.mjs` files,
+ * so the orchestrator can skip non-Angular packages without failing.
+ *
+ * @param {string} fesmDir - Absolute or workspace-relative path to a `fesm2022/` directory.
+ * @returns {Promise<{
+ *   files: number,
+ *   rawBefore: number, rawAfter: number,
+ *   gzBefore: number, gzAfter: number,
+ *   jsdocBefore: number, jsdocAfter: number,
+ *   pureBefore: number, pureAfter: number,
+ * } | null>}
+ */
 async function processFesm(fesmDir) {
   let entries;
   try {
@@ -109,9 +158,9 @@ async function processFesm(fesmDir) {
 
     const { code, map } = stripComments(sourceCode);
 
-    // Preserve original sourceMappingURL by appending it back; if the original
-    // file had `//# sourceMappingURL=...`, our keep rule retained it. If not,
-    // and a .map file exists, ensure the FESM still references it.
+    // If the original file's `//# sourceMappingURL=` line was retained (it
+    // matches our keep rule), there's nothing to do. Otherwise re-attach it
+    // so debuggers still find the rewritten map.
     let finalCode = code;
     if (!/sourceMappingURL=/.test(finalCode)) {
       try {
@@ -124,15 +173,13 @@ async function processFesm(fesmDir) {
 
     await writeFile(filePath, finalCode);
 
-    // We chained two transforms (original ngc → rollup, then our delete-only
-    // pass). Without composing them we'd emit a mapping that points at the
-    // FESM text instead of the original .ts sources. Read the upstream map and
-    // apply our mapping on top so debug tools end up at source.
+    // Compose the upstream rollup map with our delete-only mapping so debug
+    // tools end up at the original `.ts` files instead of the FESM text.
+    // magic-string emits a fresh `mappings` table relative to the FESM; we
+    // graft on the upstream `sources` / `sourcesContent` / `names`.
     try {
       const upstreamRaw = await readFile(mapPath, 'utf8');
       const upstream = JSON.parse(upstreamRaw);
-      // magic-string returns a SourceMap-like object; compose by passing the
-      // upstream sources/sourcesContent through to keep .ts file references.
       const composed = {
         version: 3,
         file: map.file ?? file,
@@ -156,15 +203,39 @@ async function processFesm(fesmDir) {
   return totals;
 }
 
+/**
+ * Format a byte count as a right-aligned KB string for the summary table.
+ *
+ * @param {number} n - Byte count.
+ * @returns {string} e.g. `'  237.2 KB'`.
+ */
 function fmtKB(n) {
   return (n / 1024).toFixed(1).padStart(7) + ' KB';
 }
 
+/**
+ * Format a before/after delta as a right-aligned percentage reduction.
+ *
+ * @param {number} before
+ * @param {number} after
+ * @returns {string} e.g. `' 50.2%'`. Zero baseline returns `'   0.0%'`.
+ */
 function fmtPct(before, after) {
   if (before === 0) return '   0.0%';
   return ((100 * (before - after)) / before).toFixed(1).padStart(6) + '%';
 }
 
+/**
+ * Orchestrate the strip across one or more `<dist>/fesm2022/` directories,
+ * print a per-package size table, and enforce integrity assertions.
+ *
+ * Exits non-zero (failing the Nx build) if any of these post-conditions fail:
+ *   - a `/** ... *\/` JSDoc block survived the strip in any file
+ *   - the total `__PURE__` count dropped for any package (silent tree-shaking
+ *     regression — bundlers would retain code that was previously DCE'd)
+ *
+ * @returns {Promise<void>}
+ */
 async function main() {
   const distDirs = process.argv.slice(2);
   if (distDirs.length === 0) {
