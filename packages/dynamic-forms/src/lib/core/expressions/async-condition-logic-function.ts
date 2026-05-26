@@ -1,7 +1,6 @@
-import { inject, Injector, Resource, signal, untracked, WritableSignal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { inject, Injector } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { catchError, debounceTime, distinctUntilChanged, from, map, of, pipe } from 'rxjs';
+import { catchError, from, map, of } from 'rxjs';
 import { AsyncCondition } from '../../models/expressions/conditional-expression';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
@@ -9,18 +8,16 @@ import { FunctionRegistryService } from '../registry/function-registry.service';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
-import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
-import { withPreviousValue } from '../../utils/resource-composition/with-previous-value';
-import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { createDebouncedResourceLogicFn } from './debounced-resource-logic-fn';
 
 /**
  * Creates a logic function for an async condition.
  *
- * Uses Angular's `rxResource()` API with snapshot composition for async resolution:
- * the LogicFn updates a `trigger` signal (serialized evaluation context), a debounced
- * version feeds into an `rxResource()` that manages the async function lifecycle, and
- * `withPreviousValue()` preserves the last resolved boolean during re-evaluation
- * to prevent UI flicker.
+ * Delegates lifecycle (per-field signal store, debouncing, rxResource +
+ * withPreviousValue) to {@link createDebouncedResourceLogicFn}; this function
+ * just supplies the async-condition-specific bits: the trigger payload is
+ * the FieldContext snapshot the loader needs to build its evaluation
+ * context, and the stream invokes the registered or inline async function.
  *
  * Must be called in injection context (same as `createLogicFunction`).
  */
@@ -52,116 +49,48 @@ export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondit
     }
   }
 
-  // Each condition needs its own per-field signal store.
-  const perFunctionSignalStore = new Map<
-    string,
-    {
-      trigger: WritableSignal<string | undefined>;
-      resultResource: Resource<boolean>;
-      // Captures the FieldContext at the moment each trigger snapshot is produced.
-      // The loader reads from this map using the trigger key, ensuring it always
-      // uses the context that was active when the trigger was set — not a stale ref
-      // that could be overwritten by a later LogicFn call before the loader executes.
-      ctxByTrigger: Map<string, FieldContext<TValue>>;
-    }
-  >();
-
-  const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
-    const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
-    let signalPair = perFunctionSignalStore.get(contextKey);
-
-    if (!signalPair) {
-      const trigger = signal<string | undefined>(undefined);
-      const ctxByTrigger = new Map<string, FieldContext<TValue>>();
-
-      // Wrap in untracked() to avoid NG0602: resource() internally creates effects,
-      // which cannot be created inside a reactive context (computed). The LogicFn runs
-      // inside Angular Signal Forms' BooleanOrLogic.compute (a computed), so we must
-      // clear the active reactive consumer before creating the resource pipeline.
-      const resultResource = untracked(() => {
-        // Debounce the trigger to batch rapid form value changes.
-        const debouncedTrigger = derivedFromDeferred(trigger, pipe(debounceTime(debounceMs), distinctUntilChanged()), {
-          initialValue: undefined as string | undefined,
-          injector,
-        });
-
-        // rxResource() manages the async function lifecycle natively with Observables:
-        // auto-cancellation via unsubscription and signal-based reactivity.
-        const asyncResource = rxResource({
-          params: () => debouncedTrigger() ?? undefined,
-          stream: ({ params: triggerKey }) => {
-            // Inline `asyncFn` wins; otherwise look up the registered function at call time
-            // (fresh reference, in case the registry was updated after LogicFn creation).
-            const asyncFn =
-              condition.asyncFn ??
-              (condition.asyncFunctionName ? functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName) : undefined);
-            if (!asyncFn) {
-              logger.warn(
-                `Async Condition - function '${condition.asyncFunctionName}' not found. ` +
-                  `Register it in customFnConfig.asyncConditions.`,
-              );
-              return of(pendingValue);
-            }
-
-            // Retrieve the FieldContext that was captured when this trigger key was set.
-            // This avoids a race condition where a mutable ref could be overwritten by
-            // a later LogicFn call before the loader finishes executing.
-            const capturedCtx = ctxByTrigger.get(triggerKey);
-            if (!capturedCtx) return of(pendingValue);
-
-            const evaluationContext = untracked(() =>
-              fieldContextRegistry.createReactiveEvaluationContext(capturedCtx, functionRegistry.getCustomFunctions()),
-            );
-
-            // asyncFn may return Promise<boolean> or Observable<boolean>.
-            // from() normalizes both to Observable.
-            return from(asyncFn(evaluationContext)).pipe(
-              map((result) => !!result),
-              catchError((error) => {
-                logger.warn('Async Condition - function failed:', error);
-                return of(pendingValue);
-              }),
-            );
-          },
-          defaultValue: pendingValue,
-          injector,
-        });
-
-        // Snapshot composition: preserve the previous boolean result during re-evaluation.
-        // Without this, the condition would briefly flash to pendingValue when the async
-        // function is re-invoked, causing visible UI flicker.
-        return withPreviousValue(asyncResource);
+  const fn = createDebouncedResourceLogicFn<TValue, FieldContext<TValue>, boolean>({
+    pendingValue,
+    debounceMs,
+    injector,
+    resolve: (ctx) => {
+      // Build reactive evaluation context here so the LogicFn establishes
+      // signal dependencies on form values — the resource's reactive graph
+      // alone wouldn't notice changes that didn't flow through the trigger.
+      const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      const key = stableStringify({
+        formValue: evaluationContext.formValue,
+        fieldValue: evaluationContext.fieldValue,
+        externalData: evaluationContext.externalData,
       });
-
-      signalPair = { trigger, resultResource, ctxByTrigger };
-      perFunctionSignalStore.set(contextKey, signalPair);
-    }
-
-    // Build reactive evaluation context (creates signal dependencies on form values)
-    const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
-
-    // Serialize evaluation context to detect changes
-    const contextSnapshot = stableStringify({
-      formValue: evaluationContext.formValue,
-      fieldValue: evaluationContext.fieldValue,
-      externalData: evaluationContext.externalData,
-    });
-
-    // Capture the FieldContext for this trigger key so the loader can retrieve it.
-    // Only keep the latest — previous entries are stale once the trigger changes.
-    const { trigger: triggerSignal, resultResource, ctxByTrigger } = signalPair;
-    ctxByTrigger.clear();
-    ctxByTrigger.set(contextSnapshot, ctx);
-
-    untracked(() => {
-      const current = triggerSignal();
-      if (current !== contextSnapshot) {
-        triggerSignal.set(contextSnapshot);
+      return { kind: 'trigger', key, payload: ctx };
+    },
+    buildStream: (capturedCtx) => {
+      // Inline `asyncFn` wins; otherwise look up the registered function at call time
+      // (fresh reference, in case the registry was updated after LogicFn creation).
+      const asyncFn =
+        condition.asyncFn ??
+        (condition.asyncFunctionName ? functionRegistry.getAsyncConditionFunction(condition.asyncFunctionName) : undefined);
+      if (!asyncFn) {
+        logger.warn(
+          `Async Condition - function '${condition.asyncFunctionName}' not found. ` + `Register it in customFnConfig.asyncConditions.`,
+        );
+        return of(pendingValue);
       }
-    });
 
-    return resultResource.value();
-  };
+      const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(capturedCtx, functionRegistry.getCustomFunctions());
+
+      // asyncFn may return Promise<boolean> or Observable<boolean>.
+      // from() normalizes both to Observable.
+      return from(asyncFn(evaluationContext)).pipe(
+        map((result) => !!result),
+        catchError((error) => {
+          logger.warn('Async Condition - function failed:', error);
+          return of(pendingValue);
+        }),
+      );
+    },
+  });
 
   if (cacheKey !== undefined) {
     cacheService.asyncConditionFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
