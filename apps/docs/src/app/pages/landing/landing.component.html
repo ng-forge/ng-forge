@@ -156,7 +156,7 @@
   </section>
 
   <!-- Stats -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section class="stats">
       <div class="stats-grid">
         <div class="stat-card">
@@ -192,7 +192,7 @@
   }
 
   <!-- Features -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="features" class="features">
       <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
         <div class="section-label">Why ng-forge</div>
@@ -234,7 +234,7 @@
   }
 
   <!-- Showcase -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="showcase" class="showcase">
       <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
         <div class="section-label">Power features</div>
@@ -271,7 +271,7 @@
   }
 
   <!-- Validation -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="validation" class="validation">
       <div class="section-container">
         <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
@@ -343,7 +343,7 @@
         </div>
 
         <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
-          <a routerLink="/validation/basics" class="inline-link" title="Read the validation documentation"
+          <a routerLink="/material/validation/basics" class="inline-link" title="Read the validation documentation"
             >Learn more about validation &rarr;</a
           >
         </p>
@@ -359,7 +359,7 @@
   }
 
   <!-- Field Types -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="field-types" class="field-types">
       <div class="section-container">
         <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
@@ -381,7 +381,7 @@
         </div>
 
         <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
-          <a routerLink="/examples/login-form" class="inline-link" title="View the login form example">See live examples &rarr;</a>
+          <a routerLink="/material/examples/login-form" class="inline-link" title="View the login form example">See live examples &rarr;</a>
         </p>
       </div>
     </section>
@@ -395,7 +395,7 @@
   }
 
   <!-- JSON Config -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="json-config" class="json-config">
       <div class="section-container">
         <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
@@ -508,7 +508,7 @@
   }
 
   <!-- Integrations -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section id="integrations" class="integrations">
       <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
         <div class="section-label">Integrations</div>
@@ -527,7 +527,7 @@
 
       <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
         Or
-        <a routerLink="/building-an-adapter" class="inline-link" title="Learn how to create custom UI library adapters"
+        <a routerLink="/custom/building-an-adapter" class="inline-link" title="Learn how to create custom UI library adapters"
           >build your own adapter</a
         >
       </p>
@@ -537,7 +537,7 @@
   }
 
   <!-- CTA -->
-  @defer (on viewport) {
+  @defer (hydrate on viewport) {
     <section class="cta">
       <h2 class="cta-title">Stop writing forms.<br /><span>Start forging them.</span></h2>
 
@@ -592,7 +592,7 @@
       </div>
 
       <div class="cta-buttons">
-        <a routerLink="/getting-started" class="btn btn-primary">
+        <a routerLink="/material/getting-started" class="btn btn-primary">
           <span class="icon icon--book"></span>
           Read the Docs
         </a>
@@ -614,7 +614,7 @@
 </main>
 
 <!-- Footer -->
-@defer (on viewport) {
+@defer (hydrate on viewport) {
   <footer>
     <div class="footer-links">
       <a href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener" title="Join the ng-forge Discord community">Discord</a>
