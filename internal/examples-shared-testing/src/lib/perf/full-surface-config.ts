@@ -444,11 +444,16 @@ export function fullSurfaceStressConfigPaged(): FormConfig {
  */
 export function fullSurfaceStressConfigPagedMostlyHidden(): FormConfig {
   const triggerPage: DF = { key: 'pageTriggers', type: 'page', fields: [...triggerFields] };
+  // Keep first 2 section pages (idx 0, 1) visible; hide the rest. The submit
+  // button must live on the last visible page so the form remains usable under
+  // default trigger values — placing it on `SECTIONS.length - 1` (which is
+  // hidden) would leave the form with no reachable submit control.
+  const LAST_VISIBLE_IDX = 1;
   const sectionPages: DF[] = SECTIONS.map((section, idx) => {
     const fields = section.build();
-    if (idx === SECTIONS.length - 1) fields.push(...controlButtons({ pagedNav: false }));
+    if (idx === LAST_VISIBLE_IDX) fields.push(...controlButtons({ pagedNav: false }));
     else fields.push(...controlButtons({ pagedNav: true }));
-    const shouldHide = idx >= 2; // keep first 2 visible; hide the rest
+    const shouldHide = idx > LAST_VISIBLE_IDX;
     const page: DF = { key: `page_${section.key}`, type: 'page', fields };
     if (shouldHide) {
       page['logic'] = [

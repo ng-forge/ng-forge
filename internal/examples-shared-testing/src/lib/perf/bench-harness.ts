@@ -20,13 +20,43 @@ export const BENCH_HARNESS_SOURCE = `(async () => {
   const charPerTrial = opts.charPerTrial || 25;
   const trials = opts.trials || 5;
   const warmupTrials = opts.warmupTrials ?? 1;
+  const targetFieldKey = opts.targetFieldKey || null;
+  // Field keys whose values gate visibility/derivation logic in the full-surface
+  // stress configs. Picking one of these would mutate the form's hidden-condition
+  // state mid-trial (see fullSurfaceStressConfigPagedMostlyHidden), so they're
+  // skipped when no explicit targetFieldKey is given.
+  const TRIGGER_KEYS = new Set(['accountType', 'region', 'tier', 'plan', 'currency']);
+  const isTriggerInput = (el) => {
+    const id = el && el.id;
+    if (!id || !id.endsWith('-input')) return false;
+    return TRIGGER_KEYS.has(id.slice(0, -'-input'.length));
+  };
+  const isHostTriggerInput = (host) => {
+    const id = host && host.id;
+    if (!id || !id.endsWith('-input')) return false;
+    return TRIGGER_KEYS.has(id.slice(0, -'-input'.length));
+  };
 
   function findInput() {
-    const direct = Array.from(document.querySelectorAll('input,textarea')).find(
+    if (targetFieldKey) {
+      const expectedId = targetFieldKey + '-input';
+      const byId = document.querySelector('input[id="' + expectedId + '"],textarea[id="' + expectedId + '"]');
+      if (byId && byId.offsetParent !== null) return { el: byId, mode: 'standard' };
+      const ionById = document.querySelector('ion-input[id="' + expectedId + '"],ion-textarea[id="' + expectedId + '"]');
+      if (ionById && ionById.offsetParent !== null) {
+        const shadowInput = ionById.shadowRoot && ionById.shadowRoot.querySelector('input,textarea');
+        if (shadowInput) return { el: shadowInput, mode: 'standard', host: ionById };
+        return { el: ionById, mode: 'ion-host' };
+      }
+      throw new Error('targetFieldKey="' + targetFieldKey + '" specified but no visible input with id="' + expectedId + '" was found');
+    }
+    const candidates = Array.from(document.querySelectorAll('input,textarea')).filter(
       (i) => i.offsetParent !== null && (i.type === 'text' || i.tagName === 'TEXTAREA') && !i.disabled,
     );
+    const direct = candidates.find((i) => !isTriggerInput(i)) || candidates[0];
     if (direct) return { el: direct, mode: 'standard' };
-    const ionHost = Array.from(document.querySelectorAll('ion-input,ion-textarea')).find((h) => h.offsetParent !== null);
+    const ionHosts = Array.from(document.querySelectorAll('ion-input,ion-textarea')).filter((h) => h.offsetParent !== null);
+    const ionHost = ionHosts.find((h) => !isHostTriggerInput(h)) || ionHosts[0];
     if (ionHost) {
       const shadowInput = ionHost.shadowRoot && ionHost.shadowRoot.querySelector('input,textarea');
       if (shadowInput) return { el: shadowInput, mode: 'standard', host: ionHost };
@@ -95,42 +125,44 @@ export const BENCH_HARNESS_SOURCE = `(async () => {
   }
 
   const trialResults = [];
-  for (let trialIdx = 0; trialIdx < trials + warmupTrials; trialIdx++) {
-    for (const k of Object.keys(STACKS)) delete STACKS[k];
-    for (const k of Object.keys(TOTALS)) delete TOTALS[k];
-    for (const k of Object.keys(COUNTS)) delete COUNTS[k];
-    loaf.length = 0;
-    longTasks.length = 0;
+  try {
+    for (let trialIdx = 0; trialIdx < trials + warmupTrials; trialIdx++) {
+      for (const k of Object.keys(STACKS)) delete STACKS[k];
+      for (const k of Object.keys(TOTALS)) delete TOTALS[k];
+      for (const k of Object.keys(COUNTS)) delete COUNTS[k];
+      loaf.length = 0;
+      longTasks.length = 0;
 
-    setValueAndDispatch('');
-    await new Promise((r) => setTimeout(r, 80));
+      setValueAndDispatch('');
+      await new Promise((r) => setTimeout(r, 80));
 
-    const keystrokes = [];
-    let buf = '';
-    for (let i = 0; i < charPerTrial; i++) {
-      const t0 = performance.now();
-      buf = buf + 'a';
-      setValueAndDispatch(buf);
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      keystrokes.push(performance.now() - t0);
+      const keystrokes = [];
+      let buf = '';
+      for (let i = 0; i < charPerTrial; i++) {
+        const t0 = performance.now();
+        buf = buf + 'a';
+        setValueAndDispatch(buf);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        keystrokes.push(performance.now() - t0);
+      }
+      await new Promise((r) => setTimeout(r, 200));
+
+      trialResults.push({
+        isWarmup: trialIdx < warmupTrials,
+        keystrokes: keystrokes.slice(),
+        loafCount: loaf.length,
+        loafTotalDuration: loaf.reduce((a, e) => a + e.duration, 0),
+        loafTotalBlocking: loaf.reduce((a, e) => a + e.blockingDuration, 0),
+        longTaskCount: longTasks.length,
+        ngTotals: Object.assign({}, TOTALS),
+        ngCounts: Object.assign({}, COUNTS),
+      });
     }
-    await new Promise((r) => setTimeout(r, 200));
-
-    trialResults.push({
-      isWarmup: trialIdx < warmupTrials,
-      keystrokes: keystrokes.slice(),
-      loafCount: loaf.length,
-      loafTotalDuration: loaf.reduce((a, e) => a + e.duration, 0),
-      loafTotalBlocking: loaf.reduce((a, e) => a + e.blockingDuration, 0),
-      longTaskCount: longTasks.length,
-      ngTotals: Object.assign({}, TOTALS),
-      ngCounts: Object.assign({}, COUNTS),
-    });
+  } finally {
+    if (window.ng && window.ng['ɵsetProfiler']) window.ng['ɵsetProfiler'](null);
+    if (loafObs) loafObs.disconnect();
+    if (ltObs) ltObs.disconnect();
   }
-
-  if (window.ng && window.ng['ɵsetProfiler']) window.ng['ɵsetProfiler'](null);
-  if (loafObs) loafObs.disconnect();
-  if (ltObs) ltObs.disconnect();
 
   const realTrials = trialResults.filter((t) => !t.isWarmup);
   const stat = (arr) => {
@@ -238,6 +270,16 @@ export type BenchOptions = {
   charPerTrial?: number;
   trials?: number;
   warmupTrials?: number;
+  /**
+   * Field key to target (matches the `id="<key>-input"` convention used by every
+   * adapter's input/textarea field component). When set, the harness will only
+   * type into that specific input and throw if it's not visible. When unset, the
+   * harness picks the first visible non-trigger input — trigger fields
+   * (`accountType`/`region`/`tier`/`plan`/`currency`) are skipped because their
+   * values gate the hidden-page conditions exercised by the stress configs and
+   * mutating them mid-trial would defeat what the bench is measuring.
+   */
+  targetFieldKey?: string;
 };
 
 /**
