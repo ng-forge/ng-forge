@@ -24,4 +24,4 @@ export { applyPropertyOverrides } from './apply-property-overrides';
 // retained for back-compat (it resolves to the same unified instance via
 // `useExisting`). Construct `DerivationOrchestrator` with `propertyStore` set
 // to wire the property pipeline.
-export { PROPERTY_DERIVATION_ORCHESTRATOR } from './property-derivation-orchestrator';
+export { PROPERTY_DERIVATION_ORCHESTRATOR } from '../derivation/derivation-orchestrator';

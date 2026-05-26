@@ -6,6 +6,7 @@ import { FieldTree } from '@angular/forms/signals';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FieldDef } from '../../definitions/base/field-def';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
+import type { FormOptions } from '../../models/form-config';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
@@ -96,10 +97,17 @@ export class DerivationOrchestrator {
   private readonly destroyRef = inject(DestroyRef);
   private readonly logger = inject(DynamicFormLogger);
   private readonly warningTracker = inject(DERIVATION_WARNING_TRACKER);
-  private readonly deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
   private readonly functionRegistry = inject(FunctionRegistryService);
-  private readonly formOptions = inject(FORM_OPTIONS);
   private readonly httpClient = inject(HttpClient, { optional: true });
+
+  // Pipeline-specific deps are injected lazily inside the per-pipeline setup
+  // methods so the unused token's provider isn't required when only one
+  // pipeline is active (matters for tests + the future
+  // withPropertyDerivations() / withDerivations() split). The value-pipeline
+  // apply helpers read `this.formOptions` directly; the definite-assignment
+  // assertion is safe because those helpers only fire from streams wired by
+  // setupValuePipeline(), which assigns the signal first.
+  private formOptions!: Signal<FormOptions | undefined>;
 
   /**
    * Computed signal containing the collected and validated value derivations.
@@ -117,139 +125,152 @@ export class DerivationOrchestrator {
 
   constructor(config: DerivationOrchestratorConfig) {
     this.config = config;
-    const valuePipelineEnabled = !!(config.form && config.derivationLogger);
-    const propertyPipelineEnabled = !!config.propertyStore;
 
-    // Value pipeline: collection + 4 stream variants
-    if (valuePipelineEnabled) {
-      this.derivationCollection = computed<DerivationCollection | null>(() => {
-        const fields = config.schemaFields();
+    this.derivationCollection =
+      config.form && config.derivationLogger ? this.setupValuePipeline() : computed<DerivationCollection | null>(() => null);
 
-        if (!fields || fields.length === 0) {
-          return null;
-        }
+    this.propertyDerivationCollection = config.propertyStore
+      ? this.setupPropertyPipeline(config.propertyStore)
+      : computed<PropertyDerivationCollection | null>(() => null);
+  }
 
-        const collection = collectDerivations(fields);
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Value pipeline — setup
+  // ─────────────────────────────────────────────────────────────────────────────
 
-        if (collection.entries.length === 0) {
-          return null;
-        }
+  private setupValuePipeline(): Signal<DerivationCollection | null> {
+    this.formOptions = inject(FORM_OPTIONS);
 
-        validateNoCycles(collection, this.logger);
-        if (DEV_MODE) {
-          warnAboutWildcardDependencies(this.logger, collection.entries, fields.length);
-          warnAboutMisconfiguredReEngagement(this.logger, collection.entries);
-        }
+    const collection = computed<DerivationCollection | null>(() => {
+      const fields = this.config.schemaFields();
 
-        return collection;
-      });
+      if (!fields || fields.length === 0) {
+        return null;
+      }
 
-      setupOnChangeStream<DerivationCollection>({
-        injector: this.injector,
-        destroyRef: this.destroyRef,
-        logger: this.logger,
-        errorLabel: 'Derivation onChange stream error',
-        collectionSignal: this.derivationCollection,
-        formValueSignal: this.config.formValue,
-        // The form accessor signal must also wake the stream so that config swaps
-        // (which produce a new FieldTree) trigger a re-application of derivations
-        // against the freshly-built form.
-        additionalAwakeners: [this.config.form!],
-        applyOnChange: (collection, changedFields) => {
-          this.applyOnChangeDerivations(
-            collection,
-            untracked(() => this.config.form!()),
-            changedFields,
-          );
-        },
-      });
+      const collected = collectDerivations(fields);
 
-      setupDebouncedStream<DerivationCollection>({
-        injector: this.injector,
-        destroyRef: this.destroyRef,
-        logger: this.logger,
-        errorLabel: 'Derivation debounced stream error',
-        collectionSignal: this.derivationCollection,
-        formValueSignal: this.config.formValue,
-        applyDebouncedForPeriod: (debounceMs, collection, changedFields) => {
-          const formAccessor = untracked(() => this.config.form!());
-          if (!formAccessor) return;
-          this.applyDebouncedEntriesForPeriod(debounceMs, collection, formAccessor, changedFields);
-        },
-      });
+      if (collected.entries.length === 0) {
+        return null;
+      }
 
-      this.setupValueHttpStreams();
-      this.setupValueAsyncFunctionStreams();
-    } else {
-      this.derivationCollection = computed<DerivationCollection | null>(() => null);
-    }
+      validateNoCycles(collected, this.logger);
+      if (DEV_MODE) {
+        warnAboutWildcardDependencies(this.logger, collected.entries, fields.length);
+        warnAboutMisconfiguredReEngagement(this.logger, collected.entries);
+      }
 
-    // Property pipeline: collection + clear/register effect + 4 stream variants
-    if (propertyPipelineEnabled) {
-      const propertyStore = config.propertyStore!;
+      return collected;
+    });
 
-      this.propertyDerivationCollection = computed<PropertyDerivationCollection | null>(() => {
-        const fields = config.schemaFields();
+    setupOnChangeStream<DerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Derivation onChange stream error',
+      collectionSignal: collection,
+      formValueSignal: this.config.formValue,
+      // The form accessor signal must also wake the stream so that config swaps
+      // (which produce a new FieldTree) trigger a re-application of derivations
+      // against the freshly-built form.
+      additionalAwakeners: [this.config.form!],
+      applyOnChange: (current, changedFields) => {
+        this.applyOnChangeDerivations(
+          current,
+          untracked(() => this.config.form!()),
+          changedFields,
+        );
+      },
+    });
 
-        if (!fields || fields.length === 0) {
-          return null;
-        }
+    setupDebouncedStream<DerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Derivation debounced stream error',
+      collectionSignal: collection,
+      formValueSignal: this.config.formValue,
+      applyDebouncedForPeriod: (debounceMs, current, changedFields) => {
+        const formAccessor = untracked(() => this.config.form!());
+        if (!formAccessor) return;
+        this.applyDebouncedEntriesForPeriod(debounceMs, current, formAccessor, changedFields);
+      },
+    });
 
-        const collection = collectPropertyDerivations(fields, this.logger, this.deprecationTracker);
+    this.setupValueHttpStreams(collection);
+    this.setupValueAsyncFunctionStreams(collection);
 
-        if (collection.entries.length === 0) {
-          return null;
-        }
+    return collection;
+  }
 
-        return collection;
-      });
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Property pipeline — setup
+  // ─────────────────────────────────────────────────────────────────────────────
 
-      // Side effect: clear store + register fields whenever the collection changes.
-      // schemaFields is in the dep array so the field count is always in sync.
-      explicitEffect([this.propertyDerivationCollection, this.config.schemaFields], ([collection, fields]) => {
-        propertyStore.clear();
+  private setupPropertyPipeline(propertyStore: PropertyOverrideStore): Signal<PropertyDerivationCollection | null> {
+    const deprecationTracker = inject(DEPRECATION_WARNING_TRACKER);
 
-        if (!collection) return;
+    const collection = computed<PropertyDerivationCollection | null>(() => {
+      const fields = this.config.schemaFields();
 
-        for (const entry of collection.entries) {
-          propertyStore.registerField(entry.fieldKey);
-        }
+      if (!fields || fields.length === 0) {
+        return null;
+      }
 
-        if (DEV_MODE) {
-          warnAboutWildcardPropertyDependencies(this.logger, collection.entries, fields?.length ?? 0);
-        }
-      });
+      const collected = collectPropertyDerivations(fields, this.logger, deprecationTracker);
 
-      setupOnChangeStream<PropertyDerivationCollection>({
-        injector: this.injector,
-        destroyRef: this.destroyRef,
-        logger: this.logger,
-        errorLabel: 'Property derivation onChange stream error',
-        collectionSignal: this.propertyDerivationCollection,
-        formValueSignal: this.config.formValue,
-        // Property pipeline's onChange historically ignored the changed-fields set
-        // (it always re-runs all 'onChange' entries). The helper computes one anyway;
-        // we drop it here to preserve the original behavior.
-        applyOnChange: (collection) => this.applyOnChangePropertyDerivations(collection, propertyStore),
-      });
+      if (collected.entries.length === 0) {
+        return null;
+      }
 
-      setupDebouncedStream<PropertyDerivationCollection>({
-        injector: this.injector,
-        destroyRef: this.destroyRef,
-        logger: this.logger,
-        errorLabel: 'Property derivation debounced stream error',
-        collectionSignal: this.propertyDerivationCollection,
-        formValueSignal: this.config.formValue,
-        applyDebouncedForPeriod: (debounceMs, collection, changedFields) => {
-          this.applyDebouncedPropertyEntriesForPeriod(debounceMs, collection, propertyStore, changedFields);
-        },
-      });
+      return collected;
+    });
 
-      this.setupPropertyHttpStreams(propertyStore);
-      this.setupPropertyAsyncFunctionStreams(propertyStore);
-    } else {
-      this.propertyDerivationCollection = computed<PropertyDerivationCollection | null>(() => null);
-    }
+    // Side effect: clear store + register fields whenever the collection changes.
+    // schemaFields is in the dep array so the field count is always in sync.
+    explicitEffect([collection, this.config.schemaFields], ([current, fields]) => {
+      propertyStore.clear();
+
+      if (!current) return;
+
+      for (const entry of current.entries) {
+        propertyStore.registerField(entry.fieldKey);
+      }
+
+      if (DEV_MODE) {
+        warnAboutWildcardPropertyDependencies(this.logger, current.entries, fields?.length ?? 0);
+      }
+    });
+
+    setupOnChangeStream<PropertyDerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Property derivation onChange stream error',
+      collectionSignal: collection,
+      formValueSignal: this.config.formValue,
+      // Property pipeline's onChange historically ignored the changed-fields set
+      // (it always re-runs all 'onChange' entries). The helper computes one anyway;
+      // we drop it here to preserve the original behavior.
+      applyOnChange: (current) => this.applyOnChangePropertyDerivations(current, propertyStore),
+    });
+
+    setupDebouncedStream<PropertyDerivationCollection>({
+      injector: this.injector,
+      destroyRef: this.destroyRef,
+      logger: this.logger,
+      errorLabel: 'Property derivation debounced stream error',
+      collectionSignal: collection,
+      formValueSignal: this.config.formValue,
+      applyDebouncedForPeriod: (debounceMs, current, changedFields) => {
+        this.applyDebouncedPropertyEntriesForPeriod(debounceMs, current, propertyStore, changedFields);
+      },
+    });
+
+    this.setupPropertyHttpStreams(collection, propertyStore);
+    this.setupPropertyAsyncFunctionStreams(collection, propertyStore);
+
+    return collection;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -320,7 +341,7 @@ export class DerivationOrchestrator {
     }
   }
 
-  private setupValueHttpStreams(): void {
+  private setupValueHttpStreams(collectionSignal: Signal<DerivationCollection | null>): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
 
     setupEntryAsyncStream<DerivationCollection, DerivationEntry>({
@@ -328,7 +349,7 @@ export class DerivationOrchestrator {
       destroyRef: this.destroyRef,
       logger: this.logger,
       errorLabel: 'HTTP Derivation: outer stream error',
-      collectionSignal: this.derivationCollection,
+      collectionSignal,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
       entrySignature: valueHttpEntrySignature,
       createStream: (entry) => {
@@ -353,7 +374,7 @@ export class DerivationOrchestrator {
     });
   }
 
-  private setupValueAsyncFunctionStreams(): void {
+  private setupValueAsyncFunctionStreams(collectionSignal: Signal<DerivationCollection | null>): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
 
     setupEntryAsyncStream<DerivationCollection, DerivationEntry>({
@@ -361,7 +382,7 @@ export class DerivationOrchestrator {
       destroyRef: this.destroyRef,
       logger: this.logger,
       errorLabel: 'Async Derivation: outer stream error',
-      collectionSignal: this.derivationCollection,
+      collectionSignal,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
       entrySignature: valueAsyncEntrySignature,
       createStream: (entry) =>
@@ -423,7 +444,7 @@ export class DerivationOrchestrator {
     applyPropertyDerivationsForTrigger(filteredCollection, 'debounced', applicatorContext, changedFields);
   }
 
-  private setupPropertyHttpStreams(store: PropertyOverrideStore): void {
+  private setupPropertyHttpStreams(collectionSignal: Signal<PropertyDerivationCollection | null>, store: PropertyOverrideStore): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
 
     setupEntryAsyncStream<PropertyDerivationCollection, PropertyDerivationEntry>({
@@ -431,7 +452,7 @@ export class DerivationOrchestrator {
       destroyRef: this.destroyRef,
       logger: this.logger,
       errorLabel: 'HTTP Property Derivation: outer stream error',
-      collectionSignal: this.propertyDerivationCollection,
+      collectionSignal,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.http) ?? [],
       entrySignature: propertyHttpEntrySignature,
       createStream: (entry) => {
@@ -453,7 +474,10 @@ export class DerivationOrchestrator {
     });
   }
 
-  private setupPropertyAsyncFunctionStreams(store: PropertyOverrideStore): void {
+  private setupPropertyAsyncFunctionStreams(
+    collectionSignal: Signal<PropertyDerivationCollection | null>,
+    store: PropertyOverrideStore,
+  ): void {
     const formValue$ = toObservable(this.config.formValue, { injector: this.injector });
 
     setupEntryAsyncStream<PropertyDerivationCollection, PropertyDerivationEntry>({
@@ -461,7 +485,7 @@ export class DerivationOrchestrator {
       destroyRef: this.destroyRef,
       logger: this.logger,
       errorLabel: 'Async Property Derivation: outer stream error',
-      collectionSignal: this.propertyDerivationCollection,
+      collectionSignal,
       selectEntries: (collection) => collection?.entries.filter((entry) => entry.asyncFunctionName || entry.asyncFn) ?? [],
       entrySignature: propertyAsyncEntrySignature,
       createStream: (entry) =>
@@ -566,6 +590,19 @@ export function createDerivationOrchestrator(config: DerivationOrchestratorConfi
  * @public
  */
 export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('DERIVATION_ORCHESTRATOR');
+
+/**
+ * Back-compat injection token for the (formerly separate) property-derivation
+ * orchestrator. The property pipeline is now wired by the unified
+ * {@link DerivationOrchestrator}; the DI binding for this token uses
+ * `useExisting: DERIVATION_ORCHESTRATOR`, so any consumer still calling
+ * `inject(PROPERTY_DERIVATION_ORCHESTRATOR)` resolves to the same instance.
+ *
+ * New code should `inject(DERIVATION_ORCHESTRATOR)` directly.
+ *
+ * @deprecated Use {@link DERIVATION_ORCHESTRATOR}.
+ */
+export const PROPERTY_DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('PROPERTY_DERIVATION_ORCHESTRATOR');
 
 /**
  * Injects the DerivationOrchestrator from the current injection context.

@@ -101,7 +101,7 @@ export interface OnChangeStreamOptions<TCollection extends ReactiveDerivationCol
 export function setupOnChangeStream<TCollection extends ReactiveDerivationCollection>(opts: OnChangeStreamOptions<TCollection>): void {
   const collection$ = toObservable(opts.collectionSignal, { injector: opts.injector });
   const formValue$ = toObservable(opts.formValueSignal, { injector: opts.injector });
-  const extra$ = (opts.additionalAwakeners ?? []).map((s) => toObservable(s, { injector: opts.injector }));
+  const extra$ = opts.additionalAwakeners?.length ? opts.additionalAwakeners.map((s) => toObservable(s, { injector: opts.injector })) : [];
 
   collection$
     .pipe(
