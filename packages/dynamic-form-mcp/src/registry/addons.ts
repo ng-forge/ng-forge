@@ -1,13 +1,4 @@
-/**
- * Addon Registry Data
- *
- * Canonical source of addon kind metadata for the MCP server. Addons render
- * inside a field's slot (typically `prefix` / `suffix`) — icons, buttons,
- * inline text, custom templates, custom components.
- *
- * Manually authored for MVP; auto-extraction from `AddonKindDefinition.schema`
- * fragments is a follow-up.
- */
+/** Addon Registry Data */
 
 import type { PropertyInfo } from './index.js';
 

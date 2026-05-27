@@ -1,21 +1,6 @@
 import { FormEvent } from '../interfaces/form-event';
 
-/**
- * Event dispatched to remove the LAST item from an array field.
- *
- * Equivalent to JavaScript's `Array.pop()` - removes from the end.
- * For removing from the beginning, use {@link ShiftArrayItemEvent}.
- * For removing at a specific index, use {@link RemoveAtIndexEvent}.
- *
- * @example
- * ```typescript
- * // Use the builder API (recommended)
- * eventBus.dispatch(arrayEvent('contacts').pop());
- *
- * // Or instantiate directly
- * eventBus.dispatch(new PopArrayItemEvent('contacts'));
- * ```
- */
+/** Event dispatched to remove the LAST item from an array field. */
 export class PopArrayItemEvent implements FormEvent {
   readonly type = 'pop-array-item' as const;
 

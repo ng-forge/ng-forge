@@ -5,15 +5,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { IonButtonAddon } from '../types/addons';
 
-/**
- * Renderer for the `ion-button` addon kind.
- *
- * Wraps Ionic's `<ion-button>`. Click dispatch (preset / actionRef /
- * action precedence, multi-set warning, `disabled` / `loading`
- * resolution) lives on `NgForgeAddonAction`; this component focuses on
- * the visual layer. While `action.loading()`, an `<ion-spinner>` is
- * rendered in place of the icon and the button is disabled.
- */
+/** Renderer for the `ion-button` addon kind. */
 @Component({
   selector: 'df-ion-button-addon',
   imports: [IonButton, IonIcon, IonSpinner, DynamicTextPipe, AsyncPipe],

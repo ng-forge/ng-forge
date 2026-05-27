@@ -30,10 +30,6 @@ const NULLABLE_SUPPORTED_FIELD_TYPES = new Set([
  * Field types whose runtime definition declares `label?: never` and therefore
  * rejects any `label` assignment under `as const satisfies FormConfig`. Emitting
  * a label on these types causes TS2322 in consumers (issue #348).
- *
- * `container` is included defensively: while the schema mapper never produces it
- * directly, an `x-ng-forge-type: container` override can route through this code
- * path, and `BaseContainerField` declares the same `label?: never` constraint.
  */
 const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page', 'container']);
 

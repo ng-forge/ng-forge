@@ -36,9 +36,6 @@ export interface NgForgeFieldFixture<C, TValue = unknown> {
  * Builds a `ComponentFixture` for an `NgForgeField`-composing component with
  * `field` + `key` bound BEFORE `detectChanges()` — sidesteps the NG0950 that
  * Shell's required `key` and Field's required `field` would otherwise throw.
- *
- * The caller drives `detectChanges()` themselves (so they can `setInput`
- * additional component-specific props in between).
  */
 export function createNgForgeFieldFixture<C, TValue = unknown>(
   component: Type<C>,

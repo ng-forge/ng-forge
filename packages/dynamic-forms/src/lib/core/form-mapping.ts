@@ -140,14 +140,6 @@ function getNumberValidationConfig(fieldDef: FieldWithValidation): NumberValidat
 /**
  * Maps a field definition to the Angular Signal Forms schema.
  *
- * This is the main entry point that should be called from the dynamic form component.
- * It handles all field types: leaf fields, containers (page, row, group), and arrays.
- *
- * Cross-field logic (formValue.*) is handled automatically by createLogicFunction
- * which uses RootFormRegistryService.
- *
- * Cross-field validators are skipped at field level and applied at form level via validateTree.
- *
  * @param fieldDef Field definition to map
  * @param fieldPath Schema path for this field
  * @param inheritedContext Cascading mapping context from the parent. Field-level
@@ -193,15 +185,7 @@ export function mapFieldToForm(
   mapLeafField(fieldDef, fieldPath, ownContext);
 }
 
-/**
- * Maps children of a container field (page, row, group) to the form schema.
- *
- * Layout containers (page/row/container) flatten into `parentPath` and are
- * recursed through without consuming a key — same contract as `mapFieldToForm`'s
- * top-level layout branch, so any depth of layout-container nesting reaches its
- * leaf descendants. Group/array fields consume their key and look up their own
- * child path on `parentPath`.
- */
+/** Maps children of a container field (page, row, group) to the form schema. */
 function mapContainerChildren(
   fields: readonly FieldDef<unknown>[] | undefined,
   parentPath: AnySchemaPath,
@@ -339,9 +323,7 @@ function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaP
   }
 }
 
-/**
- * Applies field state configuration (disabled, readonly, hidden).
- */
+/** Applies field state configuration (disabled, readonly, hidden). */
 function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>): void {
   if (fieldDef.disabled) {
     disabled(path);
@@ -356,20 +338,7 @@ function applyFieldState(fieldDef: FieldDef<unknown>, path: SchemaPath<unknown>)
   }
 }
 
-/**
- * Maps an array field to the form schema using applyEach.
- *
- * Supports two item formats:
- * - Primitive items: single FieldDef (not wrapped in array) → primitive value schema
- * - Object items: FieldDef[] (array of fields) → object schema with field keys
- *
- * Supports:
- * - Empty arrays (fields: []) - no initial items, add via buttons
- * - Primitive arrays - simple value lists like ['tag1', 'tag2']
- * - Object arrays - structured items like [{ name: 'Alice', email: '...' }]
- * - Heterogeneous arrays - mixed primitives and objects
- * - Container templates (row, group, page) that wrap children
- */
+/** Maps an array field to the form schema using applyEach. */
 function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
   if (!isArrayField(arrayField)) {
     return;

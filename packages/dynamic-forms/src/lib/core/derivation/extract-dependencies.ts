@@ -4,12 +4,6 @@ import { extractExpressionDependencies, extractStringDependencies } from '../cro
 /**
  * Extracts the union of field dependencies declared by a derivation config.
  *
- * Combines:
- * - Explicit `dependsOn` (when provided, it takes precedence over auto-detection)
- * - Expression-detected dependencies (only used when `dependsOn` is empty)
- * - `'*'` wildcard for `functionName` / inline `fn` (only when `dependsOn` is empty)
- * - Condition expression dependencies (always included)
- *
  * @internal
  */
 export function extractDependenciesFromConfig(config: DerivationLogicConfig): string[] {

@@ -1,10 +1,4 @@
-/**
- * Reason an addon was dropped during validation.
- *
- * Each variant carries its own context fields so log messages can be both
- * actionable (registered kinds enumerated, fix suggestion present) and
- * machine-readable (admin UIs surfacing per-error guidance).
- */
+/** Reason an addon was dropped during validation. */
 export type AddonWarning =
   | { type: 'unknown-field-type'; fieldKey: string; fieldType: string }
   | { type: 'field-type-no-addon-support'; fieldKey: string; fieldType: string }
@@ -43,18 +37,7 @@ export function addonWarningKey(w: AddonWarning): string {
   }
 }
 
-/**
- * Render an `AddonWarning` to a developer-friendly message.
- *
- * Returns the bare message — the `[Dynamic Forms]` prefix is added by the
- * library's logger (`ConsoleLogger`) and by `DynamicFormError`. Pass the
- * result of this function directly into `logger.warn(...)` to get the
- * standard prefixed line; use `logAddonWarnings()` for direct
- * `console.warn` output (which prefixes manually).
- *
- * Messages are designed to be actionable: they enumerate the relevant set
- * (registered kinds, allowed slots) and suggest a likely fix.
- */
+/** Render an `AddonWarning` to a developer-friendly message. */
 export function formatAddonWarning(w: AddonWarning): string {
   switch (w.type) {
     case 'unknown-field-type':

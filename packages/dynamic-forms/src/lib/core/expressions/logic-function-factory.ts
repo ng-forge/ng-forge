@@ -36,15 +36,6 @@ function validateNoNestedHttpConditions(expression: ConditionalExpression): void
 /**
  * Create a logic function from a conditional expression.
  *
- * This function is used for creating logic functions for hidden, readonly, disabled, and required.
- * It uses the REACTIVE evaluation context, which allows the logic function to create
- * reactive dependencies on form values. When dependent fields change, the logic function
- * will be automatically re-evaluated.
- *
- * NOTE: For validators, use createEvaluationContext directly (with untracked) to prevent
- * infinite reactive loops. Validators with cross-field dependencies should be hoisted
- * to form-level using validateTree.
- *
  * @param expression The conditional expression to evaluate
  * @returns A LogicFn that evaluates the condition in the context of a field
  */
@@ -93,10 +84,6 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
 
 /**
  * Create a debounced logic function from a conditional expression.
- *
- * This function wraps the condition evaluation in a debounce mechanism,
- * so state changes only take effect after the specified delay.
- * Useful for avoiding UI flicker during rapid typing.
  *
  * @param expression The conditional expression to evaluate
  * @param debounceMs The debounce duration in milliseconds

@@ -14,19 +14,7 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
   return 'key' in context && isSignal(context.key);
 }
 
-/**
- * Extracts the FieldState from a FieldContext using the public `.state` property.
- *
- * FieldContext.state is a FieldState object that has all signal properties
- * (dirty, touched, valid, etc.) needed for field state snapshots.
- *
- * IMPORTANT: Always reads with `untracked()` because accessing `.state` on a
- * FieldContext can trigger reactive reads inside Angular's internal computation
- * graph. Without `untracked()`, validators would cycle (validator → state → valid
- * → validator) and logic conditions like `hidden()` would cycle (hidden → state →
- * hidden). The FieldState object reference is stable — individual signal properties
- * within it are read reactively or untracked by the Proxy as needed.
- */
+/** Extracts the FieldState from a FieldContext using the public `.state` property. */
 function extractFieldState(fieldContext: FieldContext<unknown>): FieldState<unknown> | undefined {
   return untracked(() => {
     if (!fieldContext || !('state' in fieldContext)) return undefined;
@@ -34,17 +22,7 @@ function extractFieldState(fieldContext: FieldContext<unknown>): FieldState<unkn
   });
 }
 
-/**
- * Detects whether a field lives inside an array by examining its `pathKeys`.
- *
- * Array item fields have paths like `['addresses', '0', 'street']` where
- * a numeric segment indicates an array index. Returns the array key and
- * numeric index when detected, or `undefined` for non-array fields.
- *
- * For nested arrays (e.g., `['orders', '0', 'items', '1', 'name']`), walks backwards
- * to find the innermost array context — scoping `formValue` to that item.
- * `localKey` is always the last segment (the field's own key within its parent item).
- */
+/** Detects whether a field lives inside an array by examining its `pathKeys`. */
 function detectArrayScope(pathKeys: readonly string[]): { arrayKey: string; index: number; localKey: string } | undefined {
   // Need at least 3 segments: arrayKey, index, fieldKey
   if (pathKeys.length < 3) return undefined;
@@ -69,9 +47,6 @@ function detectArrayScope(pathKeys: readonly string[]): { arrayKey: string; inde
 /**
  * Service that provides field evaluation context by combining
  * field context with root form registry information.
- *
- * This service should be provided at the component level to ensure proper
- * isolation between different form instances.
  */
 @Injectable()
 export class FieldContextRegistryService {
@@ -129,9 +104,7 @@ export class FieldContextRegistryService {
     };
   }
 
-  /**
-   * Extracts the field path (key) for a given field context.
-   */
+  /** Extracts the field path (key) for a given field context. */
   private extractFieldPath(fieldContext: FieldContext<unknown>): string {
     if (isChildFieldContext(fieldContext)) {
       try {
@@ -145,16 +118,7 @@ export class FieldContextRegistryService {
     return '';
   }
 
-  /**
-   * Builds an evaluation context scoped to a specific array item.
-   *
-   * When a field lives inside an array (e.g., `addresses.0.street`), its logic conditions
-   * need `formValue` scoped to the array item so that `fieldValue` lookups like
-   * `hasApartment` resolve against the item rather than the root form.
-   *
-   * Falls back to root form behavior when the array data is missing or the index is
-   * out of bounds.
-   */
+  /** Builds an evaluation context scoped to a specific array item. */
   private buildArrayScopedContext<TValue>(
     rootFormValue: Record<string, unknown>,
     arrayScope: { arrayKey: string; index: number; localKey: string },
@@ -251,20 +215,7 @@ export class FieldContextRegistryService {
     return resolved;
   }
 
-  /**
-   * Creates a REACTIVE evaluation context for logic functions.
-   *
-   * Unlike createEvaluationContext, this method does NOT use untracked(),
-   * which allows logic functions (hidden, readonly, disabled, required) to
-   * create reactive dependencies on form values.
-   *
-   * When a dependent field value changes, the logic function will be re-evaluated.
-   *
-   * NOTE: This should ONLY be used for logic functions, not validators.
-   * Validators should use createEvaluationContext with untracked() to prevent
-   * infinite reactive loops. Validators with cross-field dependencies should be
-   * hoisted to form-level using validateTree.
-   */
+  /** Creates a REACTIVE evaluation context for logic functions. */
   createReactiveEvaluationContext<TValue>(
     fieldContext: FieldContext<TValue>,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
@@ -301,17 +252,6 @@ export class FieldContextRegistryService {
   /**
    * Creates an evaluation context for display-only components (text fields, pages)
    * that don't have their own FieldContext.
-   *
-   * This is useful for:
-   * - Text fields (display-only, not part of form schema)
-   * - Pages (containers that need to evaluate visibility logic)
-   *
-   * Uses reactive form value access to allow logic re-evaluation when form values change.
-   *
-   * NOTE: This method does NOT support array-scoped context because display-only
-   * components don't have a FieldContext (and therefore no `pathKeys` signal to
-   * detect array scope from). If display-only components are placed inside arrays,
-   * their logic conditions will evaluate against the root form value.
    *
    * @param fieldPath - The key/path of the display-only component
    * @param customFunctions - Optional custom functions for expression evaluation

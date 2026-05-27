@@ -7,15 +7,7 @@ import type {
   RegisteredActionRef,
 } from '@ng-forge/dynamic-forms';
 
-/**
- * Decorative icon addon for Bootstrap fields.
- *
- * Renders `<i class="bi bi-{icon}">` (Bootstrap Icons). The `icon` string is the
- * bare suffix — e.g., `'search'` produces `<i class="bi bi-search">`.
- *
- * Add `ariaLabel` for icons that convey meaning (search, error, success);
- * leave it omitted for purely decorative icons (will be `aria-hidden="true"`).
- */
+/** Decorative icon addon for Bootstrap fields. */
 export interface BsIconAddon extends BaseAddon {
   readonly kind: 'bs-icon';
   /** Bootstrap Icons name without the `bi-` prefix (e.g., `'search'`, `'x'`). */
@@ -40,11 +32,6 @@ interface BsButtonBase extends BaseAddon {
  * Click axis — XOR enforced at type level so configurations that combine
  * two click handlers (e.g., `preset` AND `actionRef`) are rejected by
  * TypeScript. The four shapes:
- *
- * - `Preset`    — built-in preset action.
- * - `ActionRef` — typed reference to a handler registered via `provideAddonActions(...)`.
- * - `Action`    — inline handler (code-only; dropped from JSON-derived configs).
- * - `None`      — decorative button with no handler.
  */
 type BsButtonClickPreset = {
   /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
@@ -101,19 +88,7 @@ type BsButtonContentDecorative = {
 };
 type BsButtonContent = BsButtonContentIconOnly | BsButtonContentLabeled | BsButtonContentDecorative;
 
-/**
- * Interactive button addon for Bootstrap fields.
- *
- * Renders `<button class="btn btn-outline-{severity}">` with optional icon,
- * label, severity, and reactive loading state.
- *
- * Type-level guarantees:
- *
- * - **Content axis (XOR):** `IconOnly` (icon + required ariaLabel) |
- *   `Labeled` (label, icon optional) | `Decorative` (neither).
- * - **Click axis (XOR):** exactly one of `preset` / `actionRef` / `action`,
- *   or none.
- */
+/** Interactive button addon for Bootstrap fields. */
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
 /** Union of all Bootstrap-shipped addon kinds. */

@@ -1,8 +1,6 @@
 import type { Logger } from './logger.interface';
 
-/**
- * Console-based logger implementation.
- */
+/** Console-based logger implementation. */
 export class ConsoleLogger implements Logger {
   private readonly prefix = '[Dynamic Forms]';
 

@@ -182,9 +182,7 @@ export default class IonicInputFieldComponent {
 
   protected readonly fill = computed(() => this.props()?.fill ?? this.ionicConfig?.fill ?? 'solid');
   protected readonly shape = computed(() => this.props()?.shape ?? this.ionicConfig?.shape);
-  /** Default 'stacked' (label above the input) for adapter parity with Material /
-   *  Bootstrap / PrimeNG. Consumers can opt into Ionic's native inline 'start'
-   *  or 'fixed' via props.labelPlacement or the IONIC_CONFIG token. */
+  /**  Bootstrap / PrimeNG. Consumers can opt into Ionic's native inline 'start' */
   protected readonly labelPlacement = computed(() => this.props()?.labelPlacement ?? this.ionicConfig?.labelPlacement ?? 'stacked');
   protected readonly color = computed(() => this.props()?.color ?? this.ionicConfig?.color);
 

@@ -1,8 +1,4 @@
-/**
- * Examples Resource
- *
- * Provides curated FormConfig examples for common use cases.
- */
+/** Examples Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import examplesData from '../registry/examples.json' with { type: 'json' };

@@ -1,9 +1,4 @@
-/**
- * Documentation Resource
- *
- * Exposes ng-forge documentation as MCP resources.
- * Fetches live content from ng-forge.com with fallback to static links.
- */
+/** Documentation Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getDocPages, getDocPage, getDocPagesByCategory } from '../registry/index.js';

@@ -10,7 +10,6 @@ import { DEV_MODE } from './dev-mode';
  * @param tracker - DI-scoped tracker to deduplicate warnings
  * @param id - Unique identifier for this deprecation (e.g., 'type:propertyDerivation')
  * @param message - Human-readable deprecation message
- *
  * @internal
  */
 export function warnDeprecated(logger: Logger, tracker: WarningTracker, id: string, message: string): void {

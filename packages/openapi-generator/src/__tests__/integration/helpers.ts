@@ -79,13 +79,6 @@ export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic';
  * adapter (Material by default) registered via module augmentation. The adapter import
  * is what activates field types like `'input'` — without it the generated config fails
  * against the core-only `RegisteredFieldTypes`.
- *
- * Resolves `@ng-forge/dynamic-forms` and the adapter via tsconfig `paths` so the test
- * is self-contained. Requires `dist/packages/dynamic-forms` and
- * `dist/packages/dynamic-forms-{adapter}` to exist — `nx build dynamic-forms` and the
- * adapter build must run before.
- *
- * Returns an array of pretty-formatted diagnostics. Empty array === clean compile.
  */
 export function typecheckGeneratedForm(formFilePath: string, adapter: AdapterName = 'material'): string[] {
   const repoRoot = resolve(__dirname, '../../../../..');

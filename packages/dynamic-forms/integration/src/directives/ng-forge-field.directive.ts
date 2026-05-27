@@ -12,21 +12,6 @@ import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
  * the `NG_FORGE_FIELD` preset. Owns the value/validation/aria plumbing every
  * value-bearing field needs.
  *
- * The Shell owns universal identity (`key`, `className`, `[id]`,
- * `[attr.data-testid]`, `[class]`); this directive injects Shell and adds
- * field-driven bindings (`[attr.hidden]`, `[attr.aria-disabled]`), the
- * standard value-field inputs (`field`, `label`, `placeholder`, `tabIndex`,
- * `props`, `meta`, `validationMessages`), the derived error/aria signals,
- * and the meta-tracking claim contract.
- *
- * @example
- * ```ts
- * \@Component({
- *   hostDirectives: NG_FORGE_FIELD,
- *   imports: [NgForgeControl, FormField],
- *   template: `
- *     <label [for]="ngf.key() + '-input'">{{ ngf.label() | dynamicText | async }}</label>
- *     <input ngForgeControl [id]="ngf.key() + '-input'" [formField]="ngf.field()" />
  *     @if (ngf.errorsToDisplay()[0]; as e) {
  *       <span [id]="ngf.errorId()">{{ e.message }}</span>
  *     }
@@ -185,12 +170,6 @@ export type TypedNgForgeField<T> = Omit<NgForgeField, 'field'> & {
  * `field` signal to `Signal<FieldTree<T>>` for the calling component's value
  * type. The cast is unchecked — the runtime contract is that mappers only
  * forward a `field` whose value type matches the field-type definition.
- *
- * @example
- * ```ts
- * protected readonly ngf = injectNgForgeField<string>();
- * // ngf.field() is Signal<FieldTree<string>>; ngf.errors() etc. unchanged
- * ```
  */
 export function injectNgForgeField<T = unknown>(): TypedNgForgeField<T> {
   return inject(NgForgeField) as unknown as TypedNgForgeField<T>;

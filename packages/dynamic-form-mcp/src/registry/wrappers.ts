@@ -1,20 +1,4 @@
-/**
- * Wrapper Registry Data
- *
- * Canonical source of wrapper metadata for the MCP server.
- *
- * Wrappers decorate the rendered output of a field without changing the form
- * data structure. They are composed as a chain: each wrapper exposes a
- * `#fieldComponent` `ViewContainerRef` slot where the next wrapper (or the
- * field itself) is rendered.
- *
- * Categories:
- *   - core    — ships from `@ng-forge/dynamic-forms`, always available.
- *   - demo    — ships from `@internal/examples-shared-ui` for the docs
- *               sandbox. NOT a library primitive — use as a pattern, not
- *               a dependency.
- *   - adapter — (reserved) would ship from a UI adapter library.
- */
+/** Wrapper Registry Data */
 
 import type { WrapperInfo } from './index.js';
 

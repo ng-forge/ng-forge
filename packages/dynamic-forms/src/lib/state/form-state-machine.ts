@@ -62,8 +62,6 @@ export interface FormStateMachineConfig<TFields extends RegisteredFieldTypes[] =
  * RxJS-based state machine for form lifecycle management.
  * Uses `concatMap` for sequential action processing.
  *
- * Flow: uninitialized → initializing → ready ⇄ transitioning (teardown → applying → restoring)
- *
  * @internal
  */
 export class FormStateMachine<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[]> {

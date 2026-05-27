@@ -1,8 +1,4 @@
-/**
- * Field Types Resource
- *
- * Exposes available ng-forge field types and their configurations.
- */
+/** Field Types Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getFieldTypes, getFieldType, getFieldTypesByCategory } from '../registry/index.js';

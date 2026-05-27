@@ -7,12 +7,6 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
 /**
  * Maps a group field definition to component inputs.
  *
- * Group components create nested form structures under the group's key.
- * The group component will inject the parent FIELD_SIGNAL_CONTEXT and create
- * a scoped child injector for its nested fields.
- *
- * Supports hidden state resolution via `logic` array or static `hidden` property.
- *
  * @param fieldDef The group field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

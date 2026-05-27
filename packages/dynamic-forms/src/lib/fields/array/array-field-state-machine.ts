@@ -6,17 +6,6 @@ import { signal, Signal } from '@angular/core';
  * `settledInitializationCycle`) plus scattered `currentVersion !== updateVersion`
  * cancellation guards with one machine.
  *
- * States
- * - `idle`     — no resolution in flight; previous work (if any) is complete.
- * - `pending`  — resolution started; awaiting `resolve()` on the active `RunHandle`.
- * - `settled`  — resolution complete; emit-effect will fire `componentInitialized`
- *                once `allResolvedFieldsRenderReady()` is true, then auto-return to `idle`.
- *
- * Cancellation
- * Every `dispatch()` bumps `runId` and returns a `RunHandle`. Async callers capture
- * the handle, run their work, and check `handle.isStale()` before applying side-effects —
- * any newer dispatch invalidates the in-flight run.
- *
  * @internal
  */
 export type ArrayMachineKind = 'idle' | 'pending' | 'settled';

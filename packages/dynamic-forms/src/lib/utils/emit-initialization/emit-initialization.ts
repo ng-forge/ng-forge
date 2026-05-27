@@ -3,17 +3,11 @@ import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
-/**
- * Component type for initialization events.
- */
+/** Component type for initialization events. */
 export type InitializationComponentType = 'dynamic-form' | 'group' | 'page' | 'array' | 'container';
 
 /**
  * Emits a component initialization event after the next render cycle.
- *
- * This utility is used by container components (group, page, array, container) to signal
- * that their child fields have been resolved and rendered. The event is dispatched
- * through the EventBus and is used by the initialization tracking system.
  *
  * @param eventBus - The EventBus instance to dispatch the event on
  * @param componentType - The type of component being initialized

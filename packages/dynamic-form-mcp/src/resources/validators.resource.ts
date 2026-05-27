@@ -1,8 +1,4 @@
-/**
- * Validators Resource
- *
- * Exposes available ng-forge validators and their configurations.
- */
+/** Validators Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getValidators, getValidator, getValidatorsByCategory } from '../registry/index.js';

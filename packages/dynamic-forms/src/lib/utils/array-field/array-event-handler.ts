@@ -9,9 +9,7 @@ import { RemoveAtIndexEvent } from '../../events/constants/remove-at-index.event
 import { EventBus } from '../../events/event.bus';
 import { FieldDef } from '../../definitions/base/field-def';
 
-/**
- * Union type of all array manipulation events.
- */
+/** Union type of all array manipulation events. */
 export type ArrayEvent =
   | AppendArrayItemEvent
   | PrependArrayItemEvent
@@ -21,9 +19,7 @@ export type ArrayEvent =
   | ShiftArrayItemEvent
   | RemoveAtIndexEvent;
 
-/**
- * All array event type discriminants.
- */
+/** All array event type discriminants. */
 const ARRAY_EVENT_TYPES: ArrayEvent['type'][] = [
   'append-array-item',
   'prepend-array-item',
@@ -74,19 +70,6 @@ function toArrayAction(event: ArrayEvent): ArrayAction {
  * @param eventBus - The event bus to subscribe to
  * @param arrayKey - Function returning the array key to filter events for
  * @returns Observable of normalized ArrayAction objects
- *
- * @example
- * ```typescript
- * observeArrayActions(this.eventBus, () => this.key())
- *   .pipe(takeUntilDestroyed())
- *   .subscribe(action => {
- *     if (action.action === 'add') {
- *       this.addItem(action.template, action.index);
- *     } else {
- *       this.removeItem(action.index);
- *     }
- *   });
- * ```
  */
 export function observeArrayActions(eventBus: EventBus, arrayKey: () => string): Observable<ArrayAction> {
   return eventBus.on<ArrayEvent>(ARRAY_EVENT_TYPES).pipe(

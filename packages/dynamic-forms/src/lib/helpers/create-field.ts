@@ -1,72 +1,23 @@
 import { DynamicFormError } from '../errors/dynamic-form-error';
 import { AvailableFieldTypes, ExtractField } from '../models';
 
-/**
- * Container field types that do NOT support labels
- */
+/** Container field types that do NOT support labels */
 const CONTAINER_TYPES = ['group', 'row', 'array', 'container'] as const;
 
-/**
- * Container and page field types that only support 'hidden' logic
- */
+/** Container and page field types that only support 'hidden' logic */
 const HIDDEN_ONLY_LOGIC_TYPES = ['group', 'row', 'array', 'container', 'page'] as const;
 
-/**
- * Field types that support options at the field level
- */
+/** Field types that support options at the field level */
 const OPTION_FIELD_TYPES = ['select', 'radio', 'multi-checkbox'] as const;
 
-/**
- * Field type that uses minValue/maxValue instead of min/max in props
- */
+/** Field type that uses minValue/maxValue instead of min/max in props */
 const SLIDER_TYPE = 'slider' as const;
 
-/**
- * Hidden field type - no logic, no validators, no label
- */
+/** Hidden field type - no logic, no validators, no label */
 const HIDDEN_TYPE = 'hidden' as const;
 
 /**
  * Creates a typed field configuration with helpful error messages for common mistakes.
- *
- * This helper function provides early validation and clear error messages
- * for common configuration pitfalls that would otherwise cause runtime errors.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const nameField = createField('input', {
- *   key: 'name',
- *   label: 'Name',
- *   value: ''
- * });
- *
- * // With validation
- * const emailField = createField('input', {
- *   key: 'email',
- *   label: 'Email',
- *   required: true,
- *   email: true,
- *   props: { type: 'email' }
- * });
- *
- * // Select with options (at field level)
- * const countryField = createField('select', {
- *   key: 'country',
- *   label: 'Country',
- *   options: [{ label: 'USA', value: 'us' }]
- * });
- *
- * // Slider with minValue/maxValue (at field level)
- * const ratingField = createField('slider', {
- *   key: 'rating',
- *   label: 'Rating',
- *   minValue: 1,
- *   maxValue: 10,
- *   step: 1,
- *   value: 5
- * });
- * ```
  *
  * @param type - The field type (e.g., 'input', 'select', 'group')
  * @param config - The field configuration (excluding the 'type' property)
@@ -189,12 +140,5 @@ export function createField<T extends AvailableFieldTypes>(type: T, config: Omit
   return { type, ...config } as ExtractField<T>;
 }
 
-/**
- * Shorthand alias for createField
- *
- * @example
- * ```typescript
- * const nameField = field('input', { key: 'name', label: 'Name', value: '' });
- * ```
- */
+/** Shorthand alias for createField */
 export const field = createField;

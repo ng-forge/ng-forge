@@ -1,9 +1,5 @@
 #!/usr/bin/env node
-/**
- * ng-forge MCP Server CLI
- *
- * This is the entry point for the MCP server when invoked via npx or as a CLI tool.
- */
+/** ng-forge MCP Server CLI */
 
 import { runStdioServer } from '../src/server.js';
 

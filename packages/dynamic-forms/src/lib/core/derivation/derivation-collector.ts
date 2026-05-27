@@ -21,22 +21,8 @@ export { SELF_DEPENDENCY_TOKEN, GROUP_DEPENDENCY_TOKEN } from './collection-cont
 /**
  * Collects all VALUE derivation entries from field definitions.
  *
- * Traverses the field definition tree and extracts:
- * - Shorthand `derivation` properties on fields
- * - Full `logic` array entries with `type: 'derivation'` *without* `targetProperty`
- *   (entries WITH `targetProperty` are property derivations; see {@link collectAllDerivations}).
- *
- * The collected entries are sorted topologically so downstream processing
- * applies them in dependency order.
- *
- * Thin wrapper over {@link collectAllDerivations} that returns the value
- * slice. For forms that have both kinds of derivations, prefer the unified
- * collector — it walks the field tree once instead of twice.
- *
  * @param fields - Array of field definitions to traverse
  * @returns Collection containing sorted derivation entries
- *
- * @public
  */
 export function collectDerivations(fields: FieldDef<unknown>[]): DerivationCollection {
   const entries: DerivationEntry[] = [];
@@ -54,13 +40,6 @@ export function collectDerivations(fields: FieldDef<unknown>[]): DerivationColle
 /**
  * Single traversal that emits both value derivations (sorted topologically)
  * and property derivations (no sort — they don't chain among themselves).
- *
- * Walks the field tree once, dispatching each `type: 'derivation'` logic
- * entry to the right collection based on whether it carries a
- * `targetProperty`. Used internally by the `DerivationOrchestrator` when
- * both pipelines are active to share one walk across both collection
- * signals; external callers should use {@link collectDerivations} or
- * `collectPropertyDerivations` instead.
  *
  * @internal
  */
@@ -144,9 +123,6 @@ function collectPropertyEntriesFromField(field: FieldDef<unknown>, entries: Prop
 /**
  * Creates a value-derivation entry from a field's shorthand `derivation`
  * property.
- *
- * Shorthand derivations target the same field they're defined on, always
- * apply (condition `true`), and always trigger on change.
  *
  * @internal
  */
@@ -244,11 +220,6 @@ function createValueLogicEntry(fieldKey: string, config: DerivationLogicConfig, 
  * encoding as value entries via {@link buildEffectiveFieldKey} —
  * `buildPropertyOverrideKey` in the original property collector produced the
  * same shape.
- *
- * Includes the property-pipeline-specific runtime validation: source-vs-sync
- * field conflicts, HTTP/async cross-bleed, missing required HTTP fields, and
- * wildcard dependency guards. Mirrors the original
- * `createPropertyDerivationEntryFromDerivation` helper.
  *
  * @internal
  */

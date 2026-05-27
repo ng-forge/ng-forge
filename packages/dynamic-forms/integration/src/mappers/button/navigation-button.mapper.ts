@@ -19,9 +19,7 @@ import { resolveHiddenValue } from './non-field-logic.utils';
 // Base Interfaces
 // =============================================================================
 
-/**
- * Base interface for navigation button fields (submit, next, previous).
- */
+/** Base interface for navigation button fields (submit, next, previous). */
 export type BaseNavigationButtonField<TProps = unknown> = ButtonField<TProps, SubmitEvent | NextPageEvent | PreviousPageEvent> & {
   type: string;
   /** Logic rules for dynamic disabled state */

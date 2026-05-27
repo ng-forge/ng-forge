@@ -15,37 +15,7 @@ import { ContainerField } from '../definitions/default/container-field';
 import { WrapperTypeDefinition } from '../models';
 import { CssWrapper, RowWrapper } from '../definitions/default';
 
-/**
- * Built-in field types provided by the dynamic form library.
- *
- * These core field types handle form structure and layout. They are automatically
- * registered when using provideDynamicForm() and form the foundation for building
- * complex form layouts with nested fields and multi-step flows.
- *
- * @example
- * ```typescript
- * // Row field for horizontal layout
- * { type: 'row', fields: [
- *   { type: 'input', key: 'firstName' },
- *   { type: 'input', key: 'lastName' }
- * ]}
- *
- * // Group field for nested form sections
- * { type: 'group', key: 'address', fields: [
- *   { type: 'input', key: 'street' },
- *   { type: 'input', key: 'city' }
- * ]}
- *
- * // Array field for array-based form sections
- * { type: 'array', key: 'items', fields: [
- *   { type: 'input', key: 'name' },
- *   { type: 'input', key: 'quantity' }
- * ]}
- *
- * // Page field for multi-step forms
- * { type: 'page', key: 'step1', fields: [...] }
- * ```
- */
+/** Built-in field types provided by the dynamic form library. */
 /**
  * Base for container field types that consume the mapper-emitted `field` input
  * (row, group, array, page, container).
@@ -62,13 +32,7 @@ const DISPLAY_FIELD_TYPES_BASE = {
   renderReadyWhen: [],
 } as const;
 
-/**
- * Built-in field types provided by the dynamic form library.
- *
- * Each field type is validated at compile time using satisfies, ensuring
- * type safety of the mapper function while allowing the array to be typed
- * as FieldTypeDefinition[] for consumer flexibility.
- */
+/** Built-in field types provided by the dynamic form library. */
 export const BUILT_IN_FIELDS: FieldTypeDefinition[] = [
   {
     name: 'row',

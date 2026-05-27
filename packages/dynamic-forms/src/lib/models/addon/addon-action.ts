@@ -24,9 +24,6 @@ interface AddonActionContextBase<TValue> {
  * Field-bound variant — the addon is attached to a real field and has a
  * working value-writer. The common case for `pi-button` / `mat-button` /
  * `bs-button` / `ion-button` inside an adapter input field.
- *
- * `setValue` is non-optional here; the optional chain (`ctx.setValue?.()`)
- * is unnecessary noise once you've narrowed via {@link isFieldBoundContext}.
  */
 export interface FieldBoundAddonActionContext<TValue = unknown> extends AddonActionContextBase<TValue> {
   /** Read-only view of the host field's tree — same view wrappers receive. */
@@ -46,24 +43,7 @@ export interface OrphanAddonActionContext<TValue = unknown> extends AddonActionC
   readonly setValue?: undefined;
 }
 
-/**
- * Context handed to inline addon actions and registered handler functions.
- *
- * Discriminated by `form`: field-bound contexts have a non-null `form` and a
- * required `setValue`; orphan contexts have `form: null` and no `setValue`.
- * Use {@link isFieldBoundContext} when the handler needs to write back.
- *
- * @example
- * ```typescript
- * provideAddonActions({
- *   submit: (ctx) => {
- *     if (!isFieldBoundContext(ctx)) return;
- *     // ctx.setValue is now `(next: TValue) => void` — no optional chain.
- *     myService.send(ctx.field.key, ctx.value, ctx.setValue);
- *   },
- * });
- * ```
- */
+/** Context handed to inline addon actions and registered handler functions. */
 export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
 
 /** Type guard narrowing {@link AddonActionContext} to its field-bound variant. */
@@ -71,74 +51,20 @@ export function isFieldBoundContext<TValue>(ctx: AddonActionContext<TValue>): ct
   return ctx.form !== null;
 }
 
-/**
- * Built-in preset actions shared across adapters.
- *
- * Adapter kinds that accept a `preset` field render the corresponding
- * behaviour:
- *
- * - `'clear'`: empties the field value.
- * - `'reset'`: restores the field's configured default value (resolved
- *   from the form's `defaultValues` map at click time); falls back to
- *   empty when no default is reachable.
- * - `'paste'`: reads from the system clipboard and writes the result.
- * - `'copy'`: writes the field's current value to the system clipboard.
- * - `'toggle-password-visibility'`: flips a host input's `type` between
- *   `password` and `text` (requires the host field to provide a type
- *   override token, e.g., `PRIME_INPUT_TYPE_OVERRIDE`).
- *
- * Form submission is intentionally NOT exposed as a button-addon preset —
- * use the dedicated `'submit'` field type instead.
- */
+/** Built-in preset actions shared across adapters. */
 export type CommonAddonActionPreset = 'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility';
 
-/**
- * Module-augmentable registry of adapter-specific preset names.
- *
- * Adapters add their canonical actions (e.g., Material's
- * `'mat-datepicker-open'`) without forking the `AddonActionPreset` union.
- *
- * @example
- * ```typescript
- * declare module '@ng-forge/dynamic-forms' {
- *   interface DynamicFormAddonActionPresetRegistry {
- *     'mat-datepicker-open': true;
- *   }
- * }
- * ```
- */
+/** Module-augmentable registry of adapter-specific preset names. */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
 export interface DynamicFormAddonActionPresetRegistry {}
 
 /**
  * Union of every preset name an addon may reference — universal presets
  * plus any contributed via {@link DynamicFormAddonActionPresetRegistry}.
- *
- * The `(string & {})` escape hatch keeps autocomplete on the known +
- * augmented presets while accepting arbitrary strings for one-off adapter
- * presets that don't warrant a module-augmentation. The runtime preset
- * runner already handles unknown names gracefully via its `default:` arm
- * (logs a warning, no throw). Mirrors `FieldDef.type`'s
- * `RegisteredFieldTypes['type'] | (string & {})` shape.
  */
 export type AddonActionPreset = CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry | (string & {});
 
-/**
- * Module-augmentable registry of user-defined named action handlers.
- *
- * Users register handlers once at bootstrap with `provideAddonActions({...})`
- * and reference them from JSON-driven configs via `actionRef: 'handlerName'`.
- *
- * @example
- * ```typescript
- * declare module '@ng-forge/dynamic-forms' {
- *   interface DynamicFormActionRegistry {
- *     openProfile: true;
- *     runWorkflow: true;
- *   }
- * }
- * ```
- */
+/** Module-augmentable registry of user-defined named action handlers. */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
 export interface DynamicFormActionRegistry {}
 

@@ -5,9 +5,6 @@ import { getGridClassString } from '../../utils/grid-classes/grid-classes';
 /**
  * Builds base input properties from a field definition.
  *
- * This is a helper function that extracts common field properties.
- * Used by mappers to build the inputs record.
- *
  * @param fieldDef The field definition to extract properties from
  * @param defaultProps Optional form-level default props to merge with field props
  * @returns Record of input names to values
@@ -74,9 +71,6 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Reco
 
 /**
  * Base field mapper that extracts common field properties into component inputs.
- *
- * Returns a Signal containing the Record of input names to values that will be
- * passed to ngComponentOutlet. The signal enables reactive updates.
  *
  * @param fieldDef The field definition to map
  * @returns Signal containing Record of input names to values

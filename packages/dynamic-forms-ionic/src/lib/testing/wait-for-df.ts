@@ -2,20 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { firstValueFrom } from 'rxjs';
 
-/**
- * Waits for all dynamic form definitions to be initialized and ready
- *
- * Hybrid approach:
- * 1. Event-based: Wait for initialized$ (tracks container components + field loading cascade)
- * 2. DOM verification: Short poll to ensure Ionic components fully rendered
- *
- * The initialized$ observable tracks page/row/group containers. Each container waits
- * for its children via forkJoin + afterNextRender before emitting its initialized event.
- * This creates a cascade where parent containers only emit after all descendants are ready.
- *
- * The short poll handles edge cases where Ionic component templates need additional
- * change detection cycles before DOM elements match test selectors.
- */
+/** Waits for all dynamic form definitions to be initialized and ready */
 export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<DynamicForm>): Promise<void> {
   fixture.detectChanges();
 
@@ -38,17 +25,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
   await fixture.whenStable();
 }
 
-/**
- * Deterministic DOM stability check
- *
- * Waits until Ionic component count stabilizes for 3 consecutive checks
- * and no loading placeholders remain. Uses timeout-based safety net instead
- * of arbitrary iteration limits.
- *
- * Note: Timeout is set to 500ms to leave margin for test assertions within
- * the 1000ms test timeout. Ionic web components with shadow DOM typically
- * stabilize well within this window.
- */
+/** Deterministic DOM stability check */
 async function waitForFieldComponents(fixture: ComponentFixture<DynamicForm>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form, form');
   if (!formElement) return;

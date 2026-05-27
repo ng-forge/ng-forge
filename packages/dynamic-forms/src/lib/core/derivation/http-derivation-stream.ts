@@ -56,21 +56,10 @@ const DEFAULT_HTTP_DEBOUNCE_MS = 300;
 /**
  * Creates an RxJS Observable stream that processes an HTTP derivation entry.
  *
- * Each HTTP derivation gets its own stream with:
- * - `debounceTime` to batch rapid changes
- * - `switchMap` to auto-cancel in-flight requests
- * - `catchError` inside the switchMap projection to prevent stream termination
- *
- * **Note:** The stream uses `startWith(null) → pairwise()` to detect changed fields.
- * This means the first form value emission (initial load) will fire an HTTP request
- * for all `dependsOn` fields, since every field appears "changed" relative to `null`.
- * This is intentional — it ensures derived values are populated on initial form load.
- *
  * @param entry - The derivation entry with HTTP configuration
  * @param formValue$ - Observable of form value changes
  * @param context - Context with HttpClient, logger, etc.
  * @returns Observable that applies HTTP-derived values to the form
- *
  * @internal
  */
 export function createHttpDerivationStream(

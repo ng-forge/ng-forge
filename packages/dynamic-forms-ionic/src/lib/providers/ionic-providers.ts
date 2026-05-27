@@ -5,9 +5,7 @@ import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';
 import type { IonButtonAddon, IonIconAddon } from '../types/addons';
 
-/**
- * Field type definitions for Ionic components.
- */
+/** Field type definitions for Ionic components. */
 export type IonicFieldTypes = FieldTypeDefinition[];
 
 type IonicConfigFeature = {
@@ -28,42 +26,7 @@ type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, IonicConfi
  * with Ionic-shipped addon kinds (`ion-icon`, `ion-button`) auto-included
  * so addons work out of the box.
  *
- * If you want field types WITHOUT addons (rare), pass them through
- * `provideDynamicForm` directly and skip this helper. If you want addons
- * WITHOUT the field types (also rare — e.g., adding addons to a form that
- * uses custom fields), call `withIonicAddons()` standalone.
- *
  * @param config - Optional global configuration for Ionic form fields
- *
- * @example
- * ```typescript
- * // Application-level setup — addons (ion-icon, ion-button) ship in automatically
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-forms';
- * import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
- *
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(...withIonicFields())
- *   ]
- * };
- * ```
- *
- * @example
- * ```typescript
- * // With global configuration
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(
- *       ...withIonicFields({
- *         fill: 'outline',
- *         labelPlacement: 'floating'
- *       })
- *     )
- *   ]
- * };
- * ```
- *
  * @returns Tuple of field type definitions, the addons feature, and
  *   optionally a config feature.
  */
@@ -127,27 +90,7 @@ type IonicAddonsFeature = {
   ɵproviders: Provider[];
 };
 
-/**
- * Register Ionic-shipped addon kinds (`ion-icon`, `ion-button`) standalone.
- *
- * **Most users don't need this** — `withIonicFields()` auto-includes
- * these kinds. Call `withIonicAddons()` directly only when you want
- * Ionic addon kinds without the Ionic field types (e.g., a custom
- * field set that wants to render `ion-icon` prefixes), or when you're
- * stitching addons through a different DI scope.
- *
- * @example
- * ```typescript
- * // Custom field types + Ionic addon kinds.
- * provideDynamicForm(
- *   ...myCustomFields(),
- *   withIonicAddons(),
- * );
- * ```
- *
- * Adapter authors who need to override a kind with a customised renderer
- * should call `withCustomAddon(...)` directly instead.
- */
+/** Register Ionic-shipped addon kinds (`ion-icon`, `ion-button`) standalone. */
 export function withIonicAddons(): IonicAddonsFeature {
   return {
     ɵkind: 'addons',

@@ -5,9 +5,7 @@ import { BootstrapConfig } from '../models/bootstrap-config';
 import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
 import type { BsButtonAddon, BsIconAddon } from '../types/addons';
 
-/**
- * Field type definitions for Bootstrap components.
- */
+/** Field type definitions for Bootstrap components. */
 export type BootstrapFieldTypes = FieldTypeDefinition[];
 
 type BootstrapConfigFeature = {
@@ -28,40 +26,7 @@ type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature
  * with Bootstrap-shipped addon kinds (`bs-icon`, `bs-button`) auto-included
  * so addons work out of the box.
  *
- * If you want addons WITHOUT the field types (rare — e.g., adding addons to
- * a form that uses custom fields), call `withBootstrapAddons()` standalone.
- *
  * @param config - Optional global configuration for Bootstrap form fields
- *
- * @example
- * ```typescript
- * // Application-level setup — addons (bs-icon, bs-button) ship in automatically
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-forms';
- * import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
- *
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(...withBootstrapFields())
- *   ]
- * };
- * ```
- *
- * @example
- * ```typescript
- * // With global configuration
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(
- *       ...withBootstrapFields({
- *         floatingLabel: true,
- *         size: 'lg'
- *       })
- *     )
- *   ]
- * };
- * ```
- *
  * @returns Tuple of field type definitions, the addons feature, and
  *   optionally a config feature.
  */
@@ -125,27 +90,7 @@ type BootstrapAddonsFeature = {
   ɵproviders: Provider[];
 };
 
-/**
- * Register Bootstrap-shipped addon kinds (`bs-icon`, `bs-button`) standalone.
- *
- * **Most users don't need this** — `withBootstrapFields()` auto-includes
- * these kinds. Call `withBootstrapAddons()` directly only when you want
- * Bootstrap addon kinds without the Bootstrap field types (e.g., a custom
- * field set that wants to render `bs-icon` prefixes), or when you're
- * stitching addons through a different DI scope.
- *
- * @example
- * ```typescript
- * // Custom field types + Bootstrap addon kinds.
- * provideDynamicForm(
- *   ...myCustomFields(),
- *   withBootstrapAddons(),
- * );
- * ```
- *
- * Adapter authors who need to override a kind with a customised renderer
- * should call `withCustomAddon(...)` directly instead.
- */
+/** Register Bootstrap-shipped addon kinds (`bs-icon`, `bs-button`) standalone. */
 export function withBootstrapAddons(): BootstrapAddonsFeature {
   return {
     ɵkind: 'addons',

@@ -13,11 +13,7 @@ import { getParentPathInScope, resolveArrayItemScope } from '../derivation/evalu
 import { isAsyncPropertyDerivationEntry, PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';
 import { PropertyOverrideStore } from './property-override-store';
 
-/**
- * Context required for applying property derivations.
- *
- * @public
- */
+/** Context required for applying property derivations. */
 export interface PropertyDerivationApplicatorContext {
   /** The current form value (signal) */
   formValue: Signal<Record<string, unknown>>;
@@ -41,11 +37,7 @@ export interface PropertyDerivationApplicatorContext {
   warningTracker?: WarningTracker;
 }
 
-/**
- * Result of property derivation processing.
- *
- * @public
- */
+/** Result of property derivation processing. */
 export interface PropertyDerivationProcessingResult {
   /** Number of property derivations successfully applied */
   appliedCount: number;
@@ -61,16 +53,10 @@ const ERROR_PREFIX = '[PropertyDerivation]';
 /**
  * Applies all property derivation entries from a collection.
  *
- * Single-pass processing — property derivations read formValue and write to the
- * property override store. No iterative refinement needed because property
- * derivations don't chain among themselves.
- *
  * @param collection - The collected property derivation entries
  * @param context - Context for applying property derivations
  * @param changedFields - Optional set of changed field keys for filtering
  * @returns Result of the processing
- *
- * @public
  */
 export function applyPropertyDerivations(
   collection: PropertyDerivationCollection,
@@ -114,8 +100,6 @@ export function applyPropertyDerivations(
  * @param context - Context for applying property derivations
  * @param changedFields - Optional set of changed field keys for filtering
  * @returns Result of the processing
- *
- * @public
  */
 export function applyPropertyDerivationsForTrigger(
   collection: PropertyDerivationCollection,
@@ -150,7 +134,6 @@ function getEntriesForChangedFields(entries: PropertyDerivationEntry[], changedF
  * Attempts to apply a single property derivation entry.
  *
  * @returns true if the override was applied, false if skipped
- *
  * @internal
  */
 function tryApplyPropertyDerivation(entry: PropertyDerivationEntry, context: PropertyDerivationApplicatorContext): boolean {
@@ -222,13 +205,6 @@ function tryApplyArrayPropertyDerivation(entry: PropertyDerivationEntry, context
 
 /**
  * Creates an evaluation context for property derivation processing.
- *
- * Note: `fieldState`/`formFieldState` are intentionally not populated here.
- * Property derivations run against the form value signal and write to a
- * separate override store; the applicator does not have access to the live
- * `FieldTree` (no `rootForm` on `PropertyDerivationApplicatorContext`), so
- * field-state snapshots cannot be read in this pipeline. Functions that need
- * field state (e.g. `dirty()`, `touched()`) must use a regular derivation.
  *
  * @internal
  */

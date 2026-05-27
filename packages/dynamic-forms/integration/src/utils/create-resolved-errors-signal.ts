@@ -9,9 +9,7 @@ import { interpolateParams } from '@ng-forge/dynamic-forms';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import type { Logger } from '@ng-forge/dynamic-forms';
 
-/**
- * Resolved validation error with interpolated message
- */
+/** Resolved validation error with interpolated message */
 export interface ResolvedError {
   kind: string;
   message: string;
@@ -26,15 +24,6 @@ export interface ResolvedError {
  * @param defaultValidationMessages - Signal containing default validation messages (fallback)
  * @param injector - Optional injector for DynamicText resolution
  * @returns Signal<ResolvedError[]> - Reactively resolved error messages
- *
- * @example
- * ```typescript
- * readonly resolvedErrors = createResolvedErrorsSignal(
- *   this.field,
- *   this.validationMessages,
- *   this.defaultValidationMessages
- * );
- * ```
  */
 export function createResolvedErrorsSignal<T>(
   field: Signal<FieldTree<T>>,
@@ -87,10 +76,6 @@ export function createResolvedErrorsSignal<T>(
 /**
  * Resolves a single error message from DynamicText sources with fallback logic
  * Priority: field-level message → default message → error.message → no message (logs warning)
- *
- * The error.message fallback enables schema validation libraries (Zod, Valibot, etc.)
- * to provide their own messages without requiring explicit validationMessages configuration.
- * Users who want translations can still override by configuring validationMessages.
  *
  * @internal
  */

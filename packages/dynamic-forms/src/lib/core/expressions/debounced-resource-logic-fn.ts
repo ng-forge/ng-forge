@@ -9,12 +9,6 @@ import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
 /**
  * Trigger value carried through the debounced reactive pipeline.
  *
- * `key` is the stable identity used for `distinctUntilChanged` — the helper
- * skips a re-evaluation when the new key matches the prior one. `payload` is
- * the actual data the stream-builder consumes (an HTTP request, an
- * evaluation context, etc.) — it doesn't participate in the dedup so each
- * stream invocation receives the most-recently-set payload for its key.
- *
  * @internal
  */
 export interface Trigger<TPayload> {
@@ -77,25 +71,6 @@ interface ResourceHandle<TPayload, TResult> {
 
 /**
  * Shared scaffolding for both async-function and HTTP condition LogicFns.
- *
- * Encapsulates the pattern that was duplicated across the two files:
- *
- *   1. A per-field map keyed by `safeReadPathKeys(ctx).join('.')`. Each entry
- *      owns one trigger signal + one `rxResource` instance, kept alive for the
- *      lifetime of the LogicFn so the resource's loading/error state persists
- *      across LogicFn invocations.
- *   2. Resource construction wrapped in `untracked()` to avoid NG0602
- *      (resources can't be created inside a reactive consumer; LogicFn runs
- *      inside Angular Signal Forms' `BooleanOrLogic.compute`).
- *   3. The trigger signal feeds `derivedFromDeferred` with `debounceTime` +
- *      `distinctUntilChanged` (keyed by `Trigger.key`) so rapid form changes
- *      collapse into one stream invocation.
- *   4. `withPreviousValue` wraps the `rxResource` so consumers see the
- *      previous resolved value during re-fetch — prevents UI flicker.
- *
- * Caller supplies only the per-condition specifics via `config.resolve`
- * (early-return logic + how to derive the trigger from the FieldContext) and
- * `config.buildStream` (how to fetch fresh values for a trigger payload).
  *
  * @internal
  */

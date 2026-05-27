@@ -9,9 +9,7 @@ import { mapFieldToInputs } from '../field-mapper/field-mapper';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { isEqual } from '../object-utils';
 
-/**
- * Options for creating an array item injector.
- */
+/** Options for creating an array item injector. */
 export interface CreateArrayItemInjectorOptions<TModel extends Record<string, unknown>> {
   /** The field template defining the array item structure. */
   template: FieldDef<unknown>;
@@ -29,18 +27,11 @@ export interface CreateArrayItemInjectorOptions<TModel extends Record<string, un
    * For primitive array items, the key of the value field in the template (e.g., 'value').
    * When set, the form getter wraps the raw FormControl in `{ [primitiveFieldKey]: FormControl }`
    * so that `getFieldTree(key)` can navigate to the control by key.
-   *
-   * Primitive items store flat values (e.g., `['angular']` not `[{value: 'angular'}]`),
-   * so the FieldTree at `rootForm['arrayKey'][index]` is a FormControl, not a FormGroup.
-   * Without wrapping, `getFieldTree('value')` would access the FormControl's `.value`
-   * property (a WritableSignal) instead of a child FieldTree.
    */
   primitiveFieldKey?: string;
 }
 
-/**
- * Result of creating an array item injector.
- */
+/** Result of creating an array item injector. */
 export interface ArrayItemInjectorResult {
   /** Scoped injector providing ARRAY_CONTEXT and FIELD_SIGNAL_CONTEXT. */
   injector: Injector;
@@ -48,20 +39,7 @@ export interface ArrayItemInjectorResult {
   inputs: Signal<Record<string, unknown>> | undefined;
 }
 
-/**
- * Creates an injector and inputs for an array item.
- *
- * Uses direct root form binding - components bind directly to the root form's
- * FieldTree for array items (rootForm['arrayKey'][index]). This architecture:
- *
- * - Eliminates the need for local forms and bidirectional sync
- * - Allows Zod/StandardSchema validation errors to flow naturally to components
- * - Reduces complexity by having a single source of truth (the root form)
- *
- * The FieldSignalContext.form property uses a getter that evaluates a computed
- * signal, making form access reactive to index changes (when items reorder,
- * the component points to the correct array position).
- */
+/** Creates an injector and inputs for an array item. */
 export function createArrayItemInjectorAndInputs<TModel extends Record<string, unknown>>(
   options: CreateArrayItemInjectorOptions<TModel>,
 ): ArrayItemInjectorResult {
@@ -122,14 +100,6 @@ interface CreateItemInjectorOptions<TModel extends Record<string, unknown>> {
 /**
  * Creates a scoped injector for an array item.
  * Provides both FIELD_SIGNAL_CONTEXT (for form access) and ARRAY_CONTEXT (for position awareness).
- *
- * The FIELD_SIGNAL_CONTEXT.form uses a getter that evaluates itemFormAccessor() on access.
- * This makes form access reactive - when mappers access context.form['fieldKey'], the getter runs,
- * evaluating the computed which tracks indexSignal as a dependency. This ensures components
- * automatically update when array items reorder.
- *
- * Uses `useFactory` with `deps: [Injector]` to provide FIELD_SIGNAL_CONTEXT. Angular resolves
- * the `Injector` dep as the child injector being created, eliminating any temporal gap.
  */
 function createItemInjector<TModel extends Record<string, unknown>>(options: CreateItemInjectorOptions<TModel>): Injector {
   const { itemFormAccessor, indexSignal, parentFieldSignalContext, parentInjector, arrayField, primitiveFieldKey } = options;

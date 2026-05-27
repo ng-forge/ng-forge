@@ -1,13 +1,4 @@
-/**
- * Documentation Fetcher Service
- *
- * Fetches and caches live documentation from ng-forge.com.
- * Uses native fetch (Node >=20) with in-memory caching and TTL.
- *
- * Fetches:
- * - llms.txt: Documentation index
- * - llms-full.txt: Full documentation content, parsed into sections
- */
+/** Documentation Fetcher Service */
 
 const BASE_URL = 'https://ng-forge.com/dynamic-forms';
 const LLMS_TXT_URL = `${BASE_URL}/llms.txt`;
@@ -113,17 +104,13 @@ export async function fetchDocSection(path: string): Promise<string | null> {
   return sections?.get(path) ?? null;
 }
 
-/**
- * Clear all caches. Useful for testing or forcing a refresh.
- */
+/** Clear all caches. Useful for testing or forcing a refresh. */
 export function clearCache(): void {
   indexCache = null;
   sectionsCache = null;
 }
 
-/**
- * Set cache TTL in milliseconds.
- */
+/** Set cache TTL in milliseconds. */
 export function setCacheTtl(ttlMs: number): void {
   cacheTtlMs = ttlMs;
 }

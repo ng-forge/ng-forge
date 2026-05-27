@@ -18,26 +18,20 @@ import {
 } from '../fields';
 import { IonicField } from '../types/types';
 
-/**
- * Configuration for creating an Ionic dynamic form test
- */
+/** Configuration for creating an Ionic dynamic form test */
 export interface IonicFormTestConfig {
   config: FormConfig;
   initialValue?: Record<string, unknown>;
   providers?: unknown[];
 }
 
-/**
- * Result of creating an Ionic dynamic form test
- */
+/** Result of creating an Ionic dynamic form test */
 export interface IonicFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm<readonly RegisteredFieldTypes[]>>;
 }
 
-/**
- * Fluent API for building Ionic form configurations
- */
+/** Fluent API for building Ionic form configurations */
 export class IonicFormConfigBuilder {
   private fields: unknown[] = [];
 
@@ -121,20 +115,14 @@ export class IonicFormConfigBuilder {
   }
 }
 
-/**
- * Utility class for testing Ionic dynamic forms
- */
+/** Utility class for testing Ionic dynamic forms */
 export class IonicFormTestUtils {
-  /**
-   * Creates a new Ionic form config builder
-   */
+  /** Creates a new Ionic form config builder */
   static builder(): IonicFormConfigBuilder {
     return new IonicFormConfigBuilder();
   }
 
-  /**
-   * Creates an Ionic dynamic form test setup with proper providers
-   */
+  /** Creates an Ionic dynamic form test setup with proper providers */
   static async createTest(testConfig: IonicFormTestConfig): Promise<IonicFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
@@ -161,9 +149,7 @@ export class IonicFormTestUtils {
     };
   }
 
-  /**
-   * Waits for the Ionic dynamic form to initialize
-   */
+  /** Waits for the Ionic dynamic form to initialize */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
@@ -185,9 +171,7 @@ export class IonicFormTestUtils {
     fixture.detectChanges();
   }
 
-  /**
-   * Helper to query into Shadow DOM
-   */
+  /** Helper to query into Shadow DOM */
   private static queryShadowDom(element: Element, selector: string): Element | null {
     // Try to find in shadow root first
     if (element.shadowRoot) {
@@ -230,9 +214,7 @@ export class IonicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user selection on an Ionic select
-   */
+  /** Simulates user selection on an Ionic select */
   static async simulateIonicSelect(fixture: ComponentFixture<DynamicForm>, selectSelector: string, value: string): Promise<void> {
     // Find the ion-select component
     const ionSelect = fixture.nativeElement.querySelector(selectSelector);
@@ -372,37 +354,27 @@ export class IonicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> {
     return component.formValue();
   }
 
-  /**
-   * Gets validation errors from the component
-   */
+  /** Gets validation errors from the component */
   static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors() as unknown[];
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Gets all Ionic field elements from the fixture
-   */
+  /** Gets all Ionic field elements from the fixture */
   static getIonicFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
     return fixture.nativeElement.querySelectorAll(`df-ion-${fieldType}`);
   }
 
-  /**
-   * Asserts that an Ionic field has a specific value
-   */
+  /** Asserts that an Ionic field has a specific value */
   static assertIonicFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): void {
     // Try to find the input element directly first
     let element = fixture.nativeElement.querySelector(fieldSelector);
@@ -432,9 +404,7 @@ export class IonicFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
@@ -442,9 +412,7 @@ export class IonicFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that an Ionic field shows an error message
-   */
+  /** Asserts that an Ionic field shows an error message */
   static assertIonicFieldError(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedError?: string): void {
     const ionItem = fixture.nativeElement.querySelector(`${fieldSelector} ion-item`);
     if (!ionItem) {

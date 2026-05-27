@@ -83,73 +83,32 @@ export type EnterKeyHint = 'enter' | 'done' | 'go' | 'next' | 'previous' | 'sear
  */
 export type Autocapitalize = 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 
-/**
- * Meta attributes specific to HTML input elements.
- *
- * Extends FieldMeta with input-specific native attributes that can be passed through
- * to the underlying input element.
- *
- * @example
- * ```typescript
- * // Input field with meta attributes
- * {
- *   type: 'input',
- *   key: 'email',
- *   meta: {
- *     autocomplete: 'email',
- *     inputmode: 'email',
- *     enterkeyhint: 'next',
- *     spellcheck: false,
- *     'data-testid': 'email-input'
- *   }
- * }
- * ```
- *
- * @public
- */
+/** Meta attributes specific to HTML input elements. */
 export interface InputMeta extends FieldMeta {
-  /**
-   * Hint for form autofill behavior.
-   */
+  /** Hint for form autofill behavior. */
   autocomplete?: AutocompleteValue;
 
-  /**
-   * Hint for virtual keyboard type on mobile devices.
-   */
+  /** Hint for virtual keyboard type on mobile devices. */
   inputmode?: InputMode;
 
-  /**
-   * Hint for the enter key label on virtual keyboards.
-   */
+  /** Hint for the enter key label on virtual keyboards. */
   enterkeyhint?: EnterKeyHint;
 
-  /**
-   * Whether to enable spellchecking for the input.
-   */
+  /** Whether to enable spellchecking for the input. */
   spellcheck?: boolean;
 
-  /**
-   * Hint for autocapitalization behavior on virtual keyboards.
-   */
+  /** Hint for autocapitalization behavior on virtual keyboards. */
   autocapitalize?: Autocapitalize;
 
-  /**
-   * Pattern for client-side validation (regex).
-   */
+  /** Pattern for client-side validation (regex). */
   pattern?: string;
 
-  /**
-   * Size hint for the input element (character count).
-   */
+  /** Size hint for the input element (character count). */
   size?: number;
 
-  /**
-   * Maximum number of characters allowed.
-   */
+  /** Maximum number of characters allowed. */
   maxlength?: number;
 
-  /**
-   * Minimum number of characters required.
-   */
+  /** Minimum number of characters required. */
   minlength?: number;
 }

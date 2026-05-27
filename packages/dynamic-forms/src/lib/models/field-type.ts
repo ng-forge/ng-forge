@@ -4,53 +4,19 @@ import { MapperFn } from '../mappers/types';
 import { FieldAddonSupport } from './addon/addon-kind';
 import { LazyComponentLoader } from './wrapper-type';
 
-/**
- * Defines how a field type handles form values and data collection.
- *
- * - 'include': Field contributes to form values (default for input fields)
- * - 'exclude': Field is excluded from form values (for display/layout fields)
- * - 'flatten': Field's children are flattened to parent level (for container fields)
- */
+/** Defines how a field type handles form values and data collection. */
 export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
 
-/**
- * Semantic grouping of interchangeable field UI alternatives.
- *
- * Used by tooling (e.g., openapi-generator) to discover which field types
- * can substitute for each other. A field with scope 'boolean' means it's
- * one of several ways to render a boolean value (checkbox, toggle, etc.).
- */
+/** Semantic grouping of interchangeable field UI alternatives. */
 export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-input' | 'numeric' | 'date';
 
-/**
- * Mapped component inputs that must be available before a field component is instantiated.
- *
- * This protects components that declare required Angular inputs and eagerly read them in
- * host bindings or computed signals. Renderers should defer component creation until all
- * listed mapped inputs are present.
- */
+/** Mapped component inputs that must be available before a field component is instantiated. */
 export type RenderReadyInput = 'field' | (string & {});
 
 /**
  * Configuration interface for registering custom field types.
  *
- * Defines how a field type should be handled by the dynamic form system,
- * including its component loading strategy and field-to-component mapping logic.
- * Supports both eager-loaded and lazy-loaded components.
- *
  * @typeParam T - The field definition type this field type handles
- *
- * @example
- * ```typescript
- * const CustomInputType: FieldTypeDefinition<InputFieldDef> = {
- *   name: 'custom-input',
- *   loadComponent: () => import('./custom-input.component').then(m => m.CustomInputComponent),
- *   mapper: customInputMapper
- * };
- *
- * // Register with providers
- * provideDynamicForm(CustomInputType)
- * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Intentionally using `any` for maximum flexibility in field type registration
 export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
@@ -61,41 +27,13 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /**
    * Function to load the component (supports lazy loading).
    * Returns a Promise that resolves to the component class or module with default export.
-   *
-   * Optional - omit for componentless fields (e.g., hidden fields) that only
-   * contribute to form values without rendering any UI.
    */
   loadComponent?: LazyComponentLoader;
-  /**
-   * Mapper function that converts field definition to component bindings.
-   *
-   * Optional - omit for componentless fields (like hidden fields) that don't need
-   * input mapping. When omitted for componentless fields (no loadComponent), an empty
-   * signal is returned. When omitted for regular fields with a component, falls back
-   * to baseFieldMapper.
-   */
+  /** Mapper function that converts field definition to component bindings. */
   mapper?: MapperFn<T>;
   /** How this field type handles form values and data collection (defaults to 'include') */
   valueHandling?: ValueHandlingMode;
-  /**
-   * List of prop keys to forward to the meta object.
-   *
-   * Some props (like `type` for inputs, `rows`/`cols` for textareas) are actually
-   * native HTML attributes. Specifying them here causes them to be merged into
-   * the meta object before being passed to the component, ensuring they're applied
-   * via the meta tracking mechanism.
-   *
-   * Note: Meta values always take precedence over forwarded props.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   name: 'input',
-   *   propsToMeta: ['type'],
-   *   // ...
-   * }
-   * ```
-   */
+  /** List of prop keys to forward to the meta object. */
   propsToMeta?: string[];
   /** Semantic scope for tooling to discover interchangeable field alternatives */
   scope?: FieldScope | FieldScope[];
@@ -105,36 +43,11 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
   /**
    * Declares which addon slots this field accepts and (optionally) the
    * subset of kinds allowed.
-   *
-   * Source of truth for the runtime addon validator. Field types that
-   * omit this property are treated as Tier 3 — any `addons` configured
-   * on such a field are dropped with a warning at config init.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   name: 'prime-input',
-   *   addons: { slots: ['prefix', 'suffix'] },
-   * }
-   * ```
    */
   addons?: FieldAddonSupport;
 }
 
-/**
- * Injection token for the global field type registry.
- *
- * Provides access to the map of registered field types throughout the application.
- * The registry is populated by the provideDynamicForm function and used by
- * field rendering components to resolve field types to their implementations.
- *
- * @example
- * ```typescript
- * constructor(@Inject(FIELD_REGISTRY) private registry: Map<string, FieldTypeDefinition>) {
- *   const inputType = registry.get('input');
- * }
- * ```
- */
+/** Injection token for the global field type registry. */
 export const FIELD_REGISTRY = new InjectionToken<Map<string, FieldTypeDefinition>>('FIELD_REGISTRY', {
   providedIn: 'root',
   factory: () => new Map(),

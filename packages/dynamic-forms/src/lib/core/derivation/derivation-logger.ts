@@ -6,11 +6,7 @@ import { DerivationProcessingResult } from './derivation-types';
 export type { DerivationLogLevel, DerivationLogConfig } from '../../models/logic/logic-config';
 export { createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
 
-/**
- * Information about a single derivation evaluation for logging.
- *
- * @public
- */
+/** Information about a single derivation evaluation for logging. */
 export interface DerivationLogEntry {
   /** Debug name if provided in the derivation config */
   debugName?: string;
@@ -32,6 +28,7 @@ export interface DerivationLogEntry {
 
 /**
  * Prefix for derivation debug log messages.
+ *
  * @internal
  */
 const LOG_PREFIX = '[Derivation]';
@@ -39,16 +36,10 @@ const LOG_PREFIX = '[Derivation]';
 /**
  * Logs a summary of derivation processing results.
  *
- * Only logs when:
- * - Config level is 'summary' or 'verbose'
- * - At least one derivation was applied or an error occurred
- *
  * @param result - The derivation processing result
  * @param trigger - The trigger type ('onChange' or 'debounced')
  * @param logger - Logger instance
  * @param config - Debug logging configuration
- *
- * @public
  */
 export function logDerivationSummary(
   result: DerivationProcessingResult,
@@ -75,8 +66,6 @@ export function logDerivationSummary(
  * @param result - The derivation processing result
  * @param trigger - The trigger type
  * @param logger - Logger instance
- *
- * @public
  */
 export function logMaxIterationsReached(result: DerivationProcessingResult, trigger: 'onChange' | 'debounced', logger: Logger): void {
   logger.warn(
@@ -89,12 +78,9 @@ export function logMaxIterationsReached(result: DerivationProcessingResult, trig
 /**
  * Logs a verbose entry for a single derivation evaluation.
  *
- * Only logs when config level is 'verbose'.
- *
  * @param entry - The derivation log entry with evaluation details
  * @param logger - Logger instance
  * @param config - Debug logging configuration
- *
  * @internal
  */
 export function logDerivationEvaluation(entry: DerivationLogEntry, logger: Logger, config: DerivationLogConfig): void {
@@ -151,13 +137,10 @@ function formatSkipReason(reason?: string): string {
 /**
  * Logs the start of a derivation processing cycle.
  *
- * Only logs when config level is 'verbose'.
- *
  * @param trigger - The trigger type ('onChange' or 'debounced')
  * @param entryCount - Number of derivations to process in this cycle
  * @param logger - Logger instance
  * @param config - Debug logging configuration
- *
  * @internal
  */
 export function logDerivationCycleStart(
@@ -174,12 +157,9 @@ export function logDerivationCycleStart(
 /**
  * Logs the start of a derivation iteration within a cycle.
  *
- * Only logs when config level is 'verbose'.
- *
  * @param iteration - Current iteration number (1-based)
  * @param logger - Logger instance
  * @param config - Debug logging configuration
- *
  * @internal
  */
 export function logDerivationIteration(iteration: number, logger: Logger, config: DerivationLogConfig): void {

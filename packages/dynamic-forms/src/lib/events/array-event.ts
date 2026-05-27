@@ -9,39 +9,6 @@ import { RemoveAtIndexEvent } from './constants/remove-at-index.event';
 /**
  * Builder for array manipulation events.
  *
- * Provides a fluent, discoverable API for array operations.
- * Type `arrayEvent('key').` in your IDE to see all available operations.
- *
- * **BREAKING CHANGE**: Template is now required for add operations.
- *
- * Supports both primitive and object array items:
- * - Primitive: Pass a single field definition → extracts field value directly
- * - Object: Pass an array of field definitions → merges fields into object
- *
- * @example
- * ```typescript
- * import { arrayEvent } from '@ng-forge/dynamic-forms';
- *
- * // Object item: append { name, email } object
- * eventBus.dispatch(arrayEvent('contacts').append([
- *   { key: 'name', type: 'input', label: 'Name' },
- *   { key: 'email', type: 'input', label: 'Email' }
- * ]));
- *
- * // Primitive item: append single value
- * eventBus.dispatch(arrayEvent('tags').append(
- *   { key: 'tag', type: 'input', label: 'Tag' }
- * ));
- *
- * // Removing items (no template needed)
- * eventBus.dispatch(arrayEvent('contacts').pop());      // Remove last
- * eventBus.dispatch(arrayEvent('contacts').shift());    // Remove first
- * eventBus.dispatch(arrayEvent('contacts').removeAt(2)); // Remove at index
- *
- * // Reordering items (no template needed, preserves item identity)
- * eventBus.dispatch(arrayEvent('contacts').move(0, 2)); // Move first to third
- * ```
- *
  * @param arrayKey - The key of the array field to operate on
  * @returns An object with methods for all 7 array operations
  */
@@ -55,19 +22,6 @@ export function arrayEvent(arrayKey: string) {
      *   - Single field: Creates a primitive item (field's value is extracted directly)
      *   - Array of fields: Creates an object item (fields merged into object)
      * @returns An AppendArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * // Object item
-     * eventBus.dispatch(arrayEvent('contacts').append([
-     *   { key: 'name', type: 'input', label: 'Name' }
-     * ]));
-     *
-     * // Primitive item
-     * eventBus.dispatch(arrayEvent('tags').append(
-     *   { key: 'tag', type: 'input', label: 'Tag' }
-     * ));
-     * ```
      */
     append: <T extends ArrayItemDefinitionTemplate>(template: T) => new AppendArrayItemEvent(arrayKey, template),
 
@@ -79,19 +33,6 @@ export function arrayEvent(arrayKey: string) {
      *   - Single field: Creates a primitive item (field's value is extracted directly)
      *   - Array of fields: Creates an object item (fields merged into object)
      * @returns A PrependArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * // Object item
-     * eventBus.dispatch(arrayEvent('contacts').prepend([
-     *   { key: 'name', type: 'input', label: 'Name' }
-     * ]));
-     *
-     * // Primitive item
-     * eventBus.dispatch(arrayEvent('tags').prepend(
-     *   { key: 'tag', type: 'input', label: 'Tag' }
-     * ));
-     * ```
      */
     prepend: <T extends ArrayItemDefinitionTemplate>(template: T) => new PrependArrayItemEvent(arrayKey, template),
 
@@ -104,19 +45,6 @@ export function arrayEvent(arrayKey: string) {
      *   - Single field: Creates a primitive item (field's value is extracted directly)
      *   - Array of fields: Creates an object item (fields merged into object)
      * @returns An InsertArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * // Object item at index 2
-     * eventBus.dispatch(arrayEvent('contacts').insertAt(2, [
-     *   { key: 'name', type: 'input', label: 'Name' }
-     * ]));
-     *
-     * // Primitive item at index 2
-     * eventBus.dispatch(arrayEvent('tags').insertAt(2,
-     *   { key: 'tag', type: 'input', label: 'Tag' }
-     * ));
-     * ```
      */
     insertAt: <T extends ArrayItemDefinitionTemplate>(index: number, template: T) => new InsertArrayItemEvent(arrayKey, index, template),
 
@@ -125,11 +53,6 @@ export function arrayEvent(arrayKey: string) {
      * Equivalent to JavaScript's `Array.pop()`.
      *
      * @returns A PopArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * eventBus.dispatch(arrayEvent('contacts').pop());
-     * ```
      */
     pop: () => new PopArrayItemEvent(arrayKey),
 
@@ -138,11 +61,6 @@ export function arrayEvent(arrayKey: string) {
      * Equivalent to JavaScript's `Array.shift()`.
      *
      * @returns A ShiftArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * eventBus.dispatch(arrayEvent('contacts').shift());
-     * ```
      */
     shift: () => new ShiftArrayItemEvent(arrayKey),
 
@@ -152,11 +70,6 @@ export function arrayEvent(arrayKey: string) {
      *
      * @param index - The position of the item to remove
      * @returns A RemoveAtIndexEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * eventBus.dispatch(arrayEvent('contacts').removeAt(2));
-     * ```
      */
     removeAt: (index: number) => new RemoveAtIndexEvent(arrayKey, index),
 
@@ -168,12 +81,6 @@ export function arrayEvent(arrayKey: string) {
      * @param from - The current index of the item to move
      * @param to - The target index to move the item to
      * @returns A MoveArrayItemEvent to dispatch
-     *
-     * @example
-     * ```typescript
-     * // Move item from index 0 to index 2
-     * eventBus.dispatch(arrayEvent('contacts').move(0, 2));
-     * ```
      */
     move: (from: number, to: number) => new MoveArrayItemEvent(arrayKey, from, to),
   };

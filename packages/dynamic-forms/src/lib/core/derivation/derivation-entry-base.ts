@@ -2,43 +2,18 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
 import type { CustomFunction } from '../expressions/custom-function-types';
 
-/**
- * Common shape shared by `DerivationEntry` and `PropertyDerivationEntry`.
- *
- * Both entry types are produced by collecting `type: 'derivation'` logic from
- * field definitions; they diverge only in their write target (form value vs.
- * property override store) and a few specialized fields. Shared utilities
- * (`computeValueFromEntry`, `getDebouncePeriods`, etc.) operate on this shape
- * so they can be reused across both pipelines without casts.
- *
- * @public
- */
+/** Common shape shared by `DerivationEntry` and `PropertyDerivationEntry`. */
 export interface BaseDerivationEntry {
-  /**
-   * The key of the field where this derivation is defined and targets.
-   *
-   * For array fields, this may include a placeholder path like 'items.$.x'
-   * which is resolved to actual indices at runtime.
-   */
+  /** The key of the field where this derivation is defined and targets. */
   fieldKey: string;
 
-  /**
-   * Field keys that this derivation depends on.
-   *
-   * Extracted from explicit `dependsOn`, expressions, and conditions.
-   */
+  /** Field keys that this derivation depends on. */
   dependsOn: string[];
 
-  /**
-   * Condition that determines when this derivation applies.
-   *
-   * Defaults to `true` (always apply) if not specified in the config.
-   */
+  /** Condition that determines when this derivation applies. */
   condition: ConditionalExpression | boolean;
 
-  /**
-   * Static value. Mutually exclusive with `expression` and `functionName`.
-   */
+  /** Static value. Mutually exclusive with `expression` and `functionName`. */
   value?: unknown;
 
   /**
@@ -73,13 +48,9 @@ export interface BaseDerivationEntry {
    */
   debounceMs?: number;
 
-  /**
-   * Optional debug name for easier identification in logs.
-   */
+  /** Optional debug name for easier identification in logs. */
   debugName?: string;
 
-  /**
-   * The original logic config if this entry was created from a full logic config.
-   */
+  /** The original logic config if this entry was created from a full logic config. */
   originalConfig?: DerivationLogicConfig;
 }

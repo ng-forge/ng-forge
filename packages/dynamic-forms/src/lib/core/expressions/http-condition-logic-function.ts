@@ -42,17 +42,7 @@ function extractBoolean(response: unknown, responseExpression: string | undefine
   return !!response;
 }
 
-/**
- * Creates a logic function for an HTTP condition.
- *
- * Delegates lifecycle (per-field signal store, debouncing, rxResource +
- * withPreviousValue) to {@link createDebouncedResourceLogicFn}; this function
- * just supplies the HTTP-specific bits: the trigger payload is the resolved
- * `HttpResourceRequest`, the stream fires the request, and the resolver
- * short-circuits via the response-cache before the resource gets touched.
- *
- * Must be called in injection context (same as `createLogicFunction`).
- */
+/** Creates a logic function for an HTTP condition. */
 export function createHttpConditionLogicFunction<TValue>(condition: HttpCondition): LogicFn<TValue, boolean> {
   const httpClient = inject(HttpClient, { optional: true });
   if (!httpClient) {

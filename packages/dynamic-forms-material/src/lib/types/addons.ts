@@ -7,15 +7,7 @@ import type {
   RegisteredActionRef,
 } from '@ng-forge/dynamic-forms';
 
-/**
- * Decorative icon addon for Material fields.
- *
- * Renders `<mat-icon>{icon}</mat-icon>` using Material Icons ligatures —
- * `icon: 'search'` produces `<mat-icon>search</mat-icon>`.
- *
- * Add `ariaLabel` for icons that convey meaning (search, error, success);
- * leave it omitted for purely decorative icons (will be `aria-hidden="true"`).
- */
+/** Decorative icon addon for Material fields. */
 export interface MatIconAddon extends BaseAddon {
   readonly kind: 'mat-icon';
   /** Material Icons name (ligature, e.g., `'search'`, `'close'`). */
@@ -79,10 +71,6 @@ type MatButtonClick = MatButtonClickPreset | MatButtonClickActionRef | MatButton
 /**
  * Content axis — XOR enforced at type level so an icon-only button is
  * forced to declare `ariaLabel`. The three shapes:
- *
- * - `IconOnly`   — just `icon`; `ariaLabel` is REQUIRED
- * - `Labeled`    — `label` set; `icon` and `ariaLabel` optional
- * - `Decorative` — neither icon nor label
  */
 type MatButtonContentIconOnly = {
   readonly icon: string;
@@ -102,21 +90,7 @@ type MatButtonContentDecorative = {
 };
 type MatButtonContent = MatButtonContentIconOnly | MatButtonContentLabeled | MatButtonContentDecorative;
 
-/**
- * Interactive button addon for Material fields.
- *
- * Renders `<button mat-icon-button>` (icon-only) or `<button mat-button>`
- * (labeled). Click dispatch (preset / actionRef / action precedence) lives
- * on `NgForgeAddonAction`; this addon shape focuses on configuration.
- *
- * Type-level guarantees:
- *
- * - **Content axis (XOR):** `IconOnly` (icon + required ariaLabel) |
- *   `Labeled` (label, icon optional) | `Decorative` (neither). The IDE
- *   rejects icon-only configs that omit `ariaLabel`.
- * - **Click axis (XOR):** exactly one of `preset` / `actionRef` / `action`,
- *   or none.
- */
+/** Interactive button addon for Material fields. */
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
 
 /** Union of all Material-shipped addon kinds. */

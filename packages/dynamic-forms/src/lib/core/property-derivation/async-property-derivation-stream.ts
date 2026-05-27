@@ -15,10 +15,6 @@ import { PropertyOverrideStore } from './property-override-store';
 /**
  * Context required for creating async-function property-derivation streams.
  *
- * Mirrors `AsyncDerivationStreamContext` from the value-derivation pipeline,
- * minus the form-accessor and dirty-state plumbing — property derivations
- * don't have a user-override concept.
- *
  * @internal
  */
 export interface AsyncPropertyDerivationStreamContext {
@@ -46,9 +42,6 @@ const DEFAULT_ASYNC_DEBOUNCE_MS = 300;
 
 /**
  * Creates an RxJS Observable stream that processes an async-function property-derivation entry.
- *
- * Mirrors `createAsyncDerivationStream` (value pipeline) but writes the result via
- * `store.setOverride(fieldKey, targetProperty, value)` instead of patching the form.
  *
  * @internal
  */

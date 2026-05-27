@@ -9,9 +9,7 @@ import { ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 import { createHiddenSignal, createRenderReadySignal } from '../resolve-field/resolve-field';
 
-/**
- * Options for resolving an array item.
- */
+/** Options for resolving an array item. */
 export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>> {
   /** The initial index of this item in the array. */
   index: number;
@@ -52,13 +50,7 @@ export interface ResolveArrayItemOptions<TModel extends Record<string, unknown>>
   primitiveFieldKey?: string;
 }
 
-/**
- * Resolves a single array item with all its fields for declarative rendering.
- *
- * Uses linkedSignal for the index, which automatically updates when itemOrderSignal changes.
- * This enables position-aware updates without recreating components when items are reordered.
- * Supports multiple sibling templates (e.g., name + email without a wrapper).
- */
+/** Resolves a single array item with all its fields for declarative rendering. */
 export function resolveArrayItem<TModel extends Record<string, unknown>>(
   options: ResolveArrayItemOptions<TModel>,
 ): Observable<ResolvedArrayItem | undefined> {

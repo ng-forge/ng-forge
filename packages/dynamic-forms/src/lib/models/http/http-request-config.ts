@@ -1,9 +1,4 @@
-/**
- * Configuration for an HTTP request used by declarative HTTP validators, derivations, and conditions.
- *
- * All string values in `queryParams` are treated as expressions evaluated by ExpressionParser.
- * When `evaluateBodyExpressions` is true, top-level string values in `body` are also evaluated as expressions (shallow only).
- */
+/** Configuration for an HTTP request used by declarative HTTP validators, derivations, and conditions. */
 export interface HttpRequestConfig {
   /** URL to send the request to */
   url: string;
@@ -14,15 +9,6 @@ export interface HttpRequestConfig {
   /**
    * URL path parameters. Keys correspond to `:key` placeholders in the URL.
    * Values are expressions evaluated by ExpressionParser against the current EvaluationContext.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   url: '/api/users/:userId/orders/:orderId',
-   *   params: { userId: 'formValue.userId', orderId: 'fieldValue' }
-   * }
-   * // With userId=42 and fieldValue='abc' → '/api/users/42/orders/abc'
-   * ```
    */
   params?: Record<string, string>;
 

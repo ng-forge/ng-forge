@@ -8,10 +8,6 @@ import { omit } from '@ng-forge/dynamic-forms';
 /**
  * Context for value field mapping, containing the injected context reference.
  * Used by specialized mappers to avoid duplicate injection.
- *
- * Note: The field tree is resolved lazily via getFieldTree() to support
- * reactive form access (e.g., for array items where the form structure
- * may not exist at injection time but becomes available later).
  */
 export interface ValueFieldContext {
   /**
@@ -25,14 +21,6 @@ export interface ValueFieldContext {
 /**
  * Creates a value field context from the injected FIELD_SIGNAL_CONTEXT.
  * Must be called within an injection context.
- *
- * With direct root form binding for array items, the FIELD_SIGNAL_CONTEXT.form
- * uses a getter that evaluates reactively. This means:
- * - For regular fields: direct access to the form's FieldTree
- * - For array items: the getter resolves rootForm['arrayKey'][index] dynamically
- *
- * The returned context provides a getFieldTree function that should be called
- * inside a computed to establish proper reactive dependencies.
  *
  * @returns The value field context with reactive field tree accessor
  */
@@ -58,9 +46,6 @@ export function resolveValueFieldContext(): ValueFieldContext {
 /**
  * Builds the base inputs for a value field.
  * This is a helper function used by valueFieldMapper and specialized mappers.
- *
- * Note: This function should be called inside a computed signal to ensure
- * proper reactive dependency tracking for the field tree resolution.
  *
  * @param fieldDef The value field definition
  * @param ctx The resolved value field context
@@ -96,20 +81,6 @@ export function buildValueFieldInputs<TProps, TValue = unknown>(
 
 /**
  * Maps a value field definition to component inputs.
- *
- * Value fields are input fields that contribute to the form's value (text, number, etc.).
- * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field proxy.
- *
- * For array items, the FIELD_SIGNAL_CONTEXT.form uses a reactive getter that resolves
- * rootForm['arrayKey'][index] dynamically. This means:
- * - Zod/StandardSchema validation errors are automatically available
- * - The field tree updates reactively when the root form structure changes
- * - Newly added array items will get their field tree once the form value updates
- *
- * For fields with specific properties, use the specialized mappers:
- * - optionsFieldMapper: for fields with options (select, radio, multi-checkbox)
- * - datepickerFieldMapper: for fields with minDate, maxDate, startAt
- * - checkboxFieldMapper: for boolean fields (checkbox, toggle)
  *
  * @param fieldDef The value field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet

@@ -11,33 +11,25 @@ import { BUILT_IN_FIELDS } from '../../src/lib/providers/built-in-fields';
 import { InputField, SelectField, checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { delay } from '@ng-forge/utils';
 
-/**
- * Internal interface for field registry operations needed by test utilities
- */
+/** Internal interface for field registry operations needed by test utilities */
 interface FieldRegistryWriter {
   registerTypes(types: FieldTypeDefinition[]): void;
 }
 
-/**
- * Configuration for creating a dynamic form test
- */
+/** Configuration for creating a dynamic form test */
 export interface DynamicFormTestConfig {
   config: FormConfig;
   initialValue?: Record<string, unknown>;
   registerTestFields?: boolean;
 }
 
-/**
- * Result of creating a dynamic form test
- */
+/** Result of creating a dynamic form test */
 export interface DynamicFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm>;
 }
 
-/**
- * Fluent API for building form configurations
- */
+/** Fluent API for building form configurations */
 export class FormConfigBuilder {
   private fields: FieldDef<unknown>[] = [];
 
@@ -130,20 +122,14 @@ export class FormConfigBuilder {
   }
 }
 
-/**
- * Utility class for testing dynamic forms
- */
+/** Utility class for testing dynamic forms */
 export class DynamicFormTestUtils {
-  /**
-   * Creates a new form config builder
-   */
+  /** Creates a new form config builder */
   static builder(): FormConfigBuilder {
     return new FormConfigBuilder();
   }
 
-  /**
-   * Creates a dynamic form test setup with optional test field registration
-   */
+  /** Creates a dynamic form test setup with optional test field registration */
   static async createTest(testConfig: DynamicFormTestConfig): Promise<DynamicFormTestResult> {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
@@ -172,6 +158,7 @@ export class DynamicFormTestUtils {
 
   /**
    * Registers common test field types including built-in types like page, row, group
+   *
    * @internal
    */
   private static registerTestFields(fieldRegistry: FieldRegistryWriter): void {
@@ -238,6 +225,7 @@ export class DynamicFormTestUtils {
   /**
    * Waits for the dynamic form to initialize.
    * Uses the initialized$ observable directly which has shareReplay for late subscribers.
+   *
    * @param fixture - The component fixture
    * @param timeoutMs - Maximum time to wait for initialization (default: 100ms)
    */
@@ -264,9 +252,7 @@ export class DynamicFormTestUtils {
     fixture.detectChanges();
   }
 
-  /**
-   * Waits for an element to appear in the DOM with retries
-   */
+  /** Waits for an element to appear in the DOM with retries */
   private static async waitForElement<T extends Element>(
     fixture: ComponentFixture<DynamicForm>,
     selector: string,
@@ -287,9 +273,7 @@ export class DynamicFormTestUtils {
     throw new Error(`[Dynamic Forms] Element not found with selector: ${selector} after ${maxAttempts} attempts`);
   }
 
-  /**
-   * Simulates user input on a field element
-   */
+  /** Simulates user input on a field element */
   static async simulateInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, selector);
 
@@ -299,9 +283,7 @@ export class DynamicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user blur on a field element
-   */
+  /** Simulates user blur on a field element */
   static async simulateBlur(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
     const element = await DynamicFormTestUtils.waitForElement<Element>(fixture, selector);
 
@@ -310,9 +292,7 @@ export class DynamicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user selection on a select element
-   */
+  /** Simulates user selection on a select element */
   static async simulateSelect(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const select = await DynamicFormTestUtils.waitForElement<HTMLSelectElement>(fixture, selector);
 
@@ -322,9 +302,7 @@ export class DynamicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates checkbox toggle
-   */
+  /** Simulates checkbox toggle */
   static async simulateCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const checkbox = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, selector);
 
@@ -335,9 +313,7 @@ export class DynamicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates button click
-   */
+  /** Simulates button click */
   static async simulateButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
     const button = await DynamicFormTestUtils.waitForElement<HTMLButtonElement>(fixture, selector);
 
@@ -346,37 +322,27 @@ export class DynamicFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> | undefined {
     return component.formValue();
   }
 
-  /**
-   * Gets validation errors from the component
-   */
+  /** Gets validation errors from the component */
   static getFormErrors(component: DynamicForm): ValidationError[] {
     return component.errors();
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Gets all field elements from the fixture
-   */
+  /** Gets all field elements from the fixture */
   static getFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
     return fixture.nativeElement.querySelectorAll(`df-test-${fieldType}`);
   }
 
-  /**
-   * Asserts that a field has a specific value
-   */
+  /** Asserts that a field has a specific value */
   static async assertFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): Promise<void> {
     const element = await DynamicFormTestUtils.waitForElement<HTMLInputElement>(fixture, fieldSelector);
 
@@ -386,9 +352,7 @@ export class DynamicFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {

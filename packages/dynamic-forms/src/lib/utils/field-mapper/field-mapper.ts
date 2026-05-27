@@ -98,10 +98,6 @@ function applyIndexSuffix(inputs: Record<string, unknown>, index: number): Recor
  * Prefixes the key with the underscored group ancestor path so that the same
  * leaf key inside different groups produces distinct DOM IDs (issue #401).
  * Form-schema keys remain clean — only the rendered `key` input is rewritten.
- *
- * Dots in the group path become underscores, then the original leaf key is
- * appended: `(groupPath='user.address', inputs.key='street')` →
- * `inputs.key = 'user_address_street'`.
  */
 function applyGroupPrefix(inputs: Record<string, unknown>, groupPath: string): Record<string, unknown> {
   const key = inputs['key'];
@@ -118,24 +114,6 @@ function applyGroupPrefix(inputs: Record<string, unknown>, groupPath: string): R
 /**
  * Main field mapper function that uses the field registry to get the appropriate mapper
  * based on the field's type property.
- *
- * This function must be called within an injection context where FIELD_SIGNAL_CONTEXT
- * is provided, as mappers inject the context to access form state.
- *
- * For componentless fields (no loadComponent and no mapper), returns undefined
- * since there's no component to bind inputs to. Callers should check for undefined
- * and skip rendering logic for such fields.
- *
- * If the field type definition specifies `propsToMeta`, the specified props
- * will be merged into the meta object (with meta taking precedence).
- *
- * When running inside an array item context (ARRAY_CONTEXT is provided), the key
- * is automatically suffixed with the item index to ensure unique DOM IDs. The form
- * schema keys remain clean (unsuffixed) so derivations and validations work correctly.
- *
- * Property overrides from the PropertyOverrideStore are applied AFTER all static
- * mapper logic, so they always take precedence. Only fields with registered property
- * derivations incur the overhead of reading from the store.
  *
  * @param fieldDef The field definition to map
  * @param fieldRegistry The registry of field type definitions

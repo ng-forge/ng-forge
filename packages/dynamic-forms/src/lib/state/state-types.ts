@@ -10,6 +10,7 @@ import { FormMode } from '../models/types/form-mode';
 
 /**
  * Lifecycle state discriminants.
+ *
  * @internal
  */
 export const LifecycleState = {
@@ -25,6 +26,7 @@ export type LifecycleStateType = (typeof LifecycleState)[keyof typeof LifecycleS
 
 /**
  * Transition phase discriminants.
+ *
  * @internal
  */
 export const Phase = {
@@ -38,6 +40,7 @@ export type PhaseType = (typeof Phase)[keyof typeof Phase];
 
 /**
  * Action type discriminants.
+ *
  * @internal
  */
 export const Action = {
@@ -56,6 +59,7 @@ export type ActionType = (typeof Action)[keyof typeof Action];
 
 /**
  * Side effect type discriminants.
+ *
  * @internal
  */
 export const Effect = {
@@ -210,11 +214,7 @@ export type SideEffect =
   | { readonly type: (typeof Effect)['CreateForm'] }
   | { readonly type: (typeof Effect)['RestoreValues']; readonly values: Record<string, unknown> };
 
-/**
- * Error from async field component loading.
- *
- * @public
- */
+/** Error from async field component loading. */
 export interface FieldLoadingError {
   readonly fieldType: string;
   readonly fieldKey: string;

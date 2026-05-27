@@ -5,25 +5,15 @@ import { NgForgeControl } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
-  /**
-   * Display radio buttons inline (horizontal)
-   */
+  /** Display radio buttons inline (horizontal) */
   inline?: boolean;
-  /**
-   * Reverse the position of the radio button and label
-   */
+  /** Reverse the position of the radio button and label */
   reverse?: boolean;
-  /**
-   * Display as button group instead of radio buttons
-   */
+  /** Display as button group instead of radio buttons */
   buttonGroup?: boolean;
-  /**
-   * Button size when using button group
-   */
+  /** Button size when using button group */
   buttonSize?: 'sm' | 'lg';
-  /**
-   * Hint text to display below the radio group
-   */
+  /** Hint text to display below the radio group */
   hint?: DynamicText;
 }
 
@@ -106,9 +96,7 @@ export class BsRadioGroupComponent implements FormValueControl<ValueType | undef
   readonly options = input.required<FieldOption<ValueType>[]>();
   readonly properties = input<BsRadioGroupProps>();
 
-  /**
-   * Handle radio button change event
-   */
+  /** Handle radio button change event */
   protected onRadioChange(newValue: ValueType): void {
     if (!this.disabled() && !this.readonly()) {
       this.value.set(newValue);

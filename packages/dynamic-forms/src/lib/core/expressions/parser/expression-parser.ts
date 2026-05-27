@@ -2,9 +2,7 @@ import { Parser } from './parser';
 import { Evaluator, EvaluationScope } from './evaluator';
 import { ASTNode, ExpressionParserError } from './types';
 
-/**
- * Maximum cache size to prevent memory issues
- */
+/** Maximum cache size to prevent memory issues */
 const MAX_AST_CACHE_SIZE = 1000;
 
 /**
@@ -56,20 +54,10 @@ class LRUCache<K, V> {
   }
 }
 
-/**
- * Cache for parsed AST nodes to improve performance
- */
+/** Cache for parsed AST nodes to improve performance */
 const astCache = new LRUCache<string, ASTNode>(MAX_AST_CACHE_SIZE);
 
-/**
- * Secure expression parser that uses AST-based evaluation
- *
- * This parser provides:
- * - Security: No arbitrary code execution, only whitelisted operations
- * - Performance: AST caching for repeated expressions
- * - Better errors: Clear error messages with position information
- * - Type safety: Strongly typed AST and evaluation
- */
+/** Secure expression parser that uses AST-based evaluation */
 export class ExpressionParser {
   /**
    * Parse an expression string into an AST
@@ -92,9 +80,7 @@ export class ExpressionParser {
     return ast;
   }
 
-  /**
-   * Evaluate an expression with a given scope
-   */
+  /** Evaluate an expression with a given scope */
   static evaluate(expression: string, scope: EvaluationScope): unknown {
     try {
       const ast = this.parse(expression);
@@ -113,16 +99,12 @@ export class ExpressionParser {
     }
   }
 
-  /**
-   * Clear the AST cache
-   */
+  /** Clear the AST cache */
   static clearCache(): void {
     astCache.clear();
   }
 
-  /**
-   * Get cache statistics
-   */
+  /** Get cache statistics */
   static getCacheStats(): { size: number; maxSize: number } {
     return {
       size: astCache.size,

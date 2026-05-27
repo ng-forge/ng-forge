@@ -6,17 +6,6 @@ import { applyNonFieldLogic } from './non-field-logic.utils';
 /**
  * Maps a button field to component inputs.
  *
- * Unlike value field mappers, button fields do not participate in form values
- * and do not need field tree resolution or validation messages.
- *
- * Button-specific properties:
- * - event: The FormEvent constructor to emit when clicked
- * - eventArgs: Optional arguments to pass to the event constructor
- *
- * Hidden and disabled states are resolved using non-field logic resolvers which consider:
- * 1. Explicit `hidden: true` / `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` or `type: 'disabled'` conditions
- *
  * @param fieldDef The button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

@@ -1,30 +1,17 @@
 import { afterRenderEffect, ElementRef, isDevMode, Signal } from '@angular/core';
 import { applyMetaToElement, FieldMeta, isEqual } from '@ng-forge/dynamic-forms';
 
-/**
- * Configuration options for setupMetaTracking.
- */
+/** Configuration options for setupMetaTracking. */
 export interface MetaTrackingOptions {
   /**
    * CSS selector for target elements within the host.
    * If not provided, meta attributes are applied directly to the host element.
-   *
-   * @example
-   * // Apply to internal radio inputs
-   * selector: 'input[type="radio"]'
-   *
-   * // Apply to host element (for Shadow DOM components)
-   * selector: undefined
    */
   selector?: string;
 
   /**
    * Additional signals to track that should trigger re-application of meta.
    * Useful for components where DOM elements are dynamically created (e.g., radio options).
-   *
-   * @example
-   * // Re-apply when options change
-   * dependents: [this.options]
    */
   dependents?: Signal<unknown>[];
 }
@@ -41,6 +28,7 @@ interface ApplyAttrsOptions {
  * Target resolution is cached by selector identity — re-resolves only on
  * selector change or `dependents` change. afterRenderEffect is signal-tracked,
  * so the callback re-runs only when computeAttrs / dependents differ.
+ *
  * @internal
  */
 function applyTrackedAttrsToTargets(
@@ -107,39 +95,9 @@ function applyTrackedAttrsToTargets(
 /**
  * Sets up automatic meta attribute tracking and application for wrapped components.
  *
- * This utility creates an `afterRenderEffect` that applies meta attributes to DOM elements
- * after Angular's render cycle. It efficiently tracks signal dependencies and only re-applies
- * when the meta signal or any dependent signals change.
- *
- * Use this instead of MutationObserver for better performance and integration with Angular's
- * change detection.
- *
  * @param elementRef - Reference to the host element
  * @param meta - Signal containing meta attributes to apply
  * @param options - Configuration options
- *
- * @example
- * ```typescript
- * // For a radio group with dynamic options
- * constructor() {
- *   setupMetaTracking(inject(ElementRef), this.meta, {
- *     selector: 'input[type="radio"]',
- *     dependents: [this.options]
- *   });
- * }
- *
- * // For a simple checkbox
- * constructor() {
- *   setupMetaTracking(inject(ElementRef), this.meta, {
- *     selector: 'input[type="checkbox"]'
- *   });
- * }
- *
- * // For Shadow DOM components (apply to host)
- * constructor() {
- *   setupMetaTracking(inject(ElementRef), this.meta);
- * }
- * ```
  */
 export function setupMetaTracking(
   elementRef: ElementRef<HTMLElement>,
@@ -152,6 +110,7 @@ export function setupMetaTracking(
 /**
  * Marker-directive variant: writes parent meta + aria to resolved targets.
  * Parent aria wins on key collision. Internal to NgForgeControl/HostControl.
+ *
  * @internal
  */
 export function setupMarkerAttrTracking(

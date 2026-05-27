@@ -8,16 +8,6 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
 /**
  * Maps a text field definition to component inputs.
  *
- * Text fields are display-only fields that don't participate in the form schema.
- * This mapper handles the `logic` configuration by using the non-field-hidden resolver
- * to evaluate conditions against the form value from RootFormRegistryService.
- *
- * Hidden state is resolved using the non-field-hidden resolver which considers:
- * 1. Explicit `hidden: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` conditions
- *
- * Note: Text fields don't support disabled logic since they are display-only.
- *
  * @param fieldDef The text field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

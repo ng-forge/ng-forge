@@ -23,12 +23,7 @@ import { FieldTreeMappingContext, resolveDescendantContext, resolveFieldOwnConte
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/**
- * Gets a FieldTree by key, supporting nested paths with dot notation.
- *
- * @example
- * getFieldTreeByKey(ctx, 'address.street') // Returns FieldTree for nested 'street' field
- */
+/** Gets a FieldTree by key, supporting nested paths with dot notation. */
 function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
   // Simple case - no nesting
   if (!key.includes('.')) {
@@ -51,50 +46,15 @@ function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): Fiel
   return current as FieldTree<unknown> | undefined;
 }
 
-/**
- * Options for creating a schema from field definitions.
- */
+/** Options for creating a schema from field definitions. */
 export interface CreateSchemaOptions<TModel = unknown> {
-  /**
-   * Optional array of collected cross-field validators.
-   */
+  /** Optional array of collected cross-field validators. */
   crossFieldValidators?: CrossFieldValidatorEntry[];
 
-  /**
-   * Optional form-level Standard Schema for additional validation.
-   *
-   * Supports Zod, Valibot, ArkType, and other Standard Schema compliant libraries.
-   * Useful for cross-field validation rules.
-   *
-   * @example
-   * ```typescript
-   * import { z } from 'zod';
-   * import { standardSchema } from '@ng-forge/dynamic-forms/schema';
-   *
-   * const PasswordSchema = z.object({
-   *   password: z.string().min(8),
-   *   confirmPassword: z.string(),
-   * }).refine(
-   *   (data) => data.password === data.confirmPassword,
-   *   { message: 'Passwords must match', path: ['confirmPassword'] }
-   * );
-   *
-   * const schema = createSchemaFromFields(fields, registry, {
-   *   formLevelSchema: standardSchema(PasswordSchema),
-   * });
-   * ```
-   */
+  /** Optional form-level Standard Schema for additional validation. */
   formLevelSchema?: FormSchema<TModel>;
 
-  /**
-   * Form-level `validateWhenHidden` setting (from `FormConfig.options.validateWhenHidden`).
-   *
-   * Acts as the root inherited value for the field tree. Per-field
-   * `FieldDef.validateWhenHidden` overrides it for a subtree, and the new value is
-   * inherited by descendants unless they override in turn.
-   *
-   * When `undefined`, the global `withValidationExecutionDefaults()` value is used.
-   */
+  /** Form-level `validateWhenHidden` setting (from `FormConfig.options.validateWhenHidden`). */
   validateWhenHidden?: boolean;
 }
 
@@ -102,11 +62,6 @@ export interface CreateSchemaOptions<TModel = unknown> {
  * Creates an Angular signal forms schema from field definitions
  * This is the single entry point at dynamic form level that replaces createSchemaFromFields
  * Uses the new modular signal forms adapter structure
- *
- * Cross-field logic (formValue.*) is handled automatically by createLogicFunction
- * which uses RootFormRegistryService. No special context needed.
- *
- * Cross-field validators are passed directly and applied at form level using validateTree.
  *
  * @param fields Field definitions to create schema from
  * @param registry Field type registry
@@ -190,17 +145,6 @@ export function createSchemaFromFields<TModel = unknown>(
 /**
  * Applies cross-field validators using Angular's validateTree API.
  *
- * This is the key integration point that routes cross-field validation errors
- * to the appropriate target fields via Angular's form state system.
- *
- * The validateTree function allows returning errors with a `fieldTree` property
- * that targets specific fields, which Angular automatically routes to those
- * fields' errors() signal.
- *
- * Supports two types of hoisted validators:
- * 1. Custom validators with cross-field expressions (e.g., `formValue.password === formValue.confirmPassword`)
- * 2. Built-in validators with cross-field `when` conditions (e.g., `required` when `country === 'USA'`)
- *
  * @param rootPath The root schema path tree
  * @param validators Array of collected cross-field validators
  * @param functionRegistry Registry containing custom functions for expression evaluation
@@ -253,9 +197,7 @@ function applyCrossFieldTreeValidator<TModel>(
   });
 }
 
-/**
- * Evaluates a single cross-field validator entry and returns an error if validation fails.
- */
+/** Evaluates a single cross-field validator entry and returns an error if validation fails. */
 function evaluateCrossFieldValidator<TModel>(
   entry: CrossFieldValidatorEntry,
   formValue: Record<string, unknown>,
@@ -285,9 +227,7 @@ function evaluateCrossFieldValidator<TModel>(
   }
 }
 
-/**
- * Evaluates a custom cross-field validator with an expression.
- */
+/** Evaluates a custom cross-field validator with an expression. */
 function evaluateCustomCrossFieldValidator<TModel>(
   config: CustomValidatorConfig,
   evaluationContext: EvaluationContext,
@@ -479,9 +419,7 @@ function applyBuiltInValidationLogic(config: ValidatorConfig, fieldValue: unknow
   }
 }
 
-/**
- * Utility to convert field definitions to default values object
- */
+/** Utility to convert field definitions to default values object */
 export function fieldsToDefaultValues<TModel = unknown>(fields: FieldDef<unknown>[], registry: Map<string, FieldTypeDefinition>): TModel {
   const defaultValues: Record<string, unknown> = {};
 

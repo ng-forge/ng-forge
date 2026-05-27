@@ -1,9 +1,4 @@
-/**
- * Wrappers Resource
- *
- * Exposes registered ng-forge wrappers (field decorators). Includes the built-in
- * core wrappers plus demo wrappers shipped with the examples-shared-ui package.
- */
+/** Wrappers Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getWrappers, getWrapper, getWrappersByCategory, WRAPPER_AUTHORING_CONTRACT } from '../registry/index.js';

@@ -1,11 +1,4 @@
-/**
- * Represents the state information of a single form field.
- *
- * Used in evaluation contexts to allow expressions and conditions
- * to reference field state (e.g., `fieldState.touched`, `formFieldState.email.dirty`).
- *
- * @public
- */
+/** Represents the state information of a single form field. */
 export interface FieldStateInfo {
   readonly touched: boolean;
   readonly dirty: boolean;
@@ -14,44 +7,16 @@ export interface FieldStateInfo {
   readonly valid: boolean;
   readonly invalid: boolean;
   readonly pending: boolean;
-  /**
-   * Whether the field is currently hidden.
-   *
-   * Note: This is a library-managed property, not a native Angular Signal Forms
-   * property. Returns `false` if the field instance does not expose a `hidden` signal.
-   */
+  /** Whether the field is currently hidden. */
   readonly hidden: boolean;
-  /**
-   * Whether the field is currently readonly.
-   *
-   * Note: This is a library-managed property, not a native Angular Signal Forms
-   * property. Returns `false` if the field instance does not expose a `readonly` signal.
-   */
+  /** Whether the field is currently readonly. */
   readonly readonly: boolean;
-  /**
-   * Whether the field is currently disabled.
-   *
-   * Note: This is a library-managed property, not a native Angular Signal Forms
-   * property. Returns `false` if the field instance does not expose a `disabled` signal.
-   */
+  /** Whether the field is currently disabled. */
   readonly disabled: boolean;
 }
 
-/**
- * Map of field keys to their state information.
- *
- * Used as `formFieldState` in evaluation contexts to access
- * state of any field in the form by key.
- *
- * @public
- */
+/** Map of field keys to their state information. */
 export type FormFieldStateMap = Record<string, FieldStateInfo | undefined>;
 
-/**
- * Field state context for the current field being evaluated.
- *
- * Used as `fieldState` in evaluation contexts.
- *
- * @public
- */
+/** Field state context for the current field being evaluated. */
 export type FieldStateContext = FieldStateInfo;

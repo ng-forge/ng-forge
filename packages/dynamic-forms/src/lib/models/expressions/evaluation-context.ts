@@ -7,13 +7,7 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
   /** Current field value */
   fieldValue: TValue;
 
-  /**
-   * Form value for the current evaluation scope.
-   *
-   * For regular (non-array) derivations, this contains the complete form value.
-   * For array item derivations, this is scoped to the current array item.
-   * Use `rootFormValue` to access the complete form when inside an array context.
-   */
+  /** Form value for the current evaluation scope. */
   formValue: TFormValue;
 
   /** Field path for relative references */
@@ -28,89 +22,19 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
   /**
    * Value of the field's nearest parent **group** (or array item, when the
    * field has no inner group above the array boundary).
-   *
-   * Complements `formValue` and `fieldValue` for derivations on fields nested
-   * inside groups built by factory helpers, where the parent group's key
-   * isn't known at config-authoring time. Mirrors the runtime semantics of
-   * the `'$group'` token used in `dependsOn`.
-   *
-   * Resolution at evaluation time:
-   * - Inside a group at form root: the parent group's value object (e.g.,
-   *   for `address.state`, `groupValue === formValue.address`).
-   * - Inside nested groups: the innermost parent group's value object.
-   * - Directly inside an array item (no inner group): the array item itself
-   *   (same shape as `formValue` in array context).
-   * - Inside a group inside an array item: the inner group's value object
-   *   within the current item.
-   * - Field at form root with no parent container: `undefined`.
-   *
-   * @example
-   * ```typescript
-   * // Field 'state' inside group 'address':
-   * deriveStateFromCountry: (ctx) => {
-   *   const country = ctx.groupValue?.country;  // no need to know parent key
-   *   return country === 'usa' ? 'NY' : '';
-   * }
-   * ```
    */
   groupValue?: unknown;
 
-  /**
-   * Root form value when inside an array context.
-   *
-   * This provides access to values outside the current array item.
-   * When a derivation targets an array item field (e.g., `items.$.lineTotal`),
-   * `formValue` is scoped to the current array item, while `rootFormValue`
-   * provides access to the entire form value including fields outside the array.
-   *
-   * @example
-   * ```typescript
-   * // In an array item derivation (on the lineTotal field inside lineItems array):
-   * {
-   *   key: 'lineTotal',
-   *   type: 'input',
-   *   // formValue = current array item { quantity: 2, unitPrice: 50 }
-   *   // rootFormValue = entire form { globalDiscount: 0.1, lineItems: [...] }
-   *   derivation: 'formValue.quantity * formValue.unitPrice * (1 - rootFormValue.globalDiscount)'
-   * }
-   * ```
-   *
-   * For non-array derivations, `rootFormValue` is not set and `formValue`
-   * contains the entire form value.
-   */
+  /** Root form value when inside an array context. */
   rootFormValue?: Record<string, unknown>;
 
-  /**
-   * Current array index when inside an array derivation.
-   */
+  /** Current array index when inside an array derivation. */
   arrayIndex?: number;
 
-  /**
-   * Path to the array field when inside an array derivation.
-   */
+  /** Path to the array field when inside an array derivation. */
   arrayPath?: string;
 
-  /**
-   * External data signals resolved to their current values.
-   *
-   * This allows forms to reference data from outside the form context
-   * in conditional logic, derivations, and other expressions.
-   *
-   * @example
-   * ```typescript
-   * // In form config:
-   * externalData: {
-   *   userRole: computed(() => this.userService.currentRole()),
-   *   permissions: computed(() => this.authService.permissions()),
-   * }
-   *
-   * // In JavaScript expression:
-   * condition: {
-   *   type: 'javascript',
-   *   expression: "externalData.userRole === 'admin'"
-   * }
-   * ```
-   */
+  /** External data signals resolved to their current values. */
   externalData?: Record<string, unknown>;
 
   /**
@@ -119,38 +43,10 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
    */
   deprecationTracker?: WarningTracker;
 
-  /**
-   * State of the current field being evaluated.
-   *
-   * Provides access to field state properties like `touched`, `dirty`, `valid`, etc.
-   * Uses a Proxy for lazy evaluation — properties are only read when accessed.
-   *
-   * @example
-   * ```typescript
-   * // In a JavaScript expression:
-   * condition: {
-   *   type: 'javascript',
-   *   expression: "fieldState.touched && fieldState.dirty"
-   * }
-   * ```
-   */
+  /** State of the current field being evaluated. */
   fieldState?: FieldStateContext;
 
-  /**
-   * State of all fields in the form, keyed by field key.
-   *
-   * Provides access to any field's state properties by key.
-   * Uses a Proxy for lazy evaluation — field state is only read when accessed.
-   *
-   * @example
-   * ```typescript
-   * // In a JavaScript expression:
-   * condition: {
-   *   type: 'javascript',
-   *   expression: "formFieldState.email.dirty && formFieldState.email.valid"
-   * }
-   * ```
-   */
+  /** State of all fields in the form, keyed by field key. */
   formFieldState?: FormFieldStateMap;
 
   /** Allow additional properties for flexible expression evaluation */

@@ -10,17 +10,7 @@ import { Logger } from '../../providers/features/logger/logger.interface';
 import { AsyncConditionFunctionCacheService } from './async-condition-function-cache.service';
 import { createDebouncedResourceLogicFn } from './debounced-resource-logic-fn';
 
-/**
- * Creates a logic function for an async condition.
- *
- * Delegates lifecycle (per-field signal store, debouncing, rxResource +
- * withPreviousValue) to {@link createDebouncedResourceLogicFn}; this function
- * just supplies the async-condition-specific bits: the trigger payload is
- * the FieldContext snapshot the loader needs to build its evaluation
- * context, and the stream invokes the registered or inline async function.
- *
- * Must be called in injection context (same as `createLogicFunction`).
- */
+/** Creates a logic function for an async condition. */
 export function createAsyncConditionLogicFunction<TValue>(condition: AsyncCondition): LogicFn<TValue, boolean> {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);

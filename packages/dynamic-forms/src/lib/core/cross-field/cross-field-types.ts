@@ -3,9 +3,7 @@ import { StateLogicConfig } from '../../models/logic/logic-config';
 import { ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 
-/**
- * Categories of cross-field configurations that need to be hoisted to form level.
- */
+/** Categories of cross-field configurations that need to be hoisted to form level. */
 export type CrossFieldCategory = 'validator' | 'logic' | 'schema';
 
 /**
@@ -26,10 +24,6 @@ export interface BaseCrossFieldEntry {
 /**
  * Cross-field validator entry.
  * Represents a validator that references formValue.* and needs form-level execution.
- *
- * Supports two types of validators:
- * 1. Custom validators with cross-field expressions (e.g., `formValue.password === formValue.confirmPassword`)
- * 2. Built-in validators with cross-field `when` conditions (e.g., `required` when `country === 'USA'`)
  */
 export interface CrossFieldValidatorEntry extends BaseCrossFieldEntry {
   category: 'validator';
@@ -48,16 +42,12 @@ export interface CrossFieldValidatorEntry extends BaseCrossFieldEntry {
   validatorType?: ValidatorConfig['type'];
 }
 
-/**
- * Logic types that can be controlled via cross-field conditions.
- */
+/** Logic types that can be controlled via cross-field conditions. */
 export type LogicType = 'hidden' | 'disabled' | 'readonly' | 'required';
 
 /**
  * Cross-field logic entry.
  * Represents a state logic condition that references other fields and needs form-level evaluation.
- *
- * Note: Derivation logic is handled separately by the derivation system.
  */
 export interface CrossFieldLogicEntry extends BaseCrossFieldEntry {
   category: 'logic';
@@ -86,9 +76,7 @@ export interface CrossFieldSchemaEntry extends BaseCrossFieldEntry {
   condition: ConditionalExpression;
 }
 
-/**
- * Union type of all cross-field entry types.
- */
+/** Union type of all cross-field entry types. */
 export type CrossFieldEntry = CrossFieldValidatorEntry | CrossFieldLogicEntry | CrossFieldSchemaEntry;
 
 /**
@@ -127,27 +115,18 @@ export interface CrossFieldSchemaResult {
   hasChanges: boolean;
 }
 
-/**
- * Combined result from the cross-field orchestrator.
- *
- * Note: Validation is handled separately by Angular's validateTree API.
- * The orchestrator only returns logic and schema results.
- */
+/** Combined result from the cross-field orchestrator. */
 export interface CrossFieldOrchestratorResult {
   logic: CrossFieldLogicResult;
   schemas: CrossFieldSchemaResult;
 }
 
-/**
- * Creates a unique key for a logic entry (fieldKey + logicType).
- */
+/** Creates a unique key for a logic entry (fieldKey + logicType). */
 export function createLogicStateKey(fieldKey: string, logicType: LogicType): string {
   return `${fieldKey}:${logicType}`;
 }
 
-/**
- * Parses a logic state key back into field key and logic type.
- */
+/** Parses a logic state key back into field key and logic type. */
 export function parseLogicStateKey(key: string): { fieldKey: string; logicType: LogicType } {
   const [fieldKey, logicType] = key.split(':');
   return { fieldKey, logicType: logicType as LogicType };

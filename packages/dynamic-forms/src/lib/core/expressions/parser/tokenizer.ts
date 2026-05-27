@@ -1,8 +1,6 @@
 import { Token, TokenType, ExpressionParserError } from './types';
 
-/**
- * Tokenizes an expression string into tokens
- */
+/** Tokenizes an expression string into tokens */
 export class Tokenizer {
   private position = 0;
   private readonly expression: string;
@@ -11,9 +9,7 @@ export class Tokenizer {
     this.expression = expression;
   }
 
-  /**
-   * Tokenize the entire expression
-   */
+  /** Tokenize the entire expression */
   tokenize(): Token[] {
     const tokens: Token[] = [];
 

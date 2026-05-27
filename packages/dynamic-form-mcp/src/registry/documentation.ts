@@ -1,9 +1,4 @@
-/**
- * Documentation Registry Data
- *
- * Maps documentation topics to their online URLs at ng-forge.com.
- * Replaces the previously bundled docs.json with links to the live documentation site.
- */
+/** Documentation Registry Data */
 
 const BASE_URL = 'https://ng-forge.com/dynamic-forms';
 

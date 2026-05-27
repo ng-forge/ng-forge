@@ -1,6 +1,4 @@
-/**
- * Context for token resolution in event args
- */
+/** Context for token resolution in event args */
 export interface TokenContext {
   /** Current field key */
   key?: string;
@@ -17,28 +15,9 @@ export interface TokenContext {
 /**
  * Resolves special tokens in event arguments to their actual values
  *
- * Supported tokens:
- * - $key: The current field key
- * - $index: The array index (if inside an array field)
- * - $arrayKey: The parent array field key (if inside an array field)
- * - $template: The template for array item creation
- * - formValue: Reference to the current form value for indexing
- *
  * @param args - Array of arguments that may contain tokens
  * @param context - Context object containing token values
  * @returns Array with resolved values
- *
- * @example
- * resolveTokens(['$arrayKey', '$index'], { arrayKey: 'contacts', index: 2 })
- * // Returns: ['contacts', 2]
- *
- * @example
- * resolveTokens(['$key', 'static'], { key: 'myField' })
- * // Returns: ['myField', 'static']
- *
- * @example
- * resolveTokens(['$arrayKey', '$template'], { arrayKey: 'contacts', template: [{ key: 'name', type: 'input' }] })
- * // Returns: ['contacts', [{ key: 'name', type: 'input' }]]
  */
 export function resolveTokens(
   args: readonly (string | number | boolean | null | undefined)[],

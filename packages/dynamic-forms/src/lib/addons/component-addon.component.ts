@@ -9,12 +9,6 @@ import type { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 /**
  * Renderer for the universal `component` addon kind.
  *
- * Loads the user-supplied component lazily (`addon.component()`) and renders
- * it via `NgComponentOutlet` with `addon.inputs` forwarded as input bindings.
- * The wrapper-style `fieldInputs` bag is not propagated — user components
- * receive only what `addon.inputs` declares. Authors that need field state
- * should switch to the `template` kind or build a wrapper.
- *
  * @codeOnly The `component` loader is a function; this kind is dropped in
  * lenient validation when the config originated from JSON.
  */

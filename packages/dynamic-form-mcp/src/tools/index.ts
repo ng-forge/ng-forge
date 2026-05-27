@@ -1,32 +1,4 @@
-/**
- * MCP Tools Registration
- *
- * Registers all available tools with the MCP server.
- *
- * 5 tools with zero overlap, each serving a single clear purpose:
- *
- * | Tool              | Purpose        | One-liner               |
- * |-------------------|----------------|-------------------------|
- * | ngforge_lookup    | Documentation  | "Tell me about X"       |
- * | ngforge_examples  | Working code   | "Show me how to do X"   |
- * | ngforge_validate  | Verification   | "Is my config correct?" |
- * | ngforge_scaffold  | Generation     | "Generate a skeleton"   |
- * | ngforge_search    | Discovery      | "Find topics about X"   |
- *
- * RECOMMENDED WORKFLOW:
- * 1. ngforge_lookup topic="workflow" - START HERE: tool usage guide
- * 2. ngforge_search query="your question" - Find relevant topics by keyword
- * 3. ngforge_lookup topic="golden-path" - Get form structure templates
- * 4. ngforge_lookup topic="<field-type>" - Get syntax for specific fields
- * 5. ngforge_validate - Validate your config (catches all errors)
- *
- * For working code examples:
- * - ngforge_examples pattern="complete" - Full multi-page form
- * - ngforge_examples pattern="minimal-conditional" - Minimal conditional example
- *
- * For generating skeletons:
- * - ngforge_scaffold pages=2 arrays=["contacts"] groups=["address"]
- */
+/** MCP Tools Registration */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerLookupTool } from './lookup.tool.js';
@@ -35,9 +7,7 @@ import { registerValidateTool } from './validate.tool.js';
 import { registerScaffoldTool } from './scaffold.tool.js';
 import { registerSearchTool } from './search.tool.js';
 
-/**
- * Register all MCP tools (5 total)
- */
+/** Register all MCP tools (5 total) */
 export function registerTools(server: McpServer): void {
   // 1. Lookup - unified documentation ("Tell me about X")
   registerLookupTool(server);

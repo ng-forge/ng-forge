@@ -1,15 +1,4 @@
-/**
- * Unified Lookup Tool
- *
- * Consolidated documentation tool that absorbs:
- * - quick-lookup.tool.ts (primary content source)
- * - get-field-info.tool.ts (field documentation + placement rules)
- * - get-api-reference.tool.ts (logic-matrix, context-api content)
- * - get-cheatsheet.tool.ts (comprehensive reference)
- * - get-field-schema.tool.ts (JSON schema for depth=schema)
- *
- * Single tool for "Tell me about X"
- */
+/** Unified Lookup Tool */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -50,9 +39,7 @@ const SCHEMA_SUPPORTED_FIELD_TYPES = [
   'previous',
 ] as const;
 
-/**
- * Get all available topics grouped by category.
- */
+/** Get all available topics grouped by category. */
 function formatTopicItem(key: string): string {
   const desc = TOPIC_DESCRIPTIONS[key];
   return desc ? `- **${key}**: ${desc}` : `- **${key}**`;
@@ -116,9 +103,7 @@ ${patterns.map(formatTopicItem).join('\n')}
 **Search:** \`ngforge_search query="your question"\` — find topics by keyword`;
 }
 
-/**
- * Format field info with placement rules (from get-field-info.tool.ts).
- */
+/** Format field info with placement rules (from get-field-info.tool.ts). */
 function formatFieldInfoFull(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
   const lines: string[] = [];
   const isContainer = ['row', 'group', 'array', 'page'].includes(field.type);
@@ -188,9 +173,7 @@ function formatFieldInfoFull(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldT
   return lines.join('\n');
 }
 
-/**
- * Format a single wrapper registry entry.
- */
+/** Format a single wrapper registry entry. */
 function formatWrapperInfo(wrapper: WrapperInfo): string {
   const lines: string[] = [];
   lines.push(`# ${wrapper.type} wrapper`);
@@ -311,9 +294,7 @@ const config = {
   return lines.join('\n');
 }
 
-/**
- * Format a single addon-kind registry entry.
- */
+/** Format a single addon-kind registry entry. */
 function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema'): string {
   if (depth === 'brief') {
     return [
@@ -363,9 +344,7 @@ function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema
   return lines.join('\n');
 }
 
-/**
- * List every registered addon kind grouped by core vs adapter.
- */
+/** List every registered addon kind grouped by core vs adapter. */
 function formatAddonsOverview(): string {
   const kinds = getAddonKinds();
   const lines: string[] = [];
@@ -427,15 +406,7 @@ function formatAddonsOverview(): string {
   return lines.join('\n');
 }
 
-/**
- * Try to fetch live documentation for a topic, falling back to hardcoded content.
- *
- * Resolution order:
- * 1. Map topic → section path(s) via topic-mapper
- * 2. If mapped, fetch live content from llms-full.txt
- * 3. If fetch fails or topic is MCP-only, use hardcoded TOPICS content
- * 4. If not in TOPICS, try field type registry
- */
+/** Try to fetch live documentation for a topic, falling back to hardcoded content. */
 async function resolveTopicContent(
   resolvedTopic: string,
   depth: 'brief' | 'full' | 'schema',
@@ -634,9 +605,7 @@ const NEXT_STEPS: Record<string, string> = {
     '**Next:** `ngforge_lookup topic="wrappers"` for the wrapper overview · `ngforge_lookup topic="css"` for the shipping CSS wrapper',
 };
 
-/**
- * Get next-steps hint for a topic, if available.
- */
+/** Get next-steps hint for a topic, if available. */
 function getNextSteps(topic: string): string | undefined {
   return NEXT_STEPS[topic];
 }

@@ -3,37 +3,7 @@ import type { CustomFunction } from '../../core/expressions/custom-function-type
 import { ConditionalExpression } from '../expressions/conditional-expression';
 import { HttpRequestConfig } from '../http/http-request-config';
 
-/**
- * Special form-state conditions for button disabled logic.
- *
- * These conditions evaluate form or page-level state rather than field values,
- * and are primarily used for controlling button disabled states.
- *
- * @example
- * ```typescript
- * // Disable submit button when form is invalid or submitting
- * {
- *   key: 'submit',
- *   type: 'submit',
- *   label: 'Submit',
- *   logic: [
- *     { type: 'disabled', condition: 'formInvalid' },
- *     { type: 'disabled', condition: 'formSubmitting' },
- *   ]
- * }
- *
- * // Disable next button when current page is invalid
- * nextButton({
- *   key: 'next',
- *   label: 'Next',
- *   logic: [
- *     { type: 'disabled', condition: 'pageInvalid' },
- *   ]
- * })
- * ```
- *
- * @public
- */
+/** Special form-state conditions for button disabled logic. */
 export type FormStateCondition =
   /** True when form.valid() === false */
   | 'formInvalid'
@@ -42,11 +12,7 @@ export type FormStateCondition =
   /** True when fields on the current page are invalid (for paged forms) */
   | 'pageInvalid';
 
-/**
- * Logic type for controlling field state (hidden, readonly, disabled, required).
- *
- * @public
- */
+/** Logic type for controlling field state (hidden, readonly, disabled, required). */
 export type StateLogicType = 'hidden' | 'readonly' | 'disabled' | 'required';
 
 /**
@@ -55,41 +21,10 @@ export type StateLogicType = 'hidden' | 'readonly' | 'disabled' | 'required';
  * @internal
  */
 interface BaseStateLogicConfig {
-  /**
-   * Logic type identifier for field state.
-   *
-   * - `hidden`: Hide the field from view (still participates in form state)
-   * - `readonly`: Make the field read-only
-   * - `disabled`: Disable user interaction
-   * - `required`: Make the field required
-   */
+  /** Logic type identifier for field state. */
   type: StateLogicType;
 
-  /**
-   * Condition that determines when this logic applies.
-   *
-   * Can be:
-   * - `boolean`: Static value (always applies or never applies)
-   * - `ConditionalExpression`: Expression evaluated against field/form values
-   * - `FormStateCondition`: Special form/page state check (for buttons)
-   *
-   * @example
-   * ```typescript
-   * // Static condition
-   * condition: true
-   *
-   * // Field value condition
-   * condition: {
-   *   type: 'fieldValue',
-   *   fieldPath: 'status',
-   *   operator: 'equals',
-   *   value: 'locked'
-   * }
-   *
-   * // Form state condition (for buttons)
-   * condition: 'formSubmitting'
-   * ```
-   */
+  /** Condition that determines when this logic applies. */
   condition: ConditionalExpression | boolean | FormStateCondition;
 }
 
@@ -101,6 +36,7 @@ interface BaseStateLogicConfig {
 interface ImmediateStateLogicConfig extends BaseStateLogicConfig {
   /**
    * Trigger for immediate evaluation.
+   *
    * @default 'onChange'
    */
   trigger?: 'onChange';
@@ -121,65 +57,16 @@ interface DebouncedStateLogicConfig extends BaseStateLogicConfig {
   trigger: 'debounced';
   /**
    * Debounce duration in milliseconds.
+   *
    * @default 500
    */
   debounceMs?: number;
 }
 
-/**
- * Configuration for conditional field state logic.
- *
- * Defines how field behavior changes based on conditions.
- * Supports hiding, disabling, making readonly, or requiring fields
- * based on form state or field values.
- *
- * @example
- * ```typescript
- * // Hide email field when contact method is not email
- * {
- *   type: 'hidden',
- *   condition: {
- *     type: 'fieldValue',
- *     fieldPath: 'contactMethod',
- *     operator: 'notEquals',
- *     value: 'email'
- *   }
- * }
- *
- * // Disable button when form is submitting
- * {
- *   type: 'disabled',
- *   condition: 'formSubmitting'
- * }
- *
- * // Debounced visibility (avoids flicker during rapid typing)
- * {
- *   type: 'hidden',
- *   trigger: 'debounced',
- *   debounceMs: 300,
- *   condition: {
- *     type: 'fieldValue',
- *     fieldPath: 'search',
- *     operator: 'isEmpty'
- *   }
- * }
- * ```
- *
- * @public
- */
+/** Configuration for conditional field state logic. */
 export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicConfig;
 
-/**
- * Trigger timing for when logic is evaluated.
- *
- * - `onChange`: Evaluate immediately when any dependency changes (default)
- * - `debounced`: Evaluate after the value has stabilized for a duration
- *
- * Use `debounced` for self-transforms (lowercase, trim) or to avoid
- * UI flicker during rapid typing.
- *
- * @public
- */
+/** Trigger timing for when logic is evaluated. */
 export type LogicTrigger = 'onChange' | 'debounced';
 
 /**
@@ -188,120 +75,21 @@ export type LogicTrigger = 'onChange' | 'debounced';
  * @internal
  */
 interface SharedDerivationFields {
-  /**
-   * Logic type identifier for value derivation.
-   */
+  /** Logic type identifier for value derivation. */
   type: 'derivation';
 
-  /**
-   * Target property name for property derivation.
-   *
-   * When set, this derivation targets a field property (like `minDate`, `options`,
-   * `label`, `placeholder`) instead of the field's value. The derivation is routed
-   * to the property derivation pipeline.
-   *
-   * When absent, the derivation targets the field's value (default behavior).
-   *
-   * **Depth limit (max 2 levels):** Only simple and single-dot-nested paths are
-   * supported. Paths with 2+ dots (e.g., `'a.b.c'`) will throw at runtime.
-   *
-   * @example
-   * ```typescript
-   * // Property derivation (new unified API)
-   * {
-   *   key: 'endDate',
-   *   type: 'datepicker',
-   *   logic: [{
-   *     type: 'derivation',
-   *     targetProperty: 'minDate',
-   *     expression: 'formValue.startDate'
-   *   }]
-   * }
-   *
-   * // Value derivation (no targetProperty — existing behavior)
-   * {
-   *   key: 'total',
-   *   type: 'input',
-   *   logic: [{
-   *     type: 'derivation',
-   *     expression: 'formValue.quantity * formValue.unitPrice'
-   *   }]
-   * }
-   * ```
-   */
+  /** Target property name for property derivation. */
   targetProperty?: string;
 
-  /**
-   * Optional name for this derivation for debugging purposes.
-   *
-   * When provided, this name appears in derivation debug logs,
-   * making it easier to identify specific derivations in complex forms.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'lineTotal',
-   *   type: 'input',
-   *   logic: [{
-   *     type: 'derivation',
-   *     debugName: 'Calculate line total',
-   *     expression: 'formValue.quantity * formValue.unitPrice'
-   *   }]
-   * }
-   * ```
-   */
+  /** Optional name for this derivation for debugging purposes. */
   debugName?: string;
 
-  /**
-   * Condition that determines when this derivation applies.
-   *
-   * Can be:
-   * - `boolean`: Static value (always applies or never applies)
-   * - `ConditionalExpression`: Expression evaluated against field/form values
-   *
-   * Defaults to `true` (always apply).
-   *
-   * Note: FormStateCondition is not supported for derivations.
-   *
-   * @example
-   * ```typescript
-   * // Always compute (default)
-   * condition: true
-   *
-   * // Conditional derivation
-   * condition: {
-   *   type: 'fieldValue',
-   *   fieldPath: 'country',
-   *   operator: 'equals',
-   *   value: 'USA'
-   * }
-   * ```
-   */
+  /** Condition that determines when this derivation applies. */
   condition?: ConditionalExpression | boolean;
 
   /**
    * When true, the derivation stops running after the user manually
    * edits the target field.
-   *
-   * This is useful for "smart defaults" — values that should be
-   * auto-filled initially but respected once the user explicitly changes them.
-   *
-   * Uses the field's `dirty()` signal to detect user modification.
-   * Derivations write directly to `value.set()` which does not trigger
-   * `markAsDirty()`, so `dirty === true` reliably indicates a user edit.
-   *
-   * @example
-   * ```typescript
-   * // Auto-fill display name from first + last name, but stop if user edits it
-   * {
-   *   key: 'displayName',
-   *   logic: [{
-   *     type: 'derivation',
-   *     expression: 'formValue.firstName + " " + formValue.lastName',
-   *     stopOnUserOverride: true
-   *   }]
-   * }
-   * ```
    */
   stopOnUserOverride?: boolean;
 
@@ -309,31 +97,13 @@ interface SharedDerivationFields {
    * When true (and `stopOnUserOverride` is also true), clears the
    * user-override flag when any dependency of this derivation changes,
    * allowing the derivation to run again.
-   *
-   * This is useful when a user override should only persist until the
-   * underlying data changes — e.g., when switching countries, the
-   * phone prefix should re-derive even if the user previously edited it.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'phonePrefix',
-   *   logic: [{
-   *     type: 'derivation',
-   *     value: '+1',
-   *     condition: { type: 'fieldValue', fieldPath: 'country', operator: 'equals', value: 'USA' },
-   *     stopOnUserOverride: true,
-   *     reEngageOnDependencyChange: true,
-   *     dependsOn: ['country']
-   *   }]
-   * }
-   * ```
    */
   reEngageOnDependencyChange?: boolean;
 }
 
 /**
  * Trigger variants for derivation timing.
+ *
  * @internal
  */
 type ImmediateDerivationTrigger = { trigger?: 'onChange'; debounceMs?: never };
@@ -356,57 +126,14 @@ interface HttpDerivationBase extends SharedDerivationFields {
   fn?: never;
   /** Forbidden on HTTP source */
   asyncFn?: never;
-  /**
-   * HTTP request configuration for server-driven derivations.
-   *
-   * The request is sent when dependencies change, with automatic
-   * debouncing and cancellation of in-flight requests.
-   *
-   * Configure debounce via the `trigger: 'debounced'` + `debounceMs` mechanism.
-   *
-   * @example
-   * ```typescript
-   * {
-   *   key: 'exchangeRate',
-   *   logic: [{
-   *     type: 'derivation',
-   *     source: 'http',
-   *     http: {
-   *       url: '/api/exchange-rate',
-   *       method: 'GET',
-   *       queryParams: {
-   *         from: 'formValue.sourceCurrency',
-   *         to: 'formValue.targetCurrency',
-   *       },
-   *     },
-   *     responseExpression: 'response.rate',
-   *     dependsOn: ['sourceCurrency', 'targetCurrency'],
-   *   }]
-   * }
-   * ```
-   */
+  /** HTTP request configuration for server-driven derivations. */
   http: HttpRequestConfig;
   /**
    * Explicit field dependencies. Required for HTTP derivations to prevent
    * wildcard triggering on every keystroke.
-   *
-   * The wildcard token `'*'` is rejected. The structural token `'$group'`
-   * (and `'$group.X'`) is allowed and resolves to the field's parent container
-   * path — be aware this fires whenever any sibling under that group changes,
-   * so the caller owns the request frequency (consider `trigger: 'debounced'`).
    */
   dependsOn: string[];
-  /**
-   * Expression to extract the derived value from the HTTP response.
-   *
-   * Evaluated via `ExpressionParser` with `{ response }` as the evaluation scope.
-   *
-   * @example
-   * ```typescript
-   * responseExpression: 'response.rate'
-   * responseExpression: 'response.data.suggestedPrice'
-   * ```
-   */
+  /** Expression to extract the derived value from the HTTP response. */
   responseExpression: string;
   // Mutual exclusivity: other sources are not allowed
   value?: never;
@@ -432,12 +159,6 @@ interface AsyncFunctionDerivationShared extends SharedDerivationFields {
   /**
    * Explicit field dependencies. Required for async derivations to prevent
    * wildcard triggering on every form change.
-   *
-   * The wildcard token `'*'` is rejected. The structural token `'$group'`
-   * (and `'$group.X'`) is allowed and resolves to the field's parent container
-   * path — be aware this fires whenever any sibling under that group changes,
-   * so the caller owns the invocation frequency (handle this via
-   * `trigger: 'debounced'` or via debouncing inside the async function).
    */
   dependsOn: string[];
   // Mutual exclusivity: other sources are not allowed
@@ -457,37 +178,13 @@ interface AsyncFunctionDerivationShared extends SharedDerivationFields {
  */
 type AsyncFunctionDerivationBase =
   | (AsyncFunctionDerivationShared & {
-      /**
-       * Name of a registered async derivation function.
-       *
-       * The function receives the evaluation context and returns a Promise or Observable
-       * of the derived value. Register functions in `customFnConfig.asyncDerivations`.
-       *
-       * @example
-       * ```typescript
-       * {
-       *   key: 'suggestedPrice',
-       *   logic: [{
-       *     type: 'derivation',
-       *     source: 'asyncFunction',
-       *     asyncFunctionName: 'fetchSuggestedPrice',
-       *     dependsOn: ['productId', 'quantity'],
-       *   }]
-       * }
-       * ```
-       */
+      /** Name of a registered async derivation function. */
       asyncFunctionName: string;
       /** Inline form is forbidden when `asyncFunctionName` is set */
       asyncFn?: never;
     })
   | (AsyncFunctionDerivationShared & {
-      /**
-       * Inline async derivation function. Mutually exclusive with `asyncFunctionName`.
-       *
-       * NOT JSON-serializable — for code-only configs. For configs loaded
-       * from JSON / OpenAPI / databases, use `asyncFunctionName` to reference
-       * a function registered in `customFnConfig.asyncDerivations`.
-       */
+      /** Inline async derivation function. Mutually exclusive with `asyncFunctionName`. */
       asyncFn: AsyncDerivationFunction;
       /** Registered form is forbidden when `asyncFn` is set */
       asyncFunctionName?: never;
@@ -508,40 +205,9 @@ interface ExpressionDerivationBase extends SharedDerivationFields {
   fn?: never;
   /** Forbidden on expression mode */
   asyncFn?: never;
-  /**
-   * JavaScript expression to evaluate for the derived value.
-   *
-   * Has access to `formValue` object containing all form values.
-   * For array fields, `formValue` is scoped to the current array item.
-   * Uses the same secure AST-based parser as other expressions.
-   *
-   * @example
-   * ```typescript
-   * expression: 'formValue.quantity * formValue.unitPrice'
-   * expression: 'formValue.firstName + " " + formValue.lastName'
-   * expression: 'formValue.price * (1 - formValue.discount / 100)'
-   * ```
-   */
+  /** JavaScript expression to evaluate for the derived value. */
   expression: string;
-  /**
-   * Explicit field dependencies for expressions.
-   *
-   * For `expression`, dependencies are automatically extracted from the expression.
-   * Provide `dependsOn` to override automatic detection for complex expressions.
-   *
-   * @example
-   * ```typescript
-   * // Override automatic detection for complex expressions
-   * {
-   *   key: 'total',
-   *   logic: [{
-   *     type: 'derivation',
-   *     expression: 'calculateTotal(formValue)',
-   *     dependsOn: ['quantity', 'unitPrice', 'discount']
-   *   }]
-   * }
-   * ```
-   */
+  /** Explicit field dependencies for expressions. */
   dependsOn?: string[];
   // Mutual exclusivity: other mode payload fields are not allowed
   value?: never;
@@ -562,26 +228,9 @@ interface ValueDerivationBase extends SharedDerivationFields {
   fn?: never;
   /** Forbidden on value mode */
   asyncFn?: never;
-  /**
-   * Static value to set on this field.
-   *
-   * Use when the derived value is a constant.
-   *
-   * @example
-   * ```typescript
-   * value: '+1'           // String
-   * value: 100            // Number
-   * value: true           // Boolean
-   * value: { code: 'US' } // Object
-   * ```
-   */
+  /** Static value to set on this field. */
   value: unknown;
-  /**
-   * Explicit field dependencies for value derivations.
-   *
-   * For `value` (static), no dependencies are needed.
-   * Provide `dependsOn` to conditionally re-evaluate when specific fields change.
-   */
+  /** Explicit field dependencies for value derivations. */
   dependsOn?: string[];
   // Mutual exclusivity: other mode payload fields are not allowed
   expression?: never;
@@ -600,26 +249,7 @@ interface FunctionDerivationShared extends SharedDerivationFields {
   source?: never;
   /** Forbidden on function-derivation mode */
   asyncFn?: never;
-  /**
-   * Explicit field dependencies for function derivations.
-   *
-   * If not provided, defaults to all fields ('*').
-   * Specify `dependsOn` for better performance when the function only
-   * depends on a subset of fields.
-   *
-   * @example
-   * ```typescript
-   * // Only re-evaluate when country changes
-   * {
-   *   key: 'currency',
-   *   logic: [{
-   *     type: 'derivation',
-   *     functionName: 'getCurrencyForCountry',
-   *     dependsOn: ['country']
-   *   }]
-   * }
-   * ```
-   */
+  /** Explicit field dependencies for function derivations. */
   dependsOn?: string[];
   // Mutual exclusivity: other mode payload fields are not allowed
   value?: never;
@@ -637,31 +267,13 @@ interface FunctionDerivationShared extends SharedDerivationFields {
  */
 type FunctionDerivationBase =
   | (FunctionDerivationShared & {
-      /**
-       * Name of a registered custom derivation function.
-       *
-       * The function receives the evaluation context and returns the derived value.
-       * Register functions in `customFnConfig.derivations`.
-       *
-       * @example
-       * ```typescript
-       * functionName: 'getCurrencyForCountry'
-       * functionName: 'calculateTax'
-       * functionName: 'formatPhoneNumber'
-       * ```
-       */
+      /** Name of a registered custom derivation function. */
       functionName: string;
       /** Inline form is forbidden when `functionName` is set */
       fn?: never;
     })
   | (FunctionDerivationShared & {
-      /**
-       * Inline custom derivation function. Mutually exclusive with `functionName`.
-       *
-       * NOT JSON-serializable — for code-only configs. For configs loaded
-       * from JSON / OpenAPI / databases, use `functionName` to reference
-       * a function registered in `customFnConfig.derivations`.
-       */
+      /** Inline custom derivation function. Mutually exclusive with `functionName`. */
       fn: CustomFunction;
       /** Registered form is forbidden when `fn` is set */
       functionName?: never;
@@ -669,124 +281,75 @@ type FunctionDerivationBase =
 
 /**
  * HTTP derivation that evaluates immediately on change (default).
+ *
  * @internal
  */
 type OnChangeHttpDerivationLogicConfig = HttpDerivationBase & ImmediateDerivationTrigger;
 
 /**
  * HTTP derivation that evaluates after a debounce period.
+ *
  * @internal
  */
 type DebouncedHttpDerivationLogicConfig = HttpDerivationBase & DebouncedDerivationTrigger;
 
 /**
  * Async function derivation that evaluates immediately on change (default).
+ *
  * @internal
  */
 type OnChangeAsyncFunctionDerivationLogicConfig = AsyncFunctionDerivationBase & ImmediateDerivationTrigger;
 
 /**
  * Async function derivation that evaluates after a debounce period.
+ *
  * @internal
  */
 type DebouncedAsyncFunctionDerivationLogicConfig = AsyncFunctionDerivationBase & DebouncedDerivationTrigger;
 
 /**
  * Expression derivation that evaluates immediately on change (default).
+ *
  * @internal
  */
 type OnChangeExpressionDerivationLogicConfig = ExpressionDerivationBase & ImmediateDerivationTrigger;
 
 /**
  * Expression derivation that evaluates after a debounce period.
+ *
  * @internal
  */
 type DebouncedExpressionDerivationLogicConfig = ExpressionDerivationBase & DebouncedDerivationTrigger;
 
 /**
  * Value derivation that evaluates immediately on change (default).
+ *
  * @internal
  */
 type OnChangeValueDerivationLogicConfig = ValueDerivationBase & ImmediateDerivationTrigger;
 
 /**
  * Value derivation that evaluates after a debounce period.
+ *
  * @internal
  */
 type DebouncedValueDerivationLogicConfig = ValueDerivationBase & DebouncedDerivationTrigger;
 
 /**
  * Function derivation that evaluates immediately on change (default).
+ *
  * @internal
  */
 type OnChangeFunctionDerivationLogicConfig = FunctionDerivationBase & ImmediateDerivationTrigger;
 
 /**
  * Function derivation that evaluates after a debounce period.
+ *
  * @internal
  */
 type DebouncedFunctionDerivationLogicConfig = FunctionDerivationBase & DebouncedDerivationTrigger;
 
-/**
- * Configuration for value derivation logic.
- *
- * Enables programmatic value derivation based on conditions.
- * Derivations are self-targeting: the logic is placed on the field
- * that should receive the computed value.
- *
- * @example
- * ```typescript
- * // Set phone prefix based on country selection
- * {
- *   key: 'phonePrefix',
- *   logic: [{
- *     type: 'derivation',
- *     value: '+1',
- *     condition: {
- *       type: 'fieldValue',
- *       fieldPath: 'country',
- *       operator: 'equals',
- *       value: 'USA'
- *     }
- *   }]
- * }
- *
- * // Compute total from quantity and price
- * {
- *   key: 'total',
- *   derivation: 'formValue.quantity * formValue.unitPrice'
- * }
- *
- * // Use custom function for complex logic
- * {
- *   key: 'currency',
- *   logic: [{
- *     type: 'derivation',
- *     functionName: 'getCurrencyForCountry'
- *   }]
- * }
- *
- * // Self-transform with debounced trigger
- * // (applies after user stops typing)
- * {
- *   key: 'email',
- *   logic: [{
- *     type: 'derivation',
- *     expression: 'formValue.email.toLowerCase()',
- *     trigger: 'debounced',
- *     debounceMs: 500
- *   }]
- * }
- *
- * // Array item derivation (formValue is scoped to current item)
- * {
- *   key: 'lineTotal',  // Inside array field
- *   derivation: 'formValue.quantity * formValue.unitPrice'
- * }
- * ```
- *
- * @public
- */
+/** Configuration for value derivation logic. */
 export type DerivationLogicConfig =
   | OnChangeHttpDerivationLogicConfig
   | DebouncedHttpDerivationLogicConfig
@@ -799,32 +362,13 @@ export type DerivationLogicConfig =
   | OnChangeFunctionDerivationLogicConfig
   | DebouncedFunctionDerivationLogicConfig;
 
-/**
- * Union type for all logic configurations.
- *
- * - `StateLogicConfig`: For field state changes (hidden, readonly, disabled, required)
- * - `DerivationLogicConfig`: For value derivation (including property derivation via `targetProperty`)
- *
- * @public
- */
+/** Union type for all logic configurations. */
 export type LogicConfig = StateLogicConfig | DerivationLogicConfig;
 
-/**
- * Log level for derivation debug output.
- *
- * - 'none': No debug logging
- * - 'summary': Log cycle completion with counts (default in dev mode)
- * - 'verbose': Log individual derivation evaluations with details
- *
- * @public
- */
+/** Log level for derivation debug output. */
 export type DerivationLogLevel = 'none' | 'summary' | 'verbose';
 
-/**
- * Configuration for derivation debug logging.
- *
- * @public
- */
+/** Configuration for derivation debug logging. */
 export interface DerivationLogConfig {
   /** Log level for derivation debugging. Defaults to 'none'. */
   level: DerivationLogLevel;
@@ -833,11 +377,7 @@ export interface DerivationLogConfig {
 /**
  * Creates the default derivation log configuration.
  *
- * Defaults to 'none' (silent). Users can enable logging via `withLoggerConfig`.
- *
  * @returns Default DerivationLogConfig
- *
- * @public
  */
 export function createDefaultDerivationLogConfig(): DerivationLogConfig {
   return {
@@ -851,8 +391,6 @@ export function createDefaultDerivationLogConfig(): DerivationLogConfig {
  * @param config - Current log configuration
  * @param minLevel - Minimum level required for logging
  * @returns True if logging should occur
- *
- * @public
  */
 export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean {
   if (config.level === 'none') return false;
@@ -865,8 +403,6 @@ export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 've
  *
  * @param condition - The condition to check
  * @returns true if the condition is a FormStateCondition
- *
- * @public
  */
 export function isFormStateCondition(
   condition: StateLogicConfig['condition'] | DerivationLogicConfig['condition'],
@@ -879,8 +415,6 @@ export function isFormStateCondition(
  *
  * @param config - The logic config to check
  * @returns true if the config is for field state logic
- *
- * @public
  */
 export function isStateLogicConfig(config: LogicConfig): config is StateLogicConfig {
   return config.type === 'hidden' || config.type === 'readonly' || config.type === 'disabled' || config.type === 'required';
@@ -891,8 +425,6 @@ export function isStateLogicConfig(config: LogicConfig): config is StateLogicCon
  *
  * @param config - The logic config to check
  * @returns true if the config is for value derivation
- *
- * @public
  */
 export function isDerivationLogicConfig(config: LogicConfig): config is DerivationLogicConfig {
   return config.type === 'derivation';
@@ -901,13 +433,8 @@ export function isDerivationLogicConfig(config: LogicConfig): config is Derivati
 /**
  * Type guard to check if a derivation config targets a property rather than the field value.
  *
- * When `targetProperty` is present on a `type: 'derivation'` config, it is routed
- * to the property derivation pipeline instead of the value derivation pipeline.
- *
  * @param config - The derivation logic config to check
  * @returns true if the config has a targetProperty (property derivation)
- *
- * @public
  */
 export function hasTargetProperty(config: DerivationLogicConfig): config is DerivationLogicConfig & { targetProperty: string } {
   return 'targetProperty' in config && typeof config.targetProperty === 'string' && config.targetProperty.length > 0;

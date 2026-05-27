@@ -3,15 +3,7 @@ import { HttpValidationResponseMapping } from '../../models/http/http-response-m
 import { Logger } from '../../providers/features/logger/logger.interface';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
 
-/**
- * Evaluates an HTTP response against a `HttpValidationResponseMapping` to produce a validation result.
- *
- * - `validWhen` === `true` → `null` (valid, no error)
- * - `validWhen` !== `true` → `{ kind: errorKind, ...evaluatedErrorParams }`
- * - Expression error → logs warning, returns `{ kind: errorKind }` (fail-closed)
- *
- * Expressions are evaluated with scope `{ response }` only.
- */
+/** Evaluates an HTTP response against a `HttpValidationResponseMapping` to produce a validation result. */
 export function evaluateHttpValidationResponse(
   response: unknown,
   mapping: HttpValidationResponseMapping,

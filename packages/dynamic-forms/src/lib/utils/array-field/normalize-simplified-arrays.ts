@@ -12,15 +12,7 @@ import { ArrayItemDefinition } from '../../definitions/default/array-field';
 import { setNormalizedArrayMetadata } from './normalized-array-metadata';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
 
-/**
- * Normalizes simplified array fields into full array field definitions.
- *
- * Walks the field tree and expands any `SimplifiedArrayField` (those with a `template` property)
- * into a standard `ArrayField` with proper item definitions and add/remove button fields.
- *
- * This is a pure function with no DI dependencies. It is idempotent — calling it on
- * already-normalized output produces the same result.
- */
+/** Normalizes simplified array fields into full array field definitions. */
 export function normalizeSimplifiedArrays(fields: FieldDef<unknown>[]): FieldDef<unknown>[] {
   return fields.flatMap((field): FieldDef<unknown>[] => {
     // Recurse into non-array containers (page, group, row) that have child fields
@@ -90,9 +82,7 @@ function validateSimplifiedTemplate(field: SimplifiedArrayField): void {
   }
 }
 
-/**
- * Expands a simplified array field into a full ArrayField + optional add button.
- */
+/** Expands a simplified array field into a full ArrayField + optional add button. */
 function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   const {
     template,
@@ -202,23 +192,12 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   return { arrayField, addButton: addButtonField };
 }
 
-/**
- * Builds a primitive array item as a single FieldDef (not wrapped in array).
- *
- * This ensures the form schema creates FormControls (not FormGroups) for each item,
- * producing flat primitive values like `['angular', 'typescript']` instead of
- * `[{ value: 'angular' }, { value: 'typescript' }]`.
- *
- * Remove buttons are handled separately via Symbol metadata on the array field,
- * which the array component renders alongside each item without affecting form values.
- */
+/** Builds a primitive array item as a single FieldDef (not wrapped in array). */
 function buildPrimitiveItem(template: ArrayAllowedChildren, value: unknown): ArrayItemDefinition {
   return { ...template, value } as ArrayAllowedChildren;
 }
 
-/**
- * Builds an object array item: template fields with values merged + optional remove button.
- */
+/** Builds an object array item: template fields with values merged + optional remove button. */
 function buildObjectItem(
   template: readonly ArrayAllowedChildren[],
   valueObj: Record<string, unknown>,
@@ -239,9 +218,7 @@ function buildObjectItem(
   return [...fieldsWithValues, buildRemoveButton(removeButton)];
 }
 
-/**
- * Builds the add button template for object items (template fields without values + remove button).
- */
+/** Builds the add button template for object items (template fields without values + remove button). */
 function buildObjectItemTemplate(
   template: readonly ArrayAllowedChildren[],
   removeButton: ArrayButtonConfig | false | undefined,
@@ -253,9 +230,7 @@ function buildObjectItemTemplate(
   return [...template, buildRemoveButton(removeButton)];
 }
 
-/**
- * Builds a remove button field definition.
- */
+/** Builds a remove button field definition. */
 function buildRemoveButton(config: ArrayButtonConfig | undefined): ArrayAllowedChildren {
   const buttonConfig = (typeof config === 'object' ? config : {}) as ArrayButtonConfig;
   // Safe cast: removeArrayItem fields are valid ArrayAllowedChildren but not in the static union

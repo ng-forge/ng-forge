@@ -1,36 +1,23 @@
-/**
- * Scaffold Tool (NEW)
- *
- * Generates valid FormConfig skeletons based on parameters.
- * Produces copy-paste ready code with proper structure.
- *
- * Single tool for "Generate a skeleton for X"
- */
+/** Scaffold Tool (NEW) */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
-/**
- * Field definition from "name:type" string.
- */
+/** Field definition from "name:type" string. */
 interface FieldDef {
   name: string;
   type: string;
 }
 
-/**
- * Hidden field definition from "name:value" string.
- */
+/** Hidden field definition from "name:value" string. */
 interface HiddenDef {
   name: string;
   value: string;
 }
 
-/**
- * Parse "name:type" pairs.
- */
+/** Parse "name:type" pairs. */
 function parseFieldDefs(fields: string[]): FieldDef[] {
   return fields.map((f) => {
     const [name, type] = f.split(':');
@@ -41,9 +28,7 @@ function parseFieldDefs(fields: string[]): FieldDef[] {
   });
 }
 
-/**
- * Parse "name:value" pairs for hidden fields.
- */
+/** Parse "name:value" pairs for hidden fields. */
 function parseHiddenDefs(hiddens: string[]): HiddenDef[] {
   return hiddens.map((h) => {
     const colonIndex = h.indexOf(':');
@@ -57,9 +42,7 @@ function parseHiddenDefs(hiddens: string[]): HiddenDef[] {
   });
 }
 
-/**
- * Generate a basic field config.
- */
+/** Generate a basic field config. */
 function generateField(def: FieldDef, indent: string): string {
   const { name, type } = def;
 
@@ -109,9 +92,7 @@ ${indent}}`;
   }
 }
 
-/**
- * Generate a hidden field config.
- */
+/** Generate a hidden field config. */
 function generateHiddenField(def: HiddenDef, indent: string): string {
   const { name, value } = def;
   // Determine if value should be quoted
@@ -122,9 +103,7 @@ function generateHiddenField(def: HiddenDef, indent: string): string {
   return `${indent}{ key: '${name}', type: 'hidden', value: ${formattedValue} }`;
 }
 
-/**
- * Generate a group skeleton.
- */
+/** Generate a group skeleton. */
 function generateGroup(name: string, indent: string): string {
   return `${indent}{
 ${indent}  key: '${name}',
@@ -153,9 +132,7 @@ ${indent}  addButton: { label: 'Add ${capitalize(name)}' }
 ${indent}}`;
 }
 
-/**
- * Capitalize first letter.
- */
+/** Capitalize first letter. */
 function capitalize(s: string): string {
   return (
     s.charAt(0).toUpperCase() +
@@ -166,9 +143,7 @@ function capitalize(s: string): string {
   );
 }
 
-/**
- * Generate complete FormConfig skeleton.
- */
+/** Generate complete FormConfig skeleton. */
 function generateScaffold(options: { pages: number; arrays: string[]; groups: string[]; hidden: HiddenDef[]; fields: FieldDef[] }): string {
   const { pages, arrays, groups, hidden, fields } = options;
   const lines: string[] = [];
@@ -292,9 +267,7 @@ function generateScaffold(options: { pages: number; arrays: string[]; groups: st
   return lines.join('\n');
 }
 
-/**
- * Generate output shape preview.
- */
+/** Generate output shape preview. */
 function generateOutputShape(options: { groups: string[]; arrays: string[]; hidden: HiddenDef[]; fields: FieldDef[] }): string {
   const lines: string[] = [];
   lines.push('');
@@ -332,9 +305,7 @@ function generateOutputShape(options: { groups: string[]; arrays: string[]; hidd
   return lines.join('\n');
 }
 
-/**
- * Get TypeScript type for field type.
- */
+/** Get TypeScript type for field type. */
 function getTypeForFieldType(type: string): string {
   switch (type) {
     case 'input':

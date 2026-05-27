@@ -16,13 +16,7 @@ export const INITIALIZATION_TIMEOUT_MS = new InjectionToken<number>('INITIALIZAT
   factory: () => 10_000,
 });
 
-/**
- * Creates an observable that tracks component initialization progress.
- *
- * Emits once with `true` when `expectedCount` component-initialized events have
- * been seen on the bus. Used internally by {@link setupInitializationTracking}
- * and kept as a named export for focused unit testing.
- */
+/** Creates an observable that tracks component initialization progress. */
 export function createInitializationTracker(eventBus: EventBus, expectedCount: number): Observable<boolean> {
   return eventBus.on<ComponentInitializedEvent>('component-initialized').pipe(
     scan((count) => count + 1, 0),
@@ -31,9 +25,7 @@ export function createInitializationTracker(eventBus: EventBus, expectedCount: n
   );
 }
 
-/**
- * Options for setting up initialization tracking.
- */
+/** Options for setting up initialization tracking. */
 export interface InitializationTrackingOptions {
   eventBus: EventBus;
   totalComponentsCount: Signal<number>;
@@ -45,24 +37,6 @@ export interface InitializationTrackingOptions {
  * Creates an observable that tracks when all form components are initialized.
  * Uses shareReplay({ bufferSize: 1, refCount: false }) to ensure exactly one emission
  * that can be received by late subscribers and keeps the subscription alive.
- *
- * Includes a configurable timeout (default 10s via INITIALIZATION_TIMEOUT_MS)
- * so that (initialized) does not hang forever if a container component throws
- * before emitting its initialization event. On timeout, a warning is logged
- * and true is emitted as a best-effort fallback.
- *
- * @example
- * ```typescript
- * const eventBus = inject(EventBus);
- * const totalComponents = computed(() => countContainerComponents(fields));
- *
- * readonly initialized$ = setupInitializationTracking({
- *   eventBus,
- *   totalComponentsCount: totalComponents,
- *   injector: this.injector,
- *   componentId: 'dynamic-form'
- * });
- * ```
  */
 export function setupInitializationTracking(options: InitializationTrackingOptions): Observable<boolean> {
   const { eventBus, totalComponentsCount, injector, componentId } = options;

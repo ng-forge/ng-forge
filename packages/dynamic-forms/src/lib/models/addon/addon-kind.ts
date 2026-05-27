@@ -9,12 +9,6 @@ import { AddonSlot } from './addon-slot';
  * (`type`/`properties`/`required`/`enum`/etc.) without pulling in a full JSON
  * Schema dependency. Extra keys are allowed via the `[key: string]` index so
  * vendor-specific annotations (`x-foo`, `markdownDescription`) still typecheck.
- *
- * Tooling-only: the runtime addon validator does NOT consult `schema` — it
- * relies on each kind's `validate?(addon, fieldKey)` callback for shape
- * enforcement. `schema` exists exclusively so the MCP server (and any other
- * AI-driven form authoring tool) can describe the kind to a model without
- * hand-maintaining a parallel registry.
  */
 export interface AddonKindSchema {
   readonly $ref?: string;
@@ -59,13 +53,7 @@ export interface AddonKindSchema {
  */
 export type AddonShapeValidator<T extends BaseAddon = BaseAddon> = (addon: T, fieldKey: string) => void;
 
-/**
- * Per-kind registration metadata.
- *
- * Registered via `withCustomAddon(...)` features (or adapter feature
- * helpers like `withPrimeNGAddons()`); resolved at render time by
- * `<df-addon-slot>`.
- */
+/** Per-kind registration metadata. */
 export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
   /** Discriminant matching `addon.kind`. */
   readonly kind: string;
@@ -86,16 +74,7 @@ export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
   readonly jsonSafe?: boolean;
 }
 
-/**
- * Per-field-type addon-support metadata declared at field registration.
- *
- * Source of truth for the runtime validator: which slots are valid for a
- * field type, which kinds are accepted (optional whitelist).
- *
- * Field types that do not declare `addons` on their `FieldTypeDefinition`
- * are treated as Tier 3 — addons configured on such fields are dropped
- * with a warning at config init.
- */
+/** Per-field-type addon-support metadata declared at field registration. */
 export interface FieldAddonSupport {
   /** Slots a field of this type accepts. */
   readonly slots: readonly AddonSlot[];
@@ -103,13 +82,7 @@ export interface FieldAddonSupport {
   readonly allowedKinds?: readonly string[];
 }
 
-/**
- * Global registry of addon kinds.
- *
- * Populated by `withCustomAddon(...)` features and adapter feature helpers
- * (e.g., `withPrimeNGAddons()`). Read by `<df-addon-slot>` to resolve a
- * kind discriminant to its renderer component.
- */
+/** Global registry of addon kinds. */
 export const ADDON_KIND_REGISTRY = new InjectionToken<Map<string, AddonKindDefinition>>('ADDON_KIND_REGISTRY', {
   providedIn: 'root',
   factory: () => new Map<string, AddonKindDefinition>(),

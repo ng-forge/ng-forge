@@ -1,9 +1,4 @@
-/**
- * Validator Registry Data
- *
- * Canonical source of validator metadata for the MCP server.
- * Previously generated as validators.json by generate-registry.ts.
- */
+/** Validator Registry Data */
 
 import type { ValidatorInfo } from './index.js';
 

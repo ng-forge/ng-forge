@@ -1,8 +1,4 @@
-/**
- * UI Adapters Resource
- *
- * Exposes UI library-specific field configurations for Material, Bootstrap, PrimeNG, and Ionic.
- */
+/** UI Adapters Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getUIAdapters, getUIAdapter } from '../registry/index.js';

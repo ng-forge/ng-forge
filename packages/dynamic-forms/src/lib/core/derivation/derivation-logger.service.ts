@@ -3,14 +3,7 @@ import { DerivationLogConfig, createDefaultDerivationLogConfig, shouldLog } from
 import { DerivationProcessingResult } from './derivation-types';
 import { DerivationLogEntry } from './derivation-logger';
 
-/**
- * Service interface for derivation logging.
- *
- * Provides methods to log derivation processing events at different verbosity levels.
- * Use `createDerivationLogger` factory to create an instance.
- *
- * @public
- */
+/** Service interface for derivation logging. */
 export interface DerivationLogger {
   /**
    * Logs the start of a derivation processing cycle.
@@ -36,9 +29,7 @@ export interface DerivationLogger {
    */
   summary(result: DerivationProcessingResult, trigger: 'onChange' | 'debounced'): void;
 
-  /**
-   * Logs when max iterations are reached (always logged as warning).
-   */
+  /** Logs when max iterations are reached (always logged as warning). */
   maxIterationsReached(result: DerivationProcessingResult, trigger: 'onChange' | 'debounced'): void;
 }
 
@@ -51,9 +42,7 @@ class ActiveDerivationLogger implements DerivationLogger {
   logger!: Logger;
   private config: DerivationLogConfig = createDefaultDerivationLogConfig();
 
-  /**
-   * Updates the log configuration.
-   */
+  /** Updates the log configuration. */
   setConfig(config: DerivationLogConfig): void {
     this.config = config;
   }
@@ -169,14 +158,9 @@ const NOOP_INSTANCE = new NoopDerivationLogger();
 /**
  * Factory function to create a DerivationLogger.
  *
- * Returns a no-op implementation if config level is 'none',
- * otherwise returns an active logger with the given config.
- *
  * @param config - The derivation log configuration
  * @param logger - The underlying logger instance
  * @returns A DerivationLogger instance
- *
- * @public
  */
 export function createDerivationLogger(config: DerivationLogConfig | undefined, logger: Logger): DerivationLogger {
   const effectiveConfig = config ?? createDefaultDerivationLogConfig();

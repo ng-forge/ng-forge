@@ -3,30 +3,8 @@ import { DerivationEntry } from './derivation-types';
 /**
  * Sorts derivation entries in topological order based on their dependencies.
  *
- * This ensures that derivations are processed in the correct order:
- * if derivation B depends on field A, and derivation A->A' modifies A,
- * then A->A' is processed before B.
- *
- * Uses Kahn's algorithm for topological sorting, which also provides
- * natural handling of entries with no dependencies (they come first).
- *
  * @param entries - The derivation entries to sort
  * @returns A new array of entries in topological order
- *
- * @example
- * ```typescript
- * // Given derivations:
- * // 1. quantity -> lineTotal (depends on quantity, unitPrice)
- * // 2. unitPrice -> lineTotal (depends on quantity, unitPrice)
- * // 3. lineTotal -> grandTotal (depends on lineTotal)
- * //
- * // Topological sort ensures lineTotal is computed before grandTotal
- * const sorted = topologicalSort(entries);
- * // Result: [1, 2, 3] - derivations that produce lineTotal come before
- * // those that consume it
- * ```
- *
- * @public
  */
 export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
   if (entries.length <= 1) {

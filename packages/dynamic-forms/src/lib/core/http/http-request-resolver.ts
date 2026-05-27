@@ -6,12 +6,6 @@ import { ExpressionParser } from '../expressions/parser/expression-parser';
 /**
  * Resolves an `HttpRequestConfig` into an `HttpResourceRequest` by evaluating
  * expression-based query params and (optionally) body values.
- *
- * Returns `null` if any path parameter resolves to `undefined` or `null`,
- * signaling that the request should be suppressed (the URL would be malformed).
- *
- * `debounceMs` is intentionally ignored — it's used by HTTP derivations/conditions (PRs 3-4),
- * not by validators.
  */
 export function resolveHttpRequest(config: HttpRequestConfig, context: EvaluationContext): HttpResourceRequest | null {
   let url = config.url;

@@ -1,9 +1,4 @@
-/**
- * UI Adapter Registry Data
- *
- * Canonical source of UI adapter metadata for the MCP server.
- * Previously generated as ui-adapters.json by generate-registry.ts.
- */
+/** UI Adapter Registry Data */
 
 import type { UIAdapterInfo } from './index.js';
 

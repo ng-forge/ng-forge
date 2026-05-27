@@ -4,13 +4,7 @@ import { TextAddon } from '../models/addon/addon-def';
 import { DynamicTextPipe } from '../pipes/dynamic-text/dynamic-text.pipe';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
-/**
- * Renderer for the universal `text` addon kind.
- *
- * Renders the addon's `text` (a `DynamicText`) inside a span. Decorative —
- * sets `aria-hidden="true"` on the host so screen readers skip it; users
- * who need announcement should use a `*-button` kind with `ariaLabel` instead.
- */
+/** Renderer for the universal `text` addon kind. */
 @Component({
   selector: 'df-text-addon',
   imports: [AsyncPipe, DynamicTextPipe],

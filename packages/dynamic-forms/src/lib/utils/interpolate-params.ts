@@ -6,10 +6,6 @@ import { ValidationError } from '../models/validation-types';
  * @param message - Message template with {{param}} placeholders
  * @param error - Validation error containing parameter values
  * @returns Message with interpolated parameters
- *
- * @example
- * interpolateParams("Min value is {{min}}", { kind: 'min', min: 5 })
- * // Returns: "Min value is 5"
  */
 export function interpolateParams(message: string, error: ValidationError): string {
   let result = message;
@@ -25,6 +21,7 @@ export function interpolateParams(message: string, error: ValidationError): stri
 
 /**
  * Safely converts a value to a string, handling complex objects
+ *
  * @internal
  */
 function safeToString(value: unknown): string {
@@ -68,6 +65,7 @@ function safeToString(value: unknown): string {
 
 /**
  * Extracts parameter values from validation error
+ *
  * @internal
  */
 function extractErrorParams(error: ValidationError): Record<string, unknown> {

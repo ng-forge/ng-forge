@@ -1,12 +1,4 @@
-/**
- * MCP Server for ng-forge dynamic forms
- *
- * Provides AI assistants with tools and resources for:
- * - Field type discovery
- * - Form schema generation
- * - Validation configuration
- * - Expression building
- */
+/** MCP Server for ng-forge dynamic forms */
 
 import { createRequire } from 'module';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -20,9 +12,7 @@ const packageJson = require('../package.json') as { name: string; version: strin
 const SERVER_NAME = 'ng-forge-mcp';
 const SERVER_VERSION = packageJson.version;
 
-/**
- * Create and configure the MCP server
- */
+/** Create and configure the MCP server */
 export function createServer(): McpServer {
   const server = new McpServer({
     name: SERVER_NAME,
@@ -38,9 +28,7 @@ export function createServer(): McpServer {
   return server;
 }
 
-/**
- * Run the MCP server with stdio transport
- */
+/** Run the MCP server with stdio transport */
 export async function runStdioServer(): Promise<void> {
   const server = createServer();
   const transport = new StdioServerTransport();

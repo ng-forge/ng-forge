@@ -21,11 +21,7 @@ const noOpLogger: Logger = {
   error: () => {},
 };
 
-/**
- * Context for resolving button disabled state.
- *
- * @public
- */
+/** Context for resolving button disabled state. */
 export interface ButtonLogicContext {
   /** The form's FieldTree instance (supports both string and number keys for array indices) */
   form: FieldTree<unknown, string | number>;
@@ -53,31 +49,16 @@ export interface ButtonLogicContext {
  * Allowed logic types for non-form-bound elements (buttons, text fields, etc.).
  * These elements only support hidden and disabled states - not readonly or required
  * since they don't participate in form validation.
- *
- * @public
  */
 export type NonFieldLogicType = 'hidden' | 'disabled';
 
 /**
  * Logic config restricted to types valid for non-form-bound elements.
  * This is a subset of LogicConfig that only includes hidden and disabled types.
- *
- * @public
  */
 export type NonFieldLogicConfig = LogicConfig & { type: NonFieldLogicType };
 
-/**
- * Context for resolving state (hidden/disabled) for non-form-bound elements.
- *
- * This is a generalized context that can be used by any field mapper (buttons, text fields,
- * or any non-form-bound elements) to evaluate logic from a `logic` array.
- *
- * Note: While this context accepts the full `LogicConfig[]` for flexibility, the resolver
- * functions only process hidden and disabled types. Other logic types (readonly, required,
- * derivation) are ignored for non-form-bound elements.
- *
- * @public
- */
+/** Context for resolving state (hidden/disabled) for non-form-bound elements. */
 export interface NonFieldLogicContext {
   /** The form's FieldTree instance (supports both string and number keys for array indices) */
   form: FieldTree<unknown, string | number>;
@@ -98,17 +79,13 @@ export interface NonFieldLogicContext {
   logger?: Logger;
 }
 
-/**
- * Default options for submit button disabled behavior.
- */
+/** Default options for submit button disabled behavior. */
 const DEFAULT_SUBMIT_BUTTON_OPTIONS: Required<SubmitButtonOptions> = {
   disableWhenInvalid: true,
   disableWhileSubmitting: true,
 };
 
-/**
- * Default options for next button disabled behavior.
- */
+/** Default options for next button disabled behavior. */
 const DEFAULT_NEXT_BUTTON_OPTIONS: Required<NextButtonOptions> = {
   disableWhenPageInvalid: true,
   disableWhileSubmitting: true,
@@ -228,28 +205,8 @@ function evaluateLogicOfType(
 /**
  * Resolves the disabled state for a submit button.
  *
- * The disabled state is determined by (in order of precedence):
- * 1. Explicit `disabled: true` on the field definition
- * 2. Field-level `logic` array (if present, overrides form-level defaults)
- * 3. Form-level `options.submitButton` defaults
- *
  * @param ctx - The button logic context
  * @returns A computed signal that returns true when the button should be disabled
- *
- * @example
- * ```typescript
- * const disabled = resolveSubmitButtonDisabled({
- *   form: formInstance,
- *   formOptions: config.options,
- *   fieldLogic: buttonField.logic,
- *   explicitlyDisabled: buttonField.disabled,
- * });
- *
- * // Use in template
- * <button [disabled]="disabled()">Submit</button>
- * ```
- *
- * @public
  */
 export function resolveSubmitButtonDisabled(ctx: ButtonLogicContext): Signal<boolean> {
   return computed(() => {
@@ -286,26 +243,8 @@ export function resolveSubmitButtonDisabled(ctx: ButtonLogicContext): Signal<boo
 /**
  * Resolves the disabled state for a next page button.
  *
- * The disabled state is determined by (in order of precedence):
- * 1. Explicit `disabled: true` on the field definition
- * 2. Field-level `logic` array (if present, overrides form-level defaults)
- * 3. Form-level `options.nextButton` defaults
- *
  * @param ctx - The button logic context
  * @returns A computed signal that returns true when the button should be disabled
- *
- * @example
- * ```typescript
- * const disabled = resolveNextButtonDisabled({
- *   form: formInstance,
- *   formOptions: config.options,
- *   fieldLogic: buttonField.logic,
- *   explicitlyDisabled: buttonField.disabled,
- *   currentPageValid: pageOrchestrator.currentPageValid,
- * });
- * ```
- *
- * @public
  */
 export function resolveNextButtonDisabled(ctx: ButtonLogicContext): Signal<boolean> {
   return computed(() => {
@@ -342,17 +281,8 @@ export function resolveNextButtonDisabled(ctx: ButtonLogicContext): Signal<boole
 /**
  * Evaluates the hidden state for non-form-bound elements synchronously.
  *
- * This is a pure function (no signal allocation) that can be called directly inside
- * an existing `computed()` block without creating ephemeral signal allocations.
- *
- * The hidden state is determined by (in order of precedence):
- * 1. Explicit `hidden: true` on the field definition
- * 2. Field-level `logic` array with `type: 'hidden'` conditions
- *
  * @param ctx - The context containing form, logic array, and explicit hidden state
  * @returns true when the element should be hidden
- *
- * @public
  */
 export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean {
   // 1. Explicit hidden always wins
@@ -376,14 +306,8 @@ export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean {
 /**
  * Resolves the hidden state for non-form-bound elements as a reactive signal.
  *
- * Wraps {@link evaluateNonFieldHidden} in a `computed()` for use cases where a standalone
- * signal is needed. When calling from inside an existing `computed()`, prefer
- * {@link evaluateNonFieldHidden} directly to avoid ephemeral signal allocation.
- *
  * @param ctx - The context containing form, logic array, and explicit hidden state
  * @returns A computed signal that returns true when the element should be hidden
- *
- * @public
  */
 export function resolveNonFieldHidden(ctx: NonFieldLogicContext): Signal<boolean> {
   return computed(() => evaluateNonFieldHidden(ctx));
@@ -392,17 +316,8 @@ export function resolveNonFieldHidden(ctx: NonFieldLogicContext): Signal<boolean
 /**
  * Evaluates the disabled state for non-form-bound elements synchronously.
  *
- * This is a pure function (no signal allocation) that can be called directly inside
- * an existing `computed()` block without creating ephemeral signal allocations.
- *
- * The disabled state is determined by (in order of precedence):
- * 1. Explicit `disabled: true` on the field definition
- * 2. Field-level `logic` array with `type: 'disabled'` conditions
- *
  * @param ctx - The context containing form, logic array, and explicit disabled state
  * @returns true when the element should be disabled
- *
- * @public
  */
 export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
   // 1. Explicit disabled always wins
@@ -426,14 +341,8 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
 /**
  * Resolves the disabled state for non-form-bound elements as a reactive signal.
  *
- * Wraps {@link evaluateNonFieldDisabled} in a `computed()` for use cases where a standalone
- * signal is needed. When calling from inside an existing `computed()`, prefer
- * {@link evaluateNonFieldDisabled} directly to avoid ephemeral signal allocation.
- *
  * @param ctx - The context containing form, logic array, and explicit disabled state
  * @returns A computed signal that returns true when the element should be disabled
- *
- * @public
  */
 export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boolean> {
   return computed(() => evaluateNonFieldDisabled(ctx));

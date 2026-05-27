@@ -5,9 +5,7 @@ import { MaterialConfig } from '../models/material-config';
 import { MATERIAL_CONFIG } from '../models/material-config.token';
 import type { MatButtonAddon, MatIconAddon } from '../types/addons';
 
-/**
- * Field type definitions for Material Design components.
- */
+/** Field type definitions for Material Design components. */
 export type MaterialFieldTypes = FieldTypeDefinition[];
 
 type MaterialConfigFeature = {
@@ -28,41 +26,7 @@ type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialAddonsFeature, M
  * Material-shipped addon kinds (`mat-icon`, `mat-button`) auto-included so
  * addons work out of the box.
  *
- * If you want field types WITHOUT addons (rare), pass them through
- * `provideDynamicForm` directly and skip this helper. If you want addons
- * WITHOUT the field types (also rare), call `withMaterialAddons()` standalone.
- *
  * @param config - Optional global configuration for Material form fields
- *
- * @example
- * ```typescript
- * // Application-level setup — addons (mat-icon, mat-button) ship in automatically
- * import { ApplicationConfig } from '@angular/core';
- * import { provideDynamicForm } from '@ng-forge/dynamic-forms';
- * import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
- *
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(...withMaterialFields())
- *   ]
- * };
- * ```
- *
- * @example
- * ```typescript
- * // With global configuration
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(
- *       ...withMaterialFields({
- *         appearance: 'fill',
- *         subscriptSizing: 'fixed'
- *       })
- *     )
- *   ]
- * };
- * ```
- *
  * @returns Tuple of field type definitions, the addons feature, and
  *   optionally a config feature.
  */
@@ -126,27 +90,7 @@ type MaterialAddonsFeature = {
   ɵproviders: Provider[];
 };
 
-/**
- * Register Material-shipped addon kinds (`mat-icon`, `mat-button`) standalone.
- *
- * **Most users don't need this** — `withMaterialFields()` auto-includes
- * these kinds. Call `withMaterialAddons()` directly only when you want
- * Material addon kinds without the Material field types (e.g., a custom
- * field set that wants to render `mat-icon` prefixes), or when you're
- * stitching addons through a different DI scope.
- *
- * @example
- * ```typescript
- * // Custom field types + Material addon kinds.
- * provideDynamicForm(
- *   ...myCustomFields(),
- *   withMaterialAddons(),
- * );
- * ```
- *
- * Adapter authors who need to override a kind with a customised renderer
- * should call `withCustomAddon(...)` directly instead.
- */
+/** Register Material-shipped addon kinds (`mat-icon`, `mat-button`) standalone. */
 export function withMaterialAddons(): MaterialAddonsFeature {
   return {
     ɵkind: 'addons',

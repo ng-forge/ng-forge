@@ -15,9 +15,7 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 
 type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
 
-/**
- * Extracts the trigger from a StateLogicConfig, handling the discriminated union.
- */
+/** Extracts the trigger from a StateLogicConfig, handling the discriminated union. */
 function getConfigTrigger(config: LogicConfig): LogicTrigger {
   if (!isStateLogicConfig(config)) {
     return 'onChange';
@@ -25,9 +23,7 @@ function getConfigTrigger(config: LogicConfig): LogicTrigger {
   return config.trigger ?? 'onChange';
 }
 
-/**
- * Extracts debounceMs from a StateLogicConfig if trigger is 'debounced'.
- */
+/** Extracts debounceMs from a StateLogicConfig if trigger is 'debounced'. */
 function getConfigDebounceMs(config: LogicConfig): number | undefined {
   if (!isStateLogicConfig(config)) {
     return undefined;

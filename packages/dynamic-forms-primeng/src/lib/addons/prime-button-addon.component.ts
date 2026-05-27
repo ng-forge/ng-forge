@@ -5,14 +5,7 @@ import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-
 import { ButtonModule } from 'primeng/button';
 import type { PrimeButtonAddon } from '../types/addons';
 
-/**
- * Renderer for the `prime-button` addon kind.
- *
- * Wraps PrimeNG's `<p-button>`. Click dispatch (preset / actionRef /
- * action precedence, multi-set warning, `disabled` / `loading`
- * resolution) lives on `NgForgeAddonAction`; this component focuses on
- * the visual layer.
- */
+/** Renderer for the `prime-button` addon kind. */
 @Component({
   selector: 'df-prime-button-addon',
   imports: [ButtonModule, DynamicTextPipe, AsyncPipe],

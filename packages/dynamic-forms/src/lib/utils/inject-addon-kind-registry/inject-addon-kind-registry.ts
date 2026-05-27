@@ -6,16 +6,6 @@ import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
 /**
  * Cache for resolved addon-kind components.
  *
- * Provided per-form by `provideDynamicFormDI()` so two `<df-dynamic-form>`
- * instances with conflicting `loadComponent` factories for the same kind
- * never share a stale entry. Has no `providedIn: 'root'` factory — the
- * registry consumer is always inside a form scope, and a root fallback
- * would only hide misconfiguration (an SSR cross-request hit if a future
- * code path forgot to provide it locally).
- *
- * Mirrors `COMPONENT_CACHE` (field types) and `WRAPPER_COMPONENT_CACHE`
- * (wrappers).
- *
  * @internal
  */
 export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE');
@@ -34,18 +24,7 @@ export interface AddonKindRegistryRef {
   readonly raw: ReadonlyMap<string, AddonKindDefinition>;
 }
 
-/**
- * Injection function for accessing the addon kind registry.
- *
- * Usage parallels {@link injectFieldRegistry}: lookup, lazy load, cache.
- * Must be called within an injection context.
- *
- * @example
- * ```typescript
- * const addonKinds = injectAddonKindRegistry();
- * const Component = await addonKinds.loadKindComponent('prime-icon');
- * ```
- */
+/** Injection function for accessing the addon kind registry. */
 export function injectAddonKindRegistry(): AddonKindRegistryRef {
   const registry = inject(ADDON_KIND_REGISTRY);
   const componentCache = inject(ADDON_KIND_COMPONENT_CACHE);

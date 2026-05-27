@@ -32,11 +32,6 @@ interface ActionAddonShape extends BaseAddon {
  * labelled buttons, etc.): `disabled` / `loading` resolution from
  * `DynamicValue<boolean>`, action context construction, and the
  * `preset / actionRef / action` precedence dispatcher.
- *
- * Adapter button kinds (e.g., `prime-button`) compose `NgForgeAddonAction`
- * and read state via `injectNgForgeAddonAction<TAddon>()`. Preset semantics
- * are adapter-specific — register an `ADDON_PRESET_HANDLER` at the host
- * field scope to receive preset dispatches.
  */
 @Directive({})
 export class NgForgeAddonActionBase {
@@ -141,22 +136,6 @@ export class NgForgeAddonActionBase {
    * Build an `AddonActionContext` for handlers from the wrapper-style
    * `fieldInputs` bag. Returns the field-bound variant when a host field
    * is reachable, or the orphan variant otherwise.
-   *
-   * Resolution order for `setValue`:
-   * 1. `inputs.setValue` from the forwarded bag (preferred — populated by
-   *    `buildFieldInputs` in `DfFieldOutlet`).
-   * 2. Fallback reconstructed from `inputs.field` itself: although
-   *    `ReadonlyFieldTree.value` is type-narrowed to `Signal<T>`, the
-   *    underlying runtime object is the same `WritableSignal<T>` created
-   *    by Signal Forms (the read-only wrapping is type-level only, see
-   *    `toReadonlyFieldTree`). Casting back at the writer boundary
-   *    produces a working setValue for ANY field depth — top-level OR
-   *    nested under groups. This avoids the previous FSC-key navigation
-   *    that broke for grouped fields, where `inputs.key` is DOM-mangled
-   *    (`'user_address_street'`) and `fsc.form[key]` returns undefined.
-   *
-   * The orphan variant fires only when the bag carries no field tree at
-   * all — genuine "rendered outside a field" scenario.
    */
   buildActionContext(): AddonActionContext {
     const inputs = this.fieldInputs();
@@ -193,22 +172,7 @@ const _NG_FORGE_ADDON_ACTION_INPUTS_LOCKSTEP: AssertTupleLockstep<
 > = true;
 void _NG_FORGE_ADDON_ACTION_INPUTS_LOCKSTEP;
 
-/**
- * Host wrapper for `NgForgeAddonActionBase`. Consumers compose this directly:
- *
- * ```ts
- * \@Component({
- *   hostDirectives: [NgForgeAddonAction],
- *   template: `
- *     <p-button [loading]="action.loading()" [disabled]="action.disabled()"
- *               (onClick)="action.dispatch()" />
- *   `,
- * })
- * export class MyButtonAddon {
- *   protected readonly action = injectNgForgeAddonAction<MyButtonAddon>();
- * }
- * ```
- */
+/** Host wrapper for `NgForgeAddonActionBase`. Consumers compose this directly: */
 @Directive({
   hostDirectives: [{ directive: NgForgeAddonActionBase, inputs: [...NG_FORGE_ADDON_ACTION_INPUTS] }],
 })

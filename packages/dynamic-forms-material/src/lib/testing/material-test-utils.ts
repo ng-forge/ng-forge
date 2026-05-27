@@ -16,26 +16,20 @@ import { MatButtonField } from '../fields/button/mat-button.type';
 import { MatMultiCheckboxField } from '../fields/multi-checkbox/mat-multi-checkbox.type';
 import { MatField } from '../types/types';
 
-/**
- * Configuration for creating a material dynamic form test
- */
+/** Configuration for creating a material dynamic form test */
 export interface MaterialFormTestConfig {
   config: FormConfig;
   initialValue?: Record<string, unknown>;
   providers?: unknown[];
 }
 
-/**
- * Result of creating a material dynamic form test
- */
+/** Result of creating a material dynamic form test */
 export interface MaterialFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm>;
 }
 
-/**
- * Fluent API for building material form configurations
- */
+/** Fluent API for building material form configurations */
 export class MaterialFormConfigBuilder {
   private fields: unknown[] = [];
 
@@ -119,20 +113,14 @@ export class MaterialFormConfigBuilder {
   }
 }
 
-/**
- * Utility class for testing material dynamic forms
- */
+/** Utility class for testing material dynamic forms */
 export class MaterialFormTestUtils {
-  /**
-   * Creates a new material form config builder
-   */
+  /** Creates a new material form config builder */
   static builder(): MaterialFormConfigBuilder {
     return new MaterialFormConfigBuilder();
   }
 
-  /**
-   * Creates a material dynamic form test setup with proper providers
-   */
+  /** Creates a material dynamic form test setup with proper providers */
   static async createTest(testConfig: MaterialFormTestConfig): Promise<MaterialFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
@@ -159,9 +147,7 @@ export class MaterialFormTestUtils {
     };
   }
 
-  /**
-   * Waits for the material dynamic form to initialize
-   */
+  /** Waits for the material dynamic form to initialize */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
@@ -183,9 +169,7 @@ export class MaterialFormTestUtils {
     fixture.detectChanges();
   }
 
-  /**
-   * Simulates user input on a material input field
-   */
+  /** Simulates user input on a material input field */
   static async simulateMatInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
@@ -199,9 +183,7 @@ export class MaterialFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user selection on a material select
-   */
+  /** Simulates user selection on a material select */
   static async simulateMatSelect(fixture: ComponentFixture<DynamicForm>, selectSelector: string, value: string): Promise<void> {
     // Find the mat-select component
     const matSelect = fixture.nativeElement.querySelector(selectSelector);
@@ -224,9 +206,7 @@ export class MaterialFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates material checkbox toggle
-   */
+  /** Simulates material checkbox toggle */
   static async simulateMatCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     let checkboxElement: Element | null = null;
 
@@ -279,9 +259,7 @@ export class MaterialFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates material toggle switch
-   */
+  /** Simulates material toggle switch */
   static async simulateMatToggle(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const toggle = fixture.nativeElement.querySelector(selector);
     if (!toggle) {
@@ -302,9 +280,7 @@ export class MaterialFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates material button click
-   */
+  /** Simulates material button click */
   static async simulateMatButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
     const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
     if (!button) {
@@ -316,37 +292,27 @@ export class MaterialFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> {
     return component.formValue();
   }
 
-  /**
-   * Gets validation errors from the component
-   */
+  /** Gets validation errors from the component */
   static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors() as unknown[];
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Gets all material field elements from the fixture
-   */
+  /** Gets all material field elements from the fixture */
   static getMatFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
     return fixture.nativeElement.querySelectorAll(`df-mat-${fieldType}`);
   }
 
-  /**
-   * Asserts that a material field has a specific value
-   */
+  /** Asserts that a material field has a specific value */
   static assertMatFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): void {
     // Try to find the input element directly first
     let element = fixture.nativeElement.querySelector(fieldSelector);
@@ -376,9 +342,7 @@ export class MaterialFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
@@ -386,9 +350,7 @@ export class MaterialFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that a material form field has the correct appearance
-   */
+  /** Asserts that a material form field has the correct appearance */
   static assertMatFormFieldAppearance(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, appearance: string): void {
     // Try both new and legacy selectors
     let formField = fixture.nativeElement.querySelector(`${fieldSelector} mat-form-field`);
@@ -405,9 +367,7 @@ export class MaterialFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that a material field shows an error message
-   */
+  /** Asserts that a material field shows an error message */
   static assertMatFieldError(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedError?: string): void {
     const formField = fixture.nativeElement.querySelector(`${fieldSelector} mat-form-field`);
     if (!formField) {

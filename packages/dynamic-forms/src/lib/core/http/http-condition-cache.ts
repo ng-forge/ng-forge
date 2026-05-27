@@ -5,16 +5,7 @@ interface CacheEntry {
   expiresAt: number;
 }
 
-/**
- * TTL cache for HTTP condition responses with max entries eviction.
- *
- * Keyed by serialized resolved request (the `HttpResourceRequest` after expression evaluation).
- * Two different form states producing the same resolved URL+body hit the same cache entry.
- *
- * When `maxEntries` is exceeded, the oldest entry (by insertion order) is evicted.
- *
- * Provided via DI (scoped to DynamicForm component) for SSR safety.
- */
+/** TTL cache for HTTP condition responses with max entries eviction. */
 export class HttpConditionCache {
   private readonly cache = new Map<string, CacheEntry>();
   private readonly maxEntries: number;

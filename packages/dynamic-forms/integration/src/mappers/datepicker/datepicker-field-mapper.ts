@@ -22,14 +22,6 @@ function toDate(value: Date | string | null | undefined): Date | null {
 /**
  * Maps a datepicker field to component inputs.
  *
- * Extends the base value field mapper by adding datepicker-specific properties:
- * - minDate: Minimum selectable date
- * - maxDate: Maximum selectable date
- * - startAt: Initial date to display when opening the picker
- *
- * Date values are automatically converted from strings to Date objects
- * since UI libraries (Material, PrimeNG, etc.) expect Date objects.
- *
  * @param fieldDef The datepicker field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

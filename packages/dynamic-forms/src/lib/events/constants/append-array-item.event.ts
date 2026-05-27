@@ -14,23 +14,6 @@ export type { ArrayItemTemplate };
 /**
  * Event dispatched to append a new item at the END of an array field.
  *
- * This is the most common array operation - adding items to the end.
- * For other positions, use {@link PrependArrayItemEvent} or {@link InsertArrayItemEvent}.
- *
- * @example
- * ```typescript
- * // Object item: append { name, email } object
- * eventBus.dispatch(arrayEvent('contacts').append([
- *   { key: 'name', type: 'input', label: 'Name' },
- *   { key: 'email', type: 'input', label: 'Email' }
- * ]));
- *
- * // Primitive item: append single value
- * eventBus.dispatch(arrayEvent('tags').append(
- *   { key: 'tag', type: 'input', label: 'Tag' }
- * ));
- * ```
- *
  * @typeParam TTemplate - The type of the template (single field or array of fields)
  */
 export class AppendArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {

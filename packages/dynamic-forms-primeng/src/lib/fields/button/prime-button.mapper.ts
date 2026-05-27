@@ -6,9 +6,6 @@ import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS, FieldDef } from '@ng-for
  * For specific button types (submit, next, prev, add/remove array items),
  * use the dedicated field types and their specific mappers.
  *
- * Supports template property for array events (AppendArrayItemEvent, PrependArrayItemEvent, InsertArrayItemEvent)
- * which enables the $template token in eventArgs.
- *
  * @param fieldDef The button field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

@@ -1,9 +1,4 @@
-/**
- * Module augmentation for @ng-forge/dynamic-form to add PrimeNG field types to the global registry.
- *
- * This file augments the FieldRegistryLeaves interface to include PrimeNG-specific field types.
- * Import this file in your main entry point to get global type safety for PrimeNG fields.
- */
+/** Module augmentation for @ng-forge/dynamic-form to add PrimeNG field types to the global registry. */
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {

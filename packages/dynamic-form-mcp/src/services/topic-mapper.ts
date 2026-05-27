@@ -1,10 +1,4 @@
-/**
- * Topic-to-Section Mapper
- *
- * Maps MCP TOPICS keys to llms-full.txt section paths.
- * Some topics map to multiple sections (concatenated when fetched).
- * Topics with no website equivalent (MCP-specific patterns) return null.
- */
+/** Topic-to-Section Mapper */
 
 /**
  * Maps topic keys to one or more llms-full.txt section paths.
@@ -98,9 +92,7 @@ export function getTopicSections(topic: string): string[] | null | undefined {
   return TOPIC_SECTION_MAP[topic];
 }
 
-/**
- * Check if a topic is MCP-specific (no website equivalent).
- */
+/** Check if a topic is MCP-specific (no website equivalent). */
 export function isMcpOnlyTopic(topic: string): boolean {
   return MCP_ONLY_TOPICS.has(topic);
 }

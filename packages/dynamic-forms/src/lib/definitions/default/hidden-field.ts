@@ -16,32 +16,6 @@ export type HiddenValue = HiddenScalar | HiddenScalar[];
 /**
  * Hidden field definition for storing values without rendering UI.
  *
- * Hidden fields participate in the form schema and contribute to form values,
- * but do not render any visible component. They are useful for:
- * - Storing IDs when updating existing records
- * - Persisting metadata that shouldn't be user-editable
- * - Tracking computed values that need to be submitted
- *
- * Unlike the `hidden` property on other fields (which hides a rendered field),
- * this field type renders nothing at all - it's a componentless field.
- *
- * @example
- * ```typescript
- * // Store a record ID for updates
- * const idField: HiddenField<string> = {
- *   type: 'hidden',
- *   key: 'id',
- *   value: '550e8400-e29b-41d4-a716-446655440000',
- * };
- *
- * // Store multiple tag IDs
- * const tagIdsField: HiddenField<number[]> = {
- *   type: 'hidden',
- *   key: 'tagIds',
- *   value: [1, 2, 3],
- * };
- * ```
- *
  * @typeParam TValue - The type of value stored (must be HiddenValue compatible)
  */
 export interface HiddenField<TValue extends HiddenValue = HiddenValue> extends FieldDef<never> {

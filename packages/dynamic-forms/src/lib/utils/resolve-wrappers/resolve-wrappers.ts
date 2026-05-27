@@ -23,14 +23,7 @@ export function isSameWrapperChain(a: readonly WrapperConfig[], b: readonly Wrap
   return true;
 }
 
-/**
- * Resolves the wrapper chain for a field.
- *
- * Merge order (outermost → innermost): auto-associations, form defaults,
- * field-level wrappers. `wrappers: null` skips all three; `skipAutoWrappers` /
- * `skipDefaultWrappers` on the field opt out of individual layers. Fresh
- * array per call — downstream memoisation is on the consuming computed.
- */
+/** Resolves the wrapper chain for a field. */
 export function resolveWrappers(
   field: Pick<FieldDef<unknown>, 'type' | 'wrappers' | 'skipAutoWrappers' | 'skipDefaultWrappers'>,
   defaultWrappers: readonly WrapperConfig[] | undefined,

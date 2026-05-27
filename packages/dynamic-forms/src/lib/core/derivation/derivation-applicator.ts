@@ -29,11 +29,7 @@ import { applyValueToForm, readFieldDirty, resetFieldState } from './field-value
 // Re-export for backwards compatibility
 export type { DerivationProcessingResult } from './derivation-types';
 
-/**
- * Context required for applying derivations.
- *
- * @public
- */
+/** Context required for applying derivations. */
 export interface DerivationApplicatorContext {
   /** The current form value (signal) */
   formValue: Signal<Record<string, unknown>>;
@@ -100,32 +96,10 @@ interface DerivationResult {
 /**
  * Applies all pending derivations from a collection.
  *
- * This function processes derivations in order, evaluating conditions
- * and computing values. It handles loop prevention through:
- * 1. Chain tracking (prevents same derivation from running twice in one cycle)
- * 2. Value equality checks (skips if target already has computed value)
- * 3. Max iteration limit (safety fallback)
- *
  * @param collection - The collected derivation entries
  * @param context - Context for applying derivations
  * @param changedFields - Set of field keys that changed (for filtering)
  * @returns Result of the derivation processing
- *
- * @example
- * ```typescript
- * const result = applyDerivations(collection, {
- *   formValue: formValueSignal,
- *   rootForm: form(),
- *   derivationFunctions: customFnConfig?.derivations,
- *   logger: inject(DynamicFormLogger),
- * });
- *
- * if (result.maxIterationsReached) {
- *   console.warn('Possible derivation loop detected');
- * }
- * ```
- *
- * @public
  */
 export function applyDerivations(
   collection: DerivationCollection,
@@ -199,19 +173,6 @@ export function applyDerivations(
 /**
  * Gets entries that should be processed based on changed fields.
  *
- * Filters entries by checking if any of their dependencies are in the changed fields set.
- * Also includes all wildcard (*) entries since they depend on any form change.
- *
- * **Parent-key matching:** Since `changedFields` contains root-level keys (e.g., `'address'`),
- * but derivation entries may target or depend on nested paths (e.g., `'address.city'`),
- * this function checks `startsWith(changed + '.')` to include entries whose field or
- * dependencies live under a changed parent. This is intentionally broad — false positives
- * are acceptable for filtering because entries are still guarded by value-equality checks
- * (`isEqual`) in `tryApplyDerivation` and will be skipped if the value hasn't changed.
- *
- * Note: Performance is O(n) where n = total entries. For large forms with many
- * derivations, consider optimizing with indexed lookup maps.
- *
  * @internal
  */
 function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: Set<string>): DerivationEntry[] {
@@ -242,20 +203,6 @@ function getEntriesForChangedFields(entries: DerivationEntry[], changedFields: S
 
 /**
  * Attempts to apply a single derivation.
- *
- * **Important:** When a derivation's condition evaluates to `false`, the previously
- * derived value is NOT automatically cleared. If you need to reset a field when a
- * condition becomes false, use a separate derivation with an inverted condition
- * that sets the desired fallback value.
- *
- * @example
- * ```typescript
- * // Two derivations for conditional value with cleanup:
- * // When country is USA, set phonePrefix to '+1'
- * { key: 'phonePrefix', logic: [{ type: 'derivation', condition: { field: 'country', operator: '==', value: 'USA' }, value: '+1' }] }
- * // When country is NOT USA, clear phonePrefix
- * { key: 'phonePrefix', logic: [{ type: 'derivation', condition: { field: 'country', operator: '!=', value: 'USA' }, value: '' }] }
- * ```
  *
  * @internal
  */
@@ -400,9 +347,6 @@ function tryApplyDerivation(
 /**
  * Handles array field derivations with '$' placeholder.
  *
- * Iterates over all array items and applies the derivation for each,
- * resolving '$' to the actual index and creating scoped evaluation contexts.
- *
  * @internal
  */
 function tryApplyArrayDerivation(
@@ -526,9 +470,6 @@ function createEvaluationContext(
 /**
  * Creates an evaluation context scoped to a specific array item.
  *
- * For array derivations, `formValue` in the expression should reference
- * the current array item's values, not the root form values.
- *
  * @internal
  */
 function createArrayItemEvaluationContext(
@@ -615,12 +556,14 @@ function computeDerivedValue(
 
 /**
  * Error message prefix for derivation-related errors.
+ *
  * @internal
  */
 const ERROR_PREFIX = '[Derivation]';
 
 /**
  * Creates a standardized error message for derivation errors.
+ *
  * @internal
  */
 function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply' | 'condition', message: string): string {
@@ -640,18 +583,6 @@ function formatDerivationError(entry: DerivationEntry, phase: 'compute' | 'apply
 /**
  * Checks whether any of the entry's dependencies appear in the changed fields set.
  *
- * **Known limitation for array derivations:** `changedFields` contains root-level keys
- * (e.g., `'lineItems'`) produced by `getChangedKeys()`, but array derivation dependencies
- * use relative names (e.g., `['quantity', 'unitPrice']`). This means `reEngageOnDependencyChange`
- * only fires for root-level dependencies (e.g., `'discountRate'`) — NOT for intra-item
- * dependencies like `'quantity'` within the same array item.
- *
- * Adding parent-key matching (checking if `entry.fieldKey.startsWith(changed + '.')`)
- * was attempted but causes false positives: editing the TARGET field also triggers
- * `changedFields = {'lineItems'}`, which would reset dirty immediately and break
- * `stopOnUserOverride`. Fixing this requires per-field change tracking instead of
- * per-root-key tracking — a more significant architectural change.
- *
  * @internal
  */
 function hasDependencyChanged(entry: DerivationEntry, changedFields: Set<string>): boolean {
@@ -664,7 +595,6 @@ function hasDependencyChanged(entry: DerivationEntry, changedFields: Set<string>
  * is set and a dependency has changed.
  *
  * @returns `true` if the derivation should be skipped, `false` otherwise
- *
  * @internal
  */
 function shouldSkipForUserOverride(
@@ -699,15 +629,11 @@ function shouldSkipForUserOverride(
 /**
  * Processes derivations for a specific trigger type.
  *
- * Filters entries by trigger type and applies them.
- *
  * @param collection - The collected derivation entries
  * @param trigger - The trigger type to filter by
  * @param context - Context for applying derivations
  * @param changedFields - Set of field keys that changed (for filtering)
  * @returns Result of the derivation processing
- *
- * @public
  */
 export function applyDerivationsForTrigger(
   collection: DerivationCollection,
@@ -735,12 +661,8 @@ export function applyDerivationsForTrigger(
 /**
  * Gets all debounced derivation entries from a collection.
  *
- * Use this to extract debounced entries for separate processing with debounce timers.
- *
  * @param collection - The collected derivation entries
  * @returns Array of debounced derivation entries
- *
- * @public
  */
 export function getDebouncedDerivationEntries(collection: DerivationCollection): DerivationEntry[] {
   return collection.entries.filter((entry) => entry.trigger === 'debounced');

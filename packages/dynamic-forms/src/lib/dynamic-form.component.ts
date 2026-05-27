@@ -44,11 +44,6 @@ import { DF_FIELD_TEMPLATES } from './models/addon/df-field-templates.token';
 /**
  * Dynamic form component — renders a form based on configuration.
  * Delegates state management to `FormStateManager`.
- *
- * @example
- *```html
- * <form [dynamic-form]="formConfig" [(value)]="formData" (submitted)="handleSubmit($event)"></form>
- * ```
  */
 @Component({
   selector: 'form[dynamic-form]',
@@ -137,8 +132,6 @@ export class DynamicForm<
   /** All `<ng-template dfTemplate="...">` instances projected into this form. */
   private readonly _projectedTemplates = contentChildren(DfTemplate);
 
-  /** State manager that owns all form state. Initialized via connectDeps() to guarantee
-   * FORM_STATE_DEPS is populated before FormStateManager is injected. */
   private readonly stateManager = this.connectDeps();
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -215,9 +208,6 @@ export class DynamicForm<
   /**
    * Recursively counts container components that will emit ComponentInitializedEvent.
    * Includes the dynamic-form component itself (+1).
-   *
-   * Recurses into all container children, including those nested inside array
-   * item templates, to avoid a premature (initialized) emission.
    */
   private totalComponentsCount = computed(() => {
     const fields = this.stateManager.formSetup()?.fields ?? [];
@@ -245,15 +235,7 @@ export class DynamicForm<
   /** Emits when form dirty state changes. */
   dirtyChange = outputFromObservable(toObservable(this.dirty));
 
-  /**
-   * Emits form values when submitted (via SubmitEvent) and form is valid.
-   *
-   * **Important:** This output only emits when the form is valid. If you need to
-   * handle submit events regardless of validity, use the `(events)` output and
-   * filter for `'submit'` events.
-   *
-   * Note: Does not emit when `submission.action` is configured - use one or the other.
-   */
+  /** Emits form values when submitted (via SubmitEvent) and form is valid. */
   submitted = outputFromObservable(this.stateManager.submitted$);
 
   /** Emits when form is reset to default values. */
@@ -302,9 +284,6 @@ export class DynamicForm<
    * - Pressing Enter in an input field
    * - Clicking a button with type="submit"
    * - Programmatic form.submit() calls
-   *
-   * This method prevents the default form submission behavior (page reload)
-   * and dispatches a SubmitEvent through the EventBus for processing.
    *
    * @param event - The native submit event from the form element
    */

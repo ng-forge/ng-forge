@@ -2,25 +2,15 @@ import { CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
 import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeCheckboxProps {
-  /**
-   * Binary mode for boolean values.
-   */
+  /** Binary mode for boolean values. */
   binary?: boolean;
-  /**
-   * CSS class to apply to the checkbox element.
-   */
+  /** CSS class to apply to the checkbox element. */
   styleClass?: string;
-  /**
-   * Value to use when checked.
-   */
+  /** Value to use when checked. */
   trueValue?: unknown;
-  /**
-   * Value to use when unchecked.
-   */
+  /** Value to use when unchecked. */
   falseValue?: unknown;
-  /**
-   * Hint text displayed below the checkbox.
-   */
+  /** Hint text displayed below the checkbox. */
   hint?: DynamicText;
 }
 

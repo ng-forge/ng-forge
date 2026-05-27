@@ -3,13 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import type { BsIconAddon } from '../types/addons';
 
-/**
- * Renderer for the `bs-icon` addon kind.
- *
- * Outputs `<i class="bi bi-{icon}">`. The host is set `aria-hidden="true"`
- * by default; if the addon supplies an `ariaLabel`, it is applied so the
- * icon is announced by screen readers.
- */
+/** Renderer for the `bs-icon` addon kind. */
 @Component({
   selector: 'df-bs-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],

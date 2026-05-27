@@ -23,37 +23,25 @@ import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
 export type { RegisteredFieldTypes } from '../models/types';
 
-/**
- * Extract FieldDef type from FieldTypeDefinition
- */
+/** Extract FieldDef type from FieldTypeDefinition */
 type ExtractFieldDef<T> = T extends FieldTypeDefinition<infer F> ? F : never;
 
-/**
- * Union of all FieldDef types from provided field types
- */
+/** Union of all FieldDef types from provided field types */
 type FieldDefUnion<T extends FieldTypeDefinition[]> = ExtractFieldDef<T[number]>;
 
-/**
- * Infer form value type from field definitions using the real inference type.
- */
+/** Infer form value type from field definitions using the real inference type. */
 type InferFormValue<TFieldDefs extends FieldDef<unknown>[]> = RealInferFormValue<TFieldDefs>;
 
-/**
- * Provider result with type inference
- */
+/** Provider result with type inference */
 type ProvideDynamicFormResult<T extends FieldTypeDefinition[]> = EnvironmentProviders & {
   __fieldDefs?: FieldDefUnion<T>;
   __formValue?: InferFormValue<FieldDefUnion<T>[]>;
 };
 
-/**
- * Union type for items that can be passed to provideDynamicForm
- */
+/** Union type for items that can be passed to provideDynamicForm */
 type FieldTypeOrFeature = FieldTypeDefinition | WrapperTypeDefinition | WrappersBundle | DynamicFormFeature;
 
-/**
- * Extract only FieldTypeDefinition items from a tuple type
- */
+/** Extract only FieldTypeDefinition items from a tuple type */
 type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
   [K in keyof T]: T[K] extends FieldTypeDefinition ? T[K] : never;
 }[number] extends infer U
@@ -65,50 +53,9 @@ type ExtractFieldTypes<T extends FieldTypeOrFeature[]> = {
 /**
  * Provider function to configure the dynamic form system with field types and options.
  *
- * This function creates environment providers that can be used at application or route level
- * to register field types. It provides type-safe field registration with automatic type inference.
- *
  * @param items - Field type definitions and/or features (like withLoggerConfig)
  * @returns Environment providers for dependency injection with type inference
- *
- * @example
- * ```typescript
- * // Application-level setup
- * bootstrapApplication(AppComponent, {
- *   providers: [
- *     provideDynamicForm(...withMaterialFields())
- *   ]
- * });
- * ```
- *
- * @example
- * ```typescript
- * // Disable logging
- * bootstrapApplication(AppComponent, {
- *   providers: [
- *     provideDynamicForm(
- *       ...withMaterialFields(),
- *       withLoggerConfig(false)
- *     )
- *   ]
- * });
- * ```
- *
- * @example
- * ```typescript
- * // Custom field types with type inference
- * import { CustomFieldType, AnotherFieldType } from './custom-fields';
- *
- * export const appConfig: ApplicationConfig = {
- *   providers: [
- *     provideDynamicForm(CustomFieldType, AnotherFieldType)
- *   ]
- * };
- * ```
- *
  * @typeParam T - Array of field type definitions for type inference
- *
- * @public
  */
 export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   ...items: T
@@ -214,12 +161,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 }
 
-/**
- * Extract FieldDef types from provider result
- */
+/** Extract FieldDef types from provider result */
 export type ExtractFieldDefs<T> = T extends { __fieldDefs?: infer F } ? F : never;
 
-/**
- * Extract form value type from provider result
- */
+/** Extract form value type from provider result */
 export type ExtractFormValue<T> = T extends { __formValue?: infer V } ? V : never;

@@ -14,9 +14,7 @@ export class Parser {
     this.expression = expression;
   }
 
-  /**
-   * Parse the expression into an AST
-   */
+  /** Parse the expression into an AST */
   parse(): ASTNode {
     const tokenizer = new Tokenizer(this.expression);
     this.tokens = tokenizer.tokenize();
@@ -65,14 +63,6 @@ export class Parser {
   /**
    * Attempts to parse an arrow function. Returns null and leaves position
    * unchanged if the next tokens don't form an arrow function head.
-   *
-   * Supported shapes:
-   *   x => body
-   *   () => body
-   *   (x) => body
-   *   (x, y, ...) => body
-   *
-   * Body returning an object literal must be wrapped in parens: `d => ({...})`.
    */
   private tryParseArrowFunction(): ASTNode | null {
     const savedPos = this.current;

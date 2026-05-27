@@ -30,13 +30,7 @@ import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
 
-/**
- * Container component for rendering nested form groups.
- *
- * Creates a scoped form context with its own validation state.
- * Child fields receive a FIELD_SIGNAL_CONTEXT scoped to this group's form instance.
- * Group values are nested under the group's key in the parent form.
- */
+/** Container component for rendering nested form groups. */
 @Component({
   selector: 'fieldset[group-field]',
   imports: [DfFieldOutlet],

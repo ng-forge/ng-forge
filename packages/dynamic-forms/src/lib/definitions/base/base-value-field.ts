@@ -18,11 +18,6 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
   /**
    * Placeholder text displayed when the field is empty.
    * Supports static strings, Observables, and Signals for dynamic content.
-   *
-   * Note: placeholder lives at the field level, NOT inside `props`. The integration-layer
-   * `props` interfaces (InputProps, TextareaProps, SelectProps, DatepickerProps) intentionally
-   * omit `placeholder` — TypeScript's excess property check rejects `props: { placeholder: ... }`
-   * for any `props` literal typed against those interfaces.
    */
   placeholder?: DynamicText;
 
@@ -30,13 +25,6 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
 
   /**
    * Whether the field accepts `null` as a valid value.
-   *
-   * When `true`, `value` may be `null` and an omitted `value` resolves to `null`
-   * (rather than the type-specific empty default). Orthogonal to `required`.
-   *
-   * Read-side caveat: a user clearing a text input reads back as `""`, not `null`
-   * — this matches classic Reactive Forms and is enforced by the Web IDL contract.
-   * `nullable` is a contract for accepted values, not a guarantee of emitted ones.
    *
    * @default false
    */

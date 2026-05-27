@@ -12,13 +12,7 @@ import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/
 import { FieldDef } from '../../definitions/base/field-def';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 
-/**
- * Renders a single page in multi-page (wizard) forms.
- *
- * Visibility is controlled by the PageOrchestrator via the isVisible input.
- * Pages cannot be nested within other pages - validation prevents this.
- * Field values are flattened into the parent form (no nesting under page key).
- */
+/** Renders a single page in multi-page (wizard) forms. */
 @Component({
   selector: 'section[page-field]',
   imports: [DfFieldOutlet],

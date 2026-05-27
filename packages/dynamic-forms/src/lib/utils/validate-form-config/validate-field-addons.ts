@@ -8,9 +8,6 @@ import { AddonWarning } from './addon-warning';
  * Walk a field's addons; return the survivors plus a list of warnings for
  * anything dropped.
  *
- * Pure: receives the registries as arguments (so the function is reusable
- * outside Angular's DI — tests, server-side validation, etc.).
- *
  * @param field        The field to validate.
  * @param fieldRegistry Snapshot of `FIELD_REGISTRY` map.
  * @param kindRegistry  Snapshot of `ADDON_KIND_REGISTRY` map.

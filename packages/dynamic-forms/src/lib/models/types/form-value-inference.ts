@@ -6,30 +6,12 @@ import { RegisteredFieldTypes } from '../registry/field-registry';
  */
 type UnionToIntersection<U> = (U extends U ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 
-/**
- * Depth counter for recursion limiting (prevents infinite type instantiation)
- */
+/** Depth counter for recursion limiting (prevents infinite type instantiation) */
 type Depth = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /**
  * Widens literal types to their primitive equivalents, recursively for objects and arrays.
  * This prevents `as const` from over-narrowing types like `''` to literal `''` instead of `string`.
- *
- * Depth-limited to prevent slow type checking on deeply nested `as const` objects.
- * Falls back to `T` (unwidened) when depth is exhausted.
- *
- * Note: For object types, `readonly` modifiers are intentionally stripped (`-readonly`)
- * so that inferred form value types have mutable properties. This is by design since
- * `as const` adds `readonly` to all properties, but form values should be mutable.
- *
- * @example
- * ```typescript
- * type A = Widen<''>; // string
- * type B = Widen<false>; // boolean
- * type C = Widen<42>; // number
- * type D = Widen<string[]>; // string[]
- * type E = Widen<{ name: 'Jane' }>; // { name: string }
- * ```
  */
 type Widen<T, D extends number = 5> = [D] extends [never]
   ? T
@@ -119,9 +101,7 @@ type InferArrayValue<T, D extends number> = T extends { template: unknown; value
         : unknown[]
       : unknown[];
 
-/**
- * Process a single field and determine its contribution to the form value type
- */
+/** Process a single field and determine its contribution to the form value type */
 type ProcessField<T, D extends number = 5> = [D] extends [never]
   ? Record<string, unknown>
   : // Container: page/row - flatten children
@@ -163,14 +143,10 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
                   : never
                 : never;
 
-/**
- * Internal helper with depth tracking
- */
+/** Internal helper with depth tracking */
 type InferFormValueWithDepth<T extends RegisteredFieldTypes[], D extends number = 5> = UnionToIntersection<ProcessField<T[number], D>>;
 
-/**
- * Helper to extract fields from either fields array or FormConfig
- */
+/** Helper to extract fields from either fields array or FormConfig */
 type ExtractFields<T> = T extends { fields: infer TFields }
   ? TFields extends readonly RegisteredFieldTypes[]
     ? TFields
@@ -183,27 +159,6 @@ type ExtractFields<T> = T extends { fields: infer TFields }
  * Infer form value type from fields array or FormConfig.
  * Recursively processes nested structures and merges the results.
  * Limited to 5 levels of nesting to prevent infinite type instantiation.
- *
- * @example
- * ```typescript
- * // From fields array
- * const fields = [
- *   { type: 'input', key: 'email', value: '', required: true },
- *   { type: 'input', key: 'name', value: '' }
- * ] as const;
- * type FieldsValue = InferFormValue<typeof fields>;
- *
- * // From FormConfig
- * const config = {
- *   fields: [
- *     { type: 'input', key: 'email', value: '', required: true },
- *     { type: 'input', key: 'name', value: '' }
- *   ]
- * } as const satisfies FormConfig;
- * type ConfigValue = InferFormValue<typeof config>;
- *
- * // Result: { email: string; name?: string }
- * ```
  */
 export type InferFormValue<T> =
   ExtractFields<T> extends readonly RegisteredFieldTypes[]

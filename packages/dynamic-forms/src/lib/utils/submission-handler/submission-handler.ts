@@ -34,9 +34,6 @@ export interface SubmissionHandlerOptions<
  * Wraps a submission action to handle both Promise and Observable returns.
  * Converts Observables to Promises for compatibility with Angular Signal Forms' submit().
  *
- * Errors are NOT caught here — they propagate so that submit() can reject its Promise,
- * allowing the caller's catchError to log and keep the submission stream alive.
- *
  * @param action - The submission action function
  * @returns A wrapped function that returns a Promise
  */
@@ -57,28 +54,8 @@ function wrapSubmissionAction<TModel extends Record<string, unknown>>(
 /**
  * Creates an Observable that handles form submission with optional submission action.
  *
- * This utility encapsulates the submission handling logic:
- * - Listens for submit events from the event bus
- * - If a submission.action is configured, wraps it and uses Angular Signal Forms' submit()
- * - Handles both Promise and Observable returns from the action
- * - Uses exhaustMap to ignore new submissions while one is in-flight (first-submit-wins)
- *
- * The returned Observable should be subscribed to with takeUntilDestroyed() in the component.
- *
  * @param options - Configuration options for the submission handler
  * @returns Observable that processes submissions (emits when submission completes)
- *
- * @example
- * ```typescript
- * // In component constructor
- * createSubmissionHandler({
- *   eventBus: this.eventBus,
- *   configSignal: this.config,
- *   formSignal: this.form,
- * })
- *   .pipe(takeUntilDestroyed())
- *   .subscribe();
- * ```
  */
 export function createSubmissionHandler<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],

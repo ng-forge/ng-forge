@@ -258,15 +258,7 @@ function createExpressionValidator(
   };
 }
 
-/**
- * Apply async validator to field path using Angular's public validateAsync() API
- *
- * Angular's validateAsync uses the resource API, which requires:
- * - params: Function that computes params from field context
- * - factory: Function that creates ResourceRef from params signal
- * - onSuccess: Maps resource result to validation errors
- * - onError: Optional handler for resource errors
- */
+/** Apply async validator to field path using Angular's public validateAsync() API */
 function applyAsyncValidator(config: AsyncValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   if (config.fn && config.functionName) {
     const logger = inject(DynamicFormLogger);
@@ -325,14 +317,7 @@ function applyUnifiedHttpValidator(
   applyDeclarativeHttpValidator(config, fieldPath);
 }
 
-/**
- * Apply function-based HTTP validator to field path using Angular's public validateHttp() API.
- *
- * Angular's validateHttp requires:
- * - request: Function that returns URL string or HttpResourceRequest
- * - onSuccess: Maps HTTP response to validation errors (inverted logic!)
- * - onError: Optional handler for HTTP errors
- */
+/** Apply function-based HTTP validator to field path using Angular's public validateHttp() API. */
 function applyFunctionHttpValidator(config: FunctionHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   if (config.fn && config.functionName) {
     const logger = inject(DynamicFormLogger);
@@ -366,12 +351,7 @@ function applyFunctionHttpValidator(config: FunctionHttpValidatorConfig, fieldPa
   validateHttp(fieldPath, httpOptions as Parameters<typeof validateHttp>[1]);
 }
 
-/**
- * Apply declarative HTTP validator — fully JSON-serializable, no function registration needed.
- *
- * Uses `resolveHttpRequest` to build the request from expressions and `evaluateHttpValidationResponse`
- * to map the HTTP response to a validation result.
- */
+/** Apply declarative HTTP validator — fully JSON-serializable, no function registration needed. */
 function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, fieldPath: SchemaPath<unknown>): void {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
