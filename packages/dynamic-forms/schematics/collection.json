@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Set up @ng-forge/dynamic-forms with a UI adapter (Material, Bootstrap, PrimeNG, Ionic, or none).",
+      "factory": "./ng-add/index#default",
+      "schema": "./ng-add/schema.json"
+    }
+  }
+}

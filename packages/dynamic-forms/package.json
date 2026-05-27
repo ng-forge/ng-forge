@@ -30,6 +30,8 @@
     "config-driven"
   ],
   "sideEffects": false,
+  "schematics": "./schematics/collection.json",
+  "generators": "./schematics/generators.json",
   "engines": {
     "node": ">=20"
   },
