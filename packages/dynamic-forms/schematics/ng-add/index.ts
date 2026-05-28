@@ -23,7 +23,7 @@ export default function ngAdd(options: NgAddOptions): Rule {
     ctx.logger.info(`[ng-forge] Setting up dynamic-forms with ${recipe.label}${projectName ? ` (project: ${projectName})` : ''}.`);
 
     return chain([
-      addPackages(recipe),
+      addPackages(recipe, !options.skipProviders),
       options.skipStyles ? noopRule() : addStyles(recipe, projectName),
       options.skipProviders ? noopRule() : addProviders(recipe, legacyStatusClasses, projectName),
       summarize(recipe, options, projectName),

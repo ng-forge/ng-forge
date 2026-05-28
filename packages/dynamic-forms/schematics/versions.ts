@@ -6,6 +6,7 @@ export const VERSIONS = {
   '@ng-forge/dynamic-forms-bootstrap': NG_FORGE_VERSION,
   '@ng-forge/dynamic-forms-primeng': NG_FORGE_VERSION,
   '@ng-forge/dynamic-forms-ionic': NG_FORGE_VERSION,
+  '@angular/animations': '~21.2.0',
   '@angular/material': '~21.2.0',
   '@angular/cdk': '~21.2.0',
   bootstrap: '^5.3.0',

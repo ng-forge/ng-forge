@@ -35,10 +35,7 @@
       "inputs": ["{projectRoot}/schematics/**/*", "!{projectRoot}/schematics/**/*.spec.ts"],
       "dependsOn": ["compile"],
       "options": {
-        "commands": [
-          "tsc -p packages/dynamic-forms/schematics/tsconfig.json",
-          "node -e \"require('node:fs').writeFileSync('dist/packages/dynamic-forms/schematics/package.json', JSON.stringify({type:'commonjs'}) + '\\n')\""
-        ],
+        "commands": ["tsc -p packages/dynamic-forms/schematics/tsconfig.json", "node scripts/finalize-dynamic-forms-schematics.mjs"],
         "parallel": false,
         "cwd": "{workspaceRoot}"
       }

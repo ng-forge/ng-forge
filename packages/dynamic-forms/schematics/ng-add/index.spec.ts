@@ -35,7 +35,7 @@ interface AdapterExpectations {
 
 const EXPECTATIONS: Record<Exclude<Adapter, 'none'>, AdapterExpectations> = {
   material: {
-    packages: ['@ng-forge/dynamic-forms', '@ng-forge/dynamic-forms-material', '@angular/material', '@angular/cdk'],
+    packages: ['@ng-forge/dynamic-forms', '@angular/animations', '@ng-forge/dynamic-forms-material', '@angular/material', '@angular/cdk'],
     styleNeedles: ['@angular/material/prebuilt-themes/azure-blue.css'],
     providerNeedles: ['provideAnimations', 'provideDynamicForm', 'withMaterialFields', 'withLegacyStatusClasses'],
   },
@@ -99,9 +99,11 @@ describe('ng-add', () => {
       result = await runner.runSchematic('ng-add', { adapter: 'none' }, tree);
     });
 
-    it('adds only core package', () => {
+    it('adds core + animations but no adapter package', () => {
       const pkg = JSON.parse(result.readContent('/package.json'));
       expect(pkg.dependencies?.['@ng-forge/dynamic-forms']).toBeDefined();
+      expect(pkg.dependencies?.['@angular/animations']).toBeDefined();
+      expect(pkg.dependencies?.['@ng-forge/dynamic-forms-material']).toBeUndefined();
     });
 
     it('does not write adapter style imports', () => {
@@ -127,12 +129,17 @@ describe('ng-add', () => {
       expect(after).toBe(before);
     });
 
-    it('--skipProviders leaves app.config.ts untouched', async () => {
+    it('--skipProviders leaves app.config.ts untouched and skips @angular/animations', async () => {
       const { runner, tree } = await makeAppTree();
       const before = tree.readContent(`${APP_DIR}/src/app/app.config.ts`);
       const result = await runner.runSchematic('ng-add', { adapter: 'material', skipProviders: true }, tree);
       const after = result.readContent(`${APP_DIR}/src/app/app.config.ts`);
       expect(after).toBe(before);
+
+      // animations is a provider-side dep; skipping providers must skip it too
+      const pkg = JSON.parse(result.readContent('/package.json'));
+      expect(pkg.dependencies?.['@angular/animations']).toBeUndefined();
+      expect(pkg.dependencies?.['@angular/material']).toBeDefined();
     });
 
     it('--legacyStatusClasses=false omits withLegacyStatusClasses()', async () => {
