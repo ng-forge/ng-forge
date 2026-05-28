@@ -47,7 +47,7 @@ export class FormIdPrefixService {
       explicitEffect([this.rawPrefix], ([raw]) => {
         const safe = raw ? sanitizeIdPrefix(raw) : raw;
         if (raw && safe !== raw) {
-          this.logger?.warn(`DynamicForm: idPrefix "${raw}" sanitized to "${safe}".`);
+          this.logger?.warn(`idPrefix "${raw}" sanitized to "${safe}".`);
         }
       });
     }
