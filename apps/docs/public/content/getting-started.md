@@ -17,7 +17,7 @@ In an existing Angular 21+ workspace:
 ng add @ng-forge/dynamic-forms
 ```
 
-You'll be prompted for a UI adapter. The schematic installs the adapter package and its peers, imports the required CSS into `styles.scss`, and wires `provideAnimations`, the adapter provider (where applicable), and `provideDynamicForm(...withXxxFields(), withLegacyStatusClasses())` into `app.config.ts`. Pass `--defaults` to skip prompts in CI.
+You'll be prompted for a UI adapter. The schematic installs the adapter package and its peers, imports the required CSS into your global styles file, and wires `provideAnimations`, the adapter provider (where applicable), and `provideDynamicForm(...withXxxFields(), withLegacyStatusClasses())` into your `ApplicationConfig`. Pass `--defaults` to skip prompts in CI.
 
 In Nx workspaces use `nx g @ng-forge/dynamic-forms:ng-add --adapter=material` (same flags).
 
