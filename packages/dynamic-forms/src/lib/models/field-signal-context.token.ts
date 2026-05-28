@@ -207,3 +207,28 @@ export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>(
  * and inherited by all children via Angular's hierarchical injector.
  */
 export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
+
+/**
+ * Injection token for the form-level DOM id prefix.
+ *
+ * Provides a `Signal<string>` prepended (underscore-joined) to every field's
+ * rendered `key` — the value that becomes the DOM `id`, `data-testid`, label
+ * `for`, and `aria-describedby` target. Scopes those ids to a single
+ * DynamicForm instance so two forms built from the same config on one page
+ * don't collide (clicking form B's label would otherwise focus form A's input).
+ *
+ * Resolves to:
+ * - the explicit `options.idPrefix` (trimmed), when set; otherwise
+ * - an auto-generated per-instance id (e.g. `df-2`) once more than one form is
+ *   mounted; otherwise
+ * - an empty string — the single-form default, leaving ids/testids
+ *   byte-identical to pre-feature behavior.
+ *
+ * Provided once at the DynamicForm level and inherited by all field injectors,
+ * so `mapFieldToInputs` reads it the same way it reads GROUP_CONTEXT. The
+ * prefix is the outermost id segment: `{idPrefix}_{groupPath}_{key}_{index}`.
+ *
+ * Inject with `{ optional: true }`: mapper unit tests run with mock injectors
+ * that don't provide it, and consumers must fall back to no prefix.
+ */
+export const FORM_ID_PREFIX = new InjectionToken<Signal<string>>('FORM_ID_PREFIX');

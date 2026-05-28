@@ -631,6 +631,32 @@ export interface FormOptions {
   disabled?: boolean;
 
   /**
+   * Prefix prepended to every field's rendered DOM `id` (and the matching
+   * label `for`, `data-testid`, and `aria-describedby` targets), scoping them
+   * to this form instance.
+   *
+   * Set this when you render more than one form built from the same config on
+   * a single page: without a prefix both forms emit identical ids (`email`,
+   * `email-input`, …), so clicking one form's label focuses the other form's
+   * input. A prefix makes them distinct (`billing_email`, `shipping_email`).
+   *
+   * When omitted, the library auto-detects multiple mounted forms and applies
+   * a generated prefix (`df-1`, `df-2`, …) only once a second form is present —
+   * a lone form keeps clean, unprefixed ids. Set this explicitly when you want
+   * stable, human-readable ids regardless of how many forms are on the page.
+   *
+   * The prefix is the outermost id segment: `{idPrefix}_{group}_{key}_{index}`.
+   *
+   * @example
+   * ```typescript
+   * options: { idPrefix: 'billing' } // → id="billing_email"
+   * ```
+   *
+   * @default undefined (auto-prefix only when multiple forms are mounted)
+   */
+  idPrefix?: string;
+
+  /**
    * Maximum number of iterations for derivation chain processing.
    *
    * Derivations can trigger other derivations (e.g., A → B → C).

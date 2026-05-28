@@ -49,6 +49,12 @@ export default [
     loadChildren: () => import('./group-fields/group-fields.routes'),
   },
 
+  // ID Collision Tests - Tests for multi-form DOM id scoping / cleanup
+  {
+    path: 'id-collision',
+    loadChildren: () => import('./id-collision/id-collision.routes'),
+  },
+
   // PrimeNG Components Tests
   {
     path: 'primeng-components',

@@ -5,7 +5,7 @@ import { mapFieldToInputs } from './field-mapper';
 import { FieldDef } from '../../definitions/base';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
-import { ARRAY_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
+import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '../../models/field-signal-context.token';
 import type { ArrayContext, GroupContext } from '../../mappers/types';
 
 describe('mapFieldToInputs', () => {
@@ -405,6 +405,98 @@ describe('mapFieldToInputs', () => {
       const field: FieldDef<unknown> = { type: 'custom', key: 'ignored' };
       const result = runWithProviders([{ provide: GROUP_CONTEXT, useValue: groupCtx('address') }], () => mapFieldToInputs(field, registry));
       expect(result!()['key']).toBe(42);
+    });
+  });
+
+  /**
+   * Form-level DOM-id prefixing: when FORM_ID_PREFIX resolves to a non-empty
+   * string, the `key` input gets it as its OUTERMOST segment so two forms built
+   * from the same config on one page produce distinct ids. An empty prefix is a
+   * no-op (single-form default), and a missing token leaves the static fast-path
+   * intact.
+   */
+  describe('form id prefix (multi-form collision scoping)', () => {
+    function runWithPrefix<T>(prefix: string, providers: Provider[], fn: () => T): T {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
+          { provide: FORM_ID_PREFIX, useValue: signal(prefix) },
+          ...providers,
+        ],
+      });
+      return TestBed.runInInjectionContext(fn);
+    }
+
+    function groupCtx(path: string): GroupContext {
+      return { groupPath: signal(path) };
+    }
+
+    function arrayCtx(index: number, arrayKey = 'items'): ArrayContext {
+      return {
+        arrayKey,
+        index: signal(index),
+        formValue: null,
+        field: { type: 'array', key: arrayKey } as FieldDef<unknown>,
+      };
+    }
+
+    it('prepends the prefix to a plain top-level key', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'email' };
+      const result = runWithPrefix('df-2', [], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('df-2_email');
+    });
+
+    it('is a no-op when the prefix is empty (single-form default)', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'email' };
+      const result = runWithPrefix('', [], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('email');
+    });
+
+    it('is the OUTERMOST segment: {prefix}_{group}_{key}_{index}', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithPrefix(
+        'df-1',
+        [
+          { provide: GROUP_CONTEXT, useValue: groupCtx('address') },
+          { provide: ARRAY_CONTEXT, useValue: arrayCtx(0, 'users') },
+        ],
+        () => mapFieldToInputs(field, registry),
+      );
+      expect(result!()['key']).toBe('df-1_address_street_0');
+    });
+
+    it('composes with a group prefix', () => {
+      const field: FieldDef<unknown> = { type: 'input', key: 'street' };
+      const result = runWithPrefix('myform', [{ provide: GROUP_CONTEXT, useValue: groupCtx('address') }], () =>
+        mapFieldToInputs(field, registry),
+      );
+      expect(result!()['key']).toBe('myform_address_street');
+    });
+
+    it('leaves non-string keys untouched', () => {
+      const customMapper = () => computed(() => ({ key: 7 as unknown as string }));
+      registry.set('custom', { component: {} as Type<unknown>, mapper: customMapper });
+      const field: FieldDef<unknown> = { type: 'custom', key: 'ignored' };
+      const result = runWithPrefix('df-2', [], () => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe(7);
+    });
+
+    it('reacts when the prefix flips from empty to an auto-id (second form mounts)', () => {
+      TestBed.resetTestingModule();
+      const prefix = signal('');
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
+          { provide: FORM_ID_PREFIX, useValue: prefix },
+        ],
+      });
+      const field: FieldDef<unknown> = { type: 'input', key: 'email' };
+      const result = TestBed.runInInjectionContext(() => mapFieldToInputs(field, registry));
+      expect(result!()['key']).toBe('email');
+
+      prefix.set('df-2');
+      expect(result!()['key']).toBe('df-2_email');
     });
   });
 
