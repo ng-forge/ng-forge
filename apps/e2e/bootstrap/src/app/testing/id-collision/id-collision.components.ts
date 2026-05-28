@@ -1,13 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
-/**
- * E2E components for the multi-form DOM-id collision fix. Adapter-agnostic in
- * content (core DynamicForm + the `input` field type), but kept in app source
- * per adapter so they're lazy-loaded locally — the adapter's own `input`
- * renderer resolves at runtime via DI. Assertions live in the shared
- * `@ng-forge/examples-shared-testing/id-collision-spec` helpers.
- */
+// E2E components for the multi-form id-collision fix. Adapter-agnostic (core
+// DynamicForm + `input`); the adapter's renderer resolves at runtime via DI.
 
 const TWO_FIELD_CONFIG = {
   fields: [

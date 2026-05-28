@@ -1,44 +1,55 @@
-import { computed, DestroyRef, effect, inject, Injectable, signal, Signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, isDevMode, linkedSignal, Signal } from '@angular/core';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DynamicFormInstanceRegistry } from './dynamic-form-instance-registry.service';
 
+// Whitespace breaks the space-separated aria-describedby list; punctuation breaks selectors.
+const INVALID_ID_CHARS = /[^\w-]+/g;
+
+function sanitizeIdPrefix(prefix: string): string {
+  return prefix.replace(INVALID_ID_CHARS, '_');
+}
+
 /**
- * Per-form (component-scoped) owner of the DOM-id prefix. Registers this form
- * with the root {@link DynamicFormInstanceRegistry} on construction and
- * unregisters via `DestroyRef`, so the registry's live count stays accurate.
- *
- * Exposes {@link prefix} — the Signal published through `FORM_ID_PREFIX` and
- * read by `mapFieldToInputs`. Resolution:
- * - explicit `options.idPrefix` (trimmed) wins, always;
- * - otherwise the instance's auto-id, once more than one form is mounted;
- * - otherwise `''` (no prefix — the single-form default).
- *
- * The "more than one form" trigger latches: once it fires, this form keeps its
- * prefix even if the sibling later unmounts, so already-rendered ids don't
- * churn back to unprefixed mid-session.
+ * Per-form owner of the DOM-id prefix, published through `FORM_ID_PREFIX`.
+ * Resolution: explicit `options.idPrefix` (trimmed + sanitized) wins; else the
+ * instance's auto-id once more than one form is mounted; else `''`.
  */
 @Injectable()
 export class FormIdPrefixService {
   private readonly registry = inject(DynamicFormInstanceRegistry);
   private readonly options = inject(FORM_OPTIONS, { optional: true });
+  private readonly logger = inject(DynamicFormLogger, { optional: true });
 
   private readonly autoId = this.registry.register();
-  private readonly latched = signal(false);
 
-  /** Effective DOM-id prefix for this form instance. */
+  private readonly rawPrefix = computed(() => this.options?.()?.idPrefix?.trim() || undefined);
+
+  // linkedSignal (not effect) keeps the latch synchronous so it resolves during the
+  // same render pass — incl. SSR, where an effect-based flip would serialize colliding
+  // ids and mutate them on hydration. Never reverts once a sibling has appeared.
+  private readonly latched = linkedSignal<boolean, boolean>({
+    source: () => this.registry.multiplePresent(),
+    computation: (multiplePresent, previous) => (previous?.value ?? false) || multiplePresent,
+  });
+
   readonly prefix: Signal<string> = computed(() => {
-    const explicit = this.options?.()?.idPrefix?.trim();
-    if (explicit) return explicit;
+    const explicit = this.rawPrefix();
+    if (explicit) return sanitizeIdPrefix(explicit);
     return this.latched() ? this.autoId : '';
   });
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.registry.unregister());
-    // Latch true the first time a sibling form is present; never revert.
-    effect(() => {
-      if (this.registry.multiplePresent()) {
-        this.latched.set(true);
-      }
-    });
+
+    if (isDevMode()) {
+      explicitEffect([this.rawPrefix], ([raw]) => {
+        const safe = raw ? sanitizeIdPrefix(raw) : raw;
+        if (raw && safe !== raw) {
+          this.logger?.warn(`DynamicForm: idPrefix "${raw}" sanitized to "${safe}".`);
+        }
+      });
+    }
   }
 }

@@ -58,6 +58,12 @@ describe('FormIdPrefixService', () => {
     expect(svc.prefix()).toBe('');
   });
 
+  it('sanitizes id-breaking characters in an explicit prefix', () => {
+    const { svc } = mountForm({ idPrefix: 'my form.1' });
+    TestBed.flushEffects();
+    expect(svc.prefix()).toBe('my_form_1');
+  });
+
   it('auto-prefixes both forms once a second one mounts', () => {
     const a = mountForm();
     const b = mountForm();

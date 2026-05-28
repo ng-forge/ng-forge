@@ -631,25 +631,18 @@ export interface FormOptions {
   disabled?: boolean;
 
   /**
-   * Prefix prepended to every field's rendered DOM `id` (and the matching
-   * label `for`, `data-testid`, and `aria-describedby` targets), scoping them
-   * to this form instance.
+   * Prefix scoping every field's DOM `id` (and matching `for` / `data-testid` /
+   * `aria-describedby`) to this form instance, as the outermost id segment:
+   * `{idPrefix}_{group}_{key}_{index}`. Use it when rendering multiple forms
+   * from the same config on one page so their ids don't collide.
    *
-   * Set this when you render more than one form built from the same config on
-   * a single page: without a prefix both forms emit identical ids (`email`,
-   * `email-input`, …), so clicking one form's label focuses the other form's
-   * input. A prefix makes them distinct (`billing_email`, `shipping_email`).
-   *
-   * When omitted, the library auto-detects multiple mounted forms and applies
-   * a generated prefix (`df-1`, `df-2`, …) only once a second form is present —
-   * a lone form keeps clean, unprefixed ids. Set this explicitly when you want
-   * stable, human-readable ids regardless of how many forms are on the page.
-   *
-   * The prefix is the outermost id segment: `{idPrefix}_{group}_{key}_{index}`.
+   * When omitted, a lone form stays unprefixed and a generated prefix (`df-1`,
+   * `df-2`, …) is applied automatically once a second form is mounted. Characters
+   * invalid in an id token (whitespace, punctuation) are replaced with `_`.
    *
    * @example
    * ```typescript
-   * options: { idPrefix: 'billing' } // → id="billing_email"
+   * options: { idPrefix: 'billing' } // → id="billing_email-input"
    * ```
    *
    * @default undefined (auto-prefix only when multiple forms are mounted)

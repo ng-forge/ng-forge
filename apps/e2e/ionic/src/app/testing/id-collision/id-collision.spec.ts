@@ -4,10 +4,7 @@ import { assertExplicitPrefixes, assertToggleCleanup, assertTwoFormsScoped } fro
 setupTestLogging();
 setupConsoleCheck();
 
-// Ionic renders `<ion-input>` (label is an internal attribute, the field lives
-// in shadow DOM), so there's no native `<label for>` to click. The fix is
-// validated by the core invariants: no duplicate ids + form-id scoping, which
-// hold regardless of how the adapter renders labels.
+// Ionic's <ion-input> has no native <label for> — core invariants (no dup ids + form-id scoping) cover the fix.
 test.describe('ID Collision E2E Tests', () => {
   test.describe('Two identical forms', () => {
     test.beforeEach(async ({ helpers }) => {

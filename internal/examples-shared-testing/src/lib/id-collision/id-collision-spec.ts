@@ -1,21 +1,11 @@
 import { expect, Page } from '@playwright/test';
 
-/**
- * Shared, mostly adapter-agnostic assertions for the multi-form DOM-id
- * collision fix. The core invariants — "no duplicate element ids" and "form
- * elements are scoped by prefix" — hold for every adapter because they're
- * produced by core (`DynamicForm`'s host `[attr.id]` and the field key
- * pipeline), regardless of how each adapter renders inputs.
- *
- * The `label`/`input` selectors differ per adapter, so the label↔input
- * assertions are parameterized and only used by adapters whose label uses a
- * native `for`/`id` association (bootstrap, primeng).
- */
+// Shared assertions for the multi-form DOM-id collision fix. The id/no-collision
+// checks are adapter-agnostic (core owns them); label↔input checks are parameterized
+// and only used by native `for`/`id` adapters (bootstrap, primeng).
 
 export interface FieldSelectors {
-  /** Selector for a field's focusable input within a form container. */
   inputSelector: string;
-  /** Selector for a field's `<label>` within a form container. */
   labelSelector: string;
 }
 
@@ -59,36 +49,26 @@ export async function assertExplicitPrefixes(page: Page): Promise<void> {
   await assertNoDuplicateIds(page);
 }
 
-/**
- * Toggle/cleanup: a lone form is unprefixed (clean ids); mounting a second
- * scopes both; unmounting it must clean up without breaking the survivor or
- * leaving id collisions behind.
- */
+/** Lone form unprefixed → mounting a second scopes both → unmounting it keeps the survivor's latched prefix and stays collision-free. */
 export async function assertToggleCleanup(page: Page): Promise<void> {
   const formA = page.locator('[data-testid="form-a"] form');
   await expect(formA).toBeVisible({ timeout: 10000 });
-
-  // Alone → unprefixed, so the form carries no id attribute (single-form default).
   await expect(formA).not.toHaveAttribute('id', /.+/, { timeout: 10000 });
   await assertNoDuplicateIds(page);
 
-  // Mount form B → both forms scope their ids; no collisions.
   await page.locator('[data-testid="toggle-form-b"]').click();
   await expect(page.locator('[data-testid="form-b"] form')).toBeVisible({ timeout: 10000 });
   await expect(formA).toHaveAttribute('id', /^df-\d+$/, { timeout: 10000 });
+  const latchedId = await formA.getAttribute('id');
   await assertNoDuplicateIds(page);
 
-  // Unmount form B → registry cleans up; survivor stays collision-free.
   await page.locator('[data-testid="toggle-form-b"]').click();
   await expect(page.locator('[data-testid="form-b"]')).toHaveCount(0);
+  await expect(formA).toHaveAttribute('id', latchedId!); // latched: prefix survives the sibling unmount
   await assertNoDuplicateIds(page);
 }
 
-/**
- * Native `for`/`id` adapters only: each label's `for` matches an input inside
- * its OWN form, and that id is unique page-wide (so it can't resolve to the
- * other form's input).
- */
+/** Native `for`/`id` adapters: each label's `for` matches its OWN form's input, and that id is unique page-wide. */
 export async function assertLabelForMatchesOwnInput(page: Page, selectors: FieldSelectors): Promise<void> {
   const formB = page.locator('[data-testid="form-b"]');
   await expect(formB.locator(selectors.inputSelector).first()).toBeVisible({ timeout: 10000 });
@@ -100,10 +80,7 @@ export async function assertLabelForMatchesOwnInput(page: Page, selectors: Field
   await expect(page.locator(`[id="${inputId}"]`)).toHaveCount(1);
 }
 
-/**
- * Native `for`/`id` adapters only: the literal reported bug — clicking form B's
- * label must focus form B's input, not form A's identically-keyed input.
- */
+/** Native `for`/`id` adapters: the reported bug — clicking form B's label focuses form B's input, not form A's. */
 export async function assertLabelClickFocusesOwnInput(page: Page, selectors: FieldSelectors): Promise<void> {
   const aInput = page.locator('[data-testid="form-a"]').locator(selectors.inputSelector).first();
   const bInput = page.locator('[data-testid="form-b"]').locator(selectors.inputSelector).first();

@@ -116,14 +116,9 @@ function applyGroupPrefix(inputs: Record<string, unknown>, groupPath: string): R
 }
 
 /**
- * Prepends the form-level id prefix so the same field key rendered by two
- * DynamicForm instances on one page produces distinct DOM IDs (clicking one
- * form's label would otherwise focus the other form's input). Mirrors
- * applyGroupPrefix/applyIndexSuffix — only the rendered `key` input is
- * rewritten; form-schema keys and override-store keys stay clean.
- *
- * Outermost segment: `(prefix='df-2', inputs.key='user_address_street_0')` →
- * `inputs.key = 'df-2_user_address_street_0'`. No-op when prefix is empty.
+ * Prepends the form-level id prefix as the outermost key segment so the same key
+ * across two forms on one page yields distinct DOM IDs. Rewrites only the rendered
+ * `key`; schema/override-store keys stay clean. No-op when prefix is empty.
  */
 function applyFormPrefix(inputs: Record<string, unknown>, prefix: string): Record<string, unknown> {
   const key = inputs['key'];
@@ -184,10 +179,7 @@ export function mapFieldToInputs(
   // Optional because GROUP_CONTEXT is only provided by GroupFieldComponent.
   const groupContext = inject(GROUP_CONTEXT, { optional: true });
 
-  // Form-level DOM-id prefix — provided at the DynamicForm level, inherited by
-  // every field injector. Scopes ids to one form instance so duplicate forms on
-  // a page don't collide. Optional because mapper unit tests use mock injectors
-  // that don't provide it (and standalone usage may omit it).
+  // Form-level DOM-id prefix (scopes ids to one form instance). Optional: absent under mock injectors.
   const formPrefixSignal = inject(FORM_ID_PREFIX, { optional: true });
 
   // Inject the property override store for property derivation overrides
@@ -203,10 +195,8 @@ export function mapFieldToInputs(
   const indexSignal = arrayContext?.index;
   const hasArrayContext = indexSignal !== undefined && isSignal(indexSignal);
   const hasGroupContext = groupContext != null;
-  // When the prefix token is provided, fields must stay in the computed wrapper:
-  // the prefix can flip from '' to an auto-id reactively when a second form
-  // mounts, and already-rendered ids need to pick that up. The transform itself
-  // is a no-op string check while the prefix is empty (the common single-form case).
+  // Bypasses the fast path so fields stay subscribed to a prefix that can flip
+  // when a sibling form mounts (gating on its current value would miss the flip).
   const hasFormPrefix = formPrefixSignal != null;
 
   // Fast-path check for property overrides: only fields whose definition declares
@@ -245,10 +235,7 @@ export function mapFieldToInputs(
       inputs = applyIndexSuffix(inputs, index);
     }
 
-    // Apply the form-level prefix LAST among key transforms so it is the
-    // outermost id segment: `{idPrefix}_{groupPath}_{key}_{index}`. Reading the
-    // signal here establishes the reactive dep so ids re-render if the prefix
-    // flips (e.g. a second form mounts). No-op while the prefix is empty.
+    // Outermost key segment; reading the signal here re-renders ids if the prefix flips.
     if (hasFormPrefix) {
       inputs = applyFormPrefix(inputs, formPrefixSignal!());
     }

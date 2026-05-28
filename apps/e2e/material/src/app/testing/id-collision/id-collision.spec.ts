@@ -4,10 +4,7 @@ import { assertExplicitPrefixes, assertToggleCleanup, assertTwoFormsScoped } fro
 setupTestLogging();
 setupConsoleCheck();
 
-// Material associates `<mat-label>` to the input via aria, not a native
-// `for`/`id`, so the focus-jump click isn't a meaningful repro here. The fix is
-// still validated by the core invariants: no duplicate ids + form-id scoping,
-// which hold regardless of how the adapter renders labels.
+// Material's <mat-label> uses aria, not native for/id — core invariants (no dup ids + form-id scoping) cover the fix.
 test.describe('ID Collision E2E Tests', () => {
   test.describe('Two identical forms', () => {
     test.beforeEach(async ({ helpers }) => {

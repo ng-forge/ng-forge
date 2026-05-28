@@ -70,6 +70,8 @@ The prefix is the **outermost** id segment, composing with group and array scopi
 {idPrefix}_{group}_{key}_{index}   e.g.  billing_address_street_0
 ```
 
+Use a valid id token — letters, digits, `-`, `_`. Whitespace or punctuation is replaced with `_` (with a dev-mode warning), since a space would break the `aria-describedby` token list and `for`/`id` matching.
+
 > [!TIP]
 > Writing E2E selectors or `aria-*` references against a form that shares the page with another form? Set an explicit `idPrefix` so the ids you target are deterministic, then select `#billing_email-input` rather than the auto-generated `#df-2_email-input`.
 
