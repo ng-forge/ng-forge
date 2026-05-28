@@ -25,9 +25,7 @@ export interface BsButtonProps {
 export type BsButtonField<TEvent extends FormEvent> = ButtonField<BsButtonProps, TEvent>;
 export type BsButtonComponent<TEvent extends FormEvent> = FieldComponent<BsButtonField<TEvent>>;
 
-/**
- * Specific button field types with preconfigured events
- */
+/** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
 export type BsSubmitButtonField = Omit<BsButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
@@ -87,9 +85,7 @@ export type InsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent
    * When inside an array, this is automatically determined from context.
    */
   arrayKey?: string;
-  /**
-   * The index at which to insert the new item.
-   */
+  /** The index at which to insert the new item. */
   index: number;
   /**
    * Template for the new array item. REQUIRED.

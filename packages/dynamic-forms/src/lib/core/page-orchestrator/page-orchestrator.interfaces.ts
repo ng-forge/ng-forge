@@ -1,9 +1,7 @@
 import { ComponentRef } from '@angular/core';
 import { FormUiControl } from '@angular/forms/signals';
 
-/**
- * State interface for the page orchestrator
- */
+/** State interface for the page orchestrator */
 export interface PageOrchestratorState {
   /** Current page index (0-based) */
   currentPageIndex: number;
@@ -17,9 +15,7 @@ export interface PageOrchestratorState {
   navigationDisabled: boolean;
 }
 
-/**
- * Configuration for page orchestrator
- */
+/** Configuration for page orchestrator */
 export interface PageOrchestratorConfig {
   /** Initial page index to show (defaults to 0) */
   initialPageIndex?: number;
@@ -27,9 +23,7 @@ export interface PageOrchestratorConfig {
   initialNavigationDisabled?: boolean;
 }
 
-/**
- * Result of a navigation attempt
- */
+/** Result of a navigation attempt */
 export interface NavigationResult {
   /** Whether the navigation was successful */
   success: boolean;
@@ -39,9 +33,7 @@ export interface NavigationResult {
   error?: string;
 }
 
-/**
- * Context for page visibility management
- */
+/** Context for page visibility management */
 export interface PageVisibilityContext {
   /** Index of the page */
   pageIndex: number;

@@ -5,13 +5,6 @@ import { FieldDef } from '../../definitions/base/field-def';
  * Per-array durable state. Survives `ArrayFieldComponent` destroy/recreate
  * cycles so a hidden array that's gated with `@if` doesn't lose its dynamically
  * added items when it becomes visible again.
- *
- * `templates` is keyed by item id and holds the field definitions used to
- * resolve each item (so we can re-create them after a destroy with the right
- * field shape). `itemOrder` records the id sequence in form-value order, so a
- * fresh `ArrayFieldComponent` can map each `fieldTree` back to its existing id
- * + template instead of generating a new id and falling through to `Priority 2`
- * static templates (which drops items that were added dynamically).
  */
 export interface ArraySlot {
   /** Templates keyed by item id. Set on resolution, deleted on item removal. */
@@ -107,10 +100,6 @@ function createSlot(): ArraySlot {
  * (e.g. 'members', 'team.members', 'orders.lineItems'). Survives
  * `ArrayFieldComponent` lifecycle, dies with the `DynamicForm`. Cleared on
  * schema swap by the `formSetup` effect in `FormStateManager`.
- *
- * `ArrayFieldComponent` injects this service and obtains its slot via
- * `slotFor(arrayPath)` on mount. Replaces the prior per-component
- * `ARRAY_TEMPLATE_REGISTRY` + `ARRAY_ITEM_ID_GENERATOR` providers.
  */
 @Injectable()
 export class ArrayItemRegistryService {

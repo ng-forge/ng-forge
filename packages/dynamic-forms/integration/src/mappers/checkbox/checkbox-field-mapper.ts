@@ -9,9 +9,6 @@ import { omit } from '@ng-forge/dynamic-forms';
 /**
  * Maps a checkbox/toggle field definition to component inputs.
  *
- * Checkbox fields are checked fields that contribute to the form's value as boolean.
- * This mapper injects FIELD_SIGNAL_CONTEXT to access the form structure and retrieve the field tree.
- *
  * @param fieldDef The checkbox field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

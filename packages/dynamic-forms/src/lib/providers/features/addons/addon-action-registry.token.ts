@@ -1,13 +1,7 @@
 import { inject, InjectionToken } from '@angular/core';
 import { AddonActionContext } from '../../../models/addon/addon-action';
 
-/**
- * Handler signature for user-registered addon actions.
- *
- * Backends reference handlers by name via `actionRef: 'name'` on button-style
- * addons; the dispatcher invokes the registered function with the addon's
- * action context.
- */
+/** Handler signature for user-registered addon actions. */
 export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TValue>) => void;
 
 /**

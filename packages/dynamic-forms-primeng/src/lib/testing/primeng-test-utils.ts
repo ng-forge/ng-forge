@@ -20,26 +20,20 @@ import {
   PrimeToggleField,
 } from '../fields';
 
-/**
- * Configuration for creating a PrimeNG dynamic form test
- */
+/** Configuration for creating a PrimeNG dynamic form test */
 export interface PrimeNGFormTestConfig {
   config: FormConfig;
   initialValue?: Record<string, unknown>;
   providers?: unknown[];
 }
 
-/**
- * Result of creating a PrimeNG dynamic form test
- */
+/** Result of creating a PrimeNG dynamic form test */
 export interface PrimeNGFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm>;
 }
 
-/**
- * Fluent API for building PrimeNG form configurations
- */
+/** Fluent API for building PrimeNG form configurations */
 export class PrimeNGFormConfigBuilder {
   private fields: unknown[] = [];
 
@@ -123,20 +117,14 @@ export class PrimeNGFormConfigBuilder {
   }
 }
 
-/**
- * Utility class for testing PrimeNG dynamic forms
- */
+/** Utility class for testing PrimeNG dynamic forms */
 export class PrimeNGFormTestUtils {
-  /**
-   * Creates a new PrimeNG form config builder
-   */
+  /** Creates a new PrimeNG form config builder */
   static builder(): PrimeNGFormConfigBuilder {
     return new PrimeNGFormConfigBuilder();
   }
 
-  /**
-   * Creates a PrimeNG dynamic form test setup with proper providers
-   */
+  /** Creates a PrimeNG dynamic form test setup with proper providers */
   static async createTest(testConfig: PrimeNGFormTestConfig): Promise<PrimeNGFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
@@ -169,9 +157,7 @@ export class PrimeNGFormTestUtils {
     };
   }
 
-  /**
-   * Waits for the PrimeNG dynamic form to initialize
-   */
+  /** Waits for the PrimeNG dynamic form to initialize */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
@@ -209,9 +195,7 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user input on a PrimeNG input field
-   */
+  /** Simulates user input on a PrimeNG input field */
   static async simulatePrimeInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
@@ -225,9 +209,7 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user selection on a PrimeNG dropdown/select
-   */
+  /** Simulates user selection on a PrimeNG dropdown/select */
   static async simulatePrimeDropdown(
     fixture: ComponentFixture<DynamicForm>,
     selectSelector: string,
@@ -256,9 +238,7 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates PrimeNG checkbox toggle
-   */
+  /** Simulates PrimeNG checkbox toggle */
   static async simulatePrimeCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     let checkboxElement: Element | null = null;
 
@@ -339,9 +319,7 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates PrimeNG toggle switch (InputSwitch)
-   */
+  /** Simulates PrimeNG toggle switch (InputSwitch) */
   static async simulatePrimeToggle(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const toggle = fixture.nativeElement.querySelector(selector);
     if (!toggle) {
@@ -362,9 +340,7 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates PrimeNG button click
-   */
+  /** Simulates PrimeNG button click */
   static async simulatePrimeButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
     const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
     if (!button) {
@@ -376,37 +352,27 @@ export class PrimeNGFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> {
     return component.formValue();
   }
 
-  /**
-   * Gets validation errors from the component
-   */
+  /** Gets validation errors from the component */
   static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors();
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Gets all PrimeNG field elements from the fixture
-   */
+  /** Gets all PrimeNG field elements from the fixture */
   static getPrimeFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
     return fixture.nativeElement.querySelectorAll(`df-prime-${fieldType}`);
   }
 
-  /**
-   * Asserts that a PrimeNG field has a specific value
-   */
+  /** Asserts that a PrimeNG field has a specific value */
   static assertPrimeFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): void {
     // Try to find the input element directly first
     let element = fixture.nativeElement.querySelector(fieldSelector);
@@ -436,9 +402,7 @@ export class PrimeNGFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
@@ -446,9 +410,7 @@ export class PrimeNGFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that a PrimeNG field shows an error message
-   */
+  /** Asserts that a PrimeNG field shows an error message */
   static assertPrimeFieldError(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedError?: string): void {
     const fieldWrapper = fixture.nativeElement.querySelector(fieldSelector);
     if (!fieldWrapper) {
@@ -466,9 +428,7 @@ export class PrimeNGFormTestUtils {
     }
   }
 
-  /**
-   * Gets a PrimeNG input text element
-   */
+  /** Gets a PrimeNG input text element */
   static getPInputText(fixture: ComponentFixture<DynamicForm>, selector: string): HTMLInputElement {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
@@ -477,9 +437,7 @@ export class PrimeNGFormTestUtils {
     return input;
   }
 
-  /**
-   * Gets a PrimeNG dropdown element
-   */
+  /** Gets a PrimeNG dropdown element */
   static getPDropdown(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const dropdown = fixture.nativeElement.querySelector(selector);
     if (!dropdown) {
@@ -488,9 +446,7 @@ export class PrimeNGFormTestUtils {
     return dropdown;
   }
 
-  /**
-   * Gets a PrimeNG checkbox element
-   */
+  /** Gets a PrimeNG checkbox element */
   static getPCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const checkbox = fixture.nativeElement.querySelector(selector);
     if (!checkbox) {
@@ -499,9 +455,7 @@ export class PrimeNGFormTestUtils {
     return checkbox;
   }
 
-  /**
-   * Gets a PrimeNG radio button element
-   */
+  /** Gets a PrimeNG radio button element */
   static getPRadioButton(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const radio = fixture.nativeElement.querySelector(selector);
     if (!radio) {
@@ -510,9 +464,7 @@ export class PrimeNGFormTestUtils {
     return radio;
   }
 
-  /**
-   * Gets a PrimeNG InputSwitch (toggle) element
-   */
+  /** Gets a PrimeNG InputSwitch (toggle) element */
   static getPInputSwitch(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const toggle = fixture.nativeElement.querySelector(selector);
     if (!toggle) {
@@ -521,9 +473,7 @@ export class PrimeNGFormTestUtils {
     return toggle;
   }
 
-  /**
-   * Gets a PrimeNG textarea element
-   */
+  /** Gets a PrimeNG textarea element */
   static getPTextarea(fixture: ComponentFixture<DynamicForm>, selector: string): HTMLTextAreaElement {
     const textarea = fixture.nativeElement.querySelector(selector) as HTMLTextAreaElement;
     if (!textarea) {
@@ -532,9 +482,7 @@ export class PrimeNGFormTestUtils {
     return textarea;
   }
 
-  /**
-   * Gets a PrimeNG calendar (datepicker) element
-   */
+  /** Gets a PrimeNG calendar (datepicker) element */
   static getPCalendar(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const calendar = fixture.nativeElement.querySelector(selector);
     if (!calendar) {
@@ -543,9 +491,7 @@ export class PrimeNGFormTestUtils {
     return calendar;
   }
 
-  /**
-   * Gets a PrimeNG slider element
-   */
+  /** Gets a PrimeNG slider element */
   static getPSlider(fixture: ComponentFixture<DynamicForm>, selector: string): Element {
     const slider = fixture.nativeElement.querySelector(selector);
     if (!slider) {
@@ -554,9 +500,7 @@ export class PrimeNGFormTestUtils {
     return slider;
   }
 
-  /**
-   * Gets a PrimeNG button element
-   */
+  /** Gets a PrimeNG button element */
   static getPButton(fixture: ComponentFixture<DynamicForm>, selector: string): HTMLButtonElement {
     const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
     if (!button) {

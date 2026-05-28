@@ -1,29 +1,11 @@
 import { ASTNode, ExpressionParserError } from './types';
 
-/**
- * Evaluation context for safe expression evaluation
- */
+/** Evaluation context for safe expression evaluation */
 export interface EvaluationScope {
   [key: string]: unknown;
 }
 
-/**
- * Security Model: Whitelist-only approach for method calls
- *
- * A method is considered SAFE if it meets ALL criteria:
- * 1. Pure data access/transformation (no side effects)
- * 2. No code execution capabilities
- * 3. No global state modification
- * 4. No prototype chain modification
- * 5. No information disclosure about system internals
- *
- * Methods NOT included (unsafe):
- * - constructor: Could enable code execution via Function constructor
- * - valueOf: Could enable type confusion attacks
- * - __proto__, __defineGetter__, etc: Direct prototype manipulation
- * - hasOwnProperty, isPrototypeOf, propertyIsEnumerable: Leak object structure
- * - toLocaleString: Could expose locale/system information
- */
+/** Security Model: Whitelist-only approach for method calls */
 
 /**
  * Type-safe method whitelists derived from TypeScript primitive types
@@ -132,9 +114,7 @@ const BLOCKED_PROPERTIES = new Set<string>([
   '__lookupSetter__',
 ]);
 
-/**
- * Safely evaluates an AST node with a given context
- */
+/** Safely evaluates an AST node with a given context */
 export class Evaluator {
   private readonly scope: EvaluationScope;
   private readonly expression: string;
@@ -144,9 +124,7 @@ export class Evaluator {
     this.expression = expression;
   }
 
-  /**
-   * Evaluate an AST node
-   */
+  /** Evaluate an AST node */
   evaluate(node: ASTNode): unknown {
     switch (node.type) {
       case 'Literal':

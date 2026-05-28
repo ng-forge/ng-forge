@@ -8,27 +8,9 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
 /**
  * Performs a deep equality comparison between two values.
  *
- * Handles:
- * - Primitives (including NaN via Object.is)
- * - Dates (by timestamp)
- * - Arrays (deep element comparison)
- * - Plain objects (deep property comparison)
- * - RegExp (by source and flags)
- * - Map and Set (by entries)
- * - Circular references (via WeakMap tracking)
- *
  * @param a - First value
  * @param b - Second value
  * @returns true if values are deeply equal
- *
- * @example
- * ```typescript
- * isEqual({ a: 1 }, { a: 1 }); // true
- * isEqual([1, 2], [1, 2]); // true
- * isEqual({ a: 1 }, { a: 2 }); // false
- * isEqual(new Date('2024-01-01'), new Date('2024-01-01')); // true
- * isEqual(/abc/gi, /abc/gi); // true
- * ```
  */
 export function isEqual(a: unknown, b: unknown): boolean {
   return isEqualInternal(a, b, new WeakMap(), new WeakMap());
@@ -36,6 +18,7 @@ export function isEqual(a: unknown, b: unknown): boolean {
 
 /**
  * Internal implementation with circular reference tracking.
+ *
  * @internal
  */
 function isEqualInternal(a: unknown, b: unknown, seenA: WeakMap<object, object>, seenB: WeakMap<object, object>): boolean {
@@ -149,12 +132,6 @@ function isEqualInternal(a: unknown, b: unknown, seenA: WeakMap<object, object>,
  * @param obj - Source object
  * @param keys - Keys to omit
  * @returns New object without specified keys
- *
- * @example
- * ```typescript
- * const obj = { a: 1, b: 2, c: 3 };
- * omit(obj, ['b']); // { a: 1, c: 3 }
- * ```
  */
 export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result = { ...obj };
@@ -169,12 +146,6 @@ export function omit<T extends object, K extends keyof T>(obj: T, keys: K[]): Om
  * @param array - Source array
  * @param key - Property to use as key
  * @returns Object keyed by the specified property
- *
- * @example
- * ```typescript
- * const users = [{ id: 'a', name: 'Alice' }, { id: 'b', name: 'Bob' }];
- * keyBy(users, 'id'); // { a: { id: 'a', name: 'Alice' }, b: { id: 'b', name: 'Bob' } }
- * ```
  */
 export function keyBy<T extends object>(array: T[], key: keyof T): Record<string, T> {
   return array.reduce(
@@ -193,12 +164,6 @@ export function keyBy<T extends object>(array: T[], key: keyof T): Record<string
  * @param obj - Source object
  * @param fn - Transformation function
  * @returns New object with transformed values
- *
- * @example
- * ```typescript
- * const obj = { a: 1, b: 2 };
- * mapValues(obj, (v) => v * 2); // { a: 2, b: 4 }
- * ```
  */
 export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: string) => U): Record<string, U> {
   return Object.entries(obj).reduce(
@@ -215,34 +180,6 @@ export function mapValues<T, U>(obj: Record<string, T>, fn: (value: T, key: stri
  * key from `defaults` plus any overrides from `value`. Plain-object values at
  * matching keys are merged recursively; primitives, dates, and class instances
  * in `value` replace the corresponding default wholesale.
- *
- * Arrays whose lengths match between `defaults` and `value` are merged
- * positionally: when both `defaults[i]` and `value[i]` are plain objects, they
- * are deep-merged so partial array-item values don't drop sibling sub-field
- * keys. When the lengths differ — the runtime add/insert/remove case — the
- * value array is returned by reference so Signal Forms doesn't see a fresh
- * array of fresh inner objects on every form-value write (which would rebuild
- * item bindings and desync the rendered rows from their FieldTrees).
- *
- * Used by `FormStateManager.entity` so a partial input value (e.g. a nested
- * group object missing one of its declared sub-fields, or an array item missing
- * one of its declared sub-fields) does not orphan the absent sub-field in
- * Angular Signal Forms' validation graph.
- *
- * @example
- * ```typescript
- * deepMergeDefaults(
- *   { a: { line1: '', line2: '', city: '' }, b: 0 },
- *   { a: { line1: 'X', city: 'Y' }, b: 1 },
- * );
- * // { a: { line1: 'X', line2: '', city: 'Y' }, b: 1 }
- *
- * deepMergeDefaults(
- *   { items: [{ checkboxA: false, checkboxB: false }] },
- *   { items: [{ checkboxA: true }] },
- * );
- * // { items: [{ checkboxA: true, checkboxB: false }] }
- * ```
  */
 export function deepMergeDefaults<T extends Record<string, unknown>>(defaults: T, value: Record<string, unknown> | null | undefined): T {
   if (value == null) return { ...defaults };
@@ -310,9 +247,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return proto === null || proto === Object.prototype;
 }
 
-/**
- * Options for memoize function
- */
+/** Options for memoize function */
 /** Default maximum cache size for memoized functions */
 const DEFAULT_MEMOIZE_MAX_SIZE = 100;
 
@@ -329,18 +264,6 @@ export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
  * @param fn - Function to memoize
  * @param resolverOrOptions - Optional key resolver function or options object
  * @returns Memoized function
- *
- * @example
- * ```typescript
- * const expensive = (a: number, b: number) => a + b;
- * const memoized = memoize(expensive); // Uses default maxSize of 100
- *
- * // With custom resolver
- * const withResolver = memoize(expensive, (a, b) => `${a}-${b}`);
- *
- * // With custom maxSize
- * const small = memoize(expensive, { maxSize: 10 });
- * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function memoize<TFunc extends (...args: any[]) => any>(
@@ -391,19 +314,9 @@ export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>
 /**
  * Gets the keys that differ between two objects.
  *
- * Compares top-level keys and returns those whose values are different.
- * Uses deep equality comparison for nested values.
- *
  * @param previous - Previous object state
  * @param current - Current object state
  * @returns Set of keys that have different values
- *
- * @example
- * ```typescript
- * const prev = { a: 1, b: 2, c: 3 };
- * const curr = { a: 1, b: 5, d: 4 };
- * getChangedKeys(prev, curr); // Set { 'b', 'c', 'd' }
- * ```
  */
 export function getChangedKeys(
   previous: Record<string, unknown> | null | undefined,
@@ -443,24 +356,7 @@ export function getChangedKeys(
   return changedKeys;
 }
 
-/**
- * Compile-time exhaustiveness check for discriminated unions.
- *
- * Place in the `default` branch of a `switch` over a union's discriminant.
- * TypeScript narrows the value to `never` only when every member is handled;
- * adding a new member without a matching `case` produces a type error here.
- *
- * At runtime, throws if somehow reached (defensive guard).
- *
- * @example
- * ```ts
- * switch (action.type) {
- *   case 'a': return handleA(action);
- *   case 'b': return handleB(action);
- *   default:  return assertNever(action);
- * }
- * ```
- */
+/** Compile-time exhaustiveness check for discriminated unions. */
 export function assertNever(value: never): never {
   throw new DynamicFormError(`Unexpected value: ${JSON.stringify(value)}`);
 }

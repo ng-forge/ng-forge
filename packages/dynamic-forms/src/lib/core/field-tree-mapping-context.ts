@@ -7,19 +7,6 @@ import { createLogicFunction } from './expressions/logic-function-factory';
 /**
  * Cascading configuration that flows from parent to child during schema mapping.
  *
- * Each property here represents a setting whose effective value is
- *
- * 1. read from the field itself if defined,
- * 2. otherwise inherited from the parent's resolved value,
- * 3. otherwise the form-level value (root parent),
- * 4. otherwise the global default (used to seed the root context).
- *
- * Once a field overrides a value, the new value becomes the inherited baseline
- * for all of its descendants unless they override in turn.
- *
- * Add new cascading options here rather than threading additional parameters
- * through `mapFieldToForm` and friends.
- *
  * @internal
  */
 export interface FieldTreeMappingContext {
@@ -67,9 +54,6 @@ export function combineAncestorHiddenLogics(logics: readonly LogicFn<unknown, bo
  * Forms already exposes that through `ctx.state.hidden()`, which the gate
  * checks separately.
  *
- * Returns the parent context unchanged when the field defines no overrides —
- * saves an allocation on every leaf in the common case.
- *
  * @internal
  */
 export function resolveFieldOwnContext(
@@ -89,13 +73,6 @@ export function resolveFieldOwnContext(
  * Builds on top of `ownContext` by folding in the field's own hidden state so
  * children can correctly skip validation when this field hides them. Used for
  * groups, arrays, and layout containers that recurse into children.
- *
- * Behavior:
- * - `hidden: true` (static) → sets `ancestorAlwaysHidden`.
- * - `logic: [{type: 'hidden', condition: true}]` → sets `ancestorAlwaysHidden`.
- * - `logic: [{type: 'hidden', condition: false}]` → no effect.
- * - `logic: [{type: 'hidden', condition: <expr>}]` → appends a reactive
- *   `LogicFn` to `ancestorHiddenLogics`.
  *
  * @internal
  */

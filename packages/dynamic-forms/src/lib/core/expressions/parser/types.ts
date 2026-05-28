@@ -1,8 +1,6 @@
 import { DynamicFormError } from '../../../errors/dynamic-form-error';
 
-/**
- * Token types for expression parsing
- */
+/** Token types for expression parsing */
 export enum TokenType {
   // Literals
   NUMBER = 'NUMBER',
@@ -53,18 +51,14 @@ export enum TokenType {
   EOF = 'EOF',
 }
 
-/**
- * Token with type, value, and position
- */
+/** Token with type, value, and position */
 export interface Token {
   type: TokenType;
   value: string;
   position: number;
 }
 
-/**
- * AST Node types
- */
+/** AST Node types */
 export type ASTNode =
   | LiteralNode
   | IdentifierNode
@@ -149,9 +143,7 @@ export interface ArrowFunctionNode {
   body: ASTNode;
 }
 
-/**
- * Parser error with position information
- */
+/** Parser error with position information */
 export class ExpressionParserError extends DynamicFormError {
   constructor(
     message: string,

@@ -1,12 +1,7 @@
 import { Injector, Signal, type Type } from '@angular/core';
 import type { FieldDef } from '../../definitions/base/field-def';
 
-/**
- * A single field within a resolved array item.
- *
- * Structurally compatible with `ResolvedField` so the same DfFieldOutlet
- * directive can render both top-level and array-item fields.
- */
+/** A single field within a resolved array item. */
 export interface ResolvedArrayItemField {
   /** Field key (used for tracking and test IDs). */
   key: string;
@@ -61,21 +56,7 @@ export type DifferentialUpdateOperation =
   | { type: 'recreate' }
   | { type: 'none' };
 
-/**
- * Determines the optimal differential update operation based on current and new state.
- *
- * Operations:
- * - Clear all (empty array)
- * - Initial render (no existing items)
- * - Append only (items added at end)
- * - Recreate (items removed - we can't know which items, so recreate all)
- * - None (same length - items update via linkedSignal)
- *
- * Note: We always use 'recreate' for removals because we can't determine which
- * specific items were removed. Operations like shift, removeAtIndex remove from
- * the middle, not just the end. Each array item has its own local form that
- * doesn't reactively track parent changes, so we must recreate to get correct values.
- */
+/** Determines the optimal differential update operation based on current and new state. */
 export function determineDifferentialOperation(currentItems: ResolvedArrayItem[], newLength: number): DifferentialUpdateOperation {
   const currentLength = currentItems.length;
 

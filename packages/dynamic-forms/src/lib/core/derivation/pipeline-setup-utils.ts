@@ -64,17 +64,6 @@ interface BaseReactiveStreamOptions<TCollection extends ReactiveDerivationCollec
 /**
  * Options for the **onChange** reactive stream.
  *
- * The stream re-fires whenever either the derivation collection OR the form
- * value emits, debounced to a microtask boundary via `auditTime(0)`. Each
- * emission invokes `applyOnChange` with the current collection and the set of
- * field keys that changed since the previous emission — value-derivation uses
- * the changed set for `reEngageOnDependencyChange`; property-derivation
- * ignores it.
- *
- * `additionalAwakeners` is an optional array of signals whose changes should
- * also wake the stream (used by the value pipeline to also react to form
- * accessor changes during config swaps).
- *
  * @internal
  */
 export interface OnChangeStreamOptions<TCollection extends ReactiveDerivationCollection> extends BaseReactiveStreamOptions<TCollection> {
@@ -85,16 +74,6 @@ export interface OnChangeStreamOptions<TCollection extends ReactiveDerivationCol
 /**
  * Subscribe to the onChange reactive stream and route emissions through
  * `applyOnChange`. The pipeline:
- *
- * 1. `combineLatestWith` collection + formValue (+ any additional awakeners).
- * 2. `auditTime(0)` to batch synchronous signal updates that fire in the same
- *    microtask (e.g., when an exhaustMap consumer calls `value.set()`).
- * 3. `startWith(null) + pairwise()` to expose the previous value-tuple so we
- *    can compute the changed-fields set per emission.
- * 4. `exhaustMap` so re-entrant emissions (caused by the apply step setting
- *    values that propagate back through the form-value signal) are dropped
- *    rather than queued or cancelled. `scheduled([null], queueScheduler)`
- *    ensures the inner observable completes in the next microtask.
  *
  * @internal
  */
@@ -131,13 +110,6 @@ export function setupOnChangeStream<TCollection extends ReactiveDerivationCollec
 
 /**
  * Options for the **debounced** reactive stream.
- *
- * The debounced stream waits until form value stops changing for
- * `DEFAULT_DEBOUNCE_MS`, computes the changed-fields set vs. the prior
- * emission, then for each unique `debounceMs` period present in the
- * collection's `'debounced'`-triggered entries, runs `applyDebouncedForPeriod`
- * after the additional wait. Per-period streams are `merge`d so different
- * debounce groups process concurrently.
  *
  * @internal
  */
@@ -204,10 +176,6 @@ export function setupDebouncedStream<TCollection extends ReactiveDerivationColle
  * {@link buildEntryStreamPipeline}, filter to entries of the relevant kind,
  * key each emission by a stable signature so unrelated topological reorderings
  * don't churn subscriptions, and per-entry call the caller's `createStream`.
- *
- * The outer pipeline (filter + signature dedup + merge) is the same in all
- * four call sites (value/property × http/async). The `selectEntries`,
- * `entrySignature`, and `createStream` callbacks carry the only differences.
  *
  * @internal
  */

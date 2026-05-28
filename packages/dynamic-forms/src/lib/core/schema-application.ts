@@ -12,11 +12,6 @@ import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 /**
  * Apply schema configuration.
  * Accepts both SchemaPath and SchemaPathTree for flexibility.
- *
- * Note: We cast fieldPath to suppress TypeScript's union type errors. This is safe because:
- * 1. We only use signal forms (not AbstractControl), so SchemaPathTree is always the supported branch
- * 2. The Angular apply functions accept SchemaPath with any value type
- * 3. The actual schema application happens at runtime via the schema function
  */
 export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPath<unknown> | SchemaPathTree<unknown>): void {
   const logger = inject(DynamicFormLogger);
@@ -63,13 +58,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
   }
 }
 
-/**
- * Create a schema function from schema definition.
- *
- * Schema functions receive SchemaPathTree which includes both the base SchemaPath
- * and nested child access properties. The validator/logic/schema application functions
- * accept SchemaPath | SchemaPathTree, so we can pass the path directly.
- */
+/** Create a schema function from schema definition. */
 export function createSchemaFunction(schema: SchemaDefinition): SchemaOrSchemaFn<unknown> {
   return (path: SchemaPathTree<unknown>) => {
     // Apply validators - path is SchemaPathTree which is accepted by applyValidator

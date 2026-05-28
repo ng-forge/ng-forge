@@ -16,9 +16,7 @@ export interface ArrayButtonContext {
   isInsideArray: boolean;
 }
 
-/**
- * Event context passed to button components for array operations.
- */
+/** Event context passed to button components for array operations. */
 export interface ArrayButtonEventContext {
   /** The button field key */
   key: string;
@@ -37,11 +35,6 @@ export interface ArrayButtonEventContext {
 
 /**
  * Resolves array button context for button mappers.
- *
- * Handles both inside-array (context from ARRAY_CONTEXT) and
- * outside-array (explicit arrayKey) placements.
- *
- * Must be called in injection context.
  *
  * @param fieldKey The button field key (for logging)
  * @param buttonType The button type name (for logging)
@@ -78,8 +71,6 @@ export function resolveArrayButtonContext(fieldKey: string, buttonType: string, 
 
 /**
  * Builds the event context passed to the button component.
- *
- * Should be called inside a computed to track index signal changes.
  *
  * @param fieldKey The button field key
  * @param ctx The resolved array button context

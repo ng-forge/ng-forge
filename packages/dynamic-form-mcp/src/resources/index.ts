@@ -1,8 +1,4 @@
-/**
- * MCP Resources Registration
- *
- * Registers all available resources with the MCP server.
- */
+/** MCP Resources Registration */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerFieldTypesResource } from './field-types.resource.js';
@@ -14,9 +10,7 @@ import { registerExamplesResource } from './examples.resource.js';
 import { registerSchemasResource } from './schemas.resource.js';
 import { registerWrappersResource } from './wrappers.resource.js';
 
-/**
- * Register all MCP resources
- */
+/** Register all MCP resources */
 export function registerResources(server: McpServer): void {
   registerInstructionsResource(server);
   registerExamplesResource(server);

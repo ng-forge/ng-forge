@@ -3,24 +3,6 @@ import { Directive, Injectable, inject, input, Signal, signal, TemplateRef } fro
 /**
  * Marks an `<ng-template>` projected into `<df-dynamic-form>` content as
  * available to template addons by name.
- *
- * The host form collects all `DfTemplate` instances via `contentChildren`
- * and exposes them through {@link DF_FIELD_TEMPLATES}, where the template
- * addon kind looks them up by `templateKey` at render time.
- *
- * @example
- * ```html
- * <df-dynamic-form [config]="config">
- *   <ng-template dfTemplate="searchIcon" let-field>
- *     <my-icon [field]="field" />
- *   </ng-template>
- * </df-dynamic-form>
- * ```
- *
- * In the field config:
- * ```ts
- * { slot: 'prefix', kind: 'template', templateKey: 'searchIcon' }
- * ```
  */
 @Directive({
   selector: 'ng-template[dfTemplate]',

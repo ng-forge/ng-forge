@@ -35,14 +35,7 @@ import { DynamicFormLogger } from '../../providers/features/logger/logger.token'
 import { ArrayFieldTree } from '../../core/field-tree-utils';
 import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
 
-/**
- * Container component for rendering dynamic arrays of fields.
- *
- * Supports add/remove/move operations via the arrayEvent() builder API.
- * Uses differential updates to optimize rendering - only recreates items when necessary.
- * Each item gets a scoped injector with ARRAY_CONTEXT for position-aware operations.
- * Supports multiple sibling fields per array item (e.g., name + email without a wrapper).
- */
+/** Container component for rendering dynamic arrays of fields. */
 @Component({
   selector: 'array-field',
   imports: [DfFieldOutlet],
@@ -132,14 +125,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * For primitive array items, the key of the value field template (e.g., 'value').
    * Used to wrap the FormControl in the item context so getFieldTree(key) works.
    * Returns undefined for object arrays (FormGroup items have natural child navigation).
-   *
-   * Detection order:
-   * 1. Normalization metadata (for simplified arrays — always available at normalization time)
-   * 2. Existing item definitions (non-empty full-API arrays)
-   * 3. Dynamically discovered key from handleAddFromEvent (empty full-API arrays)
-   *
-   * Uses linkedSignal: recomputes when field() changes, supports manual set()
-   * for the dynamic discovery case.
    */
   private readonly primitiveFieldKey = linkedSignal<string | undefined>(() => {
     // Priority 1: Normalization metadata (simplified arrays always have this)
@@ -160,10 +145,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   /**
    * Normalized item templates WITHOUT auto-remove button appended.
    * Each element is normalized to an array: single FieldDef → [FieldDef], array stays as-is.
-   *
-   * Used by moveItem() to stash raw templates into the templateRegistry, preserving
-   * the invariant that registry entries are pre-synthesis (withAutoRemove() adds the
-   * button during resolution).
    */
   private readonly rawItemTemplates = computed<ArrayItemTemplate[]>(() => {
     const arrayField = this.field();
@@ -178,12 +159,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Resolves the effective fallback template for this array — used when the form
    * value contains an item with no registered template (i.e., items that were
    * neither added via event handlers nor covered by a positional entry in `fields`).
-   *
-   * Populated from `SimplifiedArrayField.template` via normalization metadata, so every
-   * simplified array gets an automatic default. Returns undefined for full-API arrays;
-   * `createResolveItemObservable` then falls back to warn-and-drop.
-   *
-   * Homogeneous arrays only — all fallback items receive the same template.
    */
   private readonly fallbackTemplate = computed<FieldDef<unknown>[] | undefined>(() => {
     const raw = getNormalizedArrayMetadata(this.field())?.template;
@@ -196,12 +171,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Each element can be either:
    * - A single FieldDef (primitive item) - normalized to [FieldDef]
    * - An array of FieldDefs (object item) - used as-is
-   *
-   * When auto-remove is configured, the remove button is appended to each item's
-   * template list for rendering. This is purely visual — the form schema uses the
-   * original primitive item definition (single FieldDef → FormControl → flat value).
-   *
-   * Returns normalized templates where all items are arrays for consistent handling.
    */
   private readonly itemTemplates = computed<ArrayItemTemplate[]>(() => {
     const raw = this.rawItemTemplates();
@@ -340,8 +309,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * Creates resolved items FIRST, then updates form value.
    * This ensures prepend/insert work correctly - differential update sees "none"
    * because resolved items count already matches the new array length.
-   *
-   * Supports both primitive (single FieldDef) and object (FieldDef[]) templates.
    */
   private async handleAddFromEvent(template: FieldDef<unknown> | readonly FieldDef<unknown>[], index?: number): Promise<void> {
     // Normalize template to mutable array for consistent handling.
@@ -607,19 +574,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     }
   }
 
-  /**
-   * Creates an observable that resolves a single array item.
-   *
-   * Template resolution order:
-   * 1. Use overrideTemplate if provided (from recreate with stored templates)
-   * 2. Use itemTemplates[index] if within defined templates range
-   * 3. Use the simplified-array fallback template (from normalization metadata) for
-   *    untracked items present in the form value (e.g., external `value.set`, parent
-   *    two-way binding, initial values beyond what was declared via simplified `value`).
-   *    Registers the resolved item in templateRegistry so subsequent recreates use
-   *    Priority 1.
-   * 4. Return undefined (item cannot be resolved without a template)
-   */
+  /** Creates an observable that resolves a single array item. */
   private createResolveItemObservable(
     index: number,
     overrideTemplate?: FieldDef<unknown>[],
@@ -707,11 +662,6 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
    * The button is added for visual rendering only — it doesn't affect the form schema.
    * Original templates are stored in templateRegistry WITHOUT the remove button,
    * so this method is called during resolution to add it dynamically.
-   *
-   * Uses a WeakMap cache keyed by template array reference. Cache hits occur
-   * during recreate/resolution paths where stored templates are reused.
-   * Add operations always pass a fresh `[...template]` copy, so they miss
-   * the cache intentionally (the copy is needed for mutable item construction).
    */
   private withAutoRemove(templates: FieldDef<unknown>[]): FieldDef<unknown>[] {
     const removeButton = this.autoRemoveButton();

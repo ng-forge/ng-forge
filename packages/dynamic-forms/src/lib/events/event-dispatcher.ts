@@ -5,20 +5,6 @@ import { FormEvent } from '../events/interfaces/form-event';
 /**
  * Injectable service for dispatching events into a DynamicForm from outside the form.
  *
- * ## When to use
- *
- * Use `EventDispatcher` when you need to drive form behaviour **from the host component** —
- * for example, appending array items in response to a field value change, triggering a form
- * reset from a toolbar button, or reacting to external application state.
- *
- * This is the recommended alternative to accessing the form's internals via `viewChild`.
- *
- * ## Setup
- *
- * Provide `EventDispatcher` at the **host component** level (not root). DynamicForm
- * automatically detects it and connects its internal event bus to the dispatcher.
- *
- * ```typescript
  * @Component({
  *   providers: [EventDispatcher],
  *   template: `<form [dynamic-form]="config" [(value)]="formValue"></form>`

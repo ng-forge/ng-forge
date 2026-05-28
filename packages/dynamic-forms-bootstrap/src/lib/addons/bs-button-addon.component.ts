@@ -4,14 +4,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { BsButtonAddon } from '../types/addons';
 
-/**
- * Renderer for the `bs-button` addon kind.
- *
- * Renders a Bootstrap `btn-outline-{severity}` button. Click dispatch
- * (preset / actionRef / action precedence, multi-set warning, `disabled` /
- * `loading` resolution) lives on `NgForgeAddonAction`; this component
- * focuses on the visual layer.
- */
+/** Renderer for the `bs-button` addon kind. */
 @Component({
   selector: 'df-bs-button-addon',
   imports: [DynamicTextPipe, AsyncPipe],

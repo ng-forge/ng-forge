@@ -2,7 +2,6 @@
  * @ng-forge/dynamic-form-mcp
  *
  * MCP server for ng-forge dynamic forms - AI-assisted form schema generation
- *
  * @packageDocumentation
  */
 

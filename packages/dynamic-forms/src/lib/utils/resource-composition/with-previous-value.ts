@@ -5,16 +5,6 @@ import { linkedSignal, Resource, ResourceSnapshot, resourceFromSnapshots } from 
  * is loading or reloading. This prevents UI flicker when params change and a new request
  * is in-flight — the consumer sees the stale value with a `loading`/`reloading` status
  * instead of `undefined`.
- *
- * Uses Angular's `resource.snapshot` + `resourceFromSnapshots` composition pattern.
- *
- * @example
- * ```typescript
- * const user = withPreviousValue(
- *   resource({ params: () => userId(), loader: ({ params }) => fetchUser(params) })
- * );
- * // user.value() keeps the old user data during loading transitions
- * ```
  */
 export function withPreviousValue<T>(input: Resource<T>): Resource<T> {
   const derived = linkedSignal<ResourceSnapshot<T>, ResourceSnapshot<T>>({

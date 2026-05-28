@@ -12,6 +12,7 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 export class FormModeValidator {
   /**
    * Validates a form configuration and returns detailed validation results
+   *
    * @param fields The form field definitions to validate
    * @returns Validation result with mode detection and error details
    */
@@ -47,6 +48,7 @@ export class FormModeValidator {
 
   /**
    * Validates form configuration and throws an error if invalid
+   *
    * @param fields The form field definitions to validate
    * @throws Error with detailed validation messages if form is invalid
    */
@@ -64,6 +66,7 @@ export class FormModeValidator {
 
   /**
    * Generates helpful warnings for form configurations
+   *
    * @param fields The form field definitions
    * @param modeDetection The mode detection result
    * @returns Array of warning messages
@@ -95,9 +98,7 @@ export class FormModeValidator {
   }
 }
 
-/**
- * Extended validation result including warnings
- */
+/** Extended validation result including warnings */
 export interface FormConfigurationValidationResult extends FormModeDetectionResult {
   /** Array of warning messages that don't prevent form operation */
   warnings: string[];
@@ -105,6 +106,7 @@ export interface FormConfigurationValidationResult extends FormModeDetectionResu
 
 /**
  * Convenience function for quick form mode validation
+ *
  * @param fields The form field definitions to validate
  * @returns True if form configuration is valid, false otherwise
  */

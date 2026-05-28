@@ -7,11 +7,6 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
 /**
  * Maps a container field definition to component inputs.
  *
- * Container components are layout containers that don't change the form shape.
- * The container component will inject FIELD_SIGNAL_CONTEXT directly.
- *
- * Supports hidden state resolution via `logic` array or static `hidden` property.
- *
  * @param fieldDef The container field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

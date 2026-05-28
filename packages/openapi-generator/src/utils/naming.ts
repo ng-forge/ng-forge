@@ -10,9 +10,7 @@ export function toLabel(name: string): string {
     .trim();
 }
 
-/**
- * Common acronyms that should be uppercased in labels.
- */
+/** Common acronyms that should be uppercased in labels. */
 const KNOWN_ACRONYMS = new Set([
   'id',
   'url',
@@ -98,9 +96,7 @@ export function toPascalCase(str: string): string {
     .join('');
 }
 
-/**
- * Convert a string to camelCase.
- */
+/** Convert a string to camelCase. */
 export function toCamelCase(str: string): string {
   const pascal = toPascalCase(str);
   return pascal.charAt(0).toLowerCase() + pascal.slice(1);

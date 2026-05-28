@@ -2,17 +2,7 @@ import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild 
 import { FieldWrapper } from '../../models/wrapper-type';
 import { WrapperFieldInputs } from '../wrapper-field-inputs';
 
-/**
- * Built-in row wrapper component.
- *
- * Applies the grid/flex layout that `{ type: 'row' }` fields historically rendered.
- * The `rowFieldMapper` synthesizes a `{ type: 'row' }` wrapper into the container
- * field so the user-facing config stays `{ type: 'row', fields: [...] }` while the
- * runtime uses the container + wrapper pipeline.
- *
- * Children use the shared `df-col-1`..`df-col-12` utilities on their own `col`
- * property to size within the flex row.
- */
+/** Built-in row wrapper component. */
 @Component({
   selector: 'df-row-wrapper',
   template: `<ng-container #fieldComponent></ng-container>`,

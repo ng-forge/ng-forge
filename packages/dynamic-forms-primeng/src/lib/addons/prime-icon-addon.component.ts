@@ -3,13 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import type { PrimeIconAddon } from '../types/addons';
 
-/**
- * Renderer for the `prime-icon` addon kind.
- *
- * Outputs `<i class="pi pi-{icon}">`. The host is set `aria-hidden="true"`
- * by default; if the addon supplies an `ariaLabel`, it is applied so the
- * icon is announced by screen readers.
- */
+/** Renderer for the `prime-icon` addon kind. */
 @Component({
   selector: 'df-prime-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],

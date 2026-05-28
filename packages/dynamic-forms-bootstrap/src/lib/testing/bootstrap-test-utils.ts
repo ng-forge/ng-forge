@@ -16,26 +16,20 @@ import { BsButtonField } from '../fields/button/bs-button.type';
 import { BsMultiCheckboxField } from '../fields/multi-checkbox/bs-multi-checkbox.type';
 import { BsField } from '../types/types';
 
-/**
- * Configuration for creating a Bootstrap dynamic form test
- */
+/** Configuration for creating a Bootstrap dynamic form test */
 export interface BootstrapFormTestConfig {
   config: FormConfig;
   initialValue?: Record<string, unknown>;
   providers?: unknown[];
 }
 
-/**
- * Result of creating a Bootstrap dynamic form test
- */
+/** Result of creating a Bootstrap dynamic form test */
 export interface BootstrapFormTestResult {
   component: DynamicForm;
   fixture: ComponentFixture<DynamicForm<RegisteredFieldTypes[]>>;
 }
 
-/**
- * Fluent API for building Bootstrap form configurations
- */
+/** Fluent API for building Bootstrap form configurations */
 export class BootstrapFormConfigBuilder {
   private fields: unknown[] = [];
 
@@ -119,20 +113,14 @@ export class BootstrapFormConfigBuilder {
   }
 }
 
-/**
- * Utility class for testing Bootstrap dynamic forms
- */
+/** Utility class for testing Bootstrap dynamic forms */
 export class BootstrapFormTestUtils {
-  /**
-   * Creates a new Bootstrap form config builder
-   */
+  /** Creates a new Bootstrap form config builder */
   static builder(): BootstrapFormConfigBuilder {
     return new BootstrapFormConfigBuilder();
   }
 
-  /**
-   * Creates a Bootstrap dynamic form test setup with proper providers
-   */
+  /** Creates a Bootstrap dynamic form test setup with proper providers */
   static async createTest(testConfig: BootstrapFormTestConfig): Promise<BootstrapFormTestResult> {
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
@@ -160,9 +148,7 @@ export class BootstrapFormTestUtils {
     };
   }
 
-  /**
-   * Waits for the Bootstrap dynamic form to initialize
-   */
+  /** Waits for the Bootstrap dynamic form to initialize */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await waitForDFInit(fixture.componentInstance, fixture);
 
@@ -184,9 +170,7 @@ export class BootstrapFormTestUtils {
     fixture.detectChanges();
   }
 
-  /**
-   * Simulates user input on a Bootstrap input field
-   */
+  /** Simulates user input on a Bootstrap input field */
   static async simulateBsInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
@@ -200,9 +184,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user selection on a Bootstrap select
-   */
+  /** Simulates user selection on a Bootstrap select */
   static async simulateBsSelect(fixture: ComponentFixture<DynamicForm>, selectSelector: string, value: string | string[]): Promise<void> {
     const select = fixture.nativeElement.querySelector(selectSelector) as HTMLSelectElement;
     if (!select) {
@@ -226,9 +208,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates Bootstrap checkbox toggle
-   */
+  /** Simulates Bootstrap checkbox toggle */
   static async simulateBsCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     let checkboxElement: Element | null = null;
 
@@ -288,9 +268,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates Bootstrap toggle switch
-   */
+  /** Simulates Bootstrap toggle switch */
   static async simulateBsToggle(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const toggle = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!toggle) {
@@ -309,9 +287,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates Bootstrap button click
-   */
+  /** Simulates Bootstrap button click */
   static async simulateBsButtonClick(fixture: ComponentFixture<DynamicForm>, selector: string): Promise<void> {
     const button = fixture.nativeElement.querySelector(selector) as HTMLButtonElement;
     if (!button) {
@@ -323,9 +299,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates Bootstrap radio button selection
-   */
+  /** Simulates Bootstrap radio button selection */
   static async simulateBsRadio(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     // Find all radio buttons in the group
     const radios = fixture.nativeElement.querySelectorAll(selector) as NodeListOf<HTMLInputElement>;
@@ -353,9 +327,7 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates Bootstrap slider (range) input (.form-range)
-   */
+  /** Simulates Bootstrap slider (range) input (.form-range) */
   static async simulateBsSlider(fixture: ComponentFixture<DynamicForm>, selector: string, value: number): Promise<void> {
     const slider = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!slider) {
@@ -369,37 +341,27 @@ export class BootstrapFormTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> {
     return component.formValue();
   }
 
-  /**
-   * Gets validation errors from the component
-   */
+  /** Gets validation errors from the component */
   static getFormErrors(component: DynamicForm): unknown[] {
     return component.errors();
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Gets all Bootstrap field elements from the fixture
-   */
+  /** Gets all Bootstrap field elements from the fixture */
   static getBsFieldElements(fixture: ComponentFixture<DynamicForm>, fieldType: string): NodeListOf<Element> {
     return fixture.nativeElement.querySelectorAll(`df-bs-${fieldType}`);
   }
 
-  /**
-   * Asserts that a Bootstrap field has a specific value
-   */
+  /** Asserts that a Bootstrap field has a specific value */
   static assertBsFieldValue(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedValue: string): void {
     const element = fixture.nativeElement.querySelector(fieldSelector);
     if (!element) {
@@ -427,9 +389,7 @@ export class BootstrapFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
@@ -437,9 +397,7 @@ export class BootstrapFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that a Bootstrap field shows an error message
-   */
+  /** Asserts that a Bootstrap field shows an error message */
   static assertBsFieldError(fixture: ComponentFixture<DynamicForm>, fieldSelector: string, expectedError?: string): void {
     const fieldContainer = fixture.nativeElement.querySelector(fieldSelector);
     if (!fieldContainer) {
@@ -456,9 +414,7 @@ export class BootstrapFormTestUtils {
     }
   }
 
-  /**
-   * Asserts that an element has a specific Bootstrap class
-   */
+  /** Asserts that an element has a specific Bootstrap class */
   static assertHasClass(fixture: ComponentFixture<DynamicForm>, selector: string, className: string): void {
     const element = fixture.nativeElement.querySelector(selector);
     if (!element) {

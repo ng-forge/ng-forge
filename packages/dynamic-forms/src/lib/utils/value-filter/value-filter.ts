@@ -56,8 +56,6 @@ function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unkn
  * Filters form values based on field reactive state (hidden, disabled, readonly)
  * and the 3-tier exclusion config hierarchy.
  *
- * Only affects submission output — internal form state and two-way binding are unaffected.
- *
  * @param rawValue - The unfiltered form value object
  * @param schemaFields - Flattened schema fields from FormSetup (groups/arrays preserved, pages/rows unwrapped)
  * @param formTree - The Angular Signal Forms FieldTree, accessed as `formInstance[key]`

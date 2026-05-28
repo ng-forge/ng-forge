@@ -1,6 +1,7 @@
 /**
  * State management module barrel — organizational reference only.
  * Internal code must import directly from specific files, not this barrel.
+ *
  * @internal
  */
 

@@ -5,16 +5,6 @@ import { FieldTree } from '@angular/forms/signals';
 /**
  * Field signal context - the "nervous system" of the dynamic form.
  * Provided via FIELD_SIGNAL_CONTEXT injection token.
- *
- * Gives mappers and components access to form state, values, and configuration.
- * Container fields (Group, Array) create scoped contexts with nested forms.
- *
- * The `form` property uses Angular's FieldTree which includes Subfields<TModel>
- * for type-safe child field access via bracket notation when TModel is a Record.
- *
- * Note: Form-level configuration (defaultValidationMessages, formOptions, defaultProps)
- * is provided via dedicated injection tokens (DEFAULT_VALIDATION_MESSAGES, FORM_OPTIONS,
- * DEFAULT_PROPS) at the DynamicForm level and inherited by all children.
  */
 export interface FieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>> {
   injector: Injector;
@@ -44,26 +34,11 @@ export interface ArrayContext {
   field: FieldDef<unknown>;
 }
 
-/**
- * Group context for fields rendered inside `group` containers.
- *
- * Carries a reactive dot-separated chain of group ancestors (including the
- * current group). Used by `mapFieldToInputs` to scope DOM IDs of group
- * children, so the same leaf key can appear inside different groups without
- * producing duplicate `id` attributes (issue #401).
- *
- * Re-provided by every group's child injector — a nested group reads its
- * parent's context signal and composes its own path through `computed()`.
- */
+/** Group context for fields rendered inside `group` containers. */
 export interface GroupContext {
   /** Dot-separated path of group ancestors, including the current group's key (e.g. `'address'` or `'user.address'`). */
   groupPath: Signal<string>;
 }
 
-/**
- * Mapper function that converts a field definition to component inputs.
- *
- * Mappers run within an injection context and can inject FIELD_SIGNAL_CONTEXT.
- * Returns a Signal to enable reactive updates when dependencies change.
- */
+/** Mapper function that converts a field definition to component inputs. */
 export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Signal<Record<string, unknown>>;

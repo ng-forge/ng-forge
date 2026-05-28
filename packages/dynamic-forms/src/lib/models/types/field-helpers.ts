@@ -1,6 +1,4 @@
-/**
- * Helper types for creating type-safe field configurations with proper nesting constraints
- */
+/** Helper types for creating type-safe field configurations with proper nesting constraints */
 
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 

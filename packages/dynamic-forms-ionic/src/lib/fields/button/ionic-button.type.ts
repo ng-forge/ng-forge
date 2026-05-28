@@ -26,9 +26,7 @@ export interface IonicButtonProps {
 export type IonicButtonField<TEvent extends FormEvent> = ButtonField<IonicButtonProps, TEvent>;
 export type IonicButtonComponent<TEvent extends FormEvent> = FieldComponent<IonicButtonField<TEvent>>;
 
-/**
- * Specific button field types with preconfigured events
- */
+/** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
 export type IonicSubmitButtonField = Omit<IonicButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
@@ -88,9 +86,7 @@ export type InsertArrayItemButtonField = Omit<IonicButtonField<InsertArrayItemEv
    * When inside an array, this is automatically determined from context.
    */
   arrayKey?: string;
-  /**
-   * The index at which to insert the new item.
-   */
+  /** The index at which to insert the new item. */
   index: number;
   /**
    * Template for the new array item. REQUIRED.

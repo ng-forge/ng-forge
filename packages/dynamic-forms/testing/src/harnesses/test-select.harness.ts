@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField, FieldTree } from '@angular/forms/signals';
 
-/**
- * Test harness component for select fields
- */
+/** Test harness component for select fields */
 @Component({
   selector: 'df-test-select',
   template: `

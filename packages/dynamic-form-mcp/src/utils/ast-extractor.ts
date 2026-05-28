@@ -1,14 +1,4 @@
-/**
- * AST Extractor Utility
- *
- * Uses ts-morph for robust TypeScript parsing to extract FormConfig objects.
- * Handles complex patterns that regex + new Function() cannot:
- * - new Date() constructors
- * - Function references and arrow functions
- * - Regex literals
- * - External variable references
- * - Method calls like Math.floor()
- */
+/** AST Extractor Utility */
 
 /**
  * Placeholder date used when encountering `new Date()` expressions.
@@ -33,9 +23,7 @@ import {
   SatisfiesExpression,
 } from 'ts-morph';
 
-/**
- * A candidate FormConfig object found in the source file.
- */
+/** A candidate FormConfig object found in the source file. */
 export interface FormConfigCandidate {
   /** Variable or property name */
   name: string;
@@ -47,9 +35,7 @@ export interface FormConfigCandidate {
   matchReason: 'type-annotation' | 'satisfies' | 'as-cast' | 'structural';
 }
 
-/**
- * Warning about a non-serializable value that was replaced with a placeholder.
- */
+/** Warning about a non-serializable value that was replaced with a placeholder. */
 export interface ExtractionWarning {
   /** Path to the property, e.g., "fields[0].props.maxDate" */
   path: string;
@@ -61,9 +47,7 @@ export interface ExtractionWarning {
   placeholder: string | number | boolean | null;
 }
 
-/**
- * Error that occurred during extraction.
- */
+/** Error that occurred during extraction. */
 export interface ExtractionError {
   /** Path to the property */
   path: string;
@@ -71,9 +55,7 @@ export interface ExtractionError {
   message: string;
 }
 
-/**
- * Result of extracting an AST node to JSON.
- */
+/** Result of extracting an AST node to JSON. */
 export interface ExtractionResult {
   /** The extracted JSON-safe object */
   value: unknown;
@@ -83,23 +65,13 @@ export interface ExtractionResult {
   errors: ExtractionError[];
 }
 
-/**
- * Create a ts-morph Project and parse source code.
- */
+/** Create a ts-morph Project and parse source code. */
 export function createSourceFile(source: string, fileName = 'temp.ts'): SourceFile {
   const project = new Project({ useInMemoryFileSystem: true });
   return project.createSourceFile(fileName, source);
 }
 
-/**
- * Find all potential FormConfig objects in a source file.
- *
- * Uses multiple detection strategies (in order of precedence):
- * 1. Type annotation: `const x: FormConfig = {...}` or `const x: SomeFormConfig = {...}`
- * 2. Satisfies: `const x = {...} satisfies FormConfig` or `{...} as const satisfies SomeConfig`
- * 3. As cast: `const x = {...} as FormConfig`
- * 4. Structural: Any object with `fields` array containing form-like objects
- */
+/** Find all potential FormConfig objects in a source file. */
 export function findFormConfigCandidates(sourceFile: SourceFile): FormConfigCandidate[] {
   const candidates: FormConfigCandidate[] = [];
   const foundNames = new Set<string>();
@@ -215,9 +187,7 @@ function findSatisfiesExpression(node: Node | undefined): SatisfiesExpression | 
   return undefined;
 }
 
-/**
- * Find object literal within a satisfies expression.
- */
+/** Find object literal within a satisfies expression. */
 function findObjectLiteralInSatisfies(satisfiesExpr: SatisfiesExpression): ObjectLiteralExpression | undefined {
   const expression = satisfiesExpr.getExpression();
   if (!expression) return undefined;
@@ -237,9 +207,7 @@ function findObjectLiteralInSatisfies(satisfiesExpr: SatisfiesExpression): Objec
   return undefined;
 }
 
-/**
- * Find an ObjectLiteralExpression in a node (handles as const, parentheses, etc.)
- */
+/** Find an ObjectLiteralExpression in a node (handles as const, parentheses, etc.) */
 function findObjectLiteral(node: Node | undefined): ObjectLiteralExpression | undefined {
   if (!node) return undefined;
 
@@ -314,9 +282,7 @@ export function extractToJson(node: Node, path = ''): ExtractionResult {
   return { value, warnings, errors };
 }
 
-/**
- * Recursively extract a node to a JSON-safe value.
- */
+/** Recursively extract a node to a JSON-safe value. */
 function extractNode(node: Node, path: string, warnings: ExtractionWarning[], errors: ExtractionError[]): unknown {
   // String literals
   if (Node.isStringLiteral(node)) {

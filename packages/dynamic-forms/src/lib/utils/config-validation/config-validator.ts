@@ -28,16 +28,6 @@ interface ConfigTraversalData {
  * Collects all field keys, types, and validates regex patterns from a field tree
  * by recursively traversing containers (page, row, group, array).
  *
- * Keys are scoped by their group ancestors (e.g. `address.city` instead of `city`),
- * so the same leaf key can appear inside different groups without conflict. Page and
- * row containers do not contribute to the path because they flatten their children
- * into the parent scope. Array items are excluded entirely from key collection
- * because they share template keys across items by design.
- *
- * Fields whose registered `valueHandling` is anything other than `include` (e.g.
- * buttons with `exclude`, page/row with `flatten`) are not collected: they don't
- * bind to a form-value path, so duplicate-key uniqueness isn't meaningful for them.
- *
  * @param collectKeys - When false, the entire subtree skips key collection (used
  *   when descending into an array container).
  */
@@ -98,9 +88,7 @@ function collectFieldData(
   }
 }
 
-/**
- * Validates a single regex pattern string, collecting errors rather than throwing.
- */
+/** Validates a single regex pattern string, collecting errors rather than throwing. */
 function validateRegexPattern(pattern: string, fieldKey: string, errors: string[]): void {
   try {
     new RegExp(pattern);
@@ -139,14 +127,6 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
 /**
  * Validates that the underscore-projected DOM-ID namespace has no collisions.
  *
- * DOM IDs are built by underscore-joining the group ancestor path with the
- * leaf key (e.g. `address_street`). Two scoped paths can land on the same
- * DOM ID even when their form-value paths differ — e.g. a top-level key
- * `'foo_bar'` and a leaf `'bar'` inside group `'foo'` both render as
- * `id="foo_bar"`. The form-value-path check accepts this (paths are
- * `'foo_bar'` vs `'foo.bar'` — distinct) but the rendered DOM would have
- * duplicate IDs, breaking aria associations and CSS selectors.
- *
  * @throws {DynamicFormError} When two scoped paths project to the same DOM ID
  */
 function validateNoDomIdCollisions(domIds: string[]): void {
@@ -176,9 +156,6 @@ function validateNoDomIdCollisions(domIds: string[]): void {
  * Validates that every field type referenced in the config exists in the registry.
  * Logs a warning for unregistered types — unknown fields are skipped during rendering
  * rather than blocking the whole form (graceful degradation).
- *
- * Skips validation when the registry is empty (no UI adapter has been registered),
- * since the core library tests operate without a field registry.
  */
 function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<string, FieldTypeDefinition>, logger: Logger): void {
   if (registry.size === 0) return;
@@ -204,8 +181,6 @@ function validateFieldTypesRegistered(allTypes: Set<string>, registry: Map<strin
  * - Duplicate field keys (throws — this is always a developer error)
  * - Unregistered field types (warns — form degrades gracefully, skipping unknown fields)
  * - Invalid regex patterns in validators (throws — invalid regex will cause runtime errors)
- *
- * Should be called once during form setup, before fields are processed.
  *
  * @throws {DynamicFormError} When duplicate keys or invalid regex patterns are detected
  */

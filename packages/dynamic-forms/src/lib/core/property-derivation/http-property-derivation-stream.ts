@@ -17,10 +17,6 @@ import { PropertyOverrideStore } from './property-override-store';
 /**
  * Context required for creating HTTP property-derivation streams.
  *
- * Mirrors `HttpDerivationStreamContext` from the value-derivation pipeline,
- * minus the form-accessor and dirty-state plumbing — property derivations
- * don't have a user-override concept.
- *
  * @internal
  */
 export interface HttpPropertyDerivationStreamContext {
@@ -48,13 +44,6 @@ const DEFAULT_HTTP_DEBOUNCE_MS = 300;
 
 /**
  * Creates an RxJS Observable stream that processes an HTTP property-derivation entry.
- *
- * Mirrors `createHttpDerivationStream` (value pipeline) but writes the result via
- * `store.setOverride(fieldKey, targetProperty, value)` instead of patching the form.
- *
- * The stream uses `startWith(null) → pairwise()` so the first emission fires a
- * request for all `dependsOn` fields, populating the derived property on initial
- * form load. Subsequent emissions only fire when a `dependsOn` field changes.
  *
  * @internal
  */

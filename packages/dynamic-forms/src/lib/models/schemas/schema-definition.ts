@@ -2,9 +2,7 @@ import { ValidatorConfig } from '../validation/validator-config';
 import { LogicConfig } from '../logic/logic-config';
 import { ConditionalExpression } from '../expressions/conditional-expression';
 
-/**
- * Configuration for applying predefined schemas
- */
+/** Configuration for applying predefined schemas */
 export interface SchemaApplicationConfig {
   /** Schema application type */
   type: 'apply' | 'applyWhen' | 'applyWhenValue' | 'applyEach';
@@ -19,9 +17,7 @@ export interface SchemaApplicationConfig {
   typePredicate?: string;
 }
 
-/**
- * Reusable schema definition that can be referenced by name
- */
+/** Reusable schema definition that can be referenced by name */
 export interface SchemaDefinition {
   /** Unique schema identifier */
   name: string;

@@ -18,15 +18,6 @@ interface FocusSnapshot {
  * exactly the data each phase needs, so nothing in the slot is "optional state
  * that might be undefined" — the type forces every code path to handle the
  * empty/mounted/detached cases distinctly.
- *
- * - `empty`     — no `ComponentRef` exists. Either initial state or post-teardown.
- * - `mounted`   — the ref is inserted into `slot`. Inputs are being pushed.
- * - `detached`  — the ref's host view has been pulled from its slot; held briefly
- *                 between `detach()` and the next `mountOrReuse()` so a same-class
- *                 reuse can re-insert it and replay focus.
- *
- * State objects are frozen at construction so any accidental mutation throws in
- * strict mode rather than silently producing torn state.
  */
 export type FieldSlotState =
   | { readonly phase: 'empty' }
@@ -49,20 +40,6 @@ const EMPTY_STATE: FieldSlotState = Object.freeze({ phase: 'empty' });
  * directive itself stays declarative — signals + constructor wiring — while
  * the unavoidable mutable bookkeeping (Angular's view container API is
  * imperative) lives in one place behind a small, focused surface.
- *
- * State is held in a single `signal<FieldSlotState>` discriminated union;
- * every mutation is an explicit `state.set(...)` transition. No nullable
- * instance fields, no `undefined`-initialized refs — each phase carries
- * exactly the data it owns.
- *
- * Responsibilities:
- * - Create the component (or reuse the same-class instance across a rebuild,
- *   preserving its DOM state, focus, and caret).
- * - Push mapper inputs via `setInput`, dedup'd per-key so dev-mode NG0303
- *   warnings for undeclared mapper keys don't replay on every emission.
- * - Detach cleanly before the outer VCR clears, so same-class reuse can
- *   re-insert the preserved `hostView`.
- * - Destroy on directive teardown when the host view is still detached.
  */
 export class FieldComponentSlot {
   private readonly state = signal<FieldSlotState>(EMPTY_STATE);
@@ -126,15 +103,6 @@ export class FieldComponentSlot {
    * `setInput` on unknown keys logs NG0303 per call (Angular 21 is lenient
    * at runtime but warns); without the cache, every emission would re-warn
    * for every undeclared mapper key.
-   *
-   * Updates the `lastInputs` cache (a plain field, not part of `state`) so the
-   * `state` signal doesn't churn its reference on every keystroke.
-   *
-   * `reflectComponentType` does NOT include hostDirective-forwarded inputs
-   * (angular/angular#49734), so a declared-input filter here would skip every
-   * value flowing through `NgForgeFieldShell` / `NgForgeField` /
-   * `NgForgeAction`. Mapper-as-contract is enforced by the `*_INPUTS`
-   * lockstep type assertions, not at runtime here.
    */
   pushInputs(rawInputs: Record<string, unknown>, fieldInputs?: WrapperFieldInputs): void {
     const current = this.state();

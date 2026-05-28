@@ -1,17 +1,7 @@
 import { FieldOption } from '@ng-forge/dynamic-forms';
 import { MaterialFormTestUtils } from './material-test-utils';
 
-/**
- * MINIMAL TEST DATA BUILDERS
- *
- * Philosophy: Only create what you're testing
- *
- * Benefits:
- * - Clear intent (builder name matches test purpose)
- * - Fast execution (no unnecessary fields/data)
- * - Reusable (consistent patterns across tests)
- * - Maintainable (change in one place)
- */
+/** MINIMAL TEST DATA BUILDERS */
 
 export class MinimalTestBuilder {
   /**
@@ -146,9 +136,7 @@ export class MinimalTestBuilder {
     return { config, initialValue };
   }
 
-  /**
-   * Get default value for field type
-   */
+  /** Get default value for field type */
   private static getDefaultValue(fieldType: string): string | number | boolean | null {
     switch (fieldType) {
       case 'checkbox':
@@ -497,27 +485,4 @@ export class MinimalTestBuilder {
   }
 }
 
-/**
- * USAGE EXAMPLES:
- *
- * // Test input type rendering
- * it('should render email type', async () => {
- *   const { config, initialValue } = MinimalTestBuilder.withInputType('email');
- *   const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
- *   // Assert type attribute
- * });
- *
- * // Test label rendering
- * it('should render label', async () => {
- *   const { config, initialValue } = MinimalTestBuilder.withLabel('Email Address');
- *   const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
- *   // Assert label text
- * });
- *
- * // Test multiple fields
- * it('should render 5 inputs', async () => {
- *   const { config, initialValue } = MinimalTestBuilder.withMultipleFields(5);
- *   const { fixture } = await MaterialFormTestUtils.createTest({ config, initialValue });
- *   // Assert count
- * });
- */
+/** USAGE EXAMPLES: */

@@ -12,16 +12,12 @@ import { ArrayItemRegistryService } from '../../src/lib/core/registry/array-item
 import { form } from '@angular/forms/signals';
 import { RegisteredFieldTypes } from '../../src/lib/models/registry/field-registry';
 
-/**
- * Simple form configuration interface for testing
- */
+/** Simple form configuration interface for testing */
 export interface TestFormConfig {
   fields: FieldDef<unknown>[];
 }
 
-/**
- * Configuration for creating a dynamic form test
- */
+/** Configuration for creating a dynamic form test */
 export interface SimpleTestConfig<T = Record<string, unknown>> {
   config: TestFormConfig;
   initialValue?: T;
@@ -36,9 +32,7 @@ export interface SimpleTestResult {
   fixture: ComponentFixture<DynamicForm<RegisteredFieldTypes[]>>;
 }
 
-/**
- * Fluent API for building form configurations using existing field structure
- */
+/** Fluent API for building form configurations using existing field structure */
 export class TestFormConfigBuilder<T = Record<string, unknown>> {
   private fields: FieldDef<unknown>[] = [];
 
@@ -74,20 +68,14 @@ export class TestFormConfigBuilder<T = Record<string, unknown>> {
   }
 }
 
-/**
- * Simple utility class for testing dynamic forms
- */
+/** Simple utility class for testing dynamic forms */
 export class SimpleTestUtils {
-  /**
-   * Creates a new form config builder
-   */
+  /** Creates a new form config builder */
   static builder<T = Record<string, unknown>>(): TestFormConfigBuilder<T> {
     return new TestFormConfigBuilder<T>();
   }
 
-  /**
-   * Creates a simple test component - assumes TestBed is already configured
-   */
+  /** Creates a simple test component - assumes TestBed is already configured */
   static createComponent<T = Record<string, unknown>>(config: TestFormConfig = { fields: [] }, initialValue?: T): SimpleTestResult {
     const fixture = TestBed.createComponent(DynamicForm);
     const component = fixture.componentInstance;
@@ -104,9 +92,7 @@ export class SimpleTestUtils {
     return { component, fixture } as SimpleTestResult;
   }
 
-  /**
-   * Waits for the dynamic form to initialize
-   */
+  /** Waits for the dynamic form to initialize */
   static async waitForInit(fixture: ComponentFixture<DynamicForm>): Promise<void> {
     await delay(0);
     fixture.detectChanges();
@@ -114,9 +100,7 @@ export class SimpleTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates user input on a field element
-   */
+  /** Simulates user input on a field element */
   static async simulateInput(fixture: ComponentFixture<DynamicForm>, selector: string, value: string): Promise<void> {
     const input = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!input) {
@@ -129,9 +113,7 @@ export class SimpleTestUtils {
     await delay(0);
   }
 
-  /**
-   * Simulates checkbox toggle
-   */
+  /** Simulates checkbox toggle */
   static async simulateCheckbox(fixture: ComponentFixture<DynamicForm>, selector: string, checked: boolean): Promise<void> {
     const checkbox = fixture.nativeElement.querySelector(selector) as HTMLInputElement;
     if (!checkbox) {
@@ -144,23 +126,17 @@ export class SimpleTestUtils {
     await delay(0);
   }
 
-  /**
-   * Gets the current form value from the component
-   */
+  /** Gets the current form value from the component */
   static getFormValue(component: DynamicForm): Record<string, unknown> | undefined {
     return component.formValue();
   }
 
-  /**
-   * Checks if the form is valid
-   */
+  /** Checks if the form is valid */
   static isFormValid(component: DynamicForm): boolean {
     return component.valid();
   }
 
-  /**
-   * Asserts that the form has a specific value
-   */
+  /** Asserts that the form has a specific value */
   static assertFormValue(component: DynamicForm, expectedValue: Record<string, unknown>): void {
     const actualValue = component.formValue();
     if (JSON.stringify(actualValue) !== JSON.stringify(expectedValue)) {
@@ -199,9 +175,7 @@ export class TestFieldComponent {
   value = signal('test');
 }
 
-/**
- * Configuration for setting up a simple component test
- */
+/** Configuration for setting up a simple component test */
 export interface SimpleComponentTestConfig<T = unknown> {
   field: FieldDef<unknown>;
   value?: T;
@@ -210,17 +184,13 @@ export interface SimpleComponentTestConfig<T = unknown> {
   [key: string]: unknown; // Allow additional inputs for flexible component testing
 }
 
-/**
- * Result of setting up a simple component test
- */
+/** Result of setting up a simple component test */
 export interface SimpleComponentTestResult<T = unknown> {
   component: T;
   fixture: ComponentFixture<T>;
 }
 
-/**
- * Creates a simple test setup for individual field components
- */
+/** Creates a simple test setup for individual field components */
 export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleComponentTestConfig): SimpleComponentTestResult<T> {
   const mockFieldType: FieldTypeDefinition = {
     name: 'test',
@@ -286,9 +256,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
   return { component, fixture };
 }
 
-/**
- * Creates a simple test field definition
- */
+/** Creates a simple test field definition */
 export function createSimpleTestField(key: string, label: string, value?: unknown): FieldDef<unknown> {
   const field: FieldDef<unknown> = {
     key,

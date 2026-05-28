@@ -7,14 +7,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { MatButtonAddon } from '../types/addons';
 
-/**
- * Renderer for the `mat-button` addon kind.
- *
- * Renders `<button mat-icon-button>` when icon-only (no label), or
- * `<button mat-button>` when labeled. Click dispatch (preset / actionRef /
- * action precedence, multi-set warning, `disabled` / `loading` resolution)
- * lives on `NgForgeAddonAction`; this component focuses on the visual layer.
- */
+/** Renderer for the `mat-button` addon kind. */
 @Component({
   selector: 'df-mat-button-addon',
   imports: [MatButton, MatIconButton, MatIcon, MatProgressSpinner, DynamicTextPipe, AsyncPipe],

@@ -6,14 +6,7 @@ import { isContainerTypedField } from '../../definitions/default/container-field
 import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
 import { normalizeFieldsArray } from '../object-utils';
 
-/**
- * Represents a field definition that has been processed through the flattening algorithm.
- *
- * Guarantees that the field has a valid key property, either from the original
- * field definition or auto-generated during the flattening process.
- *
- * @public
- */
+/** Represents a field definition that has been processed through the flattening algorithm. */
 export interface FlattenedField extends FieldDef<unknown> {
   /** Guaranteed non-empty key for form binding and field identification */
   readonly key: string;
@@ -22,65 +15,11 @@ export interface FlattenedField extends FieldDef<unknown> {
 /**
  * Flattens a hierarchical field structure into a linear array for form processing.
  *
- * Handles different field types with specific flattening strategies:
- * - **Page fields**: Children are flattened and merged into the result (no wrapper)
- * - **Row fields**: Children are flattened and merged into the result (no wrapper), unless preserveRows=true
- * - **Group fields**: Maintains group structure with flattened children nested under the group key
- * - **Array fields**: Maintains array structure with flattened children nested under the array key
- * - **Other fields**: Pass through unchanged with guaranteed key generation
- *
- * Auto-generates keys for fields missing the key property to ensure form binding works correctly.
- *
  * @param fields - Array of field definitions that may contain nested structures
  * @param registry - Field type registry for determining value handling behavior
  * @param options - Configuration options for flattening behavior
  * @param options.preserveRows - When true, keep row fields in structure for DOM rendering (grid layout)
  * @returns Flattened array of field definitions with guaranteed keys
- *
- * @example
- * ```typescript
- * const hierarchicalFields = [
- *   {
- *     type: 'row',
- *     fields: [
- *       { type: 'input', key: 'firstName' },
- *       { type: 'input', key: 'lastName' }
- *     ]
- *   },
- *   {
- *     type: 'group',
- *     key: 'address',
- *     fields: [
- *       { type: 'input', key: 'street' },
- *       { type: 'input', key: 'city' }
- *     ]
- *   }
- * ];
- *
- * const flattened = flattenFields(hierarchicalFields, registry);
- * // Result: [
- * //   { type: 'input', key: 'firstName' },
- * //   { type: 'input', key: 'lastName' },
- * //   { type: 'group', key: 'address', fields: [...] }
- * // ]
- * ```
- *
- * @example
- * ```typescript
- * // Auto-key generation for fields without keys
- * const fieldsWithoutKeys = [
- *   { type: 'input', label: 'Name' },
- *   { type: 'button', label: 'Submit' }
- * ];
- *
- * const flattened = flattenFields(fieldsWithoutKeys, registry);
- * // Result: [
- * //   { type: 'input', label: 'Name', key: 'auto_field_0' },
- * //   { type: 'button', label: 'Submit', key: 'auto_field_1' }
- * // ]
- * ```
- *
- * @public
  */
 export function flattenFields(
   fields: FieldDef<unknown>[],

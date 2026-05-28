@@ -1,8 +1,4 @@
-/**
- * Instructions Resource
- *
- * Exposes ng-forge best practices and usage guidelines for AI assistants.
- */
+/** Instructions Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { INSTRUCTIONS } from '../registry/instructions.js';

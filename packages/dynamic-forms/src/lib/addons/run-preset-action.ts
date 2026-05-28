@@ -5,14 +5,6 @@ import type { Logger } from '../providers/features/logger/logger.interface';
 /**
  * Optional collaborators a preset may need beyond the base context. Passed
  * by the button kind component which has access to its own DI scope.
- *
- * Adapter input components fill in the collaborators their preset semantics
- * require:
- * - `mat-input` / `bs-input` / `prime-input` / `ion-input` populate
- *   `typeOverride` + `fieldValueSetter` + `fieldDefaultValueGetter` +
- *   `baselineType` from their own DI scope.
- * - Addons rendered outside any input field receive `{ logger }` only and
- *   the input-specific presets warn-and-no-op.
  */
 export interface PresetCollaborators {
   /** Per-field input-type override signal — populated only inside an input field. */
@@ -33,16 +25,7 @@ export interface PresetCollaborators {
    * yet set.
    */
   readonly baselineType?: () => string | undefined;
-  /**
-   * Logger for warnings about presets that can't be fulfilled in this context.
-   *
-   * Passed via collaborators (rather than injected) because `runPresetAction`
-   * is a DI-free pure function shared across adapters — each adapter's
-   * `ADDON_PRESET_HANDLER` factory injects `DynamicFormLogger` itself and
-   * forwards it here. The `[Dynamic Forms]` prefix comes from
-   * `ConsoleLogger`'s implementation, so the final console line is identical
-   * to one logged directly via `inject(DynamicFormLogger)`.
-   */
+  /** Logger for warnings about presets that can't be fulfilled in this context. */
   readonly logger: Logger;
 }
 
@@ -50,11 +33,6 @@ export interface PresetCollaborators {
  * Apply a built-in preset action against the addon's host field. Shared
  * across all adapters — each adapter's `ADDON_PRESET_HANDLER` provider
  * delegates here.
- *
- * Presets that require adapter-specific UI mechanics (clipboard, type
- * override) are best-effort — they no-op with a warning when the necessary
- * collaborator isn't available (e.g., toggle-password-visibility outside an
- * input field).
  *
  * @param adapterLabel Used in warnings — `'Material'` / `'Bootstrap'` / etc.
  * @param fieldLabel   Used in warnings — `'mat-input'` / `'bs-input'` / etc.

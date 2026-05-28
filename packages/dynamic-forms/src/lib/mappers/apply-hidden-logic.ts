@@ -11,10 +11,6 @@ interface FieldWithHiddenLogic {
 /**
  * Applies hidden logic to a mapper's input record.
  *
- * Evaluates the field's `hidden` property and `logic` array to determine
- * if the component should be hidden. Only runs evaluation when there's
- * actually something to evaluate (explicit `hidden: true` or logic with type 'hidden').
- *
  * @param inputs The mutable input record to potentially add `hidden` to
  * @param fieldDef The field definition containing `hidden` and `logic`
  * @param rootFormRegistry The root form registry for accessing form state

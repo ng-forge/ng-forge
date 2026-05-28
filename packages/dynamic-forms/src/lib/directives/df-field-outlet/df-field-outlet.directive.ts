@@ -13,40 +13,6 @@ import { FieldComponentSlot } from './field-component-slot';
 /**
  * Structural directive that renders a `ResolvedField` with its effective
  * wrapper chain.
- *
- * Replaces `*ngComponentOutlet` in field-rendering templates. When the field
- * has no wrappers, the component is created directly at the outlet position
- * (no extra DOM nesting). When wrappers apply, they chain outermost-first and
- * the field renders in the innermost slot.
- *
- * Effective wrappers are merged from (outermost → innermost):
- * 1. `WrapperTypeDefinition.types` auto-associations for the field's `type`
- * 2. `FormConfig.defaultWrappers`
- * 3. Field-level `FieldDef.wrappers` (`null` = explicit opt-out; `[]` does not
- *    opt out — auto + defaults still apply)
- *
- * Wrapper config keys (minus `type`) are pushed as individual Angular inputs;
- * every wrapper also receives `fieldInputs` — a `WrapperFieldInputs` bag that
- * includes the field's mapper outputs and a `ReadonlyFieldTree` view of its
- * form state.
- *
- * Rendering is gated by `field.renderReady() && !field.hidden()` — the
- * directive waits until the mapper produces the required inputs AND the
- * field isn't hidden before instantiating the component. Once rendered, a
- * transient `renderReady → false` does *not* tear the chain down; the
- * controller keeps the mounted components alive and ignores the flicker.
- * Only a structural change (wrappers or component class) triggers a rebuild.
- *
- * Imperative `ComponentRef` / `ViewContainerRef` lifecycle is encapsulated
- * in `FieldComponentSlot` — the directive itself is signal definitions
- * plus three method calls (`mountOrReuse`, `detach`, `destroyOnTeardown`).
- *
- * @example
- * ```html
- * \@for (field of resolvedFields(); track field.key) {
- *   <ng-container *dfFieldOutlet="field; environmentInjector: envInjector" />
- * }
- * ```
  */
 @Directive({
   selector: '[dfFieldOutlet]',

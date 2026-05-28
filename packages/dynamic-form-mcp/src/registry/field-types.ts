@@ -1,9 +1,4 @@
-/**
- * Field Type Registry Data
- *
- * Canonical source of field type metadata for the MCP server.
- * Previously generated as field-types.json by generate-registry.ts.
- */
+/** Field Type Registry Data */
 
 import type { FieldTypeInfo } from './index.js';
 

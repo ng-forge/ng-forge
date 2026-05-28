@@ -140,12 +140,7 @@ function tryCreateValidatorEntry(fieldKey: string, config: ValidatorConfig): Cro
   return null;
 }
 
-/**
- * Returns a logic entry if cross-field state logic, null otherwise.
- *
- * Note: Derivation logic is handled separately by the derivation system
- * and is not collected here.
- */
+/** Returns a logic entry if cross-field state logic, null otherwise. */
 function tryCreateLogicEntry(fieldKey: string, config: LogicConfig): CrossFieldLogicEntry | null {
   // Only process state logic (hidden, readonly, disabled, required)
   // Derivation logic is handled by the derivation collector

@@ -54,16 +54,10 @@ const DEFAULT_ASYNC_DEBOUNCE_MS = 300;
 /**
  * Creates an RxJS Observable stream that processes an async derivation entry.
  *
- * Each async derivation gets its own stream with:
- * - `debounceTime` to batch rapid changes
- * - `switchMap` to auto-cancel in-flight async operations
- * - `catchError` inside the switchMap projection to prevent stream termination
- *
  * @param entry - The derivation entry with asyncFunctionName
  * @param formValue$ - Observable of form value changes
  * @param context - Context with logger, etc.
  * @returns Observable that applies async-derived values to the form
- *
  * @internal
  */
 export function createAsyncDerivationStream(

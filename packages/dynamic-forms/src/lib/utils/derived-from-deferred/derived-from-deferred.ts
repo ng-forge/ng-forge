@@ -4,6 +4,7 @@ import { combineLatest, defer, Observable, OperatorFunction } from 'rxjs';
 
 /**
  * Type guard to check if a value is an array of Signals.
+ *
  * @internal
  */
 function isSignalArray(value: unknown): value is readonly Signal<unknown>[] {
@@ -12,35 +13,28 @@ function isSignalArray(value: unknown): value is readonly Signal<unknown>[] {
 
 /**
  * Type guard to check if a value is a record (object) of Signals.
+ *
  * @internal
  */
 function isSignalRecord(value: unknown): value is Record<string, Signal<unknown>> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) && Object.values(value).every((item) => isSignal(item));
 }
 
-/**
- * Options for derivedFromDeferred.
- */
+/** Options for derivedFromDeferred. */
 export interface DerivedFromDeferredOptions<R> {
   initialValue: R;
   injector: Injector;
 }
 
-/**
- * Type helper to extract the value type from a Signal.
- */
+/** Type helper to extract the value type from a Signal. */
 type SignalValue<T> = T extends Signal<infer V> ? V : never;
 
-/**
- * Type helper to map an array of Signals to an array of their value types.
- */
+/** Type helper to map an array of Signals to an array of their value types. */
 type SignalValues<T extends readonly Signal<unknown>[]> = {
   [K in keyof T]: SignalValue<T[K]>;
 };
 
-/**
- * Type helper to map an object of Signals to an object of their value types.
- */
+/** Type helper to map an object of Signals to an object of their value types. */
 type SignalObjectValues<T extends Record<string, Signal<unknown>>> = {
   [K in keyof T]: SignalValue<T[K]>;
 };
@@ -48,35 +42,6 @@ type SignalObjectValues<T extends Record<string, Signal<unknown>>> = {
 /**
  * Like derivedFrom from ngxtension, but uses defer() to avoid input availability issues.
  * This ensures toObservable is called at subscription time, not at field initialization.
- *
- * Supports three source types:
- * - Single signal: `derivedFromDeferred(signal, operator, options)`
- * - Array of signals: `derivedFromDeferred([signal1, signal2], operator, options)`
- * - Object of signals: `derivedFromDeferred({a: signal1, b: signal2}, operator, options)`
- *
- * @example
- * ```typescript
- * // Single signal
- * const result = derivedFromDeferred(
- *   mySignal,
- *   pipe(map(v => v * 2)),
- *   { initialValue: 0, injector }
- * );
- *
- * // Array of signals
- * const result = derivedFromDeferred(
- *   [signalA, signalB],
- *   pipe(map(([a, b]) => a + b)),
- *   { initialValue: 0, injector }
- * );
- *
- * // Object of signals
- * const result = derivedFromDeferred(
- *   { x: signalX, y: signalY },
- *   pipe(map(({ x, y }) => x + y)),
- *   { initialValue: 0, injector }
- * );
- * ```
  */
 
 // Overload: Single signal

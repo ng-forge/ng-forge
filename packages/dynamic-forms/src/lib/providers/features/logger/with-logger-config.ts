@@ -15,11 +15,7 @@ export const DERIVATION_LOG_CONFIG = new InjectionToken<DerivationLogConfig>('DE
   factory: createDefaultDerivationLogConfig,
 });
 
-/**
- * Configuration options for the logger feature.
- *
- * @public
- */
+/** Configuration options for the logger feature. */
 export interface LoggerConfigOptions {
   /**
    * Whether general logging is enabled.
@@ -31,10 +27,6 @@ export interface LoggerConfigOptions {
   /**
    * Derivation logging level.
    *
-   * - `'none'`: No derivation debug logging (default)
-   * - `'summary'`: Log cycle completion with counts
-   * - `'verbose'`: Log individual derivation evaluations with details
-   *
    * @default 'none'
    */
   derivations?: DerivationLogLevel;
@@ -43,40 +35,8 @@ export interface LoggerConfigOptions {
 /**
  * Configure logging for dynamic forms.
  *
- * By default, general logging is enabled (ConsoleLogger) and derivation
- * logging is disabled ('none'). Use this feature to enable derivation debugging.
- *
- * @example
- * ```typescript
- * // Disable all logging
- * provideDynamicForm(
- *   ...withMaterialFields(),
- *   withLoggerConfig(false)
- * )
- *
- * // Enable verbose derivation logging
- * provideDynamicForm(
- *   ...withMaterialFields(),
- *   withLoggerConfig({ derivations: 'verbose' })
- * )
- *
- * // Disable derivation logging but keep general logging
- * provideDynamicForm(
- *   ...withMaterialFields(),
- *   withLoggerConfig({ derivations: 'none' })
- * )
- *
- * // Conditional logging (e.g., only in dev mode)
- * provideDynamicForm(
- *   ...withMaterialFields(),
- *   withLoggerConfig(() => isDevMode())
- * )
- * ```
- *
  * @param config - Boolean to enable/disable logging, a function returning boolean, or a config object
  * @returns A DynamicFormFeature that configures logging
- *
- * @public
  */
 export function withLoggerConfig(config: boolean | (() => boolean) | LoggerConfigOptions = true): DynamicFormFeature<'logger'> {
   // Handle boolean or function

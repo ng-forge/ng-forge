@@ -7,8 +7,6 @@ import type { ContainerField } from '../../definitions/default/container-field';
 /**
  * Type constraints for field nesting rules
  * These ensure that container fields can only contain valid child field types
- *
- * Note: We explicitly list types instead of using Exclude to avoid circular dependencies
  */
 
 /**

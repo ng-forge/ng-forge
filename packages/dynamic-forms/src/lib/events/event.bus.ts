@@ -45,28 +45,6 @@ function attachFormValue<T extends FormEvent>(event: T, formValue: Record<string
 /**
  * Event bus for form-wide event communication between field components.
  *
- * **Intended for use inside DynamicForm** — i.e. within custom field components,
- * field mappers, or other services that live inside the form's component injector.
- * Inject it directly to dispatch or observe events from within a field:
- *
- * ```typescript
- * // Inside a custom field component
- * export class MyFieldComponent {
- *   private readonly eventBus = inject(EventBus);
- *
- *   onAction() {
- *     this.eventBus.dispatch(arrayEvent('items').append(template));
- *   }
- * }
- * ```
- *
- * **If you are outside DynamicForm** (e.g. in a host component or a service that wraps
- * the form), use {@link EventDispatcher} instead. Injecting `EventBus` in a parent
- * component gives you a *different instance* that the form knows nothing about.
- *
- * `EventBus` is scoped to each `DynamicForm` instance via `provideDynamicFormDI()`.
- * It provides type-safe dispatching and RxJS-based subscription for all form events.
- *
  * @see EventDispatcher — for dispatching events from outside the form
  */
 
@@ -85,38 +63,14 @@ export class EventBus {
   /**
    * Dispatches a pre-created event instance directly.
    *
-   * Use this overload with the `arrayEvent()` factory or any other code that
-   * produces a `FormEvent` instance rather than a constructor:
-   *
-   * ```typescript
-   * eventBus.dispatch(arrayEvent('contacts').append(template));
-   * eventBus.dispatch(arrayEvent('contacts').pop());
-   * ```
-   *
    * @param event - A FormEvent instance to dispatch
    */
   dispatch(event: FormEvent): void;
   /**
    * Dispatches an event to all subscribers by instantiating the provided constructor.
    *
-   * Creates an instance of the provided event constructor and broadcasts it
-   * through the event pipeline to all active subscribers.
-   *
-   * If `withEventFormValue()` is enabled globally or `options.emitFormValueOnEvents`
-   * is set to `true` in the form config, the current form value will be attached
-   * to the event's `formValue` property.
-   *
    * @param eventConstructor - Constructor function for the event to dispatch
    * @param args - Arguments to pass to the event constructor
-   *
-   * @example
-   * ```typescript
-   * // Dispatch a submit event
-   * eventBus.dispatch(SubmitEvent);
-   *
-   * // Dispatch a custom event with args
-   * eventBus.dispatch(CustomFormEvent, 'arg1', 42);
-   * ```
    */
   // TypeScript limitation: Must use ConstructorParameters which relies on `any` in FormEventConstructor
   dispatch<T extends FormEventConstructor>(eventConstructor: T, ...args: ConstructorParameters<T>): void;
@@ -131,6 +85,7 @@ export class EventBus {
   /**
    * Dispatches a pre-created event instance directly.
    * Used internally by EventDispatcher to forward events into the bus.
+   *
    * @internal
    */
   emitInstance(event: FormEvent): void {
@@ -167,13 +122,7 @@ export class EventBus {
     }
   }
 
-  /**
-   * Determines whether form value should be attached to events.
-   *
-   * Precedence rules:
-   * 1. Per-form setting (if defined) takes precedence
-   * 2. Falls back to global setting
-   */
+  /** Determines whether form value should be attached to events. */
   private shouldEmitFormValue(): boolean {
     const formLevelSetting = this.formOptions?.()?.emitFormValueOnEvents;
     return formLevelSetting ?? this.globalEmitFormValue;
@@ -196,34 +145,8 @@ export class EventBus {
   /**
    * Subscribes to form events with type-safe filtering.
    *
-   * Provides a reactive stream of events filtered by type. Supports both single
-   * event type subscriptions and multi-type subscriptions for flexible event handling.
-   *
    * @param eventType - Event type string or array of event type strings to filter by
    * @returns Observable stream of filtered events
-   *
-   * @example
-   * ```typescript
-   * // Subscribe to a single event type
-   * eventBus.on<SubmitEvent>('submit').subscribe(event => {
-   *   console.log('Submit event received');
-   * });
-   *
-   * // Subscribe to multiple event types
-   * eventBus.on<SubmitEvent | FormResetEvent | ValidationErrorEvent>(['submit', 'form-reset', 'validation-error']).subscribe(event => {
-   *   switch (event.type) {
-   *     case 'submit':
-   *       handleSubmit();
-   *       break;
-   *     case 'form-reset':
-   *       handleReset();
-   *       break;
-   *     case 'validation-error':
-   *       handleValidationError();
-   *       break;
-   *   }
-   * });
-   * ```
    */
   on<T extends FormEvent>(eventType: T['type'] | Array<T['type']>): Observable<T> {
     if (Array.isArray(eventType)) {

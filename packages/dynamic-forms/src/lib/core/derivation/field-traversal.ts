@@ -13,11 +13,6 @@ export type FieldVisitor<TContext> = (field: FieldDef<unknown>, context: TContex
 /**
  * Hooks for mutating the traversal context when crossing container boundaries.
  *
- * Both hooks receive the parent context and the container field; they return
- * a partial object that is merged into a copy of the parent context to form
- * the child context. Layout containers (page, row, container) call
- * `onLayoutChild` and by default leave context unchanged.
- *
  * @internal
  */
 export interface FieldTraversalHooks<TContext> {
@@ -31,19 +26,6 @@ export interface FieldTraversalHooks<TContext> {
 
 /**
  * Recursively walks a field-definition tree, invoking `visitor` for each field.
- *
- * Owns the subtleties shared across derivation collectors:
- * - Detects container fields via `hasChildFields`.
- * - Falls back to the simplified-array Symbol-metadata template when an array
- *   field has empty `fields` (the case for arrays initialized without a
- *   starting `value` — only the metadata template carries their item shape).
- * - Flattens primitive (FieldDef) and object (FieldDef[]) array items into a
- *   single child list before recursing.
- *
- * Callers customize per-boundary context via {@link FieldTraversalHooks}: e.g.,
- * the value-derivation collector tracks an array path AND a group path (with
- * the group path reset at array boundaries), while the property-derivation
- * collector tracks only the array path.
  *
  * @internal
  */
@@ -74,9 +56,6 @@ export function traverseFieldsWithContext<TContext>(
 /**
  * Returns the flattened list of children for an array field, falling back
  * to the Symbol metadata template when `fields` is empty.
- *
- * Caller must ensure `field` is a container (passes `hasChildFields`); this
- * function reads `field.fields` directly and would error otherwise.
  *
  * @internal
  */

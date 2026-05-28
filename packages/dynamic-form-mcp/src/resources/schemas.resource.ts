@@ -1,9 +1,4 @@
-/**
- * Schemas Resource
- *
- * Provides a lightweight index pointing to tools for schema access.
- * Actual schemas are accessed via tools to control context size.
- */
+/** Schemas Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getSupportedFieldTypes } from '@ng-forge/dynamic-forms-zod/mcp';

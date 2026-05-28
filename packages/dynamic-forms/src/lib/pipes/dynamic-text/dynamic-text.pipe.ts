@@ -6,25 +6,6 @@ import { DynamicText } from '../../models/types/dynamic-text';
 /**
  * Pipe that handles dynamic text resolution with support for static strings,
  * Observables, and Signals.
- *
- * Supports:
- * - Static strings (pass-through)
- * - Observables (subscribed internally)
- * - Signals (converted to Observable using toObservable for reactivity)
- *
- * @example
- * ```html
- * <!-- Static string -->
- * {{ 'Hello World' | dynamicText | async }}
- *
- * <!-- Observable -->
- * {{ transloco.selectTranslate('key') | dynamicText | async }}
- *
- * <!-- Signal -->
- * {{ myTextSignal | dynamicText | async }}
- * ```
- *
- * @public
  */
 @Pipe({
   name: 'dynamicText',

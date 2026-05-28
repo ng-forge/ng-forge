@@ -34,9 +34,7 @@ interface GenerateOptions {
   barrelExtension?: string;
 }
 
-/**
- * Register generate options directly on the given Command (no subcommand).
- */
+/** Register generate options directly on the given Command (no subcommand). */
 export function registerGenerateOptions(cmd: Command): void {
   cmd
     .requiredOption('--spec <path>', 'Path to OpenAPI spec file')
@@ -73,9 +71,7 @@ export function registerGenerateOptions(cmd: Command): void {
     .addHelpText('after', '\nNote: Generated files are not formatted. Run your project formatter (e.g. prettier) after generation.');
 }
 
-/**
- * Action handler for the generate command.
- */
+/** Action handler for the generate command. */
 export async function runGenerateAction(options: GenerateOptions): Promise<void> {
   if (options.verbose && options.quiet) {
     logger.error('Cannot use --verbose and --quiet together');

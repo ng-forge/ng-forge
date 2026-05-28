@@ -6,11 +6,6 @@ import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-
 /**
  * Maps a slider field to component inputs.
  *
- * Extends the base value field mapper by adding slider-specific properties:
- * - minValue: Minimum slider value
- * - maxValue: Maximum slider value
- * - step: Step increment for the slider
- *
  * @param fieldDef The slider field definition
  * @returns Signal containing Record of input names to values for ngComponentOutlet
  */

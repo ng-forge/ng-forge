@@ -5,9 +5,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldTypeDefinition } from '../../models/field-type';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
 
-/**
- * Resolved field ready for rendering with ngComponentOutlet / DfFieldOutlet.
- */
+/** Resolved field ready for rendering with ngComponentOutlet / DfFieldOutlet. */
 export interface ResolvedField {
   key: string;
   /** The original field definition (used by DfFieldOutlet to resolve wrappers). */
@@ -49,16 +47,6 @@ export function createRenderReadySignal(
  * types — value-bearing leaves source from the `FieldTree`'s `state.hidden()`
  * (where Angular Signal Forms cascades `hidden(path, …)`), and non-field outputs
  * (button/text/containers) source from the mapper's explicit `inputs.hidden`.
- *
- * The `@if (!field.hidden())` gate at every `*dfFieldOutlet` consumption site uses
- * this signal, removing hidden fields from the DOM. That's required to silence
- * Angular's `NG01916: Field 'X' is hidden but is being rendered` warning — and
- * is the prescribed pattern from the
- * [`hidden` API docs](https://angular.dev/api/forms/signals/hidden).
- *
- * Container internal state (e.g. an `ArrayFieldComponent`'s items + dynamic
- * templates + id counter) survives this destroy/recreate via the form-scoped
- * `ArrayItemRegistryService` keyed by array path.
  */
 export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Signal<boolean> {
   return computed(() => {
@@ -79,9 +67,7 @@ export function createHiddenSignal(inputs: Signal<Record<string, unknown>>): Sig
   });
 }
 
-/**
- * Context required to resolve a field.
- */
+/** Context required to resolve a field. */
 export interface ResolveFieldContext {
   /**
    * The field registry to load components from.
@@ -101,10 +87,6 @@ export interface ResolveFieldContext {
 /**
  * Resolves a single field definition to a ResolvedField using RxJS.
  * Loads the component asynchronously and maps inputs in the injection context.
- *
- * For componentless fields (e.g., hidden fields), returns undefined since
- * there's nothing to render. These fields still contribute to form values
- * through the form schema.
  *
  * @param fieldDef - The field definition to resolve
  * @param context - The context containing dependencies for resolution
@@ -152,9 +134,7 @@ export function resolveField(fieldDef: FieldDef<unknown>, context: ResolveFieldC
   );
 }
 
-/**
- * Context for synchronous field resolution when components are already cached.
- */
+/** Context for synchronous field resolution when components are already cached. */
 export interface SyncResolveFieldContext {
   /** Returns a previously loaded component, or undefined if not cached */
   getLoadedComponent: (type: string) => Type<unknown> | undefined;
@@ -166,9 +146,6 @@ export interface SyncResolveFieldContext {
 
 /**
  * Synchronously resolves a field definition to a ResolvedField using cached components.
- *
- * This is the fast path for fields whose components have already been loaded.
- * Returns undefined for componentless fields (e.g., hidden fields).
  *
  * @param fieldDef - The field definition to resolve
  * @param context - The context containing cached components and dependencies
@@ -202,11 +179,6 @@ export function resolveFieldSync(fieldDef: FieldDef<unknown>, context: SyncResol
 /**
  * Reconciles previous and current resolved fields to preserve injector instances
  * for fields that haven't changed type, preventing unnecessary component recreation.
- *
- * When a field's key, component, and injector all match the previous render but the
- * underlying `fieldDef` has changed (e.g. updated options/props), the existing
- * component/injector are preserved while the new `inputs` and `renderReady` signals
- * are adopted so prop updates flow through to the rendered component.
  *
  * @param prev - Previous resolved fields array
  * @param curr - Current resolved fields array

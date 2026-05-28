@@ -70,12 +70,6 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
 /**
  * Applies hidden logic to a non-form-bound field.
  *
- * This is a focused utility for fields that only need hidden state resolution.
- * Use this when you need hidden logic but handle disabled separately
- * (e.g., navigation buttons with custom disabled logic).
- *
- * NOTE: This function must be called inside a computed() context.
- *
  * @param rootForm The root form FieldTree (can be undefined)
  * @param fieldDef The field definition with optional hidden/logic
  * @returns The resolved hidden boolean value, or undefined if no hidden logic

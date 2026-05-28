@@ -35,25 +35,8 @@ const enum VisitState {
 /**
  * Detects cycles in the derivation dependency graph.
  *
- * Uses Kahn's algorithm variant with DFS to detect cycles.
- * Bidirectional sync patterns (A→B→A) are allowed because they stabilize
- * via the equality check at runtime.
- *
  * @param collection - The collected derivation entries
  * @returns Result indicating whether a cycle exists and details if found
- *
- * @example
- * ```typescript
- * const collection = collectDerivations(fields);
- * const result = detectCycles(collection);
- *
- * if (result.hasCycle) {
- *   console.error(`Cycle detected: ${result.cyclePath?.join(' -> ')}`);
- *   throw new Error(result.errorMessage);
- * }
- * ```
- *
- * @public
  */
 export function detectCycles(collection: DerivationCollection): CycleDetectionResult {
   // Build directed graph from derivation entries
@@ -80,33 +63,6 @@ export function detectCycles(collection: DerivationCollection): CycleDetectionRe
 
 /**
  * Detects bidirectional derivation pairs (A↔B patterns).
- *
- * These patterns are allowed because they stabilize via equality checks.
- * Example: USD/EUR conversion where both fields derive from each other.
- *
- * A bidirectional pair exists when:
- * - Field A derives its value from field B (A depends on B)
- * - Field B derives its value from field A (B depends on A)
- *
- * ## Floating-Point Precision Note
- *
- * Bidirectional derivations stabilize via equality checks using exact IEEE 754
- * comparison with no tolerance. This means:
- *
- * - **Integer math**: Safe (e.g., `A = B * 2`, `B = A / 2` where A is even)
- * - **Floating-point math**: May oscillate due to rounding errors
- *
- * For currency conversions or other floating-point operations, consider:
- * 1. Rounding values in your expression (e.g., `Math.round(value * 100) / 100`)
- * 2. Using integer cents instead of decimal dollars
- * 3. Using one-way derivation instead of bidirectional
- *
- * @example
- * ```typescript
- * // Bidirectional currency conversion
- * { key: 'amountUSD', derivation: 'formValue.amountEUR * 1.1' }
- * { key: 'amountEUR', derivation: 'formValue.amountUSD / 1.1' }
- * ```
  *
  * @internal
  */
@@ -164,13 +120,6 @@ function isBidirectionalCycle(cyclePath: string[], bidirectionalPairs: Set<strin
 /**
  * Builds a dependency graph from derivation entries.
  *
- * Creates nodes for each field involved in derivations and
- * edges representing the derivation dependencies.
- *
- * Edge direction is based on dependencies:
- * - If field A's derivation depends on field B, then B -> A (changing B triggers A)
- * - A cycle exists if: A -> B -> C -> A (circular dependency chain)
- *
  * @internal
  */
 function buildDependencyGraph(collection: DerivationCollection): Map<string, GraphNode> {
@@ -214,14 +163,6 @@ function buildDependencyGraph(collection: DerivationCollection): Map<string, Gra
 
 /**
  * Detects cycles using depth-first search.
- *
- * Uses three-color marking:
- * - Unvisited (white): Not yet processed
- * - InProgress (gray): Currently in the DFS stack
- * - Completed (black): Fully processed
- *
- * A cycle is detected when we visit a node that's InProgress,
- * unless it's a bidirectional sync pattern (allowed).
  *
  * @internal
  */
@@ -341,28 +282,9 @@ function formatCycleError(cyclePath: string[]): string {
 /**
  * Validates a derivation collection and throws if cycles are detected.
  *
- * This is the main entry point for cycle validation during form initialization.
- * Should be called after collecting derivations and before setting up effects.
- *
- * In dev mode, logs a warning when bidirectional derivation pairs are detected.
- * These patterns are allowed but may oscillate with floating-point values.
- *
  * @param collection - The collected derivation entries to validate
  * @param logger - Optional logger for dev-mode warnings
  * @throws Error if a cycle is detected, with details about the cycle
- *
- * @example
- * ```typescript
- * const collection = collectDerivations(fields);
- *
- * // This will throw if cycles exist
- * validateNoCycles(collection, logger);
- *
- * // Safe to set up derivation effects now
- * setupDerivationEffects(collection);
- * ```
- *
- * @public
  */
 export function validateNoCycles(collection: DerivationCollection, logger?: Logger): void {
   const result = detectCycles(collection);

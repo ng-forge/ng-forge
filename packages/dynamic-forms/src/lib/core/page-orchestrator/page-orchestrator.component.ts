@@ -22,28 +22,6 @@ import { isRowField } from '../../definitions/default/row-field';
  * PageOrchestrator manages page navigation and visibility for paged forms.
  * It acts as an intermediary between the DynamicForm component and PageField components,
  * handling page state management and navigation events without interfering with form data.
- *
- * This component uses declarative rendering with @defer blocks for optimal performance,
- * ensuring that non-visible pages are lazily loaded only when needed.
- *
- * Key responsibilities:
- * - Manage current page index state
- * - Handle navigation events (next/previous)
- * - Declaratively render pages with deferred loading
- * - Emit page change events
- * - Validate navigation boundaries
- *
- * @example
- * ```html
- * <div page-orchestrator
- *   [pageFields]="pageFields"
- *   [form]="form"
- *   [fieldSignalContext]="fieldSignalContext"
- *   [config]="orchestratorConfig"
- *   (pageChanged)="onPageChanged($event)"
- *   (navigationStateChanged)="onNavigationStateChanged($event)">
- * </div>
- * ```
  */
 @Component({
   selector: 'div[page-orchestrator]',
@@ -103,9 +81,7 @@ export class PageOrchestratorComponent {
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
 
-  /**
-   * Array of page field definitions to render
-   */
+  /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
 
   /**
@@ -114,9 +90,7 @@ export class PageOrchestratorComponent {
    */
   form = input.required<FieldTree<unknown>>();
 
-  /**
-   * Field signal context for child fields
-   */
+  /** Field signal context for child fields */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- FieldSignalContext is contravariant in TModel, using any allows accepting any form type
   fieldSignalContext = input.required<FieldSignalContext<any>>();
 
@@ -146,10 +120,6 @@ export class PageOrchestratorComponent {
   /**
    * Internal signal for current page index that tracks with page fields.
    * This tracks the actual page index, not the visible page index.
-   *
-   * Note: We only track pageFields().length to handle page additions/removals.
-   * The hidden state changes should NOT reset the current page index -
-   * that would cause unwanted navigation when form values change.
    */
   private readonly currentPageIndex = linkedSignal(() => {
     const totalPages = this.pageFields().length;
@@ -160,9 +130,7 @@ export class PageOrchestratorComponent {
     return 0;
   });
 
-  /**
-   * Computed state for the orchestrator
-   */
+  /** Computed state for the orchestrator */
   readonly state = computed<PageOrchestratorState>(() => {
     const currentIndex = this.currentPageIndex();
     const totalPages = this.pageFields().length;
@@ -184,10 +152,6 @@ export class PageOrchestratorComponent {
 
   /**
    * Signal indicating whether all fields on the current page are valid.
-   *
-   * This is used by next page buttons to determine their disabled state.
-   * Returns `true` if all fields on the current page pass validation,
-   * `false` otherwise.
    *
    * @returns `true` if current page is valid, `false` otherwise
    */
@@ -222,13 +186,7 @@ export class PageOrchestratorComponent {
     return true;
   });
 
-  /**
-   * Extended field signal context that includes currentPageValid.
-   *
-   * This extends the parent context from DynamicForm with page-specific
-   * information needed by button mappers (e.g., next button needs to know
-   * if the current page is valid).
-   */
+  /** Extended field signal context that includes currentPageValid. */
   readonly extendedFieldSignalContext = computed(() => ({
     ...this.fieldSignalContext(),
     currentPageValid: this.currentPageValid,
@@ -253,6 +211,7 @@ export class PageOrchestratorComponent {
 
   /**
    * Navigate to the next visible page, skipping hidden pages.
+   *
    * @returns Navigation result
    */
   navigateToNextPage(): NavigationResult {
@@ -302,6 +261,7 @@ export class PageOrchestratorComponent {
 
   /**
    * Navigate to the previous visible page, skipping hidden pages.
+   *
    * @returns Navigation result
    */
   navigateToPreviousPage(): NavigationResult {
@@ -340,6 +300,7 @@ export class PageOrchestratorComponent {
 
   /**
    * Navigate to a specific page index
+   *
    * @param pageIndex The target page index (0-based)
    * @returns Navigation result
    */
@@ -407,9 +368,7 @@ export class PageOrchestratorComponent {
     return nearest;
   }
 
-  /**
-   * Set up event listeners for navigation events
-   */
+  /** Set up event listeners for navigation events */
   private setupEventListeners(): void {
     // Listen for next page events
     this.eventBus
@@ -474,19 +433,7 @@ export class PageOrchestratorComponent {
   }
 }
 
-/**
- * Recursively collects form-tree keys for all value-bearing nodes on a page.
- *
- * Row fields are layout-only containers whose children are flattened to the
- * parent level in the form tree, so we recurse through them transparently.
- *
- * Group fields create a nested sub-tree in the form (form['address']['street']).
- * Their group-level FieldTree node aggregates child validity, so we use the
- * group's own key — not the individual child keys — to check validity.
- *
- * Array fields are also accessed by their own key; the ArrayFieldTree node
- * covers minLength/maxLength and any item-level validators.
- */
+/** Recursively collects form-tree keys for all value-bearing nodes on a page. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
 function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
   const keys: string[] = [];

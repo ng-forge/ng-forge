@@ -93,10 +93,6 @@ void _NG_FORGE_ADDONS_INPUTS_LOCKSTEP;
 /**
  * Host wrapper for `NgForgeAddonsBase`. Consumers compose this directly:
  *
- * ```ts
- * \@Component({
- *   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
- *   template: `
  *     @if (ngfa.hasAddons()) {
  *       <p-inputgroup>
  *         @for (a of ngfa.prefixAddons(); track $index) {

@@ -5,16 +5,6 @@ import { Directive, input } from '@angular/core';
  * Owns the universal identity inputs (`key`, `className`) and the host
  * bindings that every field shape — value-bearing, action, future container —
  * shares: `[id]`, `[attr.data-testid]`, `[class]`.
- *
- * Shape-specific add-ons (`NgForgeField` for value fields, `NgForgeAction`
- * for actions) inject this directive and read `key()` / `className()` from
- * it. Source-of-truth concerns like `hidden` / `disabled` live on the add-on
- * because they vary by shape (value fields derive from `field()()`; actions
- * receive direct inputs).
- *
- * Selectorless — usage is exclusively via `hostDirectives`. Prefer the
- * `NG_FORGE_FIELD` / `NG_FORGE_ACTION` presets rather than composing Shell
- * directly.
  */
 @Directive({
   host: {

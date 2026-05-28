@@ -3,56 +3,7 @@ import { ContainerAllowedChildren } from '../../models/types/nesting-constraints
 import { ContainerLogicConfig } from '../base/container-logic-config';
 import { WrapperConfig } from '../../models/wrapper-type';
 
-/**
- * Container field interface for wrapping child fields with UI chrome.
- *
- * A container field is a container that renders its children inside a chain
- * of wrapper components. Each wrapper provides visual decoration (sections,
- * headers, expand/collapse, styling) without affecting the form data structure.
- *
- * Like a row field, the container field:
- * - Does not create a new form context
- * - Flattens child values into the parent form
- * - Is purely a visual/layout container
- *
- * Unlike a row field, the container field:
- * - Supports a `wrappers` array that chains wrapper components around the children
- * - Uses imperative `ViewContainerRef.createComponent()` for the wrapper chain
- *
- * Containers are pure layout primitives that flatten their children into the
- * parent form, so any registered field type may appear inside — including
- * pages, hidden fields, rows, and other containers (see
- * {@link ContainerAllowedChildren}).
- *
- * @example
- * ```typescript
- * const field: ContainerField = {
- *   type: 'container',
- *   key: 'contactSection',
- *   fields: [
- *     { key: 'email', type: 'input', value: '' },
- *     { key: 'phone', type: 'input', value: '' },
- *   ],
- *   wrappers: [
- *     { type: 'section', header: 'Contact Info' },
- *   ]
- * };
- * ```
- *
- * @example
- * ```typescript
- * // Multiple wrappers chain from outermost to innermost
- * const field: ContainerField = {
- *   type: 'container',
- *   key: 'styledSection',
- *   fields: [{ key: 'name', type: 'input', value: '' }],
- *   wrappers: [
- *     { type: 'section', header: 'Details' },  // outermost
- *     { type: 'style', class: 'highlight' },    // innermost
- *   ]
- * };
- * ```
- */
+/** Container field interface for wrapping child fields with UI chrome. */
 export interface ContainerField<
   TFields extends readonly ContainerAllowedChildren[] = readonly ContainerAllowedChildren[],
   TWrapperConfigs extends readonly WrapperConfig[] = readonly WrapperConfig[],
@@ -83,14 +34,7 @@ export interface ContainerField<
   readonly logic?: ContainerLogicConfig[];
 }
 
-/**
- * Type guard for ContainerField with proper type narrowing.
- *
- * `wrappers` is part of the type but optional in practice — many configs use
- * containers purely as flex/layout wrappers without any wrapper components.
- * Match on `type === 'container'` and the `fields` shape only, mirroring
- * `isPageField` / `isRowField`.
- */
+/** Type guard for ContainerField with proper type narrowing. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
 export function isContainerTypedField(field: FieldDef<any>): field is ContainerField {
   return (

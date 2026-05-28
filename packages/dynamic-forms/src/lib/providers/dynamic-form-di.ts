@@ -152,11 +152,6 @@ function derivationProviders(): Provider[] {
  * Providers for the property-derivation pipeline: the override store consumed
  * by the unified `DerivationOrchestrator` plus the back-compat alias token.
  *
- * Kept separate from {@link derivationProviders} so a future
- * `withPropertyDerivations()` feature factory can drop this group when callers
- * don't use property derivations — at which point the orchestrator's property
- * branch stays dormant (no `propertyStore` in its config).
- *
  * @internal
  */
 function propertyDerivationProviders(): Provider[] {

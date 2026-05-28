@@ -21,9 +21,7 @@ export interface MatButtonProps {
 export type MatButtonField<TEvent extends FormEvent> = ButtonField<MatButtonProps, TEvent>;
 export type MatButtonComponent<TEvent extends FormEvent> = FieldComponent<MatButtonField<TEvent>>;
 
-/**
- * Specific button field types with preconfigured events
- */
+/** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
 export type MatSubmitButtonField = Omit<MatButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
@@ -83,9 +81,7 @@ export type InsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEven
    * When inside an array, this is automatically determined from context.
    */
   arrayKey?: string;
-  /**
-   * The index at which to insert the new item.
-   */
+  /** The index at which to insert the new item. */
   index: number;
   /**
    * Template for the new array item. REQUIRED.

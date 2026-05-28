@@ -10,9 +10,7 @@ import { BaseDerivationEntry } from './derivation-entry-base';
  * @internal
  */
 export interface ComputeValueOptions {
-  /**
-   * Registered derivation functions, used when the entry has `functionName`.
-   */
+  /** Registered derivation functions, used when the entry has `functionName`. */
   derivationFunctions?: Record<string, CustomFunction>;
 
   /**
@@ -32,9 +30,6 @@ export interface ComputeValueOptions {
 /**
  * Single dispatch over `value` / `expression` / `functionName` shared by both
  * the value-derivation and property-derivation applicators.
- *
- * Throws {@link DynamicFormError} on missing function or missing value source
- * so both pipelines surface the library's standard error type.
  *
  * @internal
  */

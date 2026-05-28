@@ -31,20 +31,6 @@ import { createAsyncPropertyDerivationStream } from '../property-derivation/asyn
 /**
  * Configuration for creating a DerivationOrchestrator. Both pipelines are
  * opt-in via their respective config fields:
- *
- * - **Value pipeline** (form-value derivations): activated when both `form`
- *   and `derivationLogger` are provided. Wires onChange/debounced/HTTP/async
- *   streams that write derived values into the Angular Signal-Form tree via
- *   `form()`.
- * - **Property pipeline** (hidden/disabled/readonly derivations): activated
- *   when `propertyStore` is provided. Wires the same four stream variants
- *   that write derived property overrides into the store.
- *
- * Both pipelines share the same `schemaFields` and `formValue` signals — the
- * collectors walk the same field tree but extract disjoint sets of entries
- * (value entries have no `targetProperty`; property entries have one).
- *
- * @public
  */
 export interface DerivationOrchestratorConfig {
   /** Signal containing the flattened schema fields */
@@ -82,13 +68,6 @@ export interface DerivationOrchestratorConfig {
  * (writes into a property override store). Each pipeline opts in via the
  * corresponding fields of {@link DerivationOrchestratorConfig}; an orchestrator
  * instance can run one, both, or (degenerately) neither.
- *
- * The streaming plumbing is shared between pipelines via
- * `pipeline-setup-utils` — both wire onChange + debounced + HTTP-entry-keyed +
- * async-function-entry-keyed streams via the same helpers, differing only in
- * collection, apply callback, and per-entry stream constructor.
- *
- * @public
  */
 export class DerivationOrchestrator {
   private readonly config: DerivationOrchestratorConfig;
@@ -604,18 +583,12 @@ function propertyAsyncEntrySignature(entry: PropertyDerivationEntry): string {
  *
  * @param config - Form-specific signals configuration
  * @returns The created DerivationOrchestrator
- *
- * @public
  */
 export function createDerivationOrchestrator(config: DerivationOrchestratorConfig): DerivationOrchestrator {
   return new DerivationOrchestrator(config);
 }
 
-/**
- * Injection token for the DerivationOrchestrator.
- *
- * @public
- */
+/** Injection token for the DerivationOrchestrator. */
 export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('DERIVATION_ORCHESTRATOR');
 
 /**
@@ -624,8 +597,6 @@ export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator
  * {@link DerivationOrchestrator}; the DI binding for this token uses
  * `useExisting: DERIVATION_ORCHESTRATOR`, so any consumer still calling
  * `inject(PROPERTY_DERIVATION_ORCHESTRATOR)` resolves to the same instance.
- *
- * New code should `inject(DERIVATION_ORCHESTRATOR)` directly.
  *
  * @deprecated Use {@link DERIVATION_ORCHESTRATOR}.
  */
@@ -636,8 +607,6 @@ export const PROPERTY_DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrc
  *
  * @returns The DerivationOrchestrator instance
  * @throws Error if called outside of an injection context or if orchestrator is not provided
- *
- * @public
  */
 export function injectDerivationOrchestrator(): DerivationOrchestrator {
   return inject(DERIVATION_ORCHESTRATOR);

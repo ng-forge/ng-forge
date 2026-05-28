@@ -7,9 +7,7 @@ import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';
 
 export interface PrimeRadioGroupProps {
-  /**
-   * Custom CSS class for the radio buttons
-   */
+  /** Custom CSS class for the radio buttons */
   styleClass?: string;
 }
 

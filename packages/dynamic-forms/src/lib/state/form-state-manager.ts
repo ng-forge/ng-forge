@@ -66,11 +66,6 @@ import { createFormStateMachine, FormStateMachine } from './form-state-machine';
  * field initializer (runs before FormStateManager is injected in declaration order);
  * FormStateManager reads them.
  *
- * `any` is required for config/value because Angular DI is non-generic and
- * Signal/WritableSignal are invariant in TypeScript — Signal<FormConfig<TFields>>
- * is not assignable to Signal<FormConfig>. Safe because the same component
- * instance populates and consumes these properties.
- *
  * @internal
  */
 export interface FormStateDeps {
@@ -88,14 +83,7 @@ export interface FormStateDeps {
 /** @internal */
 export const FORM_STATE_DEPS = new InjectionToken<FormStateDeps>('FORM_STATE_DEPS');
 
-/**
- * Casts a FieldTree to a record of per-key sub-trees.
- *
- * FieldTree<TModel> is structurally a callable that exposes per-key child trees
- * via bracket access (e.g., `tree['fieldKey']`), but TypeScript's FieldTree type
- * doesn't surface this as an index signature. This helper makes the cast explicit
- * and centralizes it to a single location.
- */
+/** Casts a FieldTree to a record of per-key sub-trees. */
 function asFieldTreeRecord(tree: FieldTree<unknown>): Record<string, FieldTree<unknown>> {
   return tree as unknown as Record<string, FieldTree<unknown>>;
 }
@@ -246,11 +234,6 @@ export class FormStateManager<
    * Used to skip re-logging warnings that already fired for the previous
    * config — avoids spam when the form swaps config repeatedly but the
    * addon issues haven't changed.
-   *
-   * Scoping: per-FormStateManager (i.e., per `<df-dynamic-form>` component
-   * instance). Replaced wholesale on every config setup — bounded by the
-   * current config's warning count, never grows unbounded across swaps.
-   * A warning that disappears and later returns re-logs as expected.
    */
   private lastAddonWarningKeys: Set<string> = new Set();
 
@@ -271,9 +254,7 @@ export class FormStateManager<
   // Internal State Signals
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Field loading errors accumulated during resolution.
-   */
+  /** Field loading errors accumulated during resolution. */
   readonly fieldLoadingErrors = signal<FieldLoadingError[]>([]);
 
   /**
@@ -309,9 +290,7 @@ export class FormStateManager<
     return undefined;
   });
 
-  /**
-   * Current render phase: 'render' = showing form, 'teardown' = hiding old components.
-   */
+  /** Current render phase: 'render' = showing form, 'teardown' = hiding old components. */
   readonly renderPhase = computed(() => {
     const state = this.machine.state();
     if (isTransitioningState(state) && state.phase === Phase.Teardown) return Phase.Teardown;
@@ -321,9 +300,7 @@ export class FormStateManager<
   /** Whether to render the form template. */
   readonly shouldRender = computed(() => this.activeConfig() !== undefined);
 
-  /**
-   * Computed form mode detection with validation.
-   */
+  /** Computed form mode detection with validation. */
   readonly formModeDetection = computed(() => {
     const config = this.activeConfig();
     if (!config) {
@@ -340,9 +317,7 @@ export class FormStateManager<
     return FormModeValidator.validateFormConfiguration(config.fields || []);
   });
 
-  /**
-   * Effective form options (merged from config and input).
-   */
+  /** Effective form options (merged from config and input). */
   readonly effectiveFormOptions = computed(() => {
     const config = this.activeConfig();
     const configOptions = config?.options || {};
@@ -350,9 +325,7 @@ export class FormStateManager<
     return { ...configOptions, ...inputOptions };
   });
 
-  /**
-   * Page field definitions (for paged forms).
-   */
+  /** Page field definitions (for paged forms). */
   readonly pageFieldDefinitions = computed(() => {
     const config = this.activeConfig();
     const mode = this.formModeDetection().mode;
@@ -407,9 +380,7 @@ export class FormStateManager<
     return this.createEmptyFormSetup(registry);
   });
 
-  /**
-   * Default values computed from field definitions.
-   */
+  /** Default values computed from field definitions. */
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
   /** Valid field keys — memoized separately so the Set isn't rebuilt on every keystroke. */
@@ -449,22 +420,7 @@ export class FormStateManager<
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Entity (form value merged with defaults).
-   *
-   * Bidirectional sync with `deps.value`:
-   *
-   * 1. **Inward** (deps.value → entity): When the host component sets `value` externally
-   *    (e.g. two-way binding), this `linkedSignal` source recomputes, merging the new
-   *    input with field defaults and filtering to valid keys.
-   *
-   * 2. **Outward** (entity → deps.value): An `explicitEffect` in `setupEffects()` watches
-   *    `entity` and writes changes back to `deps.value`, keeping the host's model signal
-   *    in sync with internal form state (e.g. after derivations or reset).
-   *
-   * The `isEqual` guard on the effect prevents infinite ping-pong: if entity already
-   * matches deps.value, the write-back is skipped.
-   */
+  /** Entity (form value merged with defaults). */
   readonly entity = linkedSignal<TModel>(
     () => {
       const inputValue = this.deps.value();
@@ -526,9 +482,7 @@ export class FormStateManager<
     }),
   );
 
-  /**
-   * The Angular Signal Form instance.
-   */
+  /** The Angular Signal Form instance. */
   readonly form = computed(() => {
     const schema = this.formSchema();
     const injector = this.injector;
@@ -577,14 +531,7 @@ export class FormStateManager<
   /** Current form values (reactive). */
   readonly formValue = computed(() => this.formInstance().value());
 
-  /**
-   * Form values filtered by value exclusion rules.
-   *
-   * Excludes field values from the output based on their reactive state
-   * (hidden, disabled, readonly) and the 3-tier exclusion config
-   * (Field > Form > Global). Only affects submission output — internal
-   * form state and two-way binding are unaffected.
-   */
+  /** Form values filtered by value exclusion rules. */
   readonly filteredFormValue = computed(() => {
     const rawValue = this.formValue();
     const setup = this.formSetup();
@@ -620,19 +567,7 @@ export class FormStateManager<
     );
   });
 
-  /**
-   * Form value used for the outward two-way binding sync.
-   *
-   * Only honors *explicit* form-level and field-level `excludeValueIf*` settings — global
-   * defaults (`VALUE_EXCLUSION_DEFAULTS`) are intentionally ignored here. Rationale:
-   * - Original V1 behavior: the bound model carries all values regardless of visibility.
-   * - Bug fix: when a user explicitly sets `excludeValueIfHidden: true` on a field/form,
-   *   they expect that value to disappear from the bound model when hidden (e.g. NaN for
-   *   number inputs, see issue #394).
-   * - Without explicit opt-in, the bound model keeps the V1 contract.
-   * `filteredFormValue` (above) still applies the full Field > Form > Global hierarchy
-   * for the submission output.
-   */
+  /** Form value used for the outward two-way binding sync. */
   private readonly boundFormValue = computed(() => {
     const rawValue = this.formValue();
     const setup = this.formSetup();
@@ -692,12 +627,6 @@ export class FormStateManager<
   /**
    * Phase-aware field source that coordinates component lifecycle with form updates.
    * Teardown/Applying → intersection of old/new fields; Restoring → all new fields.
-   *
-   * Uses per-field reference equality to suppress spurious emissions when the same
-   * field definitions are returned (e.g. memoized intersections during transitions)
-   * while still triggering re-resolution when the underlying field definition
-   * references change (e.g. a config swap that updates options/props for a
-   * same-keyed field).
    */
   private readonly fieldsSource = computed(
     () => {
@@ -728,15 +657,7 @@ export class FormStateManager<
     },
   );
 
-  /**
-   * Injector for field components with FIELD_SIGNAL_CONTEXT.
-   *
-   * Recreates the Injector on every `fieldSignalContext` change. This is intentional:
-   * `reconcileFields()` compares the injector reference to detect context changes
-   * (e.g. after a config transition). A new injector reference signals that
-   * `NgComponentOutlet` should pick up the updated context, while an unchanged
-   * reference preserves object identity to avoid unnecessary re-renders.
-   */
+  /** Injector for field components with FIELD_SIGNAL_CONTEXT. */
   private readonly fieldInjector = computed(() =>
     Injector.create({
       parent: this.injector,
@@ -943,16 +864,12 @@ export class FormStateManager<
   // Public Methods
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Updates the form value model.
-   */
+  /** Updates the form value model. */
   updateValue(value: Partial<TModel>): void {
     this.deps.value.set(value);
   }
 
-  /**
-   * Resets the form to default values.
-   */
+  /** Resets the form to default values. */
   reset(): void {
     this.excludedValueStore.set({});
     const defaults = this.defaultValues();
@@ -960,9 +877,7 @@ export class FormStateManager<
     this.deps.value.set(defaults as Partial<TModel>);
   }
 
-  /**
-   * Clears the form to empty state.
-   */
+  /** Clears the form to empty state. */
   clear(): void {
     this.excludedValueStore.set({});
     const emptyValue = {} as TModel;
@@ -970,9 +885,7 @@ export class FormStateManager<
     this.deps.value.set(emptyValue);
   }
 
-  /**
-   * Triggers form submission.
-   */
+  /** Triggers form submission. */
   submit(): void {
     this.eventBus.dispatch(SubmitEvent);
   }

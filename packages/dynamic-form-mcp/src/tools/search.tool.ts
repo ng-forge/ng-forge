@@ -1,9 +1,4 @@
-/**
- * Unified Search Tool
- *
- * Free-text keyword search across all TOPICS and PATTERNS.
- * Bridges the discoverability gap — find content without knowing exact topic names.
- */
+/** Unified Search Tool */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -25,9 +20,7 @@ interface SearchEntry {
 
 let searchIndex: SearchEntry[] | null = null;
 
-/**
- * Categorize a topic key into a subcategory for display.
- */
+/** Categorize a topic key into a subcategory for display. */
 function getTopicSubcategory(key: string): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
   const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
@@ -50,9 +43,7 @@ function getTopicSubcategory(key: string): string {
   return 'Pattern';
 }
 
-/**
- * Build the search index from TOPICS and PATTERNS.
- */
+/** Build the search index from TOPICS and PATTERNS. */
 function buildIndex(): SearchEntry[] {
   if (searchIndex) return searchIndex;
 
@@ -127,9 +118,7 @@ function buildIndex(): SearchEntry[] {
   return entries;
 }
 
-/**
- * Score a search entry against query tokens.
- */
+/** Score a search entry against query tokens. */
 function scoreEntry(entry: SearchEntry, tokens: string[]): number {
   let score = 0;
   const idLower = entry.id.toLowerCase();
@@ -166,9 +155,7 @@ function scoreEntry(entry: SearchEntry, tokens: string[]): number {
   return score;
 }
 
-/**
- * Format search results.
- */
+/** Format search results. */
 function formatResults(results: Array<{ entry: SearchEntry; score: number }>): string {
   if (results.length === 0) {
     return `# No Results Found

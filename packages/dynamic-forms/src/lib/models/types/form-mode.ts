@@ -5,16 +5,12 @@ import { RegisteredFieldTypes } from '../registry/field-registry';
 // Re-export isPageField for external usage
 export { isPageField };
 
-/**
- * Interface for fields that contain child fields
- */
+/** Interface for fields that contain child fields */
 interface ContainerField<T> extends FieldDef<T> {
   fields: FieldDef<unknown>[];
 }
 
-/**
- * Type guard to check if a field is a container with fields
- */
+/** Type guard to check if a field is a container with fields */
 function isContainerWithFields<T>(field: FieldDef<T>): field is FieldDef<T> & ContainerField<T> {
   return (
     (field.type === 'row' || field.type === 'group' || field.type === 'page' || field.type === 'container') &&
@@ -23,14 +19,10 @@ function isContainerWithFields<T>(field: FieldDef<T>): field is FieldDef<T> & Co
   );
 }
 
-/**
- * Form mode enumeration distinguishing between paged and non-paged forms
- */
+/** Form mode enumeration distinguishing between paged and non-paged forms */
 export type FormMode = 'paged' | 'non-paged';
 
-/**
- * Result of form mode detection with validation details
- */
+/** Result of form mode detection with validation details */
 export interface FormModeDetectionResult {
   /** The detected form mode */
   mode: FormMode;
@@ -66,6 +58,7 @@ export function isNonPagedForm<TFields extends RegisteredFieldTypes[]>(fields: T
 
 /**
  * Detects the form mode and validates the configuration
+ *
  * @param fields The form field definitions
  * @returns Detection result with mode and validation status
  */
@@ -120,6 +113,7 @@ export function detectFormMode<TFields extends RegisteredFieldTypes[]>(fields: T
 
 /**
  * Recursively checks if any field definition is a page field
+ *
  * @param fields Array of field definitions to check
  * @returns true if any page field is found at any level
  */
@@ -142,6 +136,7 @@ function hasAnyPageFields(fields: FieldDef<unknown>[]): boolean {
 /**
  * Checks if fields contain nested page fields within their children
  * (This is different from hasAnyPageFields as it checks NESTED pages, not root pages)
+ *
  * @param fields Array of field definitions to check
  * @returns true if nested page fields found
  */
@@ -164,17 +159,13 @@ function hasNestedPageFields(fields: FieldDef<unknown>[]): boolean {
   return false;
 }
 
-/**
- * Type predicate for valid paged form configurations
- */
+/** Type predicate for valid paged form configurations */
 export function isValidPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   const result = detectFormMode(fields);
   return result.mode === 'paged' && result.isValid;
 }
 
-/**
- * Type predicate for valid non-paged form configurations
- */
+/** Type predicate for valid non-paged form configurations */
 export function isValidNonPagedForm<TFields extends RegisteredFieldTypes[]>(fields: TFields): boolean {
   const result = detectFormMode(fields);
   return result.mode === 'non-paged' && result.isValid;

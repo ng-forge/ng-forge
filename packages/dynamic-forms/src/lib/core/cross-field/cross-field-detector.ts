@@ -10,22 +10,10 @@ import { CustomFunctionScope } from '../expressions/custom-function-types';
  */
 const FORM_VALUE_ACCESS_PATTERN = /\bformValue\s*(?:\.|\[)/;
 
-/**
- * Combined regex for extracting field paths from formValue expressions.
- *
- * Captures one of three groups per match:
- * - group 1: dot notation (formValue.parent.child) — JS identifier chars only
- * - group 2: single-quoted bracket (formValue['field-name']) — allows `-`
- * - group 3: double-quoted bracket (formValue["field-name"]) — allows `-`
- *
- * Note: Computed property access (formValue[variableName]) is NOT supported
- * and must use explicit dependsOn configuration.
- */
+/** Combined regex for extracting field paths from formValue expressions. */
 const FORM_VALUE_PATTERN = /\bformValue\s*(?:\.([\w.]+)|\[\s*'([\w.-]+)'\s*\]|\[\s*"([\w.-]+)"\s*\])/g;
 
-/**
- * Context for cross-field detection, providing access to function scope information.
- */
+/** Context for cross-field detection, providing access to function scope information. */
 export interface CrossFieldDetectionContext {
   /**
    * Lookup function to get the scope of a registered custom function.
@@ -38,13 +26,6 @@ export interface CrossFieldDetectionContext {
 
 /**
  * Detects if a ConditionalExpression references other fields (cross-field).
- *
- * This is the core detection function that handles ALL expression types:
- * - `fieldValue` with `fieldPath` → Always cross-field
- * - `formValue` → Always cross-field
- * - `javascript` with `formValue.*` in expression → Cross-field
- * - `custom` → Checks registered function scope, defaults to cross-field if unknown
- * - `and`/`or` → Recursively check nested conditions
  *
  * @param expr The conditional expression to analyze
  * @param context Optional context providing function scope lookup
@@ -103,10 +84,6 @@ export function isCrossFieldExpression(
 /**
  * Extracts field dependencies from a ConditionalExpression.
  *
- * Returns an array of field keys that the expression depends on.
- * For `formValue` type without specific field, returns ['*'] to indicate
- * dependency on the entire form.
- *
  * @param expr The conditional expression to analyze
  * @returns Array of field keys that this expression depends on
  */
@@ -161,13 +138,7 @@ export function extractStringDependencies(expression: string): string[] {
   return Array.from(deps);
 }
 
-/**
- * Internal helper that populates a Set with dependencies from an expression string.
- *
- * Extracts both root fields and full nested paths for precise dependency tracking:
- * - 'formValue.parent.child' → adds 'parent' (root) and 'parent.child' (full path)
- * - 'formValue.simple' → adds 'simple'
- */
+/** Internal helper that populates a Set with dependencies from an expression string. */
 function extractFromExpressionString(expression: string, deps: Set<string>): void {
   for (const match of expression.matchAll(FORM_VALUE_PATTERN)) {
     const fullPath = match[1] ?? match[2] ?? match[3];
@@ -202,9 +173,6 @@ export function isCrossFieldValidator(config: CustomValidatorConfig): boolean {
 /**
  * Detects if a built-in validator has a dynamic expression that references formValue.
  *
- * Built-in validators (min, max, pattern, etc.) can have dynamic expressions
- * like `{ type: 'min', expression: 'formValue.minAge' }`.
- *
  * @param config The validator configuration to check
  * @returns true if the validator has a cross-field dynamic expression
  */
@@ -221,14 +189,7 @@ export function isCrossFieldBuiltInValidator(config: ValidatorConfig): boolean {
   return false;
 }
 
-/**
- * Checks if a validator uses Angular's resource API (validateHttp / validateAsync).
- *
- * Resource-based validators handle cross-field when-conditions internally
- * via their request/params callbacks returning `undefined`. They must NOT
- * be skipped by the cross-field early-return guard in `applyValidator`,
- * because they require field-level registration.
- */
+/** Checks if a validator uses Angular's resource API (validateHttp / validateAsync). */
 export function isResourceBasedValidator(config: ValidatorConfig): boolean {
   return config.type === 'async' || config.type === 'http';
 }
@@ -253,9 +214,6 @@ export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: Cr
 
 /**
  * Detects if a StateLogicConfig has a cross-field condition.
- *
- * Note: This function only handles state logic (hidden, readonly, disabled, required).
- * Derivation logic is handled separately by the derivation system.
  *
  * @param config The state logic configuration to check
  * @param context Optional context providing function scope lookup

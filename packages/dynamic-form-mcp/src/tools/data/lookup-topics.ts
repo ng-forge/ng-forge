@@ -1,13 +1,6 @@
-/**
- * Lookup Topics Data
- *
- * Documentation content for the ngforge_lookup tool.
- * Extracted from lookup.tool.ts for better maintainability.
- */
+/** Lookup Topics Data */
 
-/**
- * Topic-specific documentation content.
- */
+/** Topic-specific documentation content. */
 export const TOPICS: Record<string, { brief: string; full: string }> = {
   // ========== FIELD TYPES ==========
   input: {
@@ -2614,9 +2607,7 @@ export const TOPIC_DESCRIPTIONS: Record<string, string> = {
   section: 'Demo wrapper — titled card around any field or container (examples-shared-ui)',
 };
 
-/**
- * Topic aliases for flexible lookup.
- */
+/** Topic aliases for flexible lookup. */
 export const TOPIC_ALIASES: Record<string, string> = {
   // Field type aliases
   textfield: 'input',

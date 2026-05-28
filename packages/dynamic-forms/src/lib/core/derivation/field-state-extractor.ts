@@ -25,14 +25,6 @@ function readStateSignal(fieldState: FieldState<unknown>, prop: StateProperty, r
 /**
  * Resolves a field source (FieldTree or FieldState) to its FieldState.
  *
- * Accepts either:
- * - A FieldTree (signal or callable Proxy from form tree) — called to get the FieldState
- * - A direct FieldState object (from FieldContext) — used directly
- *
- * FieldTree accessors may be Angular signals (pass `isSignal()`) or Proxy-wrapped
- * callables (fail `isSignal()` but pass `typeof === 'function'`). Both are handled
- * by the callable check.
- *
  * @internal
  */
 function resolveFieldState(
@@ -57,20 +49,10 @@ function resolveFieldState(
 /**
  * Creates a lazy FieldStateInfo that only reads state properties when accessed.
  *
- * This prevents reactive cycles when fieldState/formFieldState is used inside
- * logic conditions (readonly, hidden, disabled). Eagerly reading all properties
- * (e.g., `valid`, `readonly`) would create circular dependencies when the
- * logic condition itself controls one of those properties.
- *
- * Accepts either:
- * - A FieldTree (signal accessor from form tree) — called to get the FieldState
- * - A direct FieldState object (from FieldContext) — used directly
- *
  * @param fieldSource - A FieldTree or direct FieldState instance
  * @param reactive - If true, reads signals reactively (creates dependencies).
  *                   If false, reads signals with `untracked()` (no dependencies).
  * @returns A FieldStateInfo proxy with lazy property access, or undefined if the source is invalid
- *
  * @internal
  */
 export function readFieldStateInfo(
@@ -101,17 +83,10 @@ export function readFieldStateInfo(
 /**
  * Creates a Proxy-based FormFieldStateMap for accessing any field's state by key.
  *
- * Property access like `[key]` navigates to `rootForm[key]` and returns
- * a FieldStateInfo snapshot for that field.
- *
- * Uses an internal Map cache for identity stability within a single
- * access chain (avoids redundant snapshot allocations).
- *
  * @param rootForm - The root FieldTree of the form
  * @param reactive - If true, reads signals reactively (creates dependencies).
  *                   If false, reads signals with `untracked()` (no dependencies).
  * @returns A FormFieldStateMap proxy
- *
  * @internal
  */
 export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: boolean): FormFieldStateMap {
@@ -136,10 +111,6 @@ export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: 
 
 /**
  * Navigates the form tree to find a field accessor (FieldTree) for the given key path.
- *
- * Supports dot-notation for nested paths (e.g., 'address.city').
- * Follows the same bracket-notation navigation pattern as `applyValueToForm`
- * in `derivation-applicator.ts`.
  *
  * @internal
  */

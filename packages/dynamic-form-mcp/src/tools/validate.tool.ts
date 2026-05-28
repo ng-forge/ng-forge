@@ -1,14 +1,4 @@
-/**
- * Unified Validation Tool
- *
- * Consolidated validation tool that absorbs:
- * - validate-file.tool.ts (TypeScript file validation with AST extraction)
- * - validate-form-config.tool.ts (JSON config validation)
- * - validate-field.tool.ts (single field validation)
- *
- * Single tool for "Is my config correct?"
- * Auto-detects if config is a file path or JSON object.
- */
+/** Unified Validation Tool */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -29,9 +19,7 @@ import {
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
-/**
- * Common fixes for validation errors.
- */
+/** Common fixes for validation errors. */
 const FIX_SUGGESTIONS: Record<string, string> = {
   options: 'Move `options` from `props: { options: [...] }` to field level: `{ key, type, options: [...] }`',
   label: 'Remove `label` from this container field (page/group/row/array). Use a `text` field inside for headings.',
@@ -90,9 +78,7 @@ const ERROR_TOPIC_HINTS: Array<{ pattern: RegExp; hint: string }> = [
   { pattern: /array/i, hint: '`ngforge_lookup topic="array"` — array field configuration' },
 ];
 
-/**
- * Collect unique topic hints based on validation errors.
- */
+/** Collect unique topic hints based on validation errors. */
 function collectErrorTopicHints(errors: FormattedValidationError[]): string[] {
   const seenHints = new Set<string>();
   const hints: string[] = [];
@@ -110,9 +96,7 @@ function collectErrorTopicHints(errors: FormattedValidationError[]): string[] {
   return hints;
 }
 
-/**
- * Get fix suggestion for an error.
- */
+/** Get fix suggestion for an error. */
 function getFixSuggestion(error: FormattedValidationError): string | undefined {
   const pathParts = error.path.split('.');
   const lastPart = pathParts[pathParts.length - 1];
@@ -132,9 +116,7 @@ function getFixSuggestion(error: FormattedValidationError): string | undefined {
   return undefined;
 }
 
-/**
- * Result of extracting and validating a single FormConfig from file.
- */
+/** Result of extracting and validating a single FormConfig from file. */
 interface ConfigValidationResult {
   name: string;
   line: number;
@@ -143,9 +125,7 @@ interface ConfigValidationResult {
   validation: ValidationResult;
 }
 
-/**
- * Format validation report for file validation.
- */
+/** Format validation report for file validation. */
 function formatFileReport(
   filePath: string,
   uiIntegration: string,
@@ -245,9 +225,7 @@ function formatFileReport(
   return lines.join('\n');
 }
 
-/**
- * Format validation report for JSON config validation.
- */
+/** Format validation report for JSON config validation. */
 function formatJsonReport(uiIntegration: string, result: ValidationResult): string {
   const lines: string[] = [];
 
@@ -291,9 +269,7 @@ function formatJsonReport(uiIntegration: string, result: ValidationResult): stri
   return lines.join('\n');
 }
 
-/**
- * Detect if a string is a file path.
- */
+/** Detect if a string is a file path. */
 function isFilePath(value: string): boolean {
   // Check for common file path patterns
   return (
@@ -309,9 +285,7 @@ function isFilePath(value: string): boolean {
   );
 }
 
-/**
- * Parse config input - handles string (file path or JSON) or object.
- */
+/** Parse config input - handles string (file path or JSON) or object. */
 async function parseConfigInput(
   config: string | Record<string, unknown>,
 ): Promise<

@@ -6,18 +6,7 @@ import { DF_FIELD_TEMPLATES } from '../models/addon/df-field-templates.token';
 import { DynamicFormLogger } from '../providers/features/logger/logger.token';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
-/**
- * Renderer for the universal `template` addon kind.
- *
- * Resolves the addon's `templateKey` against {@link DF_FIELD_TEMPLATES}
- * (populated by `<df-dynamic-form>` from `<ng-template dfTemplate="...">`
- * children) and renders via `NgTemplateOutlet`. The wrapper-style host bag
- * (`fieldInputs`) is forwarded as the template's implicit context — author
- * the template as `<ng-template dfTemplate="..." let-fi>{{ fi.key }}</ng-template>`.
- *
- * If the key is unresolved, logs a warning and renders nothing — keeps the
- * form alive when a backend references a template the FE has not registered.
- */
+/** Renderer for the universal `template` addon kind. */
 @Component({
   selector: 'df-template-addon',
   imports: [NgTemplateOutlet],

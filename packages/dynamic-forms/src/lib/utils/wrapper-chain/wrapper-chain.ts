@@ -17,17 +17,6 @@ import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
  * Module-level cache keyed by component class. `reflectComponentType` returns
  * immutable metadata per class, so we probe it once and reuse the resulting
  * `Set<templateName>` for every `setInputIfDeclared` call afterwards.
- *
- * We cache `templateName` (the public input name, aka alias) rather than
- * `propName` (the class field name) because `ComponentRef.setInput()` keys by
- * the public name — that's also the name wrapper configs use. An aliased
- * input declared as `input(..., { alias: 'header' })` with class field
- * `headerText` must be addressed as `'header'`; caching `propName` would
- * leave the alias out of the declared set and silently drop config values.
- *
- * SSR-safe: the WeakMap is keyed by the component class object — classes are
- * created per Angular application bootstrap and GC'd with it, so this does not
- * leak state between server renders.
  */
 const inputNamesCache = new WeakMap<Type<unknown>, Set<string>>();
 
@@ -41,25 +30,14 @@ function getDeclaredInputs(componentType: Type<unknown>): Set<string> {
   return inputs;
 }
 
-/**
- * Set an input on a ComponentRef only when the target component actually declares it.
- *
- * Angular's `ComponentRef.setInput()` throws NG0303 when the input is missing.
- * For config keys driven by user data (e.g. a wrapper config containing a prop
- * the wrapper doesn't care about) that would surface as a noisy runtime error.
- * We probe the component's metadata via `reflectComponentType` (public API),
- * cached per component class — called once per input key per emission, so
- * avoiding the reflection scan on each call is meaningful under heavy typing.
- */
+/** Set an input on a ComponentRef only when the target component actually declares it. */
 export function setInputIfDeclared(ref: ComponentRef<unknown>, inputName: string, value: unknown): void {
   if (getDeclaredInputs(ref.componentType).has(inputName)) {
     ref.setInput(inputName, value);
   }
 }
 
-/**
- * A wrapper whose component has been resolved and loaded.
- */
+/** A wrapper whose component has been resolved and loaded. */
 export interface LoadedWrapper {
   readonly config: WrapperConfig;
   readonly component: Type<unknown>;
@@ -74,16 +52,12 @@ export function hasDefaultExport<T>(value: unknown): value is { default: T } {
   return typeof value === 'object' && value !== null && 'default' in value && !!(value as { default: unknown }).default;
 }
 
-/**
- * Pick the component class out of whatever a lazy loader returned.
- */
+/** Pick the component class out of whatever a lazy loader returned. */
 export function resolveDefaultExport<T>(result: Type<T> | { default: Type<T> }): Type<T> {
   return hasDefaultExport<Type<T>>(result) ? result.default : result;
 }
 
-/**
- * Resolve a wrapper type name to its component class, with DI-scoped caching.
- */
+/** Resolve a wrapper type name to its component class, with DI-scoped caching. */
 export async function loadWrapperComponent(
   type: string,
   registry: ReadonlyMap<string, WrapperTypeDefinition>,
@@ -130,9 +104,7 @@ export function loadWrapperComponents(
   ).pipe(map((results) => (results.some((r) => r === null) ? [] : (results as LoadedWrapper[]))));
 }
 
-/**
- * Options for building a wrapper chain.
- */
+/** Options for building a wrapper chain. */
 export interface RenderWrapperChainOptions {
   readonly outerContainer: ViewContainerRef;
   readonly loadedWrappers: readonly LoadedWrapper[];
@@ -159,13 +131,6 @@ export interface RenderWrapperChainOptions {
 /**
  * Recursively create each wrapper component, threading the next one (or the
  * innermost content) into its `#fieldComponent` slot.
- *
- * Each wrapper receives:
- * - Each of its config properties (minus `type`) as an individual Angular input
- * - `fieldInputs` as a single input, if provided
- *
- * Returns the list of wrapper `ComponentRef`s — callers retain them for later
- * cleanup and for re-setting `fieldInputs` when the mapper signal emits.
  */
 export function renderWrapperChain(options: RenderWrapperChainOptions): ComponentRef<unknown>[] {
   const refs: ComponentRef<unknown>[] = [];
@@ -250,10 +215,6 @@ function resolveInnerSlot(ref: ComponentRef<unknown>): ViewContainerRef | undefi
  * Merged injector: check the field-level injector first (for tokens like
  * `ARRAY_CONTEXT` / `FIELD_SIGNAL_CONTEXT`), fall back to the element-chain
  * injector (so nested wrappers can still `inject(OuterWrapper)`).
- *
- * Precedence: a field-level token shadows a same-named token provided by an
- * outer wrapper. That matches "more specific context wins" but is worth
- * keeping in mind if a wrapper exports service tokens.
  */
 export function createWrapperAwareInjector(fieldInjector: Injector, elementInjector: Injector): Injector {
   if (fieldInjector === elementInjector) return fieldInjector;

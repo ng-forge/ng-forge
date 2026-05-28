@@ -6,16 +6,7 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
 
 const ROW_WRAPPERS = [{ type: 'row' }] as const;
 
-/**
- * Maps a row field definition to container component inputs.
- *
- * `row` is a virtual field type: it resolves to `ContainerFieldComponent` with a
- * synthesized `{ type: 'row' }` wrapper, so the user-facing config stays
- * `{ type: 'row', fields: [...] }` while the runtime uses the container +
- * wrapper pipeline.
- *
- * Supports hidden state resolution via `logic` array or static `hidden` property.
- */
+/** Maps a row field definition to container component inputs. */
 export function rowFieldMapper(fieldDef: RowField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
   const className = buildClassName(fieldDef);

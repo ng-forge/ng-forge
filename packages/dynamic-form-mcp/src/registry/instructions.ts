@@ -1,9 +1,4 @@
-/**
- * ng-forge Best Practices
- *
- * This content is served via the ng-forge://instructions resource
- * to guide AI assistants in generating FormConfig objects.
- */
+/** ng-forge Best Practices */
 
 export const INSTRUCTIONS = `# ng-forge Dynamic Forms - Best Practices
 

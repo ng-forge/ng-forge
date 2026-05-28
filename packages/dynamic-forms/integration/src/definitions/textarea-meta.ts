@@ -8,29 +8,7 @@ import { Autocapitalize, AutocompleteValue, EnterKeyHint } from './input-meta';
  */
 export type TextareaWrap = 'hard' | 'soft' | 'off';
 
-/**
- * Meta attributes specific to HTML textarea elements.
- *
- * Extends FieldMeta with textarea-specific native attributes that can be passed through
- * to the underlying textarea element.
- *
- * @example
- * ```typescript
- * // Textarea field with meta attributes
- * {
- *   type: 'textarea',
- *   key: 'description',
- *   meta: {
- *     wrap: 'soft',
- *     spellcheck: true,
- *     autocomplete: 'off',
- *     'data-testid': 'description-textarea'
- *   }
- * }
- * ```
- *
- * @public
- */
+/** Meta attributes specific to HTML textarea elements. */
 export interface TextareaMeta extends FieldMeta {
   /**
    * How text should wrap when submitted.
@@ -40,33 +18,21 @@ export interface TextareaMeta extends FieldMeta {
    */
   wrap?: TextareaWrap;
 
-  /**
-   * Whether to enable spellchecking for the textarea.
-   */
+  /** Whether to enable spellchecking for the textarea. */
   spellcheck?: boolean;
 
-  /**
-   * Hint for form autofill behavior.
-   */
+  /** Hint for form autofill behavior. */
   autocomplete?: AutocompleteValue;
 
-  /**
-   * Hint for autocapitalization behavior on virtual keyboards.
-   */
+  /** Hint for autocapitalization behavior on virtual keyboards. */
   autocapitalize?: Autocapitalize;
 
-  /**
-   * Hint for the enter key label on virtual keyboards.
-   */
+  /** Hint for the enter key label on virtual keyboards. */
   enterkeyhint?: EnterKeyHint;
 
-  /**
-   * Maximum number of characters allowed.
-   */
+  /** Maximum number of characters allowed. */
   maxlength?: number;
 
-  /**
-   * Minimum number of characters required.
-   */
+  /** Minimum number of characters required. */
   minlength?: number;
 }

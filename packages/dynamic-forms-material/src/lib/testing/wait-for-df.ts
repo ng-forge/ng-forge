@@ -2,20 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { firstValueFrom } from 'rxjs';
 
-/**
- * Waits for all dynamic form definitions to be initialized and ready
- *
- * Deterministic approach:
- * 1. Event-based: Wait for initialized$ (tracks container components + field loading cascade)
- * 2. Stabilization: Ensure effects/change detection complete
- * 3. DOM stability check: Wait until component count stops changing
- *
- * The initialized$ observable tracks page/row/group containers. Each container waits
- * for its children via forkJoin + afterNextRender before emitting its initialized event.
- *
- * The page orchestration refactoring introduced reactive primitives that require additional
- * stabilization cycles for UI component templates to fully hydrate.
- */
+/** Waits for all dynamic form definitions to be initialized and ready */
 export async function waitForDFInit(component: DynamicForm, fixture: ComponentFixture<DynamicForm>): Promise<void> {
   fixture.detectChanges();
 
@@ -38,13 +25,7 @@ export async function waitForDFInit(component: DynamicForm, fixture: ComponentFi
   await fixture.whenStable();
 }
 
-/**
- * Deterministic DOM stability check
- *
- * Waits until Material component count stabilizes for 3 consecutive checks
- * and no loading placeholders remain. Uses timeout-based safety net instead
- * of arbitrary iteration limits.
- */
+/** Deterministic DOM stability check */
 async function waitForFieldComponents(fixture: ComponentFixture<DynamicForm>, timeoutMs = 500): Promise<void> {
   const formElement = fixture.nativeElement.querySelector('.df-form');
   if (!formElement) return;

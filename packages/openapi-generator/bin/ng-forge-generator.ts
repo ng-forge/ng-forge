@@ -1,9 +1,5 @@
 #!/usr/bin/env node
-/**
- * ng-forge OpenAPI Generator CLI
- *
- * Entry point for generating dynamic form configurations from OpenAPI specs.
- */
+/** ng-forge OpenAPI Generator CLI */
 
 import { run } from '../src/cli/cli.js';
 import { logger } from '../src/utils/logger.js';

@@ -8,14 +8,6 @@ import { keyBy, mapValues } from '../object-utils';
 /**
  * Creates memoized field processing functions shared across container components.
  *
- * These functions are used by both `FormStateManager` and `GroupFieldComponent`
- * to compute flattened fields, field lookups, and default values from field definitions.
- *
- * Caches are keyed on the input array's reference identity (via WeakMap) rather than
- * a derived content key. Different array instances — even ones with the same field
- * keys/types — must produce fresh results so per-field content changes (e.g. updated
- * select options) propagate through the form pipeline.
- *
  * @returns Object containing memoized processing functions
  */
 export function createContainerFieldProcessors() {
@@ -74,16 +66,6 @@ export function createContainerFieldProcessors() {
 
 /**
  * Shared container field processors injection token.
- *
- * Provided at the DynamicForm component level via `provideDynamicFormDI()` so one
- * form + all its nested groups share a single memoize cache, while different form
- * instances stay isolated.
- *
- * The `providedIn: 'root'` factory is a fallback only — it ensures tests and
- * standalone containers (e.g. a bare GroupFieldComponent in a unit test) can
- * resolve the token without an explicit provider. In a running application, the
- * component-level provider from `provideDynamicFormDI()` always shadows this root
- * instance, so each form gets its own isolated cache.
  *
  * @internal
  */

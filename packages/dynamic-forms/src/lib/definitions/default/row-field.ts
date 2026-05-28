@@ -7,8 +7,6 @@ import { ContainerLogicConfig } from '../base/container-logic-config';
  * A row is a synthetic field type that resolves to a Container at runtime,
  * with a synthesized `{ type: 'row' }` wrapper applied for layout. The row
  * itself does not hold a value — its children flatten into the parent form.
- *
- * Note: Rows do not support `meta` since they have no native form element.
  */
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
   type: 'row';
@@ -16,10 +14,10 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
   /** Child definitions to render within this row */
   readonly fields: TFields;
 
-  /** Row fields do not have a label property **/
+  /** Row fields do not have a label property * */
   readonly label?: never;
 
-  /** Rows do not support meta - they have no native form element **/
+  /** Rows do not support meta - they have no native form element * */
   readonly meta?: never;
 
   /**
@@ -29,9 +27,7 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
   readonly logic?: ContainerLogicConfig[];
 }
 
-/**
- * Type guard for RowField with proper type narrowing
- */
+/** Type guard for RowField with proper type narrowing */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
 export function isRowField(field: FieldDef<any>): field is RowField {
   return field.type === 'row' && 'fields' in field && Array.isArray((field as RowField).fields);

@@ -1,9 +1,4 @@
-/**
- * Registry module for field type, validator, and UI adapter metadata
- *
- * This module provides access to field types, validators, and UI adapters
- * defined as TypeScript data in the registry source files.
- */
+/** Registry module for field type, validator, and UI adapter metadata */
 
 export interface PropertyInfo {
   name: string;
@@ -94,65 +89,47 @@ export { WRAPPER_AUTHORING_CONTRACT };
 
 export type { DocPage };
 
-/**
- * Get all available field types
- */
+/** Get all available field types */
 export function getFieldTypes(): FieldTypeInfo[] {
   return FIELD_TYPES;
 }
 
-/**
- * Get a specific field type by name
- */
+/** Get a specific field type by name */
 export function getFieldType(type: string): FieldTypeInfo | undefined {
   return FIELD_TYPES.find((ft) => ft.type === type);
 }
 
-/**
- * Get field types by category
- */
+/** Get field types by category */
 export function getFieldTypesByCategory(category: 'value' | 'container' | 'button' | 'display'): FieldTypeInfo[] {
   return FIELD_TYPES.filter((ft) => ft.category === category);
 }
 
-/**
- * Get all available validators
- */
+/** Get all available validators */
 export function getValidators(): ValidatorInfo[] {
   return VALIDATORS;
 }
 
-/**
- * Get a specific validator by type
- */
+/** Get a specific validator by type */
 export function getValidator(type: string): ValidatorInfo | undefined {
   return VALIDATORS.find((v) => v.type === type);
 }
 
-/**
- * Get validators by category
- */
+/** Get validators by category */
 export function getValidatorsByCategory(category: 'built-in' | 'custom' | 'async' | 'http'): ValidatorInfo[] {
   return VALIDATORS.filter((v) => v.category === category);
 }
 
-/**
- * Get all UI adapters
- */
+/** Get all UI adapters */
 export function getUIAdapters(): UIAdapterInfo[] {
   return UI_ADAPTERS;
 }
 
-/**
- * Get a specific UI adapter by library name
- */
+/** Get a specific UI adapter by library name */
 export function getUIAdapter(library: 'material' | 'bootstrap' | 'primeng' | 'ionic'): UIAdapterInfo | undefined {
   return UI_ADAPTERS.find((a) => a.library === library);
 }
 
-/**
- * Get UI adapter field type configuration
- */
+/** Get UI adapter field type configuration */
 export function getUIAdapterFieldType(
   library: 'material' | 'bootstrap' | 'primeng' | 'ionic',
   fieldType: string,
@@ -161,44 +138,32 @@ export function getUIAdapterFieldType(
   return adapter?.fieldTypes.find((ft) => ft.type === fieldType);
 }
 
-/**
- * Get all wrappers
- */
+/** Get all wrappers */
 export function getWrappers(): WrapperInfo[] {
   return WRAPPERS;
 }
 
-/**
- * Get a specific wrapper by type
- */
+/** Get a specific wrapper by type */
 export function getWrapper(type: string): WrapperInfo | undefined {
   return WRAPPERS.find((w) => w.type === type);
 }
 
-/**
- * Get wrappers by category
- */
+/** Get wrappers by category */
 export function getWrappersByCategory(category: 'core' | 'demo' | 'adapter'): WrapperInfo[] {
   return WRAPPERS.filter((w) => w.category === category);
 }
 
-/**
- * Get all documentation pages
- */
+/** Get all documentation pages */
 export function getDocPages(): DocPage[] {
   return DOCUMENTATION;
 }
 
-/**
- * Get a specific documentation page by ID
- */
+/** Get a specific documentation page by ID */
 export function getDocPage(id: string): DocPage | undefined {
   return DOCUMENTATION.find((d) => d.id === id);
 }
 
-/**
- * Get documentation pages by category
- */
+/** Get documentation pages by category */
 export function getDocPagesByCategory(category: string): DocPage[] {
   return DOCUMENTATION.filter((d) => d.category === category);
 }

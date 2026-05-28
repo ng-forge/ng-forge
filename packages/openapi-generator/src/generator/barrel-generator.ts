@@ -2,9 +2,7 @@ export interface BarrelOptions {
   extension?: string;
 }
 
-/**
- * Generate a barrel (index.ts) file that re-exports all generated form configs.
- */
+/** Generate a barrel (index.ts) file that re-exports all generated form configs. */
 export function generateBarrel(fileNames: string[], options?: BarrelOptions): string {
   if (fileNames.length === 0) {
     return '';

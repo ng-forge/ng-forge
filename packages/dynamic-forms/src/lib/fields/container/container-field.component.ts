@@ -25,17 +25,7 @@ import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 
-/**
- * Layout container that wraps child fields with UI chrome.
- *
- * Resolves children like a row, then chains wrapper components around them
- * using imperative `ViewContainerRef.createComponent()` — each wrapper's
- * `#fieldComponent` slot hosts the next wrapper or the children template.
- *
- * Does not create a new form context - fields share the parent's context.
- * Field values are flattened into the parent form (no nesting under container key).
- * Purely a visual/layout container with no impact on form structure.
- */
+/** Layout container that wraps child fields with UI chrome. */
 @Component({
   selector: 'div[container-field]',
   imports: [DfFieldOutlet],

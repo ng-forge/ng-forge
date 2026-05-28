@@ -20,14 +20,6 @@ export interface BaseCheckedField<TProps, TMeta extends FieldMeta = FieldMeta, T
   /**
    * Whether the field accepts `null` as a valid value.
    *
-   * When `true`, `value` may be `null` and an omitted `value` resolves to `null`
-   * (rather than the type-specific empty default of `false`). Orthogonal to `required`.
-   *
-   * The data model is decoupled from the UI: a null value is a legitimate
-   * "undecided" state at the storage / OpenAPI layer. Whether the rendered
-   * checkbox shows an indeterminate visual is controlled separately via
-   * `props.indeterminate` and is not driven by this flag.
-   *
    * @default false
    */
   nullable?: TNullable;

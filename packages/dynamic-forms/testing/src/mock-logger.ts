@@ -4,9 +4,7 @@ import { DynamicFormLogger } from '../../src/lib/providers/features/logger/logge
 import { ConsoleLogger } from '../../src/lib/providers/features/logger/console-logger';
 import { Logger } from '../../src/lib/providers/features/logger/logger.interface';
 
-/**
- * Mock logger with vitest spies for testing.
- */
+/** Mock logger with vitest spies for testing. */
 export interface MockLogger extends Logger {
   debug: Mock;
   info: Mock;

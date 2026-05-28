@@ -1,9 +1,7 @@
 import { Directive, ElementRef, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
-/**
- * Directive to set min, max, and step attributes on form inputs
- */
+/** Directive to set min, max, and step attributes on form inputs */
 @Directive({
   selector: '[dfBsInputConstraints]',
 })

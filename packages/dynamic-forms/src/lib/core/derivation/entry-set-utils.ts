@@ -6,13 +6,6 @@ import { EMPTY, Observable, distinctUntilChanged, map, switchMap, merge } from '
  * reorderings triggered by unrelated entries don't churn downstream stream
  * lifecycles.
  *
- * Multiset (not set) semantics: two distinct entries with identical signatures
- * are counted separately, so `[A, B]` does NOT equal `[A, A]` even though both
- * have length 2 and both contain `A` as a signature.
- *
- * Used by the value-derivation and property-derivation orchestrators to gate
- * `distinctUntilChanged` over HTTP- and async-function-entry sets.
- *
  * @internal
  */
 export function entrySetsEqual<T>(prev: T[], next: T[], sig: (item: T) => string): boolean {
@@ -55,24 +48,12 @@ export interface EntryStreamPipelineConfig<TCollection, TEntry> {
    * owned by the outer pipeline — when the entry set changes, the previous
    * merged inner stream is unsubscribed (cancelling in-flight work) and a
    * fresh batch is created from the new entries.
-   *
-   * Return `null` to skip an entry (e.g., when a prerequisite like
-   * `HttpClient` is unavailable and an error was already logged upstream).
    */
   createStream: (entry: TEntry) => Observable<unknown> | null;
 }
 
 /**
  * Declarative pipeline shared by both derivation orchestrators:
- *
- * 1. Project the collection down to a typed entry list.
- * 2. Skip rebuilds when the entry set hasn't changed (multiset comparison).
- * 3. `switchMap` cancels the previous merged inner streams and creates fresh
- *    ones from the new entries; in-flight HTTP / async work is cancelled via
- *    ordinary RxJS unsubscribe semantics.
- *
- * No mutable subscription bookkeeping; the caller pipes through
- * `takeUntilDestroyed` for unmount cleanup.
  *
  * @internal
  */

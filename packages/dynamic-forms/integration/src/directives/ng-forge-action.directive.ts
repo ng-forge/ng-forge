@@ -18,24 +18,6 @@ import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
  * action component needs (label, disabled, event, eventArgs, …) plus the
  * `[attr.hidden]` / `[attr.aria-disabled]` host bindings driven by its own
  * inputs (no field tree).
- *
- * Components call `action.dispatch()` from their click handler; this
- * directive resolves any `eventArgs` tokens via the optional `ARRAY_CONTEXT`
- * and dispatches the configured `event` through the `EventBus`.
- *
- * @example
- * ```ts
- * \@Component({
- *   hostDirectives: NG_FORGE_ACTION,
- *   template: `<button (click)="action.dispatch()" [disabled]="action.disabled()">{{ action.label() }}</button>`,
- * })
- * export class MyButton {
- *   protected readonly action = inject(NgForgeAction);
- * }
- * ```
- *
- * Selectorless — usage is exclusively via `hostDirectives`. Prefer the
- * `NG_FORGE_ACTION` preset over composing this directive manually.
  */
 @Directive({
   host: {
@@ -116,11 +98,6 @@ void _NG_FORGE_ACTION_INPUTS_LOCKSTEP;
 /**
  * Typed wrapper around `inject(NgForgeAction)`. The generic narrows the
  * `event` input to a specific FormEvent subclass.
- *
- * @example
- * ```ts
- * protected readonly action = injectNgForgeAction<SubmitEvent>();
- * ```
  */
 export function injectNgForgeAction<TEvent extends FormEvent = FormEvent>(): NgForgeAction<TEvent> {
   return inject(NgForgeAction) as unknown as NgForgeAction<TEvent>;

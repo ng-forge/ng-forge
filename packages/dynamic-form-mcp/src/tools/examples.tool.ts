@@ -1,19 +1,9 @@
-/**
- * Unified Examples Tool
- *
- * Consolidated working code patterns tool that absorbs:
- * - get-example.tool.ts (complete and mega examples)
- * - explain-feature.tool.ts (conceptual explanations)
- *
- * Single tool for "Show me how to do X"
- */
+/** Unified Examples Tool */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-/**
- * Pattern definitions with minimal, brief, full, and explained content.
- */
+/** Pattern definitions with minimal, brief, full, and explained content. */
 export const PATTERNS: Record<
   string,
   {
@@ -1922,9 +1912,7 @@ PATTERNS.validation.brief = PATTERNS['minimal-validation'].brief;
 PATTERNS.validation.full = PATTERNS['minimal-validation'].full;
 PATTERNS.validation.explained = PATTERNS['minimal-validation'].explained;
 
-/**
- * Complete multi-page form example.
- */
+/** Complete multi-page form example. */
 export const COMPLETE_EXAMPLE = `# Complete Multi-Page Form Example
 
 This is a **complete, copy-pasteable** form configuration that demonstrates:
@@ -2067,9 +2055,7 @@ const formConfig = {
 }
 \`\`\``;
 
-/**
- * Mega kitchen sink example (abbreviated - full version exists in get-example.tool.ts).
- */
+/** Mega kitchen sink example (abbreviated - full version exists in get-example.tool.ts). */
 export const MEGA_EXAMPLE = `# Kitchen Sink Mega Example
 
 This example demonstrates **EVERY feature** of ng-forge dynamic forms.
@@ -2430,9 +2416,7 @@ Use depth="minimal" for code-only output (no markdown).`,
   );
 }
 
-/**
- * Extract just the code from markdown content.
- */
+/** Extract just the code from markdown content. */
 function extractCode(markdown: string): string {
   const codeBlocks: string[] = [];
   const regex = /```typescript\n([\s\S]*?)```/g;

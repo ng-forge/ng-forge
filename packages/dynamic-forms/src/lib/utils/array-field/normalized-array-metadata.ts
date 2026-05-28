@@ -1,14 +1,7 @@
 import { FieldDef } from '../../definitions/base/field-def';
 import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
 
-/**
- * Metadata attached to normalized array fields during simplified array expansion.
- *
- * Stored via a well-known Symbol property on the field object. This survives
- * object spreading (`{ ...field }`) since Symbol-keyed properties are copied
- * by the spread operator, while remaining invisible to `JSON.stringify`,
- * `Object.keys`, and `for...in` loops.
- */
+/** Metadata attached to normalized array fields during simplified array expansion. */
 export interface NormalizedArrayMetadata {
   /**
    * Remove button FieldDef for primitive simplified arrays.

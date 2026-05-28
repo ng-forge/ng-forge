@@ -177,9 +177,6 @@ function resolveLoadedWrappers(state: ChainState, deps: ChainDeps): Observable<C
  *   - Gate-only flicker → no-op (preserve the mounted chain)
  *   - Structural change → beforeRebuild → vcr.clear → render fresh
  *   - Idempotent re-emission → no-op
- *
- * Returns the (possibly new) wrapper refs so the caller can track them for
- * `fieldInputs` push-through.
  */
 function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyContext): ComponentRef<unknown>[] {
   const { opts, deps, mounted, refs } = ctx;

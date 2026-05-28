@@ -10,9 +10,7 @@ export interface FieldTypeResult {
   isPrimitiveArray?: boolean;
 }
 
-/**
- * Maps an OpenAPI schema to a dynamic form field type.
- */
+/** Maps an OpenAPI schema to a dynamic form field type. */
 export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
   const rawType = schema.type;
   const type: string | undefined = Array.isArray(rawType)

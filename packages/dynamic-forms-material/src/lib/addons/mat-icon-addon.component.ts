@@ -4,13 +4,7 @@ import { MatIcon } from '@angular/material/icon';
 import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import type { MatIconAddon } from '../types/addons';
 
-/**
- * Renderer for the `mat-icon` addon kind.
- *
- * Outputs `<mat-icon>{icon}</mat-icon>` using Material Icons ligatures. The
- * host is set `aria-hidden="true"` by default; if the addon supplies an
- * `ariaLabel`, it is applied so the icon is announced by screen readers.
- */
+/** Renderer for the `mat-icon` addon kind. */
 @Component({
   selector: 'df-mat-icon-addon',
   imports: [MatIcon, AsyncPipe, DynamicTextPipe],

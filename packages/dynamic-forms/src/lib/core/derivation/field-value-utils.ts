@@ -7,12 +7,7 @@ import type { WarningTracker } from '../../utils/warning-tracker';
 /**
  * Navigates the form tree to resolve a field instance at the given path.
  *
- * Walks the tree following the same pattern as `setFieldValue`:
- * each segment is looked up on the current node, and signal accessors
- * are called to get the next level.
- *
  * @returns The field instance object, or `undefined` if the path is invalid
- *
  * @internal
  */
 export function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: string): FieldState<unknown> | undefined {
@@ -34,9 +29,6 @@ export function resolveFieldInstance(rootForm: FieldTree<unknown>, fieldPath: st
 /**
  * Reads the dirty() signal from a field at the given path.
  *
- * Returns `true` if the field is dirty, `false` if pristine,
- * or `undefined` if the field cannot be found.
- *
  * @internal
  */
 export function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string): boolean | undefined {
@@ -48,12 +40,6 @@ export function readFieldDirty(rootForm: FieldTree<unknown>, fieldPath: string):
 /**
  * Resets a field's dirty/touched state at the given path.
  *
- * Used for re-engagement: when a dependency changes, clear the user override
- * so the derivation can re-apply.
- *
- * Uses the public `reset()` API on FieldState, which clears both
- * dirty and touched without changing the field's value.
- *
  * @internal
  */
 export function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string): void {
@@ -64,12 +50,6 @@ export function resetFieldState(rootForm: FieldTree<unknown>, fieldPath: string)
 
 /**
  * Applies a value to the form at the specified path.
- *
- * Uses bracket notation to access child FieldTrees, following the same pattern
- * as group-field and array-field components. Fields are accessed as signals
- * and their value is set via the `.value.set()` method.
- *
- * Handles nested paths and array paths with '$' placeholder.
  *
  * @internal
  */
@@ -116,16 +96,7 @@ export function applyValueToForm(
 /**
  * Sets a field value using the Angular Signal Forms pattern.
  *
- * Accesses the child field via bracket notation, drills down to find
- * the WritableSignal, and uses isWritableSignal for type-safe signal detection.
- *
- * Angular Signal Forms structure:
- * - form[key] is a callable function (field accessor)
- * - form[key]() returns the field instance with { value: WritableSignal<T> }
- * - form[key]().value.set(newValue) sets the value
- *
  * @returns true if the value was successfully set, false if field not found
- *
  * @internal
  */
 function setFieldValue(
@@ -167,9 +138,6 @@ function setFieldValue(
 
 /**
  * Logs a warning for a missing target field (once per field per form instance).
- *
- * Uses the provided warning tracker to avoid log spam. If no tracker is provided,
- * the warning will be logged every time.
  *
  * @internal
  */

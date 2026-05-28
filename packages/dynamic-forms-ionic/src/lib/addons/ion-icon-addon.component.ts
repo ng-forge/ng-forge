@@ -4,13 +4,7 @@ import { IonIcon } from '@ionic/angular/standalone';
 import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
 import type { IonIconAddon } from '../types/addons';
 
-/**
- * Renderer for the `ion-icon` addon kind.
- *
- * Outputs `<ion-icon [name]="icon">`. The host is set `aria-hidden="true"`
- * by default; if the addon supplies an `ariaLabel`, it is applied so the
- * icon is announced by screen readers.
- */
+/** Renderer for the `ion-icon` addon kind. */
 @Component({
   selector: 'df-ion-icon-addon',
   imports: [IonIcon, AsyncPipe, DynamicTextPipe],

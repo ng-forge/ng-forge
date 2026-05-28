@@ -10,32 +10,6 @@ import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 /**
  * Dispatcher component that renders an addon by looking up its `kind` in
  * `ADDON_KIND_REGISTRY` and instantiating the registered component.
- *
- * Used by every adapter's field component to render slot content:
- *
- * ```html
- * \@for (a of addonsAt('prefix'); track $index) {
- *   <df-addon-slot [addon]="a" />
- * }
- * ```
- *
- * Behaviour:
- * - Resolves and caches the kind's component asynchronously on first render.
- * - Forwards the `slot` HTML attribute on the host so Ionic shadow-DOM
- *   projection works (`<ion-input>` projects children with `slot="start"`
- *   into its native start slot).
- * - Honours the addon's reactive `hidden` flag — when `true`, the host is
- *   `display: none` so it occupies no layout but stays in DOM (cheaper than
- *   tearing down the component).
- * - Forwards `className` to the host element.
- * - ARIA semantics are owned by individual kind components — decorative
- *   kinds (icons, text) set `aria-hidden="true"` on themselves; interactive
- *   kinds (buttons) handle their own `aria-label`.
- *
- * If the kind cannot be resolved (registry miss, load failure), the
- * dispatcher logs a warning and renders nothing — never throws. The
- * runtime addon validator should have caught unknown kinds at config init,
- * but this provides a defence-in-depth fallback for misconfigured registries.
  */
 @Component({
   selector: 'df-addon-slot',
@@ -63,8 +37,6 @@ export class DfAddonSlot {
    * wrappers receive (`field?: ReadonlyFieldTree`, `key`, `props`, etc.).
    * Forwarded to kind components so they can read field state without
    * re-injecting `FIELD_SIGNAL_CONTEXT` and rebuilding context themselves.
-   *
-   * `undefined` when the addon is rendered outside a field (rare).
    */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
   /**
@@ -88,11 +60,6 @@ export class DfAddonSlot {
    * context (NG0602). The WeakMap caches per `hidden`-value identity, so
    * swapping `addon` inputs that share the same Observable reuses the
    * subscription instead of leaking a fresh one per swap.
-   *
-   * Resolved unconditionally (not gated on host `hidden()` presence) so a
-   * transition from `host hidden = Signal` → `undefined` doesn't expose a
-   * brief window where neither value is current — the upstream effect
-   * re-runs eventually, but the computed read can happen in between.
    */
   private readonly _hiddenByValue = new WeakMap<object, Signal<boolean>>();
   private readonly _resolvedHidden = signal<Signal<boolean> | undefined>(undefined);
