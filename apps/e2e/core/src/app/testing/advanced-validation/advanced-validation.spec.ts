@@ -104,7 +104,7 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('conditional-validator-test');
       await expect(scenario).toBeVisible();
 
-      const isAdultCheckbox = scenario.locator('#isAdult input[type="checkbox"]');
+      const isAdultCheckbox = scenario.locator(':is([id="isAdult"], [id$="_isAdult"]) input[type="checkbox"]');
       const ageInput = helpers.getInput(scenario, 'age');
       const submitButton = helpers.getSubmitButton(scenario);
 
@@ -375,8 +375,8 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('when-with-and-or-test');
       await expect(scenario).toBeVisible();
 
-      const accountTypeSelect = scenario.locator('#accountType');
-      const isVerifiedCheckbox = scenario.locator('#isVerified input[type="checkbox"]');
+      const accountTypeSelect = scenario.locator(':is([id="accountType"], [id$="_accountType"])');
+      const isVerifiedCheckbox = scenario.locator(':is([id="isVerified"], [id$="_isVerified"]) input[type="checkbox"]');
       const companyNameInput = helpers.getInput(scenario, 'companyName');
       const submitButton = helpers.getSubmitButton(scenario);
 
@@ -416,8 +416,8 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('when-with-and-or-test');
       await expect(scenario).toBeVisible();
 
-      const isPremiumCheckbox = scenario.locator('#isPremium input[type="checkbox"]');
-      const hasDiscountCheckbox = scenario.locator('#hasDiscount input[type="checkbox"]');
+      const isPremiumCheckbox = scenario.locator(':is([id="isPremium"], [id$="_isPremium"]) input[type="checkbox"]');
+      const hasDiscountCheckbox = scenario.locator(':is([id="hasDiscount"], [id$="_hasDiscount"]) input[type="checkbox"]');
       const paymentMethodInput = helpers.getInput(scenario, 'paymentMethod');
       const submitButton = helpers.getSubmitButton(scenario);
 
@@ -460,9 +460,9 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('when-with-and-or-test');
       await expect(scenario).toBeVisible();
 
-      const accountTypeSelect = scenario.locator('#accountType');
-      const isPremiumCheckbox = scenario.locator('#isPremium input[type="checkbox"]');
-      const isVerifiedCheckbox = scenario.locator('#isVerified input[type="checkbox"]');
+      const accountTypeSelect = scenario.locator(':is([id="accountType"], [id$="_accountType"])');
+      const isPremiumCheckbox = scenario.locator(':is([id="isPremium"], [id$="_isPremium"]) input[type="checkbox"]');
+      const isVerifiedCheckbox = scenario.locator(':is([id="isVerified"], [id$="_isVerified"]) input[type="checkbox"]');
       const minOrderInput = helpers.getInput(scenario, 'minOrder');
       const orderAmountInput = helpers.getInput(scenario, 'orderAmount');
       const submitButton = helpers.getSubmitButton(scenario);
@@ -538,8 +538,8 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('nested-field-paths-test');
       await expect(scenario).toBeVisible();
 
-      const sameAsBillingCheckbox = scenario.locator('#sameAsBilling input[type="checkbox"]');
-      const shippingZipField = scenario.locator('#shippingZip');
+      const sameAsBillingCheckbox = scenario.locator(':is([id="sameAsBilling"], [id$="_sameAsBilling"]) input[type="checkbox"]');
+      const shippingZipField = scenario.locator(':is([id="shippingZip"], [id$="_shippingZip"])');
       const submitButton = helpers.getSubmitButton(scenario);
 
       // Initially the shipping zip field should be visible
@@ -626,7 +626,7 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(smsCheckbox).not.toBeChecked();
 
       // Verify phone field exists (hidden initially via logic condition)
-      const phoneForSmsField = scenario.locator('#phoneForSms');
+      const phoneForSmsField = scenario.locator(':is([id="phoneForSms"], [id$="_phoneForSms"])');
       await expect(phoneForSmsField).not.toBeVisible();
 
       // Submit should be enabled initially
@@ -648,11 +648,11 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('array-cross-validation-test');
       await expect(scenario).toBeVisible();
 
-      const requireEmailCheckbox = scenario.locator('#requireEmail input[type="checkbox"]');
+      const requireEmailCheckbox = scenario.locator(':is([id="requireEmail"], [id$="_requireEmail"]) input[type="checkbox"]');
       const submitButton = helpers.getSubmitButton(scenario);
 
       // Get inputs within contacts array (name, email, role select for first item)
-      const contactInputs = scenario.locator('#contacts input');
+      const contactInputs = scenario.locator(':is([id="contacts"], [id$="_contacts"]) input');
       const nameInput = contactInputs.first(); // First input is name
       const emailInput = contactInputs.nth(1); // Second input is email
 
@@ -683,10 +683,10 @@ test.describe('Advanced Validation E2E Tests', () => {
       const scenario = helpers.getScenario('array-cross-validation-test');
       await expect(scenario).toBeVisible();
 
-      const requireEmailCheckbox = scenario.locator('#requireEmail input[type="checkbox"]');
+      const requireEmailCheckbox = scenario.locator(':is([id="requireEmail"], [id$="_requireEmail"]) input[type="checkbox"]');
 
       // Get inputs within contacts array
-      const contactInputs = scenario.locator('#contacts input');
+      const contactInputs = scenario.locator(':is([id="contacts"], [id$="_contacts"]) input');
       const nameInput = contactInputs.first();
       const emailInput = contactInputs.nth(1);
 
@@ -702,7 +702,7 @@ test.describe('Advanced Validation E2E Tests', () => {
       await helpers.blurInput(emailInput);
 
       // Should show email format error - filter by expected text to avoid picking up other field errors
-      const errorMessage = scenario.locator('#contacts mat-error').filter({ hasText: 'valid email' });
+      const errorMessage = scenario.locator(':is([id="contacts"], [id$="_contacts"]) mat-error').filter({ hasText: 'valid email' });
       await expect(errorMessage).toBeVisible();
       await expect(errorMessage).toHaveText('Please enter a valid email address');
     });

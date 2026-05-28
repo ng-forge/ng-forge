@@ -17,9 +17,14 @@ import {
 
 export const testUrl = createTestUrl(`http://localhost:${APP_PORTS['core-examples']}`);
 
+// Core suites navigate to multi-form suite-index pages where each form is
+// explicitly id-prefixed, so a field key `k` renders as `id="{prefix}_k"`.
+// Match both the bare and prefixed forms; scoping by scenario keeps it unambiguous.
+const fieldSel = (fieldId: string) => `:is([id="${fieldId}"], [id$="_${fieldId}"])`;
+
 const MATERIAL_SELECTORS = {
   errorSelector: 'mat-error',
-  submitButtonSelector: '#submit button',
+  submitButtonSelector: `${fieldSel('submit')} button`,
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -64,13 +69,32 @@ export const test = base.extend<{ helpers: TestHelpers; consoleTracker: ConsoleT
       ...baseHelpers,
       ...errorHelpers,
 
-      getCheckbox: (scenario: Locator, fieldId: string) => {
-        return scenario.locator(`#${fieldId} mat-checkbox`);
+      // Override base/error helpers with prefix-tolerant field selectors.
+      getInput: (scenario: Locator, fieldId: string) => scenario.locator(`${fieldSel(fieldId)} input`),
+      getFieldError: (scenario: Locator, fieldId: string) =>
+        scenario.locator(`${fieldSel(fieldId)} ${MATERIAL_SELECTORS.errorSelector}`).first(),
+      getFieldErrors: (scenario: Locator, fieldId: string) => scenario.locator(`${fieldSel(fieldId)} ${MATERIAL_SELECTORS.errorSelector}`),
+
+      expectErrorVisible: async (scenario: Locator, fieldId: string, options?: { timeout?: number }) => {
+        const timeout = options?.timeout ?? 5000;
+        const errorLocator = scenario.locator(`${fieldSel(fieldId)} ${MATERIAL_SELECTORS.errorSelector}`).first();
+        await expect(errorLocator).toBeAttached({ timeout });
+        await expect(errorLocator).toBeVisible({ timeout });
+        const text = await errorLocator.textContent();
+        expect(text?.trim().length).toBeGreaterThan(0);
       },
 
-      getSelect: (scenario: Locator, fieldId: string) => {
-        return scenario.locator(`#${fieldId} mat-select`);
+      expectNoErrorVisible: async (scenario: Locator, fieldId: string, options?: { timeout?: number }) => {
+        const timeout = options?.timeout ?? 5000;
+        const errorLocator = scenario.locator(`${fieldSel(fieldId)} ${MATERIAL_SELECTORS.errorSelector}`);
+        if ((await errorLocator.count()) > 0) {
+          await expect(errorLocator.first()).not.toBeVisible({ timeout });
+        }
       },
+
+      getCheckbox: (scenario: Locator, fieldId: string) => scenario.locator(`${fieldSel(fieldId)} mat-checkbox`),
+
+      getSelect: (scenario: Locator, fieldId: string) => scenario.locator(`${fieldSel(fieldId)} mat-select`),
 
       selectOption: async (select: Locator, optionText: string) => {
         await select.click();
