@@ -14,7 +14,7 @@ export function addStyles(recipe: AdapterRecipe, projectName: string | undefined
     const stylesPath = await resolveStylesPath(tree, projectName);
     if (!stylesPath) {
       ctx.logger.warn(
-        '[ng-forge] Could not locate a global styles file from angular.json. Skipping style imports. ' +
+        'Could not locate a global styles file from angular.json. Skipping style imports. ' +
           'Add the following imports manually:\n' +
           recipe.styles.map((p) => `  @import '${p}';`).join('\n'),
       );
@@ -27,7 +27,7 @@ export function addStyles(recipe: AdapterRecipe, projectName: string | undefined
 
     for (const style of recipe.styles) {
       if (current.includes(style)) {
-        ctx.logger.info(`[ng-forge] ${style} already imported; skipping.`);
+        ctx.logger.info(`${style} already imported; skipping.`);
         continue;
       }
       additions.push(`@import '${style}';`);
@@ -38,11 +38,44 @@ export function addStyles(recipe: AdapterRecipe, projectName: string | undefined
     }
 
     const block = additions.join('\n');
-    const updated = current.length > 0 ? `${block}\n${current}` : `${block}\n`;
+    const updated = insertImports(current, block);
     tree.overwrite(stylesPath, updated);
-    ctx.logger.info(`[ng-forge] Added ${additions.length} style import(s) to ${stylesPath}.`);
+    ctx.logger.info(`Added ${additions.length} style import(s) to ${stylesPath}.`);
     return tree;
   };
+}
+
+/**
+ * Inserts the import block near the top, but AFTER any leading `@use` /
+ * `@forward` rules. In SCSS those must precede all other statements, so blindly
+ * prepending `@import` above them is a compile error. Plain CSS has no such
+ * constraint, so for a file with no `@use`/`@forward` this just prepends.
+ */
+function insertImports(current: string, block: string): string {
+  if (current.length === 0) {
+    return `${block}\n`;
+  }
+
+  const lines = current.split('\n');
+  let insertAt = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed === '' || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
+      continue; // skip blank lines and comments while scanning the header
+    }
+    if (trimmed.startsWith('@use ') || trimmed.startsWith('@forward ')) {
+      insertAt = i + 1; // insert after the last leading @use/@forward
+      continue;
+    }
+    break; // first real rule — stop
+  }
+
+  if (insertAt === 0) {
+    return `${block}\n${current}`;
+  }
+  const head = lines.slice(0, insertAt);
+  const tail = lines.slice(insertAt);
+  return [...head, block, ...tail].join('\n');
 }
 
 async function resolveStylesPath(tree: Tree, projectName: string | undefined): Promise<string | null> {

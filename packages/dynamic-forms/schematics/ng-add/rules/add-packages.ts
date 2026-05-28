@@ -5,6 +5,15 @@ import { NodeDependencyType, addPackageJsonDependency, getPackageJsonDependency 
 import { AdapterRecipe, PackageSpec } from '../recipes';
 import { VERSIONS } from '../../versions';
 
+/**
+ * Shared across the rule chain: how many dependencies addPackages queued, so
+ * the final summary shows the install hint only when an install was actually
+ * scheduled (not on an idempotent re-run).
+ */
+export interface InstallState {
+  added: number;
+}
+
 const CORE_PACKAGE: PackageSpec = {
   name: '@ng-forge/dynamic-forms',
   version: VERSIONS['@ng-forge/dynamic-forms'],
@@ -18,7 +27,7 @@ const ANIMATIONS_PACKAGE: PackageSpec = {
   version: VERSIONS['@angular/animations'],
 };
 
-export function addPackages(recipe: AdapterRecipe, includeAnimations: boolean): Rule {
+export function addPackages(recipe: AdapterRecipe, includeAnimations: boolean, state: InstallState): Rule {
   return (tree: Tree, ctx: SchematicContext) => {
     const all = [CORE_PACKAGE, ...(includeAnimations ? [ANIMATIONS_PACKAGE] : []), ...recipe.packages];
     // @angular/animations ships from the core monorepo and pins @angular/core
@@ -32,7 +41,7 @@ export function addPackages(recipe: AdapterRecipe, includeAnimations: boolean): 
     for (const pkg of all) {
       const existing = getPackageJsonDependency(tree, pkg.name);
       if (existing) {
-        ctx.logger.info(`[ng-forge] ${pkg.name} already declared (${existing.version}); leaving as-is.`);
+        ctx.logger.info(`${pkg.name} already declared (${existing.version}); leaving as-is.`);
         continue;
       }
       const version = pkg.name === '@angular/animations' && angularVersion ? angularVersion : pkg.version;
@@ -48,6 +57,7 @@ export function addPackages(recipe: AdapterRecipe, includeAnimations: boolean): 
     if (added > 0) {
       ctx.addTask(new NodePackageInstallTask());
     }
+    state.added = added;
 
     return tree;
   };

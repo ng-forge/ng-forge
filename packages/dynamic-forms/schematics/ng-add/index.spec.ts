@@ -170,5 +170,52 @@ describe('ng-add', () => {
       const deps = pkg.dependencies as Record<string, string>;
       expect(Object.keys(deps).filter((k) => k === '@angular/material')).toHaveLength(1);
     });
+
+    it('re-running primeng does not duplicate the default Aura import', async () => {
+      const { runner, tree } = await makeAppTree();
+      const once = await runner.runSchematic('ng-add', { adapter: 'primeng' }, tree);
+      const twice = await runner.runSchematic('ng-add', { adapter: 'primeng' }, once);
+
+      const config = twice.readContent(`${APP_DIR}/src/app/app.config.ts`);
+      expect(config.match(/import Aura from '@primeng\/themes\/aura'/g)?.length).toBe(1);
+      expect(config.match(/providePrimeNG\s*\(/g)?.length).toBe(1);
+    });
+  });
+
+  describe('SCSS @use ordering', () => {
+    it('inserts @import after leading @use/@forward, not above them', async () => {
+      const { runner, tree } = await makeAppTree();
+      tree.overwrite(`${APP_DIR}/src/styles.scss`, "@use 'sass:math';\n@forward 'tokens';\n\nbody { margin: 0; }\n");
+      const result = await runner.runSchematic('ng-add', { adapter: 'material' }, tree);
+      const styles = result.readContent(`${APP_DIR}/src/styles.scss`);
+
+      const useIdx = styles.indexOf('@use');
+      const forwardIdx = styles.indexOf('@forward');
+      const importIdx = styles.indexOf("@import '@angular/material");
+      expect(importIdx).toBeGreaterThan(useIdx);
+      expect(importIdx).toBeGreaterThan(forwardIdx);
+      // and still above the first real rule
+      expect(importIdx).toBeLessThan(styles.indexOf('body {'));
+    });
+  });
+
+  describe('no application project', () => {
+    it('completes without throwing and skips provider wiring', async () => {
+      const runner = new SchematicTestRunner('@ng-forge/dynamic-forms', collectionPath);
+      // Bare workspace — no application project at all.
+      const wsTree = await runner.runExternalSchematic(NG_SCHEMATICS, 'workspace', {
+        name: 'empty-ws',
+        newProjectRoot: 'projects',
+        version: '21.0.0',
+      });
+
+      const result = await runner.runSchematic('ng-add', { adapter: 'material' }, wsTree);
+
+      // Core package is still added (so the dep is tracked)...
+      const pkg = JSON.parse(result.readContent('/package.json'));
+      expect(pkg.dependencies?.['@ng-forge/dynamic-forms']).toBeDefined();
+      // ...but there is no app.config.ts to wire.
+      expect(result.exists('/projects/test-app/src/app/app.config.ts')).toBe(false);
+    });
   });
 });

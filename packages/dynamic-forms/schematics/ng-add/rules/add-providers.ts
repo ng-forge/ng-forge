@@ -11,11 +11,20 @@ import {
 
 import { AdapterProviderSpec, AdapterRecipe } from '../recipes';
 
-const DEFAULT_PROJECT = 'default';
-
 export function addProviders(recipe: AdapterRecipe, legacyStatusClasses: boolean, projectName: string | undefined): Rule {
-  return () => {
-    const project = projectName ?? DEFAULT_PROJECT;
+  return (tree: Tree, ctx: SchematicContext) => {
+    // No target project (workspace has no application, or the workspace file
+    // couldn't be read). Don't guess a name — addRootProvider would throw and
+    // abort the whole ng-add. Warn and skip, mirroring addStyles' behaviour.
+    if (!projectName) {
+      ctx.logger.warn(
+        'No application project found; skipping provider wiring. ' +
+          'Add provideDynamicForm(...) to your ApplicationConfig manually — see ' +
+          'https://ng-forge.com/dynamic-forms/getting-started',
+      );
+      return tree;
+    }
+    const project = projectName;
 
     return chain([
       maybeAddRootProvider(
@@ -23,7 +32,7 @@ export function addProviders(recipe: AdapterRecipe, legacyStatusClasses: boolean
         'provideAnimations',
         ({ code, external }) => code`${external('provideAnimations', '@angular/platform-browser/animations')}()`,
       ),
-      ...recipe.adapterProviders.flatMap((spec) => adapterProviderRules(project, spec, projectName)),
+      ...recipe.adapterProviders.flatMap((spec) => adapterProviderRules(project, spec)),
       maybeAddRootProvider(project, 'provideDynamicForm', ({ code, external }) => {
         const provide = external('provideDynamicForm', '@ng-forge/dynamic-forms');
         if (recipe.withFields === null) {
@@ -40,20 +49,20 @@ export function addProviders(recipe: AdapterRecipe, legacyStatusClasses: boolean
   };
 }
 
-function adapterProviderRules(project: string, spec: AdapterProviderSpec, projectName: string | undefined): Rule[] {
+function adapterProviderRules(project: string, spec: AdapterProviderSpec): Rule[] {
   return [
-    ...spec.defaultImports.map((imp) => addDefaultImportRule(imp.symbol, imp.from, projectName)),
+    ...spec.defaultImports.map((imp) => addDefaultImportRule(imp.symbol, imp.from, project)),
     maybeAddRootProvider(project, spec.marker, spec.builder),
   ];
 }
 
-function addDefaultImportRule(symbol: string, module: string, projectName: string | undefined): Rule {
+function addDefaultImportRule(symbol: string, module: string, project: string): Rule {
   return async (tree: Tree, ctx: SchematicContext) => {
     let mainFilePath: string;
     try {
-      mainFilePath = await getMainFilePath(tree, projectName ?? DEFAULT_PROJECT);
+      mainFilePath = await getMainFilePath(tree, project);
     } catch {
-      ctx.logger.warn(`[ng-forge] Could not locate main.ts; skipping default import for ${symbol}.`);
+      ctx.logger.warn(`Could not locate main.ts; skipping default import for ${symbol}.`);
       return tree;
     }
 
@@ -68,6 +77,15 @@ function addDefaultImportRule(symbol: string, module: string, projectName: strin
       // fall back to main.ts
     }
 
+    // insertImport throws (rather than no-op'ing) for an already-present
+    // DEFAULT import, so guard idempotency ourselves before calling it.
+    const existing = tree.read(filePath)?.toString('utf-8') ?? '';
+    const moduleSpecifier = new RegExp(`from\\s+['"]${escapeRegExp(module)}['"]`);
+    if (moduleSpecifier.test(existing)) {
+      ctx.logger.info(`import ${symbol} from '${module}' already present; skipping.`);
+      return tree;
+    }
+
     const source = getSourceFile(tree, filePath);
     const change = insertImport(source, filePath, symbol, module, true);
     applyChangesToFile(tree, filePath, [change]);
@@ -75,11 +93,15 @@ function addDefaultImportRule(symbol: string, module: string, projectName: strin
   };
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function maybeAddRootProvider(project: string, marker: string, callback: Parameters<typeof addRootProvider>[1]): Rule {
   return async (tree: Tree, ctx: SchematicContext) => {
     const present = await isProviderPresent(tree, project, marker);
     if (present) {
-      ctx.logger.info(`[ng-forge] ${marker}(...) already present in providers; skipping.`);
+      ctx.logger.info(`${marker}(...) already present in providers; skipping.`);
       return noop();
     }
     return addRootProvider(project, callback);
