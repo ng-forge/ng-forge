@@ -8,7 +8,7 @@ describe('DynamicFormInstanceRegistry', () => {
     expect(registry.multiplePresent()).toBe(false);
   });
 
-  it('increments count and hands out sequential auto-ids on register', () => {
+  it('hands out sequential slots and tracks the count', () => {
     const registry = new DynamicFormInstanceRegistry();
     expect(registry.register()).toBe('df-1');
     expect(registry.count()).toBe(1);
@@ -24,43 +24,40 @@ describe('DynamicFormInstanceRegistry', () => {
     expect(registry.multiplePresent()).toBe(true);
   });
 
-  it('decrements count on unregister', () => {
+  it('decrements the count on unregister', () => {
     const registry = new DynamicFormInstanceRegistry();
-    registry.register();
+    const a = registry.register();
     registry.register();
     expect(registry.count()).toBe(2);
-    registry.unregister();
+    registry.unregister(a);
     expect(registry.count()).toBe(1);
     expect(registry.multiplePresent()).toBe(false);
   });
 
-  it('never lets count go negative', () => {
+  it('recycles the lowest freed slot rather than climbing', () => {
     const registry = new DynamicFormInstanceRegistry();
-    registry.unregister();
-    registry.unregister();
-    expect(registry.count()).toBe(0);
+    registry.register(); // df-1
+    const b = registry.register(); // df-2
+    registry.unregister(b);
+    expect(registry.register()).toBe('df-2'); // reuses the freed slot, not df-3
   });
 
-  it('resets the auto-id seq once the last form unmounts (bounded ids per mount-wave)', () => {
+  it('keeps ids compact across navigation: a persistent form holds df-1 while page forms reuse df-2', () => {
     const registry = new DynamicFormInstanceRegistry();
-    expect(registry.register()).toBe('df-1');
-    expect(registry.register()).toBe('df-2');
+    registry.register(); // shell form → df-1 (stays mounted)
 
-    registry.unregister();
-    registry.unregister();
-    expect(registry.count()).toBe(0);
+    const page1 = registry.register();
+    expect(page1).toBe('df-2');
+    registry.unregister(page1); // navigate away
 
-    // Next mount-wave starts fresh from df-1 rather than climbing forever.
-    expect(registry.register()).toBe('df-1');
+    const page2 = registry.register();
+    expect(page2).toBe('df-2'); // fresh page reuses df-2 — never df-3
   });
 
-  it('does NOT reset the seq while at least one form stays mounted', () => {
+  it('ignores unregister of an unknown id', () => {
     const registry = new DynamicFormInstanceRegistry();
-    registry.register(); // df-1, count 1
-    registry.register(); // df-2, count 2
-    registry.unregister(); // count 1 — one form still live
-
-    // seq must keep climbing so the new form never collides with the survivor.
-    expect(registry.register()).toBe('df-3');
+    registry.register();
+    registry.unregister('df-99');
+    expect(registry.count()).toBe(1);
   });
 });

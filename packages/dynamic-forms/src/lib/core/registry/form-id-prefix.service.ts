@@ -26,9 +26,7 @@ export class FormIdPrefixService {
 
   private readonly rawPrefix = computed(() => this.options?.()?.idPrefix?.trim() || undefined);
 
-  // linkedSignal (not effect) keeps the latch synchronous so it resolves during the
-  // same render pass — incl. SSR, where an effect-based flip would serialize colliding
-  // ids and mutate them on hydration. Never reverts once a sibling has appeared.
+  // Latches true once a sibling is present; never reverts.
   private readonly latched = linkedSignal<boolean, boolean>({
     source: () => this.registry.multiplePresent(),
     computation: (multiplePresent, previous) => (previous?.value ?? false) || multiplePresent,
@@ -41,7 +39,7 @@ export class FormIdPrefixService {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.registry.unregister());
+    inject(DestroyRef).onDestroy(() => this.registry.unregister(this.autoId));
 
     if (isDevMode()) {
       explicitEffect([this.rawPrefix], ([raw]) => {
