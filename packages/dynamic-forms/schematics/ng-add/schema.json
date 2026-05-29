@@ -36,14 +36,12 @@
     "skipStyles": {
       "type": "boolean",
       "default": false,
-      "description": "Do not modify styles.scss / styles.css.",
-      "x-prompt": "Skip importing adapter styles into styles.scss?"
+      "description": "Do not modify the global styles file."
     },
     "skipProviders": {
       "type": "boolean",
       "default": false,
-      "description": "Do not modify app.config.ts.",
-      "x-prompt": "Skip wiring providers in app.config.ts?"
+      "description": "Do not modify the host ApplicationConfig."
     }
   },
   "required": ["adapter"]

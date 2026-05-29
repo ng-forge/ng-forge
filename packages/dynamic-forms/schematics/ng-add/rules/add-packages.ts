@@ -22,6 +22,9 @@ const CORE_PACKAGE: PackageSpec = {
 // provideAnimations() (wired unless providers are skipped) imports from
 // @angular/platform-browser/animations, which needs @angular/animations —
 // not present in a fresh Angular app.
+// This is installed even for the `none` (core-only) adapter, because the
+// schematic still wires provideAnimations() unconditionally on the providers
+// path. Pass --skipProviders to opt out of both the wiring and the install.
 const ANIMATIONS_PACKAGE: PackageSpec = {
   name: '@angular/animations',
   version: VERSIONS['@angular/animations'],

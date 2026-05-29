@@ -79,7 +79,9 @@ function addDefaultImportRule(symbol: string, module: string, project: string): 
 
     // insertImport throws (rather than no-op'ing) for an already-present
     // DEFAULT import, so guard idempotency ourselves before calling it.
-    const existing = tree.read(filePath)?.toString('utf-8') ?? '';
+    // Strip comments first so a commented-out import doesn't suppress the
+    // real insertion.
+    const existing = stripJsComments(tree.read(filePath)?.toString('utf-8') ?? '');
     const moduleSpecifier = new RegExp(`from\\s+['"]${escapeRegExp(module)}['"]`);
     if (moduleSpecifier.test(existing)) {
       ctx.logger.info(`import ${symbol} from '${module}' already present; skipping.`);
@@ -95,6 +97,16 @@ function addDefaultImportRule(symbol: string, module: string, project: string): 
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Strips line and block comments from JS/TS source for token-presence
+ * checks. Naive: doesn't account for `//` or `/*` characters that appear
+ * inside string/template literals — those would be unusual and aren't a
+ * realistic concern for the call-expression markers we're scanning for.
+ */
+function stripJsComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 }
 
 function maybeAddRootProvider(project: string, marker: string, callback: Parameters<typeof addRootProvider>[1]): Rule {
@@ -131,6 +143,8 @@ async function isProviderPresent(tree: Tree, project: string, marker: string): P
   if (!buffer) {
     return false;
   }
-  const source = buffer.toString('utf-8');
+  // Strip comments so a commented-out reference (e.g. `// provideDynamicForm()`)
+  // doesn't cause the schematic to skip real wiring.
+  const source = stripJsComments(buffer.toString('utf-8'));
   return new RegExp(`\\b${marker}\\s*\\(`).test(source);
 }

@@ -58,10 +58,24 @@ function insertImports(current: string, block: string): string {
 
   const lines = current.split('\n');
   let insertAt = 0;
+  let inBlockComment = false;
   for (let i = 0; i < lines.length; i++) {
     const trimmed = lines[i].trim();
-    if (trimmed === '' || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
-      continue; // skip blank lines and comments while scanning the header
+    if (inBlockComment) {
+      if (trimmed.endsWith('*/')) {
+        inBlockComment = false;
+      }
+      continue;
+    }
+    if (trimmed === '' || trimmed.startsWith('//')) {
+      continue;
+    }
+    if (trimmed.startsWith('/*')) {
+      // Single-line block comment (e.g. `/* foo */`) stays out of block mode.
+      if (!trimmed.endsWith('*/')) {
+        inBlockComment = true;
+      }
+      continue;
     }
     if (trimmed.startsWith('@use ') || trimmed.startsWith('@forward ')) {
       insertAt = i + 1; // insert after the last leading @use/@forward

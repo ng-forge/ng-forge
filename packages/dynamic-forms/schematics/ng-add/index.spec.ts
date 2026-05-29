@@ -197,6 +197,58 @@ describe('ng-add', () => {
       // and still above the first real rule
       expect(importIdx).toBeLessThan(styles.indexOf('body {'));
     });
+
+    it('walks past a multi-line block comment with unprefixed interior lines', async () => {
+      const { runner, tree } = await makeAppTree();
+      tree.overwrite(
+        `${APP_DIR}/src/styles.scss`,
+        [
+          '/*',
+          'This is a block comment',
+          'spanning multiple lines',
+          'with no leading * on interior lines.',
+          '*/',
+          "@use 'sass:math';",
+          '',
+          'body { margin: 0; }',
+          '',
+        ].join('\n'),
+      );
+      const result = await runner.runSchematic('ng-add', { adapter: 'material' }, tree);
+      const styles = result.readContent(`${APP_DIR}/src/styles.scss`);
+
+      const useIdx = styles.indexOf('@use');
+      const importIdx = styles.indexOf("@import '@angular/material");
+      expect(importIdx).toBeGreaterThan(useIdx); // after @use
+      expect(importIdx).toBeLessThan(styles.indexOf('body {')); // before first real rule
+    });
+  });
+
+  describe('marker detection ignores comments', () => {
+    it('does not skip wiring when provideDynamicForm appears only in a comment', async () => {
+      const { runner, tree } = await makeAppTree();
+      const configPath = `${APP_DIR}/src/app/app.config.ts`;
+      const original = tree.readContent(configPath);
+      tree.overwrite(configPath, '// provideDynamicForm() — TODO wire this up\n' + original);
+
+      const result = await runner.runSchematic('ng-add', { adapter: 'material' }, tree);
+      const config = result.readContent(configPath);
+      // The real provideDynamicForm(...) call was added (commented marker did not block it).
+      expect(config.match(/^[^/]*provideDynamicForm\s*\(/m)).not.toBeNull();
+      expect(config).toContain('withMaterialFields');
+    });
+
+    it('does not skip a default import when its module appears only in a comment', async () => {
+      const { runner, tree } = await makeAppTree();
+      const configPath = `${APP_DIR}/src/app/app.config.ts`;
+      const original = tree.readContent(configPath);
+      tree.overwrite(configPath, "// import Aura from '@primeng/themes/aura';\n" + original);
+
+      const result = await runner.runSchematic('ng-add', { adapter: 'primeng' }, tree);
+      const config = result.readContent(configPath);
+      // The real default import was added (commented one did not block it).
+      expect(config.match(/^[^/]*import Aura from '@primeng\/themes\/aura'/m)).not.toBeNull();
+    });
   });
 
   describe('no application project', () => {
