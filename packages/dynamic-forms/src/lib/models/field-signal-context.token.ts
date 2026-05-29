@@ -43,3 +43,11 @@ export const FORM_OPTIONS = new InjectionToken<Signal<FormOptions | undefined>>(
 
 /** Injection token for form-level external data. */
 export const EXTERNAL_DATA = new InjectionToken<Signal<Record<string, Signal<unknown>> | undefined>>('EXTERNAL_DATA');
+
+/**
+ * Form-level DOM-id prefix, provided once at the DynamicForm level and read by
+ * `mapFieldToInputs` as the outermost id segment: `{idPrefix}_{group}_{key}_{index}`.
+ * Scopes ids to one form instance so duplicate forms on a page don't collide.
+ * Inject `{ optional: true }` — absent under mock injectors / standalone usage.
+ */
+export const FORM_ID_PREFIX = new InjectionToken<Signal<string>>('FORM_ID_PREFIX');

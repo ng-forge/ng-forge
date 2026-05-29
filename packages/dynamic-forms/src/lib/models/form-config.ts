@@ -92,6 +92,25 @@ export interface FormOptions {
   disabled?: boolean;
 
   /**
+   * Prefix scoping every field's DOM `id` (and matching `for` / `data-testid` /
+   * `aria-describedby`) to this form instance, as the outermost id segment:
+   * `{idPrefix}_{group}_{key}_{index}`. Use it when rendering multiple forms
+   * from the same config on one page so their ids don't collide.
+   *
+   * When omitted, a lone form stays unprefixed and a generated prefix (`df-1`,
+   * `df-2`, …) is applied automatically once a second form is mounted. Characters
+   * invalid in an id token (whitespace, punctuation) are replaced with `_`.
+   *
+   * @example
+   * ```typescript
+   * options: { idPrefix: 'billing' } // → id="billing_email-input"
+   * ```
+   *
+   * @default undefined (auto-prefix only when multiple forms are mounted)
+   */
+  idPrefix?: string;
+
+  /**
    * Maximum number of iterations for derivation chain processing.
    *
    * @default 10

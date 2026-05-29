@@ -38,6 +38,7 @@
       "@ng-forge/examples-shared-testing/playwright-config": ["internal/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/examples-shared-testing/perf": ["internal/examples-shared-testing/src/lib/perf/index.ts"],
       "@ng-forge/examples-shared-testing/perf-spec": ["internal/examples-shared-testing/src/lib/perf-spec.ts"],
+      "@ng-forge/examples-shared-testing/id-collision-spec": ["internal/examples-shared-testing/src/lib/id-collision/id-collision-spec.ts"],
       "@ng-forge/styling": ["internal/styling/src/index.ts"],
       "@ng-forge/dynamic-forms/testing": ["packages/dynamic-forms/testing/src/public_api.ts"],
       "@ng-forge/utils": ["internal/utils/src/index.ts"],

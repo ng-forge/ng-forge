@@ -139,13 +139,19 @@ export class SuiteIndexComponent {
     const cached = this.effectiveConfigs.get(scenario.testId);
     if (cached) return cached;
 
-    let effectiveConfig: FormConfig = scenario.config;
+    // When this page renders multiple forms at once, give each a stable explicit
+    // idPrefix (its testId) so DOM ids are deterministic (`{testId}_{key}`) rather
+    // than order-dependent `df-N`. Single-scenario pages stay unprefixed.
+    const multiForm = this.suite().scenarios.length > 1;
+    let effectiveConfig: FormConfig = multiForm
+      ? { ...scenario.config, options: { ...scenario.config.options, idPrefix: scenario.testId } }
+      : scenario.config;
 
     if (scenario.customFnConfig) {
       effectiveConfig = {
-        ...scenario.config,
+        ...effectiveConfig,
         customFnConfig: {
-          ...scenario.config.customFnConfig,
+          ...effectiveConfig.customFnConfig,
           ...scenario.customFnConfig,
         },
       };

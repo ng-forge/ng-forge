@@ -37,6 +37,7 @@ import { PageNavigationStateChangeEvent } from './events/constants/page-navigati
 import { DynamicFormLogger } from './providers/features/logger/logger.token';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
+import { FormIdPrefixService } from './core/registry/form-id-prefix.service';
 import { EventDispatcher } from './events/event-dispatcher';
 import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.directive';
 import { DF_FIELD_TEMPLATES } from './models/addon/df-field-templates.token';
@@ -84,6 +85,7 @@ import { DF_FIELD_TEMPLATES } from './models/addon/df-field-templates.token';
     '[class.df-form-paged]': 'formModeDetection().mode === "paged"',
     '[class.df-form-non-paged]': 'formModeDetection().mode === "non-paged"',
     '[attr.data-form-mode]': 'formModeDetection().mode',
+    '[attr.id]': 'idPrefix() || null',
     '(submit)': 'onNativeSubmit($event)',
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -133,6 +135,16 @@ export class DynamicForm<
   private readonly _projectedTemplates = contentChildren(DfTemplate);
 
   private readonly stateManager = this.connectDeps();
+
+  /**
+   * Owns this form's DOM-id prefix and registers the instance with the root
+   * registry for multi-form collision detection. Injected eagerly (not lazily
+   * via first field map) so the live-form count is accurate from construction.
+   */
+  private readonly formIdPrefix = inject(FormIdPrefixService);
+
+  /** Active DOM-id prefix — empty unless explicitly set or multiple forms are mounted. */
+  protected readonly idPrefix = this.formIdPrefix.prefix;
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Private State

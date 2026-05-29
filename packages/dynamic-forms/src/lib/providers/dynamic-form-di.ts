@@ -6,12 +6,14 @@ import { FieldContextRegistryService } from '../core/registry/field-context-regi
 import { FunctionRegistryService } from '../core/registry/function-registry.service';
 import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
+import { FormIdPrefixService } from '../core/registry/form-id-prefix.service';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
 import {
   DEFAULT_PROPS,
   DEFAULT_VALIDATION_MESSAGES,
   DEFAULT_WRAPPERS,
   EXTERNAL_DATA,
+  FORM_ID_PREFIX,
   FORM_OPTIONS,
 } from '../models/field-signal-context.token';
 import { DERIVATION_WARNING_TRACKER } from '../core/derivation/derivation-warning-tracker';
@@ -95,6 +97,14 @@ function coreProviders(): Provider[] {
       provide: EXTERNAL_DATA,
       useFactory: (stateManager: FormStateManager) => computed(() => stateManager.activeConfig()?.externalData),
       deps: [FormStateManager],
+    },
+    // Per-form DOM-id prefix: registers this instance with the root registry for
+    // multi-form collision detection and publishes the resolved prefix signal.
+    FormIdPrefixService,
+    {
+      provide: FORM_ID_PREFIX,
+      useFactory: (svc: FormIdPrefixService) => svc.prefix,
+      deps: [FormIdPrefixService],
     },
     { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
     // ADDON_ACTION_REGISTRY must live at form scope (not root) because the

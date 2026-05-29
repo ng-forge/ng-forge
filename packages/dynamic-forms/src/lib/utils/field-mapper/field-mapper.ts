@@ -3,7 +3,7 @@ import { FieldDef } from '../../definitions/base/field-def';
 import { FieldWithValidation } from '../../definitions/base/field-with-validation';
 import { FieldMeta } from '../../definitions/base/field-meta';
 import { FieldTypeDefinition } from '../../models/field-type';
-import { ARRAY_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
+import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '../../models/field-signal-context.token';
 import { ArrayContext } from '../../mappers/types';
 import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
 import { PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
@@ -112,6 +112,23 @@ function applyGroupPrefix(inputs: Record<string, unknown>, groupPath: string): R
 }
 
 /**
+ * Prepends the form-level id prefix as the outermost key segment so the same key
+ * across two forms on one page yields distinct DOM IDs. Rewrites only the rendered
+ * `key`; schema/override-store keys stay clean. No-op when prefix is empty.
+ */
+function applyFormPrefix(inputs: Record<string, unknown>, prefix: string): Record<string, unknown> {
+  const key = inputs['key'];
+  if (typeof key !== 'string' || prefix.length === 0) {
+    return inputs;
+  }
+
+  return {
+    ...inputs,
+    key: `${prefix}_${key}`,
+  };
+}
+
+/**
  * Main field mapper function that uses the field registry to get the appropriate mapper
  * based on the field's type property.
  *
@@ -140,6 +157,9 @@ export function mapFieldToInputs(
   // Optional because GROUP_CONTEXT is only provided by GroupFieldComponent.
   const groupContext = inject(GROUP_CONTEXT, { optional: true });
 
+  // Form-level DOM-id prefix (scopes ids to one form instance). Optional: absent under mock injectors.
+  const formPrefixSignal = inject(FORM_ID_PREFIX, { optional: true });
+
   // Inject the property override store for property derivation overrides
   // Always available — provided at the DynamicForm component level via provideDynamicFormDI
   const store = inject(PROPERTY_OVERRIDE_STORE);
@@ -153,6 +173,9 @@ export function mapFieldToInputs(
   const indexSignal = arrayContext?.index;
   const hasArrayContext = indexSignal !== undefined && isSignal(indexSignal);
   const hasGroupContext = groupContext != null;
+  // Bypasses the fast path so fields stay subscribed to a prefix that can flip
+  // when a sibling form mounts (gating on its current value would miss the flip).
+  const hasFormPrefix = formPrefixSignal != null;
 
   // Fast-path check for property overrides: only fields whose definition declares
   // a property-derivation enter the computed() wrapper. We inspect the FieldDef
@@ -163,7 +186,7 @@ export function mapFieldToInputs(
   const hasOverrides = fieldHasPropertyDerivations(fieldDef);
 
   // Fast path: no transformations needed
-  if (!hasPropsForwarding && !hasArrayContext && !hasGroupContext && !hasOverrides) {
+  if (!hasPropsForwarding && !hasArrayContext && !hasGroupContext && !hasOverrides && !hasFormPrefix) {
     return mapperResult;
   }
 
@@ -188,6 +211,11 @@ export function mapFieldToInputs(
     if (hasArrayContext) {
       const index = indexSignal();
       inputs = applyIndexSuffix(inputs, index);
+    }
+
+    // Outermost key segment; reading the signal here re-renders ids if the prefix flips.
+    if (hasFormPrefix) {
+      inputs = applyFormPrefix(inputs, formPrefixSignal!());
     }
 
     // Apply property overrides from the store (AFTER all static transformations).
