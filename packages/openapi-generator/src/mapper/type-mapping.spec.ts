@@ -124,6 +124,31 @@ describe('mapSchemaToFieldType', () => {
       expect(result.isAmbiguous).toBe(true);
       expect(result.ambiguousScope).toBe('numeric');
     });
+
+    it('should map number+enum to select with ambiguous flag (issue #445)', () => {
+      const result = mapSchemaToFieldType({ type: 'number', enum: [20, 31, 45, 30] } as SchemaObject);
+      expect(result.fieldType).toBe('select');
+      expect(result.props).toBeUndefined();
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('single-select');
+      expect(result.defaultAlternative).toBe('radio');
+    });
+
+    it('should map integer+enum to select with ambiguous flag (issue #445)', () => {
+      const result = mapSchemaToFieldType({ type: 'integer', enum: [1, 2, 3] } as SchemaObject);
+      expect(result.fieldType).toBe('select');
+      expect(result.props).toBeUndefined();
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('single-select');
+      expect(result.defaultAlternative).toBe('radio');
+    });
+
+    it('should map nullable number+enum (3.1 type array) to select (issue #445)', () => {
+      const result = mapSchemaToFieldType({ type: ['number', 'null'], enum: [20, 31, 45, 30] } as unknown as SchemaObject);
+      expect(result.fieldType).toBe('select');
+      expect(result.isAmbiguous).toBe(true);
+      expect(result.ambiguousScope).toBe('single-select');
+    });
   });
 
   describe('boolean type', () => {

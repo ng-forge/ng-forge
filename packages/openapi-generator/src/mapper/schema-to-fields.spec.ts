@@ -88,6 +88,32 @@ describe('mapSchemaToFields', () => {
     ]);
   });
 
+  it('should map number enum to select with options, not a number input (issue #445)', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        responseTime: {
+          type: 'number',
+          description: 'The response time of the policy. For e.g. 30 days.',
+          nullable: true,
+          enum: [20, 31, 45, 30],
+        } as unknown as SchemaObject,
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    const field = result.fields[0];
+    expect(field.type).toBe('select');
+    expect(field.props?.['type']).toBeUndefined();
+    expect(field.nullable).toBe(true);
+    expect(field.options).toEqual([
+      { label: '20', value: '20' },
+      { label: '31', value: '31' },
+      { label: '45', value: '45' },
+      { label: '30', value: '30' },
+    ]);
+  });
+
   it('should disable fields when editable is false', () => {
     const schema: SchemaObject = {
       type: 'object',

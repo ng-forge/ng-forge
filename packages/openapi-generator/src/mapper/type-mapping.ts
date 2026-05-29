@@ -18,8 +18,8 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
     : (rawType as string | undefined);
   const format = schema.format;
 
-  // string + enum → select (ambiguous with radio)
-  if (type === 'string' && schema.enum) {
+  // scalar + enum → select (ambiguous with radio). Issue #445: numeric enums too.
+  if ((type === 'string' || type === 'number' || type === 'integer') && schema.enum) {
     return {
       fieldType: 'select',
       isContainer: false,
