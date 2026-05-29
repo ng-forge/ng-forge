@@ -1365,6 +1365,66 @@ describe('form-mapping', () => {
         });
       });
 
+      // T3: page is a flatten container (children hoisted to the parent path). These pin that a
+      // hidden PAGE cascades its hidden-state to descendant validation the same way a hidden GROUP
+      // does — i.e. the page wrapper is dropped at flatten time but the cascade context survives.
+      it('should skip required validation on a leaf inside a statically hidden page by default', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ street: '' });
+          const pageField: FieldDef = {
+            type: 'page',
+            hidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(pageField, path as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Hidden page → descendant's required is skipped by default (mirrors hidden group).
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should propagate page validateWhenHidden=true to descendants without overrides', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ street: '' });
+          const pageField: FieldDef = {
+            type: 'page',
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(pageField, path as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Hidden page + page-level validate-when-hidden → descendant's required runs.
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
       it('should skip validators on a leaf with logic-based static hidden=true condition', () => {
         // A logic condition of `true` resolves to "always hidden" through the
         // cascade's ancestorAlwaysHidden short-circuit. The validator should never

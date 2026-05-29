@@ -774,6 +774,32 @@ describe('schema-builder', () => {
         expect(result).toEqual({});
       });
 
+      it('should keep same-key fields in different groups independent (#401)', () => {
+        // #401: two groups each containing a field with the SAME key must hold
+        // INDEPENDENT values. Nested grouping namespaces each child under its
+        // group key, so groupA.name and groupB.name must not collide.
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'group',
+            key: 'groupA',
+            fields: [{ type: 'input', key: 'name', value: 'Alice' }],
+          },
+          {
+            type: 'group',
+            key: 'groupB',
+            fields: [{ type: 'input', key: 'name', value: 'Bob' }],
+          },
+        ];
+        const result = fieldsToDefaultValues(fields, registry);
+        expect(result).toEqual({
+          groupA: { name: 'Alice' },
+          groupB: { name: 'Bob' },
+        });
+        // Explicit independence assertions: neither value leaked into the other group.
+        expect((result as { groupA: { name: string } }).groupA.name).toBe('Alice');
+        expect((result as { groupB: { name: string } }).groupB.name).toBe('Bob');
+      });
+
       it('should handle deeply nested structures', () => {
         const fields: FieldDef<any>[] = [
           {

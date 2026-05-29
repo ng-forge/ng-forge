@@ -1397,4 +1397,148 @@ describe('ArrayFieldComponent', () => {
       expect(component.resolvedItems()).toHaveLength(3);
     });
   });
+
+  describe('per-item state under structural mutation (regression)', () => {
+    /**
+     * Characterization tests for ARRAY field per-item state binding when the
+     * array is structurally mutated (remove middle, remove index 0, reorder, and
+     * a hide → show cycle for a dynamically added item).
+     *
+     * Observable in this unit harness:
+     *  - Per-item VALUE: read from the parent form value array (context.value()['items']).
+     *    Each item value is an object like { item: 'A' }, so value-follows-item is precise.
+     *  - Item ORDER: position in that array.
+     *  - Item IDENTITY: resolvedItems()[i].id — stable references only survive a MOVE
+     *    (splice reorder). REMOVAL is implemented as a 'recreate' (see
+     *    determineDifferentialOperation: newLength < currentLength → 'recreate'), so ids
+     *    are intentionally regenerated on remove; this suite does NOT assert id stability
+     *    across removals.
+     *
+     * NOT observable here (E2E-only gap): per-item dirty / touched / validation-error
+     * state is owned by the rendered adapter field component (TestFieldComponent is a
+     * stub). Those are exercised in the array-fields E2E suite, not in this unit context.
+     */
+
+    function valuesOf(context: FieldSignalContext<Record<string, unknown>>): unknown[] {
+      const items = context.value()['items'] as unknown[];
+      return items.map((entry) => (entry as Record<string, unknown>)['item']);
+    }
+
+    it('remove middle (index 1) → remaining values are [A, C] in order', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'A')],
+          [createSimpleTestField('item', 'Item', 'B')],
+          [createSimpleTestField('item', 'Item', 'C')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+      const context = TestBed.inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<Record<string, unknown>>;
+
+      await waitForItems(component, fixture, (n) => n >= 3);
+      expect(valuesOf(context)).toEqual(['A', 'B', 'C']);
+
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 1);
+      await waitForItems(component, fixture, (n) => n <= 2);
+
+      expect(component.resolvedItems()).toHaveLength(2);
+      // C's value must follow C — it must not stick to the slot index that B vacated.
+      expect(valuesOf(context)).toEqual(['A', 'C']);
+    });
+
+    it('remove index 0 → remaining values are [B, C] in order', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'A')],
+          [createSimpleTestField('item', 'Item', 'B')],
+          [createSimpleTestField('item', 'Item', 'C')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+      const context = TestBed.inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<Record<string, unknown>>;
+
+      await waitForItems(component, fixture, (n) => n >= 3);
+      expect(valuesOf(context)).toEqual(['A', 'B', 'C']);
+
+      eventBus.dispatch(RemoveAtIndexEvent, 'items', 0);
+      await waitForItems(component, fixture, (n) => n <= 2);
+
+      expect(component.resolvedItems()).toHaveLength(2);
+      // Both B and C shift down one slot; their values must shift with them.
+      expect(valuesOf(context)).toEqual(['B', 'C']);
+    });
+
+    it('reorder (move index 0 → 2) → values reorder and identity travels with the moved item', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [
+          [createSimpleTestField('item', 'Item', 'A')],
+          [createSimpleTestField('item', 'Item', 'B')],
+          [createSimpleTestField('item', 'Item', 'C')],
+        ],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+      const context = TestBed.inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<Record<string, unknown>>;
+
+      await waitForItems(component, fixture, (n) => n >= 3);
+      const originalItems = component.resolvedItems();
+      const itemA = originalItems[0];
+
+      eventBus.dispatch(MoveArrayItemEvent, 'items', 0, 2);
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.resolvedItems()).toHaveLength(3);
+      // Values reorder: A moves to the end.
+      expect(valuesOf(context)).toEqual(['B', 'C', 'A']);
+      // Move preserves object identity (splice reorder, no recreate), so A's per-item
+      // state object travels with it to its new slot.
+      const movedItems = component.resolvedItems();
+      expect(movedItems[2]).toBe(itemA);
+    });
+
+    it('dynamically added item survives a hide → show cycle', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'items',
+        type: 'array',
+        fields: [[createSimpleTestField('item', 'Item', 'A')]],
+      };
+
+      const { component, fixture } = setupArrayTest(field);
+      const eventBus = TestBed.inject(EventBus);
+      const context = TestBed.inject(FIELD_SIGNAL_CONTEXT) as FieldSignalContext<Record<string, unknown>>;
+
+      await waitForItems(component, fixture, (n) => n >= 1);
+
+      // Dynamically append a second item (registers its template in the slot).
+      eventBus.dispatch(AppendArrayItemEvent, 'items', [createSimpleTestField('item', 'Item', 'B')]);
+      await waitForItems(component, fixture, (n) => n >= 2);
+      expect(valuesOf(context)).toEqual(['A', 'B']);
+
+      // Hide the array, then show it again. The slot survival path (case 'initial')
+      // should rehydrate the dynamically-added item from the stored templates/itemOrder.
+      fixture.componentRef.setInput('hidden', true);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      fixture.componentRef.setInput('hidden', false);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      expect(component.resolvedItems()).toHaveLength(2);
+      expect(valuesOf(context)).toEqual(['A', 'B']);
+    });
+  });
 });

@@ -2163,6 +2163,152 @@ describe('DynamicFormComponent', () => {
     });
   });
 
+  // Integration coverage for swapping the ENTIRE `dynamic-form` config input at runtime
+  // (state machine: ready → transitioning[teardown → applying → restoring] → ready).
+  // These exercise the real component harness — the only level that drives a full config
+  // swap through field resolution + reconcileFields + value capture/restore.
+  describe('Whole-config swap reconciliation', () => {
+    // Drives a full config swap to completion by waiting for the state machine to settle
+    // back to `ready`, then flushing render/effects. Mirrors the wait pattern used by the
+    // existing "should add new fields when config changes to include them" test, which
+    // awaits `stateManager.ready$` rather than guessing at fixed delays.
+    const swapConfig = async (fixture: any, newConfig: TestFormConfig) => {
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
+      const ready = firstValueFrom(stateManager.ready$);
+      fixture.componentRef.setInput('dynamic-form', newConfig);
+      fixture.detectChanges();
+      await ready;
+      await waitForDynamicComponents(fixture);
+    };
+
+    // Scenario 1 (overlapping key, TYPE changes): a stale value from the old field type
+    // must not corrupt the new field; the new field must initialize to its own default.
+    //
+    // The new `status` field is a `select` whose only valid options are 'active'/'inactive'
+    // and whose default value is '' (empty). The old `status` field was a free-text input
+    // holding 'hello'. On swap, the form value for `status` must be the SELECT's default
+    // (''), NOT the stale free-text 'hello'.
+    it.fails('does not leak stale value into a same-key field whose type changed (input → select)', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'status', type: 'input', label: 'Status', value: 'hello' }],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ status: 'hello' });
+
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'status',
+            type: 'select',
+            label: 'Status',
+            options: [
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ],
+            // no `value` declared → select default is '' (empty)
+          },
+        ],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // BUG: FormStateManager captures the old form value before teardown and, in the
+      // RestoreValues effect, restores any captured key whose key is still present in the
+      // new config (validKeys is key-only, type-blind — see form-state-machine.ts
+      // RestoreValues + form-state-manager.ts restoreValue). So the stale free-text
+      // 'hello' is merged back onto the new `select` field, which has no such option.
+      // Expected: the new field initializes to its own default (''), not the stale value.
+      expect(component.formValue()).toEqual({ status: '' });
+    });
+
+    // Same intent as above but with a clearer "default wins" assertion: the new field of a
+    // different type declares its OWN explicit default, which must take precedence over the
+    // stale value carried by the same key from the previous config.
+    it.fails('initializes a retyped same-key field to its own declared default, not the stale value', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'flag', type: 'input', label: 'Flag', value: 'hello' }],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ flag: 'hello' });
+
+      const newConfig: TestFormConfig = {
+        fields: [{ key: 'flag', type: 'checkbox', label: 'Flag', value: false }],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // BUG: stale string 'hello' is restored onto the checkbox field instead of its
+      // declared boolean default `false`.
+      expect(component.formValue()).toEqual({ flag: false });
+    });
+
+    // Scenario 2 (key present in OLD config, absent in NEW): its value must be dropped,
+    // not leaked into the new form value.
+    it('drops the value of a key that exists in the old config but not the new one', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          { key: 'keep', type: 'input', label: 'Keep', value: 'kept' },
+          { key: 'gone', type: 'input', label: 'Gone', value: 'leaked' },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ keep: 'kept', gone: 'leaked' });
+
+      const newConfig: TestFormConfig = {
+        fields: [{ key: 'keep', type: 'input', label: 'Keep', value: '' }],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // `gone` is absent from the new config, so its value must not leak. `keep` is the
+      // only key in the new form value, and its preserved value survives the swap.
+      const formValue = component.formValue();
+      expect('gone' in formValue).toBe(false);
+      expect(formValue['keep']).toBe('kept');
+      expect(formValue).toEqual({ keep: 'kept' });
+    });
+
+    // Scenario 3 (same key, type/component changes → component is replaced): reconcileFields
+    // keys identity on key + component + injector, so a different component for the same key
+    // must produce a brand-new resolved field (replaced, not reused). Verified by asserting
+    // the rendered DOM swaps from the input harness to the select harness.
+    it('replaces the rendered component when a same-key field changes type', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'mode', type: 'input', label: 'Mode', value: 'x' }],
+      };
+
+      const { fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+
+      // Sanity: the input harness rendered for the `mode` field.
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestInputHarnessComponent)).not.toBeNull();
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent)).toBeNull();
+
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'mode',
+            type: 'select',
+            label: 'Mode',
+            options: [{ value: 'a', label: 'A' }],
+          },
+        ],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // Component replaced: input harness gone, select harness present.
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestInputHarnessComponent)).toBeNull();
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent)).not.toBeNull();
+    });
+  });
+
   describe('Row and Group Field Support', () => {
     it('should handle row definitions with multiple child definitions', async () => {
       const config: TestFormConfig = {
