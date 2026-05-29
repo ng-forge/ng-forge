@@ -17,9 +17,9 @@ export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | Array
 
 /**
  * Fields that are allowed as children of Group fields
- * Groups can contain: rows and leaf fields (but NOT pages or other groups)
+ * Groups can contain: rows, arrays, and leaf fields (but NOT pages or other groups)
  */
-export type GroupAllowedChildren = LeafFieldTypes | RowField | ContainerField;
+export type GroupAllowedChildren = LeafFieldTypes | RowField | ArrayField | SimplifiedArrayField | ContainerField;
 
 /**
  * Fields that are allowed as children of Array fields

@@ -319,7 +319,7 @@ Included in form value but not rendered.
 - Adding \`label\` to group (not allowed)
 - Using non-hidden logic types on group (only \`hidden\` is supported, apply other logic types to child fields instead)
 
-**Can contain:** rows, leaf fields (NOT pages, NOT nested groups)`,
+**Can contain:** rows, arrays, leaf fields (NOT pages, NOT nested groups)`,
   },
 
   row: {
@@ -1768,7 +1768,7 @@ provideDynamicForm({
 | Container | Label? | Logic? | Allowed Children | Notes |
 |-----------|--------|--------|------------------|-------|
 | page | NO | YES (hidden only) | rows, groups, arrays, leaf fields, buttons | Nav buttons go INSIDE |
-| group | NO | YES (hidden only) | rows, leaf fields (NOT pages, groups) | Creates nested object |
+| group | NO | YES (hidden only) | rows, arrays, leaf fields (NOT pages, groups) | Creates nested object |
 | array | NO | YES (hidden only) | rows, groups, leaf fields (NOT pages, arrays) | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
 | row | NO | YES (hidden only) | groups, arrays, containers, nested rows, hidden fields, leaf fields (NOT pages) | Layout only |
 
