@@ -161,6 +161,27 @@ describe('Enums', () => {
     expect(form).toContain("key: 'tags'");
     expect(form).toContain("type: 'multi-checkbox'");
   });
+
+  it('should map a numeric enum to select with options, not a number input (issue #445)', async () => {
+    await generate('numeric-enum.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-policy.form.ts');
+    const block = form.slice(form.indexOf("key: 'responseTime'"));
+    expect(block).toContain("type: 'select'");
+    expect(block).toContain("value: '20'");
+    expect(block).toContain("value: '30'");
+    // The numeric input shape must NOT leak onto the select.
+    expect(block).not.toContain('type: "number"');
+  });
+
+  it('should produce a form file that compiles against the published types (regression for #445)', async () => {
+    await generate('numeric-enum.yaml');
+
+    const formPath = join(outputDir, 'forms', 'create-policy.form.ts');
+    const diagnostics = typecheckGeneratedForm(formPath);
+
+    expect(diagnostics, `Generated form should type-check cleanly. Errors:\n${diagnostics.join('\n')}`).toEqual([]);
+  }, 30_000); // tsc program creation + type-check is slow in CI
 });
 
 // ─── D. Nested Objects ───────────────────────────────────────────────

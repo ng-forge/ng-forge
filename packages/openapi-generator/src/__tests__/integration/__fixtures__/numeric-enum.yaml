@@ -1,0 +1,88 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /policies:
+    post:
+      operationId: createPolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyResponseDto'
+      responses:
+        '201':
+          description: Created
+components:
+  schemas:
+    PolicyResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A primary generated column in `uuid` format.
+          nullable: false
+          example: bcdc0cb5-2167-46df-889a-003d3d54e510
+        userId:
+          type: string
+          description: The user id in `uuid` format.
+          nullable: true
+          example: 0ea06dca-ad7d-4c3d-85cd-843c3a6bdd20
+          default: null
+        name:
+          type: string
+          description: The name of the policy. For e.g. GDPR.
+          nullable: false
+          example: GDPR
+        description:
+          type: string
+          description: The description of the policy.
+          nullable: true
+          default: null
+        clientId:
+          type: string
+          description: The id of the client.
+          nullable: true
+          example: bcdc0cb5-2167-46df-889a-003d3d54e510
+          default: null
+        createdAt:
+          format: date-time
+          type: string
+          description: Date on which the data record was created.
+          nullable: false
+          example: '2025-02-26T10:28:56.990Z'
+        updatedAt:
+          format: date-time
+          type: string
+          description: Date on which the data record was last updated.
+          nullable: false
+          example: '2025-02-26T10:28:56.990Z'
+        deletedAt:
+          format: date-time
+          type: string
+          description: Date on which the data record was soft-deleted.
+          nullable: true
+          example: '2025-02-26T10:28:56.990Z'
+          default: null
+        region:
+          type: string
+          description: The region or the country of the policy. For e.g. California.
+          nullable: false
+          example: California
+        responseTime:
+          type: number
+          description: The response time of the policy. For e.g. 30 days.
+          nullable: true
+          enum:
+            - 20
+            - 31
+            - 45
+            - 30
+          example: '30'
+      required:
+        - id
+        - name
+        - createdAt
+        - region
