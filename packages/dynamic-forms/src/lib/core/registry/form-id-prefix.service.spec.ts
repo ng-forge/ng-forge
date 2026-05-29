@@ -1,13 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEnvironmentInjector, ElementRef, EnvironmentInjector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormIdPrefixService } from './form-id-prefix.service';
 import { DynamicFormInstanceRegistry } from './dynamic-form-instance-registry.service';
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { FormOptions } from '../../models/form-config';
-
-/** Let a queued ResizeObserver callback flush (it corrects the optimistic `visible` after layout). */
-const flushResizeObserver = () => new Promise<void>((resolve) => setTimeout(resolve, 50));
 
 describe('FormIdPrefixService', () => {
   let parent: EnvironmentInjector;
@@ -92,8 +89,8 @@ describe('FormIdPrefixService', () => {
 
     // Hide the sibling (as ion-router-outlet does to a cached page): its box
     // collapses, the ResizeObserver fires, and `a` is the only visible form again.
+    // Poll rather than wait a fixed delay — resolves as soon as the observer lands.
     sibling.style.display = 'none';
-    await flushResizeObserver();
-    expect(a.svc.prefix()).toBe('');
+    await vi.waitFor(() => expect(a.svc.prefix()).toBe(''));
   });
 });
