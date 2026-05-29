@@ -52,7 +52,7 @@ Each field renders a DOM `id` derived from its key (`id="email"`, `id="email-inp
 ng-forge scopes ids to a form instance to prevent this:
 
 - **One form on the page** → ids stay clean and unprefixed (`email-input`). Nothing changes, so existing selectors and `data-testid`s are untouched.
-- **Two or more forms mounted at once** → each form automatically gets a generated prefix (`df-1`, `df-2`, …), so its ids become `df-2_email-input`. The prefix is assigned once per instance and kept even if a sibling later unmounts.
+- **Two or more forms visible at once** → each form automatically gets a generated prefix (`df-1`, `df-2`, …), so its ids become `df-2_email-input`. Detection tracks the forms currently rendered, so a form reverts to clean, unprefixed ids once it's the only one left (and hidden/cached pages — e.g. a previous route still in the DOM — don't count).
 
 Set `options.idPrefix` when you want **stable, human-readable** ids regardless of how many forms are on the page (recommended when you control both forms). An explicit prefix always wins over auto-detection:
 

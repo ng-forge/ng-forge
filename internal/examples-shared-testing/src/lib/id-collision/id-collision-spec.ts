@@ -49,7 +49,7 @@ export async function assertExplicitPrefixes(page: Page): Promise<void> {
   await assertNoDuplicateIds(page);
 }
 
-/** Lone form unprefixed → mounting a second scopes both → unmounting it keeps the survivor's latched prefix and stays collision-free. */
+/** Lone form unprefixed → mounting a second scopes both → unmounting it lets the survivor revert to unprefixed (recovers, stays collision-free). */
 export async function assertToggleCleanup(page: Page): Promise<void> {
   const formA = page.locator('[data-testid="form-a"] form');
   await expect(formA).toBeVisible({ timeout: 10000 });
@@ -59,12 +59,11 @@ export async function assertToggleCleanup(page: Page): Promise<void> {
   await page.locator('[data-testid="toggle-form-b"]').click();
   await expect(page.locator('[data-testid="form-b"] form')).toBeVisible({ timeout: 10000 });
   await expect(formA).toHaveAttribute('id', /^df-\d+$/, { timeout: 10000 });
-  const latchedId = await formA.getAttribute('id');
   await assertNoDuplicateIds(page);
 
   await page.locator('[data-testid="toggle-form-b"]').click();
   await expect(page.locator('[data-testid="form-b"]')).toHaveCount(0);
-  await expect(formA).toHaveAttribute('id', latchedId!); // latched: prefix survives the sibling unmount
+  await expect(formA).not.toHaveAttribute('id', /.+/, { timeout: 10000 }); // reverts to unprefixed — only visible form again
   await assertNoDuplicateIds(page);
 }
 
