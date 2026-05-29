@@ -218,4 +218,41 @@ describe('ng-add', () => {
       expect(result.exists('/projects/test-app/src/app/app.config.ts')).toBe(false);
     });
   });
+
+  describe('multiple application projects', () => {
+    async function makeMultiAppTree(): Promise<{ runner: SchematicTestRunner; tree: UnitTestTree }> {
+      const runner = new SchematicTestRunner('@ng-forge/dynamic-forms', collectionPath);
+      let tree = await runner.runExternalSchematic(NG_SCHEMATICS, 'workspace', {
+        name: 'multi-ws',
+        newProjectRoot: 'projects',
+        version: '21.0.0',
+      });
+      for (const name of ['app-one', 'app-two']) {
+        tree = await runner.runExternalSchematic(
+          NG_SCHEMATICS,
+          'application',
+          { name, standalone: true, style: 'scss', routing: false, inlineTemplate: false, inlineStyle: false },
+          tree,
+        );
+      }
+      return { runner, tree };
+    }
+
+    it('throws with the app list when --project is omitted', async () => {
+      const { runner, tree } = await makeMultiAppTree();
+      await expect(runner.runSchematic('ng-add', { adapter: 'material' }, tree)).rejects.toThrow(
+        /Multiple application projects found.*app-one.*app-two.*--project=/s,
+      );
+    });
+
+    it('wires the selected project when --project is passed', async () => {
+      const { runner, tree } = await makeMultiAppTree();
+      const result = await runner.runSchematic('ng-add', { adapter: 'material', project: 'app-two' }, tree);
+      // Wired into app-two only.
+      const twoConfig = result.readContent('/projects/app-two/src/app/app.config.ts');
+      expect(twoConfig).toContain('withMaterialFields');
+      const oneConfig = result.readContent('/projects/app-one/src/app/app.config.ts');
+      expect(oneConfig).not.toContain('withMaterialFields');
+    });
+  });
 });

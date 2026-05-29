@@ -13,13 +13,9 @@ ng-forge generates fully working Angular forms from a single configuration objec
 
 In an existing Angular 21+ workspace:
 
-```bash
-ng add @ng-forge/dynamic-forms
-```
+<docs-cli-command package="@ng-forge/dynamic-forms"></docs-cli-command>
 
-You'll be prompted for a UI adapter. The schematic installs the adapter package and its peers, imports the required CSS into your global styles file, and wires `provideAnimations`, the adapter provider (where applicable), and `provideDynamicForm(...withXxxFields(), withLegacyStatusClasses())` into your `ApplicationConfig`. Pass `--defaults` to skip prompts in CI.
-
-In Nx workspaces use `nx g @ng-forge/dynamic-forms:ng-add --adapter=material` (same flags).
+Also works in Nx — click the **Nx** tab above for the equivalent command. You'll be prompted for a UI adapter. The schematic installs the adapter package and its peers, imports the required CSS into your global styles file, and wires `provideAnimations`, the adapter provider (where applicable), and `provideDynamicForm(...withXxxFields(), withLegacyStatusClasses())` into your `ApplicationConfig`.
 
 Prefer to wire things by hand? The full manual setup is below.
 

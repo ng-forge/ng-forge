@@ -1,0 +1,21 @@
+<div class="cli-command">
+  <div class="cli-command__tabs" role="tablist" aria-label="CLI">
+    @for (cli of clis; track cli.id) {
+      <button
+        role="tab"
+        class="cli-command__tab"
+        [class.active]="selected() === cli.id"
+        [attr.aria-selected]="selected() === cli.id"
+        (click)="select(cli.id)"
+      >
+        {{ cli.label }}
+      </button>
+    }
+  </div>
+  <div class="cli-command__body">
+    <docs-copy-button [code]="command()" />
+    <div class="cli-command__scroll">
+      <div [codeHighlight]="command()" language="bash"></div>
+    </div>
+  </div>
+</div>

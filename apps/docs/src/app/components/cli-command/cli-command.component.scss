@@ -1,5 +1,5 @@
 @use 'command-box' as cb;
 
-.install-command {
+.cli-command {
   @include cb.command-box;
 }

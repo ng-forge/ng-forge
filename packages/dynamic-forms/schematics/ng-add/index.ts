@@ -44,21 +44,37 @@ async function resolveProjectName(tree: Tree, requested: string | undefined): Pr
   if (requested) {
     return requested;
   }
+  let workspace: Awaited<ReturnType<typeof getWorkspace>>;
   try {
-    const workspace = await getWorkspace(tree);
-    const explicitDefault = workspace.extensions['defaultProject'];
-    if (typeof explicitDefault === 'string' && workspace.projects.has(explicitDefault)) {
-      return explicitDefault;
-    }
-    for (const [name, project] of workspace.projects) {
-      if (project.extensions['projectType'] === 'application') {
-        return name;
-      }
-    }
-    return undefined;
+    workspace = await getWorkspace(tree);
   } catch {
     return undefined;
   }
+
+  const explicitDefault = workspace.extensions['defaultProject'];
+  if (typeof explicitDefault === 'string' && workspace.projects.has(explicitDefault)) {
+    return explicitDefault;
+  }
+
+  const apps: string[] = [];
+  for (const [name, project] of workspace.projects) {
+    if (project.extensions['projectType'] === 'application') {
+      apps.push(name);
+    }
+  }
+
+  if (apps.length === 0) {
+    return undefined;
+  }
+  if (apps.length === 1) {
+    return apps[0];
+  }
+  // Multiple apps and no --project: silently picking one would wire
+  // ng-forge into a random project. Fail loudly with the list so the user
+  // can re-run with --project=<name>.
+  throw new SchematicsException(
+    `Multiple application projects found (${apps.join(', ')}). Pass --project=<name> to choose which one to set up.`,
+  );
 }
 
 function summarize(recipe: AdapterRecipe, options: NgAddOptions, projectName: string | undefined, installState: InstallState): Rule {

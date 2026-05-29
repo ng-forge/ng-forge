@@ -3,7 +3,7 @@
   "name": "@ng-forge/dynamic-forms",
   "version": "0.0.1",
   "generators": {
-    "ng-add": {
+    "add": {
       "factory": "./ng-add/nx-wrapper#default",
       "schema": "./ng-add/schema.json",
       "description": "Set up @ng-forge/dynamic-forms with a UI adapter (Material, Bootstrap, PrimeNG, Ionic, or none)."
