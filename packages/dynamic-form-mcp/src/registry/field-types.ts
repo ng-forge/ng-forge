@@ -394,7 +394,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       fields: {
         name: 'fields',
         type: 'GroupAllowedChildren[]',
-        description: 'Child fields in the group. Allowed: rows, leaf fields (NOT pages or other groups)',
+        description: 'Child fields in the group. Allowed: rows, arrays, leaf fields (NOT pages or other groups)',
         required: true,
       },
     },
@@ -404,6 +404,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     notAllowedIn: ['group'],
     canContain: [
       'row',
+      'array',
       'input',
       'textarea',
       'select',

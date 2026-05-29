@@ -218,4 +218,38 @@ describe('GroupField - Usage Tests', () => {
 
     expectTypeOf(field.col).toEqualTypeOf<6>();
   });
+
+  it('should accept group containing an array child', () => {
+    const field = {
+      key: 'dockerCompose',
+      type: 'group',
+      fields: [
+        { key: 'action', type: 'hidden', value: '' },
+        {
+          key: 'env',
+          type: 'array',
+          fields: [{ key: 'value', type: 'hidden', value: '' }],
+        },
+      ],
+    } as const satisfies GroupField;
+
+    expectTypeOf(field.fields[1].type).toEqualTypeOf<'array'>();
+  });
+
+  it('should accept group containing a simplified array child', () => {
+    const field = {
+      key: 'tagsGroup',
+      type: 'group',
+      fields: [
+        {
+          key: 'tags',
+          type: 'array',
+          template: { key: 'tag', type: 'hidden', value: '' },
+          value: ['angular'],
+        },
+      ],
+    } as const satisfies GroupField;
+
+    expectTypeOf(field.fields[0].type).toEqualTypeOf<'array'>();
+  });
 });
