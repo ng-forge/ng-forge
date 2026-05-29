@@ -6,6 +6,9 @@ import { DynamicFormInstanceRegistry } from './dynamic-form-instance-registry.se
 import { FORM_OPTIONS } from '../../models/field-signal-context.token';
 import { FormOptions } from '../../models/form-config';
 
+/** Let a queued ResizeObserver callback flush (it corrects the optimistic `visible` after layout). */
+const flushResizeObserver = () => new Promise<void>((resolve) => setTimeout(resolve, 50));
+
 describe('FormIdPrefixService', () => {
   let parent: EnvironmentInjector;
   let registry: DynamicFormInstanceRegistry;
@@ -73,17 +76,24 @@ describe('FormIdPrefixService', () => {
     expect(a.svc.prefix()).toBe('');
   });
 
-  it('does not count a hidden sibling', () => {
-    const a = mountForm();
-    const hidden = host();
-    hidden.style.display = 'none';
-    mountForm(undefined, hidden);
-    expect(a.svc.prefix()).toBe('');
-  });
-
   it('explicit prefix wins even when other forms are mounted', () => {
     const explicit = mountForm({ idPrefix: 'shipping' });
     mountForm();
     expect(explicit.svc.prefix()).toBe('shipping');
+  });
+
+  it('stops counting a sibling once it becomes hidden (ResizeObserver), like an ionic cached page', async () => {
+    const a = mountForm();
+    const sibling = host();
+    mountForm(undefined, sibling);
+
+    // Two visible forms → both scoped.
+    expect(a.svc.prefix()).toMatch(/^df-\d+$/);
+
+    // Hide the sibling (as ion-router-outlet does to a cached page): its box
+    // collapses, the ResizeObserver fires, and `a` is the only visible form again.
+    sibling.style.display = 'none';
+    await flushResizeObserver();
+    expect(a.svc.prefix()).toBe('');
   });
 });
