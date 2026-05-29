@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { PackageManagerService } from '../../services/package-manager.service';
+import { UidService } from '../../services/uid.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { DocsTabKeyboardDirective } from '../../directives/tab-keyboard.directive';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
@@ -35,7 +36,7 @@ export class DocsInstallCommandComponent {
     return `${binary} ${subcommand} ${this.packages()}`;
   });
 
-  private readonly uid = `pm-${Math.random().toString(36).slice(2, 8)}`;
+  private readonly uid = inject(UidService).next('pm');
 
   tabId(id: PackageManager): string {
     return `${this.uid}-tab-${id}`;

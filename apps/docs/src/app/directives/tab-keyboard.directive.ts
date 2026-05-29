@@ -1,18 +1,6 @@
 import { Directive, ElementRef, inject, input, output } from '@angular/core';
 
-/**
- * WAI-ARIA tablist keyboard handler for tab strips that follow the
- * "automatic activation" pattern (Arrow keys move both focus AND
- * selection). Apply to the element with `role="tablist"`. The directive
- * assumes the tab buttons are descendants matching `[role="tab"]`.
- *
- *  - Arrow Left / Up   → previous tab (wraps)
- *  - Arrow Right / Down → next tab (wraps)
- *  - Home              → first tab
- *  - End               → last tab
- *
- * Reference: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
- */
+// https://www.w3.org/WAI/ARIA/apg/patterns/tabs/ (automatic activation)
 @Directive({
   selector: '[docsTabKeyboard]',
   host: {
@@ -52,12 +40,7 @@ export class DocsTabKeyboardDirective<T extends string> {
     }
 
     event.preventDefault();
-    const next = items[nextIdx];
-    this.selectChange.emit(next.id);
-
-    // Move focus to the newly-active tab. focus() works on a tabindex=-1
-    // element, so we don't need to wait for the [tabindex] binding to
-    // update before focusing.
+    this.selectChange.emit(items[nextIdx].id);
     const tabs = this.host.nativeElement.querySelectorAll<HTMLButtonElement>('[role="tab"]');
     tabs[nextIdx]?.focus();
   }

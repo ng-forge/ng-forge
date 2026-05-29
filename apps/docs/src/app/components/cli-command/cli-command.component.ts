@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { DocsTabKeyboardDirective } from '../../directives/tab-keyboard.directive';
+import { UidService } from '../../services/uid.service';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 type Cli = 'angular' | 'nx';
@@ -21,9 +22,7 @@ export class DocsCliCommandComponent {
   ];
   readonly command = computed(() => (this.selected() === 'angular' ? `ng add ${this.package()}` : `nx g ${this.package()}:add`));
 
-  // Per-instance id base — Math.random per-call is SSR-safe (no shared
-  // module-level state).
-  private readonly uid = `cli-${Math.random().toString(36).slice(2, 8)}`;
+  private readonly uid = inject(UidService).next('cli');
 
   tabId(id: Cli): string {
     return `${this.uid}-tab-${id}`;
