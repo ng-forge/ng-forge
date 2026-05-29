@@ -1,18 +1,28 @@
 <div class="cli-command">
-  <div class="cli-command__tabs" role="tablist" aria-label="CLI">
+  <div
+    class="cli-command__tabs"
+    role="tablist"
+    aria-label="CLI"
+    [docsTabKeyboard]="clis"
+    [current]="selected()"
+    (selectChange)="select($event)"
+  >
     @for (cli of clis; track cli.id) {
       <button
         role="tab"
         class="cli-command__tab"
-        [class.active]="selected() === cli.id"
+        [id]="tabId(cli.id)"
+        [attr.aria-controls]="panelId"
         [attr.aria-selected]="selected() === cli.id"
+        [tabindex]="selected() === cli.id ? 0 : -1"
+        [class.active]="selected() === cli.id"
         (click)="select(cli.id)"
       >
         {{ cli.label }}
       </button>
     }
   </div>
-  <div class="cli-command__body">
+  <div class="cli-command__body" role="tabpanel" [id]="panelId" [attr.aria-labelledby]="tabId(selected())">
     <docs-copy-button [code]="command()" />
     <div class="cli-command__scroll">
       <div [codeHighlight]="command()" language="bash"></div>

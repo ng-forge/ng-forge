@@ -36,6 +36,11 @@
       color: var(--text-primary);
     }
 
+    &:focus-visible {
+      outline: 2px solid $ember-glow;
+      outline-offset: -2px;
+    }
+
     &.active {
       color: $ember-glow;
       border-bottom: 2px solid $ember-glow;
