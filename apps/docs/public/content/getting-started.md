@@ -17,6 +17,8 @@ In an existing Angular 21+ workspace:
 
 Also works in Nx — click the **Nx** tab above for the equivalent command. You'll be prompted for a UI adapter. The schematic installs the adapter package and its peers, imports the required CSS into your global styles file, and wires `provideAnimations`, the adapter provider (where applicable), and `provideDynamicForm(...withXxxFields(), withLegacyStatusClasses())` into your `ApplicationConfig`.
 
+In multi-app workspaces, pass `--project=<name>` to target a specific app — same as any other Nx generator. Angular CLI users will be told which app names to choose from if more than one application is present.
+
 Prefer to wire things by hand? The full manual setup is below.
 
 ## 1. Choose Your UI Library
