@@ -407,6 +407,7 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           // Restore a captured value only when the key survives the swap AND the field's type
           // is unchanged. A retyped key (e.g. input → select) must initialize to the new field's
           // declared default rather than inheriting the stale value from the old field type.
+          // Keyed on top-level schemaFields, so a retype of a nested-group child is not tracked here.
           const oldTypeByKey = new Map<string, string>();
           for (const f of state.currentFormSetup.schemaFields) {
             if (f.key !== undefined) oldTypeByKey.set(f.key, f.type);

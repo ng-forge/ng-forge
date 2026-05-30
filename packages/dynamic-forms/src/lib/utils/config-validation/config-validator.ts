@@ -22,11 +22,7 @@ interface ConfigTraversalData {
   domIds: string[];
   types: Set<string>;
   regexErrors: string[];
-  /**
-   * Own keys (not scoped paths) of value-bearing fields that contain a dot.
-   * Nesting must be expressed with `group` fields — a dotted key like
-   * `'address.city'` is looked up literally and silently mis-binds.
-   */
+  /** Own keys of value-bearing fields containing a dot (unsupported — nest via group fields). */
   dottedKeys: string[];
 }
 
@@ -51,9 +47,7 @@ function collectFieldData(
     const valueHandling = field.type ? getFieldValueHandling(field.type, registry) : 'include';
     const participatesInValue = valueHandling !== 'exclude' && valueHandling !== 'flatten';
 
-    // A value-bearing field's own key must not contain a dot (checked regardless
-    // of `collectKeys` so array-item template keys are covered too). Dotted keys
-    // never nest — nesting is structural via `group` fields.
+    // Dotted keys never nest (checked regardless of collectKeys, to cover array templates).
     if (field.key && field.key.includes('.') && participatesInValue) {
       data.dottedKeys.push(field.key);
     }

@@ -438,10 +438,7 @@ describe('condition-evaluator', () => {
         expect(contextChecker).toHaveBeenCalledWith(contextWithChecker);
       });
 
-      // A sync condition slot (`custom`) must return a value, not a thenable/observable.
-      // `!!promise` and `!!observable` are both truthy, so without a guard a user who
-      // wires an async function into the sync slot gets an unconditional `true` with no
-      // signal. The 'async'/'http' condition types exist for asynchronous logic.
+      // A custom fn returning a Promise/Observable must yield false, not true (both are truthy under !!).
       describe('async result misuse in the sync slot', () => {
         it('returns false (not true) and warns when a custom fn returns a Promise', () => {
           const expression: ConditionalExpression = {

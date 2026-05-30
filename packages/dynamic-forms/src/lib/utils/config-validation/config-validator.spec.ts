@@ -331,10 +331,7 @@ describe('validateFormConfig', () => {
     });
   });
 
-  // Nesting is expressed structurally via `group` fields, never via a dotted key.
-  // A leaf field keyed `'address.city'` does a literal `pathRecord['address.city']`
-  // lookup (undefined), so it silently mis-binds rather than nesting. Reject it at
-  // bootstrap so a Formly-style dotted-key config fails loudly instead.
+  // Dotted keys silently mis-bind (literal pathRecord lookup), so reject them at bootstrap.
   describe('dotted field keys', () => {
     it('throws when a value-bearing leaf field key contains a dot', () => {
       const fields: FieldDef<unknown>[] = [{ key: 'address.city', type: 'input' }];

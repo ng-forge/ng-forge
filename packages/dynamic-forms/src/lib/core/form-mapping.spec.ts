@@ -1295,11 +1295,7 @@ describe('form-mapping', () => {
         });
       });
 
-      // `excludeValueIfHidden` (value knob) and `validateWhenHidden` (validation knob)
-      // are independent. Keeping a hidden field's value does NOT opt it into validation —
-      // a hidden group with excludeValueIfHidden:false + a required child + default
-      // validateWhenHidden(false) keeps the value but still skips its validation. This
-      // documents the decoupling so the two knobs aren't assumed to move together.
+      // excludeValueIfHidden (value) and validateWhenHidden (validation) are independent knobs.
       it('keeps validation skipped for a hidden required child even when its value is retained (excludeValueIfHidden:false)', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '' } });
@@ -1319,8 +1315,7 @@ describe('form-mapping', () => {
           );
           mockFormSignal.set(formInstance);
 
-          // Value is retained, but validation is governed by validateWhenHidden (default
-          // false), not by excludeValueIfHidden — so required does not fire.
+          // Validation is governed by validateWhenHidden, not excludeValueIfHidden.
           expect(formInstance().valid()).toBe(true);
         });
       });
@@ -1513,10 +1508,7 @@ describe('form-mapping', () => {
       });
     });
 
-    // ng-forge defaults number inputs to NaN so signal-forms uses valueAsNumber;
-    // clearing a number input also yields NaN (see default-value.ts). These pin the
-    // resulting validation + wire-serialization contract, inspired by formly #3813
-    // (a non-required number throwing after type-then-clear) and #3698 (nullability).
+    // Number inputs default to NaN (see default-value.ts); these pin its validity + wire contract.
     describe('number-input NaN contract', () => {
       it('does not make a NON-required number field invalid when its value is NaN (cleared)', () => {
         runInInjectionContext(injector, () => {
@@ -1558,9 +1550,7 @@ describe('form-mapping', () => {
       });
 
       it('serializes a NaN number value to null over the wire (JSON contract)', () => {
-        // The in-memory model value is NaN, but JSON.stringify maps NaN to null, so a
-        // cleared number reaches an HTTP backend as null, not NaN. Documented so consumers
-        // reading the bound value (NaN) vs the submitted payload (null) know they differ.
+        // In-memory value is NaN, but JSON.stringify maps it to null on the wire.
         expect(JSON.stringify({ age: NaN })).toBe('{"age":null}');
       });
     });

@@ -27,13 +27,7 @@ export interface ComputeValueOptions {
   functionKind?: string;
 }
 
-/**
- * A sync derivation slot must produce a plain value, not an async primitive.
- * A Promise or Observable returned from an inline `fn` would otherwise be
- * written into the field as its value (surfacing as `[object Promise]`). Detect
- * both so the caller can warn and skip; use `asyncDerivations` or an HTTP
- * derivation for asynchronous logic.
- */
+/** True for a Promise/Observable wrongly returned into a sync derivation slot. */
 function isThenableOrObservable(value: unknown): boolean {
   if (value === null || typeof value !== 'object') return false;
   const candidate = value as { then?: unknown; subscribe?: unknown };

@@ -11,7 +11,7 @@ import { withMaterialFields } from './providers/material-providers';
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-async function mountForm(config: FormConfig) {
+async function mountForm(config: FormConfig, expectedInputs: number) {
   TestBed.configureTestingModule({
     imports: [DynamicForm],
     providers: [provideAnimations(), provideDynamicForm(...withMaterialFields())],
@@ -19,13 +19,17 @@ async function mountForm(config: FormConfig) {
   const fixture = TestBed.createComponent(DynamicForm);
   fixture.componentRef.setInput('dynamic-form', config);
   fixture.detectChanges();
-  // Material field components load via dynamic import(); pump real macrotask delays + CD/effects
-  // several times so async resolution and the derivedFromDeferred pipeline settle.
-  for (let i = 0; i < 8; i++) {
-    await delay(15);
+  // Material fields load via dynamic import(); FormStateManager.ready$ isn't public API across the
+  // package boundary, so pump CD + effects until the expected inputs actually render (bounded), then
+  // one extra pass for the derivedFromDeferred pipeline. Gates on a real condition, not a fixed wait.
+  for (let i = 0; i < 40 && fixture.nativeElement.querySelectorAll('input').length < expectedInputs; i++) {
+    await delay(5);
     fixture.detectChanges();
     TestBed.flushEffects();
   }
+  await delay(5);
+  fixture.detectChanges();
+  TestBed.flushEffects();
   return fixture;
 }
 
@@ -46,7 +50,7 @@ describe('scoped DOM IDs (a11y uniqueness)', () => {
       ],
     } as unknown as FormConfig;
 
-    const fixture = await mountForm(config);
+    const fixture = await mountForm(config, 2);
     const inputIds = collectIds(fixture.nativeElement, 'input');
 
     expect(inputIds.length).toBe(2);
@@ -65,7 +69,7 @@ describe('scoped DOM IDs (a11y uniqueness)', () => {
       ],
     } as unknown as FormConfig;
 
-    const fixture = await mountForm(config);
+    const fixture = await mountForm(config, 2);
     const inputIds = collectIds(fixture.nativeElement, 'input');
 
     expect(inputIds.length).toBeGreaterThanOrEqual(2);

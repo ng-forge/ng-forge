@@ -9,13 +9,7 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
-/**
- * A sync condition slot must return a value, not an async primitive. A Promise
- * or Observable is a truthy object, so `!!result` would silently resolve to
- * `true` regardless of the eventual value. Detect both so the caller can warn
- * and fall back to `false` instead. Use the `async`/`http` condition types for
- * asynchronous logic.
- */
+/** True for a Promise/Observable wrongly returned into a sync condition slot (truthy under `!!`). */
 function isThenableOrObservable(value: unknown): boolean {
   if (value === null || typeof value !== 'object') return false;
   const candidate = value as { then?: unknown; subscribe?: unknown };

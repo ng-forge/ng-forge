@@ -3,11 +3,7 @@ import type { EvaluationContext } from '../../models/expressions/evaluation-cont
 import type { Logger } from '../../providers/features/logger/logger.interface';
 import { computeValueFromEntry } from './compute-derived-value';
 
-// A sync derivation slot ('fn' / 'functionName' / 'expression') must return a plain
-// value. If a user wires an async function into the sync slot, the returned Promise
-// (or Observable) would otherwise be written into the field as its value, surfacing as
-// `[object Promise]`. The 'asyncDerivations' / HTTP-derivation paths exist for async
-// logic. These tests pin that the sync compute path refuses an async result.
+// A sync derivation fn returning a Promise/Observable must be refused, not written as the value.
 
 const makeLogger = (): Logger => ({ warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() });
 
