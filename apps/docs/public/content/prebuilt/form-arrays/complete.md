@@ -343,7 +343,8 @@ export class MyFormComponent {
 
 ```typescript
 import { inject } from '@angular/core';
-import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
+import { arrayEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/integration';
 
 export class MyFieldComponent {
   private readonly eventBus = inject(EventBus);

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { ButtonDirective } from 'primeng/button';
-import { DynamicTextPipe, FormEvent } from '@ng-forge/dynamic-forms';
+import { FormEvent } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAction, NgForgeActionHost } from '@ng-forge/dynamic-forms/integration';
 import { PrimeButtonProps } from './prime-button.type';
 

@@ -1,10 +1,5 @@
-import {
-  LogicConfig,
-  NonFieldLogicConfig,
-  resolveNonFieldDisabled,
-  resolveNonFieldHidden,
-  RootFormRegistryService,
-} from '@ng-forge/dynamic-forms';
+import { LogicConfig, resolveNonFieldDisabled, resolveNonFieldHidden } from '@ng-forge/dynamic-forms';
+import { NonFieldLogicConfig, RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldTree } from '@angular/forms/signals';
 
 /**

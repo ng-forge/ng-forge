@@ -1,4 +1,4 @@
-import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Multi-checkbox field for selecting multiple values from a list of options.

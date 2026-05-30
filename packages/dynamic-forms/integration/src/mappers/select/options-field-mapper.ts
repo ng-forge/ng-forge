@@ -2,7 +2,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { SelectField } from '../../definitions';
 import { RadioField } from '../../definitions';
 import { MultiCheckboxField } from '../../definitions';
-import { BaseValueField, DEFAULT_PROPS, FieldMeta } from '@ng-forge/dynamic-forms';
+import { BaseValueField, DEFAULT_PROPS, FieldMeta } from '@ng-forge/dynamic-forms/internal';
 import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-field.mapper';
 
 /** Field types that have an options property. */

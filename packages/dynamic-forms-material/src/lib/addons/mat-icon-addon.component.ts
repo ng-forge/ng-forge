@@ -1,7 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { MatIconAddon } from '../types/addons';
 
 /** Renderer for the `mat-icon` addon kind. */

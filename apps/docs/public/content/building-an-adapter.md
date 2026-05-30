@@ -82,8 +82,7 @@ The canonical shape, using a custom Bootstrap-style input as the example. Every 
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { CustomInputProps } from './custom-input.type';
 
 @Component({
@@ -320,7 +319,8 @@ Example: a hypothetical "weighted choice" field where each option has an associa
 
 ```typescript
 import { computed, inject, Signal } from '@angular/core';
-import { DEFAULT_PROPS, FieldDef } from '@ng-forge/dynamic-forms';
+import { FieldDef } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS } from '@ng-forge/dynamic-forms/integration';
 import { buildValueFieldInputs, resolveValueFieldContext } from '@ng-forge/dynamic-forms/integration';
 import type { WeightedChoiceField } from './weighted-choice.types';
 
@@ -355,8 +355,8 @@ Example: a "save draft" button that dispatches a custom `SaveDraftEvent` with th
 
 ```typescript
 import { computed, inject, Signal } from '@angular/core';
-import { ARRAY_CONTEXT, FieldDef, FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms';
-import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
+import { FieldDef } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT, buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms/integration';
 import type { ButtonField } from '@ng-forge/dynamic-forms/integration';
 import { SaveDraftEvent } from './events/save-draft.event';
 
@@ -456,7 +456,7 @@ Wrap your `FieldTypeDefinition` array in an exported provider function so consum
 ```typescript
 // my-adapter-providers.ts
 import type { Provider } from '@angular/core';
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { MY_ADAPTER_FIELD_TYPES } from './my-adapter-field-config';
 import type { MyAdapterConfig } from './my-adapter-config';
 import { MY_ADAPTER_CONFIG } from './my-adapter-config.token';

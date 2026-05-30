@@ -1,5 +1,6 @@
 import { computed, inject, Signal } from '@angular/core';
-import { buildBaseInputs, DEFAULT_PROPS, FormEvent, RootFormRegistryService } from '@ng-forge/dynamic-forms';
+import { FormEvent } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS, RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
 import { applyNonFieldLogic } from './non-field-logic.utils';
 

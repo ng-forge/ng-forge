@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { DatepickerField, DatepickerProps } from './datepicker-field';
-import type { DynamicText } from '@ng-forge/dynamic-forms';
+import type { DynamicText } from '@ng-forge/dynamic-forms/internal';
 
 // ============================================================================
 // DatepickerProps - Whitelist Test

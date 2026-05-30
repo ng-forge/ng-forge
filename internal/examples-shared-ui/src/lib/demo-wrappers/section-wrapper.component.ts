@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper } from '@ng-forge/dynamic-forms';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * Demo "section" wrapper used by the docs live examples.

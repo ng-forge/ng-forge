@@ -1,12 +1,6 @@
 import { Type } from '@angular/core';
-import {
-  ADDON_ACTION_REGISTRY,
-  ADDON_KIND_COMPONENT_CACHE,
-  ADDON_KIND_REGISTRY,
-  type AddonKindDefinition,
-  DynamicFormLogger,
-  TextAddonComponent,
-} from '@ng-forge/dynamic-forms';
+import { type AddonKindDefinition, DynamicFormLogger, TextAddonComponent } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import { BsButtonAddonComponent } from '../../addons/bs-button-addon.component';

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { FormField } from '@angular/forms/signals';
 import { IonNote, IonTextarea } from '@ionic/angular/standalone';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicTextareaProps } from './ionic-textarea.type';
 import { AsyncPipe } from '@angular/common';

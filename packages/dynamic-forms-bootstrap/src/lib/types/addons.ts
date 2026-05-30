@@ -1,11 +1,5 @@
-import type {
-  AddonActionHandler,
-  AddonActionPreset,
-  BaseAddon,
-  DynamicText,
-  DynamicValue,
-  RegisteredActionRef,
-} from '@ng-forge/dynamic-forms';
+import type { AddonActionPreset, BaseAddon, DynamicText, DynamicValue, RegisteredActionRef } from '@ng-forge/dynamic-forms';
+import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Bootstrap fields. */
 export interface BsIconAddon extends BaseAddon {

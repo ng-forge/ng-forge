@@ -1,4 +1,5 @@
-import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicSelectProps extends SelectProps {

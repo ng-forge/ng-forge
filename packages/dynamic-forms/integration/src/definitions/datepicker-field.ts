@@ -1,4 +1,4 @@
-import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Base props for datepicker fields. Intentionally empty — adapter libraries

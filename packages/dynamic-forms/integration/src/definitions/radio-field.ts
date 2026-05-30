@@ -1,4 +1,4 @@
-import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms/internal';
 
 export interface RadioField<T, TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, T, FieldMeta, TNullable> {
   type: 'radio';

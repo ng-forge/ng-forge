@@ -162,3 +162,74 @@ export type {
   NgForgeFieldFixture,
   NgForgeActionFixture,
 } from './testing';
+
+// =============================================================================
+// Adapter-tier primitives (re-exported from /internal — single compiled identity)
+// =============================================================================
+
+// Base + container mappers
+export { baseFieldMapper, buildBaseInputs } from '@ng-forge/dynamic-forms/internal';
+export {
+  arrayFieldMapper,
+  groupFieldMapper,
+  pageFieldMapper,
+  rowFieldMapper,
+  textFieldMapper,
+  containerFieldMapper,
+} from '@ng-forge/dynamic-forms/internal';
+export type { ArrayContext, FieldSignalContext, MapperFn } from '@ng-forge/dynamic-forms/internal';
+
+// Field type registration
+export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from '@ng-forge/dynamic-forms/internal';
+export { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+
+// Base field component contracts
+export type { ValueFieldComponent, CheckedFieldComponent } from '@ng-forge/dynamic-forms/internal';
+
+// Signal-context injection tokens
+export {
+  ARRAY_CONTEXT,
+  DEFAULT_PROPS,
+  DEFAULT_VALIDATION_MESSAGES,
+  DEFAULT_WRAPPERS,
+  FIELD_SIGNAL_CONTEXT,
+  FORM_OPTIONS,
+  GROUP_CONTEXT,
+  injectFieldSignalContext,
+} from '@ng-forge/dynamic-forms/internal';
+
+// FieldTree utilities
+export { getArrayLength, toReadonlyFieldTree, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
+export type { ArrayFieldTree, ReadonlyFieldTree } from '@ng-forge/dynamic-forms/internal';
+
+// Registry service used by button mappers
+export { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+
+// Low-level utils used by mappers / error utilities
+export { interpolateParams } from '@ng-forge/dynamic-forms/internal';
+export { applyMetaToElement } from '@ng-forge/dynamic-forms/internal';
+export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
+
+// Field-state types for custom expressions
+export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
+
+// =============================================================================
+// Adapter-tier primitives (re-exported from the main entrypoint — main-local)
+// =============================================================================
+
+export { EventBus, resolveTokens } from '@ng-forge/dynamic-forms';
+export { applyValidator, applyValidators } from '@ng-forge/dynamic-forms';
+export type { HttpResourceRequest } from '@ng-forge/dynamic-forms';
+export { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
+export { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+export { dynamicTextToObservable } from '@ng-forge/dynamic-forms';
+export { runPresetAction } from '@ng-forge/dynamic-forms';
+export type { PresetCollaborators } from '@ng-forge/dynamic-forms';
+export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms';
+export type { AddonActionHandler } from '@ng-forge/dynamic-forms';
+export { ADDON_KIND_DEFINITIONS } from '@ng-forge/dynamic-forms';
+export { ADDON_KIND_REGISTRY, ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from '@ng-forge/dynamic-forms';
+export { injectFieldsSupportingAddons } from '@ng-forge/dynamic-forms';
+export type { FieldAddonSupportEntry } from '@ng-forge/dynamic-forms';
+export { INITIALIZATION_TIMEOUT_MS } from '@ng-forge/dynamic-forms';
+export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';

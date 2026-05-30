@@ -1,4 +1,4 @@
-import { BaseValueField } from '@ng-forge/dynamic-forms';
+import { BaseValueField } from '@ng-forge/dynamic-forms/internal';
 import { InputMeta } from './input-meta';
 
 /**

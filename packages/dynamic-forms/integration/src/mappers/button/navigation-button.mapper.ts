@@ -1,17 +1,19 @@
 import { computed, inject, Signal } from '@angular/core';
 import {
-  buildBaseInputs,
-  DEFAULT_PROPS,
-  FieldDef,
   FieldWithValidation,
-  injectFieldSignalContext,
-  FORM_OPTIONS,
   NextPageEvent,
   PreviousPageEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
-  RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
+import {
+  buildBaseInputs,
+  DEFAULT_PROPS,
+  FieldDef,
+  injectFieldSignalContext,
+  FORM_OPTIONS,
+  RootFormRegistryService,
+} from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
 import { resolveHiddenValue } from './non-field-logic.utils';
 

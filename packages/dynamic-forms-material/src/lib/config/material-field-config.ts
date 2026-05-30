@@ -1,4 +1,4 @@
-import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import {
   addArrayItemButtonMapper,
   checkboxFieldMapper,

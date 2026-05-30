@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonNote } from '@ionic/angular/standalone';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicToggleProps } from './ionic-toggle.type';
 import { IonicToggleControlComponent } from './ionic-toggle-control.component';

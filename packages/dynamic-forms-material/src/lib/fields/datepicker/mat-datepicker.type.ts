@@ -1,4 +1,5 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { DatepickerField, DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 

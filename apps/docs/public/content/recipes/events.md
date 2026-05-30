@@ -153,7 +153,8 @@ export class MyFormComponent {
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { EventBus, SubmitEvent } from '@ng-forge/dynamic-forms';
+import { SubmitEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   selector: 'app-custom-submit-button',

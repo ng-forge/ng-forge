@@ -1,4 +1,5 @@
-import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeMultiCheckboxProps {

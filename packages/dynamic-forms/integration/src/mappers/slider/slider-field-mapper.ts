@@ -1,5 +1,5 @@
 import { computed, inject, Signal } from '@angular/core';
-import { DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS } from '@ng-forge/dynamic-forms/internal';
 import { SliderField } from '../../definitions';
 import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-field.mapper';
 

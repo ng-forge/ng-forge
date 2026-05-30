@@ -1,4 +1,5 @@
-import { CheckedFieldComponent, DynamicText } from '@ng-forge/dynamic-forms';
+import { DynamicText } from '@ng-forge/dynamic-forms';
+import { CheckedFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { ThemePalette } from '@angular/material/core';

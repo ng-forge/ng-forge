@@ -1,4 +1,4 @@
-import { BaseValueField } from '@ng-forge/dynamic-forms';
+import { BaseValueField } from '@ng-forge/dynamic-forms/internal';
 import { TextareaMeta } from './textarea-meta';
 
 export interface TextareaProps {

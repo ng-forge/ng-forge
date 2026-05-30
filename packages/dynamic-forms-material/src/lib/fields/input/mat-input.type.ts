@@ -1,4 +1,5 @@
-import { DynamicText, TemplateAddon, TextAddon, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { MatButtonAddon, MatIconAddon } from '../../types/addons';

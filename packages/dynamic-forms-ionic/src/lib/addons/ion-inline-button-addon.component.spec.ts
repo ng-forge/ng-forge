@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ADDON_ACTION_REGISTRY, type AddonActionHandler, type WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import { type WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import type { IonButtonAddon } from '../types/addons';
 import { IonInlineButtonAddonComponent } from './ion-inline-button-addon.component';

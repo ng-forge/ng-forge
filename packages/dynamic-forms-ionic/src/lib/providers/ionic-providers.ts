@@ -1,5 +1,6 @@
 import type { Provider } from '@angular/core';
-import { ADDON_KIND_DEFINITIONS, DynamicFormError, type AddonKindDefinition, type FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { DynamicFormError, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_KIND_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';

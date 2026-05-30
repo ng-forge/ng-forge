@@ -1,4 +1,4 @@
-import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms';
+import { BaseValueField, FieldMeta, FieldOption } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Base props for select fields. Intentionally empty — adapter libraries

@@ -285,81 +285,16 @@ export { createField, field, formConfig } from './helpers';
 export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 // ============================================================
-// INTERNAL EXPORTS - Used by integration entrypoint
-// These are stable APIs for UI library authors
+// ADAPTER-TIER SOURCE EXPORTS
+// Main-local symbols surfaced to adapter authors via
+// `@ng-forge/dynamic-forms/integration` (which re-exports them from here).
 // ============================================================
 
-// Base mapper utilities
-export { baseFieldMapper, buildBaseInputs } from '@ng-forge/dynamic-forms/internal';
-export {
-  arrayFieldMapper,
-  groupFieldMapper,
-  pageFieldMapper,
-  rowFieldMapper,
-  textFieldMapper,
-  containerFieldMapper,
-} from '@ng-forge/dynamic-forms/internal';
-export type { ArrayContext, FieldSignalContext, MapperFn } from '@ng-forge/dynamic-forms/internal';
-
-// Field Type Definition - for registering custom field types
-export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from '@ng-forge/dynamic-forms/internal';
-export { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
-
-// Signal Context - injection tokens for field components
-export {
-  ARRAY_CONTEXT,
-  DEFAULT_PROPS,
-  DEFAULT_VALIDATION_MESSAGES,
-  DEFAULT_WRAPPERS,
-  FIELD_SIGNAL_CONTEXT,
-  FORM_OPTIONS,
-  GROUP_CONTEXT,
-  injectFieldSignalContext,
-} from '@ng-forge/dynamic-forms/internal';
-
-// Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
-
-// Container Components — type-only so they ship as separate lazy chunks via the
-// dynamic registry (loadComponent in built-in-fields). Direct instantiation is not
-// the supported API; use the field type registry. Type-only export preserves
-// `Type<>` / generic-constraint usage at zero runtime cost.
-export type { ArrayFieldComponent, GroupFieldComponent, ContainerFieldComponent } from './fields';
-
-// Validation utilities
 export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
-
-// FieldTree Utilities
-export { getArrayLength, toReadonlyFieldTree, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
-export type { ArrayFieldTree, ReadonlyFieldTree } from '@ng-forge/dynamic-forms/internal';
 export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
-
-// EventBus — inject inside field components (scoped to the form's DI tree).
-// To dispatch from outside DynamicForm, use EventDispatcher instead.
 export { EventBus, resolveTokens } from './events';
-
-// Registry Utilities
 export { BUILT_IN_FIELDS } from './providers';
-
-// Object utilities (used by integration mappers)
-export { isEqual, omit } from '@ng-forge/dynamic-forms/internal';
-
-// Interpolation utility (used by integration error utilities)
-export { interpolateParams } from '@ng-forge/dynamic-forms/internal';
-
-// Meta utilities (used by UI library wrapped-meta directives)
-export { applyMetaToElement } from '@ng-forge/dynamic-forms/internal';
-
-// Registry services (used by UI library button mappers)
-export { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
-
-// Field State types (for consumers writing custom expressions)
-export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
-
-// Configuration tokens — override defaults via provideDynamicForm() or Angular DI
 export { INITIALIZATION_TIMEOUT_MS } from './utils/initialization-tracker/initialization-tracker';
-
-// Resource Composition Utilities (experimental — uses Angular's experimental resource composition APIs)
-export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { ADDON_ACTION_REGISTRY, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrimeButtonAddon } from '../types/addons';

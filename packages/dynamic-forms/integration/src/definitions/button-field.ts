@@ -1,4 +1,5 @@
-import { FieldDef, FormEvent, FormEventConstructor, StateLogicConfig } from '@ng-forge/dynamic-forms';
+import { FormEvent, FormEventConstructor } from '@ng-forge/dynamic-forms';
+import { FieldDef, StateLogicConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Event arguments that can contain static values or tokens to be resolved at runtime.

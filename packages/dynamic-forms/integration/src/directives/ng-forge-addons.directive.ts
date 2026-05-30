@@ -1,6 +1,6 @@
 import { computed, Directive, inject, Injector, input, Signal, signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { AnyAddon, resolveDynamicValue } from '@ng-forge/dynamic-forms';
+import { AnyAddon, resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 import type { AssertTupleLockstep } from './assert-input-lockstep';
 
 /**

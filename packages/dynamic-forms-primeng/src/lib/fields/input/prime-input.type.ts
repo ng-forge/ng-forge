@@ -1,4 +1,5 @@
-import { DynamicText, TemplateAddon, TextAddon, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
 

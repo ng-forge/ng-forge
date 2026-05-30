@@ -1,10 +1,10 @@
-import { BaseCheckedField, FieldMeta } from '@ng-forge/dynamic-forms';
-import { FieldDef } from '@ng-forge/dynamic-forms';
+import { BaseCheckedField, FieldMeta } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms';
-import { injectFieldSignalContext } from '@ng-forge/dynamic-forms';
-import { omit } from '@ng-forge/dynamic-forms';
+import { buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms/internal';
+import { injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
+import { omit } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Maps a checkbox/toggle field definition to component inputs.

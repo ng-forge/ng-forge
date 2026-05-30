@@ -16,7 +16,7 @@ A wrapper is an Angular component whose template contains a `#fieldComponent` te
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -114,7 +114,7 @@ A validation-aware section wrapper reads the field's validity:
 
 ```typescript name="section-wrapper.component.ts"
 import { ChangeDetectionStrategy, Component, computed, input, ViewContainerRef, viewChild } from '@angular/core';
-import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
   selector: 'app-section-wrapper',
@@ -157,7 +157,7 @@ This means a nested wrapper can `inject()` the wrapper that contains it. Precede
 
 ```typescript
 import { Component, inject, ViewContainerRef, viewChild } from '@angular/core';
-import { ARRAY_CONTEXT, FieldWrapper } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, FieldWrapper } from '@ng-forge/dynamic-forms/integration';
 import { OuterWrapperComponent } from './outer-wrapper.component';
 
 @Component({
@@ -245,7 +245,7 @@ Wrappers are components — test them with `TestBed` like any other. A minimal s
 import { TestBed } from '@angular/core/testing';
 import { Component, viewChild, ViewContainerRef } from '@angular/core';
 import SectionWrapperComponent from './section-wrapper.component';
-import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
 @Component({ template: `<ng-container #slot></ng-container>` })
 class TestHost {

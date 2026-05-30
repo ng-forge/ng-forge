@@ -22,7 +22,7 @@ Compose the `NgForgeFieldHost` wrapper directive via `hostDirectives` and consum
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeField, NgForgeControl, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 
 interface RichTextProps extends Record<string, unknown> {
@@ -71,7 +71,7 @@ Define a `FieldTypeDefinition` that points to your component and the appropriate
 
 ```typescript
 // rich-text-field.config.ts
-import { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 
 export const richTextField: FieldTypeDefinition = {

@@ -9,7 +9,8 @@ import {
   BaseArrayAddButtonField,
   BaseArrayRemoveButtonField,
 } from './array-button.mapper';
-import { ARRAY_CONTEXT, DEFAULT_PROPS, DynamicFormLogger, RootFormRegistryService, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, DEFAULT_PROPS, RootFormRegistryService, NonFieldLogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { vi } from 'vitest';
 
 describe('Array Button Mappers with Logic', () => {

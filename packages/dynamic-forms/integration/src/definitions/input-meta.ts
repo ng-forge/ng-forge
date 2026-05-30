@@ -1,4 +1,4 @@
-import { FieldMeta } from '@ng-forge/dynamic-forms';
+import { FieldMeta } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Autocomplete values for HTML input elements.
