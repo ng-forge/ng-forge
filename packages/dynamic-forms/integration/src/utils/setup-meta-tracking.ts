@@ -51,9 +51,9 @@ function applyTrackedAttrsToTargets(
       const selector = (typeof options.selector === 'function' ? options.selector() : options.selector)?.trim() || undefined;
 
       const selectorChanged = selector !== cachedSelector;
+      const prevDeps = previousDeps;
       const depsChanged =
-        !!currentDeps &&
-        (!previousDeps || currentDeps.length !== previousDeps.length || currentDeps.some((d, i) => d !== previousDeps![i]));
+        !!currentDeps && (!prevDeps || currentDeps.length !== prevDeps.length || currentDeps.some((d, i) => d !== prevDeps[i]));
 
       if (selectorChanged || depsChanged || cachedTargets.length === 0) {
         cachedSelector = selector;
