@@ -22,7 +22,7 @@ function makeLogger(): LoggerStub {
 // Minimal ReadonlyFieldTree stub — orphan-guard discriminates on `form !== null`.
 // The runner itself never invokes methods on `ctx.form`, so an opaque object
 // is sufficient.
-const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+const FORM_STUB = { disabled: signal(false) } as unknown as NonNullable<AddonActionContext['form']>;
 
 function makeCtx(overrides: Partial<AddonActionContext> = {}): AddonActionContext {
   // Default ctx is field-bound: non-null `form` + callable `setValue`.
@@ -78,6 +78,43 @@ describe('runPresetAction (core)', () => {
       const orphanCtx = { field: { key: '', type: 'input' }, form: null, value: 'hello' } as unknown as AddonActionContext;
       await runPresetAction('copy', orphanCtx, collab, ADAPTER, FIELD_LABEL);
       expect(writeText).toHaveBeenCalledWith('hello');
+    });
+  });
+
+  describe('disabled field guard', () => {
+    // A disabled field is non-editable; value-mutating presets (clear/reset/paste) must not change
+    // it, consistent with the rest of the library treating disabled fields as non-editable.
+    const formWith = (disabled: boolean) => ({ disabled: signal(disabled) }) as unknown as NonNullable<AddonActionContext['form']>;
+
+    it('skips clear on a disabled field and warns', async () => {
+      const fieldValueSetter = vi.fn();
+      const { collab, logger } = makeCollaborators({ fieldValueSetter });
+      await runPresetAction('clear', makeCtx({ form: formWith(true), value: 'x' }), collab, ADAPTER, FIELD_LABEL);
+      expect(fieldValueSetter).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('skips reset on a disabled field', async () => {
+      const fieldValueSetter = vi.fn();
+      const fieldDefaultValueGetter = vi.fn(() => 'default-val');
+      const { collab } = makeCollaborators({ fieldValueSetter, fieldDefaultValueGetter });
+      await runPresetAction('reset', makeCtx({ form: formWith(true), value: 'x' }), collab, ADAPTER, FIELD_LABEL);
+      expect(fieldValueSetter).not.toHaveBeenCalled();
+    });
+
+    it('still mutates an enabled field (control)', async () => {
+      const fieldValueSetter = vi.fn();
+      const { collab } = makeCollaborators({ fieldValueSetter });
+      await runPresetAction('clear', makeCtx({ form: formWith(false), value: 'x' }), collab, ADAPTER, FIELD_LABEL);
+      expect(fieldValueSetter).toHaveBeenCalledWith('');
+    });
+
+    it('still allows copy (non-mutating) on a disabled field', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { readText: vi.fn(), writeText } });
+      const { collab } = makeCollaborators();
+      await runPresetAction('copy', makeCtx({ form: formWith(true), value: 'hi' }), collab, ADAPTER, FIELD_LABEL);
+      expect(writeText).toHaveBeenCalledWith('hi');
     });
   });
 

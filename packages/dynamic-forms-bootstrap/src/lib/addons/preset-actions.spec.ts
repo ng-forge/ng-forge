@@ -12,7 +12,7 @@ function makeLogger(): Logger {
   };
 }
 
-const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+const FORM_STUB = { disabled: signal(false) } as unknown as NonNullable<AddonActionContext['form']>;
 
 function makeCtx(overrides: Partial<AddonActionContext> = {}): AddonActionContext {
   // Default ctx is field-bound: non-null `form` + callable `setValue`.
