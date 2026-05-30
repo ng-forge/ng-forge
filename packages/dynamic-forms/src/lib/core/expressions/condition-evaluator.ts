@@ -10,6 +10,19 @@ import { compareValues, getNestedValue, hasNestedProperty } from './value-utils'
 import { ExpressionParser } from './parser/expression-parser';
 
 /**
+ * A sync condition slot must return a value, not an async primitive. A Promise
+ * or Observable is a truthy object, so `!!result` would silently resolve to
+ * `true` regardless of the eventual value. Detect both so the caller can warn
+ * and fall back to `false` instead. Use the `async`/`http` condition types for
+ * asynchronous logic.
+ */
+function isThenableOrObservable(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  const candidate = value as { then?: unknown; subscribe?: unknown };
+  return typeof candidate.then === 'function' || typeof candidate.subscribe === 'function';
+}
+
+/**
  * Evaluate conditional expression
  * Uses secure AST-based parsing for JavaScript expressions
  */
@@ -42,7 +55,15 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       }
 
       try {
-        return !!customFn(context);
+        const result = customFn(context);
+        if (isThenableOrObservable(result)) {
+          context.logger.warn(
+            `Custom condition '${registeredName ?? '<inline>'}' returned a Promise or Observable. ` +
+              `Synchronous conditions must return a value; use an 'async' or 'http' condition type for asynchronous logic. Treating as false.`,
+          );
+          return false;
+        }
+        return !!result;
       } catch (error) {
         context.logger.error('Error executing custom function:', registeredName ?? '<inline>', error);
         return false;

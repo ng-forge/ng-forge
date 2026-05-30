@@ -438,6 +438,46 @@ describe('condition-evaluator', () => {
         expect(contextChecker).toHaveBeenCalledWith(contextWithChecker);
       });
 
+      // A sync condition slot (`custom`) must return a value, not a thenable/observable.
+      // `!!promise` and `!!observable` are both truthy, so without a guard a user who
+      // wires an async function into the sync slot gets an unconditional `true` with no
+      // signal. The 'async'/'http' condition types exist for asynchronous logic.
+      describe('async result misuse in the sync slot', () => {
+        it('returns false (not true) and warns when a custom fn returns a Promise', () => {
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => Promise.resolve(false),
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(false);
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Promise or Observable'));
+        });
+
+        it('returns false (not true) and warns when a custom fn returns an Observable-like value', () => {
+          const observableLike = { subscribe: () => ({ unsubscribe: () => undefined }) };
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => observableLike,
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(false);
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Promise or Observable'));
+        });
+
+        it('still returns true for a thenable-free object (normal truthy result)', () => {
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => ({ ok: true }),
+          };
+
+          expect(evaluateCondition(expression, mockContext)).toBe(true);
+        });
+      });
+
       describe('inline fn alternative', () => {
         it('evaluates inline fn correctly', () => {
           const inlineFn = vi.fn().mockReturnValue(true);

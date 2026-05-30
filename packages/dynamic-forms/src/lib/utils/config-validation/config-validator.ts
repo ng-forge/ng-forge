@@ -22,6 +22,12 @@ interface ConfigTraversalData {
   domIds: string[];
   types: Set<string>;
   regexErrors: string[];
+  /**
+   * Own keys (not scoped paths) of value-bearing fields that contain a dot.
+   * Nesting must be expressed with `group` fields — a dotted key like
+   * `'address.city'` is looked up literally and silently mis-binds.
+   */
+  dottedKeys: string[];
 }
 
 /**
@@ -44,6 +50,13 @@ function collectFieldData(
     // mis-registered field type doesn't silently drop from collision checks.
     const valueHandling = field.type ? getFieldValueHandling(field.type, registry) : 'include';
     const participatesInValue = valueHandling !== 'exclude' && valueHandling !== 'flatten';
+
+    // A value-bearing field's own key must not contain a dot (checked regardless
+    // of `collectKeys` so array-item template keys are covered too). Dotted keys
+    // never nest — nesting is structural via `group` fields.
+    if (field.key && field.key.includes('.') && participatesInValue) {
+      data.dottedKeys.push(field.key);
+    }
 
     if (collectKeys && field.key && participatesInValue) {
       const scopedKey = pathPrefix ? `${pathPrefix}.${field.key}` : field.key;
@@ -190,9 +203,20 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
     domIds: [],
     types: new Set<string>(),
     regexErrors: [],
+    dottedKeys: [],
   };
 
   collectFieldData(fields, data, registry, '');
+
+  if (data.dottedKeys.length > 0) {
+    const list = Array.from(new Set(data.dottedKeys))
+      .map((k) => `'${k}'`)
+      .join(', ');
+    throw new DynamicFormError(
+      `Field key(s) contain a dot: ${list}. Dotted keys are not supported — express nesting with 'group' fields ` +
+        `(e.g. { type: 'group', key: 'address', fields: [{ type: 'input', key: 'city' }] }).`,
+    );
+  }
 
   validateNoDuplicateKeys(data.keys);
   validateNoDomIdCollisions(data.domIds);

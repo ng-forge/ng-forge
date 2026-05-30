@@ -1295,6 +1295,36 @@ describe('form-mapping', () => {
         });
       });
 
+      // `excludeValueIfHidden` (value knob) and `validateWhenHidden` (validation knob)
+      // are independent. Keeping a hidden field's value does NOT opt it into validation —
+      // a hidden group with excludeValueIfHidden:false + a required child + default
+      // validateWhenHidden(false) keeps the value but still skips its validation. This
+      // documents the decoupling so the two knobs aren't assumed to move together.
+      it('keeps validation skipped for a hidden required child even when its value is retained (excludeValueIfHidden:false)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            hidden: true,
+            excludeValueIfHidden: false,
+            fields: [{ key: 'street', type: 'input', required: true } as FieldDef & FieldWithValidation],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Value is retained, but validation is governed by validateWhenHidden (default
+          // false), not by excludeValueIfHidden — so required does not fire.
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
       it('should let a child override and become inert when its parent says validate-when-hidden', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '' } });
@@ -1480,6 +1510,58 @@ describe('form-mapping', () => {
 
           expect(formInstance().valid()).toBe(true);
         });
+      });
+    });
+
+    // ng-forge defaults number inputs to NaN so signal-forms uses valueAsNumber;
+    // clearing a number input also yields NaN (see default-value.ts). These pin the
+    // resulting validation + wire-serialization contract, inspired by formly #3813
+    // (a non-required number throwing after type-then-clear) and #3698 (nullability).
+    describe('number-input NaN contract', () => {
+      it('does not make a NON-required number field invalid when its value is NaN (cleared)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ age: NaN });
+          const fieldDef: FieldDef & FieldWithValidation = { key: 'age', type: 'input', props: { type: 'number' } };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.age);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('treats a NaN value as empty for a REQUIRED number field (cleared = unsatisfied)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ age: NaN });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'age',
+            type: 'input',
+            required: true,
+            props: { type: 'number' },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.age);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('serializes a NaN number value to null over the wire (JSON contract)', () => {
+        // The in-memory model value is NaN, but JSON.stringify maps NaN to null, so a
+        // cleared number reaches an HTTP backend as null, not NaN. Documented so consumers
+        // reading the bound value (NaN) vs the submitted payload (null) know they differ.
+        expect(JSON.stringify({ age: NaN })).toBe('{"age":null}');
       });
     });
   });

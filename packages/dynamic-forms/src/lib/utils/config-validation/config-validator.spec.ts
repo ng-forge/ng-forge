@@ -330,4 +330,26 @@ describe('validateFormConfig', () => {
       expect(() => validateFormConfig(fields, registryWith('page', 'group', 'input'), mockLogger())).not.toThrow();
     });
   });
+
+  // Nesting is expressed structurally via `group` fields, never via a dotted key.
+  // A leaf field keyed `'address.city'` does a literal `pathRecord['address.city']`
+  // lookup (undefined), so it silently mis-binds rather than nesting. Reject it at
+  // bootstrap so a Formly-style dotted-key config fails loudly instead.
+  describe('dotted field keys', () => {
+    it('throws when a value-bearing leaf field key contains a dot', () => {
+      const fields: FieldDef<unknown>[] = [{ key: 'address.city', type: 'input' }];
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow(DynamicFormError);
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).toThrow('address.city');
+    });
+
+    it('throws when a group field key contains a dot', () => {
+      const fields = [{ key: 'a.b', type: 'group', fields: [{ key: 'x', type: 'input' }] }] as unknown as FieldDef<unknown>[];
+      expect(() => validateFormConfig(fields, registryWith('group', 'input'), mockLogger())).toThrow(DynamicFormError);
+    });
+
+    it('does not throw for the same structure expressed via nested group fields', () => {
+      const fields = [{ key: 'address', type: 'group', fields: [{ key: 'city', type: 'input' }] }] as unknown as FieldDef<unknown>[];
+      expect(() => validateFormConfig(fields, registryWith('group', 'input'), mockLogger())).not.toThrow();
+    });
+  });
 });
