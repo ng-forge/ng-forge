@@ -1,4 +1,4 @@
-import { ResolvedValidationExecutionConfig, ValidationExecutionConfig } from '../../../models/validation-execution-config';
+import { ResolvedValidationExecutionConfig, ValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
 import { VALIDATION_EXECUTION_DEFAULTS } from './validation-execution.token';
 

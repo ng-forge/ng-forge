@@ -13,21 +13,21 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { form, schema, type SchemaPath } from '@angular/forms/signals';
 import { ContainerFieldComponent } from './container-field.component';
-import { ContainerField } from '../../definitions/default/container-field';
-import { FieldDef } from '../../definitions/base/field-def';
+import { ContainerField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
-import { baseFieldMapper, FieldSignalContext } from '../../mappers';
+import { baseFieldMapper, FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { provideDynamicForm } from '../../providers';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '../../events';
-import { FieldWrapper, WrapperTypeDefinition } from '../../models/wrapper-type';
+import { FieldWrapper, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator } from '../../core/validation/validator-factory';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager } from '../../state/form-state-manager';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 
 // ─── Mock Wrapper Components ──────────────────────────────────────────────────

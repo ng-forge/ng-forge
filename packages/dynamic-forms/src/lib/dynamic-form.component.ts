@@ -14,19 +14,19 @@ import {
   TemplateRef,
   WritableSignal,
 } from '@angular/core';
-import { FieldDef } from './definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DfFieldOutlet } from './directives/df-field-outlet/df-field-outlet.directive';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
-import { FormConfig, FormOptions } from './models/form-config';
-import { RegisteredFieldTypes } from './models/registry/field-registry';
+import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from './events/event.bus';
 import { SubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
 import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
-import { InferFormValue } from './models/types/form-value-inference';
-import { hasChildFields, isContainerField } from './models/types/type-guards';
+import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { FORM_INITIALIZER } from './providers/form-initializer.token';
@@ -34,13 +34,13 @@ import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
-import { DynamicFormLogger } from './providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
 import { FormIdPrefixService } from './core/registry/form-id-prefix.service';
 import { EventDispatcher } from './events/event-dispatcher';
 import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.directive';
-import { DF_FIELD_TEMPLATES } from './models/addon/df-field-templates.token';
+import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Dynamic form component — renders a form based on configuration.

@@ -1,10 +1,10 @@
-import { Logger } from '../../providers/features/logger/logger.interface';
-import { DerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { DerivationLogConfig, shouldLog } from '@ng-forge/dynamic-forms/internal';
 import { DerivationProcessingResult } from './derivation-types';
 
 // Re-export types from models for backwards compatibility
-export type { DerivationLogLevel, DerivationLogConfig } from '../../models/logic/logic-config';
-export { createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
+export type { DerivationLogLevel, DerivationLogConfig } from '@ng-forge/dynamic-forms/internal';
+export { createDefaultDerivationLogConfig, shouldLog } from '@ng-forge/dynamic-forms/internal';
 
 /** Information about a single derivation evaluation for logging. */
 export interface DerivationLogEntry {

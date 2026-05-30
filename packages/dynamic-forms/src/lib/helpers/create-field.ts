@@ -1,5 +1,5 @@
-import { DynamicFormError } from '../errors/dynamic-form-error';
-import { AvailableFieldTypes, ExtractField } from '../models';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { AvailableFieldTypes, ExtractField } from '@ng-forge/dynamic-forms/internal';
 
 /** Container field types that do NOT support labels */
 const CONTAINER_TYPES = ['group', 'row', 'array', 'container'] as const;

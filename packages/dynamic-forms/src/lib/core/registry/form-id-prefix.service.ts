@@ -1,8 +1,8 @@
 import { computed, DestroyRef, ElementRef, inject, Injectable, isDevMode, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { FORM_OPTIONS } from '../../models/field-signal-context.token';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormInstanceRegistry } from './dynamic-form-instance-registry.service';
 
 // Whitespace breaks the space-separated aria-describedby list; punctuation breaks selectors.

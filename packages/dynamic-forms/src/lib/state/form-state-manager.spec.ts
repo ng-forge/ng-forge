@@ -4,17 +4,17 @@ import { computed, signal, Signal, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from './form-state-manager';
-import { FormConfig, FormOptions } from '../models/form-config';
-import { RegisteredFieldTypes } from '../models/registry/field-registry';
+import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '../events/event.bus';
-import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
-import { FunctionRegistryService } from '../core/registry/function-registry.service';
-import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
-import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
 
 type TestModel = Record<string, unknown>;

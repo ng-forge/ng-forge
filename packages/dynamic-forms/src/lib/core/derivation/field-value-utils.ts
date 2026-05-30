@@ -1,8 +1,8 @@
 import { isWritableSignal, untracked } from '@angular/core';
 import type { FieldState, FieldTree } from '@angular/forms/signals';
-import type { FieldTreeRecord } from '../field-tree-utils';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import type { WarningTracker } from '../../utils/warning-tracker';
+import type { FieldTreeRecord } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import type { WarningTracker } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Navigates the form tree to resolve a field instance at the given path.

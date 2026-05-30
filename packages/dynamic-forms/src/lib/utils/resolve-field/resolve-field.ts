@@ -1,8 +1,8 @@
 import { computed, DestroyRef, Injector, runInInjectionContext, Signal, Type } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
 import { catchError, forkJoin, from, map, Observable, of, OperatorFunction, pipe, scan, switchMap } from 'rxjs';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
 
 /** Resolved field ready for rendering with ngComponentOutlet / DfFieldOutlet. */

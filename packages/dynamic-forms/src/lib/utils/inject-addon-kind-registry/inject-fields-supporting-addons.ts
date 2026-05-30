@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
-import { FieldAddonSupport } from '../../models/addon/addon-kind';
-import { FIELD_REGISTRY } from '../../models/field-type';
+import { FieldAddonSupport } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 
 /** One entry per field type that declares addon support. */
 export interface FieldAddonSupportEntry {

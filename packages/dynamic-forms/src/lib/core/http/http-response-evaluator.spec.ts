@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { evaluateHttpValidationResponse } from './http-response-evaluator';
-import { HttpValidationResponseMapping } from '../../models/http/http-response-mapping';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { HttpValidationResponseMapping } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 
 describe('evaluateHttpValidationResponse', () => {
   function createLogger(): Logger {

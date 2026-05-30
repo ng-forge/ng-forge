@@ -6,13 +6,13 @@ import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
 import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
 import TestCheckboxHarnessComponent from '../../testing/src/harnesses/test-checkbox.harness';
 import TestSelectHarnessComponent from '../../testing/src/harnesses/test-select.harness';
-import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
-import { FieldWrapper, WRAPPER_REGISTRY, WrapperTypeDefinition } from './models/wrapper-type';
-import { ARRAY_CONTEXT } from './models/field-signal-context.token';
-import { ArrayContext } from './mappers/types';
-import { BaseCheckedField, BaseValueField } from './definitions';
+import { FieldWrapper, WRAPPER_REGISTRY, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ARRAY_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { ArrayContext } from '@ng-forge/dynamic-forms/internal';
+import { BaseCheckedField, BaseValueField } from '@ng-forge/dynamic-forms/internal';
 import { ChangeDetectionStrategy, Component, DebugElement, inject, viewChild, ViewContainerRef } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -20,7 +20,7 @@ import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
 import { EventBus } from './events/event.bus';
 import { arrayEvent } from './events/array-event';
-import { FormConfig } from './models/form-config';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 
 // Test specific form config type
 type TestFormConfig = {

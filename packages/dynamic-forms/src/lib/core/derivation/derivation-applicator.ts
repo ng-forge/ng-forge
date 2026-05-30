@@ -1,15 +1,15 @@
 import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import type { FieldStateInfo } from '../../models/expressions/field-state-context';
-import type { FieldTreeRecord } from '../field-tree-utils';
-import { isEqual } from '../../utils/object-utils';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { EvaluationContext } from '@ng-forge/dynamic-forms/internal';
+import type { FieldStateInfo } from '@ng-forge/dynamic-forms/internal';
+import type { FieldTreeRecord } from '@ng-forge/dynamic-forms/internal';
+import { isEqual } from '@ng-forge/dynamic-forms/internal';
 import { parseArrayPath, resolveArrayPath, isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
-import { CustomFunction } from '../expressions/custom-function-types';
-import { evaluateCondition } from '../expressions/condition-evaluator';
-import { getNestedValue } from '../expressions/value-utils';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { CustomFunction } from '@ng-forge/dynamic-forms/internal';
+import { evaluateCondition } from '@ng-forge/dynamic-forms/internal';
+import { getNestedValue } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import {
   createDerivationChainContext,
   createDerivationKey,
@@ -18,12 +18,12 @@ import {
   DerivationEntry,
   DerivationProcessingResult,
 } from './derivation-types';
-import type { WarningTracker } from '../../utils/warning-tracker';
+import type { WarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { computeValueFromEntry } from './compute-derived-value';
 import { getParentPathInScope, resolveArrayItemScope } from './evaluation-scope';
 import { MAX_DERIVATION_ITERATIONS } from './derivation-constants';
 import { DerivationLogger } from './derivation-logger.service';
-import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
+import { readFieldStateInfo, createFormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
 import { applyValueToForm, readFieldDirty, resetFieldState } from './field-value-utils';
 
 // Re-export for backwards compatibility

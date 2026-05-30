@@ -1,27 +1,27 @@
 import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider, Type } from '@angular/core';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
 import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
-import { FieldDef } from '../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
 import { ADDON_KIND_DEFINITIONS } from './features/addons/addon-kind-definitions.token';
-import { DynamicFormLogger } from './features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './features/logger/console-logger';
-import type { InferFormValue as RealInferFormValue } from '../models/types/form-value-inference';
+import type { InferFormValue as RealInferFormValue } from '@ng-forge/dynamic-forms/internal';
 import {
   isWrapperTypeDefinition,
   WrapperTypeDefinition,
   WRAPPER_AUTO_ASSOCIATIONS,
   WRAPPER_REGISTRY,
   WrapperConfig,
-} from '../models/wrapper-type';
+} from '@ng-forge/dynamic-forms/internal';
 import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
 
 // Re-export global types for module augmentation
-export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '../models/registry';
-export type { RegisteredFieldTypes } from '../models/types';
+export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '@ng-forge/dynamic-forms/internal';
+export type { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 
 /** Extract FieldDef type from FieldTypeDefinition */
 type ExtractFieldDef<T> = T extends FieldTypeDefinition<infer F> ? F : never;

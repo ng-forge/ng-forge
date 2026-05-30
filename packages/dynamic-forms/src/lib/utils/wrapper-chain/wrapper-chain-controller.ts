@@ -2,9 +2,9 @@ import { ComponentRef, computed, DestroyRef, EnvironmentInjector, inject, Inject
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { map, Observable, of, switchMap } from 'rxjs';
-import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 import { isSameWrapperChain } from '../resolve-wrappers/resolve-wrappers';
 import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from './wrapper-chain';

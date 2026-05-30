@@ -1,4 +1,4 @@
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Tokens recognised by the dependency resolver. Exported so the few callers

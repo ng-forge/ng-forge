@@ -7,7 +7,7 @@ import { PopArrayItemEvent } from '../../events/constants/pop-array-item.event';
 import { ShiftArrayItemEvent } from '../../events/constants/shift-array-item.event';
 import { RemoveAtIndexEvent } from '../../events/constants/remove-at-index.event';
 import { EventBus } from '../../events/event.bus';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 /** Union type of all array manipulation events. */
 export type ArrayEvent =

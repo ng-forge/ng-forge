@@ -3,8 +3,8 @@ import { createEnvironmentInjector, ElementRef, EnvironmentInjector, signal } fr
 import { TestBed } from '@angular/core/testing';
 import { FormIdPrefixService } from './form-id-prefix.service';
 import { DynamicFormInstanceRegistry } from './dynamic-form-instance-registry.service';
-import { FORM_OPTIONS } from '../../models/field-signal-context.token';
-import { FormOptions } from '../../models/form-config';
+import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
+import { FormOptions } from '@ng-forge/dynamic-forms/internal';
 
 describe('FormIdPrefixService', () => {
   let parent: EnvironmentInjector;

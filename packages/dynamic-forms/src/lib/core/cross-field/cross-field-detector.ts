@@ -1,8 +1,8 @@
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FormStateCondition, isFormStateCondition, StateLogicConfig } from '../../models/logic/logic-config';
-import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
-import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
-import { CustomFunctionScope } from '../expressions/custom-function-types';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { FormStateCondition, isFormStateCondition, StateLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import { CustomValidatorConfig, ValidatorConfig } from '@ng-forge/dynamic-forms/internal';
+import { SchemaApplicationConfig } from '@ng-forge/dynamic-forms/internal';
+import { CustomFunctionScope } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Regular expression to detect formValue property access in expressions.

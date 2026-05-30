@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { validateFormConfig } from './config-validator';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 
 function mockLogger(): Logger {
   return { log: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() };

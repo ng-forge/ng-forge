@@ -19,9 +19,9 @@ import {
   switchMap,
   timer,
 } from 'rxjs';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { getChangedKeys } from '../../utils/object-utils';
+import { getChangedKeys } from '@ng-forge/dynamic-forms/internal';
 import { getDebouncePeriods } from './debounce-period-utils';
 import { BaseDerivationEntry } from './derivation-entry-base';
 import { buildEntryStreamPipeline } from './entry-set-utils';

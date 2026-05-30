@@ -1,6 +1,6 @@
 import { inject, InjectionToken, Type } from '@angular/core';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
 
 /**

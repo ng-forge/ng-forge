@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { withValueExclusionDefaults } from './with-value-exclusion-defaults';
 import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
 import { isDynamicFormFeature } from '../dynamic-form-feature';
-import { ResolvedValueExclusionConfig } from '../../../models/value-exclusion-config';
+import { ResolvedValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
 describe('withValueExclusionDefaults', () => {
   describe('Feature structure', () => {

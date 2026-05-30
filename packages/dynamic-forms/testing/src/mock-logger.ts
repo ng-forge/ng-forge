@@ -1,8 +1,8 @@
 import { Provider } from '@angular/core';
 import { vi, type Mock } from 'vitest';
-import { DynamicFormLogger } from '../../src/lib/providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../../src/lib/providers/features/logger/console-logger';
-import { Logger } from '../../src/lib/providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /** Mock logger with vitest spies for testing. */
 export interface MockLogger extends Logger {

@@ -1,5 +1,5 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms/internal';
 
 /** Metadata attached to normalized array fields during simplified array expansion. */
 export interface NormalizedArrayMetadata {

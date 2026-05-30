@@ -1,13 +1,13 @@
 import { computed, Injector, runInInjectionContext, signal, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { ArrayField } from '../../definitions/default/array-field';
-import { FieldDef } from '../../definitions/base/field-def';
-import { ArrayContext, FieldSignalContext, GroupContext } from '../../mappers/types';
-import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '../../models/field-signal-context.token';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { ArrayField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { ArrayContext, FieldSignalContext, GroupContext } from '@ng-forge/dynamic-forms/internal';
+import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
-import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { isEqual } from '../object-utils';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { isEqual } from '@ng-forge/dynamic-forms/internal';
 
 /** Options for creating an array item injector. */
 export interface CreateArrayItemInjectorOptions<TModel extends Record<string, unknown>> {

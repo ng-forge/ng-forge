@@ -1,7 +1,7 @@
 // New organized exports
 export { applyValidator, applyValidators } from './validation';
 export { applyLogic, applyMultipleLogic } from './logic';
-export { compareValues, createLogicFunction, evaluateCondition, getNestedValue } from './expressions';
+export { compareValues, createLogicFunction, evaluateCondition, getNestedValue } from '@ng-forge/dynamic-forms/internal';
 export { createDynamicValueFunction, createTypePredicateFunction } from './values';
 export { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './registry';
 export { PageOrchestratorComponent } from './page-orchestrator';
@@ -21,8 +21,8 @@ export type { CreateSchemaOptions } from './schema-builder';
 export { applyFormLevelSchema, createFormLevelSchema } from './form-schema-merger';
 
 // Re-export types from specific model files
-export type { ValidatorConfig } from '../models/validation/validator-config';
-export type { LogicConfig } from '../models/logic/logic-config';
-export type { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas/schema-definition';
-export type { ConditionalExpression } from '../models/expressions/conditional-expression';
-export type { EvaluationContext } from '../models/expressions/evaluation-context';
+export type { ValidatorConfig } from '@ng-forge/dynamic-forms/internal';
+export type { LogicConfig } from '@ng-forge/dynamic-forms/internal';
+export type { SchemaApplicationConfig, SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
+export type { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+export type { EvaluationContext } from '@ng-forge/dynamic-forms/internal';

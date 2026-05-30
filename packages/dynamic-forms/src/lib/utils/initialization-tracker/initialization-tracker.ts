@@ -4,7 +4,7 @@ import { Observable, of, throwError, TimeoutError } from 'rxjs';
 import { catchError, filter, map, scan, shareReplay, switchMap, take, timeout } from 'rxjs/operators';
 import { EventBus } from '../../events/event.bus';
 import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injection token for configuring the initialization timeout in milliseconds.

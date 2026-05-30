@@ -1,19 +1,19 @@
-import { FieldTypeDefinition } from '../models/field-type';
-import { arrayFieldMapper } from '../mappers/array/array-field-mapper';
-import { groupFieldMapper } from '../mappers/group/group-field-mapper';
-import { rowFieldMapper } from '../mappers/row/row-field-mapper';
-import { pageFieldMapper } from '../mappers/page/page-field-mapper';
-import { textFieldMapper } from '../mappers/text/text-field-mapper';
-import { containerFieldMapper } from '../mappers/container/container-field-mapper';
-import { RowField } from '../definitions/default/row-field';
-import { GroupField } from '../definitions/default/group-field';
-import { HiddenField } from '../definitions/default/hidden-field';
-import { ArrayField } from '../definitions/default/array-field';
-import { PageField } from '../definitions/default/page-field';
-import { TextField } from '../definitions/default/text-field';
-import { ContainerField } from '../definitions/default/container-field';
-import { WrapperTypeDefinition } from '../models';
-import { CssWrapper, RowWrapper } from '../definitions/default';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { arrayFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { groupFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { rowFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { pageFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { textFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { containerFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { RowField } from '@ng-forge/dynamic-forms/internal';
+import { GroupField } from '@ng-forge/dynamic-forms/internal';
+import { HiddenField } from '@ng-forge/dynamic-forms/internal';
+import { ArrayField } from '@ng-forge/dynamic-forms/internal';
+import { PageField } from '@ng-forge/dynamic-forms/internal';
+import { TextField } from '@ng-forge/dynamic-forms/internal';
+import { ContainerField } from '@ng-forge/dynamic-forms/internal';
+import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { CssWrapper, RowWrapper } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in field types provided by the dynamic form library. */
 /**

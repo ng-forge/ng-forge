@@ -1,17 +1,17 @@
 import { GroupFieldComponent } from './group-field.component';
-import { GroupField } from '../../definitions/default/group-field';
-import { FieldDef } from '../../definitions/base/field-def';
+import { GroupField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { baseFieldMapper, FieldSignalContext } from '../../mappers';
+import { baseFieldMapper, FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { provideDynamicForm } from '../../providers';
-import { FIELD_REGISTRY } from '../../models/field-type';
-import { FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '../../events';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 
 describe('GroupFieldComponent', () => {
   function setupGroupTest(field: GroupField<readonly FieldDef<unknown>[]>, groupValue?: Record<string, unknown>) {

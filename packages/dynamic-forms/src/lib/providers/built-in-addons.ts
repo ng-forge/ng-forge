@@ -1,5 +1,5 @@
-import { DynamicFormError } from '../errors/dynamic-form-error';
-import { AddonKindDefinition } from '../models/addon/addon-kind';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in addon kinds shipped by core. */
 export const BUILT_IN_ADDON_KINDS: readonly AddonKindDefinition[] = [

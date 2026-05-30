@@ -1,5 +1,5 @@
-import type { AsyncDerivationFunction } from '../expressions/async-custom-function-types';
-import type { CustomFunction } from '../expressions/custom-function-types';
+import type { AsyncDerivationFunction } from '@ng-forge/dynamic-forms/internal';
+import type { CustomFunction } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Reads the optional inline `fn` property off a derivation config.

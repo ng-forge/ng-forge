@@ -2,15 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
-import { ValidatorConfig } from '../../models/validation/validator-config';
+import { ValidatorConfig } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
-import { createWarningTracker } from '../../utils/warning-tracker';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
+import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator, applyValidators } from './validator-factory';
-import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
 
 // Mock only validateHttp to capture callback options passed by applyDeclarativeHttpValidator.

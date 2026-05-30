@@ -1,7 +1,7 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { extractStringDependencies } from '../cross-field/cross-field-detector';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from '../property-derivation/property-derivation-types';
 import { topologicalSort } from './derivation-sorter';

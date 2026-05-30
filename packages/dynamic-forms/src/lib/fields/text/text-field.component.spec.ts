@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import TextFieldComponent from './text-field.component';
-import { TextProps } from '../../definitions/default/text-field';
+import { TextProps } from '@ng-forge/dynamic-forms/internal';
 import { DynamicTextPipe } from '../../pipes';
 
 @Component({

@@ -1,5 +1,5 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { WrapperAutoAssociations, WrapperConfig } from '../../models/wrapper-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { WrapperAutoAssociations, WrapperConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Shared empty chain — returned when no wrappers apply so callers get a

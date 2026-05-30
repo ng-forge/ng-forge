@@ -1,10 +1,10 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { isRowField } from '../../definitions/default/row-field';
-import { isGroupField } from '../../definitions/default/group-field';
-import { isArrayField } from '../../definitions/default/array-field';
-import { isContainerTypedField } from '../../definitions/default/container-field';
-import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
-import { normalizeFieldsArray } from '../object-utils';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { isRowField } from '@ng-forge/dynamic-forms/internal';
+import { isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { isArrayField } from '@ng-forge/dynamic-forms/internal';
+import { isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition, getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
+import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 
 /** Represents a field definition that has been processed through the flattening algorithm. */
 export interface FlattenedField extends FieldDef<unknown> {

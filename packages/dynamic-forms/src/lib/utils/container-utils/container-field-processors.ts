@@ -1,9 +1,9 @@
 import { InjectionToken } from '@angular/core';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { flattenFields } from '../flattener/field-flattener';
 import { getFieldDefaultValue } from '../default-value/default-value';
-import { keyBy, mapValues } from '../object-utils';
+import { keyBy, mapValues } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Creates memoized field processing functions shared across container components.

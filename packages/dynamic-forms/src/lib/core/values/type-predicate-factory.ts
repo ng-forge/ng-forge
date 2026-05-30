@@ -1,5 +1,5 @@
-import type { Logger } from '../../providers/features/logger/logger.interface';
-import { ExpressionParser } from '../expressions/parser/expression-parser';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
+import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Create a type predicate function from a predicate string.

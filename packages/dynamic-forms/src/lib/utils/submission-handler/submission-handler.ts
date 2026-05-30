@@ -3,10 +3,10 @@ import { FieldTree, submit } from '@angular/forms/signals';
 import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
 import { EventBus } from '../../events/event.bus';
 import { SubmitEvent } from '../../events/constants/submit.event';
-import { FormConfig } from '../../models/form-config';
-import { RegisteredFieldTypes } from '../../models/registry/field-registry';
-import type { InferFormValue } from '../../models/types/form-value-inference';
-import type { Logger } from '../../providers/features/logger/logger.interface';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
+import type { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Options for creating a submission handler.

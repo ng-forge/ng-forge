@@ -1,9 +1,9 @@
 import { DestroyRef, Injector, signal, Signal, untracked, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { catchError, concatMap, EMPTY, Observable, of, Subject } from 'rxjs';
-import { FormConfig } from '../models/form-config';
-import { Logger } from '../providers/features/logger/logger.interface';
-import { RegisteredFieldTypes } from '../models/registry/field-registry';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import {
   Action,
   createDestroyedState,
@@ -23,7 +23,7 @@ import {
   StateTransition,
   TransitionResult,
 } from './state-types';
-import { assertNever } from '../utils/object-utils';
+import { assertNever } from '@ng-forge/dynamic-forms/internal';
 import { SideEffectScheduler } from './side-effect-scheduler';
 
 /**

@@ -1,5 +1,5 @@
 import { FieldTree } from '@angular/forms/signals';
-import { ReadonlyFieldTree, toReadonlyFieldTreeCached, writeToFieldValue } from '../../core/field-tree-utils';
+import { ReadonlyFieldTree, toReadonlyFieldTreeCached, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**

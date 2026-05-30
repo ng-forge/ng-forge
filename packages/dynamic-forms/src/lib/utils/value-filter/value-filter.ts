@@ -1,9 +1,9 @@
 import { FieldTree } from '@angular/forms/signals';
-import { FieldDef } from '../../definitions/base/field-def';
-import { isGroupField } from '../../definitions/default/group-field';
-import { isArrayField } from '../../definitions/default/array-field';
-import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
-import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '../../models/value-exclusion-config';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { isArrayField } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition, getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
+import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Resolves the effective exclusion config for a field using the 3-tier hierarchy:

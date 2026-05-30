@@ -1,5 +1,5 @@
 import { InjectionToken, signal, Signal, WritableSignal } from '@angular/core';
-import { isEqual } from '../../utils/object-utils';
+import { isEqual } from '@ng-forge/dynamic-forms/internal';
 
 /** Per-field signal store for property overrides. */
 export interface PropertyOverrideStore {

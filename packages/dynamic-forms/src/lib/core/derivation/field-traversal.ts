@@ -1,7 +1,7 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { hasChildFields } from '../../models/types/type-guards';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { hasChildFields } from '@ng-forge/dynamic-forms/internal';
 import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
-import { normalizeFieldsArray } from '../../utils/object-utils';
+import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Visitor invoked for every field encountered during traversal.

@@ -34,7 +34,7 @@ export type { ExtractFieldDefs, ExtractFormValue } from './providers';
 
 // Logger Feature
 export { withLoggerConfig } from './providers/features/logger/with-logger-config';
-export { DynamicFormLogger } from './providers/features/logger/logger.token';
+export { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 export type { Logger } from './providers/features/logger';
 export { ConsoleLogger } from './providers/features/logger/console-logger';
 export { NoopLogger } from './providers/features/logger/noop-logger';
@@ -45,18 +45,18 @@ export { hasFormValue } from './events/interfaces/form-event';
 
 // Value Exclusion Feature
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
-export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from './models/value-exclusion-config';
+export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
 // Validation Execution Feature
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';
-export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from './models/validation-execution-config';
+export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';
 
 // Legacy Status Classes Feature (opt-in for `.ng-touched` / `.ng-invalid` CSS classes)
 export { withLegacyStatusClasses } from './providers/features/legacy-status-classes';
 
 // Wrapper Types
-export type { WrapperTypeDefinition, FieldWrapper } from './models/wrapper-type';
-export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from './models/wrapper-type';
+export type { WrapperTypeDefinition, FieldWrapper } from '@ng-forge/dynamic-forms/internal';
+export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 
 // Wrapper Registration DX
 export { wrapperProps } from './wrappers/wrapper-props';
@@ -74,7 +74,7 @@ export type {
   DynamicFormAddonSlotRegistry,
   TemplateAddon,
   TextAddon,
-} from './models';
+} from '@ng-forge/dynamic-forms/internal';
 export type {
   AddonActionContext,
   AddonActionPreset,
@@ -88,9 +88,9 @@ export type {
   FieldBoundAddonActionContext,
   OrphanAddonActionContext,
   RegisteredActionRef,
-} from './models';
-export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES, isFieldBoundContext } from './models';
-export type { DynamicValue } from './models';
+} from '@ng-forge/dynamic-forms/internal';
+export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES, isFieldBoundContext } from '@ng-forge/dynamic-forms/internal';
+export type { DynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Components & Directives
 export { DfAddonSlot } from './components/df-addon-slot.component';
@@ -105,7 +105,7 @@ export type { PresetCollaborators } from './addons/run-preset-action';
 export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
 export { injectFieldsSupportingAddons } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
 export type { FieldAddonSupportEntry } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
-export { resolveDynamicValue } from './utils/dynamic-value/resolve-dynamic-value';
+export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Features (for adapter authors and end users)
 export { withCustomAddon } from './providers/features/addons/with-custom-addon';
@@ -127,15 +127,15 @@ export {
 export type { AddonWarning, SanitizedFormConfig, SanitizeFormConfigOptions } from './utils/validate-form-config/validate-form-config';
 
 // Configuration Types
-export type { CustomFnConfig, FormConfig, FormOptions } from './models';
-export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from './models';
+export type { CustomFnConfig, FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
+export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 
 // Submission Config
-export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from './models';
+export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from '@ng-forge/dynamic-forms/internal';
 
 // Form State Condition
-export type { FormStateCondition } from './models';
-export { isFormStateCondition } from './models';
+export type { FormStateCondition } from '@ng-forge/dynamic-forms/internal';
+export { isFormStateCondition } from '@ng-forge/dynamic-forms/internal';
 
 // Logic Resolvers
 export {
@@ -159,8 +159,8 @@ export type {
   FieldWithValidation,
   ValueFieldComponent,
   ValueType,
-} from './definitions';
-export { isCheckedField, isValueField } from './definitions';
+} from '@ng-forge/dynamic-forms/internal';
+export { isCheckedField, isValueField } from '@ng-forge/dynamic-forms/internal';
 
 // Built-in Container Field Types
 export type {
@@ -176,8 +176,8 @@ export type {
   ContainerField,
   WrapperConfig,
   CssWrapper,
-} from './definitions/default';
-export { isRowField, isSimplifiedArrayField, isContainerTypedField } from './definitions/default';
+} from '@ng-forge/dynamic-forms/internal';
+export { isRowField, isSimplifiedArrayField, isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
 
 // Validation Config Types
 export type {
@@ -187,25 +187,32 @@ export type {
   CustomValidatorConfig,
   DeclarativeHttpValidatorConfig,
   ValidatorConfig,
-} from './models';
+} from '@ng-forge/dynamic-forms/internal';
 
 // HTTP Config Types
-export type { HttpRequestConfig, HttpValidationResponseMapping } from './models';
+export type { HttpRequestConfig, HttpValidationResponseMapping } from '@ng-forge/dynamic-forms/internal';
 
 // Validator Function Types (for customFnConfig)
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
 
 // Logic & Expression Types
-export type { ConditionalExpression, HttpCondition, AsyncCondition, EvaluationContext, LogicConfig, StateLogicConfig } from './models';
+export type {
+  ConditionalExpression,
+  HttpCondition,
+  AsyncCondition,
+  EvaluationContext,
+  LogicConfig,
+  StateLogicConfig,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Custom Function Types (sync — for inline fn alternatives + customFnConfig)
-export type { CustomFunction } from './core/expressions/custom-function-types';
+export type { CustomFunction } from '@ng-forge/dynamic-forms/internal';
 
 // Async Custom Function Types
-export type { AsyncDerivationFunction, AsyncConditionFunction } from './core/expressions/async-custom-function-types';
+export type { AsyncDerivationFunction, AsyncConditionFunction } from '@ng-forge/dynamic-forms/internal';
 
 // Schema Types
-export type { SchemaApplicationConfig, SchemaDefinition } from './models';
+export type { SchemaApplicationConfig, SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
 
 // Registry Types (for module augmentation)
 export type {
@@ -220,7 +227,7 @@ export type {
   NarrowField,
   NarrowFields,
   RegisteredFieldTypes,
-} from './models';
+} from '@ng-forge/dynamic-forms/internal';
 
 // Utility Types
 export type {
@@ -235,10 +242,18 @@ export type {
   Prettify,
   RowAllowedChildren,
   WithInputSignals,
-} from './models';
+} from '@ng-forge/dynamic-forms/internal';
 
 // Type Guards
-export { isArrayField, isContainerField, isDisplayOnlyField, isGroupField, isLeafField, isPageField, isValueBearingField } from './models';
+export {
+  isArrayField,
+  isContainerField,
+  isDisplayOnlyField,
+  isGroupField,
+  isLeafField,
+  isPageField,
+  isValueBearingField,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Events
 export {
@@ -267,7 +282,7 @@ export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } 
 export { createField, field, formConfig } from './helpers';
 
 // Errors
-export { DynamicFormError } from './errors/dynamic-form-error';
+export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 // ============================================================
 // INTERNAL EXPORTS - Used by integration entrypoint
@@ -275,13 +290,20 @@ export { DynamicFormError } from './errors/dynamic-form-error';
 // ============================================================
 
 // Base mapper utilities
-export { baseFieldMapper, buildBaseInputs } from './mappers';
-export { arrayFieldMapper, groupFieldMapper, pageFieldMapper, rowFieldMapper, textFieldMapper, containerFieldMapper } from './mappers';
-export type { ArrayContext, FieldSignalContext, MapperFn } from './mappers';
+export { baseFieldMapper, buildBaseInputs } from '@ng-forge/dynamic-forms/internal';
+export {
+  arrayFieldMapper,
+  groupFieldMapper,
+  pageFieldMapper,
+  rowFieldMapper,
+  textFieldMapper,
+  containerFieldMapper,
+} from '@ng-forge/dynamic-forms/internal';
+export type { ArrayContext, FieldSignalContext, MapperFn } from '@ng-forge/dynamic-forms/internal';
 
 // Field Type Definition - for registering custom field types
-export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './models';
-export { FIELD_REGISTRY } from './models';
+export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from '@ng-forge/dynamic-forms/internal';
+export { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 
 // Signal Context - injection tokens for field components
 export {
@@ -293,7 +315,7 @@ export {
   FORM_OPTIONS,
   GROUP_CONTEXT,
   injectFieldSignalContext,
-} from './models';
+} from '@ng-forge/dynamic-forms/internal';
 
 // Dynamic Text utilities
 export { dynamicTextToObservable } from './utils';
@@ -310,8 +332,8 @@ export { applyValidator, applyValidators } from './core/validation';
 export type { HttpResourceRequest } from './core/validation';
 
 // FieldTree Utilities
-export { getArrayLength, toReadonlyFieldTree, writeToFieldValue } from './core/field-tree-utils';
-export type { ArrayFieldTree, ReadonlyFieldTree } from './core/field-tree-utils';
+export { getArrayLength, toReadonlyFieldTree, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
+export type { ArrayFieldTree, ReadonlyFieldTree } from '@ng-forge/dynamic-forms/internal';
 export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
 
 // EventBus — inject inside field components (scoped to the form's DI tree).
@@ -322,22 +344,22 @@ export { EventBus, resolveTokens } from './events';
 export { BUILT_IN_FIELDS } from './providers';
 
 // Object utilities (used by integration mappers)
-export { isEqual, omit } from './utils/object-utils';
+export { isEqual, omit } from '@ng-forge/dynamic-forms/internal';
 
 // Interpolation utility (used by integration error utilities)
-export { interpolateParams } from './utils/interpolate-params';
+export { interpolateParams } from '@ng-forge/dynamic-forms/internal';
 
 // Meta utilities (used by UI library wrapped-meta directives)
-export { applyMetaToElement } from './utils/apply-meta';
+export { applyMetaToElement } from '@ng-forge/dynamic-forms/internal';
 
 // Registry services (used by UI library button mappers)
-export { RootFormRegistryService } from './core/registry/root-form-registry.service';
+export { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 
 // Field State types (for consumers writing custom expressions)
-export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from './models/expressions/field-state-context';
+export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
 
 // Configuration tokens — override defaults via provideDynamicForm() or Angular DI
 export { INITIALIZATION_TIMEOUT_MS } from './utils/initialization-tracker/initialization-tracker';
 
 // Resource Composition Utilities (experimental — uses Angular's experimental resource composition APIs)
-export { withPreviousValue } from './utils/resource-composition/with-previous-value';
+export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';

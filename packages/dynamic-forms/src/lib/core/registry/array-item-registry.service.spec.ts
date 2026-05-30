@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ArrayItemRegistryService } from './array-item-registry.service';
-import type { FieldDef } from '../../definitions/base/field-def';
+import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 const template = (key: string): FieldDef<unknown>[] => [{ key, type: 'input' } as FieldDef<unknown>];
 

@@ -15,24 +15,24 @@ import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, tap } from 'rxjs';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { ArrayField, ArrayItemDefinition, ArrayItemTemplate } from '../../definitions/default/array-field';
-import { isGroupField } from '../../definitions/default/group-field';
+import { ArrayField, ArrayItemDefinition, ArrayItemTemplate } from '@ng-forge/dynamic-forms/internal';
+import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree } from '@angular/forms/signals';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
-import { getFieldValueHandling } from '../../models/field-type';
+import { getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '../../events/event.bus';
-import { FieldSignalContext } from '../../mappers/types';
-import { injectFieldSignalContext } from '../../models/field-signal-context.token';
+import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
+import { injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { ArrayFieldStateMachine, RunHandle } from './array-field-state-machine';
 import { determineDifferentialOperation, getArrayValue, ResolvedArrayItem } from '../../utils/array-field/array-field.types';
 import { resolveArrayItem } from '../../utils/array-field/resolve-array-item';
 import { observeArrayActions } from '../../utils/array-field/array-event-handler';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { ArrayFieldTree } from '../../core/field-tree-utils';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { ArrayFieldTree } from '@ng-forge/dynamic-forms/internal';
 import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
 
 /** Container component for rendering dynamic arrays of fields. */

@@ -1,9 +1,9 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { TemplateAddon } from '../models/addon/addon-def';
-import { DF_FIELD_TEMPLATES } from '../models/addon/df-field-templates.token';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { TemplateAddon } from '@ng-forge/dynamic-forms/internal';
+import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /** Renderer for the universal `template` addon kind. */

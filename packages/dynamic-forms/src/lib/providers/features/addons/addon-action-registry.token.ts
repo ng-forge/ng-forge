@@ -1,5 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import { AddonActionContext } from '../../../models/addon/addon-action';
+import { AddonActionContext } from '@ng-forge/dynamic-forms/internal';
 
 /** Handler signature for user-registered addon actions. */
 export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TValue>) => void;

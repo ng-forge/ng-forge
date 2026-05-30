@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { collectCrossFieldEntries } from './cross-field-collector';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 describe('collectCrossFieldEntries()', () => {
   describe('top-level fields', () => {

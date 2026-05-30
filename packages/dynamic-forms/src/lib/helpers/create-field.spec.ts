@@ -1,5 +1,5 @@
 import { createField, field } from './create-field';
-import { DynamicFormError } from '../errors/dynamic-form-error';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 describe('createField', () => {
   describe('basic validation', () => {

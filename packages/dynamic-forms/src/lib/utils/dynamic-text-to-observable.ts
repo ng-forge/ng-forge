@@ -1,7 +1,7 @@
 import { isSignal, Injector } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
-import { DynamicText } from '../models/types/dynamic-text';
+import { DynamicText } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Converts DynamicText (string | Observable | Signal) to Observable<string>

@@ -1,1 +1,1 @@
-export { RowWrapper } from './row-wrapper.type';
+export { RowWrapper } from '@ng-forge/dynamic-forms/internal';

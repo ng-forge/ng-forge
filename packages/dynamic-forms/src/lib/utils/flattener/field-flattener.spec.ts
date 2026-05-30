@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { flattenFields } from './field-flattener';
-import { FieldDef } from '../../definitions';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 describe('field-flattener', () => {
   let registry: Map<string, FieldTypeDefinition>;

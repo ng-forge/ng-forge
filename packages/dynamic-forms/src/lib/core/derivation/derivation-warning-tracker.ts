@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { createWarningTracker, type WarningTracker } from '../../utils/warning-tracker';
+import { createWarningTracker, type WarningTracker } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injection token for the derivation warning tracker.

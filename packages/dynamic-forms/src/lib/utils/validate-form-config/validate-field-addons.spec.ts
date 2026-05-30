@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { FieldDef } from '../../definitions/base/field-def';
-import { AddonKindDefinition } from '../../models/addon/addon-kind';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { validateFieldAddons, walkAndValidateAddons } from './validate-field-addons';
 
 const TEST_KINDS: ReadonlyArray<AddonKindDefinition> = [

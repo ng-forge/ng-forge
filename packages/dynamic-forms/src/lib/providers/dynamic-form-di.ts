@@ -2,9 +2,9 @@ import { computed, Provider, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { EventBus } from '../events/event.bus';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
-import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
-import { FunctionRegistryService } from '../core/registry/function-registry.service';
-import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FormIdPrefixService } from '../core/registry/form-id-prefix.service';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
@@ -15,31 +15,31 @@ import {
   EXTERNAL_DATA,
   FORM_ID_PREFIX,
   FORM_OPTIONS,
-} from '../models/field-signal-context.token';
+} from '@ng-forge/dynamic-forms/internal';
 import { DERIVATION_WARNING_TRACKER } from '../core/derivation/derivation-warning-tracker';
-import { DEPRECATION_WARNING_TRACKER } from '../utils/deprecation-warning-tracker';
-import { createWarningTracker } from '../utils/warning-tracker';
+import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
+import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
 import {
   DERIVATION_ORCHESTRATOR,
   createDerivationOrchestrator,
   DerivationOrchestratorConfig,
 } from '../core/derivation/derivation-orchestrator';
 import { createDerivationLogger } from '../core/derivation/derivation-logger.service';
-import { DynamicFormLogger } from './features/logger/logger.token';
-import { Logger } from './features/logger/logger.interface';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
-import { DerivationLogConfig } from '../models/logic/logic-config';
-import { FieldDef } from '../definitions/base/field-def';
+import { DerivationLogConfig } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 import {
   createPropertyOverrideStore,
   PROPERTY_OVERRIDE_STORE,
   PropertyOverrideStore,
 } from '../core/property-derivation/property-override-store';
-import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../core/http/http-condition-cache';
-import { LogicFunctionCacheService } from '../core/expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../core/expressions/http-condition-function-cache.service';
-import { AsyncConditionFunctionCacheService } from '../core/expressions/async-condition-function-cache.service';
+import { HTTP_CONDITION_CACHE, HttpConditionCache } from '@ng-forge/dynamic-forms/internal';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { AsyncConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
 import { PROPERTY_DERIVATION_ORCHESTRATOR } from '../core/derivation/derivation-orchestrator';
 import { FORM_INITIALIZER } from './form-initializer.token';

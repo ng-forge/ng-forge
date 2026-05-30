@@ -1,5 +1,5 @@
 import { FormEvent } from '../interfaces/form-event';
-import { ArrayItemDefinition, ArrayItemTemplate } from '../../definitions/default/array-field';
+import { ArrayItemDefinition, ArrayItemTemplate } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Template type for array items used in events.

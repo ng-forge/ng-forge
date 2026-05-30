@@ -1,4 +1,4 @@
-import type { Logger } from './logger.interface';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /** Console-based logger implementation. */
 export class ConsoleLogger implements Logger {

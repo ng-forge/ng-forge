@@ -9,8 +9,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
-import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
 
 /**

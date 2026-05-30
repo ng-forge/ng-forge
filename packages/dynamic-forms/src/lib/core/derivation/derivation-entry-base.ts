@@ -1,6 +1,6 @@
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { DerivationLogicConfig, LogicTrigger } from '../../models/logic/logic-config';
-import type { CustomFunction } from '../expressions/custom-function-types';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { DerivationLogicConfig, LogicTrigger } from '@ng-forge/dynamic-forms/internal';
+import type { CustomFunction } from '@ng-forge/dynamic-forms/internal';
 
 /** Common shape shared by `DerivationEntry` and `PropertyDerivationEntry`. */
 export interface BaseDerivationEntry {

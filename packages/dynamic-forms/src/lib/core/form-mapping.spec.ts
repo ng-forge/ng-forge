@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
-import { FieldDef } from '../definitions/base/field-def';
-import { FieldWithValidation } from '../definitions/base/field-with-validation';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
 import { FormStateManager } from '../state/form-state-manager';
 import { mapFieldToForm } from './form-mapping';
-import { LogicFunctionCacheService } from './expressions/logic-function-cache.service';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 describe('form-mapping', () => {
   let injector: Injector;

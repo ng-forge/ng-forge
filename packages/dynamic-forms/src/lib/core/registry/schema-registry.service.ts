@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SchemaDefinition } from '../../models/schemas/schema-definition';
+import { SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
 
 @Injectable()
 export class SchemaRegistryService {

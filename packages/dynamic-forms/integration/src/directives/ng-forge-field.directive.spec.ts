@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, required, schema, FieldTree, type SchemaPath } from '@angular/forms/signals';
-import { DEFAULT_VALIDATION_MESSAGES } from '../../../src/lib/models/field-signal-context.token';
-import { ValidationMessages } from '../../../src/lib/models/validation-types';
+import { DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms/internal';
+import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeField } from './ng-forge-field.directive';
 import { NgForgeControl, NgForgeHostControl } from './ng-forge-controls';

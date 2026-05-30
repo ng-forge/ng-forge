@@ -2,8 +2,8 @@
  * Exhaustive type tests for CssWrapper type.
  */
 import { expectTypeOf } from 'vitest';
-import type { CssWrapper } from './css-wrapper.type';
-import type { DynamicText } from '../../models/types/dynamic-text';
+import type { CssWrapper } from '@ng-forge/dynamic-forms/internal';
+import type { DynamicText } from '@ng-forge/dynamic-forms/internal';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================

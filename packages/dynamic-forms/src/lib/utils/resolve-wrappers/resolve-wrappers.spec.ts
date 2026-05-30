@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { isSameWrapperChain, resolveWrappers } from './resolve-wrappers';
-import { WrapperConfig } from '../../models/wrapper-type';
-import { FieldDef } from '../../definitions/base/field-def';
+import { WrapperConfig } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 type TestField = Pick<FieldDef<unknown>, 'type' | 'wrappers' | 'skipAutoWrappers' | 'skipDefaultWrappers'>;
 

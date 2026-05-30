@@ -1,15 +1,15 @@
 import { computed, inject, isSignal, Signal } from '@angular/core';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { FieldMeta } from '../../definitions/base/field-meta';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '../../models/field-signal-context.token';
-import { ArrayContext } from '../../mappers/types';
-import { baseFieldMapper } from '../../mappers/base/base-field-mapper';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { FieldMeta } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { ArrayContext } from '@ng-forge/dynamic-forms/internal';
+import { baseFieldMapper } from '@ng-forge/dynamic-forms/internal';
 import { PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 import { applyPropertyOverrides } from '../../core/property-derivation/apply-property-overrides';
 import { buildPropertyOverrideKey } from '../../core/property-derivation/property-override-key';
-import { hasTargetProperty, isDerivationLogicConfig } from '../../models/logic/logic-config';
+import { hasTargetProperty, isDerivationLogicConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Returns true if the field has any property-derivation logic entries

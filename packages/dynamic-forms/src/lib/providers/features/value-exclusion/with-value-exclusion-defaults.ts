@@ -1,4 +1,4 @@
-import { ValueExclusionConfig } from '../../../models/value-exclusion-config';
+import { ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
 import { VALUE_EXCLUSION_DEFAULTS } from './value-exclusion.token';
 

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ChangeDetectionStrategy, Component, signal, Type } from '@angular/core';
 import { injectFieldRegistry } from './inject-field-registry';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 @Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
 class TestComponent {}

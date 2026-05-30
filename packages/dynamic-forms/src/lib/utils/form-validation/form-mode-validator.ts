@@ -1,7 +1,7 @@
-import { detectFormMode, FormModeDetectionResult, isPageField } from '../../models/types/form-mode';
-import { RegisteredFieldTypes } from '../../models/registry';
-import { validatePageNesting } from '../../definitions/default/page-field';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { detectFormMode, FormModeDetectionResult, isPageField } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
+import { validatePageNesting } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Comprehensive form configuration validator that checks:

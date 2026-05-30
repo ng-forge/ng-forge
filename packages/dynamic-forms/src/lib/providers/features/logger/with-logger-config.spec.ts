@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { withLoggerConfig } from './with-logger-config';
-import { DynamicFormLogger } from './logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './console-logger';
 import { NoopLogger } from './noop-logger';
-import type { Logger } from './logger.interface';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 
 describe('withLoggerConfig', () => {
   describe('Feature structure', () => {

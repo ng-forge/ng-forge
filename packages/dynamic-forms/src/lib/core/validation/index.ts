@@ -1,5 +1,5 @@
 export { applyValidator, applyValidators } from './validator-factory';
-export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator, HttpResourceRequest } from './validator-types';
+export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator, HttpResourceRequest } from '@ng-forge/dynamic-forms/internal';
 export {
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,

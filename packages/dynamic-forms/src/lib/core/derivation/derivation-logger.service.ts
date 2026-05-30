@@ -1,5 +1,5 @@
-import { Logger } from '../../providers/features/logger/logger.interface';
-import { DerivationLogConfig, createDefaultDerivationLogConfig, shouldLog } from '../../models/logic/logic-config';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { DerivationLogConfig, createDefaultDerivationLogConfig, shouldLog } from '@ng-forge/dynamic-forms/internal';
 import { DerivationProcessingResult } from './derivation-types';
 import { DerivationLogEntry } from './derivation-logger';
 

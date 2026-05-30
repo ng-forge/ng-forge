@@ -1,6 +1,6 @@
-import type { FormConfig } from '../models/form-config';
-import type { NarrowFields } from '../models/registry/field-registry';
-import type { InferFormValue } from '../models/types/form-value-inference';
+import type { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import type { NarrowFields } from '@ng-forge/dynamic-forms/internal';
+import type { InferFormValue } from '@ng-forge/dynamic-forms/internal';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 
 /**

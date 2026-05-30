@@ -1,8 +1,8 @@
-import { FieldDef } from '../definitions/base/field-def';
-import { FieldTypeDefinition } from '../models/field-type';
-import { FormConfig } from '../models/form-config';
-import { RegisteredFieldTypes } from '../models/registry/field-registry';
-import { FormMode } from '../models/types/form-mode';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
+import { FormMode } from '@ng-forge/dynamic-forms/internal';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Discriminant constants

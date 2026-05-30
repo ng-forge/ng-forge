@@ -1,9 +1,9 @@
 import { InjectionToken } from '@angular/core';
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
-import { DynamicFormLogger } from './logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './console-logger';
 import { NoopLogger } from './noop-logger';
-import { DerivationLogConfig, DerivationLogLevel, createDefaultDerivationLogConfig } from '../../../models/logic/logic-config';
+import { DerivationLogConfig, DerivationLogLevel, createDefaultDerivationLogConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injection token for derivation logging configuration.

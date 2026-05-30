@@ -1,13 +1,13 @@
 import { inject } from '@angular/core';
 import { apply, applyEach, applyWhen, applyWhenValue, SchemaOrSchemaFn } from '@angular/forms/signals';
 import type { SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { SchemaApplicationConfig, SchemaDefinition } from '../models/schemas/schema-definition';
+import { SchemaApplicationConfig, SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from './registry/schema-registry.service';
-import { createLogicFunction } from './expressions/logic-function-factory';
+import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { createTypePredicateFunction } from './values/type-predicate-factory';
 import { applyValidator } from './validation/validator-factory';
 import { applyLogic } from './logic/logic-applicator';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Apply schema configuration.

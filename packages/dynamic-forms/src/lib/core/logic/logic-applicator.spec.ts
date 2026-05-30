@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { form, schema } from '@angular/forms/signals';
-import { LogicConfig } from '../../models/logic';
+import { LogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
-import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
 
 describe('logic-applicator', () => {

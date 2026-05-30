@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '../../models/value-exclusion-config';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 import { resolveExclusionConfig, filterFormValue } from './value-filter';
 
 // ─────────────────────────────────────────────────────────────────────────────

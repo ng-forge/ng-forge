@@ -7,8 +7,8 @@ import { FormEvent, hasFormValue } from './interfaces/form-event';
 import { take, toArray, skip } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
-import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
-import { FORM_OPTIONS } from '../models/field-signal-context.token';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
 
 // Test event classes

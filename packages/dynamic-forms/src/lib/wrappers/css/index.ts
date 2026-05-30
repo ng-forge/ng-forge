@@ -1,1 +1,1 @@
-export { CssWrapper } from './css-wrapper.type';
+export { CssWrapper } from '@ng-forge/dynamic-forms/internal';

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { createHttpPropertyDerivationStream, HttpPropertyDerivationStreamContext } from './http-property-derivation-stream';
 import { PropertyDerivationEntry } from './property-derivation-types';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';

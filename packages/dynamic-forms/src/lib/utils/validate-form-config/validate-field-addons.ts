@@ -1,7 +1,7 @@
-import { AnyAddon } from '../../models/addon/addon-def';
-import { AddonKindDefinition } from '../../models/addon/addon-kind';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { AnyAddon } from '@ng-forge/dynamic-forms/internal';
+import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { AddonWarning } from './addon-warning';
 
 /**

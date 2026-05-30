@@ -1,4 +1,4 @@
-import { DerivationLogicConfig } from '../../models/logic/logic-config';
+import { DerivationLogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
 
 /**

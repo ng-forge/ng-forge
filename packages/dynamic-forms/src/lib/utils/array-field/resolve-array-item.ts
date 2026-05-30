@@ -1,10 +1,10 @@
 import { DestroyRef, Injector, linkedSignal, Signal, Type } from '@angular/core';
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
-import { ArrayField } from '../../definitions/default/array-field';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldSignalContext } from '../../mappers/types';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { ArrayField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedArrayItem, ResolvedArrayItemField } from './array-field.types';
 import { createArrayItemInjectorAndInputs } from './create-array-item-injector';
 import { createHiddenSignal, createRenderReadySignal } from '../resolve-field/resolve-field';

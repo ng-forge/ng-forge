@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getFieldDefaultValue } from './default-value';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 describe('getFieldDefaultValue', () => {
   let registry: Map<string, FieldTypeDefinition>;

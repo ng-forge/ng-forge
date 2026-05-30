@@ -1,4 +1,4 @@
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { collectAllDerivations } from '../derivation/derivation-collector';
 import { PropertyDerivationCollection } from './property-derivation-types';
 

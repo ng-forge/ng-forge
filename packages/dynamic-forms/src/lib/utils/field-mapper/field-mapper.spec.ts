@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, Injector, Provider, runInInjectionContext, signal, Signal, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { mapFieldToInputs } from './field-mapper';
-import { FieldDef } from '../../definitions/base';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
-import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '../../models/field-signal-context.token';
-import type { ArrayContext, GroupContext } from '../../mappers/types';
+import { ARRAY_CONTEXT, FORM_ID_PREFIX, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import type { ArrayContext, GroupContext } from '@ng-forge/dynamic-forms/internal';
 
 describe('mapFieldToInputs', () => {
   let registry: Map<string, FieldTypeDefinition>;

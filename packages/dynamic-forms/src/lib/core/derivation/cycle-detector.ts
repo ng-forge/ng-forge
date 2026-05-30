@@ -1,6 +1,6 @@
 import { DEV_MODE } from '../../utils/dev-mode';
 import { CycleDetectionResult, DerivationCollection } from './derivation-types';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Node in the derivation dependency graph.
