@@ -842,9 +842,18 @@ export class FormStateManager<
             filtered[key] = val;
           }
         }
-        if (Object.keys(filtered).length > 0) {
-          this.deps.value.update((current) => ({ ...current, ...filtered }) as Partial<TModel>);
-        }
+        // Strip any captured key that did NOT survive the swap (dropped or retyped). The stale
+        // value lingers in `deps.value` from before teardown, and `entity` layers it on top of
+        // the new field's default — so a retyped key would otherwise inherit the old value
+        // instead of initializing to its declared default. `values` is the full captured
+        // snapshot, so any captured key absent from `validKeys` must be removed from the model.
+        this.deps.value.update((current) => {
+          const next = { ...current, ...filtered } as Record<string, unknown>;
+          for (const key of Object.keys(values)) {
+            if (!validKeys.has(key)) delete next[key];
+          }
+          return next as Partial<TModel>;
+        });
       },
       onTransition: (transition) => {
         this.logger.debug('State transition:', transition.from.type, '→', transition.to.type, transition.action.type);

@@ -504,23 +504,19 @@ describe('filterFormValue', () => {
       });
     });
 
-    // BUG: page-level excludeValueIfHidden is ignored.
+    // Page-level excludeValueIfHidden drops the hoisted child's value.
     //
-    // Pages have valueHandling 'flatten'. By the time filterFormValue sees them, flattenFields
-    // (field-flattener.ts:55-65) has already DISCARDED the page wrapper and HOISTED its children
-    // to the top level of `schemaFields`. The page's `hidden` / `excludeValueIfHidden` flags are
-    // dropped in the process and are NOT propagated onto the hoisted children. (Even if the page
-    // entry survived, value-filter.ts:83 would skip it as 'flatten' before exclusion is checked.)
-    //
-    // Net effect: hiding a page does NOT drop its hoisted child values. This test models the real
-    // flattened input (no page wrapper, child not individually hidden) and asserts the CORRECT
-    // behavior (subtree dropped). It is expected to FAIL today, documenting the gap; a future fix
-    // that propagates page exclusion to children flips it green.
-    it.fails('should drop the subtree when a page is hidden + excludeValueIfHidden', () => {
-      // Post-flatten schemaFields: the page wrapper is gone, its child is hoisted to top level.
+    // Pages have valueHandling 'flatten'. flattenFields discards the page wrapper and hoists its
+    // children to the top level of `schemaFields`, propagating the page's exclusion-relevant state
+    // onto each hoisted child via `inheritedExclusionState` (mirroring how a hidden group drops its
+    // preserved subtree). value-filter then reads that inherited state, so hiding a page drops its
+    // hoisted child values even though the child is not individually hidden.
+    it('should drop the subtree when a page is hidden + excludeValueIfHidden', () => {
+      // Post-flatten schemaFields: the page wrapper is gone, its child is hoisted to top level and
+      // carries the page's inherited hidden state.
       const rawValue = { step1Field: 'value-from-hidden-page', visibleField: 'keep' };
       const fields: FieldDef<unknown>[] = [
-        { key: 'step1Field', type: 'input' },
+        { key: 'step1Field', type: 'input', inheritedExclusionState: { hidden: true } } as FieldDef<unknown>,
         { key: 'visibleField', type: 'input' },
       ];
       // The hoisted child is NOT itself hidden — only the (now-discarded) page was hidden.

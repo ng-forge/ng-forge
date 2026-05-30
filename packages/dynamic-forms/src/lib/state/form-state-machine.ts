@@ -403,7 +403,18 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
             this.config.logger.warn('RestoreValues effect: pendingFormSetup was not set — falling back to recomputing.');
           }
           const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);
-          const validKeys = new Set(formSetup.schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
+
+          // Restore a captured value only when the key survives the swap AND the field's type
+          // is unchanged. A retyped key (e.g. input → select) must initialize to the new field's
+          // declared default rather than inheriting the stale value from the old field type.
+          const oldTypeByKey = new Map<string, string>();
+          for (const f of state.currentFormSetup.schemaFields) {
+            if (f.key !== undefined) oldTypeByKey.set(f.key, f.type);
+          }
+          const validKeys = new Set<string>();
+          for (const f of formSetup.schemaFields) {
+            if (f.key !== undefined && oldTypeByKey.get(f.key) === f.type) validKeys.add(f.key);
+          }
 
           this.config.restoreValue(effect.values, validKeys);
           this.dispatch({ type: Action.RestoreComplete });

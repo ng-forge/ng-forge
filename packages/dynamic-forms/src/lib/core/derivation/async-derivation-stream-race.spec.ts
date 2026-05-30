@@ -195,12 +195,10 @@ describe('createAsyncDerivationStream — in-flight × state-change races', () =
   // the late write can clobber their input. Reproduce-first.
   // ---------------------------------------------------------------------------
   describe('stopOnUserOverride — user edits field while async is in flight', () => {
-    it.fails('does NOT overwrite the user edit that happened during the in-flight window', () => {
-      // BUG: async-derivation-stream.ts reads dirty() only at fire-time (switchMap, lines
-      // ~117-138). When the result arrives in `next` (lines ~191-222) it applies the value
-      // with no re-check of dirty/stopOnUserOverride. A user who edits the field after the
-      // async call started but before it resolves gets their input silently overwritten by
-      // the stale derived value. Same #394-family late-write leak, dirty-state variant.
+    it('does NOT overwrite the user edit that happened during the in-flight window', () => {
+      // async-derivation-stream.ts re-reads dirty() at apply-time in the `next` handler,
+      // so a user who edits the field after the async call started but before it resolves
+      // keeps their input — stopOnUserOverride protects the late write.
       const productId = createFieldInstance('abc');
       const price = createFieldInstance(0);
 
@@ -394,10 +392,9 @@ describe('createHttpDerivationStream — in-flight × state-change races', () =>
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("target field 'rate' not found"));
   });
 
-  it.fails('does NOT overwrite a user edit that happened during the in-flight HTTP window', () => {
-    // BUG: http-derivation-stream.ts mirrors the async stream — dirty() is read at fire-time
-    // only (switchMap, lines ~104-137); the response `next` handler (lines ~201-234) applies
-    // with no dirty re-check. A user edit during the in-flight window is clobbered.
+  it('does NOT overwrite a user edit that happened during the in-flight HTTP window', () => {
+    // http-derivation-stream.ts re-reads dirty() at apply-time in the response `next`
+    // handler, so a user edit during the in-flight window is preserved.
     const country = createFieldInstance('US');
     const rate = createFieldInstance(0);
 

@@ -27,24 +27,38 @@ export function resolveExclusionConfig(
 }
 
 /**
+ * Static exclusion state a field may have inherited from a discarded flatten
+ * container (page/row) ancestor during flattening. See `FlattenedField`.
+ */
+interface FieldWithInheritedExclusion {
+  readonly inheritedExclusionState?: {
+    readonly hidden?: boolean;
+    readonly disabled?: boolean;
+    readonly readonly?: boolean;
+  };
+}
+
+/**
  * Determines whether a field's value should be excluded based on its reactive state,
- * the field def's static state (for fields whose `state.hidden()` isn't wired — e.g. groups),
- * and the resolved exclusion config.
+ * the field def's static state (for fields whose `state.hidden()` isn't wired — e.g. groups,
+ * or state inherited from a hidden page/row container that was flattened away), and the
+ * resolved exclusion config.
  */
 function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unknown>, config: ResolvedValueExclusionConfig): boolean {
   const state = fieldState();
+  const inherited = (field as FieldWithInheritedExclusion).inheritedExclusionState;
 
-  const isHidden = state.hidden() || field.hidden === true;
+  const isHidden = state.hidden() || field.hidden === true || inherited?.hidden === true;
   if (config.excludeValueIfHidden && isHidden) {
     return true;
   }
 
-  const isDisabled = state.disabled() || field.disabled === true;
+  const isDisabled = state.disabled() || field.disabled === true || inherited?.disabled === true;
   if (config.excludeValueIfDisabled && isDisabled) {
     return true;
   }
 
-  const isReadonly = state.readonly() || field.readonly === true;
+  const isReadonly = state.readonly() || field.readonly === true || inherited?.readonly === true;
   if (config.excludeValueIfReadonly && isReadonly) {
     return true;
   }
@@ -96,10 +110,11 @@ export function filterFormValue<T extends Record<string, unknown>>(
     // Componentless field (no FieldTree) — decide from the static field def alone, then include if not excluded.
     const fieldState = formTree[key] as FieldTree<unknown> | undefined;
     if (!fieldState || typeof fieldState !== 'function') {
+      const inherited = (field as FieldWithInheritedExclusion).inheritedExclusionState;
       const staticallyExcluded =
-        (resolvedConfig.excludeValueIfHidden && field.hidden === true) ||
-        (resolvedConfig.excludeValueIfDisabled && field.disabled === true) ||
-        (resolvedConfig.excludeValueIfReadonly && field.readonly === true);
+        (resolvedConfig.excludeValueIfHidden && (field.hidden === true || inherited?.hidden === true)) ||
+        (resolvedConfig.excludeValueIfDisabled && (field.disabled === true || inherited?.disabled === true)) ||
+        (resolvedConfig.excludeValueIfReadonly && (field.readonly === true || inherited?.readonly === true));
       if (!staticallyExcluded) {
         result[key] = rawValue[key];
       }

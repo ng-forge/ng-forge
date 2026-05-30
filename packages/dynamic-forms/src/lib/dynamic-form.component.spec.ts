@@ -2188,7 +2188,7 @@ describe('DynamicFormComponent', () => {
     // and whose default value is '' (empty). The old `status` field was a free-text input
     // holding 'hello'. On swap, the form value for `status` must be the SELECT's default
     // (''), NOT the stale free-text 'hello'.
-    it.fails('does not leak stale value into a same-key field whose type changed (input → select)', async () => {
+    it('does not leak stale value into a same-key field whose type changed (input → select)', async () => {
       const initialConfig: TestFormConfig = {
         fields: [{ key: 'status', type: 'input', label: 'Status', value: 'hello' }],
       };
@@ -2214,19 +2214,17 @@ describe('DynamicFormComponent', () => {
 
       await swapConfig(fixture, newConfig);
 
-      // BUG: FormStateManager captures the old form value before teardown and, in the
-      // RestoreValues effect, restores any captured key whose key is still present in the
-      // new config (validKeys is key-only, type-blind — see form-state-machine.ts
-      // RestoreValues + form-state-manager.ts restoreValue). So the stale free-text
-      // 'hello' is merged back onto the new `select` field, which has no such option.
-      // Expected: the new field initializes to its own default (''), not the stale value.
+      // The RestoreValues effect computes validKeys by intersecting key AND field type between
+      // the old (currentFormSetup) and new (pendingFormSetup) schemaFields, so a retyped key is
+      // excluded from restoration and the new `select` field initializes to its own default ('')
+      // rather than inheriting the stale free-text 'hello' (which is not a valid option).
       expect(component.formValue()).toEqual({ status: '' });
     });
 
     // Same intent as above but with a clearer "default wins" assertion: the new field of a
     // different type declares its OWN explicit default, which must take precedence over the
     // stale value carried by the same key from the previous config.
-    it.fails('initializes a retyped same-key field to its own declared default, not the stale value', async () => {
+    it('initializes a retyped same-key field to its own declared default, not the stale value', async () => {
       const initialConfig: TestFormConfig = {
         fields: [{ key: 'flag', type: 'input', label: 'Flag', value: 'hello' }],
       };
@@ -2241,8 +2239,8 @@ describe('DynamicFormComponent', () => {
 
       await swapConfig(fixture, newConfig);
 
-      // BUG: stale string 'hello' is restored onto the checkbox field instead of its
-      // declared boolean default `false`.
+      // The type changed (input → checkbox), so the captured 'hello' is dropped during restore
+      // and the checkbox initializes to its declared boolean default `false`.
       expect(component.formValue()).toEqual({ flag: false });
     });
 
