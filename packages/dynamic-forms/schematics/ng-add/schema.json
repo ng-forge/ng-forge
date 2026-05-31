@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "NgForgeDynamicFormsNgAdd",
+  "title": "ng-forge dynamic-forms ng-add",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project to target. Defaults to the workspace default project.",
+      "$default": {
+        "$source": "projectName"
+      }
+    },
+    "adapter": {
+      "type": "string",
+      "description": "Which UI adapter to wire up.",
+      "enum": ["material", "bootstrap", "primeng", "ionic", "none"],
+      "x-prompt": {
+        "message": "Which UI adapter should ng-forge use?",
+        "type": "list",
+        "items": [
+          { "value": "material", "label": "Angular Material" },
+          { "value": "bootstrap", "label": "Bootstrap" },
+          { "value": "primeng", "label": "PrimeNG" },
+          { "value": "ionic", "label": "Ionic" },
+          { "value": "none", "label": "Core only (no adapter)" }
+        ]
+      }
+    },
+    "legacyStatusClasses": {
+      "type": "boolean",
+      "default": true,
+      "description": "Add withLegacyStatusClasses() to enable legacy .ng-touched / .ng-invalid CSS classes.",
+      "x-prompt": "Enable legacy .ng-touched / .ng-invalid CSS classes? (recommended)"
+    },
+    "skipStyles": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not modify the global styles file."
+    },
+    "skipProviders": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not modify the host ApplicationConfig."
+    }
+  },
+  "required": ["adapter"]
+}

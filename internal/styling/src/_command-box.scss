@@ -1,0 +1,100 @@
+@use 'tokens' as *;
+@use 'themes' as *;
+@use 'mixins' as mix;
+
+// ============================================
+// COMMAND BOX (tabbed + scrollable code block)
+// ============================================
+// Shared visual treatment for docs components that render a CLI command
+// behind a tab strip: `docs-install-command` (npm/pnpm/yarn) and
+// `docs-cli-command` (Angular CLI / Nx). Include from within a BEM block
+// so the modifier selectors compose under the consumer's root class.
+
+@mixin command-box {
+  border-radius: $radius-md;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+
+  &__tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface);
+    border-radius: $radius-md $radius-md 0 0;
+  }
+
+  &__tab {
+    padding: $space-2 $space-4;
+    font-size: $text-xs;
+    font-family: $font-mono;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    opacity: 0.65;
+    cursor: pointer;
+    transition:
+      opacity $transition-fast,
+      color $transition-fast;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $ember-glow;
+      outline-offset: -2px;
+    }
+
+    &.active {
+      color: $ember-glow;
+      opacity: 1;
+      border-bottom: 2px solid $ember-glow;
+    }
+  }
+
+  &__body {
+    position: relative;
+
+    &:hover docs-copy-button {
+      opacity: 1;
+    }
+  }
+
+  &__scroll {
+    padding: $space-3 $space-4;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: $text-sm;
+    mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent 100%);
+    border-radius: 0 0 $radius-md $radius-md;
+
+    @include mix.mobile {
+      font-size: $text-xs;
+      padding: $space-2 $space-3;
+    }
+
+    // Shiki wraps output in a <pre>, flatten it to fit our container.
+    // !important overrides the global `.doc-page-content pre.shiki code`
+    // rule which has higher specificity than emulated encapsulation.
+    ::ng-deep pre {
+      margin: 0;
+      padding: 0;
+      background: transparent !important;
+      border: none;
+      // Do NOT use min-width: max-content — it makes the pre wider than the
+      // viewport, which triggers WebKit/iOS text autosizing (font inflation).
+      font-size: $text-sm !important;
+
+      @include mix.mobile {
+        font-size: $text-xs !important;
+      }
+    }
+
+    ::ng-deep pre code {
+      font-size: $text-sm !important;
+
+      @include mix.mobile {
+        font-size: $text-xs !important;
+      }
+    }
+  }
+}

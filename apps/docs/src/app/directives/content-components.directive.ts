@@ -36,6 +36,12 @@ const COMPONENT_REGISTRY: ComponentRegistration[] = [
     extractInputs: (attrs) => ({ packages: attrs['packages'] ?? '' }),
   },
   {
+    selector: 'docs-cli-command',
+    defer: true,
+    loadComponent: () => import('../components/cli-command/cli-command.component'),
+    extractInputs: (attrs) => ({ package: attrs['package'] ?? '@ng-forge/dynamic-forms' }),
+  },
+  {
     selector: 'docs-adapter-picker',
     defer: true,
     loadComponent: () => import('../components/adapter-picker/adapter-picker.component'),

@@ -18,7 +18,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "inputs": ["production", "^production"],
-      "dependsOn": ["compile"],
+      "dependsOn": ["compile", "build-schematics"],
       "options": {
         "command": "node scripts/strip-fesm-comments.mjs dist/packages/dynamic-forms",
         "cwd": "{workspaceRoot}"
@@ -28,6 +28,25 @@
         "development": {}
       },
       "defaultConfiguration": "production"
+    },
+    "build-schematics": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}/schematics"],
+      "inputs": ["{projectRoot}/schematics/**/*", "!{projectRoot}/schematics/**/*.spec.ts"],
+      "dependsOn": ["compile"],
+      "options": {
+        "commands": ["tsc -p packages/dynamic-forms/schematics/tsconfig.json", "node scripts/finalize-dynamic-forms-schematics.mjs"],
+        "parallel": false,
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test-schematics": {
+      "executor": "@nx/vitest:test",
+      "inputs": ["{projectRoot}/schematics/**/*", "{workspaceRoot}/dist/{projectRoot}/schematics/**/*"],
+      "dependsOn": ["build-schematics"],
+      "options": {
+        "configFile": "packages/dynamic-forms/schematics/vitest.config.ts"
+      }
     },
     "compile": {
       "executor": "@nx/angular:package",

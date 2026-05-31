@@ -9,8 +9,17 @@ export default [
       '@nx/dependency-checks': [
         'error',
         {
-          ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
-          ignoredDependencies: ['vite', '@analogjs/vite-plugin-angular', '@nx/vite', '@vitest/browser-playwright', 'vitest'],
+          ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}', '{projectRoot}/schematics/**/*'],
+          ignoredDependencies: [
+            'vite',
+            '@analogjs/vite-plugin-angular',
+            '@nx/vite',
+            '@vitest/browser-playwright',
+            'vitest',
+            '@angular-devkit/schematics',
+            '@schematics/angular',
+            '@nx/devkit',
+          ],
         },
       ],
     },

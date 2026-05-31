@@ -9,6 +9,16 @@ description: 'Install ng-forge, pick a UI adapter (Material, Bootstrap, PrimeNG,
 
 ng-forge generates fully working Angular forms from a single configuration object — validation, conditional logic, and multi-step wizards included. Here's how to set it up.
 
+## Quick setup
+
+In an existing Angular 21+ workspace:
+
+<docs-cli-command package="@ng-forge/dynamic-forms"></docs-cli-command>
+
+Pick an adapter when prompted. Works in Nx too — toggle the **Nx** tab.
+
+Prefer to wire things by hand? Manual setup is below.
+
 ## 1. Choose Your UI Library
 
 <docs-adapter-picker></docs-adapter-picker>
