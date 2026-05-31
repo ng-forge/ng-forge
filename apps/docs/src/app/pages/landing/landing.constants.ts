@@ -125,9 +125,9 @@ export const FEATURES: Feature[] = [
     description: 'Lazy-loaded field components. Load only what you render.',
   },
   {
-    icon: 'zap',
-    title: 'Zoneless Ready',
-    description: 'No Zone.js required. OnPush everywhere. Built for where Angular is going.',
+    icon: 'check',
+    title: 'Bring Your Own Schema',
+    description: 'Validate with Zod or any Standard Schema validator, cross-field rules included. Reuse one schema on client and server.',
   },
   {
     icon: 'plug',

@@ -1,5 +1,4 @@
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -11,10 +10,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
+import { defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
 
 import { SandboxHarness, SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
@@ -70,7 +69,6 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 })
 export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly http = inject(HttpClient);
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly harness = inject(SandboxHarness);
 
@@ -132,34 +130,6 @@ export class LandingComponent {
   readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
   private readonly visibleElements = signal<Set<string>>(new Set());
   private confettiIdCounter = 0;
-
-  // ============================================
-  // STATS (fetched dynamically)
-  // ============================================
-
-  private readonly npmResource = rxResource({
-    params: () => (this.isBrowser ? {} : undefined),
-    stream: () =>
-      this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms').pipe(
-        map((data) => this.formatNumber(data?.downloads ?? 0)),
-        catchError(() => of('-')),
-      ),
-  });
-
-  readonly npmDownloads = computed(() => this.npmResource.value() ?? '-');
-
-  private readonly githubResource = rxResource({
-    params: () => (this.isBrowser ? {} : undefined),
-    stream: () =>
-      this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge').pipe(
-        map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
-        catchError(() => of('-')),
-      ),
-  });
-
-  readonly githubStars = computed(() => this.githubResource.value() ?? '-');
-
-  readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
 
   // ============================================
   // REACTIVE STATE (RxJS -> Signal)
@@ -324,16 +294,6 @@ export class LandingComponent {
     // Clear confetti after animation completes
     if (this.confettiTimer) clearTimeout(this.confettiTimer);
     this.confettiTimer = setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
-  }
-
-  private formatNumber(num: number): string {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    }
-    return num.toString();
   }
 
   onCardMouseMove(event: MouseEvent): void {

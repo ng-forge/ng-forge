@@ -1153,102 +1153,6 @@ nav {
 }
 
 // ============================================
-// STATS
-// ============================================
-.stats {
-  padding: 3rem 2rem;
-  position: relative;
-  z-index: 2;
-
-  @media (max-width: 768px) {
-    padding: 2rem 1rem;
-  }
-}
-
-.stats-grid {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.75rem;
-  background: rgba($bg-surface, 0.4);
-  border: 1px solid rgba($steel-dark, 0.4);
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba($bg-surface, 0.6);
-    border-color: rgba($ember-glow, 0.3);
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.2),
-      0 0 20px rgba($ember-glow, 0.1);
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    max-width: 280px;
-    padding: 1rem 1.25rem;
-  }
-}
-
-.stat-icon {
-  // Force size override since icon-mask mixin sets its own sizes
-  width: 32px !important;
-  height: 32px !important;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, $ember-glow, $ember-hot);
-  opacity: 0.9;
-
-  @media (max-width: 768px) {
-    width: 28px !important;
-    height: 28px !important;
-  }
-}
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $steel;
-  line-height: 1.2;
-
-  @media (max-width: 768px) {
-    font-size: 1.25rem;
-  }
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: $steel-mid;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  @media (max-width: 768px) {
-    font-size: 0.7rem;
-  }
-}
-
-// ============================================
 // SECTIONS (COMMON)
 // ============================================
 section {
@@ -1440,8 +1344,8 @@ section {
     color: #34d399; // emerald
   }
 
-  &.icon--zap {
-    color: #60a5fa; // blue
+  &.icon--check {
+    color: $success; // green, reads as validation
   }
 
   &.icon--plug {
@@ -1692,230 +1596,6 @@ section {
   gap: 3rem;
 }
 
-.flow-diagram {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 0 4rem; // Extra bottom padding for labels
-  overflow-x: auto;
-  gap: 0;
-
-  @media (max-width: 600px) {
-    padding: 1.5rem 0 3rem;
-  }
-}
-
-.flow-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.flow-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $bg-deep;
-  border: 1px solid $steel-dark;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-
-  .icon {
-    width: 28px;
-    height: 28px;
-    color: $steel-mid;
-  }
-
-  &.database {
-    background: linear-gradient(135deg, rgba($ember-core, 0.1), rgba($ember-glow, 0.05));
-    border-color: rgba($ember-core, 0.3);
-
-    .icon {
-      color: $ember-glow;
-    }
-  }
-
-  &.api {
-    background: linear-gradient(135deg, rgba($molten, 0.1), rgba($molten, 0.05));
-    border-color: rgba($molten, 0.3);
-
-    .icon {
-      color: $molten;
-    }
-  }
-
-  &.json {
-    background: linear-gradient(135deg, rgba($steel, 0.1), rgba($steel, 0.05));
-    border-color: rgba($steel-mid, 0.3);
-
-    .icon {
-      color: $steel;
-    }
-  }
-
-  &.form {
-    background: linear-gradient(135deg, rgba($success, 0.1), rgba($success, 0.05));
-    border-color: rgba($success, 0.3);
-
-    .icon {
-      color: $success;
-    }
-  }
-
-  @media (max-width: 600px) {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-
-    .icon {
-      width: 22px;
-      height: 22px;
-    }
-  }
-}
-
-.flow-label {
-  position: absolute;
-  top: calc(100% + 0.75rem);
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: $steel-mid;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap;
-
-  @media (max-width: 600px) {
-    font-size: 0.6rem;
-    letter-spacing: 0.5px;
-    top: calc(100% + 0.5rem);
-  }
-}
-
-.flow-connector {
-  width: 60px;
-  height: 2px;
-  position: relative;
-  margin-top: 31px; // Center with 64px icon (64/2 - 1)
-  flex-shrink: 0;
-
-  @media (max-width: 600px) {
-    width: 32px;
-    margin-top: 23px; // Center with 48px icon (48/2 - 1)
-  }
-}
-
-.flow-line {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, $steel-dark, $steel-dim, $steel-dark);
-}
-
-.flow-packet {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: $ember-glow;
-  border-radius: 50%;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  box-shadow: 0 0 10px $ember-glow;
-  opacity: 0;
-
-  @media (max-width: 600px) {
-    width: 6px;
-    height: 6px;
-  }
-}
-
-// Sequential animation - packets flow with overlap (next starts before previous ends)
-// Total cycle: 5s, packets visible simultaneously during handoff
-.flow-connector:nth-child(2) .flow-packet {
-  animation: packet-flow-1 5s ease-in-out infinite;
-}
-
-.flow-connector:nth-child(4) .flow-packet {
-  animation: packet-flow-2 5s ease-in-out infinite;
-}
-
-.flow-connector:nth-child(6) .flow-packet {
-  animation: packet-flow-3 5s ease-in-out infinite;
-}
-
-// First connector: 0% - 28% (packet 2 starts at 22%, overlap 22-28%)
-@keyframes packet-flow-1 {
-  0% {
-    left: 0;
-    opacity: 0;
-  }
-  2% {
-    opacity: 1;
-  }
-  24% {
-    opacity: 1;
-  }
-  28% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-  100% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-}
-
-// Second connector: 22% - 50% (starts while packet 1 still visible, packet 3 starts at 44%)
-@keyframes packet-flow-2 {
-  0%,
-  22% {
-    left: 0;
-    opacity: 0;
-  }
-  24% {
-    opacity: 1;
-  }
-  46% {
-    opacity: 1;
-  }
-  50% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-  100% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-}
-
-// Third connector: 44% - 72% (starts while packet 2 still visible)
-@keyframes packet-flow-3 {
-  0%,
-  44% {
-    left: 0;
-    opacity: 0;
-  }
-  46% {
-    opacity: 1;
-  }
-  68% {
-    opacity: 1;
-  }
-  72% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-  100% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-}
-
 .json-code-example {
   .code-block {
     max-width: 550px;
@@ -1994,36 +1674,30 @@ section {
 // ============================================
 // FIELD TYPES SECTION
 // ============================================
-.field-types-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 1rem;
+// Compact chip cloud: the type names speak for themselves; the full snippet
+// is revealed on hover rather than spelled out under every tile.
+.field-types-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-bottom: 2rem;
-
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 600px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .field-type {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
   background: $bg-deep;
   border: 1px solid $steel-dark;
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  transition: all 0.2s;
-  position: relative;
-  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     border-color: $steel-dim;
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px);
 
     .field-type-tooltip {
       opacity: 1;
@@ -2032,19 +1706,10 @@ section {
     }
   }
 
-  &:active {
-    transform: translateY(0) scale(0.98);
-  }
-
   code {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: $ember-glow;
-  }
-
-  > span {
-    font-size: 0.75rem;
-    color: $steel-mid;
   }
 }
 

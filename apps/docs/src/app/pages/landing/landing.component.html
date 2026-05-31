@@ -155,42 +155,6 @@
     </div>
   </section>
 
-  <!-- Stats -->
-  @defer (hydrate on viewport) {
-    <section class="stats">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-icon icon icon--download"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ npmDownloads() }}</span>
-            <span class="stat-label">Monthly Downloads</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon icon icon--star"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ githubStars() }}</span>
-            <span class="stat-label">GitHub Stars</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon icon icon--layers"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ uiLibraryCount }}</span>
-            <span class="stat-label">UI Integrations</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section class="stats" style="min-height: 120px"></section>
-      <div class="divider"></div>
-    </div>
-  }
-
   <!-- Features -->
   @defer (hydrate on viewport) {
     <section id="features" class="features">
@@ -381,11 +345,10 @@
           <p class="section-desc">Inputs, selects, sliders, arrays, groups, and multi-step pages. Build custom ones with the same API.</p>
         </div>
 
-        <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
+        <div class="field-types-row fade-up" [class.visible]="isVisible('field-types-grid')">
           @for (fieldType of fieldTypes; track fieldType.code) {
             <div class="field-type">
               <code>{{ fieldType.code }}</code>
-              <span>{{ fieldType.label }}</span>
               <div class="field-type-tooltip">
                 <pre>{{ fieldType.snippet }}</pre>
               </div>
@@ -414,8 +377,8 @@
         <div class="codegen-header fade-up" [class.visible]="isVisible('codegen-header')">
           <h2 class="section-title">Generate the config from your spec or your AI assistant</h2>
           <p class="section-desc">
-            The config is a plain typed object, so you rarely write it by hand. Generate it from an OpenAPI spec, or scaffold and validate
-            it in your editor with an MCP-aware assistant.
+            The config is a plain typed object, the single source of truth for your form. Generate it from an OpenAPI spec, or scaffold and
+            validate it in your editor with an MCP-aware assistant.
           </p>
         </div>
 
@@ -502,52 +465,6 @@
         </div>
 
         <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
-          <!-- Flow diagram -->
-          <div class="flow-diagram">
-            <div class="flow-step">
-              <div class="flow-icon database">
-                <span class="icon icon--database"></span>
-              </div>
-              <span class="flow-label">Database</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon api">
-                <span class="icon icon--api"></span>
-              </div>
-              <span class="flow-label">API Request</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon json">
-                <span class="icon icon--json"></span>
-              </div>
-              <span class="flow-label">JSON</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon form">
-                <span class="icon icon--form"></span>
-              </div>
-              <span class="flow-label">Live Form</span>
-            </div>
-          </div>
-
           <!-- Code example -->
           <div class="json-code-example">
             <div class="code-block">
