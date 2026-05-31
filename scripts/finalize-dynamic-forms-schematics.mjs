@@ -12,10 +12,7 @@ const workspaceManifest = 'package.json';
 // Third-party UI lib install ranges are sourced from the workspace root
 // at build time and embedded under `ngForgeSchematicDeps`. The schematic
 // reads this field from its own manifest at runtime — no hardcoded values.
-const SCHEMATIC_DEPS_KEYS = ['bootstrap', 'primeng', '@primeng/themes', 'primeicons', '@ionic/angular'];
-const HARDCODED_FALLBACKS = {
-  '@primeng/themes': '^21.0.0',
-};
+const SCHEMATIC_DEPS_KEYS = ['bootstrap', 'primeng', '@primeuix/themes', 'primeicons', '@ionic/angular'];
 
 writeFileSync(cjsMarker, JSON.stringify({ type: 'commonjs' }) + '\n');
 
@@ -34,7 +31,7 @@ if (existsSync(distManifest) && existsSync(workspaceManifest)) {
   const wsAll = { ...(ws.dependencies ?? {}), ...(ws.devDependencies ?? {}) };
   const schematicDeps = {};
   for (const key of SCHEMATIC_DEPS_KEYS) {
-    const spec = wsAll[key] ?? HARDCODED_FALLBACKS[key];
+    const spec = wsAll[key];
     if (!spec) continue;
     schematicDeps[key] = toInstallRange(spec);
   }

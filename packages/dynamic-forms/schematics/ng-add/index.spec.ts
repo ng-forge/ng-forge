@@ -45,7 +45,7 @@ const EXPECTATIONS: Record<Exclude<Adapter, 'none'>, AdapterExpectations> = {
     providerNeedles: ['provideAnimations', 'provideDynamicForm', 'withBootstrapFields', 'withLegacyStatusClasses'],
   },
   primeng: {
-    packages: ['@ng-forge/dynamic-forms', '@ng-forge/dynamic-forms-primeng', 'primeng', '@primeng/themes', 'primeicons'],
+    packages: ['@ng-forge/dynamic-forms', '@ng-forge/dynamic-forms-primeng', 'primeng', '@primeuix/themes', 'primeicons'],
     styleNeedles: ['primeicons/primeicons.css'],
     providerNeedles: ['provideAnimations', 'providePrimeNG', 'Aura', 'provideDynamicForm', 'withPrimeNGFields', 'withLegacyStatusClasses'],
   },
@@ -177,7 +177,7 @@ describe('ng-add', () => {
       const twice = await runner.runSchematic('ng-add', { adapter: 'primeng' }, once);
 
       const config = twice.readContent(`${APP_DIR}/src/app/app.config.ts`);
-      expect(config.match(/import Aura from '@primeng\/themes\/aura'/g)?.length).toBe(1);
+      expect(config.match(/import Aura from '@primeuix\/themes\/aura'/g)?.length).toBe(1);
       expect(config.match(/providePrimeNG\s*\(/g)?.length).toBe(1);
     });
   });
@@ -242,12 +242,12 @@ describe('ng-add', () => {
       const { runner, tree } = await makeAppTree();
       const configPath = `${APP_DIR}/src/app/app.config.ts`;
       const original = tree.readContent(configPath);
-      tree.overwrite(configPath, "// import Aura from '@primeng/themes/aura';\n" + original);
+      tree.overwrite(configPath, "// import Aura from '@primeuix/themes/aura';\n" + original);
 
       const result = await runner.runSchematic('ng-add', { adapter: 'primeng' }, tree);
       const config = result.readContent(configPath);
       // The real default import was added (commented one did not block it).
-      expect(config.match(/^[^/]*import Aura from '@primeng\/themes\/aura'/m)).not.toBeNull();
+      expect(config.match(/^[^/]*import Aura from '@primeuix\/themes\/aura'/m)).not.toBeNull();
     });
   });
 

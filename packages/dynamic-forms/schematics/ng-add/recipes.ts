@@ -49,12 +49,12 @@ export const RECIPES: Record<Adapter, AdapterRecipe> = {
   },
   primeng: {
     label: 'PrimeNG',
-    packages: [v('@ng-forge/dynamic-forms-primeng'), v('primeng'), v('@primeng/themes'), v('primeicons')],
+    packages: [v('@ng-forge/dynamic-forms-primeng'), v('primeng'), v('@primeuix/themes'), v('primeicons')],
     styles: ['primeicons/primeicons.css'],
     adapterProviders: [
       {
         marker: 'providePrimeNG',
-        defaultImports: [{ symbol: 'Aura', from: '@primeng/themes/aura' }],
+        defaultImports: [{ symbol: 'Aura', from: '@primeuix/themes/aura' }],
         builder: ({ code, external }) => code`${external('providePrimeNG', 'primeng/config')}({ theme: { preset: Aura } })`,
       },
     ],
