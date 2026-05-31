@@ -284,11 +284,7 @@ export { createField, field, formConfig } from './helpers';
 // Errors
 export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
-// ============================================================
-// ADAPTER-TIER SOURCE EXPORTS
-// Main-local symbols surfaced to adapter authors via
-// `@ng-forge/dynamic-forms/integration` (which re-exports them from here).
-// ============================================================
+// Adapter-tier source exports — adapter-author API, re-exported via /integration.
 
 export { dynamicTextToObservable } from './utils';
 export { DynamicTextPipe } from './pipes';
