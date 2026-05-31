@@ -5,7 +5,7 @@ import { map, Observable, of, switchMap } from 'rxjs';
 import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { isSameWrapperChain } from '../resolve-wrappers/resolve-wrappers';
 import { LoadedWrapper, loadWrapperComponents, renderWrapperChain, setInputIfDeclared } from './wrapper-chain';
 

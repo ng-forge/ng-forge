@@ -1,6 +1,6 @@
 import { computed, Provider, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { EventBus } from '../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -40,7 +40,7 @@ import { HTTP_CONDITION_CACHE, HttpConditionCache } from '@ng-forge/dynamic-form
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { AsyncConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { PROPERTY_DERIVATION_ORCHESTRATOR } from '../core/derivation/derivation-orchestrator';
 import { FORM_INITIALIZER } from './form-initializer.token';
 import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';

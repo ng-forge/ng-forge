@@ -1,4 +1,4 @@
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 /** Event dispatched to move an existing item from one index to another within an array field. */
 export class MoveArrayItemEvent implements FormEvent {

@@ -1,13 +1,7 @@
 import { computed, Directive, inject, Injector, input, Signal, signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import {
-  ADDON_ACTION_REGISTRY,
-  AddonActionHandler,
-  BaseAddon,
-  DynamicFormLogger,
-  DynamicValue,
-  WrapperFieldInputs,
-} from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, AddonActionHandler, BaseAddon, DynamicFormLogger, DynamicValue } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { AddonActionContext, resolveDynamicValue, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_PRESET_HANDLER } from './addon-preset-handler.token';
 import type { AssertTupleLockstep } from './assert-input-lockstep';

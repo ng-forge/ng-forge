@@ -1,5 +1,6 @@
 import { Directive, inject, input, Signal } from '@angular/core';
-import { type ArrayItemContext, EventBus, type FormEvent, type FormEventConstructor, resolveTokens } from '@ng-forge/dynamic-forms';
+import { type ArrayItemContext, type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
+import { EventBus, resolveTokens } from '@ng-forge/dynamic-forms/internal';
 import { ARRAY_CONTEXT, type DynamicText } from '@ng-forge/dynamic-forms/internal';
 import type { EventArgs } from '../definitions/button-field';
 import type { AssertTupleLockstep } from './assert-input-lockstep';

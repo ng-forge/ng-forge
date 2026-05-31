@@ -10,7 +10,7 @@ import { FormStateManager } from '../state/form-state-manager';
 import { applySchema, createSchemaFunction } from './schema-application';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { DynamicValueFunctionCacheService } from './values/dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { createSchemaFromFields, fieldsToDefaultValues } from './schema-builder';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';

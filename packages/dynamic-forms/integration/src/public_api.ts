@@ -142,9 +142,9 @@ export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } fro
 // =============================================================================
 
 export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
+export type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 export type {
   FieldWrapper,
-  WrapperFieldInputs,
   WrapperRegistration,
   WrappersBundle,
   InferWrapperRegistry,
@@ -214,15 +214,22 @@ export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 export type { FieldStateInfo, FieldStateContext, FormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
 
 // =============================================================================
+// Adapter-tier primitives (re-exported from /internal)
+// =============================================================================
+
+export { EventBus, resolveTokens } from '@ng-forge/dynamic-forms/internal';
+export { applyValidator, applyValidators } from '@ng-forge/dynamic-forms/internal';
+export type { HttpResourceRequest } from '@ng-forge/dynamic-forms/internal';
+export { DynamicTextPipe } from '@ng-forge/dynamic-forms/internal';
+export { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
+export { INITIALIZATION_TIMEOUT_MS } from '@ng-forge/dynamic-forms/internal';
+export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';
+
+// =============================================================================
 // Adapter-tier primitives (re-exported from the main entrypoint — main-local)
 // =============================================================================
 
-export { EventBus, resolveTokens } from '@ng-forge/dynamic-forms';
-export { applyValidator, applyValidators } from '@ng-forge/dynamic-forms';
-export type { HttpResourceRequest } from '@ng-forge/dynamic-forms';
 export { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
-export { DynamicTextPipe } from '@ng-forge/dynamic-forms';
-export { dynamicTextToObservable } from '@ng-forge/dynamic-forms';
 export { runPresetAction } from '@ng-forge/dynamic-forms';
 export type { PresetCollaborators } from '@ng-forge/dynamic-forms';
 export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms';
@@ -231,5 +238,3 @@ export { ADDON_KIND_DEFINITIONS } from '@ng-forge/dynamic-forms';
 export { ADDON_KIND_REGISTRY, ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from '@ng-forge/dynamic-forms';
 export { injectFieldsSupportingAddons } from '@ng-forge/dynamic-forms';
 export type { FieldAddonSupportEntry } from '@ng-forge/dynamic-forms';
-export { INITIALIZATION_TIMEOUT_MS } from '@ng-forge/dynamic-forms';
-export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';

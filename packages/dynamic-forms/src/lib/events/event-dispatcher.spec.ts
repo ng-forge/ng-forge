@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EventDispatcher } from './event-dispatcher';
-import { EventBus } from './event.bus';
-import { FormEvent } from './interfaces/form-event';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 class TestEvent implements FormEvent {
   readonly type = 'test-event' as const;

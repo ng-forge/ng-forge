@@ -8,4 +8,4 @@ export {
   type WrappersBundle,
   type InferWrapperRegistry,
 } from './create-wrappers';
-export type { WrapperFieldInputs } from './wrapper-field-inputs';
+export type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';

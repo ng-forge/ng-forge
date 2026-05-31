@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { EventBus, FormEvent } from '@ng-forge/dynamic-forms';
+import { FormEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { ARRAY_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeAction } from './ng-forge-action.directive';

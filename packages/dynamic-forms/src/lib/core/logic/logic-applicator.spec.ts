@@ -8,7 +8,7 @@ import { FormStateManager } from '../../state/form-state-manager';
 import { applyLogic, applyMultipleLogic } from './logic-applicator';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 describe('logic-applicator', () => {
   let injector: Injector;

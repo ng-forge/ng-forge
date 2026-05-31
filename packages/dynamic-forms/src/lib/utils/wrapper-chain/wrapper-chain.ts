@@ -11,7 +11,7 @@ import {
 import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Module-level cache keyed by component class. `reflectComponentType` returns

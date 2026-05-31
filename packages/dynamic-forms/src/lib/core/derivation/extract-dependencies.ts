@@ -1,5 +1,5 @@
 import { DerivationLogicConfig } from '@ng-forge/dynamic-forms/internal';
-import { extractExpressionDependencies, extractStringDependencies } from '../cross-field/cross-field-detector';
+import { extractExpressionDependencies, extractStringDependencies } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Extracts the union of field dependencies declared by a derivation config.

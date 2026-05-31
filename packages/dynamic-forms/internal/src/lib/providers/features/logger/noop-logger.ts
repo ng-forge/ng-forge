@@ -1,4 +1,4 @@
-import type { Logger } from '@ng-forge/dynamic-forms/internal';
+import type { Logger } from './logger.interface';
 
 /**
  * No-operation logger implementation.

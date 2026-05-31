@@ -1,6 +1,6 @@
 import { ComponentRef, EnvironmentInjector, Injector, signal, Type, ViewContainerRef } from '@angular/core';
 import { createWrapperAwareInjector, setInputIfDeclared } from '../../utils/wrapper-chain/wrapper-chain';
-import type { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Captured focus + caret for one detach/reinsert cycle. Tied to a single

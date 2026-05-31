@@ -13,7 +13,7 @@ import { withLoggerConfig } from './features/logger/with-logger-config';
 import { withCustomAddon } from './features/addons/with-custom-addon';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './features/logger/console-logger';
-import { NoopLogger } from './features/logger/noop-logger';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
 
 // Internal Angular structure for EnvironmentProviders
 interface InternalEnvironmentProviders {

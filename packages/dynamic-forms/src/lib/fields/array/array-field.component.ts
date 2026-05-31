@@ -23,7 +23,7 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';

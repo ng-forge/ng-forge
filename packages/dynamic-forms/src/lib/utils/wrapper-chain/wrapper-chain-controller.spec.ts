@@ -23,8 +23,8 @@ import {
   WrapperTypeDefinition,
 } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { createWrapperChainController } from './wrapper-chain-controller';
 
 @Component({

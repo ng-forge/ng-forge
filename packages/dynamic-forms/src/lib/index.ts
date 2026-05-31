@@ -37,11 +37,11 @@ export { withLoggerConfig } from './providers/features/logger/with-logger-config
 export { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 export type { Logger } from './providers/features/logger';
 export { ConsoleLogger } from './providers/features/logger/console-logger';
-export { NoopLogger } from './providers/features/logger/noop-logger';
+export { NoopLogger } from '@ng-forge/dynamic-forms/internal';
 
 // Event Form Value Feature
 export { withEventFormValue } from './providers/features/event-form-value';
-export { hasFormValue } from './events/interfaces/form-event';
+export { hasFormValue } from '@ng-forge/dynamic-forms/internal';
 
 // Value Exclusion Feature
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
@@ -284,13 +284,6 @@ export { createField, field, formConfig } from './helpers';
 // Errors
 export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
-// Adapter-tier source exports — adapter-author API, re-exported via /integration.
-
-export { dynamicTextToObservable } from './utils';
-export { DynamicTextPipe } from './pipes';
-export { applyValidator, applyValidators } from './core/validation';
-export type { HttpResourceRequest } from './core/validation';
-export type { WrapperFieldInputs } from './wrappers/wrapper-field-inputs';
-export { EventBus, resolveTokens } from './events';
+// Built-in field registry — wires renderer components, so it stays in this entrypoint.
+// Adapter-tier: surfaced to adapter authors via /integration.
 export { BUILT_IN_FIELDS } from './providers';
-export { INITIALIZATION_TIMEOUT_MS } from './utils/initialization-tracker/initialization-tracker';

@@ -24,7 +24,7 @@ import {
 } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
 
 @Component({

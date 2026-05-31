@@ -3,7 +3,7 @@ export type { FlattenedField } from './flattener/field-flattener';
 export { getGridClassString, buildClassName } from '@ng-forge/dynamic-forms/internal';
 export { FormModeValidator, isValidFormConfiguration } from './form-validation/form-mode-validator';
 export type { FormConfigurationValidationResult } from './form-validation/form-mode-validator';
-export { dynamicTextToObservable } from './dynamic-text-to-observable';
+export { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
 export { getFieldDefaultValue } from './default-value/default-value';
 export { createDebouncedEffect, createDebouncedSignal, DEFAULT_DEBOUNCE_MS } from './debounce/debounce';
 export { applyMetaToElement } from '@ng-forge/dynamic-forms/internal';

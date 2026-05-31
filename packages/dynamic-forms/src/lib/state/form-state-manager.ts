@@ -23,7 +23,7 @@ import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simpli
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';
-import { EventBus } from '../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormClearEvent } from '../events/constants/form-clear.event';
 import { FormResetEvent } from '../events/constants/form-reset.event';
 import { SubmitEvent } from '../events/constants/submit.event';

@@ -2,7 +2,7 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { DerivationLogicConfig, hasTargetProperty, isDerivationLogicConfig } from '@ng-forge/dynamic-forms/internal';
-import { extractStringDependencies } from '../cross-field/cross-field-detector';
+import { extractStringDependencies } from '@ng-forge/dynamic-forms/internal';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from '../property-derivation/property-derivation-types';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry } from './derivation-types';

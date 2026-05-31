@@ -15,7 +15,7 @@ import {
   isCrossFieldSchema,
   extractExpressionDependencies,
   extractStringDependencies,
-} from './cross-field-detector';
+} from '@ng-forge/dynamic-forms/internal';
 import { CrossFieldValidatorEntry, CrossFieldLogicEntry, CrossFieldSchemaEntry, LogicType } from './cross-field-types';
 
 /** Collected cross-field entries from traversing field definitions. */

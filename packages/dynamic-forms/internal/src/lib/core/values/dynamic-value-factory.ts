@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
-import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { ExpressionParser } from '../expressions/parser/expression-parser';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
 
 /**

@@ -16,6 +16,17 @@ const INT = '@ng-forge/dynamic-forms/internal';
 
 // Symbols owned by /internal (config types, tokens, mappers, kernel utils, base contracts).
 const INTERNAL_OWNED = new Set([
+  // moved in the leaked-adapter-tier cleanup
+  'EventBus',
+  'resolveTokens',
+  'applyValidator',
+  'applyValidators',
+  'HttpResourceRequest',
+  'DynamicTextPipe',
+  'dynamicTextToObservable',
+  'INITIALIZATION_TIMEOUT_MS',
+  'WrapperFieldInputs',
+  'withPreviousValue',
   'buildBaseInputs',
   'baseFieldMapper',
   'DEFAULT_PROPS',

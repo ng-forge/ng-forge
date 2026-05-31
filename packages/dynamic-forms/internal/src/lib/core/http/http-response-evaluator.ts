@@ -1,7 +1,7 @@
 import { ValidationError } from '@angular/forms/signals';
-import { HttpValidationResponseMapping } from '@ng-forge/dynamic-forms/internal';
-import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
+import { HttpValidationResponseMapping } from '../../models/http/http-response-mapping';
+import { Logger } from '../../providers/features/logger/logger.interface';
+import { ExpressionParser } from '../expressions/parser/expression-parser';
 
 /** Evaluates an HTTP response against a `HttpValidationResponseMapping` to produce a validation result. */
 export function evaluateHttpValidationResponse(

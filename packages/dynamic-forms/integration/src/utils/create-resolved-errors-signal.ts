@@ -4,7 +4,7 @@ import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
-import { dynamicTextToObservable } from '@ng-forge/dynamic-forms';
+import { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
 import { interpolateParams } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import type { Logger } from '@ng-forge/dynamic-forms';

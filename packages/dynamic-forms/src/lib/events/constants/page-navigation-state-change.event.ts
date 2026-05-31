@@ -1,4 +1,4 @@
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 import { PageOrchestratorState } from '../../core/page-orchestrator/page-orchestrator.interfaces';
 
 export class PageNavigationStateChangeEvent implements FormEvent {

@@ -7,7 +7,7 @@ import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { READONLY_FIELD_TREE_CACHE } from '@ng-forge/dynamic-forms/internal';
 import { buildFieldInputs } from '../../utils/build-field-inputs/build-field-inputs';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { FieldComponentSlot } from './field-component-slot';
 
 /**

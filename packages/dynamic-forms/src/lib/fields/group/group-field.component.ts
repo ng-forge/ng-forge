@@ -27,7 +27,7 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldSignalContext, GroupContext } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT, injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { createSchemaFromFields } from '../../core/schema-builder';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { SubmitEvent } from '../../events/constants/submit.event';
 
 /** Container component for rendering nested form groups. */

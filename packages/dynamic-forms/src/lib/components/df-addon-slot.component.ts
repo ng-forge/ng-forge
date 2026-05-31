@@ -5,7 +5,7 @@ import { AnyAddon } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 import { injectAddonKindRegistry } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
-import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Dispatcher component that renders an addon by looking up its `kind` in

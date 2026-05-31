@@ -1,7 +1,7 @@
 import { inject, Injector, isSignal, Pipe, PipeTransform } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
-import { DynamicText } from '@ng-forge/dynamic-forms/internal';
+import { DynamicText } from '../../models/types/dynamic-text';
 
 /**
  * Pipe that handles dynamic text resolution with support for static strings,

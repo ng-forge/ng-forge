@@ -4,7 +4,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import type { ComponentAddon } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
-import type { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Renderer for the universal `component` addon kind.

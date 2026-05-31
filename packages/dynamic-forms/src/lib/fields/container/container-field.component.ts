@@ -17,7 +17,7 @@ import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-fi
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
 import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';

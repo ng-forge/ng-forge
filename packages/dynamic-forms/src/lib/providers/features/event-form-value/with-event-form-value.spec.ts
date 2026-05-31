@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { withEventFormValue } from './with-event-form-value';
-import { EMIT_FORM_VALUE_ON_EVENTS } from './emit-form-value.token';
+import { EMIT_FORM_VALUE_ON_EVENTS } from '@ng-forge/dynamic-forms/internal';
 
 describe('withEventFormValue', () => {
   describe('Feature structure', () => {

@@ -22,7 +22,7 @@ import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '../../events';
 import { FieldWrapper, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { applyValidator } from '../../core/validation/validator-factory';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Subject } from 'rxjs';
 import { observeArrayActions, ArrayAction, ArrayEvent } from './array-event-handler';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 
 describe('array-event-handler', () => {
   describe('observeArrayActions', () => {

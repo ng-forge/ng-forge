@@ -16,7 +16,7 @@ import {
 import type { FieldContext, SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
-import { applyValidator } from './validation/validator-factory';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { applySchema } from './schema-application';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';

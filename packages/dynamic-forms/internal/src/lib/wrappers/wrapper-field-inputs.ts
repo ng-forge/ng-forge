@@ -1,4 +1,4 @@
-import { ReadonlyFieldTree } from '@ng-forge/dynamic-forms/internal';
+import { ReadonlyFieldTree } from '../core/field-tree-utils';
 
 /** Input shape passed to a wrapper component via the `fieldInputs` input. */
 export interface WrapperFieldInputs {

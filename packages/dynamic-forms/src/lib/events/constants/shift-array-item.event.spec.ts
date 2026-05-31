@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ShiftArrayItemEvent } from './shift-array-item.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('ShiftArrayItemEvent', () => {
   it('should create event with correct type', () => {

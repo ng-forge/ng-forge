@@ -3,8 +3,8 @@ import { pipe, switchMap } from 'rxjs';
 import { derivedFrom } from 'ngxtension/derived-from';
 import { FieldWrapper } from '@ng-forge/dynamic-forms/internal';
 import { DynamicText } from '@ng-forge/dynamic-forms/internal';
-import { dynamicTextToObservable } from '../../utils/dynamic-text-to-observable';
-import { WrapperFieldInputs } from '../wrapper-field-inputs';
+import { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in CSS wrapper component. */
 @Component({

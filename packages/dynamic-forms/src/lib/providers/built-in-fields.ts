@@ -13,7 +13,8 @@ import { PageField } from '@ng-forge/dynamic-forms/internal';
 import { TextField } from '@ng-forge/dynamic-forms/internal';
 import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { CssWrapper, RowWrapper } from '@ng-forge/dynamic-forms/internal';
+import { CssWrapper } from '@ng-forge/dynamic-forms/internal';
+import { RowWrapper } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in field types provided by the dynamic form library. */
 /**

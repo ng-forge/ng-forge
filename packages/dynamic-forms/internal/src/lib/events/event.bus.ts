@@ -2,11 +2,11 @@ import { inject, Injectable, InjectionToken, Signal, Type } from '@angular/core'
 import { filter, Observable, Subject } from 'rxjs';
 import { FormEvent, FormEventConstructor } from './interfaces/form-event';
 import { EMIT_FORM_VALUE_ON_EVENTS } from '../providers/features/event-form-value/emit-form-value.token';
-import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
-import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
-import { FormOptions } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import type { Logger } from '@ng-forge/dynamic-forms/internal';
+import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { FORM_OPTIONS } from '../models/field-signal-context.token';
+import { FormOptions } from '../models/form-config';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import type { Logger } from '../providers/features/logger/logger.interface';
 import { NoopLogger } from '../providers/features/logger/noop-logger';
 
 /**

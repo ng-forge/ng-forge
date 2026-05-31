@@ -1,6 +1,6 @@
 import { FieldTree } from '@angular/forms/signals';
 import { ReadonlyFieldTree, toReadonlyFieldTreeCached, writeToFieldValue } from '@ng-forge/dynamic-forms/internal';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Convert a field's raw mapper outputs into the {@link WrapperFieldInputs}

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { required } from '@angular/forms/signals';
-import { EventBus, FormEvent } from '@ng-forge/dynamic-forms';
+import { FormEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeActionHost, NgForgeFieldHost } from '../directives/host-directive-presets';
 import { injectNgForgeField } from '../directives/ng-forge-field.directive';

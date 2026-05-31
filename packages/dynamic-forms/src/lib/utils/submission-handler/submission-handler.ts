@@ -1,7 +1,7 @@
 import { Signal } from '@angular/core';
 import { FieldTree, submit } from '@angular/forms/signals';
 import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { SubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';

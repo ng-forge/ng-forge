@@ -5,7 +5,7 @@ import { SchemaApplicationConfig, SchemaDefinition } from '@ng-forge/dynamic-for
 import { SchemaRegistryService } from './registry/schema-registry.service';
 import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { createTypePredicateFunction } from './values/type-predicate-factory';
-import { applyValidator } from './validation/validator-factory';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 

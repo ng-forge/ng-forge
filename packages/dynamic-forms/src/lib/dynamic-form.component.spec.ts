@@ -18,7 +18,7 @@ import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormStateManager } from './state/form-state-manager';
-import { EventBus } from './events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { arrayEvent } from './events/array-event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 

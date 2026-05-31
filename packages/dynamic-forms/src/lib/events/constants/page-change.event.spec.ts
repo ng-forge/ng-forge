@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PageChangeEvent } from './page-change.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('PageChangeEvent', () => {
   describe('Event creation', () => {

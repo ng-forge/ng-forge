@@ -6,14 +6,14 @@ import { FieldTree } from '@angular/forms/signals';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from './form-state-manager';
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
-import { EventBus } from '../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { DynamicValueFunctionCacheService } from '../core/values/dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
 

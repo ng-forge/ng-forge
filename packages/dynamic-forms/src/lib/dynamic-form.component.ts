@@ -21,10 +21,10 @@ import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
-import { EventBus } from './events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { SubmitEvent } from './events/constants/submit.event';
-import { ComponentInitializedEvent } from './events/constants/component-initialized.event';
-import { setupInitializationTracking } from './utils/initialization-tracker/initialization-tracker';
+import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
+import { setupInitializationTracking } from '@ng-forge/dynamic-forms/internal';
 import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
 import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';

@@ -15,8 +15,8 @@ import {
   ValidationError,
 } from '@angular/forms/signals';
 import { inject } from '@angular/core';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DynamicFormError } from '../../errors/dynamic-form-error';
 import {
   AsyncValidatorConfig,
   CustomValidatorConfig,
@@ -24,15 +24,15 @@ import {
   FunctionHttpValidatorConfig,
   isFunctionHttpValidator,
   ValidatorConfig,
-} from '@ng-forge/dynamic-forms/internal';
-import { resolveHttpRequest } from '@ng-forge/dynamic-forms/internal';
+} from '../../models/validation/validator-config';
+import { resolveHttpRequest } from '../http/http-request-resolver';
 import { evaluateHttpValidationResponse } from '../http/http-response-evaluator';
-import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
+import { createLogicFunction } from '../expressions/logic-function-factory';
 import { createDynamicValueFunction } from '../values/dynamic-value-factory';
-import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
-import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
-import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
-import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
+import { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import { FunctionRegistryService } from '../registry/function-registry.service';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { ExpressionParser } from '../expressions/parser/expression-parser';
 import {
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,

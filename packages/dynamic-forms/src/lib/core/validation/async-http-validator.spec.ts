@@ -5,7 +5,7 @@ import { form, schema, FieldContext } from '@angular/forms/signals';
 import { AsyncValidatorConfig, FunctionHttpValidatorConfig } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { applyValidator } from './validator-factory';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { AsyncCustomValidator, HttpCustomValidator } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
@@ -13,7 +13,7 @@ import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
 import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 // Helper type for mock ResourceRef
 type MockResourceRef<T> = {

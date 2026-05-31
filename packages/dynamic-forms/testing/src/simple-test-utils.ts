@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, computed, Injector, input, runInInj
 import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
-import { EventBus } from '../../src/lib/events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../src/lib/core/registry/array-item-registry.service';
 import { form } from '@angular/forms/signals';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
