@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
 import { delay } from '@ng-forge/utils';
 import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
@@ -2168,16 +2168,19 @@ describe('DynamicFormComponent', () => {
   // These exercise the real component harness — the only level that drives a full config
   // swap through field resolution + reconcileFields + value capture/restore.
   describe('Whole-config swap reconciliation', () => {
-    // Drives a full config swap to completion by waiting for the state machine to settle
-    // back to `ready`, then flushing render/effects. Mirrors the wait pattern used by the
-    // existing "should add new fields when config changes to include them" test, which
-    // awaits `stateManager.ready$` rather than guessing at fixed delays.
-    const swapConfig = async (fixture: any, newConfig: TestFormConfig) => {
+    // Drives a full config swap to completion. ready$ replays the current (pre-swap) ready
+    // state via toObservable, so awaiting it would resolve before the swap even starts. Instead
+    // gate on activeConfig flipping to the new config reference (only true once the state machine
+    // reaches it), then settle render + value restore.
+    const swapConfig = async (fixture: ComponentFixture<DynamicForm>, newConfig: TestFormConfig) => {
       const stateManager = fixture.debugElement.injector.get(FormStateManager);
-      const ready = firstValueFrom(stateManager.ready$);
       fixture.componentRef.setInput('dynamic-form', newConfig);
       fixture.detectChanges();
-      await ready;
+      for (let i = 0; i < 40 && stateManager.activeConfig() !== newConfig; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
       await waitForDynamicComponents(fixture);
     };
 
