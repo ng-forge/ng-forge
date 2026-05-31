@@ -96,7 +96,7 @@ export const INTERSECTION_CONFIG = {
 // SECTION IDS
 // ============================================
 
-export const SECTION_IDS = ['features', 'showcase', 'validation', 'field-types', 'json-config', 'integrations'] as const;
+export const SECTION_IDS = ['features', 'showcase', 'validation', 'field-types', 'codegen', 'json-config', 'integrations'] as const;
 
 // ============================================
 // FEATURES
@@ -481,4 +481,45 @@ export class SurveyComponent {
     this.http.get<FormConfig>('/api/forms/survey')
   );
 }`,
+
+  httpDerivation: `{
+  key: 'shippingCost',
+  type: 'input',
+  readonly: true,
+  logic: [{
+    type: 'derivation',
+    source: 'http',
+    http: {
+      url: '/api/shipping',
+      queryParams: { zip: 'formValue.zip' },
+    },
+    responseExpression: 'response.cost',
+    dependsOn: ['zip'],
+  }],
+}`,
+
+  mcpConfig: `{
+  "ng-forge": {
+    "command": "npx",
+    "args": ["-y", "@ng-forge/dynamic-form-mcp"]
+  }
+}`,
+
+  openapiCommand: `npx @ng-forge/openapi-generator \\
+  --spec ./openapi.yaml \\
+  --output ./src/forms`,
+
+  openapiOutput: `// generated from openapi.yaml
+export const createUserForm = {
+  fields: [
+    { key: 'email', type: 'input', label: 'Email',
+      props: { type: 'email' },
+      validators: [{ type: 'required' }, { type: 'email' }] },
+    { key: 'role', type: 'select', label: 'Role',
+      options: [
+        { label: 'Admin', value: 'admin' },
+        { label: 'Member', value: 'member' },
+      ] },
+  ],
+} as const satisfies FormConfig;`,
 } as const;

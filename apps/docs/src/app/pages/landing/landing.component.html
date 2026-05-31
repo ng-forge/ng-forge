@@ -238,7 +238,9 @@
     <section id="showcase" class="showcase">
       <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
         <h2 class="section-title">Complex behavior stays declarative</h2>
-        <p class="section-desc">Conditional fields, multi-step wizards, and i18n live in the config, not in imperative component code.</p>
+        <p class="section-desc">
+          Conditional fields, multi-step wizards, and server-driven values live in the config, not in imperative component code.
+        </p>
       </div>
 
       <div class="showcase-grid">
@@ -248,7 +250,7 @@
             Conditional Everything
           </h3>
           <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
-          <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
+          <div class="showcase-code" tabindex="0" [codeHighlight]="codeSnippets.conditionalLogic"></div>
         </div>
         <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
           <h3>
@@ -256,7 +258,15 @@
             Multi-Step Wizards
           </h3>
           <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
-          <div class="showcase-code" [codeHighlight]="codeSnippets.multiStepWizard"></div>
+          <div class="showcase-code" tabindex="0" [codeHighlight]="codeSnippets.multiStepWizard"></div>
+        </div>
+        <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-2')">
+          <h3>
+            <span class="showcase-icon icon icon--api"></span>
+            Server-Driven Values
+          </h3>
+          <p>Derive a value from an HTTP endpoint or async function. Debouncing and request cancellation are handled for you.</p>
+          <div class="showcase-code" tabindex="0" [codeHighlight]="codeSnippets.httpDerivation"></div>
         </div>
       </div>
     </section>
@@ -393,6 +403,91 @@
   } @placeholder {
     <div>
       <section id="field-types" class="field-types" style="min-height: 400px"></section>
+      <div class="divider"></div>
+    </div>
+  }
+
+  <!-- Config generation (OpenAPI + AI) -->
+  @defer (hydrate on viewport) {
+    <section id="codegen" class="codegen">
+      <div class="section-container">
+        <div class="codegen-header fade-up" [class.visible]="isVisible('codegen-header')">
+          <h2 class="section-title">Generate the config from your spec or your AI assistant</h2>
+          <p class="section-desc">
+            The config is a plain typed object, so you rarely write it by hand. Generate it from an OpenAPI spec, or scaffold and validate
+            it in your editor with an MCP-aware assistant.
+          </p>
+        </div>
+
+        <div class="codegen-grid fade-up" [class.visible]="isVisible('codegen-grid')">
+          <div class="codegen-card">
+            <div class="codegen-card-head">
+              <span class="codegen-icon icon icon--api" aria-hidden="true"></span>
+              <div class="codegen-card-text">
+                <h3>From your OpenAPI spec</h3>
+                <p>Point the CLI at a spec. It emits typed FormConfig objects and matching interfaces.</p>
+              </div>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-title">terminal</span>
+              </div>
+              <div class="code-body" tabindex="0" [codeHighlight]="codeSnippets.openapiCommand" language="bash"></div>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-title">user.form.ts</span>
+              </div>
+              <div class="code-body" tabindex="0" [codeHighlight]="codeSnippets.openapiOutput"></div>
+            </div>
+          </div>
+
+          <div class="codegen-card">
+            <div class="codegen-card-head">
+              <span class="codegen-icon icon icon--sparkles" aria-hidden="true"></span>
+              <div class="codegen-card-text">
+                <h3>From your AI assistant</h3>
+                <p>An MCP server lets Claude, Cursor, and Copilot generate, validate, and scaffold configs in your editor.</p>
+              </div>
+            </div>
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-title">mcp.json</span>
+              </div>
+              <div class="code-body" tabindex="0" [codeHighlight]="codeSnippets.mcpConfig" language="json"></div>
+            </div>
+            <ul class="codegen-tools">
+              <li><code>lookup</code><span>docs for any field or concept</span></li>
+              <li><code>examples</code><span>working patterns to copy</span></li>
+              <li><code>validate</code><span>a config, with clear errors</span></li>
+              <li><code>scaffold</code><span>a typed skeleton to fill in</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="codegen-cta fade-up" [class.visible]="isVisible('codegen-cta')">
+          Read the
+          <a routerLink="/openapi-generator" class="inline-link" title="OpenAPI generator documentation">OpenAPI generator</a>
+          and
+          <a routerLink="/ai-integration" class="inline-link" title="AI integration documentation">AI integration</a>
+          guides &rarr;
+        </p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+  } @placeholder {
+    <div>
+      <section id="codegen" class="codegen" style="min-height: 500px"></section>
       <div class="divider"></div>
     </div>
   }
