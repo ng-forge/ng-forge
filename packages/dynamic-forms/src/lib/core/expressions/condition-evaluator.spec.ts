@@ -131,6 +131,71 @@ describe('condition-evaluator', () => {
       });
     });
 
+    describe('matches operator (regex handling)', () => {
+      // GAP 1: `matches` builds a RegExp from the string `value` via
+      // `new RegExp(String(expected))` (no flags) in value-utils.compareValues.
+      it('should match a basic regex pattern (regression lock)', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: '^john@',
+        };
+
+        expect(evaluateCondition(expression, mockContext)).toBe(true);
+      });
+
+      it('should NOT match when the pattern requires a different case (case-sensitive by default)', () => {
+        // formValue.email is 'john@example.com'. Uppercase pattern must not match
+        // because no `i` flag is applied. This locks the case-sensitive behavior.
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: 'JOHN@EXAMPLE',
+        };
+
+        expect(evaluateCondition(expression, mockContext)).toBe(false);
+      });
+
+      // Case-insensitive matching via the `/pattern/flags` regex-literal form.
+      it('should support case-insensitive matching via the /pattern/flags form', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: '/JOHN@EXAMPLE/i',
+        };
+
+        expect(evaluateCondition(expression, mockContext)).toBe(true);
+      });
+
+      it('treats a plain pattern (no /.../ delimiters) as case-sensitive', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: 'JOHN@EXAMPLE',
+        };
+
+        expect(evaluateCondition(expression, mockContext)).toBe(false);
+      });
+
+      it('should evaluate to false (not throw) for an invalid regex string', () => {
+        // An unterminated group is an invalid regex. compareValues wraps the
+        // RegExp construction in try/catch and returns false on SyntaxError.
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: '(',
+        };
+
+        expect(() => evaluateCondition(expression, mockContext)).not.toThrow();
+        expect(evaluateCondition(expression, mockContext)).toBe(false);
+      });
+    });
+
     describe('javascript type', () => {
       it('should evaluate simple JavaScript expressions', () => {
         const expression: ConditionalExpression = {
@@ -372,6 +437,43 @@ describe('condition-evaluator', () => {
 
         expect(result).toBe(true);
         expect(contextChecker).toHaveBeenCalledWith(contextWithChecker);
+      });
+
+      // A custom fn returning a Promise/Observable must yield false, not true (both are truthy under !!).
+      describe('async result misuse in the sync slot', () => {
+        it('returns false (not true) and warns when a custom fn returns a Promise', () => {
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => Promise.resolve(false),
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(false);
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Promise or Observable'));
+        });
+
+        it('returns false (not true) and warns when a custom fn returns an Observable-like value', () => {
+          const observableLike = { subscribe: () => ({ unsubscribe: () => undefined }) };
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => observableLike,
+          };
+
+          const result = evaluateCondition(expression, mockContext);
+
+          expect(result).toBe(false);
+          expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Promise or Observable'));
+        });
+
+        it('still returns true for a thenable-free object (normal truthy result)', () => {
+          const expression: ConditionalExpression = {
+            type: 'custom',
+            fn: () => ({ ok: true }),
+          };
+
+          expect(evaluateCondition(expression, mockContext)).toBe(true);
+        });
       });
 
       describe('inline fn alternative', () => {

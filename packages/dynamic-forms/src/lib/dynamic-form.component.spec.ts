@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DynamicForm } from './dynamic-form.component';
 import { delay } from '@ng-forge/utils';
 import { SimpleTestUtils } from '../../testing/src/simple-test-utils';
@@ -2080,7 +2080,7 @@ describe('DynamicFormComponent', () => {
     // Skip: Config changes that replace fields have timing issues in unit tests due to
     // afterNextRender callbacks and component destruction order. This is verified in E2E tests:
     // "rapid config changes settle to final config" in essential-tests.spec.ts
-    it.skip('should handle rapid config changes (latest wins)', async () => {
+    it('should handle rapid config changes (latest wins)', async () => {
       const config1: TestFormConfig = {
         fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
       };
@@ -2089,30 +2089,27 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
       expect(component.formValue()).toEqual({ fieldA: 'a' });
 
-      // Rapid successive config changes
       const config2: TestFormConfig = {
         fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
       };
-
       const config3: TestFormConfig = {
         fields: [{ key: 'fieldC', type: 'input', label: 'C', value: 'c' }],
       };
 
-      // Fire them rapidly
+      // Fire two swaps without awaiting between them; the state machine processes them
+      // sequentially and the latest config must win. Settle deterministically on activeConfig.
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
       fixture.componentRef.setInput('dynamic-form', config2);
       fixture.detectChanges();
       fixture.componentRef.setInput('dynamic-form', config3);
       fixture.detectChanges();
+      for (let i = 0; i < 60 && stateManager.activeConfig() !== config3; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
+      await waitForDynamicComponents(fixture);
 
-      // Wait for transitions to complete
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-
-      // Should end up with the last config (config3)
       expect(component.formValue()).toEqual({ fieldC: 'c' });
     });
 
@@ -2131,9 +2128,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
     });
 
-    // Skip: Config changes that replace fields have timing issues in unit tests due to
-    // afterNextRender callbacks and component destruction order. This is verified in E2E tests.
-    it.skip('should transition through phases when config changes', async () => {
+    it('should transition through phases when config changes', async () => {
       const config1: TestFormConfig = {
         fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
       };
@@ -2146,20 +2141,167 @@ describe('DynamicFormComponent', () => {
         fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
       };
 
+      // Swap and settle deterministically until the new config is active (ready → teardown
+      // → applying → restoring → ready), then assert it ended back in the render phase.
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
       fixture.componentRef.setInput('dynamic-form', config2);
       fixture.detectChanges();
+      for (let i = 0; i < 60 && stateManager.activeConfig() !== config2; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
+      await waitForDynamicComponents(fixture);
 
-      // Wait for transition to complete (goes through teardown → render)
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-
-      // Should be back to render phase with new config applied
       expect(component.renderPhase()).toBe('render');
       expect(component.formValue()).toEqual({ fieldB: 'b' });
+    });
+  });
+
+  // Integration coverage for swapping the ENTIRE `dynamic-form` config input at runtime
+  // (state machine: ready → transitioning[teardown → applying → restoring] → ready).
+  // These exercise the real component harness — the only level that drives a full config
+  // swap through field resolution + reconcileFields + value capture/restore.
+  describe('Whole-config swap reconciliation', () => {
+    // Drives a full config swap to completion. ready$ replays the current (pre-swap) ready
+    // state via toObservable, so awaiting it would resolve before the swap even starts. Instead
+    // gate on activeConfig flipping to the new config reference (only true once the state machine
+    // reaches it), then settle render + value restore.
+    const swapConfig = async (fixture: ComponentFixture<DynamicForm>, newConfig: TestFormConfig) => {
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
+      fixture.componentRef.setInput('dynamic-form', newConfig);
+      fixture.detectChanges();
+      for (let i = 0; i < 40 && stateManager.activeConfig() !== newConfig; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
+      await waitForDynamicComponents(fixture);
+    };
+
+    // Scenario 1 (overlapping key, TYPE changes): a stale value from the old field type
+    // must not corrupt the new field; the new field must initialize to its own default.
+    //
+    // The new `status` field is a `select` whose only valid options are 'active'/'inactive'
+    // and whose default value is '' (empty). The old `status` field was a free-text input
+    // holding 'hello'. On swap, the form value for `status` must be the SELECT's default
+    // (''), NOT the stale free-text 'hello'.
+    it('does not leak stale value into a same-key field whose type changed (input → select)', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'status', type: 'input', label: 'Status', value: 'hello' }],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ status: 'hello' });
+
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'status',
+            type: 'select',
+            label: 'Status',
+            options: [
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+            ],
+            // no `value` declared → select default is '' (empty)
+          },
+        ],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // The RestoreValues effect computes validKeys by intersecting key AND field type between
+      // the old (currentFormSetup) and new (pendingFormSetup) schemaFields, so a retyped key is
+      // excluded from restoration and the new `select` field initializes to its own default ('')
+      // rather than inheriting the stale free-text 'hello' (which is not a valid option).
+      expect(component.formValue()).toEqual({ status: '' });
+    });
+
+    // Same intent as above but with a clearer "default wins" assertion: the new field of a
+    // different type declares its OWN explicit default, which must take precedence over the
+    // stale value carried by the same key from the previous config.
+    it('initializes a retyped same-key field to its own declared default, not the stale value', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'flag', type: 'input', label: 'Flag', value: 'hello' }],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ flag: 'hello' });
+
+      const newConfig: TestFormConfig = {
+        fields: [{ key: 'flag', type: 'checkbox', label: 'Flag', value: false }],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // The type changed (input → checkbox), so the captured 'hello' is dropped during restore
+      // and the checkbox initializes to its declared boolean default `false`.
+      expect(component.formValue()).toEqual({ flag: false });
+    });
+
+    // Scenario 2 (key present in OLD config, absent in NEW): its value must be dropped,
+    // not leaked into the new form value.
+    it('drops the value of a key that exists in the old config but not the new one', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [
+          { key: 'keep', type: 'input', label: 'Keep', value: 'kept' },
+          { key: 'gone', type: 'input', label: 'Gone', value: 'leaked' },
+        ],
+      };
+
+      const { component, fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+      expect(component.formValue()).toEqual({ keep: 'kept', gone: 'leaked' });
+
+      const newConfig: TestFormConfig = {
+        fields: [{ key: 'keep', type: 'input', label: 'Keep', value: '' }],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // `gone` is absent from the new config, so its value must not leak. `keep` is the
+      // only key in the new form value, and its preserved value survives the swap.
+      const formValue = component.formValue();
+      expect('gone' in formValue).toBe(false);
+      expect(formValue['keep']).toBe('kept');
+      expect(formValue).toEqual({ keep: 'kept' });
+    });
+
+    // Scenario 3 (same key, type/component changes → component is replaced): reconcileFields
+    // keys identity on key + component + injector, so a different component for the same key
+    // must produce a brand-new resolved field (replaced, not reused). Verified by asserting
+    // the rendered DOM swaps from the input harness to the select harness.
+    it('replaces the rendered component when a same-key field changes type', async () => {
+      const initialConfig: TestFormConfig = {
+        fields: [{ key: 'mode', type: 'input', label: 'Mode', value: 'x' }],
+      };
+
+      const { fixture } = createComponent(initialConfig);
+      await waitForDynamicComponents(fixture);
+
+      // Sanity: the input harness rendered for the `mode` field.
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestInputHarnessComponent)).not.toBeNull();
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent)).toBeNull();
+
+      const newConfig: TestFormConfig = {
+        fields: [
+          {
+            key: 'mode',
+            type: 'select',
+            label: 'Mode',
+            options: [{ value: 'a', label: 'A' }],
+          },
+        ],
+      };
+
+      await swapConfig(fixture, newConfig);
+
+      // Component replaced: input harness gone, select harness present.
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestInputHarnessComponent)).toBeNull();
+      expect(fixture.debugElement.query((de: DebugElement) => de.componentInstance instanceof TestSelectHarnessComponent)).not.toBeNull();
     });
   });
 

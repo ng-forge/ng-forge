@@ -14,7 +14,7 @@ function makeLogger(): LoggerStub {
   return { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
 }
 
-const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+const FORM_STUB = { disabled: signal(false) } as unknown as NonNullable<AddonActionContext['form']>;
 
 function makeCtx<T = unknown>(value: T = '' as T): AddonActionContext<T> {
   // Default ctx is field-bound: non-null `form` + callable `setValue`.

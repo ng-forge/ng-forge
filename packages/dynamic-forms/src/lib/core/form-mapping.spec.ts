@@ -1295,6 +1295,31 @@ describe('form-mapping', () => {
         });
       });
 
+      // excludeValueIfHidden (value) and validateWhenHidden (validation) are independent knobs.
+      it('keeps validation skipped for a hidden required child even when its value is retained (excludeValueIfHidden:false)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            hidden: true,
+            excludeValueIfHidden: false,
+            fields: [{ key: 'street', type: 'input', required: true } as FieldDef & FieldWithValidation],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Validation is governed by validateWhenHidden, not excludeValueIfHidden.
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
       it('should let a child override and become inert when its parent says validate-when-hidden', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '' } });
@@ -1365,6 +1390,66 @@ describe('form-mapping', () => {
         });
       });
 
+      // T3: page is a flatten container (children hoisted to the parent path). These pin that a
+      // hidden PAGE cascades its hidden-state to descendant validation the same way a hidden GROUP
+      // does — i.e. the page wrapper is dropped at flatten time but the cascade context survives.
+      it('should skip required validation on a leaf inside a statically hidden page by default', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ street: '' });
+          const pageField: FieldDef = {
+            type: 'page',
+            hidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(pageField, path as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Hidden page → descendant's required is skipped by default (mirrors hidden group).
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should propagate page validateWhenHidden=true to descendants without overrides', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ street: '' });
+          const pageField: FieldDef = {
+            type: 'page',
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [
+              {
+                key: 'street',
+                type: 'input',
+                required: true,
+              } as FieldDef & FieldWithValidation,
+            ],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(pageField, path as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // Hidden page + page-level validate-when-hidden → descendant's required runs.
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
       it('should skip validators on a leaf with logic-based static hidden=true condition', () => {
         // A logic condition of `true` resolves to "always hidden" through the
         // cascade's ancestorAlwaysHidden short-circuit. The validator should never
@@ -1420,6 +1505,53 @@ describe('form-mapping', () => {
 
           expect(formInstance().valid()).toBe(true);
         });
+      });
+    });
+
+    // Number inputs default to NaN (see default-value.ts); these pin its validity + wire contract.
+    describe('number-input NaN contract', () => {
+      it('does not make a NON-required number field invalid when its value is NaN (cleared)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ age: NaN });
+          const fieldDef: FieldDef & FieldWithValidation = { key: 'age', type: 'input', props: { type: 'number' } };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.age);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('treats a NaN value as empty for a REQUIRED number field (cleared = unsatisfied)', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ age: NaN });
+          const fieldDef: FieldDef & FieldWithValidation = {
+            key: 'age',
+            type: 'input',
+            required: true,
+            props: { type: 'number' },
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(fieldDef, path.age);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('serializes a NaN number value to null over the wire (JSON contract)', () => {
+        // In-memory value is NaN, but JSON.stringify maps it to null on the wire.
+        expect(JSON.stringify({ age: NaN })).toBe('{"age":null}');
       });
     });
   });

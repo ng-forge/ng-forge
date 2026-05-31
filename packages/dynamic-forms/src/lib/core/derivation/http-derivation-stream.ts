@@ -219,8 +219,23 @@ export function createHttpDerivationStream(
                   return;
                 }
 
-                // Apply the value to the form
+                // Re-read dirty state at apply-time: the user may have edited the field
+                // after the request started but before it resolved. Mirrors the
+                // fire-time stopOnUserOverride guard in the switchMap above.
                 const currentForm = untracked(() => context.form());
+                if (entry.stopOnUserOverride && readFieldDirty(currentForm, entry.fieldKey)) {
+                  const derivationLogger = untracked(() => context.derivationLogger());
+                  derivationLogger.evaluation({
+                    debugName: entry.debugName,
+                    fieldKey: entry.fieldKey,
+                    result: 'skipped',
+                    skipReason: 'user-override',
+                  });
+                  subscriber.complete();
+                  return;
+                }
+
+                // Apply the value to the form
                 applyValueToForm(entry.fieldKey, newValue, currentForm, context.logger, context.warningTracker);
 
                 const derivationLogger = untracked(() => context.derivationLogger());

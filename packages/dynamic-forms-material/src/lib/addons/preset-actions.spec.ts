@@ -5,7 +5,7 @@ import { type PresetCollaborators, runMatPresetAction } from './preset-actions';
 
 // Field-bound stub — opaque form object; the runner discriminates on
 // `form !== null`, not on tree methods.
-const FORM_STUB = {} as unknown as NonNullable<AddonActionContext['form']>;
+const FORM_STUB = { disabled: signal(false) } as unknown as NonNullable<AddonActionContext['form']>;
 
 function makeCtx(value: unknown, setValue: (next: unknown) => void = () => undefined): AddonActionContext {
   return {

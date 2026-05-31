@@ -2092,6 +2092,8 @@ const config = { fields: [...] } as const satisfies FormConfig;
 | \`endsWith\` | String ends with | \`'hello'.endsWith('lo')\` |
 | \`matches\` | Regex match | \`/^[0-9]+$/.test(value)\` |
 
+For \`matches\`, the value is a pattern string. Use the \`/pattern/flags\` form to pass regex flags, e.g. \`"/john/i"\` for case-insensitive matching. A plain pattern (no \`/.../\` delimiters) is matched case-sensitively with no flags.
+
 ## Combining Conditions
 
 **AND (all must be true):**

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import type { FieldTree, SchemaPath } from '@angular/forms/signals';
-import { form, schema } from '@angular/forms/signals';
+import { form, schema, validate, requiredError } from '@angular/forms/signals';
 import { createResolvedErrorsSignal } from '@ng-forge/dynamic-forms/integration';
 import { ValidationMessages } from '../models/validation-types';
 import { applyValidator } from '../core/validation/validator-factory';
@@ -189,6 +189,59 @@ describe('createResolvedErrorsSignal', () => {
         TestBed.flushEffects();
 
         expect(resolvedErrors()).toEqual([{ kind: 'min', message: 'Default: Minimum value is 18' }]);
+      });
+    });
+
+    it('should let a configured field-level message win over a validator-provided message', () => {
+      // GAP 3(a): precedence field-level > validator-provided error.message.
+      // The validator attaches its own human-readable message via
+      // requiredError({ message }); the field-level config must still win.
+      runInInjectionContext(injector, () => {
+        const initialValue = signal({ email: '' });
+        const testForm = form(
+          initialValue,
+          schema<{ email: string }>((path) => {
+            validate(path.email as SchemaPath<string>, () => requiredError({ message: 'Validator: required from validator' }));
+          }),
+        );
+
+        const emailField = signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
+
+        const fieldMessages = signal<ValidationMessages>({
+          required: 'Field-level: Email is required',
+        });
+        const defaultMessages = signal<ValidationMessages>({});
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, defaultMessages);
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Field-level: Email is required' }]);
+      });
+    });
+
+    it('should fall back to the validator-provided message when no field-level or default message exists', () => {
+      // GAP 3: lowest configured layer — error.message from the validator is
+      // used when neither field-level nor default messages are provided.
+      runInInjectionContext(injector, () => {
+        const initialValue = signal({ email: '' });
+        const testForm = form(
+          initialValue,
+          schema<{ email: string }>((path) => {
+            validate(path.email as SchemaPath<string>, () => requiredError({ message: 'Validator: required from validator' }));
+          }),
+        );
+
+        const emailField = signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
+
+        const fieldMessages = signal<ValidationMessages>({});
+        const defaultMessages = signal<ValidationMessages>({});
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, defaultMessages);
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator: required from validator' }]);
       });
     });
   });

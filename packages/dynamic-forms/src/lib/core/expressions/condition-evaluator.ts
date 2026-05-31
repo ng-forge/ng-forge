@@ -9,6 +9,13 @@ import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { compareValues, getNestedValue, hasNestedProperty } from './value-utils';
 import { ExpressionParser } from './parser/expression-parser';
 
+/** True for a Promise/Observable wrongly returned into a sync condition slot (truthy under `!!`). */
+function isThenableOrObservable(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  const candidate = value as { then?: unknown; subscribe?: unknown };
+  return typeof candidate.then === 'function' || typeof candidate.subscribe === 'function';
+}
+
 /**
  * Evaluate conditional expression
  * Uses secure AST-based parsing for JavaScript expressions
@@ -42,7 +49,15 @@ export function evaluateCondition(expression: ConditionalExpression, context: Ev
       }
 
       try {
-        return !!customFn(context);
+        const result = customFn(context);
+        if (isThenableOrObservable(result)) {
+          context.logger.warn(
+            `Custom condition '${registeredName ?? '<inline>'}' returned a Promise or Observable. ` +
+              `Synchronous conditions must return a value; use an 'async' or 'http' condition type for asynchronous logic. Treating as false.`,
+          );
+          return false;
+        }
+        return !!result;
       } catch (error) {
         context.logger.error('Error executing custom function:', registeredName ?? '<inline>', error);
         return false;

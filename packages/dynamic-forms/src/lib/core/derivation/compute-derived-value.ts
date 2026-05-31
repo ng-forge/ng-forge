@@ -27,6 +27,13 @@ export interface ComputeValueOptions {
   functionKind?: string;
 }
 
+/** True for a Promise/Observable wrongly returned into a sync derivation slot. */
+function isThenableOrObservable(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') return false;
+  const candidate = value as { then?: unknown; subscribe?: unknown };
+  return typeof candidate.then === 'function' || typeof candidate.subscribe === 'function';
+}
+
 /**
  * Single dispatch over `value` / `expression` / `functionName` shared by both
  * the value-derivation and property-derivation applicators.
@@ -57,7 +64,15 @@ export function computeValueFromEntry(
       const kind = options.functionKind ?? 'Derivation function';
       throw new DynamicFormError(`${kind} '${entry.functionName}' not found in customFnConfig.derivations`);
     }
-    return fn(evalContext);
+    const result = fn(evalContext);
+    if (isThenableOrObservable(result)) {
+      evalContext.logger.warn(
+        `Derivation for '${options.subject}' returned a Promise or Observable. ` +
+          `Synchronous derivations must return a value; use 'asyncDerivations' or an HTTP derivation for asynchronous logic. Skipping.`,
+      );
+      return undefined;
+    }
+    return result;
   }
 
   throw new DynamicFormError(

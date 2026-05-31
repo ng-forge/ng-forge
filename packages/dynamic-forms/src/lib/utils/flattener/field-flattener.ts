@@ -10,6 +10,63 @@ import { normalizeFieldsArray } from '../object-utils';
 export interface FlattenedField extends FieldDef<unknown> {
   /** Guaranteed non-empty key for form binding and field identification */
   readonly key: string;
+
+  /**
+   * Static hidden/disabled/readonly state inherited from a discarded flatten
+   * container (page/row) ancestor. Set only when a hoisted child's ancestor
+   * declared the state; the child's own state still wins for everything else.
+   *
+   * Read exclusively by the value-exclusion path (`filterFormValue`) so a hidden
+   * page drops its hoisted children's values — mirroring how a hidden group
+   * drops its preserved subtree. NOT consumed by schema building or rendering,
+   * which keeps this purely a value-exclusion concern with no validation side
+   * effects.
+   */
+  readonly inheritedExclusionState?: {
+    readonly hidden?: boolean;
+    readonly disabled?: boolean;
+    readonly readonly?: boolean;
+  };
+}
+
+/**
+ * Propagates a discarded flatten-container's (page/row) exclusion-relevant config
+ * onto a hoisted child so the value-exclusion path can still drop the child's value
+ * when the container was hidden/disabled/readonly.
+ *
+ * - Static state (`hidden`/`disabled`/`readonly`) is OR-accumulated into the child's
+ *   `inheritedExclusionState`, so nested flatten containers compound correctly.
+ * - `excludeValueIf*` config is applied only where the child has not declared its own
+ *   (child override wins), matching the group-cascade resolution model.
+ *
+ * Returns the child unchanged when the container carries no exclusion-relevant config,
+ * preserving object identity for the common case.
+ */
+function inheritContainerExclusion(container: FieldDef<unknown>, child: FlattenedField): FlattenedField {
+  const inheritedHidden = container.hidden === true || child.inheritedExclusionState?.hidden === true;
+  const inheritedDisabled = container.disabled === true || child.inheritedExclusionState?.disabled === true;
+  const inheritedReadonly = container.readonly === true || child.inheritedExclusionState?.readonly === true;
+
+  const hasInheritedState = inheritedHidden || inheritedDisabled || inheritedReadonly;
+  const containerExcludeConfig =
+    container.excludeValueIfHidden !== undefined ||
+    container.excludeValueIfDisabled !== undefined ||
+    container.excludeValueIfReadonly !== undefined;
+
+  if (!hasInheritedState && !containerExcludeConfig) {
+    return child;
+  }
+
+  return {
+    ...child,
+    ...(hasInheritedState
+      ? { inheritedExclusionState: { hidden: inheritedHidden, disabled: inheritedDisabled, readonly: inheritedReadonly } }
+      : {}),
+    // Child override wins; otherwise inherit the container's exclusion config.
+    excludeValueIfHidden: child.excludeValueIfHidden ?? container.excludeValueIfHidden,
+    excludeValueIfDisabled: child.excludeValueIfDisabled ?? container.excludeValueIfDisabled,
+    excludeValueIfReadonly: child.excludeValueIfReadonly ?? container.excludeValueIfReadonly,
+  };
 }
 
 /**
@@ -59,9 +116,13 @@ export function flattenFields(
         const fields = field.fields as FieldDef<unknown>[] | Record<string, FieldDef<unknown>>;
         const flattenedChildren = flattenFields(normalizeFieldsArray(fields), registry, options);
 
-        // Spread children directly into result - the container field itself is discarded
-        // This is used for page fields (form structure) and row fields (form values)
-        result.push(...flattenedChildren);
+        // Spread children directly into result - the container field itself is discarded.
+        // Because the container (page/row) is dropped, its exclusion-relevant state would
+        // otherwise be lost. Propagate it onto each hoisted child so a hidden/disabled/
+        // readonly page drops its children's values during value exclusion — mirroring how
+        // a hidden group drops its preserved subtree. The child's own config still wins.
+        // This is used for page fields (form structure) and row fields (form values).
+        result.push(...flattenedChildren.map((child) => inheritContainerExclusion(field, child)));
       }
     } else if (isGroupField(field)) {
       // Step 4: Handle group fields - preserve structure for nested form values

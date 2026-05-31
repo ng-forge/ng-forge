@@ -28,13 +28,19 @@ export function compareValues(actual: unknown, expected: unknown, operator: stri
       return String(actual).endsWith(String(expected));
     case 'matches':
       try {
-        return new RegExp(String(expected)).test(String(actual));
+        return toRegExp(String(expected)).test(String(actual));
       } catch {
         return false;
       }
     default:
       return false;
   }
+}
+
+/** Builds a RegExp, supporting the `/pattern/flags` literal form (e.g. `/john/i`) for flags like `i`. */
+function toRegExp(value: string): RegExp {
+  const literal = /^\/(.+)\/([dgimsuvy]*)$/.exec(value);
+  return literal ? new RegExp(literal[1], literal[2]) : new RegExp(value);
 }
 
 /**

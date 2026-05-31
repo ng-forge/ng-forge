@@ -269,6 +269,57 @@ describe('field-flattener', () => {
 
         expect(result).toEqual([{ type: 'input', key: 'test' }]);
       });
+
+      it('should propagate a hidden page state onto its hoisted children', () => {
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'page',
+            hidden: true,
+            fields: [
+              { type: 'input', key: 'name' },
+              { type: 'input', key: 'email' },
+            ],
+          },
+        ];
+
+        const result = flattenFields(fields, registry) as Array<FieldDef<any> & { inheritedExclusionState?: unknown }>;
+
+        expect(result).toHaveLength(2);
+        expect(result[0].inheritedExclusionState).toEqual({ hidden: true, disabled: false, readonly: false });
+        expect(result[1].inheritedExclusionState).toEqual({ hidden: true, disabled: false, readonly: false });
+      });
+
+      it('should propagate a page excludeValueIfHidden config onto children (child override wins)', () => {
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'page',
+            excludeValueIfHidden: true,
+            fields: [
+              { type: 'input', key: 'inherits' },
+              { type: 'input', key: 'overrides', excludeValueIfHidden: false },
+            ],
+          },
+        ];
+
+        const result = flattenFields(fields, registry) as Array<FieldDef<any>>;
+
+        expect(result[0].excludeValueIfHidden).toBe(true);
+        expect(result[1].excludeValueIfHidden).toBe(false);
+      });
+
+      it('should not annotate children when the page carries no exclusion config', () => {
+        const fields: FieldDef<any>[] = [
+          {
+            type: 'page',
+            fields: [{ type: 'input', key: 'plain' }],
+          },
+        ];
+
+        const result = flattenFields(fields, registry);
+
+        // Identity preserved — no extra exclusion keys added.
+        expect(result).toEqual([{ type: 'input', key: 'plain' }]);
+      });
     });
 
     describe('group field handling', () => {

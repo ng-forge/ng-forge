@@ -56,6 +56,14 @@ export async function runPresetAction(
     return;
   }
 
+  // A disabled field is non-editable; value-mutating presets must not change it, consistent with
+  // the rest of the library treating disabled fields as non-interactive. `readonly` is not exposed
+  // on the field-bound `ReadonlyFieldTree`, so the guard is scoped to `disabled`.
+  if (ctx.form !== null && (preset === 'clear' || preset === 'reset' || preset === 'paste') && ctx.form.disabled()) {
+    collaborators.logger.warn(`preset '${String(preset)}' skipped — host '${fieldLabel}' is disabled.`);
+    return;
+  }
+
   switch (preset) {
     case 'clear': {
       // Preserve type semantics: strings clear to `''` (browser-friendly for

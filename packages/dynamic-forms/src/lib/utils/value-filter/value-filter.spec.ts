@@ -429,6 +429,109 @@ describe('filterFormValue', () => {
     });
   });
 
+  // ───────────────────────────────────────────────────────────────────────
+  // Regression / characterization: value-exclusion on hidden CONTAINER fields
+  // ───────────────────────────────────────────────────────────────────────
+  describe('hidden container fields (exclusion)', () => {
+    it('should omit the whole group value when group is hidden + excludeValueIfHidden', () => {
+      const rawValue = { profile: { firstName: 'Jane', lastName: 'Doe' } };
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'profile',
+          type: 'group',
+          fields: [
+            { key: 'firstName', type: 'input' },
+            { key: 'lastName', type: 'input' },
+          ],
+        } as FieldDef<unknown>,
+      ];
+      const formTree = {
+        profile: createFieldState({ hidden: true }),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_ENABLED, undefined);
+
+      expect(result).toEqual({});
+    });
+
+    it('should omit the whole array value when array is hidden + excludeValueIfHidden', () => {
+      const rawValue = { contacts: [{ name: 'A' }, { name: 'B' }] };
+      const fields: FieldDef<unknown>[] = [
+        { key: 'contacts', type: 'array', fields: [[{ key: 'name', type: 'input' }]] } as FieldDef<unknown>,
+      ];
+      const formTree = {
+        contacts: createFieldState({ hidden: true }),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_ENABLED, undefined);
+
+      expect(result).toEqual({});
+    });
+
+    it('should NOT filter per-item: a hidden child field inside a visible array keeps the array whole (v1: no per-item filtering)', () => {
+      // The array item template declares a 'secret' child marked hidden + excludeValueIfHidden.
+      // Documented v1 behavior: arrays are included wholesale when the array itself is not excluded.
+      const rawValue = {
+        contacts: [
+          { name: 'A', secret: 's1' },
+          { name: 'B', secret: 's2' },
+        ],
+      };
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'contacts',
+          type: 'array',
+          fields: [
+            [
+              { key: 'name', type: 'input' },
+              { key: 'secret', type: 'input', hidden: true, excludeValueIfHidden: true },
+            ],
+          ],
+        } as FieldDef<unknown>,
+      ];
+      const formTree = {
+        contacts: createFieldState(),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_ENABLED, undefined);
+
+      // Whole array (including per-item 'secret') survives — per-item filtering is not implemented.
+      expect(result).toEqual({
+        contacts: [
+          { name: 'A', secret: 's1' },
+          { name: 'B', secret: 's2' },
+        ],
+      });
+    });
+
+    // Page-level excludeValueIfHidden drops the hoisted child's value.
+    //
+    // Pages have valueHandling 'flatten'. flattenFields discards the page wrapper and hoists its
+    // children to the top level of `schemaFields`, propagating the page's exclusion-relevant state
+    // onto each hoisted child via `inheritedExclusionState` (mirroring how a hidden group drops its
+    // preserved subtree). value-filter then reads that inherited state, so hiding a page drops its
+    // hoisted child values even though the child is not individually hidden.
+    it('should drop the subtree when a page is hidden + excludeValueIfHidden', () => {
+      // Post-flatten schemaFields: the page wrapper is gone, its child is hoisted to top level and
+      // carries the page's inherited hidden state.
+      const rawValue = { step1Field: 'value-from-hidden-page', visibleField: 'keep' };
+      const fields: FieldDef<unknown>[] = [
+        { key: 'step1Field', type: 'input', inheritedExclusionState: { hidden: true } } as FieldDef<unknown>,
+        { key: 'visibleField', type: 'input' },
+      ];
+      // The hoisted child is NOT itself hidden — only the (now-discarded) page was hidden.
+      const formTree = {
+        step1Field: createFieldState(),
+        visibleField: createFieldState(),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_ENABLED, undefined);
+
+      // CORRECT behavior: the hidden page's hoisted child value should be dropped.
+      expect(result).toEqual({ visibleField: 'keep' });
+    });
+  });
+
   describe('missing raw values', () => {
     it('should skip fields whose key is not in rawValue', () => {
       const rawValue = { name: 'John' };
