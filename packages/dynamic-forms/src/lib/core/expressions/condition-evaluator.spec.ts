@@ -158,26 +158,27 @@ describe('condition-evaluator', () => {
         expect(evaluateCondition(expression, mockContext)).toBe(false);
       });
 
-      // LIMITATION: The `matches` operator has no API to pass regex flags. A
-      // string value is fed straight into `new RegExp(value)` with no flags, so
-      // case-insensitive matching is impossible. Inline-flag syntax `(?i)` is
-      // not valid ECMAScript and throws inside the RegExp constructor, which
-      // compareValues catches and turns into `false`. There is no way for a
-      // config author to request a case-insensitive `matches`. If flag support
-      // is ever added (e.g. `value: '/JOHN/i'` parsing or a `flags` field),
-      // flip this to a passing `it`.
-      it.fails('should support case-insensitive matching via inline (?i) flag', () => {
+      // Case-insensitive matching via the `/pattern/flags` regex-literal form.
+      it('should support case-insensitive matching via the /pattern/flags form', () => {
         const expression: ConditionalExpression = {
           type: 'fieldValue',
           fieldPath: 'email',
           operator: 'matches',
-          value: '(?i)JOHN@EXAMPLE',
+          value: '/JOHN@EXAMPLE/i',
         };
 
-        // Desired behavior: case-insensitive match succeeds. Actual: `(?i)` is
-        // an invalid JS regex token → RegExp throws → compareValues returns
-        // false, so this assertion fails (documented limitation).
         expect(evaluateCondition(expression, mockContext)).toBe(true);
+      });
+
+      it('treats a plain pattern (no /.../ delimiters) as case-sensitive', () => {
+        const expression: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'email',
+          operator: 'matches',
+          value: 'JOHN@EXAMPLE',
+        };
+
+        expect(evaluateCondition(expression, mockContext)).toBe(false);
       });
 
       it('should evaluate to false (not throw) for an invalid regex string', () => {

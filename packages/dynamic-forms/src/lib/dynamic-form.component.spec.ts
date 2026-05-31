@@ -2080,7 +2080,7 @@ describe('DynamicFormComponent', () => {
     // Skip: Config changes that replace fields have timing issues in unit tests due to
     // afterNextRender callbacks and component destruction order. This is verified in E2E tests:
     // "rapid config changes settle to final config" in essential-tests.spec.ts
-    it.skip('should handle rapid config changes (latest wins)', async () => {
+    it('should handle rapid config changes (latest wins)', async () => {
       const config1: TestFormConfig = {
         fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
       };
@@ -2089,30 +2089,27 @@ describe('DynamicFormComponent', () => {
       await waitForDynamicComponents(fixture);
       expect(component.formValue()).toEqual({ fieldA: 'a' });
 
-      // Rapid successive config changes
       const config2: TestFormConfig = {
         fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
       };
-
       const config3: TestFormConfig = {
         fields: [{ key: 'fieldC', type: 'input', label: 'C', value: 'c' }],
       };
 
-      // Fire them rapidly
+      // Fire two swaps without awaiting between them; the state machine processes them
+      // sequentially and the latest config must win. Settle deterministically on activeConfig.
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
       fixture.componentRef.setInput('dynamic-form', config2);
       fixture.detectChanges();
       fixture.componentRef.setInput('dynamic-form', config3);
       fixture.detectChanges();
+      for (let i = 0; i < 60 && stateManager.activeConfig() !== config3; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
+      await waitForDynamicComponents(fixture);
 
-      // Wait for transitions to complete
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-
-      // Should end up with the last config (config3)
       expect(component.formValue()).toEqual({ fieldC: 'c' });
     });
 
@@ -2131,9 +2128,7 @@ describe('DynamicFormComponent', () => {
       expect(component.formValue()).toEqual({ firstName: 'John' });
     });
 
-    // Skip: Config changes that replace fields have timing issues in unit tests due to
-    // afterNextRender callbacks and component destruction order. This is verified in E2E tests.
-    it.skip('should transition through phases when config changes', async () => {
+    it('should transition through phases when config changes', async () => {
       const config1: TestFormConfig = {
         fields: [{ key: 'fieldA', type: 'input', label: 'A', value: 'a' }],
       };
@@ -2146,18 +2141,18 @@ describe('DynamicFormComponent', () => {
         fields: [{ key: 'fieldB', type: 'input', label: 'B', value: 'b' }],
       };
 
+      // Swap and settle deterministically until the new config is active (ready → teardown
+      // → applying → restoring → ready), then assert it ended back in the render phase.
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
       fixture.componentRef.setInput('dynamic-form', config2);
       fixture.detectChanges();
+      for (let i = 0; i < 60 && stateManager.activeConfig() !== config2; i++) {
+        await delay(5);
+        fixture.detectChanges();
+        TestBed.flushEffects();
+      }
+      await waitForDynamicComponents(fixture);
 
-      // Wait for transition to complete (goes through teardown → render)
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-      await delay();
-      fixture.detectChanges();
-
-      // Should be back to render phase with new config applied
       expect(component.renderPhase()).toBe('render');
       expect(component.formValue()).toEqual({ fieldB: 'b' });
     });
