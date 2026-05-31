@@ -230,6 +230,9 @@ jobs:
       - name: Test affected projects
         run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
 
+      - name: Test schematics (affected)
+        run: pnpm nx affected -t test-schematics --base=origin/main
+
       - name: Type test affected projects
         run: pnpm nx affected -t type-test --base=origin/main
 

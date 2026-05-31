@@ -32,7 +32,7 @@ export const VERSIONS = {
   '@angular/cdk': ANGULAR,
   bootstrap: THIRD_PARTY['bootstrap'] ?? '^5.3.0',
   primeng: THIRD_PARTY['primeng'] ?? '^21.0.0',
-  '@primeng/themes': THIRD_PARTY['@primeng/themes'] ?? '^21.0.0',
+  '@primeuix/themes': THIRD_PARTY['@primeuix/themes'] ?? '^2.0.0',
   primeicons: THIRD_PARTY['primeicons'] ?? '^7.0.0',
   '@ionic/angular': THIRD_PARTY['@ionic/angular'] ?? '^8.8.0',
 } satisfies Record<string, string>;

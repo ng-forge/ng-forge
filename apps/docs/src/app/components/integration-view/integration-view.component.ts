@@ -75,13 +75,13 @@ export const appConfig: ApplicationConfig = {
     ],
   },
   primeng: {
-    packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeng/themes primeicons',
+    packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeuix/themes primeicons',
     stylesCode: `// styles.scss
 @import 'primeicons/primeicons.css';`,
     setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
