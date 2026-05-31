@@ -142,22 +142,22 @@ export class LandingComponent {
     stream: () =>
       this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms').pipe(
         map((data) => this.formatNumber(data?.downloads ?? 0)),
-        catchError(() => of('—')),
+        catchError(() => of('-')),
       ),
   });
 
-  readonly npmDownloads = computed(() => this.npmResource.value() ?? '—');
+  readonly npmDownloads = computed(() => this.npmResource.value() ?? '-');
 
   private readonly githubResource = rxResource({
     params: () => (this.isBrowser ? {} : undefined),
     stream: () =>
       this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge').pipe(
         map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
-        catchError(() => of('—')),
+        catchError(() => of('-')),
       ),
   });
 
-  readonly githubStars = computed(() => this.githubResource.value() ?? '—');
+  readonly githubStars = computed(() => this.githubResource.value() ?? '-');
 
   readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
 

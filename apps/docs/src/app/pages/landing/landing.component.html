@@ -195,10 +195,10 @@
   @defer (hydrate on viewport) {
     <section id="features" class="features">
       <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
-        <div class="section-label">Why ng-forge</div>
-        <h2 class="section-title">Built different.</h2>
+        <h2 class="section-title">Built on Signal Forms, not bolted on top</h2>
         <p class="section-desc">
-          Not another forms wrapper. Native signal forms integration, real type safety, actual developer experience.
+          Real integration with Angular's reactive primitives. Type safety your IDE can see, and field components that load only when they
+          render.
         </p>
       </div>
 
@@ -237,9 +237,8 @@
   @defer (hydrate on viewport) {
     <section id="showcase" class="showcase">
       <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
-        <div class="section-label">Power features</div>
-        <h2 class="section-title">Simple API. Complex forms.</h2>
-        <p class="section-desc">Conditional logic, multi-step wizards, i18n. All declarative.</p>
+        <h2 class="section-title">Complex behavior stays declarative</h2>
+        <p class="section-desc">Conditional fields, multi-step wizards, and i18n live in the config, not in imperative component code.</p>
       </div>
 
       <div class="showcase-grid">
@@ -275,9 +274,8 @@
     <section id="validation" class="validation">
       <div class="section-container">
         <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
-          <div class="section-label">Validation</div>
-          <h2 class="section-title">Try to break it.</h2>
-          <p class="section-desc">Real-time validation. No Validators import. Just properties.</p>
+          <h2 class="section-title">Validation without the Validators import</h2>
+          <p class="section-desc">Set required, email, min, or a pattern as plain properties. Errors update as the user types.</p>
         </div>
 
         <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
@@ -337,7 +335,13 @@
                 <span class="code-dot"></span>
                 <span class="code-title">validation-config.ts</span>
               </div>
-              <div class="code-body" [codeHighlight]="codeSnippets.validationShowcase"></div>
+              <div
+                class="code-body"
+                tabindex="0"
+                role="region"
+                aria-label="validation-config.ts source, scrollable"
+                [codeHighlight]="codeSnippets.validationShowcase"
+              ></div>
             </div>
           </div>
         </div>
@@ -363,9 +367,8 @@
     <section id="field-types" class="field-types">
       <div class="section-container">
         <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
-          <div class="section-label">Field types</div>
-          <h2 class="section-title">Everything you need, built in.</h2>
-          <p class="section-desc">Common field types ready to use. Need more? Create your own.</p>
+          <h2 class="section-title">Fifteen field types ship in the box</h2>
+          <p class="section-desc">Inputs, selects, sliders, arrays, groups, and multi-step pages. Build custom ones with the same API.</p>
         </div>
 
         <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
@@ -399,9 +402,8 @@
     <section id="json-config" class="json-config">
       <div class="section-container">
         <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
-          <div class="section-label">Backend-driven</div>
-          <h2 class="section-title">Forms don't have to live in code.</h2>
-          <p class="section-desc">Store configs in your database. Fetch via API. Update forms without redeploying.</p>
+          <h2 class="section-title">Store form configs in your database</h2>
+          <p class="section-desc">Fetch the config from an API and render it. Change a form without shipping a new build.</p>
         </div>
 
         <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
@@ -511,9 +513,8 @@
   @defer (hydrate on viewport) {
     <section id="integrations" class="integrations">
       <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
-        <div class="section-label">Integrations</div>
-        <h2 class="section-title">Your UI library. Our forms.</h2>
-        <p class="section-desc">First-class adapters for everything you're already using.</p>
+        <h2 class="section-title">One config, four UI libraries</h2>
+        <p class="section-desc">First-class adapters for Material, PrimeNG, Ionic, and Bootstrap. Swap a single import.</p>
       </div>
 
       <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">

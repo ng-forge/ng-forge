@@ -106,12 +106,12 @@ export const FEATURES: Feature[] = [
   {
     icon: 'signal',
     title: 'Signal Forms Native',
-    description: "Built directly on Angular Signal Forms. Not a wrapper — real integration with Angular's reactive future.",
+    description: "Built directly on Angular Signal Forms. Not a wrapper. Real integration with Angular's reactive future.",
   },
   {
     icon: 'target',
     title: 'Actually Type-Safe',
-    description: ' — your IDE knows everything. No more guessing.',
+    description: ' gives your IDE the full shape. No more guessing.',
     highlightCode: 'as const satisfies',
   },
   {

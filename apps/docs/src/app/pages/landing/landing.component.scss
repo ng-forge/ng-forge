@@ -170,20 +170,15 @@
   animation: spark-burst 0.3s ease-out forwards;
 }
 
+// Animate opacity only. The glow (box-shadow) stays static on .firefly so the
+// pulse never triggers a per-frame shadow repaint, keeping the loop GPU-cheap.
 @keyframes firefly-pulse {
   0%,
   100% {
-    opacity: 0.6;
-    box-shadow:
-      0 0 8px $ember-hot,
-      0 0 16px $ember-glow;
+    opacity: 0.55;
   }
   50% {
     opacity: 1;
-    box-shadow:
-      0 0 12px $ember-hot,
-      0 0 24px $ember-glow,
-      0 0 36px rgba($ember-glow, 0.3);
   }
 }
 
@@ -558,15 +553,18 @@ nav {
 }
 
 .hero h1 {
-  font-size: clamp(3.5rem, 10vw, 7rem);
+  // Capped at ~5.5rem: above the ~6rem ceiling the page shouts instead of
+  // designing. line-height 1.02 keeps the 'g' descender in "boring" clear.
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
   font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -3px;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
 
   @media (max-width: 768px) {
-    letter-spacing: -2px;
+    letter-spacing: -0.02em;
     margin-top: 1.5rem;
   }
 }
@@ -585,11 +583,14 @@ nav {
 }
 
 .hero-tagline {
-  font-size: 1.4rem;
-  color: $steel-mid;
-  max-width: 550px;
+  font-size: 1.35rem;
+  // Brighter than $steel-mid for a confident lede read (~8:1 on $bg-deep)
+  // while staying clearly secondary to the headline.
+  color: #b6b1a7;
+  max-width: 34rem;
   margin-bottom: 2.5rem;
-  line-height: 1.5;
+  line-height: 1.55;
+  text-wrap: pretty;
 
   @media (max-width: 768px) {
     font-size: 1.15rem;
@@ -746,7 +747,7 @@ nav {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: $steel-dim;
+  color: $steel-mid;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
   font-weight: 500;
@@ -1122,7 +1123,7 @@ nav {
   margin-left: auto;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
-  color: $steel-dim;
+  color: $steel-mid;
 }
 
 .code-body {
@@ -1262,27 +1263,23 @@ section {
   }
 }
 
-.section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: $ember-glow;
-  margin-bottom: 1rem;
-}
-
 .section-title {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-wrap: balance;
   margin-bottom: 1rem;
   color: $steel;
 }
 
 .section-desc {
-  color: $steel-mid;
+  // Brighter than $steel-mid so descriptions read with confidence (~8:1).
+  color: #b6b1a7;
   font-size: 1.1rem;
-  max-width: 500px;
+  line-height: 1.55;
+  max-width: 34rem;
+  text-wrap: pretty;
 }
 
 .section-container {
@@ -1782,7 +1779,7 @@ section {
   transform: translateX(-50%);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
-  color: $steel-dim;
+  color: $steel-mid;
   text-transform: uppercase;
   letter-spacing: 1px;
   white-space: nowrap;
@@ -1983,7 +1980,7 @@ section {
   }
 
   span {
-    color: $steel-dim;
+    color: $steel-mid;
     font-size: 0.85rem;
   }
 }
@@ -2041,7 +2038,7 @@ section {
 
   > span {
     font-size: 0.75rem;
-    color: $steel-dim;
+    color: $steel-mid;
   }
 }
 
@@ -2237,7 +2234,9 @@ section {
 .cta-title {
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
-  letter-spacing: -1px;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  text-wrap: balance;
   margin-bottom: 2.5rem;
   color: $steel;
 
@@ -2277,7 +2276,7 @@ section {
 .install-tab {
   background: transparent;
   border: none;
-  color: $steel-dim;
+  color: $steel-mid;
   padding: 0.6rem 1rem;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
@@ -2329,7 +2328,7 @@ section {
 .copy-btn {
   background: transparent;
   border: none;
-  color: $steel-dim;
+  color: $steel-mid;
   cursor: pointer;
   padding: 4px;
   transition: all 0.2s;
@@ -2431,25 +2430,45 @@ footer {
 }
 
 .footer-copy {
-  color: $steel-dim;
+  color: $steel-mid;
   font-size: 0.8rem;
 }
 
 // ============================================
 // ANIMATIONS
 // ============================================
+// Scroll reveal. Content is VISIBLE BY DEFAULT, so SSR, no-JS, headless
+// renderers, crawlers, reduced-motion, and browsers without scroll-timeline
+// support all paint the final state. Nothing is ever gated on a JS-triggered
+// class, so a section can never ship blank.
+//
+// The reveal is layered on top only where the platform can do it natively and
+// motion is allowed: CSS scroll-driven animation (view timeline). No scroll
+// listeners, no per-frame main-thread work, so it stays cheap for INP.
 .fade-up {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+}
 
-  &.animate {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    :host(.browser) .fade-up {
+      animation: fade-up-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
   }
+}
 
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
+// Transform-only reveal: opacity stays at 1 the whole time. Off-screen content
+// is fully opaque (just shifted down), so accessibility/contrast audits that
+// scan before the element scrolls into view never see semi-transparent text.
+// The rise still reads as a reveal as the section enters the viewport.
+@keyframes fade-up-reveal {
+  from {
+    transform: translateY(28px);
+  }
+  to {
+    transform: none;
   }
 }
