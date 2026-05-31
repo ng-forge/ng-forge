@@ -14,11 +14,8 @@ export interface DefaultImportSpec {
 }
 
 export interface AdapterProviderSpec {
-  /** Symbol name used to detect existing providers and skip insertion. */
   marker: string;
-  /** Default imports the provider expression depends on (e.g. `import Aura from '@primeng/themes/aura'`). */
   defaultImports: DefaultImportSpec[];
-  /** Builds the provider expression using addRootProvider's CodeBlock helper. */
   builder: CodeBlockCallback;
 }
 

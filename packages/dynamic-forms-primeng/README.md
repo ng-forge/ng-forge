@@ -34,7 +34,7 @@ PrimeNG field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/pac
 ## Installation
 
 ```bash
-npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeng/themes primeicons
+npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @primeuix/themes primeicons
 ```
 
 ## Setup
@@ -42,7 +42,7 @@ npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-primeng primeng @pri
 ```typescript
 // app.config.ts
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
 
