@@ -1,4 +1,4 @@
-import { getNestedValue } from '../expressions/value-utils';
+import { getNestedValue } from '@ng-forge/dynamic-forms/internal';
 import { ArrayPathInfo } from '../../utils/path-utils/path-utils';
 
 /**

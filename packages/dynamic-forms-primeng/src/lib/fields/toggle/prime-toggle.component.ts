@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { PrimeToggleProps } from './prime-toggle.type';
 import { AsyncPipe } from '@angular/common';

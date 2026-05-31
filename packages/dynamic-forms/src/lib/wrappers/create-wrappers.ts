@@ -1,4 +1,4 @@
-import { LazyComponentLoader, WrapperTypeDefinition } from '../models/wrapper-type';
+import { LazyComponentLoader, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 /** User-facing wrapper registration shape used with `createWrappers(...)`. */
 export interface WrapperRegistration<TName extends string = string, TConfig = unknown> {

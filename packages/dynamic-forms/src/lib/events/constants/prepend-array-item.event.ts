@@ -1,4 +1,4 @@
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemDefinitionTemplate } from './append-array-item.event';
 
 /**

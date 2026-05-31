@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeSimplifiedArrays } from './normalize-simplified-arrays';
 import { getNormalizedArrayMetadata } from './normalized-array-metadata';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 // Helper to cast field literals to FieldDef<unknown>
 const fields = (...defs: Record<string, unknown>[]) => defs as FieldDef<unknown>[];

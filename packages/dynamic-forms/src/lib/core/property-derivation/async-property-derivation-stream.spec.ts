@@ -1,8 +1,8 @@
 import { signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import type { AsyncDerivationFunction } from '../expressions/async-custom-function-types';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import type { AsyncDerivationFunction } from '@ng-forge/dynamic-forms/internal';
 import { createAsyncPropertyDerivationStream, AsyncPropertyDerivationStreamContext } from './async-property-derivation-stream';
 import { PropertyDerivationEntry } from './property-derivation-types';
 import { createPropertyOverrideStore, PropertyOverrideStore } from './property-override-store';

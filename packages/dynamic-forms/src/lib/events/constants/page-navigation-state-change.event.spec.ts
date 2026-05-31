@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PageNavigationStateChangeEvent } from './page-navigation-state-change.event';
 import { PageOrchestratorState } from '../../core';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('PageNavigationStateChangeEvent', () => {
   const createMockState = (overrides: Partial<PageOrchestratorState> = {}): PageOrchestratorState => ({

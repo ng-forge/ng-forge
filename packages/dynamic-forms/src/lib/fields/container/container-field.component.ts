@@ -12,16 +12,16 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
-import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
-import { ContainerField } from '../../definitions/default/container-field';
+import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { EventBus } from '../../events/event.bus';
-import { FieldDef } from '../../definitions/base/field-def';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { WRAPPER_AUTO_ASSOCIATIONS } from '../../models/wrapper-type';
-import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
+import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 

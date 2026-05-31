@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
-import { FieldWrapper } from '../../models/wrapper-type';
-import { WrapperFieldInputs } from '../wrapper-field-inputs';
+import { FieldWrapper } from '@ng-forge/dynamic-forms/internal';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in row wrapper component. */
 @Component({

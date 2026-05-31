@@ -1,2 +1,2 @@
-export { DynamicTextPipe } from './dynamic-text/dynamic-text.pipe';
-export type { DynamicText } from '../models/types/dynamic-text';
+export { DynamicTextPipe } from '@ng-forge/dynamic-forms/internal';
+export type { DynamicText } from '@ng-forge/dynamic-forms/internal';

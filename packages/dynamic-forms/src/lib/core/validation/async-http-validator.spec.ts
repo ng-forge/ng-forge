@@ -2,18 +2,18 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal, ResourceStatus } from '@angular/core';
 import { beforeEach, describe, expect, it, vi, Mock } from 'vitest';
 import { form, schema, FieldContext } from '@angular/forms/signals';
-import { AsyncValidatorConfig, FunctionHttpValidatorConfig } from '../../models/validation/validator-config';
+import { AsyncValidatorConfig, FunctionHttpValidatorConfig } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { applyValidator } from './validator-factory';
-import { AsyncCustomValidator, HttpCustomValidator } from './validator-types';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
+import { AsyncCustomValidator, HttpCustomValidator } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
-import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
-import { createWarningTracker } from '../../utils/warning-tracker';
-import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from '../expressions/http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from '../values/dynamic-value-function-cache.service';
+import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
+import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 // Helper type for mock ResourceRef
 type MockResourceRef<T> = {

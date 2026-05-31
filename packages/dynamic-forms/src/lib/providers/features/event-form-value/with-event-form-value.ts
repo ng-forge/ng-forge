@@ -1,5 +1,5 @@
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
-import { EMIT_FORM_VALUE_ON_EVENTS } from './emit-form-value.token';
+import { EMIT_FORM_VALUE_ON_EVENTS } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Enables automatic form value attachment to all events dispatched through the EventBus.

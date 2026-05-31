@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { DynamicTextPipe } from '../../pipes/dynamic-text/dynamic-text.pipe';
-import { TextProps } from '../../definitions/default/text-field';
-import { DynamicText } from '../../models/types/dynamic-text';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/internal';
+import { TextProps } from '@ng-forge/dynamic-forms/internal';
+import { DynamicText } from '@ng-forge/dynamic-forms/internal';
 
 @Component({
   selector: 'df-text',

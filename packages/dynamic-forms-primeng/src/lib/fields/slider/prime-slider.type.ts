@@ -1,4 +1,5 @@
-import { DynamicText, ValueFieldComponent } from '@ng-forge/dynamic-forms';
+import { DynamicText } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SliderField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeSliderProps {

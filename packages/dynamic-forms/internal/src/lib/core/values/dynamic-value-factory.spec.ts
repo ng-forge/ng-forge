@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
 import { RootFormRegistryService, FieldContextRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '../registry/field-context-registry.service';
 import { ConsoleLogger } from '../../providers/features/logger/console-logger';
 import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
 

@@ -3,21 +3,21 @@ import { Signal, untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
 import { EMPTY, Observable, debounceTime, filter, map, pairwise, startWith, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { getChangedKeys, isEqual } from '../../utils/object-utils';
+import { EvaluationContext } from '@ng-forge/dynamic-forms/internal';
+import { getChangedKeys, isEqual } from '@ng-forge/dynamic-forms/internal';
 import { isArrayPlaceholderPath } from '../../utils/path-utils/path-utils';
-import { CustomFunction } from '../expressions/custom-function-types';
-import { evaluateCondition } from '../expressions/condition-evaluator';
-import { ExpressionParser } from '../expressions/parser/expression-parser';
-import { getNestedValue } from '../expressions/value-utils';
-import { resolveHttpRequest } from '../http/http-request-resolver';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { CustomFunction } from '@ng-forge/dynamic-forms/internal';
+import { evaluateCondition } from '@ng-forge/dynamic-forms/internal';
+import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
+import { getNestedValue } from '@ng-forge/dynamic-forms/internal';
+import { resolveHttpRequest } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DerivationEntry } from './derivation-types';
 import { DerivationLogger } from './derivation-logger.service';
-import type { WarningTracker } from '../../utils/warning-tracker';
+import type { WarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { readFieldDirty, resetFieldState, applyValueToForm } from './field-value-utils';
-import { readFieldStateInfo, createFormFieldStateMap } from './field-state-extractor';
-import type { FieldTreeRecord } from '../field-tree-utils';
+import { readFieldStateInfo, createFormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
+import type { FieldTreeRecord } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Context required for creating HTTP derivation streams.

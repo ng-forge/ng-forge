@@ -1,8 +1,8 @@
 import { Component, Injector, runInInjectionContext, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../../models/addon/addon-kind';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './inject-addon-kind-registry';
 
 @Component({ template: '' })

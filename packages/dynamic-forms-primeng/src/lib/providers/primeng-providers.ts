@@ -1,5 +1,6 @@
 import type { Provider } from '@angular/core';
-import { ADDON_KIND_DEFINITIONS, DynamicFormError, type AddonKindDefinition, type FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import { DynamicFormError, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_KIND_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
 import { PrimeNGConfig } from '../models/primeng-config';
 import { PRIMENG_CONFIG } from '../models/primeng-config.token';

@@ -1,17 +1,19 @@
 import { computed, inject, Signal } from '@angular/core';
 import {
-  buildBaseInputs,
-  DEFAULT_PROPS,
-  FieldDef,
   FieldWithValidation,
-  injectFieldSignalContext,
-  FORM_OPTIONS,
   NextPageEvent,
   PreviousPageEvent,
   resolveNextButtonDisabled,
   resolveSubmitButtonDisabled,
-  RootFormRegistryService,
 } from '@ng-forge/dynamic-forms';
+import {
+  buildBaseInputs,
+  DEFAULT_PROPS,
+  FieldDef,
+  injectFieldSignalContext,
+  FORM_OPTIONS,
+  RootFormRegistryService,
+} from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
 import { resolveHiddenValue } from './non-field-logic.utils';
 
@@ -43,15 +45,18 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
-    const rootForm = rootFormRegistry.rootForm()!;
+    const rootForm = rootFormRegistry.rootForm();
 
-    // Use rootForm (not fieldSignalContext.form) — submit needs root form validity (#157)
-    const disabled = resolveSubmitButtonDisabled({
-      form: rootForm,
-      formOptions: formOptions(),
-      fieldLogic: fieldWithLogic.logic,
-      explicitlyDisabled: fieldDef.disabled,
-    })();
+    // Use rootForm (not fieldSignalContext.form) — submit needs root form validity (#157).
+    // Before the root form is available, fall back to the explicit disabled value.
+    const disabled = rootForm
+      ? resolveSubmitButtonDisabled({
+          form: rootForm,
+          formOptions: formOptions(),
+          fieldLogic: fieldWithLogic.logic,
+          explicitlyDisabled: fieldDef.disabled,
+        })()
+      : (fieldDef.disabled ?? false);
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,

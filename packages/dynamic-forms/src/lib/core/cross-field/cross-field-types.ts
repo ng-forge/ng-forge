@@ -1,7 +1,7 @@
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { StateLogicConfig } from '../../models/logic/logic-config';
-import { ValidatorConfig } from '../../models/validation/validator-config';
-import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { StateLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import { ValidatorConfig } from '@ng-forge/dynamic-forms/internal';
+import { SchemaApplicationConfig } from '@ng-forge/dynamic-forms/internal';
 
 /** Categories of cross-field configurations that need to be hoisted to form level. */
 export type CrossFieldCategory = 'validator' | 'logic' | 'schema';

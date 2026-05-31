@@ -3,7 +3,7 @@
  */
 import { expectTypeOf } from 'vitest';
 import type { SelectField, SelectProps } from './select-field';
-import type { FieldOption } from '@ng-forge/dynamic-forms';
+import type { FieldOption } from '@ng-forge/dynamic-forms/internal';
 
 // ============================================================================
 // SelectField - Keys Whitelist Test

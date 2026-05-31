@@ -1,5 +1,6 @@
 import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { FormStateCondition, isFormStateCondition, StateLogicConfig } from '../../models/logic/logic-config';
+import { FormStateCondition, StateLogicConfig } from '../../models/logic/logic-config';
+import { isFormStateCondition } from '../../models/logic';
 import { CustomValidatorConfig, ValidatorConfig } from '../../models/validation/validator-config';
 import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
 import { CustomFunctionScope } from '../expressions/custom-function-types';

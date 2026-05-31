@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { SchemaRegistryService } from './schema-registry.service';
-import { SchemaDefinition } from '../../models';
+import { SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
 
 describe('SchemaRegistryService', () => {
   let service: SchemaRegistryService;

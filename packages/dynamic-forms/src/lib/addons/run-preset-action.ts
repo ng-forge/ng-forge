@@ -1,6 +1,6 @@
 import { WritableSignal } from '@angular/core';
-import { AddonActionContext, AddonActionPreset } from '../models/addon/addon-action';
-import type { Logger } from '../providers/features/logger/logger.interface';
+import { AddonActionContext, AddonActionPreset } from '@ng-forge/dynamic-forms/internal';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Optional collaborators a preset may need beyond the base context. Passed

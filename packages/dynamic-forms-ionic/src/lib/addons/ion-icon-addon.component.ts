@@ -1,7 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
-import { DynamicTextPipe, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { IonIconAddon } from '../types/addons';
 
 /** Renderer for the `ion-icon` addon kind. */

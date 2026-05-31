@@ -1,13 +1,13 @@
 import { computed, DestroyRef, Directive, EnvironmentInjector, inject, input, Signal, signal, Type, ViewContainerRef } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { WRAPPER_AUTO_ASSOCIATIONS } from '../../models/wrapper-type';
-import { DEFAULT_WRAPPERS } from '../../models/field-signal-context.token';
+import { WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
+import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
-import { READONLY_FIELD_TREE_CACHE } from '../../core/field-tree-utils';
+import { READONLY_FIELD_TREE_CACHE } from '@ng-forge/dynamic-forms/internal';
 import { buildFieldInputs } from '../../utils/build-field-inputs/build-field-inputs';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { FieldComponentSlot } from './field-component-slot';
 
 /**

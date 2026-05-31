@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { MatButtonAddon } from '../types/addons';
 

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, input, ViewContainerRef, viewChild } from '@angular/core';
-import { EventBus, arrayEvent } from '@ng-forge/dynamic-forms';
-import type { FieldDef, FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms';
+import { arrayEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/integration';
+import type { FieldDef, FieldWrapper } from '@ng-forge/dynamic-forms';
+import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * Demo "arraySection" wrapper — wraps an array field in a titled card

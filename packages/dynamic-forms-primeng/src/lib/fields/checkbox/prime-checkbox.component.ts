@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { Checkbox } from 'primeng/checkbox';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { PrimeCheckboxProps } from './prime-checkbox.type';
 import { AsyncPipe } from '@angular/common';

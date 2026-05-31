@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { withValidationExecutionDefaults } from './with-validation-execution-defaults';
 import { VALIDATION_EXECUTION_DEFAULTS } from './validation-execution.token';
 import { isDynamicFormFeature } from '../dynamic-form-feature';
-import { ResolvedValidationExecutionConfig } from '../../../models/validation-execution-config';
+import { ResolvedValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';
 
 describe('withValidationExecutionDefaults', () => {
   describe('Feature structure', () => {

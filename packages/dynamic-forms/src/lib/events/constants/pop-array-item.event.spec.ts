@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PopArrayItemEvent } from './pop-array-item.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('PopArrayItemEvent', () => {
   it('should create event with correct type', () => {

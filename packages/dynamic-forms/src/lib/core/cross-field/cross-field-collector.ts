@@ -1,12 +1,12 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { isStateLogicConfig, LogicConfig, StateLogicConfig } from '../../models/logic/logic-config';
-import { ValidatorConfig, CustomValidatorConfig, BuiltInValidatorConfig } from '../../models/validation/validator-config';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { SchemaApplicationConfig } from '../../models/schemas/schema-definition';
-import { hasChildFields, isGroupField } from '../../models/types/type-guards';
-import { normalizeFieldsArray } from '../../utils/object-utils';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { isStateLogicConfig, LogicConfig, StateLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import { ValidatorConfig, CustomValidatorConfig, BuiltInValidatorConfig } from '@ng-forge/dynamic-forms/internal';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { SchemaApplicationConfig } from '@ng-forge/dynamic-forms/internal';
+import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import {
   isCrossFieldValidator,
   isCrossFieldBuiltInValidator,
@@ -15,7 +15,7 @@ import {
   isCrossFieldSchema,
   extractExpressionDependencies,
   extractStringDependencies,
-} from './cross-field-detector';
+} from '@ng-forge/dynamic-forms/internal';
 import { CrossFieldValidatorEntry, CrossFieldLogicEntry, CrossFieldSchemaEntry, LogicType } from './cross-field-types';
 
 /** Collected cross-field entries from traversing field definitions. */

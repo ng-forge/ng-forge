@@ -1,10 +1,10 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldWithValidation } from '../../definitions/base/field-with-validation';
-import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
-import { hasChildFields, isGroupField } from '../../models/types/type-guards';
-import { normalizeFieldsArray } from '../object-utils';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition, getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
+import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /** Data collected during a single config traversal. */
 interface ConfigTraversalData {

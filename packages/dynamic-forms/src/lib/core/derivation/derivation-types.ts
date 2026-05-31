@@ -1,6 +1,6 @@
-import type { FormFieldStateMap } from '../../models/expressions/field-state-context';
-import { HttpRequestConfig } from '../../models/http/http-request-config';
-import type { AsyncDerivationFunction } from '../expressions/async-custom-function-types';
+import type { FormFieldStateMap } from '@ng-forge/dynamic-forms/internal';
+import { HttpRequestConfig } from '@ng-forge/dynamic-forms/internal';
+import type { AsyncDerivationFunction } from '@ng-forge/dynamic-forms/internal';
 import { BaseDerivationEntry } from './derivation-entry-base';
 
 /** Entry representing a collected derivation from field definitions. */

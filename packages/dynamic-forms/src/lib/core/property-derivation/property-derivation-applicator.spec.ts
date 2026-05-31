@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { describe, expect, it } from 'vitest';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
 import { PropertyDerivationApplicatorContext } from './property-derivation-applicator';
 import { applyPropertyDerivations, applyPropertyDerivationsForTrigger } from './property-derivation-applicator';
 import { PropertyDerivationCollection, PropertyDerivationEntry } from './property-derivation-types';

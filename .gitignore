@@ -90,3 +90,4 @@ graphify-out/.graphify_python
 
 # Cross-adapter perf bench output directory (machine-local)
 .perf-results/
+HANDOFF.md

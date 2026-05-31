@@ -4,7 +4,7 @@
 import { expectTypeOf } from 'vitest';
 import type { EnvironmentProviders } from '@angular/core';
 import type { ExtractFieldDefs, ExtractFormValue } from './dynamic-form-providers';
-import type { FieldDef } from '../definitions/base/field-def';
+import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 // ============================================================================
 // Test Helpers — Phantom-typed result shapes

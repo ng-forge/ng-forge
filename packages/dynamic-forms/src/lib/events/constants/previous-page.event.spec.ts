@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PreviousPageEvent } from './previous-page.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('PreviousPageEvent', () => {
   it('should create event with correct type', () => {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeField, NgForgeFieldHost, isEqual, NgForgeControl } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';

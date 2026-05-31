@@ -3,13 +3,13 @@ import { Injector, runInInjectionContext, signal } from '@angular/core';
 import type { FieldTree, SchemaPath } from '@angular/forms/signals';
 import { form, schema, validate, requiredError } from '@angular/forms/signals';
 import { createResolvedErrorsSignal } from '@ng-forge/dynamic-forms/integration';
-import { ValidationMessages } from '../models/validation-types';
-import { applyValidator } from '../core/validation/validator-factory';
-import { FieldContextRegistryService } from '../core/registry/field-context-registry.service';
-import { FunctionRegistryService } from '../core/registry/function-registry.service';
-import { RootFormRegistryService } from '../core/registry/root-form-registry.service';
+import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager } from '../state/form-state-manager';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 describe('createResolvedErrorsSignal', () => {

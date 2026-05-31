@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { FormValueControl } from '@angular/forms/signals';
-import { DynamicTextPipe, FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { FieldMeta, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeField, setupMetaTracking } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 import { RadioButton } from 'primeng/radiobutton';

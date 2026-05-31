@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { InsertArrayItemEvent } from './insert-array-item.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('InsertArrayItemEvent', () => {
   const defaultTemplate = [{ key: 'name', type: 'input' as const }];

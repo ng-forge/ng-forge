@@ -1,8 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { TextAddon } from '../models/addon/addon-def';
-import { DynamicTextPipe } from '../pipes/dynamic-text/dynamic-text.pipe';
-import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
+import { TextAddon } from '@ng-forge/dynamic-forms/internal';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/internal';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /** Renderer for the universal `text` addon kind. */
 @Component({

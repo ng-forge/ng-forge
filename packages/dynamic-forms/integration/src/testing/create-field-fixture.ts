@@ -1,14 +1,9 @@
 import { EnvironmentInjector, Provider, runInInjectionContext, signal, type Type, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { type FieldTree, form, schema, type SchemaPath } from '@angular/forms/signals';
-import {
-  DEFAULT_VALIDATION_MESSAGES,
-  EventBus,
-  type DynamicText,
-  type FormEvent,
-  type FormEventConstructor,
-  type ValidationMessages,
-} from '@ng-forge/dynamic-forms';
+import { type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { DEFAULT_VALIDATION_MESSAGES, type DynamicText, type ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import type { EventArgs } from '../definitions/button-field';
 
 export interface CreateNgForgeFieldFixtureOptions<TValue = unknown> {

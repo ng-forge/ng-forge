@@ -1,22 +1,22 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
-import { PageField } from '../../definitions/default/page-field';
-import { ContainerLogicConfig } from '../../definitions/base/container-logic-config';
-import { FieldSignalContext } from '../../mappers/types';
+import { PageField } from '@ng-forge/dynamic-forms/internal';
+import { ContainerLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { FieldTree } from '@angular/forms/signals';
-import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { evaluateCondition } from '../expressions/condition-evaluator';
-import { FunctionRegistryService } from '../registry/function-registry.service';
-import { FieldContextRegistryService } from '../registry/field-context-registry.service';
-import { FieldDef } from '../../definitions/base/field-def';
-import { isRowField } from '../../definitions/default/row-field';
+import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { evaluateCondition } from '@ng-forge/dynamic-forms/internal';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { isRowField } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.

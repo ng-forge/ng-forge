@@ -14,19 +14,19 @@ import {
   schema,
 } from '@angular/forms/signals';
 import type { FieldContext, SchemaPath, SchemaPathTree } from '@angular/forms/signals';
-import { FieldDef } from '../definitions/base/field-def';
-import { FieldWithValidation } from '../definitions/base/field-with-validation';
-import { applyValidator } from './validation/validator-factory';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { applySchema } from './schema-application';
-import { isGroupField } from '../definitions/default/group-field';
-import { isArrayField } from '../definitions/default/array-field';
-import { isPageField } from '../definitions/default/page-field';
-import { isRowField } from '../definitions/default/row-field';
-import { isContainerTypedField } from '../definitions/default/container-field';
+import { isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { isArrayField } from '@ng-forge/dynamic-forms/internal';
+import { isPageField } from '@ng-forge/dynamic-forms/internal';
+import { isRowField } from '@ng-forge/dynamic-forms/internal';
+import { isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
 import { getNormalizedArrayMetadata } from '../utils/array-field/normalized-array-metadata';
-import { DynamicFormError } from '../errors/dynamic-form-error';
-import { isStateLogicConfig, LogicConfig } from '../models/logic/logic-config';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { isStateLogicConfig, LogicConfig } from '@ng-forge/dynamic-forms/internal';
 import {
   combineAncestorHiddenLogics,
   FieldTreeMappingContext,

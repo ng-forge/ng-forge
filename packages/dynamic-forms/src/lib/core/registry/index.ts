@@ -1,4 +1,4 @@
-export { FunctionRegistryService } from './function-registry.service';
+export { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 export { SchemaRegistryService } from './schema-registry.service';
-export { RootFormRegistryService } from './root-form-registry.service';
-export { FieldContextRegistryService } from './field-context-registry.service';
+export { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+export { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';

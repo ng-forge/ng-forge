@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { computed, DestroyRef, Injector, Type } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { reconcileFields, ResolvedField, resolveField, ResolveFieldContext } from './resolve-field';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 describe('resolve-field', () => {
   describe('resolveField', () => {

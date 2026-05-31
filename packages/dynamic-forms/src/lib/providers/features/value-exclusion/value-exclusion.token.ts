@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { ResolvedValueExclusionConfig } from '../../../models/value-exclusion-config';
+import { ResolvedValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injection token for global value exclusion defaults.

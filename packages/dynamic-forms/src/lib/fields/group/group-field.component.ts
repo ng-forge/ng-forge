@@ -14,20 +14,20 @@ import {
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../../utils/container-utils/container-field-processors';
-import { isEqual } from '../../utils/object-utils';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { GroupField } from '../../definitions/default/group-field';
+import { isEqual } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { GroupField } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { FieldTree, form } from '@angular/forms/signals';
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldSignalContext, GroupContext } from '../../mappers/types';
-import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT, injectFieldSignalContext } from '../../models/field-signal-context.token';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldSignalContext, GroupContext } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT, injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { createSchemaFromFields } from '../../core/schema-builder';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { SubmitEvent } from '../../events/constants/submit.event';
 
 /** Container component for rendering nested form groups. */

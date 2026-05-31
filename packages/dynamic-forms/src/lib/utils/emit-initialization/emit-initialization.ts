@@ -1,7 +1,7 @@
 import { afterNextRender, Injector } from '@angular/core';
-import { EventBus } from '../../events/event.bus';
-import { ComponentInitializedEvent } from '../../events/constants/component-initialized.event';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 
 /** Component type for initialization events. */
 export type InitializationComponentType = 'dynamic-form' | 'group' | 'page' | 'array' | 'container';

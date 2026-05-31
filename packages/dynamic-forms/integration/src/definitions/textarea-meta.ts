@@ -1,4 +1,4 @@
-import { FieldMeta } from '@ng-forge/dynamic-forms';
+import { FieldMeta } from '@ng-forge/dynamic-forms/internal';
 import { Autocapitalize, AutocompleteValue, EnterKeyHint } from './input-meta';
 
 /**

@@ -1,6 +1,6 @@
 import { inject, InjectionToken, Type } from '@angular/core';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../../models/addon/addon-kind';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
 
 /**

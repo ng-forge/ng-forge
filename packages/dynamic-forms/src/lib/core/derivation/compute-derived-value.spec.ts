@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { EvaluationContext } from '../../models/expressions/evaluation-context';
-import type { Logger } from '../../providers/features/logger/logger.interface';
+import type { EvaluationContext } from '@ng-forge/dynamic-forms/internal';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 import { computeValueFromEntry } from './compute-derived-value';
 
 // A sync derivation fn returning a Promise/Observable must be refused, not written as the value.

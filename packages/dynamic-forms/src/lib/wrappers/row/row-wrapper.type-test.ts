@@ -2,7 +2,7 @@
  * Exhaustive type tests for RowWrapper type.
  */
 import { expectTypeOf } from 'vitest';
-import type { RowWrapper } from './row-wrapper.type';
+import type { RowWrapper } from '@ng-forge/dynamic-forms/internal';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 describe('RowWrapper - Exhaustive Whitelist', () => {

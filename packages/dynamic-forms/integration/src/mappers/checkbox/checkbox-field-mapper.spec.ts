@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { form } from '@angular/forms/signals';
 import { checkboxFieldMapper } from './checkbox-field-mapper';
 import { BaseCheckedField } from '../../definitions';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 
 describe('checkboxFieldMapper', () => {
   let parentInjector: EnvironmentInjector;

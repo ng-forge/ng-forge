@@ -1,5 +1,6 @@
 import { computed, inject, Signal } from '@angular/core';
-import { ARRAY_CONTEXT, ArrayAllowedChildren, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, ArrayAllowedChildren } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Context for array button mapping, containing resolved array information.

@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { createAsyncDerivationStream, AsyncDerivationStreamContext } from './async-derivation-stream';
 import { createHttpDerivationStream, HttpDerivationStreamContext } from './http-derivation-stream';
 import { DerivationEntry } from './derivation-types';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DerivationLogger } from './derivation-logger.service';
 
 /**

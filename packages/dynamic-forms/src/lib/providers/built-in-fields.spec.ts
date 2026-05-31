@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { BUILT_IN_FIELDS } from './built-in-fields';
-import { FieldTypeDefinition } from '../models/field-type';
-import { arrayFieldMapper, groupFieldMapper, rowFieldMapper, textFieldMapper } from '../mappers';
-import { pageFieldMapper } from '../mappers/page/page-field-mapper';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { arrayFieldMapper, groupFieldMapper, rowFieldMapper, textFieldMapper } from '@ng-forge/dynamic-forms/internal';
+import { pageFieldMapper } from '@ng-forge/dynamic-forms/internal';
 
 describe('BUILT_IN_FIELDS', () => {
   // Pre-load all components to cache dynamic imports (skip componentless fields)

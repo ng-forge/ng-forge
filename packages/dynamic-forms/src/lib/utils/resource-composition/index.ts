@@ -1,1 +1,1 @@
-export { withPreviousValue } from './with-previous-value';
+export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';

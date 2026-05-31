@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import type { IonButtonAddon } from '../types/addons';
 import { IonButtonAddonComponent } from './ion-button-addon.component';

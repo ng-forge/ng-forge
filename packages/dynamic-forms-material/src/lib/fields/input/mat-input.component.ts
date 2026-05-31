@@ -3,15 +3,9 @@ import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input
 import { FormField } from '@angular/forms/signals';
 import { MatError, MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
-import {
-  AddonActionContext,
-  AddonActionPreset,
-  DfAddonSlot,
-  DynamicFormLogger,
-  DynamicTextPipe,
-  FIELD_SIGNAL_CONTEXT,
-  WrapperFieldInputs,
-} from '@ng-forge/dynamic-forms';
+import { AddonActionContext, AddonActionPreset, DfAddonSlot, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import {
   ADDON_PRESET_HANDLER,
   AddonPresetHandler,

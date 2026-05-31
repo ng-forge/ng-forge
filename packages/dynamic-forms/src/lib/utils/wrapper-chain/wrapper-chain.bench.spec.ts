@@ -62,11 +62,17 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { delay } from '@ng-forge/utils';
-import { FieldWrapper, WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { NoopLogger } from '../../providers/features/logger/noop-logger';
-import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import {
+  FieldWrapper,
+  WRAPPER_COMPONENT_CACHE,
+  WRAPPER_REGISTRY,
+  WrapperConfig,
+  WrapperTypeDefinition,
+} from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { createWrapperChainController } from './wrapper-chain-controller';
 import { loadWrapperComponents, renderWrapperChain } from './wrapper-chain';
 import { firstValueFrom } from 'rxjs';

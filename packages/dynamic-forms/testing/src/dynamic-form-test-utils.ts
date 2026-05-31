@@ -4,10 +4,10 @@ import { ValidationError } from '@angular/forms/signals';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DynamicForm } from '../../src/lib/dynamic-form.component';
-import { FormConfig } from '../../src/lib/models/form-config';
-import { FieldDef } from '../../src/lib/definitions/base/field-def';
-import { FieldTypeDefinition } from '../../src/lib/models/field-type';
-import { BUILT_IN_FIELDS } from '../../src/lib/providers/built-in-fields';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms/internal';
 import { InputField, SelectField, checkboxFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { delay } from '@ng-forge/utils';
 

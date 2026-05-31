@@ -2,18 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { EnvironmentProviders, InjectionToken, Provider } from '@angular/core';
 import { provideDynamicForm } from './dynamic-form-providers';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
-import { WrapperTypeDefinition, WRAPPER_REGISTRY } from '../models/wrapper-type';
-import { ADDON_KIND_REGISTRY } from '../models/addon/addon-kind';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { WrapperTypeDefinition, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
 import { createWrappers } from '../wrappers/create-wrappers';
 import { wrapperProps } from '../wrappers/wrapper-props';
 import { withLoggerConfig } from './features/logger/with-logger-config';
 import { withCustomAddon } from './features/addons/with-custom-addon';
-import { DynamicFormLogger } from './features/logger/logger.token';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './features/logger/console-logger';
-import { NoopLogger } from './features/logger/noop-logger';
+import { NoopLogger } from '@ng-forge/dynamic-forms/internal';
 
 // Internal Angular structure for EnvironmentProviders
 interface InternalEnvironmentProviders {

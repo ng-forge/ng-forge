@@ -422,7 +422,7 @@ export default class ${className}Component {
 }
 
 // my-${name}.type.ts
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { ${guide.mapper} } from '@ng-forge/dynamic-forms/integration';
 
 export const ${className}Type: FieldTypeDefinition = {
@@ -453,7 +453,7 @@ export default class ${className}Component<TEvent extends FormEvent> {
 }
 
 // my-${name}.type.ts
-import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms';
+import type { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { ${guide.mapper} } from '@ng-forge/dynamic-forms/integration';
 
 export const ${className}Type: FieldTypeDefinition = {

@@ -2,15 +2,9 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, ElementRef, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonInput, IonNote } from '@ionic/angular/standalone';
-import {
-  AddonActionContext,
-  AddonActionPreset,
-  DfAddonSlot,
-  DynamicFormLogger,
-  DynamicTextPipe,
-  FIELD_SIGNAL_CONTEXT,
-  WrapperFieldInputs,
-} from '@ng-forge/dynamic-forms';
+import { AddonActionContext, AddonActionPreset, DfAddonSlot, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { DynamicTextPipe, FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import {
   ADDON_PRESET_HANDLER,
   AddonPresetHandler,

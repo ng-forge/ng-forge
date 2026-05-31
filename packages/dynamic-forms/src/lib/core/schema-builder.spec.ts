@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { createSchemaFromFields, fieldsToDefaultValues, CreateSchemaOptions } from './schema-builder';
-import { FieldTypeDefinition } from '../models/field-type';
-import { FieldDef } from '../definitions';
-import { FunctionRegistryService } from './registry/function-registry.service';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Use vi.hoisted() to declare mocks before vi.mock() hoisting

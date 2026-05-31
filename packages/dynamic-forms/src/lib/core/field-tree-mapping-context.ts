@@ -1,8 +1,8 @@
 import { FieldContext, LogicFn } from '@angular/forms/signals';
-import { FieldDef } from '../definitions/base/field-def';
-import { FieldWithValidation } from '../definitions/base/field-with-validation';
-import { isStateLogicConfig } from '../models/logic/logic-config';
-import { createLogicFunction } from './expressions/logic-function-factory';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { isStateLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Cascading configuration that flows from parent to child during schema mapping.

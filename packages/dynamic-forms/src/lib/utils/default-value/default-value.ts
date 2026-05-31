@@ -1,5 +1,5 @@
-import { FieldDef } from '../../definitions/base/field-def';
-import { FieldTypeDefinition, getFieldValueHandling } from '../../models/field-type';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition, getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Generates appropriate default values for different field types in dynamic forms.

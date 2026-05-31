@@ -20,11 +20,11 @@ export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './constants
 export { arrayEvent } from './array-event';
 
 // Interfaces
-export type { FormEvent, FormEventConstructor } from './interfaces/form-event';
-export { hasFormValue } from './interfaces/form-event';
+export type { FormEvent, FormEventConstructor } from '@ng-forge/dynamic-forms/internal';
+export { hasFormValue } from '@ng-forge/dynamic-forms/internal';
 
 // Utilities
-export { EventBus } from './event.bus';
-export type { TokenContext } from './utils/token-resolver';
-export { resolveTokens } from './utils/token-resolver';
+export { EventBus } from '@ng-forge/dynamic-forms/internal';
+export type { TokenContext } from '@ng-forge/dynamic-forms/internal';
+export { resolveTokens } from '@ng-forge/dynamic-forms/internal';
 export type { ArrayItemContext } from './interfaces/array-item-context';

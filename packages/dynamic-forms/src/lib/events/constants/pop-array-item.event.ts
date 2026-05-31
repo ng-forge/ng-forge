@@ -1,4 +1,4 @@
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 /** Event dispatched to remove the LAST item from an array field. */
 export class PopArrayItemEvent implements FormEvent {

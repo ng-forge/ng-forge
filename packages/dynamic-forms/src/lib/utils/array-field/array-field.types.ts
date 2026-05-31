@@ -1,5 +1,5 @@
 import { Injector, Signal, type Type } from '@angular/core';
-import type { FieldDef } from '../../definitions/base/field-def';
+import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 /** A single field within a resolved array item. */
 export interface ResolvedArrayItemField {

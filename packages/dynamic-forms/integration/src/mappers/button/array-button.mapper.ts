@@ -1,17 +1,19 @@
 import { computed, inject, Signal } from '@angular/core';
 import {
   AppendArrayItemEvent,
-  ArrayAllowedChildren,
-  buildBaseInputs,
-  DEFAULT_PROPS,
   InsertArrayItemEvent,
-  NonFieldLogicConfig,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   RemoveAtIndexEvent,
-  RootFormRegistryService,
   ShiftArrayItemEvent,
 } from '@ng-forge/dynamic-forms';
+import {
+  ArrayAllowedChildren,
+  buildBaseInputs,
+  DEFAULT_PROPS,
+  NonFieldLogicConfig,
+  RootFormRegistryService,
+} from '@ng-forge/dynamic-forms/internal';
 import { buildArrayButtonEventContext, EventArg, resolveArrayButtonContext, resolveArrayButtonEventArgs } from './array-button.utils';
 import { applyNonFieldLogic } from './non-field-logic.utils';
 

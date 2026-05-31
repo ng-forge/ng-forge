@@ -1,4 +1,4 @@
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 export class PageChangeEvent implements FormEvent {
   readonly type = 'page-change' as const;

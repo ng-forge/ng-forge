@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
-import { DynamicTextPipe } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { MatSliderProps } from './mat-slider.type';
 import { MatError } from '@angular/material/input';

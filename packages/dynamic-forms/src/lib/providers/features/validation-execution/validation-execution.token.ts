@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { ResolvedValidationExecutionConfig } from '../../../models/validation-execution-config';
+import { ResolvedValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injection token for global validation execution defaults.

@@ -1,6 +1,6 @@
 import { computed, Injector, Signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized, InitializationComponentType } from '../emit-initialization/emit-initialization';
 import { ResolvedField } from '../resolve-field/resolve-field';
 

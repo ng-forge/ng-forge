@@ -1,10 +1,10 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { DynamicFormError } from '../errors/dynamic-form-error';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '../models/addon/addon-kind';
-import { AnyAddon, TextAddon } from '../models/addon/addon-def';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { AnyAddon, TextAddon } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
 import { DfAddonSlot } from './df-addon-slot.component';
 

@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, EnvironmentIn
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { derivedFromDeferred } from '../../utils/derived-from-deferred/derived-from-deferred';
+import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
-import { PageField, validatePageNesting } from '../../definitions/default/page-field';
+import { PageField, validatePageNesting } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { FieldDef } from '../../definitions/base/field-def';
-import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({

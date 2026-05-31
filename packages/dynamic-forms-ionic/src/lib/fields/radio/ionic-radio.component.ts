@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { IonItem, IonNote, IonRadio, IonRadioGroup } from '@ionic/angular/standalone';
-import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicRadioProps } from './ionic-radio.type';
 import { AsyncPipe } from '@angular/common';

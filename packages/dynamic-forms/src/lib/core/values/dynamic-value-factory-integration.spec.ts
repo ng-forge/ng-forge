@@ -1,10 +1,10 @@
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { type FieldContext, form, schema } from '@angular/forms/signals';
-import { createDynamicValueFunction } from './dynamic-value-factory';
+import { createDynamicValueFunction } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService, RootFormRegistryService } from '../registry';
 import { FormStateManager } from '../../state/form-state-manager';
-import { DynamicValueFunctionCacheService } from './dynamic-value-function-cache.service';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 describe('dynamic-value-factory (integration)', () => {
   const mockEntity = signal<Record<string, unknown>>({});

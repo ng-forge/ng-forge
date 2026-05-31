@@ -1,16 +1,16 @@
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import {
   isSimplifiedArrayField,
   SimplifiedArrayField,
   ArrayButtonConfig,
   ArrayField,
   isArrayField,
-} from '../../definitions/default/array-field';
-import { isContainerField, hasChildFields } from '../../models/types/type-guards';
-import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
-import { ArrayItemDefinition } from '../../definitions/default/array-field';
+} from '@ng-forge/dynamic-forms/internal';
+import { isContainerField, hasChildFields } from '@ng-forge/dynamic-forms/internal';
+import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms/internal';
+import { ArrayItemDefinition } from '@ng-forge/dynamic-forms/internal';
 import { setNormalizedArrayMetadata } from './normalized-array-metadata';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 /** Normalizes simplified array fields into full array field definitions. */
 export function normalizeSimplifiedArrays(fields: FieldDef<unknown>[]): FieldDef<unknown>[] {

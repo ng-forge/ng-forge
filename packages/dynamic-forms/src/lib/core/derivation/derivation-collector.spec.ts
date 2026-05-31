@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { collectDerivations } from './derivation-collector';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { TextFieldDef } from '../../definitions/text/text-field-def';
 import { NumberFieldDef } from '../../definitions/number/number-field-def';
 import { GroupFieldDef } from '../../definitions/group/group-field-def';

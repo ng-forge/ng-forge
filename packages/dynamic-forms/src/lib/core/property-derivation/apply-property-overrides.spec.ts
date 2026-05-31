@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { applyPropertyOverrides } from './apply-property-overrides';
 
 describe('applyPropertyOverrides', () => {

@@ -4,10 +4,10 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { delay } from '@ng-forge/utils';
 import { DynamicForm } from '../dynamic-form.component';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../models/field-type';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
-import { FormConfig } from '../models/form-config';
-import { FIELD_SIGNAL_CONTEXT } from '../models';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 
 @Component({
   selector: 'df-test-required-field',

@@ -1,5 +1,6 @@
 import { computed, inject, isSignal, Signal } from '@angular/core';
-import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS, FieldDef } from '@ng-forge/dynamic-forms';
+import { FieldDef } from '@ng-forge/dynamic-forms';
+import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * Generic button mapper for custom events or basic buttons.

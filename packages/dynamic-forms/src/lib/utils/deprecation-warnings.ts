@@ -1,5 +1,5 @@
-import { Logger } from '../providers/features/logger/logger.interface';
-import type { WarningTracker } from './warning-tracker';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
+import type { WarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { DEV_MODE } from './dev-mode';
 
 /**

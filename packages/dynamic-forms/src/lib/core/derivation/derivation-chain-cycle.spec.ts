@@ -4,7 +4,7 @@ import type { FieldTree } from '@angular/forms/signals';
 import { applyDerivations, DerivationApplicatorContext } from './derivation-applicator';
 import { topologicalSort } from './derivation-sorter';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DerivationLogger } from './derivation-logger.service';
 
 /**

@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
-import { FieldDef } from '../../definitions/base/field-def';
-import { ADDON_KIND_REGISTRY } from '../../models/addon/addon-kind';
-import { FormConfig } from '../../models/form-config';
-import { FIELD_REGISTRY } from '../../models/field-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { AddonWarning, formatAddonWarning } from './addon-warning';
 import { walkAndValidateAddons } from './validate-field-addons';
 
@@ -82,8 +82,8 @@ export function logAddonWarnings(warnings: readonly AddonWarning[], logger?: Log
  */
 export function sanitizeFormConfigPure(
   config: FormConfig,
-  fieldRegistry: ReadonlyMap<string, import('../../models/field-type').FieldTypeDefinition>,
-  kindRegistry: ReadonlyMap<string, import('../../models/addon/addon-kind').AddonKindDefinition>,
+  fieldRegistry: ReadonlyMap<string, import('@ng-forge/dynamic-forms/internal').FieldTypeDefinition>,
+  kindRegistry: ReadonlyMap<string, import('@ng-forge/dynamic-forms/internal').AddonKindDefinition>,
   options: SanitizeFormConfigOptions = {},
 ): SanitizedFormConfig {
   const source = options.source ?? 'inline';

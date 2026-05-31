@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { collectPropertyDerivations } from './property-derivation-collector';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 describe('property-derivation-collector', () => {
   describe('collectPropertyDerivations', () => {

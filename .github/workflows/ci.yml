@@ -55,6 +55,9 @@ jobs:
           }
           echo "✅ Dependency graph is valid"
 
+      - name: Validate generated /internal public_api
+        run: node scripts/refactor/gen-public-api.mjs --check
+
       - name: Cache node_modules
         uses: actions/cache/save@v5
         with:

@@ -12,8 +12,8 @@ import {
 } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
-import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '../../models/wrapper-type';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { hasDefaultExport, loadWrapperComponents, renderWrapperChain, resolveDefaultExport, setInputIfDeclared } from './wrapper-chain';
 
 /** No-op logger for tests that don't assert on log output. */

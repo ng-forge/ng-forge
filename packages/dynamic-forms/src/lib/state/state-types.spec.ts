@@ -14,8 +14,8 @@ import {
   FormSetup,
   FormLifecycleState,
 } from './state-types';
-import { FormConfig } from '../models/form-config';
-import { RegisteredFieldTypes } from '../models/registry/field-registry';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 
 // ---------------------------------------------------------------------------
 // Minimal mock data

@@ -1,5 +1,6 @@
-import type { AddonActionContext, AddonActionPreset, PresetCollaborators } from '@ng-forge/dynamic-forms';
-import { runPresetAction } from '@ng-forge/dynamic-forms';
+import type { AddonActionContext, AddonActionPreset } from '@ng-forge/dynamic-forms';
+import type { PresetCollaborators } from '@ng-forge/dynamic-forms/integration';
+import { runPresetAction } from '@ng-forge/dynamic-forms/integration';
 
 export type { PresetCollaborators };
 

@@ -2,14 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { NextPageEvent, PageChangeEvent } from '../../events/constants';
 import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
 import { DynamicForm } from '../../dynamic-form.component';
-import { FIELD_REGISTRY, FieldTypeDefinition } from '../../models/field-type';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
-import { FormConfig } from '../../models/form-config';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
 
 // Minimal field type registration for page orchestrator tests.

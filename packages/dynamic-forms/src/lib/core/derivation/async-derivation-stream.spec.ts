@@ -3,7 +3,7 @@ import { computed, signal, WritableSignal } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { createAsyncDerivationStream, AsyncDerivationStreamContext } from './async-derivation-stream';
 import { DerivationEntry } from './derivation-types';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DerivationLogger } from './derivation-logger.service';
 
 describe('createAsyncDerivationStream', () => {

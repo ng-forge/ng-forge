@@ -3,10 +3,10 @@ import { Injector, runInInjectionContext, signal, type Signal } from '@angular/c
 import { form, type FieldTree } from '@angular/forms/signals';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Subscription } from 'rxjs';
-import { EventBus } from '../../events/event.bus';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { SubmitEvent } from '../../events/constants/submit.event';
-import type { FormConfig } from '../../models/form-config';
-import type { Logger } from '../../providers/features/logger/logger.interface';
+import type { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import type { Logger } from '@ng-forge/dynamic-forms/internal';
 import { createSubmissionHandler } from './submission-handler';
 
 // The submission handler had no dedicated coverage. These tests pin its guard contract:

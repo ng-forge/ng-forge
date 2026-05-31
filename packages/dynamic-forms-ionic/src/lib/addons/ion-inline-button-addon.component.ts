@@ -2,7 +2,8 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, Injector, Signal, signal } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { IonIcon, IonSpinner } from '@ionic/angular/standalone';
-import { DynamicText, DynamicTextPipe, resolveDynamicValue } from '@ng-forge/dynamic-forms';
+import { DynamicText } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe, resolveDynamicValue } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { IonButtonAddon } from '../types/addons';
 

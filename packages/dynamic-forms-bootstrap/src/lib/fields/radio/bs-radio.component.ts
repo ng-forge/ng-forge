@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { DynamicTextPipe, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { BsRadioProps } from './bs-radio.type';
 import { AsyncPipe } from '@angular/common';

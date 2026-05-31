@@ -1,5 +1,6 @@
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
-import { DynamicText, ValueFieldComponent, ValueType } from '@ng-forge/dynamic-forms';
+import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
+import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface MatSelectProps extends SelectProps {

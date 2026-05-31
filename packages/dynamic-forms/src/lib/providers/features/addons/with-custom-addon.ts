@@ -1,5 +1,5 @@
-import { AddonKindDefinition } from '../../../models/addon/addon-kind';
-import { BaseAddon } from '../../../models/addon/addon-def';
+import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { BaseAddon } from '@ng-forge/dynamic-forms/internal';
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
 import { ADDON_KIND_DEFINITIONS } from './addon-kind-definitions.token';
 

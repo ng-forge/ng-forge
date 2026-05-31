@@ -1,7 +1,7 @@
 import { DEV_MODE } from '../../utils/dev-mode';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { BaseValueField } from '../../definitions/base/base-value-field';
-import { FieldWithValidation } from '../../definitions/base/field-with-validation';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { BaseValueField } from '@ng-forge/dynamic-forms/internal';
+import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
 
 /** Properties defined by individual field components, not part of the shared base interfaces. */
 type AdapterFieldKey = 'options' | 'hint' | 'tooltip' | 'prefix' | 'suffix' | 'step' | 'rows' | 'cols' | 'multiple' | 'appearance';

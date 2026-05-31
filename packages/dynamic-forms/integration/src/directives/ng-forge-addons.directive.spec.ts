@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
-import type { AnyAddon, TextAddon, TemplateAddon } from '@ng-forge/dynamic-forms';
+import type { AnyAddon, TextAddon, TemplateAddon } from '@ng-forge/dynamic-forms/internal';
 import { NgForgeAddons, NgForgeAddonsBase, injectNgForgeAddons } from './ng-forge-addons.directive';
 
 @Component({

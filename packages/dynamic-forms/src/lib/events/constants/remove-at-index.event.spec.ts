@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { RemoveAtIndexEvent } from './remove-at-index.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('RemoveAtIndexEvent', () => {
   it('should create event with correct type', () => {

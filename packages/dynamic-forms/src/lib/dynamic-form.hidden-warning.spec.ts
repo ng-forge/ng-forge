@@ -4,11 +4,11 @@ import { delay } from '@ng-forge/utils';
 import { DynamicForm } from './dynamic-form.component';
 import { SimpleTestUtils, TestFormConfig } from '../../testing/src/simple-test-utils';
 import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
-import { FIELD_REGISTRY, FieldTypeDefinition } from './models/field-type';
+import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
-import { WRAPPER_REGISTRY } from './models/wrapper-type';
-import type { FieldDef } from './definitions/base/field-def';
+import { WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {

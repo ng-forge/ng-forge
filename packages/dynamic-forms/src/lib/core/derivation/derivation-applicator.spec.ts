@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { computed, signal, WritableSignal } from '@angular/core';
 import { applyDerivations, applyDerivationsForTrigger, DerivationApplicatorContext } from './derivation-applicator';
 import { DerivationCollection, DerivationEntry } from './derivation-types';
-import { Logger } from '../../providers/features/logger/logger.interface';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DerivationLogger } from './derivation-logger.service';
 
 describe('derivation-applicator', () => {

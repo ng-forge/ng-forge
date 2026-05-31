@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { SubmitEvent } from './submit.event';
-import { FormEvent } from '../interfaces/form-event';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 describe('SubmitEvent', () => {
   it('should create event with correct type', () => {

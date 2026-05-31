@@ -1,5 +1,5 @@
-import { ExpressionParser } from './expression-parser';
-import { ExpressionParserError } from './types';
+import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
+import { ExpressionParserError } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Comprehensive security test suite for the expression parser

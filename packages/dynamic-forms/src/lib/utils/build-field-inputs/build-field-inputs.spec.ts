@@ -1,6 +1,6 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { describe, expect, it, vi } from 'vitest';
-import type { ReadonlyFieldTree } from '../../core/field-tree-utils';
+import type { ReadonlyFieldTree } from '@ng-forge/dynamic-forms/internal';
 import { buildFieldInputs } from './build-field-inputs';
 
 // Minimal FieldTree stub. Signal Forms' FieldTree is a callable that returns a

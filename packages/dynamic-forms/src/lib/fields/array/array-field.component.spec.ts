@@ -1,19 +1,19 @@
 import { ArrayFieldComponent } from './array-field.component';
-import { ArrayField } from '../../definitions/default/array-field';
+import { ArrayField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeSimplifiedArrays } from '../../utils/array-field/normalize-simplified-arrays';
-import { RowField } from '../../definitions/default/row-field';
+import { RowField } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
 import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';
-import { baseFieldMapper, FieldSignalContext, rowFieldMapper } from '../../mappers';
+import { baseFieldMapper, FieldSignalContext, rowFieldMapper } from '@ng-forge/dynamic-forms/internal';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { provideDynamicForm } from '../../providers';
 import { withLoggerConfig } from '../../providers/features/logger/with-logger-config';
-import { FIELD_REGISTRY } from '../../models/field-type';
-import { FieldTypeDefinition } from '../../models/field-type';
-import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '../../models/field-signal-context.token';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { DEFAULT_PROPS, DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import {
   AppendArrayItemEvent,
   EventBus,
@@ -24,13 +24,13 @@ import {
 } from '../../events';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { vi } from 'vitest';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
-import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 import { setNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
-import { FieldDef } from '../../definitions/base/field-def';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Polls until the component's resolvedItems count satisfies the predicate.

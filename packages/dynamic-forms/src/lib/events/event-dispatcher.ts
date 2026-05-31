@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { EventBus } from '../events/event.bus';
-import { FormEvent } from '../events/interfaces/form-event';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Injectable service for dispatching events into a DynamicForm from outside the form.

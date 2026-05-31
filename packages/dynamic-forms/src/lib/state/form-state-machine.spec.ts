@@ -4,9 +4,9 @@ import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 import { FormStateMachine, FormStateMachineConfig } from './form-state-machine';
 import { Action, FormSetup, LifecycleState, Phase, StateTransition, isTransitioningState } from './state-types';
-import { FormConfig } from '../models/form-config';
-import { RegisteredFieldTypes } from '../models/registry/field-registry';
-import { Logger } from '../providers/features/logger/logger.interface';
+import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
+import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { SideEffectScheduler } from './side-effect-scheduler';
 
 // ---------------------------------------------------------------------------

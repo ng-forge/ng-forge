@@ -6,5 +6,5 @@ export {
   resolveNonFieldDisabled,
   evaluateNonFieldHidden,
   evaluateNonFieldDisabled,
-} from './non-field-logic-resolver';
-export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from './non-field-logic-resolver';
+} from '@ng-forge/dynamic-forms/internal';
+export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms/internal';

@@ -1,7 +1,7 @@
-import { DynamicFormError } from '../../errors/dynamic-form-error';
-import { EvaluationContext } from '../../models/expressions/evaluation-context';
-import { CustomFunction } from '../expressions/custom-function-types';
-import { ExpressionParser } from '../expressions/parser/expression-parser';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { EvaluationContext } from '@ng-forge/dynamic-forms/internal';
+import { CustomFunction } from '@ng-forge/dynamic-forms/internal';
+import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
 import { BaseDerivationEntry } from './derivation-entry-base';
 
 /**

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { ADDON_ACTION_REGISTRY, type AddonActionContext, type AddonActionHandler, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { type AddonActionContext, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler, NgForgeAddonActionBase } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import type { MatButtonAddon } from '../types/addons';

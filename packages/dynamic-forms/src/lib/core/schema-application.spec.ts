@@ -3,18 +3,18 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { runInInjectionContext, Injector, signal } from '@angular/core';
 import { form, schema } from '@angular/forms/signals';
 import { SchemaRegistryService } from './registry/schema-registry.service';
-import { FunctionRegistryService } from './registry/function-registry.service';
-import { RootFormRegistryService } from './registry/root-form-registry.service';
-import { FieldContextRegistryService } from './registry/field-context-registry.service';
+import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager } from '../state/form-state-manager';
-import { SchemaApplicationConfig, SchemaDefinition } from '../models';
-import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { SchemaApplicationConfig, SchemaDefinition } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from '../providers/features/logger/console-logger';
 
 import { applySchema, createSchemaFunction } from './schema-application';
-import { LogicFunctionCacheService } from './expressions/logic-function-cache.service';
-import { HttpConditionFunctionCacheService } from './expressions/http-condition-function-cache.service';
-import { DynamicValueFunctionCacheService } from './values/dynamic-value-function-cache.service';
+import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Integration tests for schema-application.

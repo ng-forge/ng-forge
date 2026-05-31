@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { HiddenField, isHiddenField } from '../../definitions/default/hidden-field';
-import { FieldDef } from '../../definitions/base/field-def';
-import { RowField } from '../../definitions/default/row-field';
+import { HiddenField, isHiddenField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { RowField } from '@ng-forge/dynamic-forms/internal';
 
 describe('HiddenField', () => {
   describe('type definition', () => {

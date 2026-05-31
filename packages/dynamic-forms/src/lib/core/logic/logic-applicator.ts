@@ -7,11 +7,11 @@ import {
   isDerivationLogicConfig,
   LogicTrigger,
   type StateLogicType,
-} from '../../models/logic/logic-config';
-import { ConditionalExpression } from '../../models/expressions/conditional-expression';
-import { createLogicFunction, createDebouncedLogicFunction } from '../expressions/logic-function-factory';
+} from '@ng-forge/dynamic-forms/internal';
+import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
+import { createLogicFunction, createDebouncedLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { DynamicFormError } from '../../errors/dynamic-form-error';
+import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 type AnyLogicFn<TValue> = LogicFn<TValue, boolean> | (() => boolean);
 

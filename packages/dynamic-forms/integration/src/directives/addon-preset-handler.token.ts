@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { AddonActionContext } from '@ng-forge/dynamic-forms';
+import { AddonActionContext } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Adapter-supplied resolver for `preset` addon actions (e.g., `'clear'`,

@@ -10,8 +10,8 @@ export type {
 } from './cross-field-types';
 
 // Detection
-export { isCrossFieldExpression } from './cross-field-detector';
-export type { CrossFieldDetectionContext } from './cross-field-detector';
+export { isCrossFieldExpression } from '@ng-forge/dynamic-forms/internal';
+export type { CrossFieldDetectionContext } from '@ng-forge/dynamic-forms/internal';
 
 // Collector
 export { collectCrossFieldEntries, createEmptyCollection } from './cross-field-collector';

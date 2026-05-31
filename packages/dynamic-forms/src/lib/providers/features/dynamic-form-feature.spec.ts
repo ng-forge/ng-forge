@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createFeature, isDynamicFormFeature, DynamicFormFeature } from './dynamic-form-feature';
-import { FieldTypeDefinition } from '../../models/field-type';
+import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 describe('DynamicFormFeature', () => {
   describe('createFeature', () => {
