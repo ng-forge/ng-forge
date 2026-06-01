@@ -6,14 +6,6 @@ export const heroFormConfig = {
   },
   fields: [
     {
-      key: 'title',
-      type: 'text',
-      label: 'Get in Touch',
-      props: {
-        elementType: 'h2',
-      },
-    },
-    {
       key: 'name',
       type: 'input',
       label: 'Your Name',

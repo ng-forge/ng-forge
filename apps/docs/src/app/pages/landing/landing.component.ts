@@ -1,20 +1,20 @@
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   PLATFORM_ID,
   signal,
   viewChild,
 } from '@angular/core';
-import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
-import { catchError, defer, delay, filter, map, merge, of, switchMap, tap } from 'rxjs';
+import { defer, of } from 'rxjs';
 
 import { SandboxHarness, SandboxMountDirective } from '@ng-forge/sandbox-harness';
 
@@ -23,40 +23,14 @@ import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { SearchComponent } from '../../components/search/search.component';
 import { openInStackBlitz } from '../../components/live-example/stackblitz-project';
-import {
-  CODE_SNIPPETS,
-  FEATURES,
-  FIELD_TYPES,
-  INTEGRATIONS,
-  INTERSECTION_CONFIG,
-  PACKAGE_MANAGERS,
-  SECTION_IDS,
-  UI_LIBRARIES,
-  type FireflyPosition,
-  type Spark,
-} from './landing.constants';
-
-import {
-  copyToClipboard,
-  createFireflyAnimation,
-  fromIntersectionObserver,
-  mousePosition$,
-  navScrolled$,
-  scrollProgress$,
-  scrollSnap$,
-  scrollToHash,
-} from './landing.utils';
-
+import { CAPABILITIES, CODE_SNIPPETS, HERO_ROLES, INTEGRATIONS, PACKAGE_MANAGERS, SECTION_IDS, UI_LIBRARIES } from './landing.constants';
+import { copyToClipboard, navScrolled$, scrollToHash } from './landing.utils';
 import { heroFormConfig, validationFormConfig } from './landing.forms';
+import { initEmberCanvas } from './ember-canvas';
 
-const EMPTY_FIREFLY_STATE = { positions: [] as FireflyPosition[], sparks: [] as Spark[] };
-
-/** Delay cosmetic firefly animation until after hero LCP paint completes. */
-const FIREFLY_LCP_DELAY_MS = 1200;
-
-// Animation timing constants
 const COPY_FEEDBACK_DURATION_MS = 2000;
 const CONFETTI_ANIMATION_DURATION_MS = 800;
+const ROLE_CYCLE_MS = 2200;
 
 @Component({
   selector: 'app-landing',
@@ -70,26 +44,28 @@ const CONFETTI_ANIMATION_DURATION_MS = 800;
 })
 export class LandingComponent {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly http = inject(HttpClient);
   protected readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly harness = inject(SandboxHarness);
 
   private copyFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
   private confettiTimer: ReturnType<typeof setTimeout> | null = null;
+  private roleTimer: ReturnType<typeof setInterval> | null = null;
 
   // ============================================
-  // FORM CONFIGS (for landing page demos)
+  // LIVE FORM DEMOS (sandbox)
   // ============================================
 
   readonly heroFormConfig = heroFormConfig;
   readonly validationFormConfig = validationFormConfig;
 
-  // Sandbox mount refs for loading state
   private readonly heroMount = viewChild<SandboxMountDirective>('heroMount');
   private readonly validationMount = viewChild<SandboxMountDirective>('validationMount');
+  private readonly emberCanvas = viewChild<ElementRef<HTMLCanvasElement>>('emberCanvas');
 
-  readonly heroLoaded = computed(() => {
-    const mount = this.heroMount();
+  readonly heroLoaded = computed(() => this.mountLoaded(this.heroMount()));
+  readonly validationLoaded = computed(() => this.mountLoaded(this.validationMount()));
+
+  private mountLoaded(mount: SandboxMountDirective | undefined): boolean {
     if (!mount) return false;
     try {
       const status = mount.mount.status();
@@ -97,90 +73,34 @@ export class LandingComponent {
     } catch {
       return false;
     }
-  });
-
-  readonly validationLoaded = computed(() => {
-    const mount = this.validationMount();
-    if (!mount) return false;
-    try {
-      const status = mount.mount.status();
-      return status === 'resolved' || status === 'local';
-    } catch {
-      return false;
-    }
-  });
+  }
 
   // ============================================
   // EXPOSED CONSTANTS
   // ============================================
 
-  readonly features = FEATURES;
-  readonly fieldTypes = FIELD_TYPES;
+  readonly capabilities = CAPABILITIES;
   readonly integrations = INTEGRATIONS;
   readonly packageManagers = PACKAGE_MANAGERS;
   readonly uiLibraries = UI_LIBRARIES;
   readonly codeSnippets = CODE_SNIPPETS;
 
   // ============================================
-  // UI STATE SIGNALS
+  // UI STATE
   // ============================================
 
   readonly currentPackageManager = signal('npm');
   readonly currentUiLibrary = signal('material');
-  readonly heroTab = signal<'config' | 'demo'>('demo');
+  readonly demoTab = signal<'config' | 'demo'>('demo');
   readonly copied = signal(false);
   readonly copyConfetti = signal<{ id: number; x: number; y: number; angle: number }[]>([]);
-  private readonly visibleElements = signal<Set<string>>(new Set());
   private confettiIdCounter = 0;
 
-  // ============================================
-  // STATS (fetched dynamically)
-  // ============================================
-
-  private readonly npmResource = rxResource({
-    params: () => (this.isBrowser ? {} : undefined),
-    stream: () =>
-      this.http.get<{ downloads?: number }>('https://api.npmjs.org/downloads/point/last-month/@ng-forge/dynamic-forms').pipe(
-        map((data) => this.formatNumber(data?.downloads ?? 0)),
-        catchError(() => of('—')),
-      ),
-  });
-
-  readonly npmDownloads = computed(() => this.npmResource.value() ?? '—');
-
-  private readonly githubResource = rxResource({
-    params: () => (this.isBrowser ? {} : undefined),
-    stream: () =>
-      this.http.get<{ stargazers_count?: number }>('https://api.github.com/repos/ng-forge/ng-forge').pipe(
-        map((data) => this.formatNumber(data?.stargazers_count ?? 0)),
-        catchError(() => of('—')),
-      ),
-  });
-
-  readonly githubStars = computed(() => this.githubResource.value() ?? '—');
-
-  readonly uiLibraryCount = '4'; // Static: Material, Bootstrap, PrimeNG, Ionic
-
-  // ============================================
-  // REACTIVE STATE (RxJS -> Signal)
-  // ============================================
+  // Cycling hero role word ("A {type-safe} forms engine for Angular.")
+  readonly roleIndex = signal(0);
+  readonly heroRole = computed(() => HERO_ROLES[this.roleIndex() % HERO_ROLES.length]);
 
   readonly navScrolled = toSignal(this.isBrowser ? defer(() => navScrolled$()) : of(false), { requireSync: true });
-
-  readonly scrollProgress = toSignal(this.isBrowser ? defer(() => scrollProgress$()) : of(0), { requireSync: true });
-
-  private readonly fireflyState = toSignal(
-    this.isBrowser && (navigator.hardwareConcurrency ?? 4) > 2
-      ? of(null).pipe(
-          delay(FIREFLY_LCP_DELAY_MS),
-          switchMap(() => createFireflyAnimation(mousePosition$())),
-        )
-      : of(EMPTY_FIREFLY_STATE),
-    { initialValue: EMPTY_FIREFLY_STATE },
-  );
-
-  readonly fireflyPositions = computed(() => this.fireflyState().positions);
-  readonly sparks = computed(() => this.fireflyState().sparks);
 
   readonly installCommand = computed(() => {
     const pkg = this.packageManagers.find((p) => p.id === this.currentPackageManager());
@@ -189,12 +109,19 @@ export class LandingComponent {
   });
 
   constructor() {
-    // afterNextRender only runs in browser, no platform check needed
     afterNextRender(() => {
-      this.initializeBrowserFeatures();
+      const canvas = this.emberCanvas()?.nativeElement;
+      if (canvas) {
+        const stop = initEmberCanvas(canvas);
+        this.destroyRef.onDestroy(stop);
+      }
 
-      // Preload Material adapter on idle so sandbox bootstrap is faster.
-      // Runs after render to avoid competing with hydration.
+      // Cycle the hero role word unless the user prefers reduced motion.
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.roleTimer = setInterval(() => this.roleIndex.update((i) => (i + 1) % HERO_ROLES.length), ROLE_CYCLE_MS);
+      }
+
+      // Preload the Material adapter on idle so the live demos bootstrap faster.
       if (typeof requestIdleCallback === 'function') {
         const idleHandle = requestIdleCallback(() => this.harness.preload('material'));
         this.destroyRef.onDestroy(() => cancelIdleCallback(idleHandle));
@@ -203,86 +130,28 @@ export class LandingComponent {
         this.destroyRef.onDestroy(() => clearTimeout(timeoutHandle));
       }
 
-      // Landing page is always dark — set data-theme so sandbox sub-apps
-      // pick up the correct theme via document.documentElement attribute.
+      // Landing is always dark; expose the theme to sandbox sub-apps.
       const docEl = document.documentElement;
       const previousTheme = docEl.getAttribute('data-theme');
       docEl.setAttribute('data-theme', 'dark');
       this.destroyRef.onDestroy(() => {
-        if (previousTheme) {
-          docEl.setAttribute('data-theme', previousTheme);
-        } else {
-          docEl.removeAttribute('data-theme');
-        }
+        if (previousTheme) docEl.setAttribute('data-theme', previousTheme);
+        else docEl.removeAttribute('data-theme');
       });
+
+      scrollToHash(SECTION_IDS);
     });
 
     this.destroyRef.onDestroy(() => {
       if (this.copyFeedbackTimer) clearTimeout(this.copyFeedbackTimer);
       if (this.confettiTimer) clearTimeout(this.confettiTimer);
-    });
-  }
-
-  // ============================================
-  // INITIALIZATION (browser-only via afterNextRender)
-  // ============================================
-
-  private initializeBrowserFeatures(): void {
-    // Merge all browser-only subscriptions into one
-    // Note: scrollSnapEffect$ disabled for now - uncomment to re-enable
-    merge(/* this.scrollSnapEffect$(), */ this.intersectionObserverEffect$()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-
-    scrollToHash(SECTION_IDS);
-  }
-
-  private scrollSnapEffect$() {
-    return scrollSnap$();
-  }
-
-  private intersectionObserverEffect$() {
-    return of(null).pipe(
-      delay(INTERSECTION_CONFIG.initDelayMs),
-      map(() => this.collectAnimatedElements()),
-      filter((elements) => elements.length > 0),
-      switchMap((elements) => fromIntersectionObserver(elements, { threshold: INTERSECTION_CONFIG.threshold })),
-      tap((entries) => this.handleIntersectionEntries(entries)),
-    );
-  }
-
-  private collectAnimatedElements(): Element[] {
-    const elements = document.querySelectorAll('.fade-up');
-    const result: Element[] = [];
-
-    elements.forEach((el, index) => {
-      const id =
-        el.getAttribute('data-animate-id') ??
-        el.className.split(' ').find((c) => c.includes('header') || c.includes('demo') || c.includes('grid') || c.includes('cta')) ??
-        `element-${index}`;
-      el.setAttribute('data-animate-id', id);
-      result.push(el);
-    });
-
-    return result;
-  }
-
-  private handleIntersectionEntries(entries: { target: Element; isIntersecting: boolean }[]): void {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute('data-animate-id');
-        if (id) {
-          this.visibleElements.update((set) => new Set(set).add(id));
-        }
-      }
+      if (this.roleTimer) clearInterval(this.roleTimer);
     });
   }
 
   // ============================================
   // TEMPLATE METHODS
   // ============================================
-
-  isVisible(id: string): boolean {
-    return this.visibleElements().has(id);
-  }
 
   setPackageManager(id: string): void {
     this.currentPackageManager.set(id);
@@ -292,12 +161,11 @@ export class LandingComponent {
     this.currentUiLibrary.set(id);
   }
 
-  setHeroTab(tab: 'config' | 'demo'): void {
-    this.heroTab.set(tab);
+  setDemoTab(tab: 'config' | 'demo'): void {
+    this.demoTab.set(tab);
   }
 
   copyInstallCommand(): void {
-    // User actions only happen in browser, no check needed
     copyToClipboard(this.installCommand())
       .then(() => {
         this.copied.set(true);
@@ -306,52 +174,25 @@ export class LandingComponent {
         this.copyFeedbackTimer = setTimeout(() => this.copied.set(false), COPY_FEEDBACK_DURATION_MS);
       })
       .catch(() => {
-        // Clipboard API may fail in some contexts (e.g., insecure origins) — silently ignored
+        // Clipboard API can fail on insecure origins; ignore.
       });
   }
 
   private spawnCopyConfetti(): void {
     const particleCount = 12;
-    const newParticles = Array.from({ length: particleCount }, (_, i) => ({
-      id: this.confettiIdCounter++,
-      x: (Math.random() - 0.5) * 60, // Spread horizontally
-      y: (Math.random() - 0.5) * 40, // Spread vertically
-      angle: (i / particleCount) * 360 + Math.random() * 30, // Distribute angles
-    }));
-
-    this.copyConfetti.set(newParticles);
-
-    // Clear confetti after animation completes
+    this.copyConfetti.set(
+      Array.from({ length: particleCount }, (_, i) => ({
+        id: this.confettiIdCounter++,
+        x: (Math.random() - 0.5) * 60,
+        y: (Math.random() - 0.5) * 40,
+        angle: (i / particleCount) * 360 + Math.random() * 30,
+      })),
+    );
     if (this.confettiTimer) clearTimeout(this.confettiTimer);
     this.confettiTimer = setTimeout(() => this.copyConfetti.set([]), CONFETTI_ANIMATION_DURATION_MS);
   }
 
-  private formatNumber(num: number): string {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    }
-    return num.toString();
-  }
-
-  onCardMouseMove(event: MouseEvent): void {
-    const card = event.currentTarget as HTMLElement;
-    const rect = card.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    card.style.setProperty('--mouse-x', `${x}px`);
-    card.style.setProperty('--mouse-y', `${y}px`);
-  }
-
-  onCardMouseLeave(event: MouseEvent): void {
-    const card = event.currentTarget as HTMLElement;
-    card.style.removeProperty('--mouse-x');
-    card.style.removeProperty('--mouse-y');
-  }
-
-  /** Landing page is always Material — it's the primary adapter showcased on the homepage. */
+  /** Landing always showcases the Material adapter. */
   openOnStackBlitz(config: FormConfig, title: string): void {
     if (!this.isBrowser) return;
     openInStackBlitz('material', config, title);

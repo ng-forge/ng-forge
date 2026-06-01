@@ -20,6 +20,8 @@ export interface Integration {
   route: string;
   icon: string;
   title: string;
+  package: string;
+  importLine: string;
 }
 
 export interface PackageManager {
@@ -96,7 +98,13 @@ export const INTERSECTION_CONFIG = {
 // SECTION IDS
 // ============================================
 
-export const SECTION_IDS = ['features', 'showcase', 'validation', 'field-types', 'json-config', 'integrations'] as const;
+export const SECTION_IDS = ['demo', 'capabilities', 'type-safe', 'adapters', 'generate', 'install'] as const;
+
+// ============================================
+// HERO ROLE CYCLE ("A {role} forms engine for Angular.")
+// ============================================
+
+export const HERO_ROLES = ['type-safe', 'signal-native', 'declarative', 'zero-config'] as const;
 
 // ============================================
 // FEATURES
@@ -106,18 +114,18 @@ export const FEATURES: Feature[] = [
   {
     icon: 'signal',
     title: 'Signal Forms Native',
-    description: "Built directly on Angular Signal Forms. Not a wrapper — real integration with Angular's reactive future.",
+    description: "Built directly on Angular Signal Forms. Not a wrapper, a real integration with Angular's reactive primitives.",
   },
   {
     icon: 'target',
     title: 'Actually Type-Safe',
-    description: ' — your IDE knows everything. No more guessing.',
+    description: ' gives your IDE the full shape. No more guessing.',
     highlightCode: 'as const satisfies',
   },
   {
     icon: 'layers',
     title: 'Any UI Library',
-    description: 'One import swap. Same logic everywhere.',
+    description: 'One import swap across Material, PrimeNG, Ionic, and Bootstrap. Same logic everywhere.',
   },
   {
     icon: 'package',
@@ -125,9 +133,9 @@ export const FEATURES: Feature[] = [
     description: 'Lazy-loaded field components. Load only what you render.',
   },
   {
-    icon: 'zap',
-    title: 'Zoneless Ready',
-    description: 'No Zone.js required. OnPush everywhere. Built for where Angular is going.',
+    icon: 'check',
+    title: 'Bring Your Own Schema',
+    description: 'Validate with Zod or any Standard Schema validator, cross-field rules included.',
   },
   {
     icon: 'plug',
@@ -306,24 +314,32 @@ export const INTEGRATIONS: Integration[] = [
     route: '/material',
     icon: 'assets/icons/material.svg',
     title: 'Angular Material integration documentation',
+    package: '@ng-forge/dynamic-forms-material',
+    importLine: "import { withMaterialFields } from '@ng-forge/dynamic-forms-material';",
   },
   {
     name: 'PrimeNG',
     route: '/primeng',
     icon: 'assets/icons/primeng.webp',
     title: 'PrimeNG integration documentation',
+    package: '@ng-forge/dynamic-forms-primeng',
+    importLine: "import { withPrimeNgFields } from '@ng-forge/dynamic-forms-primeng';",
   },
   {
     name: 'Ionic',
     route: '/ionic',
     icon: 'assets/icons/ionic.svg',
     title: 'Ionic Framework integration documentation',
+    package: '@ng-forge/dynamic-forms-ionic',
+    importLine: "import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';",
   },
   {
     name: 'Bootstrap',
     route: '/bootstrap',
     icon: 'assets/icons/bootstrap.svg',
     title: 'Bootstrap integration documentation',
+    package: '@ng-forge/dynamic-forms-bootstrap',
+    importLine: "import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';",
   },
 ];
 
@@ -342,10 +358,10 @@ export const PACKAGE_MANAGERS: PackageManager[] = [
 // ============================================
 
 export const UI_LIBRARIES: UiLibrary[] = [
-  { id: 'material', label: 'Material', package: '@ng-forge/material' },
-  { id: 'primeng', label: 'PrimeNG', package: '@ng-forge/primeng' },
-  { id: 'ionic', label: 'Ionic', package: '@ng-forge/ionic' },
-  { id: 'bootstrap', label: 'Bootstrap', package: '@ng-forge/bootstrap' },
+  { id: 'material', label: 'Material', package: '@ng-forge/dynamic-forms-material' },
+  { id: 'primeng', label: 'PrimeNG', package: '@ng-forge/dynamic-forms-primeng' },
+  { id: 'ionic', label: 'Ionic', package: '@ng-forge/dynamic-forms-ionic' },
+  { id: 'bootstrap', label: 'Bootstrap', package: '@ng-forge/dynamic-forms-bootstrap' },
 ];
 
 // ============================================
@@ -353,44 +369,59 @@ export const UI_LIBRARIES: UiLibrary[] = [
 // ============================================
 
 export const CODE_SNIPPETS = {
-  heroConfig: `import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dynamic-forms';
+  // Compact (desktop): one field per line. The wide panel fits these lines.
+  heroConfig: `import { type FormConfig } from '@ng-forge/dynamic-forms';
 
-@Component({
-  imports: [DynamicForm],
-  template: \`<form [dynamic-form]="config" (submit)="onSubmit($event)"></form>\`
-})
-export class ContactComponent {
-  config = {
-    fields: [
-      { key: 'title', type: 'text', label: 'Get in Touch', props: { elementType: 'h2' } },
-      { key: 'name', type: 'input', label: 'Your Name', required: true },
-      { key: 'email', type: 'input', label: 'Email',
-        required: true, email: true, props: { type: 'email' } },
-      { key: 'message', type: 'textarea', label: 'Message',
-        required: true, minLength: 10, props: { rows: 3 } },
-      { key: 'submit', type: 'submit', label: 'Send Message' },
-    ]
-  } as const satisfies FormConfig;
+const config = {
+  fields: [
+    { key: 'name', type: 'input', label: 'Your Name', required: true },
+    { key: 'email', type: 'input', label: 'Email', email: true },
+    { key: 'message', type: 'textarea', label: 'Message' },
+    { key: 'submit', type: 'submit', label: 'Send Message' },
+  ],
+} as const satisfies FormConfig;`,
 
-  onSubmit(value: InferFormValue<typeof this.config.fields>) {
-    // value is fully typed: { name: string, email: string, message: string }
-    console.log(value);
-  }
-}`,
+  // Expanded (mobile): one property per line so nothing overflows a phone.
+  heroConfigStacked: `import { type FormConfig }
+  from '@ng-forge/dynamic-forms';
+
+const config = {
+  fields: [
+    {
+      key: 'name',
+      type: 'input',
+      label: 'Your Name',
+      required: true,
+    },
+    {
+      key: 'email',
+      type: 'input',
+      label: 'Email',
+      email: true,
+    },
+    {
+      key: 'message',
+      type: 'textarea',
+      label: 'Message',
+    },
+    {
+      key: 'submit',
+      type: 'submit',
+      label: 'Send Message',
+    },
+  ],
+} as const satisfies FormConfig;`,
 
   conditionalLogic: `{
   key: 'company',
   type: 'input',
-  label: 'Company Name',
-  logic: [
-    {
-      type: 'required',
-      when: {
-        field: 'accountType',
-        equals: 'business',
-      },
+  logic: [{
+    type: 'required',
+    when: {
+      field: 'accountType',
+      equals: 'business',
     },
-  ],
+  }],
 }`,
 
   multiStepWizard: `{
@@ -398,13 +429,11 @@ export class ContactComponent {
     {
       type: 'page',
       key: 'info',
-      label: 'Your Info',
       fields: [...],
     },
     {
       type: 'page',
       key: 'payment',
-      label: 'Payment',
       fields: [...],
     },
   ],
@@ -471,14 +500,115 @@ export class ContactComponent {
   ]
 }`,
 
-  jsonFetch: `@Component({
-  template: \`<form [dynamic-form]="config()" />\`
-})
-export class SurveyComponent {
+  jsonFetch: `export class SurveyComponent {
   private http = inject(HttpClient);
 
+  // Fetch the config at runtime
   config = toSignal(
-    this.http.get<FormConfig>('/api/forms/survey')
+    this.http.get<FormConfig>(
+      '/api/forms/survey',
+    ),
   );
 }`,
+
+  arrayField: `{
+  key: 'contacts',
+  type: 'array',
+  label: 'Contacts',
+  fields: [
+    {
+      key: 'name',
+      type: 'input',
+      required: true,
+    },
+  ],
+}`,
+
+  httpDerivation: `{
+  key: 'shippingCost',
+  type: 'input',
+  logic: [{
+    type: 'derivation',
+    source: 'http',
+    http: { url: '/api/shipping' },
+    responseExpression: 'response.cost',
+    dependsOn: ['zip'],
+  }],
+}`,
+
+  typeSafety: `const config = {
+  fields: [
+    {
+      key: 'email',
+      type: 'input',
+      required: true,
+      email: true,
+    },
+    {
+      key: 'age',
+      type: 'input',
+      props: { type: 'number' },
+    },
+  ],
+} as const satisfies FormConfig;
+
+// Inferred, no manual typing:
+// { email: string; age: number }
+type Value = InferFormValue<typeof config.fields>;`,
+
+  openapiCommand: `# Turn an OpenAPI document into
+# typed, ready-to-render FormConfigs
+npx @ng-forge/openapi-generator \\
+  --spec ./openapi.yaml \\
+  --output ./src/forms`,
+
+  mcpConfig: `{
+  "ng-forge": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@ng-forge/dynamic-form-mcp"
+    ]
+  }
+}`,
 } as const;
+
+// ============================================
+// CAPABILITIES ("the hard parts, declarative")
+// ============================================
+
+export interface Capability {
+  icon: string;
+  title: string;
+  description: string;
+  snippetKey: keyof typeof CODE_SNIPPETS;
+}
+
+// Order pairs similarly-sized snippets per row (the two compact ones, then the
+// two taller ones) so cards line up cleanly in the 2-column grid.
+export const CAPABILITIES: Capability[] = [
+  {
+    icon: 'git-branch',
+    title: 'Conditional fields',
+    description: 'Show, hide, or require a field based on other values. No imperative subscriptions.',
+    snippetKey: 'conditionalLogic',
+  },
+  {
+    icon: 'api',
+    title: 'Server-driven values',
+    description: 'Derive a value from an HTTP call, debounced and cancelled for you.',
+    snippetKey: 'httpDerivation',
+  },
+  {
+    icon: 'workflow',
+    title: 'Multi-step wizards',
+    description: 'Pages with per-step validation, navigation, and progress. Built in.',
+    snippetKey: 'multiStepWizard',
+  },
+  {
+    icon: 'layers',
+    title: 'Repeatable arrays',
+    description: 'Add, remove, and reorder rows and nested groups straight from the config.',
+    snippetKey: 'arrayField',
+  },
+];
