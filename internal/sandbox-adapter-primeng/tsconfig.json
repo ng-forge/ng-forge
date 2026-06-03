@@ -9,11 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": false,
-    "lib": ["dom", "es2022"],
-    "paths": {
-      "@ng-forge/dynamic-forms-primeng": ["dist/packages/dynamic-forms-primeng"],
-      "@ng-forge/styling": ["dist/internal/styling"]
-    }
+    "lib": ["dom", "es2022"]
   },
   "angularCompilerOptions": {
     "compilationMode": "partial",
