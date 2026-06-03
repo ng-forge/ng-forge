@@ -40,5 +40,5 @@ export interface PageVisibilityContext {
   /** Whether this page should be visible */
   isVisible: boolean;
   /** Component reference for the page */
-  pageComponent: ComponentRef<FormUiControl>;
+  pageComponent: ComponentRef<FormUiControl<unknown>>;
 }
