@@ -1,5 +1,5 @@
 import { inject, Injectable, isSignal, Signal, untracked } from '@angular/core';
-import { ChildFieldContext, FieldContext, FieldState, FieldTree } from '@angular/forms/signals';
+import { ChildFieldContext, FieldContext, FieldTree, ReadonlyFieldState } from '@angular/forms/signals';
 import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { DynamicFormError } from '../../errors/dynamic-form-error';
@@ -15,7 +15,7 @@ function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is 
 }
 
 /** Extracts the FieldState from a FieldContext using the public `.state` property. */
-function extractFieldState(fieldContext: FieldContext<unknown>): FieldState<unknown> | undefined {
+function extractFieldState(fieldContext: FieldContext<unknown>): ReadonlyFieldState<unknown> | undefined {
   return untracked(() => {
     if (!fieldContext || !('state' in fieldContext)) return undefined;
     return fieldContext.state;

@@ -108,6 +108,7 @@ export function typecheckGeneratedForm(formFilePath: string, adapter: AdapterNam
     skipLibCheck: true,
     experimentalDecorators: true,
     allowImportingTsExtensions: false,
+    ignoreDeprecations: '6.0',
     baseUrl: repoRoot,
     paths: resolveCompilerPaths(adapter),
     // Ensure the adapter's module augmentation is loaded (the side-effect import in the
