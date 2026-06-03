@@ -37,7 +37,7 @@ export const heroFormConfig = {
       },
       placeholder: 'How can we help?',
       props: {
-        rows: 3,
+        rows: 2,
       },
     },
     {

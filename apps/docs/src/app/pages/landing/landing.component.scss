@@ -409,18 +409,33 @@ section {
 
 .section-title {
   font-family: $font-primary;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2.1rem, 5vw, 3.25rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.85rem;
   color: $steel;
+  text-wrap: balance;
+
+  // Small ember accent above the title (a forge spark, not a text eyebrow).
+  &::before {
+    content: '';
+    display: block;
+    width: 2.25rem;
+    height: 3px;
+    margin-bottom: 1.1rem;
+    border-radius: 2px;
+    background: linear-gradient(90deg, $ember-core, $ember-glow);
+  }
 }
 
 .section-desc {
-  color: $steel-mid;
+  // Brighter than $steel-mid: this is lead copy, not secondary metadata.
+  color: rgba($steel, 0.72);
   font-size: 1.1rem;
-  max-width: 560px;
+  max-width: 56ch;
   line-height: 1.6;
+  // Avoid one-word orphans on the last line.
+  text-wrap: pretty;
 }
 
 // ============================================
@@ -433,13 +448,15 @@ section {
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 8rem 2rem 6rem;
+  // Asymmetric padding biases the centered content upward so there is less
+  // empty band above the eyebrow.
+  padding: 5rem 2rem 10rem;
   position: relative;
   z-index: 2;
   overflow: hidden;
 
   @media (max-width: 768px) {
-    padding: 7rem 1.25rem 4rem;
+    padding: 6rem 1.25rem 5rem;
   }
 }
 
@@ -751,20 +768,23 @@ section {
 .stackblitz-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 6px;
+  padding: 5px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
-  color: $steel-mid;
+  // StackBlitz brand blue.
+  color: #1389fd;
   cursor: pointer;
   transition:
     color 0.15s,
-    border-color 0.15s;
+    background 0.15s;
 
   .stackblitz-icon {
-    width: 20px;
-    height: 20px;
+    display: block;
+    width: 18px;
+    height: 18px;
     transition: filter 0.25s ease;
   }
 
@@ -796,10 +816,10 @@ section {
     }
 
     &:hover {
-      color: #1389fd;
+      background: rgba(#1389fd, 0.14);
 
       .stackblitz-icon {
-        filter: drop-shadow(0 0 1px #1389fd) drop-shadow(0 0 3px rgba(#1389fd, 0.5));
+        filter: drop-shadow(0 0 3px rgba(#1389fd, 0.55));
       }
 
       &::after {
@@ -859,7 +879,7 @@ section {
 // Specific selector to beat `.demo-config .code-body`.
 .demo-config .demo-code--wide {
   font-size: 0.85rem;
-  line-height: 2.2;
+  line-height: 1.85;
 }
 
 @media (max-width: 900px) {
@@ -1047,6 +1067,9 @@ section {
 
   pre {
     margin: 0;
+    // The shared Shiki theme (material-theme-darker) is muted; lift its colors
+    // a touch so code reads clearly on the near-black panels.
+    filter: saturate(1.35) brightness(1.12);
   }
 
   @media (max-width: 900px) {
@@ -1169,10 +1192,10 @@ section {
   margin-top: 0.25rem;
 
   // Fixed, uniform window so all four cards are the same size. Snippets are
-  // sized to fit it, so no scrollbar.
+  // sized to fill it evenly, so no scrollbar and minimal blank space.
   .code-body {
     flex: none;
-    height: 300px;
+    height: 265px;
     max-height: none;
   }
 }
@@ -1193,8 +1216,9 @@ section {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: 1.5rem;
-  // Top-align the payoff callout with the code block, not floating mid-height.
-  align-items: start;
+  // Equal-height panels; the payoff centers its content (below) so it reads as
+  // a balanced callout rather than a short box floating at the top.
+  align-items: stretch;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -1214,7 +1238,11 @@ section {
   border: 1px solid rgba($ember-glow, 0.25);
   border-radius: 14px;
   background: linear-gradient(160deg, rgba($ember-core, 0.07), rgba($ember-core, 0.02));
-  padding: 1.5rem;
+  padding: 1.75rem;
+  // Center the content within the (taller) panel.
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
   .payoff-label {
     font-family: $font-mono;
@@ -1593,29 +1621,81 @@ section {
   }
 }
 
+// At-a-glance trust row under the closing CTA.
+.cta-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.6rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: $font-mono;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: $steel-mid;
+
+  li {
+    position: relative;
+
+    &:not(:first-child)::before {
+      content: '';
+      position: absolute;
+      left: -0.85rem;
+      top: 50%;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba($ember-glow, 0.55);
+      transform: translateY(-50%);
+    }
+  }
+}
+
 // ============================================
 // FOOTER
 // ============================================
 footer {
   position: relative;
   z-index: 2;
-  padding: 3rem 2rem;
+  padding: 3.5rem 2rem 2.5rem;
   border-top: 1px solid $steel-dark;
-  text-align: center;
   background: $bg-deep;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 340px;
+
+  p {
+    color: $steel-mid;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+  }
 }
 
 .footer-links {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin-bottom: 1.5rem;
+  gap: 1.75rem;
   flex-wrap: wrap;
 
   a {
     color: $steel-mid;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     transition: color 0.2s;
 
     &:hover {
@@ -1625,6 +1705,10 @@ footer {
 }
 
 .footer-copy {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba($steel-dark, 0.6);
   color: $steel-mid;
   font-size: 0.8rem;
 }

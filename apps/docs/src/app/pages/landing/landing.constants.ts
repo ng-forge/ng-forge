@@ -104,7 +104,7 @@ export const SECTION_IDS = ['demo', 'capabilities', 'type-safe', 'adapters', 'ge
 // HERO ROLE CYCLE ("A {role} forms engine for Angular.")
 // ============================================
 
-export const HERO_ROLES = ['type-safe', 'signal-native', 'declarative', 'zero-config'] as const;
+export const HERO_ROLES = ['type-safe', 'signal-native', 'declarative', 'composable'] as const;
 
 // ============================================
 // FEATURES
@@ -431,11 +431,7 @@ const config = {
       key: 'info',
       fields: [...],
     },
-    {
-      type: 'page',
-      key: 'payment',
-      fields: [...],
-    },
+    { type: 'page', key: 'review' },
   ],
 }`,
 
@@ -552,8 +548,7 @@ const config = {
   ],
 } as const satisfies FormConfig;
 
-// Inferred, no manual typing:
-// { email: string; age: number }
+// Inferred from the config above, no hand-written types:
 type Value = InferFormValue<typeof config.fields>;`,
 
   openapiCommand: `# Turn an OpenAPI document into
