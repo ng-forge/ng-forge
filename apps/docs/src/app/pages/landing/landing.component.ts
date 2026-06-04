@@ -34,7 +34,7 @@ import {
   USE_CASES,
 } from './landing.constants';
 import { copyToClipboard, navScrolled$, scrollToHash } from './landing.utils';
-import { heroFormConfig, validationFormConfig } from './landing.forms';
+import { heroFormConfig } from './landing.forms';
 import { initEmberCanvas } from './ember-canvas';
 
 const COPY_FEEDBACK_DURATION_MS = 2000;
@@ -65,14 +65,11 @@ export class LandingComponent {
   // ============================================
 
   readonly heroFormConfig = heroFormConfig;
-  readonly validationFormConfig = validationFormConfig;
 
   private readonly heroMount = viewChild<SandboxMountDirective>('heroMount');
-  private readonly validationMount = viewChild<SandboxMountDirective>('validationMount');
   private readonly emberCanvas = viewChild<ElementRef<HTMLCanvasElement>>('emberCanvas');
 
   readonly heroLoaded = computed(() => this.mountLoaded(this.heroMount()));
-  readonly validationLoaded = computed(() => this.mountLoaded(this.validationMount()));
 
   private mountLoaded(mount: SandboxMountDirective | undefined): boolean {
     if (!mount) return false;
