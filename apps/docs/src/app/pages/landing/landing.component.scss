@@ -1619,12 +1619,15 @@ section {
   font-size: clamp(2rem, 6vw, 4rem);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.05;
+  line-height: 1.1;
   margin-bottom: 2.5rem;
   color: $steel;
 
   span {
     display: inline-block;
+    // Extra bottom room so the gradient covers the descender of "forging"
+    // (background-clip: text otherwise stops at the line box and cuts the g).
+    padding-bottom: 0.12em;
     background: linear-gradient(90deg, $ember-core, $molten);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1787,7 +1790,8 @@ section {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem 1.6rem;
-  margin: 2rem 0 0;
+  // Centered between the title (its margin-bottom above) and the install box.
+  margin: 0 0 2.5rem;
   padding: 0;
   list-style: none;
   font-family: $font-mono;
