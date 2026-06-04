@@ -370,7 +370,7 @@ export const UI_LIBRARIES: UiLibrary[] = [
 
 export const CODE_SNIPPETS = {
   // Compact (desktop): one field per line. The wide panel fits these lines.
-  heroConfig: `import { type FormConfig } from '@ng-forge/dynamic-forms';
+  heroConfig: `import type { FormConfig } from '@ng-forge/dynamic-forms';
 
 const config = {
   fields: [
@@ -382,7 +382,7 @@ const config = {
 } as const satisfies FormConfig;`,
 
   // Expanded (mobile): one property per line so nothing overflows a phone.
-  heroConfigStacked: `import { type FormConfig }
+  heroConfigStacked: `import type { FormConfig }
   from '@ng-forge/dynamic-forms';
 
 const config = {

@@ -847,109 +847,112 @@ section {
 }
 
 // ============================================
-// DEMO CENTERPIECE (config side by side with live form)
+// DEMO CENTERPIECE (one window: live form / config tabs)
 // ============================================
-.demo-split {
-  display: grid;
-  // Give the config a little more room so each field fits on one line.
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1.5rem;
-  // Equal-height panels: the config is sized to match the live form.
-  align-items: stretch;
-  max-width: 100%;
+// Narrower than the section so the form fills the window instead of floating
+// in it, while still leaving the config lines room to breathe. Left-aligned to
+// sit under the section heading.
+.demo-window {
+  max-width: 720px;
+  margin: 0;
+}
 
-  // Stack before the config column gets too narrow for the compact (wide)
-  // config lines, which would otherwise force an internal horizontal scrollbar.
-  @media (max-width: 1140px) {
-    grid-template-columns: 1fr;
+// Tabs sit in the window's title bar (the .code-header traffic-light row).
+.demo-window-header {
+  gap: 0.75rem;
+}
+
+.demo-tabs {
+  display: flex;
+  gap: 0.3rem;
+  margin-left: 0.6rem;
+}
+
+.demo-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  font-family: $font-mono;
+  font-size: 0.8rem;
+  color: $steel-mid;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+
+  .icon {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  &:hover {
+    color: $steel;
+  }
+
+  &.active {
+    color: $ember-glow;
+    border-color: rgba($ember-glow, 0.35);
+    background: rgba($ember-core, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: 2px;
   }
 }
 
-.demo-config,
-.demo-preview {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+.demo-window-header .stackblitz-link {
+  margin-left: auto;
 }
 
-.demo-config .code-block {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+// One stable height so switching tabs doesn't shift the page below.
+.demo-window-body {
+  position: relative;
+  min-height: 24rem;
 }
 
-// Show the whole config (no inner scrollbar); the page scrolls, not the card.
-.demo-config .code-body {
-  flex: 1;
-  max-height: none;
-  font-size: 0.72rem;
-}
-
-// Compact one-line-per-field on wide screens, expanded one-prop-per-line on
-// phones, so the desktop demo stays short and the mobile one never overflows.
-.demo-code--narrow {
+.demo-panel {
   display: none;
-}
 
-// The compact version has few lines, so give it a larger, airier type on
-// desktop to fill the panel (matched to the live form) and read more clearly.
-// Specific selector to beat `.demo-config .code-body`.
-.demo-config .demo-code--wide {
-  font-size: 0.85rem;
-  line-height: 1.85;
-}
-
-@media (max-width: 900px) {
-  .demo-code--wide {
-    display: none;
-  }
-  .demo-code--narrow {
+  &.active {
     display: block;
   }
 }
 
-.demo-preview {
-  background: $bg-deep;
-  border: 1px solid $steel-dark;
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
+// Config view: full width, readable, no inner scrollbar.
+.demo-panel--config {
+  .code-body {
+    max-height: none;
+    font-size: 0.85rem;
+    line-height: 1.85;
+  }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, $ember-core, transparent);
-    opacity: 0.5;
+  .demo-code--narrow {
+    display: none;
   }
 }
 
-.demo-preview-header {
-  font-size: 0.85rem;
-  color: $steel-mid;
-  font-weight: 500;
-
-  .panel-icon {
-    width: 16px !important;
-    height: 16px !important;
-    color: $ember-glow;
-  }
-
-  .stackblitz-link {
-    margin-left: auto;
+// Below this width the compact one-line-per-field config would overflow, so
+// swap to the expanded one-prop-per-line variant.
+@media (max-width: 680px) {
+  .demo-panel--config {
+    .demo-code--wide {
+      display: none;
+    }
+    .demo-code--narrow {
+      display: block;
+    }
   }
 }
 
-.demo-preview-body {
+// Form view: padded, the form itself stays centered via .landing-form.
+.demo-panel--form {
   padding: $space-4;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  // Top-align the form so its heading sits under the panel header (no floating gap).
-  justify-content: flex-start;
 }
 
 .demo-live {
@@ -964,7 +967,9 @@ section {
 .landing-form {
   position: relative;
   width: 100%;
-  max-width: 552px;
+  // Wider than the old split panel so the form fills the full-width window
+  // instead of floating in a narrow centered column.
+  max-width: 760px;
   margin: 0 auto;
 }
 

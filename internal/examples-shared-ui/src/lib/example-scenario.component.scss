@@ -365,7 +365,8 @@
   form {
     display: flex;
     flex-direction: column;
-    gap: $space-3;
+    // A touch more room between fields in the landing demo (minimal mode only).
+    gap: $space-5;
     width: 100%;
   }
 
