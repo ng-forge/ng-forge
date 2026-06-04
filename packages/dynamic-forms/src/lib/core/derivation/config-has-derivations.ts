@@ -21,6 +21,10 @@ import { someField } from './field-traversal';
  */
 export function configHasDerivations(fields: FieldDef<unknown>[]): boolean {
   return someField(fields, (field) => {
+    // Match the collector's keyless guard (derivation-collector.ts): a keyless
+    // field never produces a derivation entry, so it must not trip the gate.
+    // `someField` still recurses into its children.
+    if (!field.key) return false;
     const validationField = field as FieldDef<unknown> & FieldWithValidation;
     return !!validationField.derivation || !!validationField.logic?.some(isDerivationLogicConfig);
   });

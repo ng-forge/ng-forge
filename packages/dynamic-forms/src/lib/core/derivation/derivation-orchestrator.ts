@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, DestroyRef, inject, InjectionToken, Injector, Signal, untracked } from '@angular/core';
+import { computed, DestroyRef, inject, Injector, Signal, untracked } from '@angular/core';
 import { DEV_MODE } from '../../utils/dev-mode';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
@@ -586,30 +586,6 @@ function propertyAsyncEntrySignature(entry: PropertyDerivationEntry): string {
  */
 export function createDerivationOrchestrator(config: DerivationOrchestratorConfig): DerivationOrchestrator {
   return new DerivationOrchestrator(config);
-}
-
-/** Injection token for the DerivationOrchestrator. */
-export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('DERIVATION_ORCHESTRATOR');
-
-/**
- * Back-compat injection token for the (formerly separate) property-derivation
- * orchestrator. The property pipeline is now wired by the unified
- * {@link DerivationOrchestrator}; the DI binding for this token uses
- * `useExisting: DERIVATION_ORCHESTRATOR`, so any consumer still calling
- * `inject(PROPERTY_DERIVATION_ORCHESTRATOR)` resolves to the same instance.
- *
- * @deprecated Use {@link DERIVATION_ORCHESTRATOR}.
- */
-export const PROPERTY_DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('PROPERTY_DERIVATION_ORCHESTRATOR');
-
-/**
- * Injects the DerivationOrchestrator from the current injection context.
- *
- * @returns The DerivationOrchestrator instance
- * @throws Error if called outside of an injection context or if orchestrator is not provided
- */
-export function injectDerivationOrchestrator(): DerivationOrchestrator {
-  return inject(DERIVATION_ORCHESTRATOR);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
