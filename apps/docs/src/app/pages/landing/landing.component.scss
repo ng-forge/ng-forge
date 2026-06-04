@@ -1022,9 +1022,10 @@ section {
   }
 }
 
-// Form view: generous horizontal breathing room around the centered form.
+// Form view: left-aligned with the fields running wide, and the empty space
+// sitting on the right (like the original demo) rather than centered.
 .demo-panel--form {
-  padding: 1.5rem 3.75rem;
+  padding: 1.75rem 6rem 1.75rem 2.5rem;
 
   @media (max-width: 560px) {
     padding: 1.25rem 1rem;
@@ -1043,10 +1044,9 @@ section {
 .landing-form {
   position: relative;
   width: 100%;
-  // Wider than the old split panel so the form fills the full-width window
-  // instead of floating in a narrow centered column.
+  // Left-aligned, filling the (asymmetrically padded) panel area.
   max-width: 760px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 // Sandbox container: mount creates a child <div> with a shadow root.
