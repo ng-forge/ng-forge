@@ -607,7 +607,7 @@ export const CAPABILITIES: Capability[] = [
   {
     icon: 'git-branch',
     title: 'Conditional fields',
-    description: 'Show, hide, or require a field based on other values. No imperative subscriptions.',
+    description: 'Show, hide, or require a field based on other field values, resolved as they change.',
     snippetKey: 'conditionalLogic',
   },
   {
@@ -645,7 +645,7 @@ export const USE_CASES: UseCase[] = [
   {
     icon: 'database',
     title: 'Backend-driven forms',
-    description: 'The shape comes from your API, not your bundle. Change a form without shipping a build.',
+    description: 'The form shape comes from your API at runtime, so you can change it without a new build.',
     route: '/api-driven-forms',
   },
   {

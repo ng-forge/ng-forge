@@ -509,7 +509,31 @@ section {
   align-items: center;
 }
 
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0.32rem 0.8rem;
+  border: 1px solid rgba($ember-glow, 0.32);
+  border-radius: 999px;
+  background: rgba($ember-core, 0.08);
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: $ember-glow;
+
+  .hero-badge__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $ember-core;
+    box-shadow: 0 0 8px rgba($ember-core, 0.85);
+  }
+}
+
 .hero-eyebrow {
+  display: block;
   font-family: $font-mono;
   font-size: 0.75rem;
   color: $steel-mid;
