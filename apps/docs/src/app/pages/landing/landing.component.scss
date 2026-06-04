@@ -509,18 +509,17 @@ section {
   align-items: center;
 }
 
+// A plain ember status label (not a pill) so it doesn't compete with the
+// "From ngx-formly?" pill at the bottom of the hero.
 .hero-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.1rem;
-  padding: 0.32rem 0.8rem;
-  border: 1px solid rgba($ember-glow, 0.32);
-  border-radius: 999px;
-  background: rgba($ember-core, 0.08);
+  gap: 0.55rem;
+  margin-bottom: 1.4rem;
   font-family: $font-mono;
-  font-size: 0.72rem;
-  letter-spacing: 0.03em;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: $ember-glow;
 
   .hero-badge__dot {
