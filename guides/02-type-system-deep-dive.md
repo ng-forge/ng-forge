@@ -444,7 +444,7 @@ type WithInputSignals<T> = {
 ### Component Implementation
 
 ```typescript
-export default class PrimeInputFieldComponent implements PrimeInputComponent {
+export default class PrimeInputFieldComponent implements ValueFieldComponent<PrimeInputField> {
   // TypeScript infers all these as InputSignal<T>
   readonly field = input.required<FieldTree<string>>();
   readonly key = input.required<string>();
