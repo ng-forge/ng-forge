@@ -810,8 +810,10 @@ section {
       content: 'Open in StackBlitz';
       position: absolute;
       top: calc(100% + 6px);
-      left: 50%;
-      transform: translateX(-50%) translateY(4px);
+      // Right-aligned to the button so the label grows left into the window,
+      // instead of overflowing the right edge and getting clipped.
+      right: 0;
+      transform: translateY(4px);
       padding: 4px 8px;
       border-radius: 4px;
       background: $bg-surface;
@@ -840,7 +842,7 @@ section {
       &::after {
         opacity: 1;
         visibility: visible;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
       }
     }
   }
