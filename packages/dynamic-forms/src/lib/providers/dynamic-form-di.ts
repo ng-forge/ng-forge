@@ -1,5 +1,4 @@
 import { computed, Provider, Signal } from '@angular/core';
-import { FieldTree } from '@angular/forms/signals';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -19,29 +18,14 @@ import {
 import { DERIVATION_WARNING_TRACKER } from '../core/derivation/derivation-warning-tracker';
 import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
 import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
-import {
-  DERIVATION_ORCHESTRATOR,
-  createDerivationOrchestrator,
-  DerivationOrchestratorConfig,
-} from '../core/derivation/derivation-orchestrator';
-import { createDerivationLogger } from '../core/derivation/derivation-logger.service';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { DERIVATION_LOG_CONFIG } from './features/logger/with-logger-config';
-import { DerivationLogConfig } from '@ng-forge/dynamic-forms/internal';
-import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { createDerivationRenderGate, DERIVATION_RENDER_GATE } from '../core/derivation/derivation-render-gate';
 import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
-import {
-  createPropertyOverrideStore,
-  PROPERTY_OVERRIDE_STORE,
-  PropertyOverrideStore,
-} from '../core/property-derivation/property-override-store';
+import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../core/property-derivation/property-override-store';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '@ng-forge/dynamic-forms/internal';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { AsyncConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { FORM_INITIALIZER } from './form-initializer.token';
 import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';
 
 /**
@@ -115,51 +99,31 @@ function coreProviders(): Provider[] {
 }
 
 /**
- * Providers for the value-derivation engine: orchestrator + warning tracker.
- * Future: this group becomes opt-in via withDerivations() at a separate entry point.
+ * Providers for the value-derivation engine: warning tracker + a lazy bootstrap
+ * hook. The heavy orchestrator module (collectors, applicators, cycle detection,
+ * and the value/property/HTTP/async stream factories) is NOT statically imported
+ * here — it is dynamically imported the first time a config declares a derivation,
+ * so forms without derivations never pay for the engine.
  *
  * @internal
  */
 function derivationProviders(): Provider[] {
   return [
     { provide: DERIVATION_WARNING_TRACKER, useFactory: createWarningTracker },
-    {
-      provide: DERIVATION_ORCHESTRATOR,
-      useFactory: (
-        stateManager: FormStateManager,
-        logger: Logger,
-        logConfig: DerivationLogConfig,
-        externalData: Signal<Record<string, Signal<unknown>> | undefined>,
-        propertyStore: PropertyOverrideStore,
-      ) => {
-        // FormStateManager is injected without type parameters, so its generic defaults
-        // to Record<string, unknown>. The casts widen the type to match DerivationOrchestratorConfig
-        // which uses unknown — safe because the orchestrator only reads values.
-        // Both value AND property pipelines are wired on the same instance. When
-        // propertyDerivationProviders() is moved behind a withPropertyDerivations()
-        // feature factory, callers who omit it will get a no-op PROPERTY_OVERRIDE_STORE
-        // and the orchestrator's property pipeline will stay dormant.
-        const config: DerivationOrchestratorConfig = {
-          schemaFields: computed(() => stateManager.formSetup()?.schemaFields as FieldDef<unknown>[] | undefined),
-          formValue: stateManager.formValue as Signal<Record<string, unknown>>,
-          form: computed(() => stateManager.form() as unknown as FieldTree<unknown>),
-          derivationLogger: computed(() => createDerivationLogger(logConfig, logger)),
-          propertyStore,
-          externalData,
-        };
-        return createDerivationOrchestrator(config);
-      },
-      deps: [FormStateManager, DynamicFormLogger, DERIVATION_LOG_CONFIG, EXTERNAL_DATA, PROPERTY_OVERRIDE_STORE],
-    },
-    // Wake the orchestrator at form bootstrap without DynamicForm needing a static
-    // reference to the token.
-    { provide: FORM_INITIALIZER, useExisting: DERIVATION_ORCHESTRATOR, multi: true },
+    // The render gate lazy-loads + wires the orchestrator on the first config
+    // that declares a derivation, and holds `shouldRender` closed until it does
+    // (so derivation-bearing fields render already-derived, no flash). The
+    // orchestrator is component-scoped (it can't be `providedIn: 'root'`), so the
+    // gate loads it with a plain dynamic `import()` + `runInInjectionContext`,
+    // not `injectAsync`. `DynamicForm` injects the gate, which wakes the load.
+    { provide: DERIVATION_RENDER_GATE, useFactory: createDerivationRenderGate },
   ];
 }
 
 /**
- * Providers for the property-derivation pipeline: the override store consumed
- * by the unified `DerivationOrchestrator`.
+ * Provider for the property-derivation override store. The store is consumed
+ * eagerly by field rendering (to apply derived hidden/disabled/readonly state),
+ * so it stays eager even though the orchestrator that writes into it is lazy.
  *
  * @internal
  */

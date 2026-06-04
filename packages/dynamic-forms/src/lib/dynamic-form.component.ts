@@ -29,6 +29,7 @@ import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
 import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
+import { DERIVATION_RENDER_GATE } from './core/derivation/derivation-render-gate';
 import { FORM_INITIALIZER } from './providers/form-initializer.token';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -208,7 +209,10 @@ export class DynamicForm<
   fieldLoadingErrors = this.stateManager.fieldLoadingErrors;
 
   /** Whether to render the form template */
-  shouldRender = this.stateManager.shouldRender;
+  // `derivationReady` is false only while a derivation-bearing config waits for
+  // the lazily-loaded engine to wire, so fields render already-derived (no flash).
+  private derivationReady = inject(DERIVATION_RENDER_GATE);
+  shouldRender = computed(() => this.stateManager.shouldRender() && this.derivationReady());
 
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;

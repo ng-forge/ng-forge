@@ -1,568 +1,502 @@
-<!-- Skip link for accessibility -->
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
-<!-- Scroll progress indicator -->
-<div class="scroll-progress" [style.transform]="'scaleX(' + scrollProgress() / 100 + ')'" aria-hidden="true"></div>
-
-<!-- Noise texture overlay -->
 <div class="noise-overlay" aria-hidden="true"></div>
-
-<!-- Background glow -->
 <div class="bg-glow" aria-hidden="true"></div>
 
-<!-- Fireflies -->
-<div class="fireflies" aria-hidden="true">
-  @for (firefly of fireflyPositions(); track $index) {
-    <div class="firefly interactive" [style.left.px]="firefly.x" [style.top.px]="firefly.y"></div>
-  }
-  @for (spark of sparks(); track $index) {
-    <div class="spark" [style.left.px]="spark.x" [style.top.px]="spark.y" [style.opacity]="spark.opacity"></div>
-  }
-</div>
-
-<!-- Navigation -->
-<nav [class.scrolled]="navScrolled()" aria-label="Main navigation">
-  <a routerLink="/" class="logo">
+<!-- ============================================ -->
+<!-- NAVIGATION -->
+<!-- ============================================ -->
+<header class="nav" [class.scrolled]="navScrolled()" aria-label="Primary">
+  <a routerLink="/" class="logo" aria-label="ng-forge home">
     <app-logo size="lg" />
   </a>
-  <div class="nav-links">
+
+  <nav class="nav-links" aria-label="Primary navigation">
     @defer (on idle) {
       <docs-search />
     } @placeholder {
       <div></div>
     }
-    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" title="GitHub">
-      <span class="icon icon--github"></span>
-    </a>
-  </div>
-</nav>
 
-<!-- Hero -->
+    <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="github-link" aria-label="ng-forge on GitHub">
+      <span class="icon icon--github" aria-hidden="true"></span>
+    </a>
+
+    <!-- Surfaces only once the hero CTA has scrolled out of view. -->
+    <a routerLink="/material/getting-started" class="btn btn-primary nav-cta">Get Started</a>
+  </nav>
+</header>
+
 <main id="main-content">
+  <!-- ============================================ -->
+  <!-- HERO -->
+  <!-- ============================================ -->
   <section class="hero">
+    <canvas #emberCanvas class="ember-canvas" aria-hidden="true"></canvas>
+    <div class="ember-bloom" aria-hidden="true"></div>
+    <div class="hero-veil" aria-hidden="true"></div>
+
     <div class="hero-content">
-      <div class="hero-badge">
-        <span class="hero-badge-dot"></span>
-        Angular 21+ Signal Forms
-      </div>
+      <span class="hero-badge">
+        <span class="hero-badge__dot" aria-hidden="true"></span>
+        v1.0 &middot; production-ready
+      </span>
+
       <h1>
         <span class="line1">Forms are boring.</span>
         <span class="line2">Your code shouldn't be.</span>
       </h1>
-      <p class="hero-tagline">Write the config. We handle the rest. Type-safe. Signal-native. Zero boilerplate.</p>
+
+      <p class="hero-role">
+        A <span class="role">{{ heroRole() }}</span> forms engine for Angular. Write the config, ship the form.
+      </p>
+
       <div class="hero-ctas">
         <a routerLink="/material/getting-started" class="btn btn-primary">
-          <span class="icon icon--sparkles"></span>
+          <span class="icon icon--sparkles" aria-hidden="true"></span>
           Get Started
         </a>
-        <a
-          href="https://github.com/ng-forge/ng-forge"
-          target="_blank"
-          rel="noopener"
-          class="btn btn-secondary"
-          title="View ng-forge repository on GitHub"
-        >
-          <span class="icon icon--github"></span>
+        <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span class="icon icon--github" aria-hidden="true"></span>
           View on GitHub
         </a>
       </div>
+
       <a routerLink="/material/migrating-from-ngx-formly" class="hero-formly-link">
         <span class="hero-formly-link__leader">From</span>
-        <span class="hero-formly-link__brand">ngx-formly</span>?
-        <span class="hero-formly-link__arrow" aria-hidden="true">→</span>
+        <span class="hero-formly-link__brand">ngx-formly</span>
+        <span class="hero-formly-link__leader">?</span>
+        <span class="hero-formly-link__arrow" aria-hidden="true">&rsaquo;</span>
       </a>
+    </div>
 
-      <div class="hero-demo">
-        <div class="hero-demo-container">
-          <div class="hero-demo-header">
-            <div class="header-dots">
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-            </div>
-            <div class="header-tabs" role="tablist" aria-label="Demo view options">
+    <div class="scroll-cue" aria-hidden="true">
+      <span class="scroll-cue__label">SCROLL</span>
+      <span class="scroll-cue__track"><span class="scroll-cue__beam"></span></span>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- DEMO (centerpiece: config side by side with live form) -->
+  <!-- ============================================ -->
+  <section id="demo">
+    <div class="section-container">
+      <div class="demo-header reveal">
+        <h2 class="section-title">See it in action</h2>
+        <p class="section-desc">The exact config you write, and the live form it renders. Flip between them.</p>
+      </div>
+
+      <div class="demo-window reveal" [class.is-config]="demoTab() === 'config'">
+        <div class="code-block">
+          <div class="code-header demo-window-header">
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+            <span class="code-dot"></span>
+
+            <div class="demo-toggle" role="tablist" aria-label="Demo view">
+              <span class="demo-toggle__indicator" aria-hidden="true"></span>
               <button
-                class="header-tab"
+                type="button"
                 role="tab"
-                [attr.aria-selected]="heroTab() === 'demo'"
-                aria-controls="demo-panel"
-                [class.active]="heroTab() === 'demo'"
-                (click)="setHeroTab('demo')"
+                id="demo-tab-form"
+                class="demo-toggle__btn"
+                [class.active]="demoTab() === 'demo'"
+                [attr.aria-selected]="demoTab() === 'demo'"
+                [attr.tabindex]="demoTab() === 'demo' ? 0 : -1"
+                aria-controls="demo-panel-form"
+                (click)="setDemoTab('demo')"
+                (keydown)="onDemoTabKey($event)"
               >
-                <span class="icon icon--play" aria-hidden="true"></span> Live Demo
+                <span class="demo-live-dot" aria-hidden="true"></span>
+                Live form
               </button>
               <button
-                class="header-tab"
+                type="button"
                 role="tab"
-                [attr.aria-selected]="heroTab() === 'config'"
-                aria-controls="config-panel"
-                [class.active]="heroTab() === 'config'"
-                (click)="setHeroTab('config')"
+                id="demo-tab-config"
+                class="demo-toggle__btn"
+                [class.active]="demoTab() === 'config'"
+                [attr.aria-selected]="demoTab() === 'config'"
+                [attr.tabindex]="demoTab() === 'config' ? 0 : -1"
+                aria-controls="demo-panel-config"
+                (click)="setDemoTab('config')"
+                (keydown)="onDemoTabKey($event)"
               >
-                <span class="icon icon--code" aria-hidden="true"></span> Config
+                <span class="icon icon--code" aria-hidden="true"></span>
+                Config
               </button>
             </div>
+
             <button
-              class="stackblitz-link stackblitz-link--icon-only"
               type="button"
+              class="stackblitz-link stackblitz-link--icon-only"
+              aria-label="Open Contact Form in StackBlitz"
               (click)="openOnStackBlitz(heroFormConfig, 'Contact Form')"
             >
-              <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
+              <svg class="stackblitz-icon" viewBox="0 0 28 28" fill="currentColor" aria-hidden="true">
+                <path d="M12.747 16.273h-7.46L18.925 1.5l-3.671 10.227h7.46L9.075 26.5l3.672-10.227Z" />
+              </svg>
             </button>
           </div>
 
-          <div class="hero-demo-body">
-            <div id="demo-panel" role="tabpanel" class="demo-content landing-form" [class.hidden]="heroTab() !== 'demo'">
-              @if (!heroLoaded()) {
-                <div class="sandbox-skeleton">
-                  <div class="skel-field">
-                    <div class="skel-label"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-field">
-                    <div class="skel-label"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-field">
-                    <div class="skel-label skel-label--short"></div>
-                    <div class="skel-input skel-input--tall"></div>
-                  </div>
-                  <div class="skel-button"></div>
-                </div>
-              }
-              <div
-                class="sandbox-container"
-                [class.mounting]="!heroLoaded()"
-                sandboxMount
-                #heroMount="sandboxMount"
-                adapter="material"
-                route="/examples/demo?minimal=true"
-                [config]="heroFormConfig"
-                locationStrategy="memory"
-                styleIsolation="scoped"
-              ></div>
-            </div>
+          <div class="demo-window-body">
+            <!-- Config view -->
             <div
-              id="config-panel"
+              class="demo-panel demo-panel--config"
+              id="demo-panel-config"
               role="tabpanel"
-              class="code-content"
-              [class.hidden]="heroTab() !== 'config'"
-              [codeHighlight]="codeSnippets.heroConfig"
-            ></div>
+              aria-labelledby="demo-tab-config"
+              [class.active]="demoTab() === 'config'"
+              [attr.aria-hidden]="demoTab() !== 'config'"
+            >
+              <div class="code-body demo-code--wide" [codeHighlight]="codeSnippets.heroConfig"></div>
+              <div class="code-body demo-code--narrow" [codeHighlight]="codeSnippets.heroConfigStacked"></div>
+            </div>
+
+            <!-- Live form view (sandbox stays mounted; only hidden when inactive) -->
+            <div
+              class="demo-panel demo-panel--form landing-form"
+              id="demo-panel-form"
+              role="tabpanel"
+              aria-labelledby="demo-tab-form"
+              [class.active]="demoTab() === 'demo'"
+              [attr.aria-hidden]="demoTab() !== 'demo'"
+            >
+              <div class="demo-live" [class.mounting]="!heroLoaded()">
+                @if (!heroLoaded()) {
+                  <div class="sandbox-skeleton">
+                    <div class="skel-field">
+                      <div class="skel-label"></div>
+                      <div class="skel-input"></div>
+                    </div>
+                    <div class="skel-field">
+                      <div class="skel-label"></div>
+                      <div class="skel-input"></div>
+                    </div>
+                    <div class="skel-field">
+                      <div class="skel-label skel-label--short"></div>
+                      <div class="skel-input skel-input--tall"></div>
+                    </div>
+                    <div class="skel-button"></div>
+                  </div>
+                }
+                <div
+                  class="sandbox-container"
+                  [class.mounting]="!heroLoaded()"
+                  sandboxMount
+                  #heroMount="sandboxMount"
+                  adapter="material"
+                  route="/examples/demo?minimal=true"
+                  [config]="heroFormConfig"
+                  locationStrategy="memory"
+                  styleIsolation="scoped"
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Stats -->
-  @defer (hydrate on viewport) {
-    <section class="stats">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-icon icon icon--download"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ npmDownloads() }}</span>
-            <span class="stat-label">Monthly Downloads</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon icon icon--star"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ githubStars() }}</span>
-            <span class="stat-label">GitHub Stars</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon icon icon--layers"></span>
-          <div class="stat-content">
-            <span class="stat-value">{{ uiLibraryCount }}</span>
-            <span class="stat-label">UI Integrations</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section class="stats" style="min-height: 120px"></section>
-      <div class="divider"></div>
-    </div>
-  }
-
-  <!-- Features -->
-  @defer (hydrate on viewport) {
-    <section id="features" class="features">
-      <div class="features-header fade-up" [class.visible]="isVisible('features-header')">
-        <div class="section-label">Why ng-forge</div>
-        <h2 class="section-title">Built different.</h2>
-        <p class="section-desc">
-          Not another forms wrapper. Native signal forms integration, real type safety, actual developer experience.
-        </p>
+  <!-- ============================================ -->
+  <!-- CAPABILITIES (the hard parts, declarative) -->
+  <!-- ============================================ -->
+  <section id="capabilities">
+    <div class="section-container">
+      <div class="capabilities-header reveal">
+        <h2 class="section-title">The hard parts, declarative</h2>
+        <p class="section-desc">The stuff that usually means imperative spaghetti, declared in the config.</p>
       </div>
 
-      <div class="features-container">
-        @for (feature of features; track feature.title) {
-          <div
-            class="feature-card fade-up"
-            [class.visible]="isVisible('feature-' + $index)"
-            (mousemove)="onCardMouseMove($event)"
-            (mouseleave)="onCardMouseLeave($event)"
-          >
-            <div class="feature-header">
-              <span class="feature-icon icon icon--{{ feature.icon }}" aria-hidden="true"></span>
-              <h3>{{ feature.title }}</h3>
+      <div class="capabilities-grid">
+        @for (cap of capabilities; track cap.title) {
+          <article class="capability-card reveal">
+            <div class="capability-head">
+              <span class="capability-icon icon icon--{{ cap.icon }}" aria-hidden="true"></span>
+              <h3>{{ cap.title }}</h3>
             </div>
-            <p>
-              @if (feature.highlightCode) {
-                <code>{{ feature.highlightCode }}</code>
-              }
-              {{ feature.description }}
-            </p>
-          </div>
+            <p>{{ cap.description }}</p>
+            <div class="code-block capability-code">
+              <div class="code-header">
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+              </div>
+              <div class="code-body" [codeHighlight]="codeSnippets[cap.snippetKey]"></div>
+            </div>
+          </article>
         }
       </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section id="features" class="features" style="min-height: 600px"></section>
-      <div class="divider"></div>
     </div>
-  }
+  </section>
 
-  <!-- Showcase -->
-  @defer (hydrate on viewport) {
-    <section id="showcase" class="showcase">
-      <div class="showcase-header fade-up" [class.visible]="isVisible('showcase-header')">
-        <div class="section-label">Power features</div>
-        <h2 class="section-title">Simple API. Complex forms.</h2>
-        <p class="section-desc">Conditional logic, multi-step wizards, i18n. All declarative.</p>
+  <!-- ============================================ -->
+  <!-- SERIALIZABLE (it's all just data) -->
+  <!-- ============================================ -->
+  <section id="serializable">
+    <div class="section-container">
+      <div class="serializable-header reveal">
+        <h2 class="section-title">It's all just data</h2>
+        <p class="section-desc">
+          A form is plain data, all the way down to its validation, derivations, and conditions. None of it depends on a function, so a
+          backend can build one as JSON and hand it to the client.
+        </p>
       </div>
 
-      <div class="showcase-grid">
-        <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-0')">
-          <h3>
-            <span class="showcase-icon icon icon--git-branch"></span>
-            Conditional Everything
-          </h3>
-          <p>Fields that appear, disappear, or become required based on other values. No imperative code.</p>
-          <div class="showcase-code" [codeHighlight]="codeSnippets.conditionalLogic"></div>
-        </div>
-        <div class="showcase-item fade-up" [class.visible]="isVisible('showcase-1')">
-          <h3>
-            <span class="showcase-icon icon icon--workflow"></span>
-            Multi-Step Wizards
-          </h3>
-          <p>Page-level validation, navigation controls, progress tracking. Built-in.</p>
-          <div class="showcase-code" [codeHighlight]="codeSnippets.multiStepWizard"></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section id="showcase" class="showcase" style="min-height: 500px"></section>
-      <div class="divider"></div>
-    </div>
-  }
-
-  <!-- Validation -->
-  @defer (hydrate on viewport) {
-    <section id="validation" class="validation">
-      <div class="section-container">
-        <div class="validation-header fade-up" [class.visible]="isVisible('validation-header')">
-          <div class="section-label">Validation</div>
-          <h2 class="section-title">Try to break it.</h2>
-          <p class="section-desc">Real-time validation. No Validators import. Just properties.</p>
-        </div>
-
-        <div class="validation-showcase fade-up" [class.visible]="isVisible('validation-demo')">
-          <div class="validation-demo-panel">
-            <div class="demo-panel-header">
-              <span class="panel-icon icon icon--play"></span>
-              <span>Live Demo</span>
-              <button
-                class="stackblitz-link stackblitz-link--icon-only"
-                type="button"
-                (click)="openOnStackBlitz(validationFormConfig, 'Validation Demo')"
-              >
-                <img src="assets/icons/stackblitz.svg" alt="StackBlitz" class="stackblitz-icon" />
-              </button>
+      <div class="serializable-grid reveal">
+        <div class="serializable-code">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-title">field.ts</span>
             </div>
-            <div class="demo-panel-body validation-form">
-              @if (!validationLoaded()) {
-                <div class="sandbox-skeleton">
-                  <div class="skel-field">
-                    <div class="skel-label"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-field">
-                    <div class="skel-label"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-field">
-                    <div class="skel-label skel-label--short"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-field">
-                    <div class="skel-label"></div>
-                    <div class="skel-input"></div>
-                  </div>
-                  <div class="skel-button"></div>
-                </div>
-              }
-              <div
-                class="sandbox-container"
-                [class.mounting]="!validationLoaded()"
-                sandboxMount
-                #validationMount="sandboxMount"
-                adapter="material"
-                route="/examples/demo?minimal=true"
-                [config]="validationFormConfig"
-                locationStrategy="memory"
-                styleIsolation="scoped"
-              ></div>
-            </div>
-          </div>
-
-          <div class="validation-code-panel">
-            <div class="code-block">
-              <div class="code-header">
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="code-title">validation-config.ts</span>
-              </div>
-              <div class="code-body" [codeHighlight]="codeSnippets.validationShowcase"></div>
-            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.serializableLogic"></div>
           </div>
         </div>
 
-        <p class="validation-cta fade-up" [class.visible]="isVisible('validation-cta')">
-          <a routerLink="/material/validation/basics" class="inline-link" title="Read the validation documentation"
-            >Learn more about validation &rarr;</a
+        <ul class="serializable-points">
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Validation that hits your API.</strong>
+              An HTTP check is a declared request; debouncing and cancellation come with it.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Computed values as expressions.</strong>
+              <code>derivation: 'qty * price'</code>, not a subscription you wire up by hand.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Conditions are data.</strong>
+              A rule that hides or requires a field is JSON you can store, not a callback.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Store it anywhere.</strong>
+              It lives happily in a database column or a CMS entry, and a form changes without a redeploy.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- TYPE SAFETY -->
+  <!-- ============================================ -->
+  <section id="type-safe">
+    <div class="section-container type-safe">
+      <div class="type-safe-header reveal">
+        <h2 class="section-title">Typed end to end</h2>
+        <p class="section-desc">
+          Mistype a field and it won't compile. <code>as const satisfies FormConfig</code> infers your submit value from the config, with
+          zero hand-written interfaces.
+        </p>
+      </div>
+
+      <div class="type-safe-grid reveal">
+        <div class="type-safe-code">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-title">form.config.ts</span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.typeSafety"></div>
+          </div>
+        </div>
+
+        <aside class="type-safe-payoff">
+          <p class="payoff-label">Your <code>onSubmit</code> value</p>
+          <pre class="payoff-type"
+            >{{ '{' }}
+  email: string;
+  age: number;
+{{ '}' }}</pre
           >
+          <p class="payoff-note">Rename a field and this type follows along, without a cast or an <code>any</code> in sight.</p>
+        </aside>
+      </div>
+
+      <div class="schema-strip reveal">
+        <span class="schema-strip__icon icon icon--check" aria-hidden="true"></span>
+        <p>
+          Already using <strong>Zod</strong> or <strong>Valibot</strong>? Pass them through any
+          <a routerLink="/schema-validation/zod" class="inline-link">Standard Schema</a> with
+          <code>schema: standardSchema(yourSchema)</code> and they validate as-is.
         </p>
       </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section id="validation" class="validation" style="min-height: 600px"></section>
-      <div class="divider"></div>
     </div>
-  }
+  </section>
 
-  <!-- Field Types -->
-  @defer (hydrate on viewport) {
-    <section id="field-types" class="field-types">
-      <div class="section-container">
-        <div class="field-types-header fade-up" [class.visible]="isVisible('field-types-header')">
-          <div class="section-label">Field types</div>
-          <h2 class="section-title">Everything you need, built in.</h2>
-          <p class="section-desc">Common field types ready to use. Need more? Create your own.</p>
-        </div>
-
-        <div class="field-types-grid fade-up" [class.visible]="isVisible('field-types-grid')">
-          @for (fieldType of fieldTypes; track fieldType.code) {
-            <div class="field-type">
-              <code>{{ fieldType.code }}</code>
-              <span>{{ fieldType.label }}</span>
-              <div class="field-type-tooltip">
-                <pre>{{ fieldType.snippet }}</pre>
-              </div>
-            </div>
-          }
-        </div>
-
-        <p class="field-types-cta fade-up" [class.visible]="isVisible('field-types-cta')">
-          <a routerLink="/material/examples/login-form" class="inline-link" title="View the login form example">See live examples &rarr;</a>
-        </p>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section id="field-types" class="field-types" style="min-height: 400px"></section>
-      <div class="divider"></div>
-    </div>
-  }
-
-  <!-- JSON Config -->
-  @defer (hydrate on viewport) {
-    <section id="json-config" class="json-config">
-      <div class="section-container">
-        <div class="json-header fade-up" [class.visible]="isVisible('json-header')">
-          <div class="section-label">Backend-driven</div>
-          <h2 class="section-title">Forms don't have to live in code.</h2>
-          <p class="section-desc">Store configs in your database. Fetch via API. Update forms without redeploying.</p>
-        </div>
-
-        <div class="json-flow fade-up" [class.visible]="isVisible('json-demo')">
-          <!-- Flow diagram -->
-          <div class="flow-diagram">
-            <div class="flow-step">
-              <div class="flow-icon database">
-                <span class="icon icon--database"></span>
-              </div>
-              <span class="flow-label">Database</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon api">
-                <span class="icon icon--api"></span>
-              </div>
-              <span class="flow-label">API Request</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon json">
-                <span class="icon icon--json"></span>
-              </div>
-              <span class="flow-label">JSON</span>
-            </div>
-
-            <div class="flow-connector">
-              <div class="flow-line"></div>
-              <div class="flow-packet"></div>
-            </div>
-
-            <div class="flow-step">
-              <div class="flow-icon form">
-                <span class="icon icon--form"></span>
-              </div>
-              <span class="flow-label">Live Form</span>
-            </div>
-          </div>
-
-          <!-- Code example -->
-          <div class="json-code-example">
-            <div class="code-block">
-              <div class="code-header">
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="code-title">form.component.ts</span>
-              </div>
-              <div class="code-body" [codeHighlight]="codeSnippets.jsonFetch"></div>
-            </div>
-          </div>
-
-          <!-- Use cases -->
-          <div class="json-use-cases">
-            <div class="use-case">
-              <span class="use-case-icon icon icon--palette"></span>
-              <div class="use-case-text">
-                <strong>Form Builders</strong>
-                <span>Visual editors that output JSON</span>
-              </div>
-            </div>
-            <div class="use-case">
-              <span class="use-case-icon icon icon--users"></span>
-              <div class="use-case-text">
-                <strong>Multi-tenant</strong>
-                <span>Custom forms per customer</span>
-              </div>
-            </div>
-            <div class="use-case">
-              <span class="use-case-icon icon icon--bar-chart"></span>
-              <div class="use-case-text">
-                <strong>Dynamic Surveys</strong>
-                <span>Change questions on the fly</span>
-              </div>
-            </div>
-            <div class="use-case">
-              <span class="use-case-icon icon icon--flame"></span>
-              <div class="use-case-text">
-                <strong>Hot Swappable</strong>
-                <span>Forms update when config changes</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-  } @placeholder {
-    <div>
-      <section id="json-config" class="json-config" style="min-height: 600px"></section>
-      <div class="divider"></div>
-    </div>
-  }
-
-  <!-- Integrations -->
-  @defer (hydrate on viewport) {
-    <section id="integrations" class="integrations">
-      <div class="integrations-header fade-up" [class.visible]="isVisible('integrations-header')">
-        <div class="section-label">Integrations</div>
-        <h2 class="section-title">Your UI library. Our forms.</h2>
-        <p class="section-desc">First-class adapters for everything you're already using.</p>
+  <!-- ============================================ -->
+  <!-- GENERATE (you barely write the config) -->
+  <!-- ============================================ -->
+  <section id="generate">
+    <div class="section-container">
+      <div class="generate-header reveal">
+        <h2 class="section-title">You don't have to hand-write it</h2>
+        <p class="section-desc">Generate the config from your API contract or your editor, or fetch it at runtime.</p>
       </div>
 
-      <div class="integrations-row fade-up" [class.visible]="isVisible('integrations-row')">
+      <div class="generate-rows">
+        <article class="generate-row reveal">
+          <div class="generate-text">
+            <div class="generate-head">
+              <span class="generate-icon icon icon--api" aria-hidden="true"></span>
+              <h3>From an OpenAPI spec</h3>
+            </div>
+            <p>Your OpenAPI spec becomes a typed FormConfig.</p>
+          </div>
+          <div class="code-block generate-code">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.openapiCommand" language="bash"></div>
+          </div>
+        </article>
+
+        <article class="generate-row reveal">
+          <div class="generate-text">
+            <div class="generate-head">
+              <span class="generate-icon icon icon--sparkles" aria-hidden="true"></span>
+              <h3>From your AI assistant</h3>
+            </div>
+            <p>An MCP server lets Claude, Cursor, or Copilot generate and check a config from inside your editor.</p>
+          </div>
+          <div class="code-block generate-code">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.mcpConfig" language="json"></div>
+          </div>
+        </article>
+
+        <article class="generate-row reveal">
+          <div class="generate-text">
+            <div class="generate-head">
+              <span class="generate-icon icon icon--database" aria-hidden="true"></span>
+              <h3>From your backend</h3>
+            </div>
+            <p>Store configs in your database. Change a form without shipping a new build.</p>
+          </div>
+          <div class="code-block generate-code">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.jsonFetch"></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- ADAPTERS -->
+  <!-- ============================================ -->
+  <section id="adapters">
+    <div class="section-container">
+      <div class="integrations-header reveal">
+        <h2 class="section-title">Works with your stack</h2>
+        <p class="section-desc">Swap one import. The same config renders in Material, PrimeNG, Ionic, or Bootstrap.</p>
+      </div>
+
+      <div class="adapter-row reveal">
         @for (integration of integrations; track integration.name) {
-          <a [routerLink]="integration.route" class="integration-logo" [title]="integration.title">
+          <a [routerLink]="integration.route" class="adapter-logo" [attr.title]="integration.title">
             <img [src]="integration.icon" [alt]="integration.name" loading="lazy" />
             <span>{{ integration.name }}</span>
           </a>
         }
       </div>
 
-      <p class="integrations-footnote fade-up" [class.visible]="isVisible('integrations-footnote')">
-        Or
-        <a routerLink="/custom/building-an-adapter" class="inline-link" title="Learn how to create custom UI library adapters"
-          >build your own adapter</a
-        >
+      <p class="adapter-footnote reveal">
+        Need something else?
+        <a routerLink="/custom/building-an-adapter" class="inline-link">Build your own adapter</a>
+        by implementing the field contract.
       </p>
-    </section>
-  } @placeholder {
-    <section id="integrations" class="integrations" style="min-height: 300px"></section>
-  }
+    </div>
+  </section>
 
-  <!-- CTA -->
-  @defer (hydrate on viewport) {
-    <section class="cta">
-      <h2 class="cta-title">Stop writing forms.<br /><span>Start forging them.</span></h2>
+  <!-- ============================================ -->
+  <!-- PRODUCTION QUALITIES (the unglamorous parts, handled) -->
+  <!-- ============================================ -->
+  <section id="use-cases">
+    <div class="section-container">
+      <div class="use-cases-header reveal">
+        <h2 class="section-title">Production-grade by default</h2>
+        <p class="section-desc">
+          Accessibility, i18n, and performance come built in, and everything is extensible once you outgrow the defaults.
+        </p>
+      </div>
+
+      <div class="use-cases-grid reveal">
+        @for (uc of useCases; track uc.title) {
+          <div class="use-case-card">
+            <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
+            <h3>{{ uc.title }}</h3>
+            <p>{{ uc.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- INSTALL / CTA -->
+  <!-- ============================================ -->
+  <section id="install">
+    <div class="cta">
+      <h2 class="cta-title">Stop writing forms. <span>Start forging them.</span></h2>
+
+      <ul class="cta-trust" aria-label="At a glance">
+        <li>MIT licensed</li>
+        <li>Angular 22+</li>
+        <li>Signal-native</li>
+        <li>Zoneless-ready</li>
+        <li>4 UI adapters</li>
+      </ul>
 
       <div class="install-box">
         <div class="install-selectors">
-          <div class="install-tabs" role="tablist" aria-label="Package manager">
+          <div class="install-tabs" role="group" aria-label="Package manager">
             @for (pkg of packageManagers; track pkg.id) {
               <button
+                type="button"
                 class="install-tab"
-                role="tab"
-                [attr.aria-selected]="currentPackageManager() === pkg.id"
                 [class.active]="currentPackageManager() === pkg.id"
+                [attr.aria-pressed]="currentPackageManager() === pkg.id"
                 (click)="setPackageManager(pkg.id)"
               >
                 {{ pkg.label }}
               </button>
             }
           </div>
-          <div class="install-tabs ui-tabs" role="tablist" aria-label="UI library">
+
+          <div class="install-tabs ui-tabs" role="group" aria-label="UI library">
             @for (ui of uiLibraries; track ui.id) {
               <button
+                type="button"
                 class="install-tab"
-                role="tab"
-                [attr.aria-selected]="currentUiLibrary() === ui.id"
                 [class.active]="currentUiLibrary() === ui.id"
+                [attr.aria-pressed]="currentUiLibrary() === ui.id"
                 (click)="setUiLibrary(ui.id)"
               >
                 {{ ui.label }}
@@ -570,21 +504,26 @@
             }
           </div>
         </div>
+
         <div class="install-cmd">
           <code>{{ installCommand() }}</code>
-          <button class="copy-btn" (click)="copyInstallCommand()" [attr.aria-label]="copied() ? 'Copied!' : 'Copy to clipboard'">
+          <button
+            type="button"
+            class="copy-btn"
+            (click)="copyInstallCommand()"
+            [attr.aria-label]="copied() ? 'Copied' : 'Copy to clipboard'"
+          >
             @if (copied()) {
-              <span class="icon icon--check" style="color: #28ca42"></span>
+              <span class="icon icon--check" aria-hidden="true"></span>
             } @else {
-              <span class="icon icon--copy"></span>
+              <span class="icon icon--copy" aria-hidden="true"></span>
             }
-            <!-- Confetti particles -->
-            @for (particle of copyConfetti(); track particle.id) {
+            @for (p of copyConfetti(); track p.id) {
               <span
                 class="copy-confetti"
-                [style.--confetti-x]="particle.x + 'px'"
-                [style.--confetti-y]="particle.y + 'px'"
-                [style.--confetti-angle]="particle.angle + 'deg'"
+                [style.--confetti-x]="p.x + 'px'"
+                [style.--confetti-y]="p.y + 'px'"
+                [style.--confetti-angle]="p.angle + 'deg'"
               ></span>
             }
           </button>
@@ -592,49 +531,32 @@
       </div>
 
       <div class="cta-buttons">
-        <a routerLink="/material/getting-started" class="btn btn-primary">
-          <span class="icon icon--book"></span>
-          Read the Docs
-        </a>
-        <a
-          href="https://github.com/ng-forge/ng-forge"
-          target="_blank"
-          rel="noopener"
-          class="btn btn-secondary"
-          title="View ng-forge repository on GitHub"
-        >
-          <span class="icon icon--github"></span>
+        <a routerLink="/material/getting-started" class="btn btn-primary">Read the Docs</a>
+        <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener" class="btn btn-secondary">
+          <span class="icon icon--github" aria-hidden="true"></span>
           GitHub
         </a>
       </div>
-    </section>
-  } @placeholder {
-    <section class="cta" style="min-height: 400px"></section>
-  }
+    </div>
+  </section>
 </main>
 
-<!-- Footer -->
-@defer (hydrate on viewport) {
-  <footer>
-    <div class="footer-links">
-      <a href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener" title="Join the ng-forge Discord community">Discord</a>
-      <a
-        href="https://github.com/ng-forge/ng-forge/issues"
-        target="_blank"
-        rel="noopener"
-        title="Report bugs or request features on GitHub Issues"
-        >Issues</a
-      >
-      <a
-        href="https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md"
-        target="_blank"
-        rel="noopener"
-        title="Learn how to contribute to ng-forge"
-        >Contributing</a
-      >
+<!-- ============================================ -->
+<!-- FOOTER -->
+<!-- ============================================ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <app-logo size="md" />
+      <p>Type-safe dynamic forms for Angular. Write the config, ship the form.</p>
     </div>
-    <p class="footer-copy">MIT License &copy; ng-forge</p>
-  </footer>
-} @placeholder {
-  <footer style="min-height: 80px"></footer>
-}
+    <nav class="footer-links" aria-label="Footer">
+      <a routerLink="/material/getting-started">Docs</a>
+      <a href="https://github.com/ng-forge/ng-forge" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/qpzzvFagj3" target="_blank" rel="noopener">Discord</a>
+      <a href="https://github.com/ng-forge/ng-forge/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/ng-forge/ng-forge/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+    </nav>
+  </div>
+  <p class="footer-copy">MIT licensed &middot; ng-forge</p>
+</footer>

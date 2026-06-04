@@ -146,16 +146,23 @@ After sorting:  [subtotal, tax, total]
 
 Central coordinator that sets up RxJS streams for reactive derivation processing.
 
-**Instantiation:** The orchestrator is provided via `DERIVATION_ORCHESTRATOR` injection token and lazily instantiated in `DynamicForm`:
+**Instantiation:** The orchestrator module is lazy-loaded. `DERIVATION_RENDER_GATE` (`derivation-render-gate.ts`) watches the form setup, and the first time a config declares a derivation it dynamically imports `bootstrap-derivation-orchestrator.ts` (the chunk boundary) and constructs the orchestrator in the form's injection context:
 
 ```typescript
-// In DynamicForm constructor
-afterNextRender(() => {
-  this.injector.get(DERIVATION_ORCHESTRATOR);
+// derivation-render-gate.ts (provided per form, ANDed into DynamicForm.shouldRender)
+explicitEffect([hasDerivations], ([has]) => {
+  if (!has || engine() !== 'idle') return;
+  engine.set('loading');
+  pendingTasks.run(() =>
+    import('./bootstrap-derivation-orchestrator').then(({ bootstrapDerivationOrchestrator }) => {
+      runInInjectionContext(injector, () => bootstrapDerivationOrchestrator());
+      engine.set('wired');
+    }),
+  );
 });
 ```
 
-The lazy instantiation via `afterNextRender` avoids circular dependency issues (the orchestrator factory depends on DynamicForm signals).
+The gate holds `shouldRender` closed until the engine is wired, so derivation-bearing fields render already-derived (no flash). Configs without derivations never import the orchestrator module. The import runs inside a `PendingTasks` task so SSR waits for the engine before serializing. A `configHasDerivations()` predicate (kept in parity with the collector) drives the gate.
 
 **Streams:**
 
@@ -671,7 +678,7 @@ Use `debugName` on derivation configs for easier identification:
 
 ### Derivations Not Running
 
-1. **Check if orchestrator is instantiated:** The `DERIVATION_ORCHESTRATOR` must be injected somewhere. The `DynamicForm` component does this lazily via `afterNextRender`.
+1. **Check if the engine loaded:** The orchestrator is lazy-loaded by `DERIVATION_RENDER_GATE` only when `configHasDerivations()` is true. If a derivation isn't firing, confirm the field actually declares one (shorthand `derivation` or a `logic[]` entry of `type: 'derivation'`) so the gate loads the engine.
 
 2. **Check dependencies:** If using a custom function without `dependsOn`, it defaults to wildcard (`*`). For expressions, dependencies are auto-extracted.
 

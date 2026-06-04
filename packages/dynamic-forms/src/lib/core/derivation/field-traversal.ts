@@ -54,6 +54,23 @@ export function traverseFieldsWithContext<TContext>(
 }
 
 /**
+ * Returns `true` as soon as `predicate` holds for any field in the tree,
+ * short-circuiting the walk. Resolves children exactly like
+ * {@link traverseFieldsWithContext} (including array-item templates), so a
+ * presence check stays in lockstep with the full traversal.
+ *
+ * @internal
+ */
+export function someField(fields: readonly FieldDef<unknown>[], predicate: (field: FieldDef<unknown>) => boolean): boolean {
+  return fields.some((field) => {
+    if (predicate(field)) return true;
+    if (!hasChildFields(field)) return false;
+    const children = field.type === 'array' ? collectArrayChildren(field) : (normalizeFieldsArray(field.fields) as FieldDef<unknown>[]);
+    return someField(children, predicate);
+  });
+}
+
+/**
  * Returns the flattened list of children for an array field, falling back
  * to the Symbol metadata template when `fields` is empty.
  *
