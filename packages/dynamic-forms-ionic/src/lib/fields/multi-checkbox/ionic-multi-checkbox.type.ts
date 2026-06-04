@@ -1,5 +1,4 @@
-import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicMultiCheckboxProps {
@@ -10,6 +9,3 @@ export interface IonicMultiCheckboxProps {
 }
 
 export type IonicMultiCheckboxField<T> = MultiCheckboxField<T, IonicMultiCheckboxProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type IonicMultiCheckboxComponent = ValueFieldComponent<IonicMultiCheckboxField<ValueType>>;

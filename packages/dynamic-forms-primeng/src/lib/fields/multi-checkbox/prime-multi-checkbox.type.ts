@@ -1,5 +1,4 @@
-import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 
 export interface PrimeMultiCheckboxProps {
@@ -10,6 +9,3 @@ export interface PrimeMultiCheckboxProps {
 }
 
 export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckboxProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type PrimeMultiCheckboxComponent = ValueFieldComponent<PrimeMultiCheckboxField<ValueType>>;

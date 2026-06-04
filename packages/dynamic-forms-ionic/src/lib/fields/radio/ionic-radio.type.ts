@@ -1,5 +1,4 @@
 import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { RadioField } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicRadioProps {
@@ -10,5 +9,3 @@ export interface IonicRadioProps {
   hint?: DynamicText;
 }
 export type IonicRadioField<T> = RadioField<T, IonicRadioProps>;
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type IonicRadioComponent = ValueFieldComponent<IonicRadioField<ValueType>>;

@@ -1,5 +1,4 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 import type { MatButtonAddon, MatIconAddon } from '../../types/addons';
@@ -29,6 +28,3 @@ export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | Template
 export type MatInputField = InputField<MatInputProps> & {
   addons?: ReadonlyArray<MatInputAddon>;
 };
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type MatInputComponent = ValueFieldComponent<MatInputField>;

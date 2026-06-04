@@ -1,5 +1,4 @@
 import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 /** Configuration props for PrimeNG select field component. */
@@ -19,6 +18,3 @@ export interface PrimeSelectProps extends SelectProps {
 }
 
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type PrimeSelectComponent = ValueFieldComponent<PrimeSelectField<ValueType>>;

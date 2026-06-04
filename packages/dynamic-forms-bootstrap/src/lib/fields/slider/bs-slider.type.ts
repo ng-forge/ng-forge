@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SliderField } from '@ng-forge/dynamic-forms/integration';
 
 export interface BsSliderProps {
@@ -25,6 +24,3 @@ export interface BsSliderProps {
 }
 
 export type BsSliderField = SliderField<BsSliderProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type BsSliderComponent = ValueFieldComponent<BsSliderField>;

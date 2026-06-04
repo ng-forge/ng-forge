@@ -592,17 +592,6 @@ export function createDerivationOrchestrator(config: DerivationOrchestratorConfi
 export const DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('DERIVATION_ORCHESTRATOR');
 
 /**
- * Back-compat injection token for the (formerly separate) property-derivation
- * orchestrator. The property pipeline is now wired by the unified
- * {@link DerivationOrchestrator}; the DI binding for this token uses
- * `useExisting: DERIVATION_ORCHESTRATOR`, so any consumer still calling
- * `inject(PROPERTY_DERIVATION_ORCHESTRATOR)` resolves to the same instance.
- *
- * @deprecated Use {@link DERIVATION_ORCHESTRATOR}.
- */
-export const PROPERTY_DERIVATION_ORCHESTRATOR = new InjectionToken<DerivationOrchestrator>('PROPERTY_DERIVATION_ORCHESTRATOR');
-
-/**
  * Injects the DerivationOrchestrator from the current injection context.
  *
  * @returns The DerivationOrchestrator instance

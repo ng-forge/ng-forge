@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { TextareaField, TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
@@ -13,6 +12,3 @@ export interface MatTextareaProps extends TextareaProps {
 }
 
 export type MatTextareaField = TextareaField<MatTextareaProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type MatTextareaComponent = ValueFieldComponent<MatTextareaField>;

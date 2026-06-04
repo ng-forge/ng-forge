@@ -41,7 +41,6 @@ import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { AsyncConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { PROPERTY_DERIVATION_ORCHESTRATOR } from '../core/derivation/derivation-orchestrator';
 import { FORM_INITIALIZER } from './form-initializer.token';
 import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';
 
@@ -160,17 +159,12 @@ function derivationProviders(): Provider[] {
 
 /**
  * Providers for the property-derivation pipeline: the override store consumed
- * by the unified `DerivationOrchestrator` plus the back-compat alias token.
+ * by the unified `DerivationOrchestrator`.
  *
  * @internal
  */
 function propertyDerivationProviders(): Provider[] {
-  return [
-    { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
-    // PROPERTY_DERIVATION_ORCHESTRATOR is a back-compat alias for any caller
-    // that still injects the legacy token. Resolves to the same instance.
-    { provide: PROPERTY_DERIVATION_ORCHESTRATOR, useExisting: DERIVATION_ORCHESTRATOR },
-  ];
+  return [{ provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore }];
 }
 
 /**

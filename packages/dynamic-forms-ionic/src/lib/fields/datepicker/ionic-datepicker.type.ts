@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { DatepickerField, DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicDatepickerProps extends DatepickerProps {
@@ -17,5 +16,3 @@ export interface IonicDatepickerProps extends DatepickerProps {
   hint?: DynamicText;
 }
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type IonicDatepickerComponent = ValueFieldComponent<IonicDatepickerField>;

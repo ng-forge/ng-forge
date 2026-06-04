@@ -1,2 +1,2 @@
 export { default as PrimeTextareaFieldComponent } from './prime-textarea.component';
-export type { PrimeTextareaProps, PrimeTextareaField, PrimeTextareaComponent } from './prime-textarea.type';
+export type { PrimeTextareaProps, PrimeTextareaField } from './prime-textarea.type';

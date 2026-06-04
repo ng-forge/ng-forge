@@ -1,5 +1,4 @@
 import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicSelectProps extends SelectProps {
@@ -17,6 +16,3 @@ export interface IonicSelectProps extends SelectProps {
 }
 
 export type IonicSelectField<T> = SelectField<T, IonicSelectProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type IonicSelectComponent = ValueFieldComponent<IonicSelectField<ValueType>>;
