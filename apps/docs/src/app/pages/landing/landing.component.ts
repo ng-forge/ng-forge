@@ -172,6 +172,22 @@ export class LandingComponent {
     this.demoTab.set(tab);
   }
 
+  /** Roving tabindex / arrow-key navigation for the demo tablist. */
+  onDemoTabKey(event: KeyboardEvent): void {
+    const tabs = ['demo', 'config'] as const;
+    const current = tabs.indexOf(this.demoTab());
+    let next: (typeof tabs)[number] | null = null;
+    if (event.key === 'ArrowRight') next = tabs[(current + 1) % tabs.length];
+    else if (event.key === 'ArrowLeft') next = tabs[(current - 1 + tabs.length) % tabs.length];
+    else if (event.key === 'Home') next = tabs[0];
+    else if (event.key === 'End') next = tabs[tabs.length - 1];
+    if (!next) return;
+
+    event.preventDefault();
+    this.setDemoTab(next);
+    document.getElementById(next === 'demo' ? 'demo-tab-form' : 'demo-tab-config')?.focus();
+  }
+
   copyInstallCommand(): void {
     copyToClipboard(this.installCommand())
       .then(() => {

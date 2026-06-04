@@ -98,10 +98,14 @@
               <button
                 type="button"
                 role="tab"
+                id="demo-tab-form"
                 class="demo-toggle__btn"
                 [class.active]="demoTab() === 'demo'"
                 [attr.aria-selected]="demoTab() === 'demo'"
+                [attr.tabindex]="demoTab() === 'demo' ? 0 : -1"
+                aria-controls="demo-panel-form"
                 (click)="setDemoTab('demo')"
+                (keydown)="onDemoTabKey($event)"
               >
                 <span class="demo-live-dot" aria-hidden="true"></span>
                 Live form
@@ -109,10 +113,14 @@
               <button
                 type="button"
                 role="tab"
+                id="demo-tab-config"
                 class="demo-toggle__btn"
                 [class.active]="demoTab() === 'config'"
                 [attr.aria-selected]="demoTab() === 'config'"
+                [attr.tabindex]="demoTab() === 'config' ? 0 : -1"
+                aria-controls="demo-panel-config"
                 (click)="setDemoTab('config')"
+                (keydown)="onDemoTabKey($event)"
               >
                 <span class="icon icon--code" aria-hidden="true"></span>
                 Config
@@ -133,7 +141,14 @@
 
           <div class="demo-window-body">
             <!-- Config view -->
-            <div class="demo-panel demo-panel--config" [class.active]="demoTab() === 'config'" [attr.aria-hidden]="demoTab() !== 'config'">
+            <div
+              class="demo-panel demo-panel--config"
+              id="demo-panel-config"
+              role="tabpanel"
+              aria-labelledby="demo-tab-config"
+              [class.active]="demoTab() === 'config'"
+              [attr.aria-hidden]="demoTab() !== 'config'"
+            >
               <div class="code-body demo-code--wide" [codeHighlight]="codeSnippets.heroConfig"></div>
               <div class="code-body demo-code--narrow" [codeHighlight]="codeSnippets.heroConfigStacked"></div>
             </div>
@@ -141,6 +156,9 @@
             <!-- Live form view (sandbox stays mounted; only hidden when inactive) -->
             <div
               class="demo-panel demo-panel--form landing-form"
+              id="demo-panel-form"
+              role="tabpanel"
+              aria-labelledby="demo-tab-form"
               [class.active]="demoTab() === 'demo'"
               [attr.aria-hidden]="demoTab() !== 'demo'"
             >
@@ -456,14 +474,13 @@
 
       <div class="install-box">
         <div class="install-selectors">
-          <div class="install-tabs" role="tablist" aria-label="Package manager">
+          <div class="install-tabs" role="group" aria-label="Package manager">
             @for (pkg of packageManagers; track pkg.id) {
               <button
                 type="button"
-                role="tab"
                 class="install-tab"
                 [class.active]="currentPackageManager() === pkg.id"
-                [attr.aria-selected]="currentPackageManager() === pkg.id"
+                [attr.aria-pressed]="currentPackageManager() === pkg.id"
                 (click)="setPackageManager(pkg.id)"
               >
                 {{ pkg.label }}
@@ -471,14 +488,13 @@
             }
           </div>
 
-          <div class="install-tabs ui-tabs" role="tablist" aria-label="UI library">
+          <div class="install-tabs ui-tabs" role="group" aria-label="UI library">
             @for (ui of uiLibraries; track ui.id) {
               <button
                 type="button"
-                role="tab"
                 class="install-tab"
                 [class.active]="currentUiLibrary() === ui.id"
-                [attr.aria-selected]="currentUiLibrary() === ui.id"
+                [attr.aria-pressed]="currentUiLibrary() === ui.id"
                 (click)="setUiLibrary(ui.id)"
               >
                 {{ ui.label }}

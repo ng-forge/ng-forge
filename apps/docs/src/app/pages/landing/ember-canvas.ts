@@ -104,13 +104,21 @@ export function initEmberCanvas(canvas: HTMLCanvasElement): () => void {
 
   resize();
   particles = Array.from({ length: MAX_PARTICLES }, () => makeParticle(true));
-  window.addEventListener('resize', resize, { passive: true });
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) {
+    // Static single frame. Repaint on resize, since resize() clears the backing
+    // store and there's no animation loop to redraw it.
+    const onStaticResize = (): void => {
+      resize();
+      paint(false);
+    };
+    window.addEventListener('resize', onStaticResize, { passive: true });
     paint(false);
-    return () => window.removeEventListener('resize', resize);
+    return () => window.removeEventListener('resize', onStaticResize);
   }
+
+  window.addEventListener('resize', resize, { passive: true });
 
   let observer: IntersectionObserver | null = null;
   if ('IntersectionObserver' in window) {
