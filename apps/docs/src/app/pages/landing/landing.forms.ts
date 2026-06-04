@@ -6,14 +6,6 @@ export const heroFormConfig = {
   },
   fields: [
     {
-      key: 'title',
-      type: 'text',
-      label: 'Get in Touch',
-      props: {
-        elementType: 'h2',
-      },
-    },
-    {
       key: 'name',
       type: 'input',
       label: 'Your Name',
@@ -45,83 +37,13 @@ export const heroFormConfig = {
       },
       placeholder: 'How can we help?',
       props: {
-        rows: 3,
+        rows: 2,
       },
     },
     {
       key: 'submit',
       type: 'submit',
       label: 'Send Message',
-    },
-  ],
-} as const satisfies FormConfig;
-
-export const validationFormConfig = {
-  defaultValidationMessages: {
-    required: 'This field is required',
-    email: 'Enter a valid email address',
-    minLength: 'At least {{requiredLength}} characters needed',
-    maxLength: 'Maximum {{requiredLength}} characters allowed',
-    min: 'Must be at least {{min}}',
-    max: 'Must be at most {{max}}',
-    pattern: 'Invalid format',
-  },
-  fields: [
-    {
-      key: 'email',
-      type: 'input',
-      label: 'Email',
-      required: true,
-      email: true,
-      placeholder: 'try "not-an-email"',
-      props: {
-        type: 'email',
-      },
-    },
-    {
-      key: 'password',
-      type: 'input',
-      label: 'Password',
-      required: true,
-      minLength: 8,
-      pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-      validationMessages: {
-        pattern: 'Need uppercase, lowercase & number',
-      },
-      placeholder: 'try "weak"',
-      props: {
-        type: 'password',
-      },
-    },
-    {
-      key: 'age',
-      type: 'input',
-      label: 'Age',
-      required: true,
-      min: 18,
-      max: 120,
-      placeholder: 'try 10 or 150',
-      props: {
-        type: 'number',
-      },
-    },
-    {
-      key: 'username',
-      type: 'input',
-      label: 'Username',
-      required: true,
-      minLength: 3,
-      maxLength: 15,
-      pattern: /^[a-z0-9_]+$/,
-      validationMessages: {
-        pattern: 'Only lowercase letters, numbers, underscores',
-      },
-      placeholder: 'try "AB" or "Invalid User!"',
-    },
-    {
-      key: 'submit',
-      type: 'submit',
-      label: 'Submit',
     },
   ],
 } as const satisfies FormConfig;
