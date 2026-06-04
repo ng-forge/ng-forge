@@ -631,39 +631,40 @@ export const CAPABILITIES: Capability[] = [
 ];
 
 // ============================================
-// USE CASES ("built for the forms you ship")
+// PRODUCTION QUALITIES (the unglamorous parts, handled)
 // ============================================
 
 export interface UseCase {
   icon: string;
   title: string;
   description: string;
-  route: string;
+  /** Optional docs deep-link. Quality claims (a11y, perf) have no dedicated page. */
+  route?: string;
 }
 
 export const USE_CASES: UseCase[] = [
   {
-    icon: 'database',
-    title: 'Backend-driven forms',
-    description: 'The form shape comes from your API at runtime, so you can change it without a new build.',
-    route: '/api-driven-forms',
+    icon: 'users',
+    title: 'Accessible',
+    description: 'ARIA state, focus, and labels are wired up on accessible adapter components, and tested against axe for WCAG AA.',
   },
   {
-    icon: 'workflow',
-    title: 'Multi-step onboarding',
-    description: 'Wizards with per-step validation, navigation, and progress, all from the config.',
-    route: '/prebuilt/form-pages',
+    icon: 'book',
+    title: 'Internationalized',
+    description:
+      'Labels, placeholders, and errors take an Observable or Signal, so Transloco, ngx-translate, or any i18n source plugs straight in.',
+    route: '/dynamic-behavior/i18n',
   },
   {
-    icon: 'check',
-    title: 'Schema-validated forms',
-    description: 'Reuse the Zod or Valibot schemas you already have through Standard Schema.',
-    route: '/schema-validation/zod',
+    icon: 'plug',
+    title: 'Extensible',
+    description: 'Prefix and suffix addons, field wrappers, or a fully custom component when you outgrow the built-ins, all type-safe.',
+    route: '/addons/overview',
   },
   {
-    icon: 'layers',
-    title: 'Admin and CRUD',
-    description: 'Repeatable rows, nested groups, and conditional sections for dense data entry.',
-    route: '/prebuilt/form-arrays/simplified',
+    icon: 'zap',
+    title: 'Fast',
+    description:
+      'Signal-native and zoneless-ready. Field components and the derivation engine load lazily, so a form pays only for what it renders.',
   },
 ];

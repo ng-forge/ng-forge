@@ -392,23 +392,31 @@
   </section>
 
   <!-- ============================================ -->
-  <!-- USE CASES (built for the forms you ship) -->
+  <!-- PRODUCTION QUALITIES (the unglamorous parts, handled) -->
   <!-- ============================================ -->
   <section id="use-cases">
     <div class="section-container">
       <div class="use-cases-header reveal">
-        <h2 class="section-title">Built for the forms you actually ship</h2>
-        <p class="section-desc">The patterns production apps need, each with its own docs.</p>
+        <h2 class="section-title">Production-grade by default</h2>
+        <p class="section-desc">Accessibility, i18n, and performance handled out of the box, with room to extend when you need it.</p>
       </div>
 
       <div class="use-cases-grid reveal">
         @for (uc of useCases; track uc.title) {
-          <a [routerLink]="uc.route" class="use-case-card">
-            <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
-            <h3>{{ uc.title }}</h3>
-            <p>{{ uc.description }}</p>
-            <span class="use-case-cta">Read the docs <span class="use-case-cta__arrow" aria-hidden="true">&rarr;</span></span>
-          </a>
+          @if (uc.route) {
+            <a [routerLink]="uc.route" class="use-case-card use-case-card--link">
+              <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
+              <h3>{{ uc.title }}</h3>
+              <p>{{ uc.description }}</p>
+              <span class="use-case-cta">Read the docs <span class="use-case-cta__arrow" aria-hidden="true">&rarr;</span></span>
+            </a>
+          } @else {
+            <div class="use-case-card">
+              <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
+              <h3>{{ uc.title }}</h3>
+              <p>{{ uc.description }}</p>
+            </div>
+          }
         }
       </div>
     </div>
@@ -491,7 +499,7 @@
         <li>MIT licensed</li>
         <li>Angular 21+</li>
         <li>Signal-native</li>
-        <li>Zoneless</li>
+        <li>Zoneless-ready</li>
         <li>4 UI adapters</li>
       </ul>
     </div>

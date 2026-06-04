@@ -1882,11 +1882,25 @@ footer {
   @include landing-card;
   gap: 0.65rem;
   text-decoration: none;
+
+  h3 {
+    font-size: 1.05rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    margin: 0;
+    flex: 1;
+  }
+}
+
+// Only the cards that link out (i18n, extensible) get the lift + affordance.
+// The claim cards (accessible, fast) stay static.
+.use-case-card--link {
   transition:
     border-color 0.25s ease,
     transform 0.25s ease;
 
-  // These ARE navigational, so a quiet lift + ember edge on hover is warranted.
   &:hover {
     border-color: rgba($ember-glow, 0.45);
     transform: translateY(-3px);
@@ -1907,16 +1921,6 @@ footer {
   &:focus-visible {
     outline: 2px solid $ember-glow;
     outline-offset: 3px;
-  }
-
-  h3 {
-    font-size: 1.05rem;
-  }
-
-  p {
-    font-size: 0.9rem;
-    margin: 0;
-    flex: 1;
   }
 }
 
