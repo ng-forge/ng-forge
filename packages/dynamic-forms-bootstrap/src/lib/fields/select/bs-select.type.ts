@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { SelectField, SelectProps } from '@ng-forge/dynamic-forms/integration';
 
 /**
@@ -20,5 +19,3 @@ export interface BsSelectProps extends SelectProps {
 export type BsSelectField<T> = SelectField<T, BsSelectProps>;
 
 /** Bootstrap select only supports string values due to native HTML select limitations */
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type BsSelectComponent = ValueFieldComponent<BsSelectField<string>>;

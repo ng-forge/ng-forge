@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { TextareaField, TextareaProps } from '@ng-forge/dynamic-forms/integration';
 
 export interface IonicTextareaProps extends TextareaProps {
@@ -14,6 +13,3 @@ export interface IonicTextareaProps extends TextareaProps {
 }
 
 export type IonicTextareaField = TextareaField<IonicTextareaProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type IonicTextareaComponent = ValueFieldComponent<IonicTextareaField>;

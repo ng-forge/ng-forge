@@ -1,2 +1,2 @@
 export { default as MatInputFieldComponent } from './mat-input.component';
-export type { MatInputProps, MatInputField, MatInputComponent } from './mat-input.type';
+export type { MatInputProps, MatInputField } from './mat-input.type';

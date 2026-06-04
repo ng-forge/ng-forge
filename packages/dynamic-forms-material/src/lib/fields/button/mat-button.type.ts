@@ -19,6 +19,7 @@ export interface MatButtonProps {
 }
 
 export type MatButtonField<TEvent extends FormEvent> = ButtonField<MatButtonProps, TEvent>;
+/** @deprecated Scheduled for removal in 0.11.0. Use `injectNgForgeAction<TEvent>()` for typed access to a button component's action directive instance. */
 export type MatButtonComponent<TEvent extends FormEvent> = FieldComponent<MatButtonField<TEvent>>;
 
 /** Specific button field types with preconfigured events */

@@ -1,5 +1,4 @@
-import { DynamicText, ValueType } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
+import { DynamicText } from '@ng-forge/dynamic-forms';
 import { RadioField } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 
@@ -11,6 +10,3 @@ export interface MatRadioProps {
 }
 
 export type MatRadioField<T> = RadioField<T, MatRadioProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type MatRadioComponent = ValueFieldComponent<MatRadioField<ValueType>>;

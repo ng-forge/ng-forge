@@ -1,5 +1,4 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
-import { ValueFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 import type { BsButtonAddon, BsIconAddon } from '../../types/addons';
 
@@ -28,6 +27,3 @@ export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAdd
 export type BsInputField = InputField<BsInputProps> & {
   addons?: ReadonlyArray<BsInputAddon>;
 };
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type BsInputComponent = ValueFieldComponent<BsInputField>;

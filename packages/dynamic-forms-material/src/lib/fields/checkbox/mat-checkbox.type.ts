@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { CheckedFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 
@@ -12,6 +11,3 @@ export interface MatCheckboxProps {
 }
 
 export type MatCheckboxField = CheckboxField<MatCheckboxProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type MatCheckboxComponent = CheckedFieldComponent<MatCheckboxField>;

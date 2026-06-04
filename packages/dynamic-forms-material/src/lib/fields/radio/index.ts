@@ -1,2 +1,2 @@
 export { default as MatRadioFieldComponent } from './mat-radio.component';
-export type { MatRadioProps, MatRadioField, MatRadioComponent } from './mat-radio.type';
+export type { MatRadioProps, MatRadioField } from './mat-radio.type';

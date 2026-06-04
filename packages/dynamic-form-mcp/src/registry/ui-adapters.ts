@@ -204,7 +204,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
     fieldTypes: [
       {
         type: 'input',
-        componentName: 'BootstrapInputComponent',
+        componentName: 'BsInputFieldComponent',
         additionalProps: {
           size: {
             name: 'size',
@@ -223,7 +223,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
       },
       {
         type: 'select',
-        componentName: 'BootstrapSelectComponent',
+        componentName: 'BsSelectFieldComponent',
         additionalProps: {
           size: {
             name: 'size',
@@ -242,7 +242,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
     fieldTypes: [
       {
         type: 'input',
-        componentName: 'PrimeInputComponent',
+        componentName: 'PrimeInputFieldComponent',
         additionalProps: {
           variant: {
             name: 'variant',
@@ -255,7 +255,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
       },
       {
         type: 'select',
-        componentName: 'PrimeDropdownComponent',
+        componentName: 'PrimeSelectFieldComponent',
         additionalProps: {
           filter: {
             name: 'filter',
@@ -275,7 +275,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
       },
       {
         type: 'datepicker',
-        componentName: 'PrimeDatepickerComponent',
+        componentName: 'PrimeDatepickerFieldComponent',
         additionalProps: {
           showIcon: {
             name: 'showIcon',
@@ -302,7 +302,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
     fieldTypes: [
       {
         type: 'input',
-        componentName: 'IonicInputComponent',
+        componentName: 'IonicInputFieldComponent',
         additionalProps: {
           fill: {
             name: 'fill',
@@ -322,7 +322,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
       },
       {
         type: 'select',
-        componentName: 'IonicSelectComponent',
+        componentName: 'IonicSelectFieldComponent',
         additionalProps: {
           interface: {
             name: 'interface',
@@ -335,7 +335,7 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
       },
       {
         type: 'toggle',
-        componentName: 'IonicToggleComponent',
+        componentName: 'IonicToggleFieldComponent',
         additionalProps: {
           enableOnOffLabels: {
             name: 'enableOnOffLabels',

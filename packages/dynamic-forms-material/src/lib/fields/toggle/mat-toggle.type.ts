@@ -1,5 +1,4 @@
 import { DynamicText } from '@ng-forge/dynamic-forms';
-import { CheckedFieldComponent } from '@ng-forge/dynamic-forms/integration';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { ThemePalette } from '@angular/material/core';
@@ -14,6 +13,3 @@ export interface MatToggleProps {
 }
 
 export type MatToggleField = ToggleField<MatToggleProps>;
-
-/** @deprecated Scheduled for removal in v1. Use `injectNgForgeField<T>()` for typed access to a field component's directive instance. */
-export type MatToggleComponent = CheckedFieldComponent<MatToggleField>;
