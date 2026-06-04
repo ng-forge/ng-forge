@@ -37,7 +37,7 @@
     <div class="hero-veil" aria-hidden="true"></div>
 
     <div class="hero-content">
-      <span class="hero-eyebrow">ANGULAR 21+ / SIGNAL FORMS</span>
+      <span class="hero-eyebrow">ANGULAR 21+ / SIGNAL FORMS / ZONELESS</span>
 
       <h1>
         <span class="line1">Forms are boring.</span>
@@ -185,6 +185,66 @@
   </section>
 
   <!-- ============================================ -->
+  <!-- SERIALIZABLE (it's all just data) -->
+  <!-- ============================================ -->
+  <section id="serializable">
+    <div class="section-container">
+      <div class="serializable-header reveal">
+        <h2 class="section-title">It's all just data</h2>
+        <p class="section-desc">
+          Validation, derivations, and conditional logic are plain JSON. No callbacks, nothing that only lives in your bundle. Your backend
+          can author a form and send it down, ready to render.
+        </p>
+      </div>
+
+      <div class="serializable-grid reveal">
+        <div class="serializable-code">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-dot"></span>
+              <span class="code-title">field.json</span>
+            </div>
+            <div class="code-body" [codeHighlight]="codeSnippets.serializableLogic" language="json"></div>
+          </div>
+        </div>
+
+        <ul class="serializable-points">
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Async checks, no functions.</strong>
+              Declare an HTTP validator. Debounce and cancellation are handled for you.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Computed values as expressions.</strong>
+              <code>derivation: 'qty * price'</code> instead of a hand-wired subscription.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Conditions are data.</strong>
+              Show, hide, or require a field from other values, declared in the config.
+            </div>
+          </li>
+          <li>
+            <span class="serializable-check icon icon--check" aria-hidden="true"></span>
+            <div>
+              <strong>Store it anywhere.</strong>
+              A database row, an API response, a CMS field. Change the form without a redeploy.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
   <!-- TYPE SAFETY -->
   <!-- ============================================ -->
   <section id="type-safe">
@@ -220,6 +280,15 @@
           >
           <p class="payoff-note">Rename a field or change a type, and this updates with it. No casting, no <code>any</code>.</p>
         </aside>
+      </div>
+
+      <div class="schema-strip reveal">
+        <span class="schema-strip__icon icon icon--check" aria-hidden="true"></span>
+        <p>
+          Already using <strong>Zod</strong> or <strong>Valibot</strong>? Validate with any
+          <a routerLink="/schema-validation/zod" class="inline-link">Standard Schema</a>. Just
+          <code>schema: standardSchema(yourSchema)</code>, no rewrite.
+        </p>
       </div>
     </div>
   </section>
@@ -310,6 +379,29 @@
         <a routerLink="/custom/building-an-adapter" class="inline-link">Build your own adapter</a>
         by implementing the field contract.
       </p>
+    </div>
+  </section>
+
+  <!-- ============================================ -->
+  <!-- USE CASES (built for the forms you ship) -->
+  <!-- ============================================ -->
+  <section id="use-cases">
+    <div class="section-container">
+      <div class="use-cases-header reveal">
+        <h2 class="section-title">Built for the forms you actually ship</h2>
+        <p class="section-desc">Not a toy demo. The patterns real apps need, with docs for each.</p>
+      </div>
+
+      <div class="use-cases-grid reveal">
+        @for (uc of useCases; track uc.title) {
+          <a [routerLink]="uc.route" class="use-case-card">
+            <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
+            <h3>{{ uc.title }}</h3>
+            <p>{{ uc.description }}</p>
+            <span class="use-case-arrow" aria-hidden="true">&rsaquo;</span>
+          </a>
+        }
+      </div>
     </div>
   </section>
 

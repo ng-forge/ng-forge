@@ -23,7 +23,16 @@ import { Logo } from '../../components/logo';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { SearchComponent } from '../../components/search/search.component';
 import { openInStackBlitz } from '../../components/live-example/stackblitz-project';
-import { CAPABILITIES, CODE_SNIPPETS, HERO_ROLES, INTEGRATIONS, PACKAGE_MANAGERS, SECTION_IDS, UI_LIBRARIES } from './landing.constants';
+import {
+  CAPABILITIES,
+  CODE_SNIPPETS,
+  HERO_ROLES,
+  INTEGRATIONS,
+  PACKAGE_MANAGERS,
+  SECTION_IDS,
+  UI_LIBRARIES,
+  USE_CASES,
+} from './landing.constants';
 import { copyToClipboard, navScrolled$, scrollToHash } from './landing.utils';
 import { heroFormConfig, validationFormConfig } from './landing.forms';
 import { initEmberCanvas } from './ember-canvas';
@@ -80,6 +89,7 @@ export class LandingComponent {
   // ============================================
 
   readonly capabilities = CAPABILITIES;
+  readonly useCases = USE_CASES;
   readonly integrations = INTEGRATIONS;
   readonly packageManagers = PACKAGE_MANAGERS;
   readonly uiLibraries = UI_LIBRARIES;

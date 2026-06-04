@@ -1195,7 +1195,7 @@ section {
   // sized to fill it evenly, so no scrollbar and minimal blank space.
   .code-body {
     flex: none;
-    height: 265px;
+    height: 292px;
     max-height: none;
   }
 }
@@ -1278,6 +1278,52 @@ section {
       font-size: 0.85em;
       color: $steel;
     }
+  }
+}
+
+// Standard Schema / Zod strip below the type-safe grid.
+.schema-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid $steel-dark;
+  border-radius: 12px;
+  background: $bg-deep;
+
+  .schema-strip__icon {
+    flex-shrink: 0;
+    width: 20px !important;
+    height: 20px !important;
+    color: $ember-glow;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: $steel-mid;
+
+    strong {
+      color: $steel;
+      font-weight: 600;
+    }
+
+    code {
+      font-family: $font-mono;
+      font-size: 0.85em;
+      color: $ember-glow;
+      background: $bg-elevated;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
   }
 }
 
@@ -1711,6 +1757,149 @@ footer {
   border-top: 1px solid rgba($steel-dark, 0.6);
   color: $steel-mid;
   font-size: 0.8rem;
+}
+
+// ============================================
+// SERIALIZABLE SECTION (it's all just data)
+// ============================================
+.serializable-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.serializable-code {
+  min-width: 0;
+
+  // Show the full snippet; no inner scrollbar.
+  .code-body {
+    max-height: none;
+  }
+}
+
+.serializable-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.15rem;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+
+    div {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: $steel-mid;
+    }
+
+    strong {
+      display: block;
+      color: $steel;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    code {
+      font-family: $font-mono;
+      font-size: 0.85em;
+      color: $ember-glow;
+      background: $bg-elevated;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+  }
+
+  .serializable-check {
+    flex-shrink: 0;
+    width: 18px !important;
+    height: 18px !important;
+    margin-top: 0.15rem;
+    color: $ember-core;
+  }
+}
+
+// ============================================
+// USE CASES SECTION (built for the forms you ship)
+// ============================================
+.use-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+
+  @media (max-width: 980px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.use-case-card {
+  @include landing-card;
+  gap: 0.65rem;
+  text-decoration: none;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease;
+
+  // These ARE navigational, so a quiet lift + ember edge on hover is warranted.
+  &:hover {
+    border-color: rgba($ember-glow, 0.45);
+    transform: translateY(-3px);
+
+    &::before {
+      opacity: 0.7;
+    }
+
+    .use-case-arrow {
+      color: $ember-glow;
+      transform: translateX(3px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ember-glow;
+    outline-offset: 3px;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    margin: 0;
+    flex: 1;
+  }
+}
+
+.use-case-icon {
+  flex-shrink: 0;
+  width: 26px !important;
+  height: 26px !important;
+  color: $ember-glow;
+}
+
+.use-case-arrow {
+  position: relative;
+  align-self: flex-start;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: $steel-dim;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
 }
 
 // ============================================

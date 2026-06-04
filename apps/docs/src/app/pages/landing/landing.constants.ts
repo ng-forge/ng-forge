@@ -417,9 +417,11 @@ const config = {
   type: 'input',
   logic: [{
     type: 'required',
-    when: {
-      field: 'accountType',
-      equals: 'business',
+    condition: {
+      type: 'fieldValue',
+      fieldPath: 'accountType',
+      operator: 'equals',
+      value: 'business',
     },
   }],
 }`,
@@ -548,8 +550,9 @@ const config = {
   ],
 } as const satisfies FormConfig;
 
-// Inferred from the config above, no hand-written types:
-type Value = InferFormValue<typeof config.fields>;`,
+// Inferred, no hand-written types:
+type Value =
+  InferFormValue<typeof config.fields>;`,
 
   openapiCommand: `# Turn an OpenAPI document into
 # typed, ready-to-render FormConfigs
@@ -565,6 +568,22 @@ npx @ng-forge/openapi-generator \\
       "@ng-forge/dynamic-form-mcp"
     ]
   }
+}`,
+
+  // Flagship "it's all just data": an async HTTP validator declared as pure JSON.
+  // No callbacks, no functions — the kind of thing a backend can author and send.
+  serializableLogic: `{
+  "key": "username",
+  "type": "input",
+  "label": "Username",
+  "validators": [{
+    "type": "http",
+    "http": { "url": "/api/check-username" },
+    "responseMapping": {
+      "validWhen": "response.available",
+      "errorKind": "taken"
+    }
+  }]
 }`,
 } as const;
 
@@ -605,5 +624,43 @@ export const CAPABILITIES: Capability[] = [
     title: 'Repeatable arrays',
     description: 'Add, remove, and reorder rows and nested groups straight from the config.',
     snippetKey: 'arrayField',
+  },
+];
+
+// ============================================
+// USE CASES ("built for the forms you ship")
+// ============================================
+
+export interface UseCase {
+  icon: string;
+  title: string;
+  description: string;
+  route: string;
+}
+
+export const USE_CASES: UseCase[] = [
+  {
+    icon: 'database',
+    title: 'Backend-driven forms',
+    description: 'The shape comes from your API, not your bundle. Change a form without shipping a build.',
+    route: '/api-driven-forms',
+  },
+  {
+    icon: 'workflow',
+    title: 'Multi-step onboarding',
+    description: 'Wizards with per-step validation, navigation, and progress, all from the config.',
+    route: '/prebuilt/form-pages',
+  },
+  {
+    icon: 'check',
+    title: 'Schema-validated forms',
+    description: 'Reuse the Zod or Valibot schemas you already have through Standard Schema.',
+    route: '/schema-validation/zod',
+  },
+  {
+    icon: 'layers',
+    title: 'Admin and CRUD',
+    description: 'Repeatable rows, nested groups, and conditional sections for dense data entry.',
+    route: '/prebuilt/form-arrays/simplified',
   },
 ];
