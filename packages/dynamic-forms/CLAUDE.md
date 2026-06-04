@@ -32,7 +32,7 @@ Side effects are scheduled via `SideEffectScheduler`:
 
 ### Provider Architecture (`providers/dynamic-form-di.ts`)
 
-`provideDynamicFormDI()` creates all component-level providers. Fixes circular dependency: `DERIVATION_ORCHESTRATOR` depends on `FormStateManager`, not `DynamicForm`.
+`provideDynamicFormDI()` creates all component-level providers. The derivation orchestrator is lazy-loaded: `DERIVATION_RENDER_GATE` (`core/derivation/derivation-render-gate.ts`) dynamically imports and wires it only when `configHasDerivations()` is true, and holds `shouldRender` closed until it is wired (so derivation fields render already-derived). Configs without derivations never pull the orchestrator chunk.
 
 ## File Structure
 
