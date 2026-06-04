@@ -638,8 +638,6 @@ export interface UseCase {
   icon: string;
   title: string;
   description: string;
-  /** Optional docs deep-link. Quality claims (a11y, perf) have no dedicated page. */
-  route?: string;
 }
 
 export const USE_CASES: UseCase[] = [
@@ -653,13 +651,11 @@ export const USE_CASES: UseCase[] = [
     title: 'Internationalized',
     description:
       'Labels, placeholders, and errors take an Observable or Signal, so Transloco, ngx-translate, or any i18n source plugs straight in.',
-    route: '/dynamic-behavior/i18n',
   },
   {
     icon: 'plug',
     title: 'Extensible',
     description: 'Prefix and suffix addons, field wrappers, or a fully custom component when you outgrow the built-ins, all type-safe.',
-    route: '/addons/overview',
   },
   {
     icon: 'zap',

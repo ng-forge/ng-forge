@@ -403,20 +403,11 @@
 
       <div class="use-cases-grid reveal">
         @for (uc of useCases; track uc.title) {
-          @if (uc.route) {
-            <a [routerLink]="uc.route" class="use-case-card use-case-card--link">
-              <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
-              <h3>{{ uc.title }}</h3>
-              <p>{{ uc.description }}</p>
-              <span class="use-case-cta">Read the docs <span class="use-case-cta__arrow" aria-hidden="true">&rarr;</span></span>
-            </a>
-          } @else {
-            <div class="use-case-card">
-              <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
-              <h3>{{ uc.title }}</h3>
-              <p>{{ uc.description }}</p>
-            </div>
-          }
+          <div class="use-case-card">
+            <span class="use-case-icon icon icon--{{ uc.icon }}" aria-hidden="true"></span>
+            <h3>{{ uc.title }}</h3>
+            <p>{{ uc.description }}</p>
+          </div>
         }
       </div>
     </div>

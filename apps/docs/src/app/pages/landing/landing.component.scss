@@ -1890,51 +1890,6 @@ footer {
   p {
     font-size: 0.9rem;
     margin: 0;
-    flex: 1;
-  }
-}
-
-// Only the cards that link out (i18n, extensible) get the lift + affordance.
-// The claim cards (accessible, fast) stay static.
-.use-case-card--link {
-  transition:
-    border-color 0.25s ease,
-    transform 0.25s ease;
-
-  &:hover {
-    border-color: rgba($ember-glow, 0.45);
-    transform: translateY(-3px);
-
-    &::before {
-      opacity: 0.7;
-    }
-
-    .use-case-cta {
-      color: $ember-hot;
-    }
-
-    .use-case-cta__arrow {
-      transform: translateX(3px);
-    }
-  }
-
-  &:focus-visible {
-    outline: 2px solid $ember-glow;
-    outline-offset: 3px;
-  }
-}
-
-// Explicit "this card links somewhere" affordance.
-.use-case-cta {
-  margin-top: 0.35rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: $ember-glow;
-  transition: color 0.25s ease;
-
-  .use-case-cta__arrow {
-    display: inline-block;
-    transition: transform 0.25s ease;
   }
 }
 
