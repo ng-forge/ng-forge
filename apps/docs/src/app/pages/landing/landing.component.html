@@ -239,8 +239,8 @@
       <div class="serializable-header reveal">
         <h2 class="section-title">It's all just data</h2>
         <p class="section-desc">
-          Validation, derivations, and conditional logic are plain, serializable data. No callbacks, nothing trapped in your bundle. Your
-          backend can author a form as JSON and send it down, ready to render.
+          A form is plain data, all the way down to its validation, derivations, and conditions. None of it depends on a function, so a
+          backend can build one as JSON and hand it to the client.
         </p>
       </div>
 
@@ -261,29 +261,29 @@
           <li>
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
-              <strong>Async checks, no functions.</strong>
-              Declare an HTTP validator. Debounce and cancellation are handled for you.
+              <strong>Validation that hits your API.</strong>
+              An HTTP check is a declared request; debouncing and cancellation come with it.
             </div>
           </li>
           <li>
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
               <strong>Computed values as expressions.</strong>
-              <code>derivation: 'qty * price'</code> instead of a hand-wired subscription.
+              <code>derivation: 'qty * price'</code>, not a subscription you wire up by hand.
             </div>
           </li>
           <li>
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
               <strong>Conditions are data.</strong>
-              Show, hide, or require a field from other values, declared in the config.
+              A rule that hides or requires a field is JSON you can store, not a callback.
             </div>
           </li>
           <li>
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
               <strong>Store it anywhere.</strong>
-              A database row, an API response, a CMS field. Change the form without a redeploy.
+              It lives happily in a database column or a CMS entry, and a form changes without a redeploy.
             </div>
           </li>
         </ul>
@@ -325,16 +325,16 @@
   age: number;
 {{ '}' }}</pre
           >
-          <p class="payoff-note">Rename a field or change a type, and this updates with it. No casting, no <code>any</code>.</p>
+          <p class="payoff-note">Rename a field and this type follows along, without a cast or an <code>any</code> in sight.</p>
         </aside>
       </div>
 
       <div class="schema-strip reveal">
         <span class="schema-strip__icon icon icon--check" aria-hidden="true"></span>
         <p>
-          Already using <strong>Zod</strong> or <strong>Valibot</strong>? Validate with any
-          <a routerLink="/schema-validation/zod" class="inline-link">Standard Schema</a>. Just
-          <code>schema: standardSchema(yourSchema)</code>, no rewrite.
+          Already using <strong>Zod</strong> or <strong>Valibot</strong>? Pass them through any
+          <a routerLink="/schema-validation/zod" class="inline-link">Standard Schema</a> with
+          <code>schema: standardSchema(yourSchema)</code> and they validate as-is.
         </p>
       </div>
     </div>
@@ -375,7 +375,7 @@
               <span class="generate-icon icon icon--sparkles" aria-hidden="true"></span>
               <h3>From your AI assistant</h3>
             </div>
-            <p>An MCP server lets Claude, Cursor, and Copilot scaffold and validate configs in your editor.</p>
+            <p>An MCP server lets Claude, Cursor, or Copilot generate and check a config from inside your editor.</p>
           </div>
           <div class="code-block generate-code">
             <div class="code-header">
@@ -442,7 +442,9 @@
     <div class="section-container">
       <div class="use-cases-header reveal">
         <h2 class="section-title">Production-grade by default</h2>
-        <p class="section-desc">Accessibility, i18n, and performance handled out of the box, with room to extend when you need it.</p>
+        <p class="section-desc">
+          Accessibility, i18n, and performance come built in, and everything is extensible once you outgrow the defaults.
+        </p>
       </div>
 
       <div class="use-cases-grid reveal">

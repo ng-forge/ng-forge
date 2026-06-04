@@ -338,25 +338,25 @@ export const CAPABILITIES: Capability[] = [
   {
     icon: 'git-branch',
     title: 'Conditional fields',
-    description: 'Show, hide, or require a field based on other field values, resolved as they change.',
+    description: "A field can hide itself or turn required based on another field's value, re-checked as the form changes.",
     snippetKey: 'conditionalLogic',
   },
   {
     icon: 'api',
     title: 'Server-driven values',
-    description: 'Derive a value from an HTTP call, debounced and cancelled for you.',
+    description: "Pull a field's value from an HTTP endpoint; the requests debounce and cancel as inputs change.",
     snippetKey: 'httpDerivation',
   },
   {
     icon: 'workflow',
     title: 'Multi-step wizards',
-    description: 'Pages with per-step validation, navigation, and progress. Built in.',
+    description: 'Split a long form into pages that validate one step at a time, with navigation and a progress bar.',
     snippetKey: 'multiStepWizard',
   },
   {
     icon: 'layers',
     title: 'Repeatable arrays',
-    description: 'Add, remove, and reorder rows and nested groups straight from the config.',
+    description: 'Repeatable rows, nested groups included, that users can add and reorder from the config.',
     snippetKey: 'arrayField',
   },
 ];
@@ -375,23 +375,25 @@ export const USE_CASES: UseCase[] = [
   {
     icon: 'users',
     title: 'Accessible',
-    description: 'ARIA state, focus, and labels are wired up on accessible adapter components, and tested against axe for WCAG AA.',
+    description:
+      'Built on adapter components that are accessible already, with ARIA and focus handled on top and verified against axe for WCAG AA.',
   },
   {
     icon: 'book',
     title: 'Internationalized',
     description:
-      'Labels, placeholders, and errors take an Observable or Signal, so Transloco, ngx-translate, or any i18n source plugs straight in.',
+      'Any text in a form can be an Observable or a Signal, so Transloco, ngx-translate, or your own translation source works unchanged.',
   },
   {
     icon: 'plug',
     title: 'Extensible',
-    description: 'Prefix and suffix addons, field wrappers, or a fully custom component when you outgrow the built-ins, all type-safe.',
+    description:
+      'Reach for a prefix or suffix addon, wrap a field in your own markup, or drop to a fully custom component when the built-ins run out.',
   },
   {
     icon: 'zap',
     title: 'Fast',
     description:
-      'Signal-native and zoneless-ready. Field components and the derivation engine load lazily, so a form pays only for what it renders.',
+      'Signal-native and zoneless-ready. Field components and the derivation engine load on demand, so a form only ships what it renders.',
   },
 ];
