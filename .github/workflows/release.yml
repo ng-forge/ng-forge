@@ -20,6 +20,16 @@ on:
           - dry-run # stable path, no npm publish (dry-run only)
           - publish # stable path, real publish to @latest + tag + GH release
           - next # manual invocation of the @next path — same code as the scheduled run
+      target:
+        # Starts (or re-targets) an rc cycle as a prerelease CHANNEL off main — no release
+        # branch. One dispatch with mode=next + target=1.0.0 publishes 1.0.0-rc.1 to @rc;
+        # every nightly after that auto-continues (rc.2, rc.3, …) by detecting the rc tag,
+        # with no input needed. The cycle closes when the stable v1.0.0 ships. Ignored
+        # unless mode=next; leave empty for ordinary @next nightlies.
+        description: 'rc target version, e.g. 1.0.0 (mode=next only; leave empty for normal nightlies)'
+        required: false
+        type: string
+        default: ''
   schedule:
     - cron: '27 1 * * *' # 01:27 UTC daily (~04:27 EEST) — after the late-night commit window, off the hour to avoid GH Actions cron stampede
 
@@ -138,6 +148,9 @@ jobs:
       - name: Detect relevant changes & compute version
         id: gate
         shell: bash
+        env:
+          # Explicit rc target from a `mode=next` dispatch; empty on scheduled runs.
+          RC_TARGET_INPUT: ${{ inputs.target }}
         run: |
           set -euo pipefail
 
@@ -151,23 +164,29 @@ jobs:
             exit 0
           fi
 
-          # Detect an active RC cycle. An RC is "active" once vX.Y.Z-rc.N has been cut
-          # (human release via the stable path) and the final vX.Y.Z hasn't shipped yet.
-          # During an active RC, nightlies follow the rc format (X.Y.Z-rc.{N+1}) under the
-          # @rc dist-tag instead of the usual {nextMinor}.0-next.N under @next.
-          LAST_RC_TAG=$(git tag --list 'v[0-9]*-rc.*' --sort=-v:refname | head -1 || true)
-          RC_ACTIVE=""
-          if [ -n "$LAST_RC_TAG" ]; then
-            RC_BASE=${LAST_RC_TAG#v}; RC_BASE=${RC_BASE%%-rc.*}   # v1.0.0-rc.1 -> 1.0.0
-            if git rev-parse -q --verify "refs/tags/v${RC_BASE}^{}" >/dev/null 2>&1; then
-              echo "Final v${RC_BASE} already tagged — RC cycle is closed"
+          # RC cycle = a prerelease CHANNEL off main, no release branch. It is "active"
+          # either because this run explicitly bootstraps/re-targets it (mode=next with
+          # target=X.Y.Z) or because a prior rc tag exists whose final vX.Y.Z hasn't
+          # shipped — letting scheduled nightlies auto-continue rc.2, rc.3, … with no input.
+          # All rc versions we've ever tagged (manual v…-rc.N OR nightly rc/…), normalized
+          # to bare versions and version-sorted; the last is the most recent rc.
+          LATEST_RC=$(git tag --list 'v[0-9]*-rc.*' 'rc/[0-9]*-rc.*' \
+            | sed -e 's#^rc/##' -e 's#^v##' | sort -V | tail -1 || true)
+
+          RC_TARGET=""
+          if [ -n "${RC_TARGET_INPUT:-}" ]; then
+            RC_TARGET="$RC_TARGET_INPUT"               # explicit bootstrap / re-target
+          elif [ -n "$LATEST_RC" ]; then
+            CAND=${LATEST_RC%%-rc.*}                    # 1.0.0-rc.2 -> 1.0.0
+            if git rev-parse -q --verify "refs/tags/v${CAND}^{}" >/dev/null 2>&1; then
+              echo "Final v${CAND} already tagged — RC cycle is closed"
             else
-              RC_ACTIVE=1
+              RC_TARGET="$CAND"                         # auto-continue the open rc cycle
             fi
           fi
 
-          if [ -n "$RC_ACTIVE" ]; then
-            TARGET="$RC_BASE"; LABEL="rc"; DIST_TAG="rc"; TAG_NS="rc"
+          if [ -n "$RC_TARGET" ]; then
+            TARGET="$RC_TARGET"; LABEL="rc"; DIST_TAG="rc"; TAG_NS="rc"
           else
             LAST_VERSION=${LAST_STABLE#v}
             # @next always signals the upcoming minor, regardless of whether the next
@@ -191,7 +210,7 @@ jobs:
                      'refs/tags/v[0-9]*' 'refs/tags/next/*' 'refs/tags/rc/*')
           [ -z "$BASE" ] && BASE="$LAST_STABLE"
 
-          echo "Last stable: ${LAST_STABLE:-none}; last rc: ${LAST_RC_TAG:-none} (active: ${RC_ACTIVE:-no}); target: ${TARGET}-${LABEL}; gate base: $BASE"
+          echo "Last stable: ${LAST_STABLE:-none}; latest rc: ${LATEST_RC:-none}; target: ${TARGET}-${LABEL} (dist-tag: ${DIST_TAG}); gate base: $BASE"
 
           # Bump-worthy commit types per nx.json release.conventionalCommits:
           # feat, fix, perf, revert. Everything else (docs/ci/chore/test/build/style/refactor)
@@ -219,7 +238,11 @@ jobs:
 
           echo "Bump-worthy commits touching packages/ since $BASE: $RELEVANT"
 
-          if [ "$RELEVANT" -eq 0 ]; then
+          # An explicit rc bootstrap (mode=next + target=…) publishes rc.1 on demand even
+          # with no new commits — the human decision to enter the rc channel is the trigger.
+          # Auto-continue crons (no input) still require bump-worthy commits, so an idle
+          # rc cycle doesn't churn out empty rc.N every night.
+          if [ "$RELEVANT" -eq 0 ] && [ -z "${RC_TARGET_INPUT:-}" ]; then
             echo "No bump-worthy commits since last release — skipping next release"
             echo "should_publish=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -232,8 +255,8 @@ jobs:
 
           # Monotonic counter per (target, label): TARGET.0-next.N normally, or
           # TARGET-rc.N during an active RC cycle (where TARGET already carries the rc's
-          # M.m.p, e.g. 1.0.0). The RC counter naturally continues past the human-cut
-          # rc.1 because that version is on npm too.
+          # M.m.p, e.g. 1.0.0). The bootstrap run finds no rc on npm yet → rc.1; every
+          # nightly after reads the published rc.N and continues rc.{N+1}.
           # Query *every* library package and take the max — if one package failed to
           # publish on a prior run the others advanced, and we must not collide with the
           # highest existing counter anywhere. Commit traceability stays recoverable via
