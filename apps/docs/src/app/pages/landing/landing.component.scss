@@ -532,16 +532,6 @@ section {
   }
 }
 
-.hero-eyebrow {
-  display: block;
-  font-family: $font-mono;
-  font-size: 0.75rem;
-  color: $steel-mid;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  margin-bottom: 1.5rem;
-}
-
 .hero h1 {
   font-family: $font-primary;
   font-size: clamp(2.4rem, 7vw, 4.8rem);
