@@ -720,6 +720,8 @@ section {
 .capabilities-header,
 .type-safe-header,
 .generate-header,
+.serializable-header,
+.use-cases-header,
 .integrations-header {
   margin-bottom: 2.5rem;
 }
@@ -843,7 +845,9 @@ section {
   align-items: stretch;
   max-width: 100%;
 
-  @media (max-width: 900px) {
+  // Stack before the config column gets too narrow for the compact (wide)
+  // config lines, which would otherwise force an internal horizontal scrollbar.
+  @media (max-width: 1140px) {
     grid-template-columns: 1fr;
   }
 }
@@ -1195,7 +1199,7 @@ section {
   // sized to fill it evenly, so no scrollbar and minimal blank space.
   .code-body {
     flex: none;
-    height: 292px;
+    height: 304px;
     max-height: none;
   }
 }
@@ -1231,6 +1235,12 @@ section {
   // Show the full snippet; no inner scrollbar.
   .code-body {
     max-height: none;
+
+    // The `type Value = InferFormValue<...>` line is the widest; shrink the mono
+    // a touch on phones so it stays one line without a horizontal scrollbar.
+    @media (max-width: 600px) {
+      font-size: 0.68rem;
+    }
   }
 }
 
@@ -1330,19 +1340,32 @@ section {
 // ============================================
 // GENERATE SECTION
 // ============================================
-.generate-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+// Full-width rows (text + code side by side) so the code gets a wide column and
+// reads at the same size as the other split sections, instead of a cramped 3-up.
+.generate-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
-  @media (max-width: 900px) {
+.generate-row {
+  @include landing-card;
+  display: grid;
+  grid-template-columns: 1fr 1.45fr;
+  gap: 2rem;
+  align-items: center;
+
+  @media (max-width: 760px) {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 }
 
-.generate-card {
-  @include landing-card;
-  gap: 1rem;
+.generate-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .generate-head {
@@ -1369,15 +1392,12 @@ section {
 }
 
 .generate-code {
-  flex: 0 0 auto;
+  min-width: 0;
 
-  // Narrow 3-up column, so a slightly smaller mono keeps lines from clipping.
-  // Uniform height so all three cards match.
+  // Each window sizes to its own content (no fixed height, no empty space) and
+  // shows the full snippet without an inner scrollbar.
   .code-body {
-    flex: none;
-    height: 215px;
     max-height: none;
-    font-size: 0.72rem;
   }
 }
 
@@ -1862,8 +1882,11 @@ footer {
       opacity: 0.7;
     }
 
-    .use-case-arrow {
-      color: $ember-glow;
+    .use-case-cta {
+      color: $ember-hot;
+    }
+
+    .use-case-cta__arrow {
       transform: translateX(3px);
     }
   }
@@ -1884,22 +1907,25 @@ footer {
   }
 }
 
+// Explicit "this card links somewhere" affordance.
+.use-case-cta {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $ember-glow;
+  transition: color 0.25s ease;
+
+  .use-case-cta__arrow {
+    display: inline-block;
+    transition: transform 0.25s ease;
+  }
+}
+
 .use-case-icon {
   flex-shrink: 0;
   width: 26px !important;
   height: 26px !important;
   color: $ember-glow;
-}
-
-.use-case-arrow {
-  position: relative;
-  align-self: flex-start;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: $steel-dim;
-  transition:
-    color 0.25s ease,
-    transform 0.25s ease;
 }
 
 // ============================================

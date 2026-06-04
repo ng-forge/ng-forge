@@ -433,7 +433,11 @@ const config = {
       key: 'info',
       fields: [...],
     },
-    { type: 'page', key: 'review' },
+    {
+      type: 'page',
+      key: 'review',
+      fields: [...],
+    },
   ],
 }`,
 
@@ -551,8 +555,7 @@ const config = {
 } as const satisfies FormConfig;
 
 // Inferred, no hand-written types:
-type Value =
-  InferFormValue<typeof config.fields>;`,
+type Value = InferFormValue<typeof config.fields>;`,
 
   openapiCommand: `# Turn an OpenAPI document into
 # typed, ready-to-render FormConfigs
@@ -570,20 +573,20 @@ npx @ng-forge/openapi-generator \\
   }
 }`,
 
-  // Flagship "it's all just data": an async HTTP validator declared as pure JSON.
-  // No callbacks, no functions — the kind of thing a backend can author and send.
+  // Flagship "it's all just data": an async HTTP validator declared as plain,
+  // serializable data. No callbacks, no functions — a backend can author and send it.
   serializableLogic: `{
-  "key": "username",
-  "type": "input",
-  "label": "Username",
-  "validators": [{
-    "type": "http",
-    "http": { "url": "/api/check-username" },
-    "responseMapping": {
-      "validWhen": "response.available",
-      "errorKind": "taken"
-    }
-  }]
+  key: 'username',
+  type: 'input',
+  label: 'Username',
+  validators: [{
+    type: 'http',
+    http: { url: '/api/check-username' },
+    responseMapping: {
+      validWhen: 'response.available',
+      errorKind: 'taken',
+    },
+  }],
 }`,
 } as const;
 
