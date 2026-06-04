@@ -23,6 +23,7 @@ export interface BsButtonProps {
 }
 
 export type BsButtonField<TEvent extends FormEvent> = ButtonField<BsButtonProps, TEvent>;
+/** @deprecated Scheduled for removal in 0.11.0. Use `injectNgForgeAction<TEvent>()` for typed access to a button component's action directive instance. */
 export type BsButtonComponent<TEvent extends FormEvent> = FieldComponent<BsButtonField<TEvent>>;
 
 /** Specific button field types with preconfigured events */

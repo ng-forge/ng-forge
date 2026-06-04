@@ -25,6 +25,7 @@ export interface PrimeButtonProps {
 }
 
 export type PrimeButtonField<TEvent extends FormEvent = FormEvent> = ButtonField<PrimeButtonProps, TEvent>;
+/** @deprecated Scheduled for removal in 0.11.0. Use `injectNgForgeAction<TEvent>()` for typed access to a button component's action directive instance. */
 export type PrimeButtonComponent<TEvent extends FormEvent = FormEvent> = FieldComponent<PrimeButtonField<TEvent>>;
 
 /** Specific button field types with preconfigured events */
