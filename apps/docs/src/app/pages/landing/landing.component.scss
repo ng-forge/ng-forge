@@ -1882,6 +1882,19 @@ footer {
   @include landing-card;
   gap: 0.65rem;
   text-decoration: none;
+  transition:
+    border-color 0.25s ease,
+    transform 0.25s ease;
+
+  // Quiet lift to keep the cards alive, even though they are static claims.
+  &:hover {
+    border-color: rgba($ember-glow, 0.4);
+    transform: translateY(-3px);
+
+    &::before {
+      opacity: 0.6;
+    }
+  }
 
   h3 {
     font-size: 1.05rem;
