@@ -138,5 +138,6 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   /** Marks the field as touched when datepicker loses focus */
   onBlur(): void {
     this.touched.set(true);
+    this.parentField?.field()().markAsTouched();
   }
 }

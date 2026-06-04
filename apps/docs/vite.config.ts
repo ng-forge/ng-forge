@@ -147,6 +147,77 @@ function adapterCssPlugin(): Plugin {
 }
 
 /**
+ * Adapter icon fonts (Material Icons, Bootstrap Icons, PrimeIcons) are served
+ * from local npm packages instead of third-party CDNs (Google Fonts / jsDelivr).
+ * Loading them from a CDN transmits each visitor's IP to the CDN operator, which
+ * is the docs site's only real GDPR exposure; self-hosting removes it.
+ *
+ * Each entry maps a file inside node_modules to its served path under
+ * `fonts/icons/<pkg>/`. The per-package directory layout is preserved so the
+ * relative `url()` references inside each CSS resolve to the sibling font files.
+ * Only woff2 (+ legacy woff/ttf fallbacks) are shipped; modern browsers fetch
+ * woff2 and never request the rest.
+ */
+const ICON_FONT_ASSETS: ReadonlyArray<readonly [src: string, dest: string]> = [
+  ['material-icons/iconfont/material-icons.css', 'fonts/icons/material-icons/material-icons.css'],
+  ['material-icons/iconfont/material-icons.woff2', 'fonts/icons/material-icons/material-icons.woff2'],
+  ['material-icons/iconfont/material-icons.woff', 'fonts/icons/material-icons/material-icons.woff'],
+  ['bootstrap-icons/font/bootstrap-icons.min.css', 'fonts/icons/bootstrap-icons/bootstrap-icons.min.css'],
+  ['bootstrap-icons/font/fonts/bootstrap-icons.woff2', 'fonts/icons/bootstrap-icons/fonts/bootstrap-icons.woff2'],
+  ['bootstrap-icons/font/fonts/bootstrap-icons.woff', 'fonts/icons/bootstrap-icons/fonts/bootstrap-icons.woff'],
+  ['primeicons/primeicons.css', 'fonts/icons/primeicons/primeicons.css'],
+  ['primeicons/fonts/primeicons.woff2', 'fonts/icons/primeicons/fonts/primeicons.woff2'],
+  ['primeicons/fonts/primeicons.woff', 'fonts/icons/primeicons/fonts/primeicons.woff'],
+  ['primeicons/fonts/primeicons.ttf', 'fonts/icons/primeicons/fonts/primeicons.ttf'],
+];
+
+const CONTENT_TYPES: Record<string, string> = {
+  css: 'text/css',
+  woff2: 'font/woff2',
+  woff: 'font/woff',
+  ttf: 'font/ttf',
+};
+
+/**
+ * Serves the icon-font assets from node_modules: via middleware in dev, and as
+ * emitted assets at build time. Mirrors the adapterCssPlugin pattern.
+ */
+function iconFontsPlugin(): Plugin {
+  return {
+    name: 'vite-plugin-icon-fonts',
+
+    configureServer(server) {
+      const byDest = new Map(ICON_FONT_ASSETS.map(([src, dest]) => [`/${dest}`, src]));
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split('?')[0] ?? '';
+        const src = byDest.get(url);
+        if (!src) return next();
+        try {
+          const ext = url.split('.').pop() ?? '';
+          res.setHeader('Content-Type', CONTENT_TYPES[ext] ?? 'application/octet-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(readFileSync(resolve(nodeModules, src)));
+        } catch (err) {
+          console.error(`[icon-fonts] Failed to serve ${url}:`, err);
+          res.statusCode = 404;
+          res.end();
+        }
+      });
+    },
+
+    generateBundle() {
+      for (const [src, dest] of ICON_FONT_ASSETS) {
+        try {
+          this.emitFile({ type: 'asset', fileName: dest, source: readFileSync(resolve(nodeModules, src)) });
+        } catch (err) {
+          console.error(`[icon-fonts] Failed to emit ${dest}:`, err);
+        }
+      }
+    },
+  };
+}
+
+/**
  * Recursively collect all .md files in a directory and return their slugs.
  * e.g., 'getting-started.md' → 'getting-started'
  *       'validation/basics.md' → 'validation/basics'
@@ -265,6 +336,7 @@ export default defineConfig(({ mode }) => {
       },
       globalStylesPlugin(),
       adapterCssPlugin(),
+      iconFontsPlugin(),
       apiDocsPlugin(),
       searchIndexPlugin(),
       ogImagePlugin(),

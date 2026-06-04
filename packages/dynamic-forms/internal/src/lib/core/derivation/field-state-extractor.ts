@@ -1,5 +1,5 @@
 import { type Signal, isSignal, untracked } from '@angular/core';
-import type { FieldState, FieldTree } from '@angular/forms/signals';
+import type { FieldTree, ReadonlyFieldState } from '@angular/forms/signals';
 import type { FieldStateInfo, FormFieldStateMap } from '../../models/expressions/field-state-context';
 import type { FieldTreeRecord } from '../field-tree-utils';
 
@@ -16,7 +16,7 @@ type StateProperty = (typeof STATE_PROPERTIES)[number];
  *
  * @internal
  */
-function readStateSignal(fieldState: FieldState<unknown>, prop: StateProperty, reactive: boolean): boolean {
+function readStateSignal(fieldState: ReadonlyFieldState<unknown>, prop: StateProperty, reactive: boolean): boolean {
   const signalFn: Signal<boolean> | undefined = fieldState[prop];
   if (!signalFn || !isSignal(signalFn)) return false;
   return reactive ? !!signalFn() : !!untracked(signalFn);
@@ -28,9 +28,9 @@ function readStateSignal(fieldState: FieldState<unknown>, prop: StateProperty, r
  * @internal
  */
 function resolveFieldState(
-  fieldSource: FieldTree<unknown> | FieldState<unknown> | undefined,
+  fieldSource: FieldTree<unknown> | ReadonlyFieldState<unknown> | undefined,
   reactive: boolean,
-): FieldState<unknown> | undefined {
+): ReadonlyFieldState<unknown> | undefined {
   if (!fieldSource) return undefined;
 
   // FieldTree: signal or callable Proxy — invoke to get the FieldState
@@ -40,7 +40,7 @@ function resolveFieldState(
 
   // Direct FieldState object (from FieldContext)
   if (typeof fieldSource === 'object') {
-    return fieldSource as FieldState<unknown>;
+    return fieldSource as ReadonlyFieldState<unknown>;
   }
 
   return undefined;
@@ -56,7 +56,7 @@ function resolveFieldState(
  * @internal
  */
 export function readFieldStateInfo(
-  fieldSource: FieldTree<unknown> | FieldState<unknown> | undefined,
+  fieldSource: FieldTree<unknown> | ReadonlyFieldState<unknown> | undefined,
   reactive: boolean,
 ): FieldStateInfo | undefined {
   const state = resolveFieldState(fieldSource, reactive);

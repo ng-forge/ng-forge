@@ -9,9 +9,10 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
     name: 'material',
     stylesheetUrl: 'material.css',
     // Material Icons class rules (`.material-icons { font-family: 'Material Icons'; ... }`)
-    // live in the Google Fonts CSS. Without re-injecting them into the shadow root,
+    // live in the icon-font CSS. Without re-injecting them into the shadow root,
     // <mat-icon>search</mat-icon> renders the ligature text instead of the glyph.
-    extraStylesheetUrls: ['https://fonts.googleapis.com/icon?family=Material+Icons'],
+    // Self-hosted from the material-icons npm package (see vite-plugin-icon-fonts).
+    extraStylesheetUrls: ['fonts/icons/material-icons/material-icons.css'],
     defaultRoute: 'examples/input',
     loadRoutes: async () => {
       const lib = await import('@ng-forge/examples-material');
@@ -27,7 +28,8 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
     stylesheetUrl: 'bootstrap.css',
     // Bootstrap Icons (`.bi`, `.bi-*::before { content: '\f...'; }`) — re-inject
     // into the shadow root so `<i class="bi bi-search">` renders the glyph.
-    extraStylesheetUrls: ['https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'],
+    // Self-hosted from the bootstrap-icons npm package (see vite-plugin-icon-fonts).
+    extraStylesheetUrls: ['fonts/icons/bootstrap-icons/bootstrap-icons.min.css'],
     defaultRoute: 'examples/input',
     loadRoutes: async () => {
       const lib = await import('@ng-forge/examples-bootstrap');
@@ -43,9 +45,10 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
     stylesheetUrl: 'primeng.css',
     // PrimeIcons (`.pi-*::before { content: '\\e...'; font-family: 'primeicons'; }`).
     // adapter-primeng.scss imports primeicons.css but the font file path can break
-    // when the bundle is loaded from a different origin; the CDN version is self-
-    // contained and dedup-safe via the browser's font cache.
-    extraStylesheetUrls: ['https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css'],
+    // when the bundle is loaded from a different origin; this self-contained copy is
+    // dedup-safe via the browser's font cache.
+    // Self-hosted from the primeicons npm package (see vite-plugin-icon-fonts).
+    extraStylesheetUrls: ['fonts/icons/primeicons/primeicons.css'],
     defaultRoute: 'examples/input',
     loadRoutes: async () => {
       const lib = await import('@ng-forge/examples-primeng');

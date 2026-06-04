@@ -129,5 +129,6 @@ export class PrimeSelectControlComponent implements FormValueControl<ValueType> 
   /** Marks the field as touched when select loses focus */
   onBlur(): void {
     this.touched.set(true);
+    this.parentField?.field()().markAsTouched();
   }
 }

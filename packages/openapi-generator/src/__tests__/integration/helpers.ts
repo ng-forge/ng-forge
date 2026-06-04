@@ -81,7 +81,6 @@ export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic';
  * against the core-only `RegisteredFieldTypes`.
  */
 export function typecheckGeneratedForm(formFilePath: string, adapter: AdapterName = 'material'): string[] {
-  const repoRoot = resolve(__dirname, '../../../../..');
   const { pkg } = resolveAdapterTypings(adapter);
 
   // Derive the form-file identifier so this works for any fixture, not just create-user.
@@ -108,7 +107,6 @@ export function typecheckGeneratedForm(formFilePath: string, adapter: AdapterNam
     skipLibCheck: true,
     experimentalDecorators: true,
     allowImportingTsExtensions: false,
-    baseUrl: repoRoot,
     paths: resolveCompilerPaths(adapter),
     // Ensure the adapter's module augmentation is loaded (the side-effect import in the
     // companion file alone isn't enough — TS tree-shakes unused .d.ts files).
