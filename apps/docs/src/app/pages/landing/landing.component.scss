@@ -849,41 +849,70 @@ section {
 // ============================================
 // DEMO CENTERPIECE (one window: live form / config tabs)
 // ============================================
-// Narrower than the section so the form fills the window instead of floating
-// in it, while still leaving the config lines room to breathe. Left-aligned to
-// sit under the section heading.
+// The centerpiece. Left-aligned under the heading, narrower than the section so
+// the form fills the window, with an ember halo so it reads as the focal point.
 .demo-window {
+  position: relative;
   max-width: 720px;
   margin: 0;
+
+  .code-block {
+    box-shadow:
+      0 24px 60px -24px rgba(0, 0, 0, 0.75),
+      0 0 50px -16px rgba($ember-core, 0.42);
+  }
 }
 
-// Tabs sit in the window's title bar (the .code-header traffic-light row).
 .demo-window-header {
   gap: 0.75rem;
 }
 
-.demo-tabs {
-  display: flex;
-  gap: 0.3rem;
+// Segmented toggle with a sliding ember indicator. Equal-width segments (grid
+// 1fr 1fr) so the 50%-wide indicator lines up exactly under either label.
+.demo-toggle {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
   margin-left: 0.6rem;
+  padding: 3px;
+  border: 1px solid $steel-dark;
+  border-radius: 9px;
+  background: rgba($bg-void, 0.45);
 }
 
-.demo-tab {
-  display: inline-flex;
+.demo-toggle__indicator {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: calc(100% - 6px);
+  border-radius: 6px;
+  background: rgba($ember-core, 0.16);
+  border: 1px solid rgba($ember-glow, 0.45);
+  box-shadow: 0 0 16px -4px rgba($ember-core, 0.6);
+  transition: transform 0.3s cubic-bezier(0.34, 1.15, 0.64, 1);
+}
+
+.demo-window.is-config .demo-toggle__indicator {
+  transform: translateX(100%);
+}
+
+.demo-toggle__btn {
+  position: relative;
+  z-index: 1;
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.32rem 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 7px;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.85rem;
+  border: 0;
   background: transparent;
   font-family: $font-mono;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: $steel-mid;
   cursor: pointer;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
+  white-space: nowrap;
+  transition: color 0.25s ease;
 
   .icon {
     width: 13px !important;
@@ -893,16 +922,34 @@ section {
   &:hover {
     color: $steel;
   }
-
   &.active {
     color: $ember-glow;
-    border-color: rgba($ember-glow, 0.35);
-    background: rgba($ember-core, 0.1);
   }
-
   &:focus-visible {
     outline: 2px solid $ember-glow;
-    outline-offset: 2px;
+    outline-offset: 3px;
+  }
+}
+
+// "live" pulse on the form toggle.
+.demo-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $ember-core;
+  box-shadow: 0 0 7px $ember-core;
+  animation: demo-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes demo-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
   }
 }
 
@@ -910,17 +957,24 @@ section {
   margin-left: auto;
 }
 
-// One stable height so switching tabs doesn't shift the page below.
+// Both views share one grid cell, so the window is the height of the taller
+// view (stable, no jump) and they cross-fade when you switch.
 .demo-window-body {
-  position: relative;
-  min-height: 24rem;
+  display: grid;
+  min-height: 23rem;
 }
 
 .demo-panel {
-  display: none;
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
 
   &.active {
-    display: block;
+    opacity: 1;
+    visibility: visible;
   }
 }
 
@@ -938,7 +992,9 @@ section {
 }
 
 // Below this width the compact one-line-per-field config would overflow, so
-// swap to the expanded one-prop-per-line variant.
+// swap to the expanded one-prop-per-line variant. That variant is much taller
+// than the form, so drop the shared-height cross-fade here and let each view
+// take its own natural height (no empty gap below the form).
 @media (max-width: 680px) {
   .demo-panel--config {
     .demo-code--wide {
@@ -948,11 +1004,31 @@ section {
       display: block;
     }
   }
+
+  .demo-window-body {
+    display: block;
+    min-height: 0;
+  }
+
+  .demo-panel {
+    grid-area: auto;
+    display: none;
+    opacity: 1;
+    visibility: visible;
+
+    &.active {
+      display: block;
+    }
+  }
 }
 
-// Form view: padded, the form itself stays centered via .landing-form.
+// Form view: generous horizontal breathing room around the centered form.
 .demo-panel--form {
-  padding: $space-4;
+  padding: 1.5rem 2.5rem;
+
+  @media (max-width: 560px) {
+    padding: 1.25rem 1rem;
+  }
 }
 
 .demo-live {

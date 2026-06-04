@@ -82,33 +82,34 @@
   <section id="demo">
     <div class="section-container">
       <div class="demo-header reveal">
-        <h2 class="section-title">This config renders this form.</h2>
-        <p class="section-desc">Type-safe end to end. Change the config, the form changes.</p>
+        <h2 class="section-title">See it in action</h2>
+        <p class="section-desc">The exact config you write, and the live form it renders. Flip between them.</p>
       </div>
 
-      <div class="demo-window reveal">
+      <div class="demo-window reveal" [class.is-config]="demoTab() === 'config'">
         <div class="code-block">
           <div class="code-header demo-window-header">
             <span class="code-dot"></span>
             <span class="code-dot"></span>
             <span class="code-dot"></span>
 
-            <div class="demo-tabs" role="tablist" aria-label="Demo view">
+            <div class="demo-toggle" role="tablist" aria-label="Demo view">
+              <span class="demo-toggle__indicator" aria-hidden="true"></span>
               <button
                 type="button"
                 role="tab"
-                class="demo-tab"
+                class="demo-toggle__btn"
                 [class.active]="demoTab() === 'demo'"
                 [attr.aria-selected]="demoTab() === 'demo'"
                 (click)="setDemoTab('demo')"
               >
-                <span class="icon icon--play" aria-hidden="true"></span>
+                <span class="demo-live-dot" aria-hidden="true"></span>
                 Live form
               </button>
               <button
                 type="button"
                 role="tab"
-                class="demo-tab"
+                class="demo-toggle__btn"
                 [class.active]="demoTab() === 'config'"
                 [attr.aria-selected]="demoTab() === 'config'"
                 (click)="setDemoTab('config')"
