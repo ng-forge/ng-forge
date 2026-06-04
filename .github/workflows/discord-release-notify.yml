@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to post (e.g. v0.8.0 or next/0.8.1-next.5). Fired automatically by release.yml on successful publish; can also be invoked manually to re-post.'
+        description: 'Release tag to post (e.g. v0.8.0, next/0.8.1-next.5, v1.0.0-rc.1, or rc/1.0.0-rc.2). Fired automatically by release.yml on successful publish; can also be invoked manually to re-post.'
         required: true
         type: string
 
@@ -57,6 +57,14 @@ jobs:
           RELEASE_NAME=$(echo "$META" | jq -r '.name // .tagName')
           RELEASE_URL=$(echo "$META" | jq -r '.url')
           IS_PRERELEASE=$(echo "$META" | jq -r '.isPrerelease')
+
+          # Install dist-tag inferred from the tag name: rc releases (vX.Y.Z-rc.N or
+          # rc/X.Y.Z-rc.N) install via @rc; nightly releases via @next.
+          case "$(echo "$META" | jq -r '.tagName')" in
+            *-rc.*) INSTALL_TAG="rc" ;;
+            *)      INSTALL_TAG="next" ;;
+          esac
+
           BODY=$(echo "$META" | jq -r '.body // empty')
           BODY="${BODY:-_No release notes provided._}"
 
@@ -72,6 +80,7 @@ jobs:
               --arg title "🌙 ${RELEASE_NAME}" \
               --arg url "$RELEASE_URL" \
               --arg description "$BODY" \
+              --arg install "$INSTALL_TAG" \
               '{
                 embeds: [{
                   title: $title,
@@ -80,7 +89,7 @@ jobs:
                   color: 15844367,
                   fields: [{
                     name: "Install",
-                    value: "```bash\npnpm add @ng-forge/dynamic-forms@next\n```"
+                    value: ("```bash\npnpm add @ng-forge/dynamic-forms@" + $install + "\n```")
                   }],
                   timestamp: now | todateiso8601
                 }]

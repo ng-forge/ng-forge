@@ -124,6 +124,10 @@ jobs:
       version: ${{ steps.gate.outputs.version }}
       sha: ${{ steps.gate.outputs.sha }}
       base: ${{ steps.gate.outputs.base }}
+      # 'next' normally, 'rc' during an active RC cycle. Drives the npm dist-tag and the
+      # git tag namespace (next/… vs rc/…) for the nightly publish.
+      dist_tag: ${{ steps.gate.outputs.dist_tag }}
+      tag_ns: ${{ steps.gate.outputs.tag_ns }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -137,7 +141,9 @@ jobs:
         run: |
           set -euo pipefail
 
-          LAST_STABLE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
+          # True stable only: `*-*` excludes every prerelease (-next, -nightly, -rc, …),
+          # so an in-flight RC tag (v1.0.0-rc.1) is NOT mistaken for the last stable.
+          LAST_STABLE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || echo "")
 
           if [ -z "$LAST_STABLE" ]; then
             echo "::warning::No prior stable tag found — skipping next release"
@@ -145,22 +151,47 @@ jobs:
             exit 0
           fi
 
-          # Most recent next/* tag by commit date (empty if no nightlies have shipped yet).
-          LAST_NEXT=$(git for-each-ref --sort=-creatordate --format='%(refname:short)' 'refs/tags/next/*' | head -1 || true)
-
-          # Gate base: whichever of {last stable, last next} sits later in history.
-          # If LAST_STABLE is an ancestor of LAST_NEXT, the nightly is fresher (BASE = nightly).
-          # Otherwise the stable was tagged on a later commit (BASE = stable — typical right
-          # after a release cut). This single check replaces both the prior "commits since
-          # stable" gate and the SHA-idempotency lookup: when nothing relevant has landed
-          # since the most recent release, RELEVANT=0 and we skip.
-          if [ -n "$LAST_NEXT" ] && git merge-base --is-ancestor "$LAST_STABLE" "$LAST_NEXT"; then
-            BASE="$LAST_NEXT"
-          else
-            BASE="$LAST_STABLE"
+          # Detect an active RC cycle. An RC is "active" once vX.Y.Z-rc.N has been cut
+          # (human release via the stable path) and the final vX.Y.Z hasn't shipped yet.
+          # During an active RC, nightlies follow the rc format (X.Y.Z-rc.{N+1}) under the
+          # @rc dist-tag instead of the usual {nextMinor}.0-next.N under @next.
+          LAST_RC_TAG=$(git tag --list 'v[0-9]*-rc.*' --sort=-v:refname | head -1 || true)
+          RC_ACTIVE=""
+          if [ -n "$LAST_RC_TAG" ]; then
+            RC_BASE=${LAST_RC_TAG#v}; RC_BASE=${RC_BASE%%-rc.*}   # v1.0.0-rc.1 -> 1.0.0
+            if git rev-parse -q --verify "refs/tags/v${RC_BASE}^{}" >/dev/null 2>&1; then
+              echo "Final v${RC_BASE} already tagged — RC cycle is closed"
+            else
+              RC_ACTIVE=1
+            fi
           fi
 
-          echo "Last stable: $LAST_STABLE; last next: ${LAST_NEXT:-none}; gate base: $BASE"
+          if [ -n "$RC_ACTIVE" ]; then
+            TARGET="$RC_BASE"; LABEL="rc"; DIST_TAG="rc"; TAG_NS="rc"
+          else
+            LAST_VERSION=${LAST_STABLE#v}
+            # @next always signals the upcoming minor, regardless of whether the next
+            # stable ends up a patch or minor — keeps 0.10.0-next.1, 0.10.0-next.2, …
+            # stable across a cycle; the base rolls forward when the real release ships.
+            TARGET=$(node -e "const [M,m]='${LAST_VERSION}'.split('.').map(Number); console.log(\`\${M}.\${m+1}.0\`)")
+            LABEL="next"; DIST_TAG="next"; TAG_NS="next"
+          fi
+
+          # Gate base: the most recent release marker of ANY kind reachable from HEAD —
+          # last stable (vX.Y.Z), last RC (vX.Y.Z-rc.N or rc/…), or last nightly (next/…).
+          # Tags are scanned newest-first; the first that is an ancestor of HEAD wins, so
+          # the relevant-commit window below spans only what landed since the last release.
+          # Replaces the prior commits-since-stable + SHA-idempotency checks: when nothing
+          # relevant landed since the most recent release, RELEVANT=0 and we skip.
+          BASE=""
+          while read -r t; do
+            [ -z "$t" ] && continue
+            if git merge-base --is-ancestor "$t" HEAD 2>/dev/null; then BASE="$t"; break; fi
+          done < <(git for-each-ref --sort=-creatordate --format='%(refname:short)' \
+                     'refs/tags/v[0-9]*' 'refs/tags/next/*' 'refs/tags/rc/*')
+          [ -z "$BASE" ] && BASE="$LAST_STABLE"
+
+          echo "Last stable: ${LAST_STABLE:-none}; last rc: ${LAST_RC_TAG:-none} (active: ${RC_ACTIVE:-no}); target: ${TARGET}-${LABEL}; gate base: $BASE"
 
           # Bump-worthy commit types per nx.json release.conventionalCommits:
           # feat, fix, perf, revert. Everything else (docs/ci/chore/test/build/style/refactor)
@@ -199,22 +230,16 @@ jobs:
           # version doesn't embed the SHA, so pinning the ref is our only defense.)
           FULL_SHA=$(git rev-parse HEAD)
 
-          LAST_VERSION=${LAST_STABLE#v}
-          # Bump minor: @next always signals "the upcoming minor release", regardless
-          # of whether the next stable ends up being a patch or a minor. This keeps
-          # versions like 0.8.0-next.1, 0.8.0-next.2, … stable across a release cycle.
-          # When the real 0.8.0 (or 0.9.0) ships, the base rolls forward and the
-          # counter resets.
-          NEXT_MINOR=$(node -e "const [M,m,p]='${LAST_VERSION}'.split('.').map(Number); console.log(\`\${M}.\${m+1}.0\`)")
-
-          # Monotonic counter per base version: 0.8.0-next.1, 0.8.0-next.2, ...
-          # Query *every* library package and take the max — if one package failed
-          # to publish on a prior run the others advanced, and we must not collide
-          # with the highest existing counter anywhere. Commit traceability is still
-          # recoverable via the publish timestamp + the npm provenance attestation
-          # (records exact SHA).
-          # We MUST succeed at every package lookup — fail loud rather than default
-          # to counter=1, which could clobber a real previous publish on a transient error.
+          # Monotonic counter per (target, label): TARGET.0-next.N normally, or
+          # TARGET-rc.N during an active RC cycle (where TARGET already carries the rc's
+          # M.m.p, e.g. 1.0.0). The RC counter naturally continues past the human-cut
+          # rc.1 because that version is on npm too.
+          # Query *every* library package and take the max — if one package failed to
+          # publish on a prior run the others advanced, and we must not collide with the
+          # highest existing counter anywhere. Commit traceability stays recoverable via
+          # the publish timestamp + the npm provenance attestation (records exact SHA).
+          # We MUST succeed at every package lookup — fail loud rather than default to
+          # counter=1, which could clobber a real previous publish on a transient error.
           MAX_COUNTER=0
           for pkg in ${{ env.LIBRARY_PACKAGES }}; do
             if ! VERSIONS_JSON=$(npm view "@ng-forge/${pkg}" versions --json); then
@@ -222,12 +247,12 @@ jobs:
               exit 1
             fi
             # Regex-escape the base via env var inside Node — avoids leaving
-            # literal dots as wildcards in the pattern (0x8x0 would otherwise match).
+            # literal dots as wildcards in the pattern (1x0x0 would otherwise match).
             PKG_MAX=$(echo "$VERSIONS_JSON" \
-              | NEXT_MINOR="$NEXT_MINOR" node -e "
+              | TARGET="$TARGET" LABEL="$LABEL" node -e "
                 const v=JSON.parse(require('fs').readFileSync(0,'utf8'));
-                const base=process.env.NEXT_MINOR.replace(/\\./g, '\\\\.');
-                const re=new RegExp('^'+base+'-next\\\\.(\\\\d+)\$');
+                const base=process.env.TARGET.replace(/\\./g, '\\\\.');
+                const re=new RegExp('^'+base+'-'+process.env.LABEL+'\\\\.(\\\\d+)\$');
                 const nums=(Array.isArray(v)?v:[v]).map(x=>{const m=re.exec(x);return m?+m[1]:-1}).filter(n=>n>=0);
                 console.log(nums.length?Math.max(...nums):0);
               ")
@@ -236,14 +261,16 @@ jobs:
             fi
           done
           COUNTER=$((MAX_COUNTER + 1))
-          NEXT_VERSION="${NEXT_MINOR}-next.${COUNTER}"
+          NEXT_VERSION="${TARGET}-${LABEL}.${COUNTER}"
 
-          echo "Proposed next version: $NEXT_VERSION"
+          echo "Proposed next version: $NEXT_VERSION (dist-tag: $DIST_TAG)"
 
           echo "should_publish=true" >> "$GITHUB_OUTPUT"
           echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
           echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
           echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+          echo "dist_tag=${DIST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "tag_ns=${TAG_NS}" >> "$GITHUB_OUTPUT"
 
       - name: Verify CI passed on the candidate commit
         # Skip @next publishes when main's CI is red. The stable path already has this
@@ -338,21 +365,35 @@ jobs:
         id: resolve
         env:
           GATE_VERSION: ${{ needs.next-gate.outputs.version }}
+          GATE_DIST_TAG: ${{ needs.next-gate.outputs.dist_tag }}
+          GATE_TAG_NS: ${{ needs.next-gate.outputs.tag_ns }}
           # Single source of truth for "are we on the @next path?"
           IS_NEXT_PATH: ${{ github.event_name == 'schedule' || inputs.mode == 'next' }}
         run: |
           if [ "$IS_NEXT_PATH" = "true" ]; then
             VERSION="$GATE_VERSION"
-            DIST_TAG="next"
+            DIST_TAG="$GATE_DIST_TAG"          # 'next', or 'rc' during an active RC cycle
+            PRERELEASE=true
+            RELEASE_TAG="${GATE_TAG_NS}/${VERSION}"   # next/… or rc/…
           else
             # Stable dispatch (dry-run or publish): sources were already bumped by /release PR.
+            # A prerelease version (e.g. 1.0.0-rc.1) must NOT land on @latest — route rc
+            # versions to @rc, any other prerelease id to @next, and flag the GitHub
+            # release as a prerelease. Only a clean M.m.p goes to @latest.
             VERSION=$(node -p "require('./packages/dynamic-forms/package.json').version")
-            DIST_TAG="latest"
+            case "$VERSION" in
+              *-rc.*) DIST_TAG="rc";     PRERELEASE=true  ;;
+              *-*)    DIST_TAG="next";   PRERELEASE=true  ;;
+              *)      DIST_TAG="latest"; PRERELEASE=false ;;
+            esac
+            RELEASE_TAG="v${VERSION}"
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_ENV"
+          echo "PRERELEASE=$PRERELEASE" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "📦 Releasing $VERSION (dist-tag: $DIST_TAG)"
+          echo "📦 Releasing $VERSION (dist-tag: $DIST_TAG, prerelease: $PRERELEASE, tag: $RELEASE_TAG)"
 
       - name: Generate GitHub App Token
         # Generated up-front so the job fails before any irreversible action if App config
@@ -486,7 +527,7 @@ jobs:
           name: Release v${{ env.VERSION }}
           body_path: RELEASE_NOTES.md
           draft: false
-          prerelease: false
+          prerelease: ${{ env.PRERELEASE }}
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
@@ -504,7 +545,7 @@ jobs:
           CHANGELOG=$(git log "${BASE}..${NEXT_SHA}" --pretty=format:"- %s (%h)" --no-merges)
 
           cat > NEXT_RELEASE_NOTES.md <<EOF
-          Nightly @next prerelease — published from \`main\`.
+          Nightly @${DIST_TAG} prerelease — published from \`main\`.
 
           ## Changes since ${BASE}
 
@@ -513,8 +554,9 @@ jobs:
 
       - name: Create GitHub Prerelease (@next)
         # Replaces the prior manual `git tag` step. action-gh-release creates the
-        # `next/<version>` tag at the gate SHA via the GitHub API — same idempotency
-        # marker that next-gate looks up, so re-runs on the same commit still become no-ops.
+        # `next/<version>` (or `rc/<version>` during an RC cycle) tag at the gate SHA via
+        # the GitHub API — the same kind of marker next-gate's BASE scan looks up, so
+        # re-runs on the same commit still become no-ops.
         # Tag-after-publish (not before): if this fails, worst case is one duplicate
         # publish on the next run — strictly better than the tag-first failure mode where
         # a phantom tag could permanently block future publishes.
@@ -530,7 +572,7 @@ jobs:
         continue-on-error: true
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: next/${{ env.VERSION }}
+          tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: ${{ needs.next-gate.outputs.sha }}
           name: Nightly v${{ env.VERSION }}
           body_path: NEXT_RELEASE_NOTES.md
@@ -557,13 +599,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "$DIST_TAG" = "next" ]; then
-            TAG="next/${VERSION}"
-          else
-            TAG="v${VERSION}"
-          fi
-          echo "Dispatching discord-release-notify.yml for tag: $TAG"
-          gh workflow run discord-release-notify.yml -f tag="$TAG"
+          # RELEASE_TAG already carries the correct namespace for every path:
+          # v<ver> (stable + rc cut), next/<ver> (nightly), rc/<ver> (rc nightly).
+          echo "Dispatching discord-release-notify.yml for tag: $RELEASE_TAG"
+          gh workflow run discord-release-notify.yml -f tag="$RELEASE_TAG"
 
       - name: Summary
         run: |
