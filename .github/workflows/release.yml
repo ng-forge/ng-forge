@@ -175,6 +175,13 @@ jobs:
 
           RC_TARGET=""
           if [ -n "${RC_TARGET_INPUT:-}" ]; then
+            # Must be a bare M.m.p (no leading v, no suffix) — it becomes the rc base.
+            # A bootstrap bypasses the commit gate and goes straight to publish, so reject
+            # a typo here rather than failing opaquely later at `nx release version`.
+            if ! [[ "$RC_TARGET_INPUT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Invalid rc target '$RC_TARGET_INPUT' — expected bare M.m.p (e.g. 1.0.0)"
+              exit 1
+            fi
             RC_TARGET="$RC_TARGET_INPUT"               # explicit bootstrap / re-target
           elif [ -n "$LATEST_RC" ]; then
             CAND=${LATEST_RC%%-rc.*}                    # 1.0.0-rc.2 -> 1.0.0
@@ -494,7 +501,10 @@ jobs:
         # runner, so ordering before publish is fine. Earlier placement also means
         # `RELEASE_NOTES.md` is ready when the GitHub Release step runs below.
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*next*' --exclude '*nightly*' 2>/dev/null || echo "")
+          # `*-*` excludes every prerelease (matches the gate's LAST_STABLE), so a stable
+          # changelog spans since the last STABLE — never truncated to since-last-rc even
+          # if a v…-rc.… tag was ever cut via the prerelease safety-net path.
+          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || echo "")
 
           if [ -z "$PREV_TAG" ]; then
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
