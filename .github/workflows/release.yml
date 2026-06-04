@@ -418,10 +418,18 @@ jobs:
             esac
             RELEASE_TAG="v${VERSION}"
           fi
+          # GitHub release title by channel: rc reads "Release candidate", @next stays
+          # "Nightly", stable is "Release".
+          case "$DIST_TAG" in
+            rc)   RELEASE_NAME="Release candidate v${VERSION}" ;;
+            next) RELEASE_NAME="Nightly v${VERSION}" ;;
+            *)    RELEASE_NAME="Release v${VERSION}" ;;
+          esac
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "DIST_TAG=$DIST_TAG" >> "$GITHUB_ENV"
           echo "PRERELEASE=$PRERELEASE" >> "$GITHUB_ENV"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=$RELEASE_NAME" >> "$GITHUB_ENV"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "📦 Releasing $VERSION (dist-tag: $DIST_TAG, prerelease: $PRERELEASE, tag: $RELEASE_TAG)"
 
@@ -607,7 +615,7 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: ${{ needs.next-gate.outputs.sha }}
-          name: Nightly v${{ env.VERSION }}
+          name: ${{ env.RELEASE_NAME }}
           body_path: NEXT_RELEASE_NOTES.md
           prerelease: true
           draft: false
