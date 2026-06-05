@@ -135,7 +135,7 @@ Override form-level defaults on individual buttons using the `logic` array:
 }
 ```
 
-**Note:** `type: 'submit'` is a UI-integration convenience type that pre-configures the button with `SubmitEvent`. Use `type: 'button'` with `event: SubmitEvent` for the core API.
+**Note:** `type: 'submit'` is a UI-integration convenience type that pre-configures the button with `FormSubmitEvent`. Use `type: 'button'` with `event: FormSubmitEvent` for the core API.
 
 ### FormStateCondition
 

@@ -76,6 +76,7 @@ export * from './lib/mappers/row/row-field-mapper';
 export * from './lib/mappers/text/text-field-mapper';
 export * from './lib/mappers/types';
 export * from './lib/models/addon/addon-action';
+export * from './lib/models/addon/addon-action-registry';
 export * from './lib/models/addon/addon-def';
 export * from './lib/models/addon/addon-kind';
 export * from './lib/models/addon/addon-slot';

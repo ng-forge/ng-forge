@@ -1,17 +1,13 @@
 import { computed, inject, Signal } from '@angular/core';
-import {
-  FieldWithValidation,
-  NextPageEvent,
-  PreviousPageEvent,
-  resolveNextButtonDisabled,
-  resolveSubmitButtonDisabled,
-} from '@ng-forge/dynamic-forms';
+import { FieldWithValidation, FormSubmitEvent, NextPageEvent, PreviousPageEvent } from '@ng-forge/dynamic-forms';
 import {
   buildBaseInputs,
   DEFAULT_PROPS,
   FieldDef,
   injectFieldSignalContext,
   FORM_OPTIONS,
+  resolveNextButtonDisabled,
+  resolveSubmitButtonDisabled,
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
@@ -22,7 +18,7 @@ import { resolveHiddenValue } from './non-field-logic.utils';
 // =============================================================================
 
 /** Base interface for navigation button fields (submit, next, previous). */
-export type BaseNavigationButtonField<TProps = unknown> = ButtonField<TProps, SubmitEvent | NextPageEvent | PreviousPageEvent> & {
+export type BaseNavigationButtonField<TProps = unknown> = ButtonField<TProps, FormSubmitEvent | NextPageEvent | PreviousPageEvent> & {
   type: string;
   /** Logic rules for dynamic disabled state */
   logic?: FieldWithValidation['logic'];

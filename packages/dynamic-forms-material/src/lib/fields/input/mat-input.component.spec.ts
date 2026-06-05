@@ -1,12 +1,7 @@
 import { Injector, signal, type Type } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import {
-  ADDON_ACTION_REGISTRY,
-  ADDON_KIND_COMPONENT_CACHE,
-  ADDON_KIND_REGISTRY,
-  type AddonKindDefinition,
-  DynamicFormLogger,
-} from '@ng-forge/dynamic-forms';
+import { type AddonKindDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import {
   FIELD_SIGNAL_CONTEXT,
   type FieldSignalContext,

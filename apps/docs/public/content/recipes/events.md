@@ -88,7 +88,7 @@ For observing events from a host component, use the output bindings exposed dire
 | Output                          | Emits                                                     |
 | ------------------------------- | --------------------------------------------------------- |
 | `(events)`                      | Every form event (full stream)                            |
-| `(submitted)`                   | Form value when submitted **and valid** (SubmitEvent)     |
+| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent) |
 | `(reset)`                       | When the form is reset to default values                  |
 | `(cleared)`                     | When the form is cleared to empty state                   |
 | `(onPageChange)`                | PageChangeEvent on each wizard page navigation            |
@@ -153,7 +153,7 @@ export class MyFormComponent {
 
 ```typescript
 import { Component, inject } from '@angular/core';
-import { SubmitEvent } from '@ng-forge/dynamic-forms';
+import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
 import { EventBus } from '@ng-forge/dynamic-forms/integration';
 
 @Component({
@@ -164,7 +164,7 @@ export class CustomSubmitButton {
   private readonly eventBus = inject(EventBus);
 
   submit() {
-    this.eventBus.dispatch(SubmitEvent);
+    this.eventBus.dispatch(FormSubmitEvent);
   }
 }
 ```
@@ -187,12 +187,12 @@ export class CustomFieldComponent {
 
 ## Built-in Events
 
-### SubmitEvent
+### FormSubmitEvent
 
 Fired when form is submitted.
 
 ```typescript
-eventBus.on<SubmitEvent>('submit').subscribe(() => {
+eventBus.on<FormSubmitEvent>('submit').subscribe(() => {
   console.log('Form submitted');
 });
 ```
@@ -364,7 +364,7 @@ eventBus.dispatch(AddContactEvent);
 Subscribe to multiple event types by passing an array of type strings:
 
 ```typescript
-eventBus.on<SubmitEvent | PageChangeEvent | NextPageEvent>(['submit', 'page-change', 'next-page']).subscribe((event) => {
+eventBus.on<FormSubmitEvent | PageChangeEvent | NextPageEvent>(['submit', 'page-change', 'next-page']).subscribe((event) => {
   switch (event.type) {
     case 'submit':
       handleSubmit();
@@ -465,7 +465,7 @@ Use the `hasFormValue()` type guard to safely access the attached value:
 ```typescript
 import { hasFormValue } from '@ng-forge/dynamic-forms';
 
-eventBus.on<SubmitEvent>('submit').subscribe((event) => {
+eventBus.on<FormSubmitEvent>('submit').subscribe((event) => {
   if (hasFormValue(event)) {
     // TypeScript knows event.formValue exists
     console.log('Form value at submission:', event.formValue);

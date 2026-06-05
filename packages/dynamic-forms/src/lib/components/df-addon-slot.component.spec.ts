@@ -5,7 +5,7 @@ import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 import { AnyAddon, TextAddon } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
+import { ADDON_KIND_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
 import { DfAddonSlot } from './df-addon-slot.component';
 
 @Component({ template: 'icon-rendered' })

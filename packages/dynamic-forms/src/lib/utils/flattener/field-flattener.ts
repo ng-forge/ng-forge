@@ -2,7 +2,7 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { isRowField } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isArrayField } from '@ng-forge/dynamic-forms/internal';
-import { isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
+import { isGenericContainerField } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition, getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
 import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 
@@ -95,7 +95,7 @@ export function flattenFields(
     // Step 2: Check if this is a row or container field that should be preserved for DOM rendering
     // Row fields need to render their container element for grid layouts to work
     // Container fields need to render their container for the wrapper chain
-    if (options.preserveRows && (isRowField(field) || isContainerTypedField(field))) {
+    if (options.preserveRows && (isRowField(field) || isGenericContainerField(field))) {
       if (field.fields) {
         // Recursively flatten children while preserving row structure
         const flattenedChildren = flattenFields(normalizeFieldsArray(field.fields as FieldDef<unknown>[]), registry, options);

@@ -26,7 +26,7 @@ import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormClearEvent } from '../events/constants/form-clear.event';
 import { FormResetEvent } from '../events/constants/form-reset.event';
-import { SubmitEvent } from '../events/constants/submit.event';
+import { FormSubmitEvent } from '../events/constants/submit.event';
 import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
@@ -780,7 +780,7 @@ export class FormStateManager<
       return this.fieldsSource().length === this.resolvedFields().length;
     });
 
-    this.submitted$ = this.eventBus.on<SubmitEvent>('submit').pipe(
+    this.submitted$ = this.eventBus.on<FormSubmitEvent>('submit').pipe(
       filter(() => {
         if (!this.valid()) {
           this.logger.debug('Form submitted while invalid, not emitting to (submitted) output');
@@ -896,7 +896,7 @@ export class FormStateManager<
 
   /** Triggers form submission. */
   submit(): void {
-    this.eventBus.dispatch(SubmitEvent);
+    this.eventBus.dispatch(FormSubmitEvent);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

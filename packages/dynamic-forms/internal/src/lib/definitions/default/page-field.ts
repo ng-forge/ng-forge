@@ -2,7 +2,7 @@ import { FieldDef } from '../base/field-def';
 import { PageAllowedChildren } from '../../models/types/nesting-constraints';
 import { isRowField } from './row-field';
 import { isGroupField } from './group-field';
-import { isContainerTypedField } from './container-field';
+import { isGenericContainerField } from './container-field';
 import { ContainerLogicConfig } from '../base/container-logic-config';
 
 /**
@@ -49,7 +49,7 @@ export function validatePageNesting(pageField: PageField): boolean {
 /** Type guard to check if a field is a container with fields property */
 function isContainerWithFields(field: FieldDef<unknown>): field is FieldDef<unknown> & { readonly fields: readonly FieldDef<unknown>[] } {
   return (
-    (isRowField(field) || isGroupField(field) || isContainerTypedField(field)) &&
+    (isRowField(field) || isGroupField(field) || isGenericContainerField(field)) &&
     'fields' in field &&
     Array.isArray((field as { fields: unknown }).fields)
   );

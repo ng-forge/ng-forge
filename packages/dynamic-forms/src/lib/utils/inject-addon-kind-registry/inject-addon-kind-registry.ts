@@ -1,14 +1,7 @@
-import { inject, InjectionToken, Type } from '@angular/core';
+import { inject, Type } from '@angular/core';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
-
-/**
- * Cache for resolved addon-kind components.
- *
- * @internal
- */
-export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE');
 
 /**
  * Public shape returned by {@link injectAddonKindRegistry}. Pinned explicitly

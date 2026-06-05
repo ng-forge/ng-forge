@@ -22,7 +22,7 @@ import { createSubmissionHandler } from './utils/submission-handler/submission-h
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { SubmitEvent } from './events/constants/submit.event';
+import { FormSubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
 import { setupInitializationTracking } from '@ng-forge/dynamic-forms/internal';
 import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
@@ -251,7 +251,7 @@ export class DynamicForm<
   /** Emits when form dirty state changes. */
   dirtyChange = outputFromObservable(toObservable(this.dirty));
 
-  /** Emits form values when submitted (via SubmitEvent) and form is valid. */
+  /** Emits form values when submitted (via FormSubmitEvent) and form is valid. */
   submitted = outputFromObservable(this.stateManager.submitted$);
 
   /** Emits when form is reset to default values. */
@@ -305,7 +305,7 @@ export class DynamicForm<
    */
   protected onNativeSubmit(event: Event): void {
     event.preventDefault();
-    this.eventBus.dispatch(SubmitEvent);
+    this.eventBus.dispatch(FormSubmitEvent);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

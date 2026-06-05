@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { ADDON_ACTION_REGISTRY, DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { type WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, type WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler } from './addon-preset-handler.token';
 import { injectNgForgeAddonAction, NgForgeAddonAction, NgForgeAddonActionBase } from './ng-forge-addon-action.directive';
 

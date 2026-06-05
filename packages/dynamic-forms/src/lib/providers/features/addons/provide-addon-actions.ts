@@ -1,5 +1,5 @@
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
-import { AddonActionHandler, ADDON_ACTION_HANDLERS } from './addon-action-registry.token';
+import { AddonActionHandler, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Typed feature returned by {@link provideAddonActions}. Carries the

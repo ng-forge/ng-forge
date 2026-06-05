@@ -4,7 +4,7 @@ import { form, type FieldTree } from '@angular/forms/signals';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Subscription } from 'rxjs';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { SubmitEvent } from '../../events/constants/submit.event';
+import { FormSubmitEvent } from '../../events/constants/submit.event';
 import type { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import type { Logger } from '@ng-forge/dynamic-forms/internal';
 import { createSubmissionHandler } from './submission-handler';
@@ -44,7 +44,7 @@ describe('createSubmissionHandler', () => {
     });
   }
 
-  const dispatchSubmit = () => runInInjectionContext(injector, () => eventBus.dispatch(new SubmitEvent()));
+  const dispatchSubmit = () => runInInjectionContext(injector, () => eventBus.dispatch(new FormSubmitEvent()));
 
   it('skips the submission action when the form is not valid (invalid OR pending async validators)', async () => {
     const action = vi.fn().mockResolvedValue(undefined);
@@ -77,8 +77,8 @@ describe('createSubmissionHandler', () => {
     const action = vi.fn().mockReturnValue(gate);
     const sub = start(true, action);
     runInInjectionContext(injector, () => {
-      eventBus.dispatch(new SubmitEvent());
-      eventBus.dispatch(new SubmitEvent());
+      eventBus.dispatch(new FormSubmitEvent());
+      eventBus.dispatch(new FormSubmitEvent());
     });
     await tick(15);
     expect(action).toHaveBeenCalledTimes(1);

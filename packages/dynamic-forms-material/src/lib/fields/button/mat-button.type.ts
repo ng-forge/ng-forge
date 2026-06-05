@@ -3,6 +3,7 @@ import {
   ArrayAllowedChildren,
   FieldComponent,
   FormEvent,
+  FormSubmitEvent,
   InsertArrayItemEvent,
   NextPageEvent,
   PopArrayItemEvent,
@@ -25,7 +26,7 @@ export type MatButtonComponent<TEvent extends FormEvent> = FieldComponent<MatBut
 /** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
-export type MatSubmitButtonField = Omit<MatButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type MatSubmitButtonField = Omit<MatButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'submit';
 };
 

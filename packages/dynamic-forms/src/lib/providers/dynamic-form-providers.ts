@@ -1,7 +1,6 @@
 import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider, Type } from '@angular/core';
-import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_COMPONENT_CACHE } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
 import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';

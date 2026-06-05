@@ -3,6 +3,7 @@ import {
   ArrayAllowedChildren,
   FieldComponent,
   FormEvent,
+  FormSubmitEvent,
   InsertArrayItemEvent,
   NextPageEvent,
   PopArrayItemEvent,
@@ -31,7 +32,7 @@ export type PrimeButtonComponent<TEvent extends FormEvent = FormEvent> = FieldCo
 /** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
-export type PrimeSubmitButtonField = Omit<PrimeButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeSubmitButtonField = Omit<PrimeButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'submit';
 };
 

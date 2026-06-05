@@ -3,6 +3,7 @@ import {
   ArrayAllowedChildren,
   FieldComponent,
   FormEvent,
+  FormSubmitEvent,
   InsertArrayItemEvent,
   NextPageEvent,
   PopArrayItemEvent,
@@ -30,7 +31,7 @@ export type IonicButtonComponent<TEvent extends FormEvent> = FieldComponent<Ioni
 /** Specific button field types with preconfigured events */
 
 /** Submit button field - automatically disabled when form is invalid */
-export type IonicSubmitButtonField = Omit<IonicButtonField<SubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicSubmitButtonField = Omit<IonicButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
   type: 'submit';
 };
 

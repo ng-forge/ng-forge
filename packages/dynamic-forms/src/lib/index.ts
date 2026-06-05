@@ -7,7 +7,7 @@
  * - DynamicForm component
  * - provideDynamicForm() for configuration
  * - FormConfig and field definition types
- * - Event classes (SubmitEvent, PageChangeEvent, etc.)
+ * - Event classes (FormSubmitEvent, PageChangeEvent, etc.)
  *
  * ## Integration API (for UI library authors)
  * Import from '@ng-forge/dynamic-forms/integration' for:
@@ -56,7 +56,7 @@ export { withLegacyStatusClasses } from './providers/features/legacy-status-clas
 
 // Wrapper Types
 export type { WrapperTypeDefinition, FieldWrapper } from '@ng-forge/dynamic-forms/internal';
-export { isWrapperTypeDefinition, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+export { isWrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 
 // Wrapper Registration DX
 export { wrapperProps } from './wrappers/wrapper-props';
@@ -89,7 +89,7 @@ export type {
   OrphanAddonActionContext,
   RegisteredActionRef,
 } from '@ng-forge/dynamic-forms/internal';
-export { ADDON_KIND_REGISTRY, DF_FIELD_TEMPLATES, isFieldBoundContext } from '@ng-forge/dynamic-forms/internal';
+export { DF_FIELD_TEMPLATES, isFieldBoundContext } from '@ng-forge/dynamic-forms/internal';
 export type { DynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Components & Directives
@@ -102,7 +102,7 @@ export { runPresetAction } from './addons/run-preset-action';
 export type { PresetCollaborators } from './addons/run-preset-action';
 
 // Addon Registry helpers (for adapter authors)
-export { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
+export { injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
 export { injectFieldsSupportingAddons } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
 export type { FieldAddonSupportEntry } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
 export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
@@ -112,18 +112,9 @@ export { withCustomAddon } from './providers/features/addons/with-custom-addon';
 export { provideAddonActions } from './providers/features/addons/provide-addon-actions';
 export type { AddonActionsFeature } from './providers/features/addons/provide-addon-actions';
 export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
-export { ADDON_ACTION_HANDLERS, ADDON_ACTION_REGISTRY } from './providers/features/addons/addon-action-registry.token';
-export type { AddonActionHandler } from './providers/features/addons/addon-action-registry.token';
 
 // Addon Validation
-export {
-  formatAddonWarning,
-  logAddonWarnings,
-  sanitizeFormConfig,
-  sanitizeFormConfigPure,
-  validateFieldAddons,
-  walkAndValidateAddons,
-} from './utils/validate-form-config/validate-form-config';
+export { sanitizeFormConfig } from './utils/validate-form-config/validate-form-config';
 export type { AddonWarning, SanitizedFormConfig, SanitizeFormConfigOptions } from './utils/validate-form-config/validate-form-config';
 
 // Configuration Types
@@ -137,17 +128,6 @@ export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, Nex
 export type { FormStateCondition } from '@ng-forge/dynamic-forms/internal';
 export { isFormStateCondition } from '@ng-forge/dynamic-forms/internal';
 
-// Logic Resolvers
-export {
-  resolveSubmitButtonDisabled,
-  resolveNextButtonDisabled,
-  resolveNonFieldHidden,
-  resolveNonFieldDisabled,
-  evaluateNonFieldHidden,
-  evaluateNonFieldDisabled,
-} from './core/logic';
-export type { ButtonLogicContext, NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from './core/logic';
-
 // Abstract Base Field Types (for extension by UI libraries)
 export type {
   BaseCheckedField,
@@ -160,7 +140,6 @@ export type {
   ValueFieldComponent,
   ValueType,
 } from '@ng-forge/dynamic-forms/internal';
-export { isCheckedField, isValueField } from '@ng-forge/dynamic-forms/internal';
 
 // Built-in Container Field Types
 export type {
@@ -177,7 +156,7 @@ export type {
   WrapperConfig,
   CssWrapper,
 } from '@ng-forge/dynamic-forms/internal';
-export { isRowField, isSimplifiedArrayField, isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
+export { isRowField, isSimplifiedArrayField } from '@ng-forge/dynamic-forms/internal';
 
 // Validation Config Types
 export type {
@@ -239,7 +218,6 @@ export type {
   GroupAllowedChildren,
   InferFormValue,
   PageAllowedChildren,
-  Prettify,
   RowAllowedChildren,
   WithInputSignals,
 } from '@ng-forge/dynamic-forms/internal';
@@ -269,7 +247,7 @@ export {
   PreviousPageEvent,
   RemoveAtIndexEvent,
   ShiftArrayItemEvent,
-  SubmitEvent,
+  FormSubmitEvent,
 } from './events';
 
 // Array event builder (recommended public API)
@@ -279,7 +257,7 @@ export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
 // Helpers
-export { createField, field, formConfig } from './helpers';
+export { createField, formConfig } from './helpers';
 
 // Errors
 export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';

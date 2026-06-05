@@ -36,7 +36,7 @@ export interface ContainerField<
 
 /** Type guard for ContainerField with proper type narrowing. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Type guard must accept any field type
-export function isContainerTypedField(field: FieldDef<any>): field is ContainerField {
+export function isGenericContainerField(field: FieldDef<any>): field is ContainerField {
   return (
     field.type === 'container' &&
     'wrappers' in field &&

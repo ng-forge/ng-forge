@@ -9,7 +9,7 @@ export type {
   RowAllowedChildren,
 } from './nesting-constraints';
 export { isContainerField, isDisplayOnlyField, isLeafField, isValueBearingField } from './type-guards';
-export { isArrayField, isGroupField, isPageField, isRowField, isContainerTypedField } from './type-guards';
+export { isArrayField, isGroupField, isPageField, isRowField, isGenericContainerField } from './type-guards';
 export type { FieldPathAccess } from './field-helpers';
 export type { AvailableFieldTypes, ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry';
 export type { DynamicText } from './dynamic-text';
