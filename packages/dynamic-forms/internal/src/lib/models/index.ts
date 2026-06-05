@@ -112,7 +112,7 @@ export {
   isPagedForm,
   isPageField,
   isRowField,
-  isContainerTypedField,
+  isGenericContainerField,
   isValidNonPagedForm,
   isValidPagedForm,
   isValueBearingField,

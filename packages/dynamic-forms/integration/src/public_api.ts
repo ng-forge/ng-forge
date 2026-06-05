@@ -134,8 +134,8 @@ export { NgForgeFieldHost, NgForgeActionHost } from './directives';
 // Non-Field Logic Resolvers (re-exported from @ng-forge/dynamic-forms)
 // =============================================================================
 
-export { resolveNonFieldHidden, resolveNonFieldDisabled } from '@ng-forge/dynamic-forms';
-export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms';
+export { resolveNonFieldHidden, resolveNonFieldDisabled } from '@ng-forge/dynamic-forms/internal';
+export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } from '@ng-forge/dynamic-forms/internal';
 
 // =============================================================================
 // Wrapper Authoring (re-exported from @ng-forge/dynamic-forms)
@@ -185,6 +185,7 @@ export { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 
 // Base field component contracts
 export type { ValueFieldComponent, CheckedFieldComponent } from '@ng-forge/dynamic-forms/internal';
+export { isValueField, isCheckedField } from '@ng-forge/dynamic-forms/internal';
 
 // Signal-context injection tokens
 export {
@@ -232,9 +233,10 @@ export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';
 export { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
 export { runPresetAction } from '@ng-forge/dynamic-forms';
 export type { PresetCollaborators } from '@ng-forge/dynamic-forms';
-export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms';
-export type { AddonActionHandler } from '@ng-forge/dynamic-forms';
+export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms/internal';
+export type { AddonActionHandler } from '@ng-forge/dynamic-forms/internal';
 export { ADDON_KIND_DEFINITIONS } from '@ng-forge/dynamic-forms';
-export { ADDON_KIND_REGISTRY, ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from '@ng-forge/dynamic-forms';
+export { ADDON_KIND_REGISTRY, ADDON_KIND_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
+export { injectAddonKindRegistry } from '@ng-forge/dynamic-forms';
 export { injectFieldsSupportingAddons } from '@ng-forge/dynamic-forms';
 export type { FieldAddonSupportEntry } from '@ng-forge/dynamic-forms';

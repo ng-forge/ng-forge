@@ -1,17 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { SubmitEvent } from './submit.event';
+import { FormSubmitEvent } from './submit.event';
 import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
-describe('SubmitEvent', () => {
+describe('FormSubmitEvent', () => {
   it('should create event with correct type', () => {
-    const event = new SubmitEvent();
+    const event = new FormSubmitEvent();
 
-    expect(event).toBeInstanceOf(SubmitEvent);
+    expect(event).toBeInstanceOf(FormSubmitEvent);
     expect(event.type).toBe('submit');
   });
 
   it('should implement FormEvent interface', () => {
-    const event = new SubmitEvent();
+    const event = new FormSubmitEvent();
     const formEvent: FormEvent = event;
 
     expect(formEvent.type).toBe('submit');

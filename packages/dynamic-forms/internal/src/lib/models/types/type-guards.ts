@@ -3,7 +3,7 @@ import { isPageField } from '../../definitions/default/page-field';
 import { isRowField } from '../../definitions/default/row-field';
 import { isGroupField } from '../../definitions/default/group-field';
 import { isArrayField } from '../../definitions/default/array-field';
-import { isContainerTypedField } from '../../definitions/default/container-field';
+import { isGenericContainerField } from '../../definitions/default/container-field';
 import { ContainerFieldTypes, LeafFieldTypes, RegisteredFieldTypes } from '../registry/field-registry';
 
 /**
@@ -60,4 +60,4 @@ export function isDisplayOnlyField(field: RegisteredFieldTypes): boolean {
 }
 
 // Re-export the specific type guards for convenience
-export { isPageField, isRowField, isGroupField, isArrayField, isContainerTypedField };
+export { isPageField, isRowField, isGroupField, isArrayField, isGenericContainerField };

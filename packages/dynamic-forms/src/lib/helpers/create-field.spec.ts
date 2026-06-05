@@ -1,4 +1,4 @@
-import { createField, field } from './create-field';
+import { createField } from './create-field';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
 describe('createField', () => {
@@ -184,12 +184,6 @@ describe('createField', () => {
           template: [{ type: 'input', key: 'name' }],
         } as unknown as Parameters<typeof createField>[1]),
       ).toThrow("Use 'fields' (NOT 'template')");
-    });
-  });
-
-  describe('field alias', () => {
-    it('should be an alias for createField', () => {
-      expect(field).toBe(createField);
     });
   });
 });

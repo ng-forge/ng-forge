@@ -2,7 +2,7 @@ import { Signal } from '@angular/core';
 import { FieldTree, submit } from '@angular/forms/signals';
 import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { SubmitEvent } from '../../events/constants/submit.event';
+import { FormSubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import type { InferFormValue } from '@ng-forge/dynamic-forms/internal';
@@ -67,7 +67,7 @@ export function createSubmissionHandler<
   // is in-flight is silently dropped rather than cancelling the running Promise.
   // switchMap would unsubscribe the Observable wrapper but cannot cancel the
   // underlying Promise, causing both side effects to execute.
-  return eventBus.on<SubmitEvent>('submit').pipe(
+  return eventBus.on<FormSubmitEvent>('submit').pipe(
     exhaustMap(() => {
       const submissionConfig = configSignal().submission;
 

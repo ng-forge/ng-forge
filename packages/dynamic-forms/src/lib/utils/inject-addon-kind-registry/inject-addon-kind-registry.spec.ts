@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_COMPONENT_CACHE, injectAddonKindRegistry } from './inject-addon-kind-registry';
+import { ADDON_KIND_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
+import { injectAddonKindRegistry } from './inject-addon-kind-registry';
 
 @Component({ template: '' })
 class IconKindComponent {}

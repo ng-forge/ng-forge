@@ -149,19 +149,19 @@ For action / button components there's a sibling `createNgForgeActionFixture`:
 
 ```typescript
 import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/integration';
-import { SubmitEvent } from '@ng-forge/dynamic-forms';
+import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
 import SubmitButtonComponent from './my-submit-button.component';
 
-it('dispatches SubmitEvent through EventBus on click', () => {
+it('dispatches FormSubmitEvent through EventBus on click', () => {
   const { fixture, eventBus } = createNgForgeActionFixture(SubmitButtonComponent, {
     key: 'submit',
     label: 'Save',
-    event: SubmitEvent,
+    event: FormSubmitEvent,
   });
   const spy = vi.spyOn(eventBus, 'dispatch');
   fixture.detectChanges();
   fixture.nativeElement.querySelector('button').click();
-  expect(spy).toHaveBeenCalledWith(SubmitEvent);
+  expect(spy).toHaveBeenCalledWith(FormSubmitEvent);
 });
 ```
 

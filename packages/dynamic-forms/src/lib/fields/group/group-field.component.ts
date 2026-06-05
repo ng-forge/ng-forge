@@ -28,7 +28,7 @@ import { FieldSignalContext, GroupContext } from '@ng-forge/dynamic-forms/intern
 import { FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT, injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { createSchemaFromFields } from '../../core/schema-builder';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { SubmitEvent } from '../../events/constants/submit.event';
+import { FormSubmitEvent } from '../../events/constants/submit.event';
 
 /** Container component for rendering nested form groups. */
 @Component({
@@ -213,7 +213,7 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
 
   readonly validityChange = outputFromObservable(toObservable(this.valid));
   readonly dirtyChange = outputFromObservable(toObservable(this.dirty));
-  readonly submitted = outputFromObservable(this.eventBus.on<SubmitEvent>('submit'));
+  readonly submitted = outputFromObservable(this.eventBus.on<FormSubmitEvent>('submit'));
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution

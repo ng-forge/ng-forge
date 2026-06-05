@@ -23,7 +23,7 @@ import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isArrayField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField } from '@ng-forge/dynamic-forms/internal';
 import { isRowField } from '@ng-forge/dynamic-forms/internal';
-import { isContainerTypedField } from '@ng-forge/dynamic-forms/internal';
+import { isGenericContainerField } from '@ng-forge/dynamic-forms/internal';
 import { getNormalizedArrayMetadata } from '../utils/array-field/normalized-array-metadata';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isStateLogicConfig, LogicConfig } from '@ng-forge/dynamic-forms/internal';
@@ -156,7 +156,7 @@ export function mapFieldToForm(
   // Layout containers (page, row, container) - flatten children to current level.
   // Layout containers have no schema path of their own, so any hidden state on them
   // must be propagated to descendants through the cascade.
-  if (isPageField(fieldDef) || isRowField(fieldDef) || isContainerTypedField(fieldDef)) {
+  if (isPageField(fieldDef) || isRowField(fieldDef) || isGenericContainerField(fieldDef)) {
     const descendantContext = resolveDescendantContext(fieldDef, ownContext);
     mapContainerChildren(fieldDef.fields as FieldDef<unknown>[] | undefined, fieldPath, descendantContext);
     return;
@@ -196,7 +196,7 @@ function mapContainerChildren(
   const pathRecord = parentPath as Record<string, AnySchemaPath>;
 
   for (const field of fields) {
-    if (isPageField(field) || isRowField(field) || isContainerTypedField(field)) {
+    if (isPageField(field) || isRowField(field) || isGenericContainerField(field)) {
       // Layout containers can still carry their own cascading overrides that flow
       // down to their flattened descendants.
       const layoutOwn = resolveFieldOwnContext(field, inheritedContext);
@@ -389,7 +389,7 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
     } else if (
       isPageField(itemDef as FieldDef<unknown>) ||
       isRowField(itemDef as FieldDef<unknown>) ||
-      isContainerTypedField(itemDef as FieldDef<unknown>)
+      isGenericContainerField(itemDef as FieldDef<unknown>)
     ) {
       // Layout container as a single-template item: its descendants describe
       // the item's object shape. Hand it to the object-item collector wrapped
@@ -417,7 +417,7 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
 
     // Map ALL unique template fields from all object items
     for (const templateField of allObjectFields) {
-      if (isRowField(templateField) || isPageField(templateField) || isContainerTypedField(templateField)) {
+      if (isRowField(templateField) || isPageField(templateField) || isGenericContainerField(templateField)) {
         // Row/page/container templates flatten their children
         const layoutOwn = resolveFieldOwnContext(templateField, context);
         const layoutDescendant = resolveDescendantContext(templateField, layoutOwn);
@@ -462,7 +462,7 @@ function collectFieldsFromObjectItem(itemFields: readonly FieldDef<unknown>[], a
 
   for (const field of itemFields) {
     // For row/page/container fields, we need to collect their children's keys
-    if (isRowField(field) || isPageField(field) || isContainerTypedField(field)) {
+    if (isRowField(field) || isPageField(field) || isGenericContainerField(field)) {
       // Use a synthetic key for container fields to dedupe them
       const containerKey = `__container_${field.type}_${JSON.stringify(field.fields?.map((f) => f.key))}`;
       if (!seenKeys.has(containerKey)) {

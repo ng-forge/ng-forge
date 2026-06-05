@@ -1,5 +1,6 @@
 import type { Type } from '@angular/core';
-import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import { type AddonKindDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import IonicInputFieldComponent from './ionic-input.component';

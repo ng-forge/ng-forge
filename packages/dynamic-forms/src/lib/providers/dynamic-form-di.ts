@@ -26,7 +26,7 @@ import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { AsyncConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from './features/addons/addon-action-registry.token';
+import { ADDON_ACTION_REGISTRY, createAddonActionRegistry } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Always-on providers for any DynamicForm: state machine, registries, signal-context tokens.

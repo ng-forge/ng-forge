@@ -1,4 +1,4 @@
-import { InjectionToken } from '@angular/core';
+import { InjectionToken, Type } from '@angular/core';
 import { LazyComponentLoader } from '../wrapper-type';
 import { BaseAddon } from './addon-def';
 import { AddonSlot } from './addon-slot';
@@ -87,3 +87,11 @@ export const ADDON_KIND_REGISTRY = new InjectionToken<Map<string, AddonKindDefin
   providedIn: 'root',
   factory: () => new Map<string, AddonKindDefinition>(),
 });
+
+/**
+ * Cache for resolved addon-kind components. Provided at form scope by
+ * `provideDynamicForm`.
+ *
+ * @internal
+ */
+export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE');

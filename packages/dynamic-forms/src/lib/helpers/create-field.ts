@@ -139,6 +139,3 @@ export function createField<T extends AvailableFieldTypes>(type: T, config: Omit
 
   return { type, ...config } as ExtractField<T>;
 }
-
-/** Shorthand alias for createField */
-export const field = createField;

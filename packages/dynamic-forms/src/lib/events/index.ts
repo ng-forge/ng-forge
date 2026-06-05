@@ -12,7 +12,7 @@ export {
   PreviousPageEvent,
   RemoveAtIndexEvent,
   ShiftArrayItemEvent,
-  SubmitEvent,
+  FormSubmitEvent,
 } from './constants';
 export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './constants';
 
