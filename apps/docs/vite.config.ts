@@ -357,6 +357,14 @@ export default defineConfig(({ mode }) => {
             },
           },
         },
+        // Prerendering 730+ routes in parallel exhausts the 8 GB Vercel build
+        // container (SIGKILL/OOM). Serialize it: peak memory stays at one render
+        // instead of N, at the cost of a slightly slower prerender pass.
+        nitro: {
+          prerender: {
+            concurrency: 1,
+          },
+        },
         prerender: {
           routes: generatePrerenderRoutes(),
         },
