@@ -51,6 +51,9 @@ function globalStylesPlugin(): Plugin {
     const result = sass.compile(globalStylesPath, {
       loadPaths: scssLoadPaths,
       style: 'compressed',
+      // Bootstrap's own SCSS still uses deprecated color fns and @import; we
+      // can't edit vendored code, so silence deprecations from dependencies.
+      quietDeps: true,
     });
     return inlineCssImports(result.css);
   }
@@ -101,6 +104,7 @@ function adapterCssPlugin(): Plugin {
     const result = sass.compile(filePath, {
       loadPaths: scssLoadPaths,
       style: 'compressed',
+      quietDeps: true,
     });
     return inlineCssImports(result.css);
   }
@@ -299,6 +303,7 @@ export default defineConfig(({ mode }) => {
       preprocessorOptions: {
         scss: {
           loadPaths: [resolve(__dirname, '../../internal/styling/src'), resolve(__dirname, '../../packages')],
+          quietDeps: true,
         },
       },
     },
@@ -350,6 +355,15 @@ export default defineConfig(({ mode }) => {
             highlighter: {
               themes: ['material-theme-lighter', 'material-theme-darker'],
             },
+          },
+        },
+        // Prerendering 730+ routes with Nitro's default (high) concurrency
+        // overruns the 8 GB build container (SIGKILL/OOM). Cap it to the build
+        // machine's core count: enough parallelism to use both cores, few enough
+        // concurrent renders to stay within the heap cap set in vercel-build.sh.
+        nitro: {
+          prerender: {
+            concurrency: 2,
           },
         },
         prerender: {

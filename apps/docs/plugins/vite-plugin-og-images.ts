@@ -1,7 +1,7 @@
 /**
  * Vite plugin that generates per-route Open Graph images from markdown content frontmatter.
  *
- * Uses satori (JSX → SVG) + @resvg/resvg-js (SVG → PNG) to render 1200×630 social cards
+ * Uses satori (JSX → SVG) + sharp (SVG → PNG) to render 1200×630 social cards
  * styled in the Forge design language.
  *
  * Dev mode: serves images via middleware at /og/{slug}.png with caching.
@@ -12,7 +12,7 @@ import { resolve, relative } from 'node:path';
 import { readFileSync, readdirSync, statSync, watch, existsSync } from 'node:fs';
 import type { Plugin, ViteDevServer } from 'vite';
 import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
+import sharp from 'sharp';
 
 // ============================================
 // TYPES
@@ -396,26 +396,20 @@ async function renderOgImage(
     fonts,
   });
 
-  const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: OG_WIDTH },
-  });
-
-  return Buffer.from(resvg.render().asPng());
+  // satori emits an SVG sized at OG_WIDTH×OG_HEIGHT, so sharp rasterizes 1:1.
+  return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
 // ============================================
 // LOGO LOADING
 // ============================================
 
-function loadLogoDataUri(root: string): string {
+async function loadLogoDataUri(root: string): Promise<string> {
   const logoSvgPath = resolve(root, 'public/logo.svg');
   if (!existsSync(logoSvgPath)) return '';
 
   const svg = readFileSync(logoSvgPath, 'utf-8');
-  const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: 88 },
-  });
-  const png = Buffer.from(resvg.render().asPng());
+  const png = await sharp(Buffer.from(svg)).resize({ width: 88 }).png().toBuffer();
   return `data:image/png;base64,${png.toString('base64')}`;
 }
 
@@ -495,7 +489,7 @@ export function ogImagePlugin(): Plugin {
           }
 
           const fonts = loadFonts(rootDir);
-          const logo = loadLogoDataUri(rootDir);
+          const logo = await loadLogoDataUri(rootDir);
           let page: PageMeta;
 
           if (slug === 'default') {
@@ -533,7 +527,7 @@ export function ogImagePlugin(): Plugin {
     // Build: generate all OG images and emit as assets
     async generateBundle() {
       const fonts = loadFonts(rootDir);
-      const logo = loadLogoDataUri(rootDir);
+      const logo = await loadLogoDataUri(rootDir);
       const pages = collectPages(contentDir);
 
       // Add default image
