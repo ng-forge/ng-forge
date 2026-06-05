@@ -51,6 +51,9 @@ function globalStylesPlugin(): Plugin {
     const result = sass.compile(globalStylesPath, {
       loadPaths: scssLoadPaths,
       style: 'compressed',
+      // Bootstrap's own SCSS still uses deprecated color fns and @import; we
+      // can't edit vendored code, so silence deprecations from dependencies.
+      quietDeps: true,
     });
     return inlineCssImports(result.css);
   }
@@ -101,6 +104,7 @@ function adapterCssPlugin(): Plugin {
     const result = sass.compile(filePath, {
       loadPaths: scssLoadPaths,
       style: 'compressed',
+      quietDeps: true,
     });
     return inlineCssImports(result.css);
   }
@@ -299,6 +303,7 @@ export default defineConfig(({ mode }) => {
       preprocessorOptions: {
         scss: {
           loadPaths: [resolve(__dirname, '../../internal/styling/src'), resolve(__dirname, '../../packages')],
+          quietDeps: true,
         },
       },
     },
