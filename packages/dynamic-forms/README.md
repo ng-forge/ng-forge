@@ -31,6 +31,19 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 | 0.1.1+                  | 21.0.2-21.0.5 |
 | 0.1.0                   | 21.0.0-21.0.1 |
 
+## Supported entrypoints
+
+| Entrypoint                            | Audience            | Stability                        |
+| ------------------------------------- | ------------------- | -------------------------------- |
+| `@ng-forge/dynamic-forms`             | Form consumers      | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/integration` | UI adapter authors  | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/internal`    | None (build-time)   | Unsupported, no semver guarantee |
+| `@ng-forge/dynamic-forms/testing`     | None (test helpers) | Unsupported, no semver guarantee |
+
+The `/internal` and `/testing` entrypoints are unsupported build and test surfaces with no semver guarantee. They are published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Their contents may change or be removed in any release, including patch releases.
+
+Import only from `@ng-forge/dynamic-forms` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
+
 ## Installation
 
 ```bash
