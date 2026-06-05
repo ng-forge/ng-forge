@@ -6,7 +6,7 @@ import { defineConfig, type Plugin } from 'vite';
 import analog from '@analogjs/platform';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as sass from 'sass';
-import { apiDocsPlugin, getApiPackages } from './plugins/vite-plugin-api-docs';
+import { apiDocsPlugin } from './plugins/vite-plugin-api-docs';
 import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
 import { ogImagePlugin } from './plugins/vite-plugin-og-images';
 import { docsMetaPlugin } from './plugins/vite-plugin-docs-meta';
@@ -250,29 +250,15 @@ const PRERENDER_ADAPTERS = ['material', 'bootstrap', 'primeng', 'ionic', 'custom
 const contentSlugs = collectContentSlugs(resolve(__dirname, 'public/content'));
 
 /**
- * API reference symbols are crawler-friendly only when prerendered. We render the
- * canonical version under /material/api-reference/{symbol} for each symbol that
- * appears in core or any adapter package — DocPageComponent emits a canonical link
- * pointing to material, so non-material adapter URLs stay as SPA-resolved without
- * SEO penalty. Per-adapter prerendering would multiply route count by 5x.
+ * Individual API-reference symbol pages are intentionally NOT prerendered. Search
+ * Console shows Google crawls them (via the prerendered api-reference index) but
+ * leaves them "Crawled - currently not indexed" — they're auto-generated, thin, and
+ * low-value, so prerendering ~400 of them was the bulk of the build's time and
+ * memory for zero indexation. They resolve client-side via the SPA fallback and stay
+ * discoverable through the index pages, which ARE still prerendered below.
  */
-function collectApiSymbols(): string[] {
-  try {
-    const packages = getApiPackages();
-    const names = new Set<string>();
-    for (const pkg of packages.values()) {
-      for (const decl of pkg.declarations) names.add(decl.name);
-    }
-    return [...names].sort();
-  } catch (err) {
-    console.warn('[prerender] Failed to extract API symbols, skipping api-reference prerender:', err);
-    return [];
-  }
-}
-
 function generatePrerenderRoutes(): string[] {
   const routes: string[] = ['/'];
-  const apiSymbols = collectApiSymbols();
   for (const adapter of PRERENDER_ADAPTERS) {
     routes.push(`/${adapter}/getting-started`);
     routes.push(`/${adapter}/examples`);
@@ -281,10 +267,7 @@ function generatePrerenderRoutes(): string[] {
       routes.push(`/${adapter}/${slug}`);
     }
   }
-  for (const symbol of apiSymbols) {
-    routes.push(`/material/api-reference/${symbol}`);
-  }
-  console.log(`[prerender] Generated ${routes.length} routes (${apiSymbols.length} API symbols on /material)`);
+  console.log(`[prerender] Generated ${routes.length} routes`);
   return routes;
 }
 
