@@ -109,8 +109,8 @@ export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Features (for adapter authors and end users)
 export { withCustomAddon } from './providers/features/addons/with-custom-addon';
-export { provideAddonActions } from './providers/features/addons/provide-addon-actions';
-export type { AddonActionsFeature } from './providers/features/addons/provide-addon-actions';
+export { withAddonActions } from './providers/features/addons/with-addon-actions';
+export type { AddonActionsFeature } from './providers/features/addons/with-addon-actions';
 export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
 
 // Addon Validation

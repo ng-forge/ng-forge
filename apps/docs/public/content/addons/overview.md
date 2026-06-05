@@ -61,7 +61,7 @@ Icon kinds emit `aria-hidden="true"` by default. When the icon conveys meaning (
 
 - **Addon doesn t render at all.** Check the console for `[Dynamic Forms]` warnings. Common causes: the active adapter s `with*Fields()` helper isn t in `provideDynamicForm`; the `kind` string belongs to a different adapter (e.g. `prime-button` in a Material form); the host field type doesn t support addons.
 - **Icon-only button has no `ariaLabel`.** TypeScript and the runtime validator both refuse this — set `ariaLabel`. For genuinely decorative icons, prefer `kind: 'text'` or the adapter s `*-icon` kind.
-- **`actionRef` warning at click time.** The handler name isn t registered. Did you call `provideAddonActions({ runSearch: ... })` for that name?
+- **`actionRef` warning at click time.** The handler name isn t registered. Did you call `withAddonActions({ runSearch: ... })` for that name?
 - **Inline function silently dropped.** Configs with `source: 'json'` strip functions on `action`, `hidden`, `disabled`, `loading` at validation time — they cant round-trip through JSON. See [Reactive addons from JSON](/addons/presets-and-actions#reactive-from-json).
 - **Material `MatFormFieldControl` ContentChild missing.** Caused by wrapping the input in a template that breaks Material s content-projection query. Render `<input matInput>` directly inside `<mat-form-field>`.
 

@@ -301,13 +301,13 @@ provideDynamicForm(...${d.withFieldsHelper}());
   protected readonly actionsWiringCode = computed(() => {
     const d = this.data();
     return `import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm, provideAddonActions } from '@ng-forge/dynamic-forms';
+import { provideDynamicForm, withAddonActions } from '@ng-forge/dynamic-forms';
 import { ${d.withFieldsHelper} } from '${d.packageName}';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideDynamicForm(...${d.withFieldsHelper}()),
-    provideAddonActions({
+    withAddonActions({
       runSearch: (ctx) => mySearchService.search(ctx.value),
       submitDraft: (ctx) => myDraftService.save(ctx.field.key, ctx.value),
     }),

@@ -29,7 +29,7 @@ interface ActionAddonShape extends BaseAddon {
 export class NgForgeAddonActionBase {
   // The action registry is form-scoped. `optional: true` matches the
   // preset handler so addons rendered outside a form that called
-  // `provideAddonActions(...)` degrade gracefully instead of throwing —
+  // `withAddonActions(...)` degrade gracefully instead of throwing —
   // `actionRef` dispatches then log an actionable warning and no-op.
   private readonly actionRegistry = inject(ADDON_ACTION_REGISTRY, { optional: true });
   private readonly presetHandler = inject(ADDON_PRESET_HANDLER, { optional: true });
@@ -109,8 +109,8 @@ export class NgForgeAddonActionBase {
         this.logger.warn(
           `Addon button: actionRef '${addon.actionRef}' is not registered. ` +
             (this.actionRegistry
-              ? `Did you call provideAddonActions({ ${addon.actionRef}: ... })?`
-              : `No provideAddonActions(...) registry is reachable in this scope — was the addon rendered outside a form?`),
+              ? `Did you call withAddonActions({ ${addon.actionRef}: ... })?`
+              : `No withAddonActions(...) registry is reachable in this scope — was the addon rendered outside a form?`),
         );
       }
       return;

@@ -35,7 +35,7 @@ type PiButtonClickPreset = {
 };
 /**
  * Value type for the `actionRef` slot. When no actions have been registered
- * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * via `withAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
  * which would make this variant uninhabitable and break `addon.actionRef`
  * narrowing in the renderer. Fall back to `string` so the variant stays
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
@@ -44,14 +44,14 @@ type PiButtonClickPreset = {
 type PiButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
 type PiButtonClickActionRef = {
   readonly preset?: never;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
   readonly actionRef: PiButtonActionRef;
   readonly action?: never;
 };
 type PiButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
-  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
+  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `withAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
 type PiButtonClickNone = {

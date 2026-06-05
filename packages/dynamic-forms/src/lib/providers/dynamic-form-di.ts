@@ -92,7 +92,7 @@ function coreProviders(): Provider[] {
     { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
     // ADDON_ACTION_REGISTRY must live at form scope (not root) because the
     // multi-provider source `ADDON_ACTION_HANDLERS` is contributed by
-    // `provideAddonActions(...)` features passed to `provideDynamicForm(...)`
+    // `withAddonActions(...)` features passed to `provideDynamicForm(...)`
     // — those entries are only visible inside the form's own injector tree.
     { provide: ADDON_ACTION_REGISTRY, useFactory: createAddonActionRegistry },
   ];

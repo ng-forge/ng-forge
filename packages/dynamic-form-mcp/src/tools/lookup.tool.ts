@@ -398,7 +398,7 @@ function formatAddonsOverview(): string {
   lines.push('## Click variants (mutually exclusive on button-like addons)');
   lines.push('');
   lines.push('- `preset`: built-in semantics — `clear` / `reset` / `paste` / `copy` / `toggle-password-visibility`.');
-  lines.push('- `actionRef`: named handler resolved via `provideAddonActions({ ... })`.');
+  lines.push('- `actionRef`: named handler resolved via `withAddonActions({ ... })`.');
   lines.push('- `action`: inline function (code-only, dropped by JSON validator).');
   lines.push('');
   lines.push('Setting more than one logs a warning and applies the first (precedence: `preset` > `actionRef` > `action`).');

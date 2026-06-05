@@ -15,7 +15,7 @@ const config = {
           icon: 'star',
           ariaLabel: 'Star',
           severity: 'success',
-          // `appendStar` is registered via `provideAddonActions({...})` in app.config.ts.
+          // `appendStar` is registered via `withAddonActions({...})` in app.config.ts.
           // Resolved at click time against `ADDON_ACTION_REGISTRY`.
           actionRef: 'appendStar',
         },

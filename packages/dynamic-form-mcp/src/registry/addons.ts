@@ -193,7 +193,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         name: 'actionRef',
         type: 'string',
         description:
-          'Typed string handle to a handler registered via `provideAddonActions(...)`. Mutually exclusive with `preset` and `action`. JSON-safe.',
+          'Typed string handle to a handler registered via `withAddonActions(...)`. Mutually exclusive with `preset` and `action`. JSON-safe.',
         required: false,
       },
       action: {
@@ -273,7 +273,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
@@ -352,7 +352,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
@@ -437,7 +437,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
