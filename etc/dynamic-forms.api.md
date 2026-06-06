@@ -728,6 +728,18 @@ export function hasFormValue<T extends FormEvent>(event: T): event is T & {
 };
 
 // @public
+export interface HiddenField<TValue extends HiddenValue = HiddenValue> extends FieldDef<never> {
+    type: 'hidden';
+    value: TValue;
+}
+
+// @public
+export type HiddenScalar = string | number | boolean;
+
+// @public
+export type HiddenValue = HiddenScalar | HiddenScalar[];
+
+// @public
 export interface HttpCondition {
     cacheDurationMs?: number;
     debounceMs?: number;
@@ -808,6 +820,9 @@ export function isFormStateCondition(condition: StateLogicConfig['condition'] | 
 
 // @public
 export function isGroupField(field: FieldDef<any>): field is GroupField;
+
+// @public
+export function isHiddenField(field: FieldDef<unknown>): field is HiddenField;
 
 // @public
 export function isLeafField(field: RegisteredFieldTypes): field is LeafFieldTypes;
