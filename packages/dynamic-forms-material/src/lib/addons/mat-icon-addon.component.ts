@@ -5,7 +5,7 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { MatIconAddon } from '../types/addons';
 
-/** Renderer for the `mat-icon` addon kind. */
+/** Renderer for the `mat-icon` addon type. */
 @Component({
   selector: 'df-mat-icon-addon',
   imports: [MatIcon, AsyncPipe, DynamicTextPipe],
@@ -17,7 +17,7 @@ import type { MatIconAddon } from '../types/addons';
 })
 export class MatIconAddonComponent {
   readonly addon = input.required<MatIconAddon>();
-  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every type must declare it. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly ariaLabel = computed(() => this.addon().ariaLabel);

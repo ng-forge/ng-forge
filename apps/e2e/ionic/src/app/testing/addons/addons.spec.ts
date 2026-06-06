@@ -7,7 +7,7 @@ setupConsoleCheck();
 // ion-button[df-ion-button-addon slot=start|end] via an attribute-selector
 // component (IonInlineButtonAddonComponent), so Ionic's
 // `::slotted(ion-button[slot=start|end])` shadow CSS fires natively.
-// Decorative kinds (icon/text/template/component) render via the universal
+// Decorative types (icon/text/template/component) render via the universal
 // df-addon-slot dispatcher wrapped in <span slot="start|end">. Selectors
 // use the accessibility tree (getByRole) because <ion-button> forwards
 // aria-label into shadow DOM rather than exposing it on the host.
@@ -28,7 +28,7 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('icon-prefix');
       await expect(scenario).toBeVisible();
 
-      // ion-icon kind renders <ion-icon name="search-outline"> projected into the start slot.
+      // ion-icon type renders <ion-icon name="search-outline"> projected into the start slot.
       const prefixIcon = scenario.locator('ion-input span[slot="start"] df-ion-icon-addon ion-icon[name="search-outline"]');
       await expect(prefixIcon).toBeVisible();
     });

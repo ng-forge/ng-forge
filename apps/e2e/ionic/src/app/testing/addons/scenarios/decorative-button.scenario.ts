@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'ion-button',
+          type: 'ion-button',
           label: 'Info',
           color: 'tertiary',
           // No preset / actionRef / action — Decorative content-axis branch.

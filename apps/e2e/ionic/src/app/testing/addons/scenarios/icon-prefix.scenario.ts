@@ -8,7 +8,7 @@ const config = {
       type: 'input',
       label: 'Search',
       placeholder: 'Type to search…',
-      addons: [{ slot: 'prefix', kind: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' }],
+      addons: [{ slot: 'prefix', type: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' }],
     },
   ],
 } as const satisfies FormConfig;

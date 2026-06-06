@@ -1,22 +1,22 @@
 import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, Signal, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { AnyAddon } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
-import { injectAddonKindRegistry } from '../utils/inject-addon-kind-registry/inject-addon-kind-registry';
-import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+import { AnyAddon } from '../models/addon/addon-def';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { resolveDynamicValue } from '../utils/dynamic-value/resolve-dynamic-value';
+import { injectAddonTypeRegistry } from './inject-addon-type-registry';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
- * Dispatcher component that renders an addon by looking up its `kind` in
- * `ADDON_KIND_REGISTRY` and instantiating the registered component.
+ * Dispatcher component that renders an addon by looking up its `type` in
+ * `ADDON_TYPE_REGISTRY` and instantiating the registered component.
  */
 @Component({
   selector: 'df-addon-slot',
   imports: [NgComponentOutlet],
   template: `
     @if (resolvedComponent(); as cmp) {
-      <ng-container *ngComponentOutlet="cmp; inputs: kindInputs()" />
+      <ng-container *ngComponentOutlet="cmp; inputs: typeInputs()" />
     }
   `,
   host: {
@@ -27,7 +27,7 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DfAddonSlot {
-  private readonly registry = injectAddonKindRegistry();
+  private readonly registry = injectAddonTypeRegistry();
   private readonly logger = inject(DynamicFormLogger);
   private readonly hostInjector = inject(Injector);
 
@@ -35,7 +35,7 @@ export class DfAddonSlot {
   /**
    * Optional read-only view of the host field's mapped inputs — same shape
    * wrappers receive (`field?: ReadonlyFieldTree`, `key`, `props`, etc.).
-   * Forwarded to kind components so they can read field state without
+   * Forwarded to type components so they can read field state without
    * re-injecting `FIELD_SIGNAL_CONTEXT` and rebuilding context themselves.
    */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
@@ -78,31 +78,31 @@ export class DfAddonSlot {
   });
 
   /**
-   * Latest async-loaded `{ kind, component }` pair. Tagging the result with
-   * its kind lets `resolvedComponent` filter stale loads structurally — no
-   * monotonic token needed. When `addon.kind` changes mid-load, the prior
+   * Latest async-loaded `{ type, component }` pair. Tagging the result with
+   * its type lets `resolvedComponent` filter stale loads structurally — no
+   * monotonic token needed. When `addon.type` changes mid-load, the prior
    * load still completes and writes here, but the computed ignores it
-   * because the recorded kind no longer matches the current one.
+   * because the recorded type no longer matches the current one.
    */
-  private readonly asyncLoaded = signal<{ kind: string; component: Type<unknown> } | undefined>(undefined);
+  private readonly asyncLoaded = signal<{ type: string; component: Type<unknown> } | undefined>(undefined);
 
   /**
-   * Resolved kind component — composed declaratively from two sources of
+   * Resolved type component — composed declaratively from two sources of
    * truth: the registry's synchronous cache (warm hits, e.g., a second
-   * `<df-addon-slot>` for an already-loaded kind) and the kind-tagged async
-   * loader result. Reading `addon().kind` first makes the computed react to
+   * `<df-addon-slot>` for an already-loaded type) and the type-tagged async
+   * loader result. Reading `addon().type` first makes the computed react to
    * addon swaps and naturally invalidate stale async-load results.
    */
   protected readonly resolvedComponent = computed<Type<unknown> | undefined>(() => {
-    const kind = this.addon().kind;
-    const cached = this.registry.getLoadedKindComponent(kind);
+    const type = this.addon().type;
+    const cached = this.registry.getLoadedTypeComponent(type);
     if (cached) return cached;
     const loaded = this.asyncLoaded();
-    return loaded?.kind === kind ? loaded.component : undefined;
+    return loaded?.type === type ? loaded.component : undefined;
   });
 
-  /** Inputs passed to the kind component — addon plus the wrapper-style host bag. */
-  protected readonly kindInputs = computed(() => ({
+  /** Inputs passed to the type component — addon plus the wrapper-style host bag. */
+  protected readonly typeInputs = computed(() => ({
     addon: this.addon(),
     fieldInputs: this.fieldInputs(),
   }));
@@ -124,17 +124,17 @@ export class DfAddonSlot {
     });
 
     // Kick off async loads on cache miss. `resolvedComponent` filters stale
-    // results by kind identity, so this effect is a pure side-effect dispatcher.
+    // results by type identity, so this effect is a pure side-effect dispatcher.
     explicitEffect([this.addon], ([addon]) => {
-      const kind = addon.kind;
-      if (this.registry.getLoadedKindComponent(kind)) return; // sync path; computed picks it up
+      const type = addon.type;
+      if (this.registry.getLoadedTypeComponent(type)) return; // sync path; computed picks it up
       this.registry
-        .loadKindComponent(kind)
-        .then((component) => this.asyncLoaded.set({ kind, component }))
+        .loadTypeComponent(type)
+        .then((component) => this.asyncLoaded.set({ type, component }))
         .catch((error: unknown) => {
           this.logger.warn(
-            `Failed to load addon kind '${kind}': ${error instanceof Error ? error.message : String(error)}. ` +
-              `Registered kinds: ${this.registry.getKindNames().join(', ') || '(none)'}.`,
+            `Failed to load addon type '${type}': ${error instanceof Error ? error.message : String(error)}. ` +
+              `Registered types: ${this.registry.getTypeNames().join(', ') || '(none)'}.`,
           );
         });
     });

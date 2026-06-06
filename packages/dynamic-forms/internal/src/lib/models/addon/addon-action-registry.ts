@@ -5,7 +5,7 @@ import { AddonActionContext } from './addon-action';
 export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TValue>) => void;
 
 /**
- * Multi-provider token populated by `provideAddonActions({...})` calls.
+ * Multi-provider token populated by `withAddonActions({...})` calls.
  * `ADDON_ACTION_REGISTRY` aggregates these into a single name → handler map.
  *
  * @internal
@@ -13,9 +13,9 @@ export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TVal
 export const ADDON_ACTION_HANDLERS = new InjectionToken<readonly Record<string, AddonActionHandler>[]>('ADDON_ACTION_HANDLERS');
 
 /**
- * Form-scoped name → handler map. Read by adapter button kinds at click
+ * Form-scoped name → handler map. Read by adapter button types at click
  * time for `actionRef: 'name'` lookups. Provided at form scope (not root)
- * because `ADDON_ACTION_HANDLERS` is form-scoped via `provideAddonActions`.
+ * because `ADDON_ACTION_HANDLERS` is form-scoped via `withAddonActions`.
  */
 export const ADDON_ACTION_REGISTRY = new InjectionToken<ReadonlyMap<string, AddonActionHandler>>('ADDON_ACTION_REGISTRY');
 

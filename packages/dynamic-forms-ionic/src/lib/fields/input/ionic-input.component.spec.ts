@@ -1,6 +1,6 @@
 import type { Type } from '@angular/core';
-import { type AddonKindDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
+import { type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import IonicInputFieldComponent from './ionic-input.component';
@@ -25,8 +25,8 @@ function createFixture(inputs: Record<string, unknown>) {
     value: '',
     inputs,
     providers: [
-      { provide: ADDON_KIND_REGISTRY, useValue: new Map<string, AddonKindDefinition>() },
-      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+      { provide: ADDON_TYPE_REGISTRY, useValue: new Map<string, AddonTypeDefinition>() },
+      { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
     ],
   });

@@ -78,13 +78,10 @@ export type {
 export type {
   AddonActionContext,
   AddonActionPreset,
-  AddonKindDefinition,
-  AddonKindSchema,
-  AddonShapeValidator,
+  AddonTypeDefinition,
   CommonAddonActionPreset,
   DynamicFormActionRegistry,
   DynamicFormAddonActionPresetRegistry,
-  FieldAddonSupport,
   FieldBoundAddonActionContext,
   OrphanAddonActionContext,
   RegisteredActionRef,
@@ -92,26 +89,21 @@ export type {
 export { DF_FIELD_TEMPLATES, isFieldBoundContext } from '@ng-forge/dynamic-forms/internal';
 export type { DynamicValue } from '@ng-forge/dynamic-forms/internal';
 
-// Addon Components & Directives
-export { DfAddonSlot } from './components/df-addon-slot.component';
+// Addon Components & Directives (end-user authoring: template projection + built-in renderers)
 export { DfTemplate } from './directives/df-template.directive';
 export { TextAddonComponent } from './addons/text-addon.component';
 export { TemplateAddonComponent } from './addons/template-addon.component';
 export { ComponentAddonComponent } from './addons/component-addon.component';
-export { runPresetAction } from './addons/run-preset-action';
-export type { PresetCollaborators } from './addons/run-preset-action';
-
-// Addon Registry helpers (for adapter authors)
-export { injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
-export { injectFieldsSupportingAddons } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
-export type { FieldAddonSupportEntry } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
 export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Features (for adapter authors and end users)
 export { withCustomAddon } from './providers/features/addons/with-custom-addon';
-export { provideAddonActions } from './providers/features/addons/provide-addon-actions';
-export type { AddonActionsFeature } from './providers/features/addons/provide-addon-actions';
-export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
+export { withAddonActions } from './providers/features/addons/with-addon-actions';
+export type { AddonActionsFeature } from './providers/features/addons/with-addon-actions';
+
+// Adapter-author addon surface — DfAddonSlot, ADDON_TYPE_DEFINITIONS, injectAddonTypeRegistry,
+// injectFieldsSupportingAddons, runPresetAction, FieldAddonSupport, AddonTypeSchema and
+// AddonShapeValidator live in '@ng-forge/dynamic-forms/integration'.
 
 // Addon Validation
 export { sanitizeFormConfig } from './utils/validate-form-config/validate-form-config';

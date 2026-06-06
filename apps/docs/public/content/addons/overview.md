@@ -16,13 +16,13 @@ Addons decorate a field with inline content — a search icon, a clear button, a
 
 <docs-live-example scenario="examples/addon-clear-button"></docs-live-example>
 
-A universal addon (works the same in every adapter, no per-kind branching):
+A universal addon (works the same in every adapter, no per-type branching):
 
 <docs-live-example scenario="examples/addon-currency"></docs-live-example>
 
-## Available kinds
+## Available types
 
-<docs-addon-info field="kinds-table"></docs-addon-info>
+<docs-addon-info field="types-table"></docs-addon-info>
 
 ## How addons render
 
@@ -55,17 +55,17 @@ Authoring forms in JSON? Reactive values can't survive serialization — see [Re
 
 ## Accessibility
 
-Icon kinds emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button kinds (no `label`) require `ariaLabel` — TypeScript and the runtime validator both enforce this.
+Icon types emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button types (no `label`) require `ariaLabel` — TypeScript and the runtime validator both enforce this.
 
 ## Troubleshooting
 
-- **Addon doesn t render at all.** Check the console for `[Dynamic Forms]` warnings. Common causes: the active adapter s `with*Fields()` helper isn t in `provideDynamicForm`; the `kind` string belongs to a different adapter (e.g. `prime-button` in a Material form); the host field type doesn t support addons.
-- **Icon-only button has no `ariaLabel`.** TypeScript and the runtime validator both refuse this — set `ariaLabel`. For genuinely decorative icons, prefer `kind: 'text'` or the adapter s `*-icon` kind.
-- **`actionRef` warning at click time.** The handler name isn t registered. Did you call `provideAddonActions({ runSearch: ... })` for that name?
+- **Addon doesn t render at all.** Check the console for `[Dynamic Forms]` warnings. Common causes: the active adapter s `with*Fields()` helper isn t in `provideDynamicForm`; the `type` string belongs to a different adapter (e.g. `prime-button` in a Material form); the host field type doesn t support addons.
+- **Icon-only button has no `ariaLabel`.** TypeScript and the runtime validator both refuse this — set `ariaLabel`. For genuinely decorative icons, prefer `type: 'text'` or the adapter s `*-icon` type.
+- **`actionRef` warning at click time.** The handler name isn t registered. Did you call `withAddonActions({ runSearch: ... })` for that name?
 - **Inline function silently dropped.** Configs with `source: 'json'` strip functions on `action`, `hidden`, `disabled`, `loading` at validation time — they cant round-trip through JSON. See [Reactive addons from JSON](/addons/presets-and-actions#reactive-from-json).
 - **Material `MatFormFieldControl` ContentChild missing.** Caused by wrapping the input in a template that breaks Material s content-projection query. Render `<input matInput>` directly inside `<mat-form-field>`.
 
 ## Where to next
 
 1. **[Presets and Actions](/addons/presets-and-actions)** — built-in click presets (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`), `actionRef` for registered handlers, and inline `action` for code-only behaviour.
-2. **[Custom Kinds](/addons/custom-kinds)** — register your own addon kind (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level extensions seam.
+2. **[Custom Types](/addons/custom-types)** — register your own addon type (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level extensions seam.

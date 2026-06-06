@@ -5,7 +5,7 @@ import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-
 import { ButtonModule } from 'primeng/button';
 import type { PrimeButtonAddon } from '../types/addons';
 
-/** Renderer for the `prime-button` addon kind. */
+/** Renderer for the `prime-button` addon type. */
 @Component({
   selector: 'df-prime-button-addon',
   imports: [ButtonModule, DynamicTextPipe, AsyncPipe],

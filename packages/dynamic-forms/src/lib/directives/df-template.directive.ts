@@ -29,7 +29,7 @@ export class DfTemplate {
 export class DfFieldTemplateRegistry {
   private readonly _map = signal<ReadonlyMap<string, TemplateRef<unknown>>>(new Map());
 
-  /** Reactive view consumed by the `template` addon kind via DI. */
+  /** Reactive view consumed by the `template` addon type via DI. */
   readonly map: Signal<ReadonlyMap<string, TemplateRef<unknown>>> = this._map.asReadonly();
 
   /** Replace the registry contents — called from `DynamicForm` when projected templates change. */

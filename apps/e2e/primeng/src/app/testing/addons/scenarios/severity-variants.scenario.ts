@@ -12,7 +12,7 @@ const config = {
     addons: [
       {
         slot: 'suffix' as const,
-        kind: 'prime-button' as const,
+        type: 'prime-button' as const,
         label: severity,
         severity,
         action: () => {

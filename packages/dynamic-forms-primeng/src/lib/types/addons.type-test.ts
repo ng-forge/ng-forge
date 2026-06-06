@@ -20,7 +20,7 @@ import type { PrimeButtonAddon } from './addons';
 
 // Valid: preset only.
 const _presetOnly: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'times',
   ariaLabel: 'Clear',
@@ -29,7 +29,7 @@ const _presetOnly: PrimeButtonAddon = {
 
 // Valid: actionRef only.
 const _actionRefOnly: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'send',
   ariaLabel: 'Send',
@@ -38,7 +38,7 @@ const _actionRefOnly: PrimeButtonAddon = {
 
 // Valid: action only.
 const _actionOnly: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'send',
   ariaLabel: 'Send',
@@ -47,7 +47,7 @@ const _actionOnly: PrimeButtonAddon = {
 
 // Valid: none — decorative.
 const _noClickVariant: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'send',
   ariaLabel: 'Send',
@@ -56,7 +56,7 @@ const _noClickVariant: PrimeButtonAddon = {
 // Invalid: preset + actionRef.
 // @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _presetPlusActionRef: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'times',
   ariaLabel: 'Clear',
@@ -67,7 +67,7 @@ const _presetPlusActionRef: PrimeButtonAddon = {
 // Invalid: preset + action.
 // @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _presetPlusAction: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'times',
   ariaLabel: 'Clear',
@@ -78,7 +78,7 @@ const _presetPlusAction: PrimeButtonAddon = {
 // Invalid: actionRef + action.
 // @ts-expect-error XOR: at most one of preset / actionRef / action may be set.
 const _actionRefPlusAction: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'send',
   ariaLabel: 'Send',
@@ -93,7 +93,7 @@ const _actionRefPlusAction: PrimeButtonAddon = {
 // Invalid: icon without label OR ariaLabel.
 // @ts-expect-error icon-only buttons must carry an accessible label.
 const _iconWithoutLabelOrAria: PrimeButtonAddon = {
-  kind: 'prime-button',
+  type: 'prime-button',
   slot: 'suffix',
   icon: 'times',
 };

@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
-import { FieldAddonSupport } from '@ng-forge/dynamic-forms/internal';
-import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { FieldAddonSupport } from '../models/addon/addon-type';
+import { FIELD_REGISTRY } from '../models/field-type';
 
 /** One entry per field type that declares addon support. */
 export interface FieldAddonSupportEntry {
   readonly name: string;
   readonly slots: FieldAddonSupport['slots'];
-  readonly allowedKinds: FieldAddonSupport['allowedKinds'];
+  readonly allowedTypes: FieldAddonSupport['allowedTypes'];
 }
 
 /**
@@ -18,7 +18,7 @@ export interface FieldAddonSupportEntry {
  *   protected readonly addonable = injectFieldsSupportingAddons();
  *
  *   constructor() {
- *     // -> [{ name: 'prime-input', slots: ['prefix', 'suffix'], allowedKinds: [...] }, ...]
+ *     // -> [{ name: 'prime-input', slots: ['prefix', 'suffix'], allowedTypes: [...] }, ...]
  *   }
  * }
  * ```
@@ -28,7 +28,7 @@ export function injectFieldsSupportingAddons(): FieldAddonSupportEntry[] {
   const entries: FieldAddonSupportEntry[] = [];
   for (const [name, def] of registry.entries()) {
     if (def.addons === undefined) continue;
-    entries.push({ name, slots: def.addons.slots, allowedKinds: def.addons.allowedKinds });
+    entries.push({ name, slots: def.addons.slots, allowedTypes: def.addons.allowedTypes });
   }
   return entries;
 }

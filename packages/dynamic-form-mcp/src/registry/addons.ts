@@ -2,24 +2,24 @@
 
 import type { PropertyInfo } from './index.js';
 
-export interface AddonKindInfo {
-  /** Discriminant matching `addon.kind` in form configs. */
-  kind: string;
+export interface AddonTypeInfo {
+  /** Discriminant matching `addon.type` in form configs. */
+  type: string;
   /** Source category — core ships from the library, adapter from a UI-integration package. */
   category: 'core' | 'adapter';
   /** Provider package; `'core'` means @ng-forge/dynamic-forms. */
   package: string;
-  /** Adapter that ships this kind, or `null` for core kinds. */
+  /** Adapter that ships this type, or `null` for core types. */
   adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
-  /** One-line description of what this kind renders. */
+  /** One-line description of what this type renders. */
   description: string;
   /**
-   * Whether the kind survives `JSON.stringify`/`parse`. JSON-safe kinds may
-   * be referenced from server-driven configs; code-only kinds are dropped by
+   * Whether the type survives `JSON.stringify`/`parse`. JSON-safe types may
+   * be referenced from server-driven configs; code-only types are dropped by
    * the lenient validator when the config came from JSON.
    */
   jsonSafe: boolean;
-  /** Per-kind config props (excludes universal `slot`, `className`, `hidden`, `disabled`). */
+  /** Per-type config props (excludes universal `slot`, `className`, `hidden`, `disabled`). */
   props: Record<string, PropertyInfo>;
   /** Full inline example for documentation. */
   example: string;
@@ -49,15 +49,15 @@ const UNIVERSAL_BASE_PROPS: Record<string, PropertyInfo> = {
   disabled: {
     name: 'disabled',
     type: 'boolean | Signal<boolean> | Observable<boolean>',
-    description: 'Reactive disabled state — primarily relevant for interactive kinds.',
+    description: 'Reactive disabled state — primarily relevant for interactive types.',
     required: false,
   },
 };
 
-export const ADDON_KINDS: AddonKindInfo[] = [
-  // ─── Core-shipped universal kinds ────────────────────────────────────────
+export const ADDON_TYPES: AddonTypeInfo[] = [
+  // ─── Core-shipped universal types ────────────────────────────────────────
   {
-    kind: 'text',
+    type: 'text',
     category: 'core',
     package: '@ng-forge/dynamic-forms',
     adapter: null,
@@ -72,11 +72,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: true,
       },
     },
-    example: `{ slot: 'prefix', kind: 'text', text: '$' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'text', text: '$' }`,
+    example: `{ slot: 'prefix', type: 'text', text: '$' }`,
+    minimalExample: `{ slot: 'prefix', type: 'text', text: '$' }`,
   },
   {
-    kind: 'template',
+    type: 'template',
     category: 'core',
     package: '@ng-forge/dynamic-forms',
     adapter: null,
@@ -92,16 +92,16 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: true,
       },
     },
-    example: `{ slot: 'suffix', kind: 'template', templateKey: 'searchIcon' }`,
-    minimalExample: `{ slot: 'suffix', kind: 'template', templateKey: 'mySlot' }`,
+    example: `{ slot: 'suffix', type: 'template', templateKey: 'searchIcon' }`,
+    minimalExample: `{ slot: 'suffix', type: 'template', templateKey: 'mySlot' }`,
   },
   {
-    kind: 'component',
+    type: 'component',
     category: 'core',
     package: '@ng-forge/dynamic-forms',
     adapter: null,
     description:
-      'Renders an arbitrary Angular component. The `component` loader is a function; this kind is dropped from JSON-derived configs by the validator.',
+      'Renders an arbitrary Angular component. The `component` loader is a function; this type is dropped from JSON-derived configs by the validator.',
     jsonSafe: false,
     props: {
       ...UNIVERSAL_BASE_PROPS,
@@ -120,16 +120,16 @@ export const ADDON_KINDS: AddonKindInfo[] = [
     },
     example: `{
   slot: 'prefix',
-  kind: 'component',
+  type: 'component',
   component: () => import('./my-component').then(m => m.MyComponent),
   inputs: { foo: 'bar' },
 }`,
-    minimalExample: `{ slot: 'prefix', kind: 'component', component: () => import('./x') }`,
+    minimalExample: `{ slot: 'prefix', type: 'component', component: () => import('./x') }`,
   },
 
-  // ─── PrimeNG-shipped kinds ───────────────────────────────────────────────
+  // ─── PrimeNG-shipped types ───────────────────────────────────────────────
   {
-    kind: 'prime-icon',
+    type: 'prime-icon',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-primeng',
     adapter: 'primeng',
@@ -150,11 +150,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'prefix', kind: 'prime-icon', icon: 'search', ariaLabel: 'Search' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'prime-icon', icon: 'search' }`,
+    example: `{ slot: 'prefix', type: 'prime-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', type: 'prime-icon', icon: 'search' }`,
   },
   {
-    kind: 'prime-button',
+    type: 'prime-button',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-primeng',
     adapter: 'primeng',
@@ -193,7 +193,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         name: 'actionRef',
         type: 'string',
         description:
-          'Typed string handle to a handler registered via `provideAddonActions(...)`. Mutually exclusive with `preset` and `action`. JSON-safe.',
+          'Typed string handle to a handler registered via `withAddonActions(...)`. Mutually exclusive with `preset` and `action`. JSON-safe.',
         required: false,
       },
       action: {
@@ -204,13 +204,13 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
-    minimalExample: `{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
+    example: `{ slot: 'suffix', type: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', type: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 
-  // ─── Material-shipped kinds ──────────────────────────────────────────────
+  // ─── Material-shipped types ──────────────────────────────────────────────
   {
-    kind: 'mat-icon',
+    type: 'mat-icon',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-material',
     adapter: 'material',
@@ -231,11 +231,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'prefix', kind: 'mat-icon', icon: 'search', ariaLabel: 'Search' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'mat-icon', icon: 'search' }`,
+    example: `{ slot: 'prefix', type: 'mat-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', type: 'mat-icon', icon: 'search' }`,
   },
   {
-    kind: 'mat-button',
+    type: 'mat-button',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-material',
     adapter: 'material',
@@ -273,7 +273,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
@@ -283,13 +283,13 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
-    minimalExample: `{ slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
+    example: `{ slot: 'suffix', type: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', type: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 
-  // ─── Bootstrap-shipped kinds ─────────────────────────────────────────────
+  // ─── Bootstrap-shipped types ─────────────────────────────────────────────
   {
-    kind: 'bs-icon',
+    type: 'bs-icon',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-bootstrap',
     adapter: 'bootstrap',
@@ -310,11 +310,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'prefix', kind: 'bs-icon', icon: 'search', ariaLabel: 'Search' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'bs-icon', icon: 'search' }`,
+    example: `{ slot: 'prefix', type: 'bs-icon', icon: 'search', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', type: 'bs-icon', icon: 'search' }`,
   },
   {
-    kind: 'bs-button',
+    type: 'bs-button',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-bootstrap',
     adapter: 'bootstrap',
@@ -352,7 +352,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
@@ -362,13 +362,13 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'suffix', kind: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
-    minimalExample: `{ slot: 'suffix', kind: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
+    example: `{ slot: 'suffix', type: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', type: 'bs-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 
-  // ─── Ionic-shipped kinds ─────────────────────────────────────────────────
+  // ─── Ionic-shipped types ─────────────────────────────────────────────────
   {
-    kind: 'ion-icon',
+    type: 'ion-icon',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-ionic',
     adapter: 'ionic',
@@ -389,11 +389,11 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'prefix', kind: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' }`,
-    minimalExample: `{ slot: 'prefix', kind: 'ion-icon', icon: 'search-outline' }`,
+    example: `{ slot: 'prefix', type: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' }`,
+    minimalExample: `{ slot: 'prefix', type: 'ion-icon', icon: 'search-outline' }`,
   },
   {
-    kind: 'ion-button',
+    type: 'ion-button',
     category: 'adapter',
     package: '@ng-forge/dynamic-forms-ionic',
     adapter: 'ionic',
@@ -437,7 +437,7 @@ export const ADDON_KINDS: AddonKindInfo[] = [
       actionRef: {
         name: 'actionRef',
         type: 'string',
-        description: 'Typed handle to a handler registered via `provideAddonActions(...)`. JSON-safe.',
+        description: 'Typed handle to a handler registered via `withAddonActions(...)`. JSON-safe.',
         required: false,
       },
       action: {
@@ -447,13 +447,13 @@ export const ADDON_KINDS: AddonKindInfo[] = [
         required: false,
       },
     },
-    example: `{ slot: 'suffix', kind: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
-    minimalExample: `{ slot: 'suffix', kind: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
+    example: `{ slot: 'suffix', type: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
+    minimalExample: `{ slot: 'suffix', type: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' }`,
   },
 ];
 
 /**
- * Per-field-type addon support metadata. Records which slots and kinds a
+ * Per-field-type addon support metadata. Records which slots and types a
  * field type accepts at runtime — feeds the validator's allowed-list checks.
  */
 export interface FieldAddonSupportInfo {
@@ -463,8 +463,8 @@ export interface FieldAddonSupportInfo {
   adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
   /** Slots this field accepts. */
   slots: ('prefix' | 'suffix' | string)[];
-  /** Whitelist of allowed kinds (omitted = any registered kind). */
-  allowedKinds?: string[];
+  /** Whitelist of allowed types (omitted = any registered type). */
+  allowedTypes?: string[];
 }
 
 // Every adapter registers its input under the bare discriminant `'input'`

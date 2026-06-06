@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Ion fields. */
 export interface IonIconAddon extends BaseAddon {
-  readonly kind: 'ion-icon';
+  readonly type: 'ion-icon';
   /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -21,7 +21,7 @@ type IonButtonFill = 'clear' | 'outline' | 'solid' | 'default';
  * participate in either XOR axis.
  */
 interface IonButtonBase extends BaseAddon {
-  readonly kind: 'ion-button';
+  readonly type: 'ion-button';
   /** Ion button colour. */
   readonly color?: IonButtonColor;
   /** Ion button fill style. */
@@ -43,7 +43,7 @@ type IonButtonClickPreset = {
 };
 /**
  * Value type for the `actionRef` slot. When no actions have been registered
- * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * via `withAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
  * which would make this variant uninhabitable and break `addon.actionRef`
  * narrowing in the renderer. Fall back to `string` so the variant stays
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
@@ -52,14 +52,14 @@ type IonButtonClickPreset = {
 type IonButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
 type IonButtonClickActionRef = {
   readonly preset?: never;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
   readonly actionRef: IonButtonActionRef;
   readonly action?: never;
 };
 type IonButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
-  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
+  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `withAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
 type IonButtonClickNone = {
@@ -94,7 +94,7 @@ type IonButtonContent = IonButtonContentIconOnly | IonButtonContentLabeled | Ion
 /** Interactive button addon for Ion fields. */
 export type IonButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
 
-/** Union of all Ion-shipped addon kinds. */
+/** Union of all Ion-shipped addon types. */
 export type IonAddon = IonIconAddon | IonButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

@@ -103,7 +103,7 @@ export const NAV_ITEMS: NavItem[] = [
         children: [
           { label: 'Overview', path: 'addons/overview' },
           { label: 'Presets and Actions', path: 'addons/presets-and-actions' },
-          { label: 'Custom Kinds', path: 'addons/custom-kinds' },
+          { label: 'Custom Types', path: 'addons/custom-types' },
         ],
       },
     ],

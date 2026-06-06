@@ -1,6 +1,6 @@
 import type { Type } from '@angular/core';
-import { type AddonKindDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
+import { type AddonTypeDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import { PrimeButtonAddonComponent } from '../../addons/prime-button-addon.component';
@@ -9,17 +9,17 @@ import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
 import type { PrimeInputAddon } from './prime-input.type';
 import PrimeInputFieldComponent from './prime-input.component';
 
-const PI_ICON_KIND: AddonKindDefinition = {
-  kind: 'prime-icon',
+const PI_ICON_KIND: AddonTypeDefinition = {
+  type: 'prime-icon',
   loadComponent: () => Promise.resolve(PrimeIconAddonComponent),
 };
-const PI_BUTTON_KIND: AddonKindDefinition = {
-  kind: 'prime-button',
+const PI_BUTTON_KIND: AddonTypeDefinition = {
+  type: 'prime-button',
   loadComponent: () => Promise.resolve(PrimeButtonAddonComponent),
 };
 
-function makeKindRegistry(): ReadonlyMap<string, AddonKindDefinition> {
-  return new Map<string, AddonKindDefinition>([
+function makeTypeRegistry(): ReadonlyMap<string, AddonTypeDefinition> {
+  return new Map<string, AddonTypeDefinition>([
     ['prime-icon', PI_ICON_KIND],
     ['prime-button', PI_BUTTON_KIND],
   ]);
@@ -31,8 +31,8 @@ function createFixture(addons: ReadonlyArray<PrimeInputAddon>) {
     value: '',
     inputs: { addons },
     providers: [
-      { provide: ADDON_KIND_REGISTRY, useValue: makeKindRegistry() },
-      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+      { provide: ADDON_TYPE_REGISTRY, useValue: makeTypeRegistry() },
+      { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
       { provide: DynamicFormLogger, useValue: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() } },
       provideTestValidationMessages({}),
@@ -42,7 +42,7 @@ function createFixture(addons: ReadonlyArray<PrimeInputAddon>) {
 
 describe('PrimeInputFieldComponent — addon rendering', () => {
   it('wraps the input in <p-inputgroup> when a prefix addon is supplied', async () => {
-    const prefix: PrimeIconAddon = { kind: 'prime-icon', slot: 'prefix', icon: 'search' };
+    const prefix: PrimeIconAddon = { type: 'prime-icon', slot: 'prefix', icon: 'search' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -56,7 +56,7 @@ describe('PrimeInputFieldComponent — addon rendering', () => {
 
   it('renders a suffix <p-inputgroup-addon> for a prime-button addon', async () => {
     const suffix: PrimeButtonAddon = {
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear',
@@ -79,8 +79,8 @@ describe('PrimeInputFieldComponent — addon rendering', () => {
 
   it('renders both prefix and suffix when both slots are supplied', async () => {
     const addons: PrimeInputAddon[] = [
-      { kind: 'prime-icon', slot: 'prefix', icon: 'search' } as PrimeIconAddon,
-      { kind: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
+      { type: 'prime-icon', slot: 'prefix', icon: 'search' } as PrimeIconAddon,
+      { type: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();

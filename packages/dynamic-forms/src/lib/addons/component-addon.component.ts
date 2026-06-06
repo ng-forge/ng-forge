@@ -7,7 +7,7 @@ import { resolveDefaultExport } from '../utils/wrapper-chain/wrapper-chain';
 import type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
 /**
- * Renderer for the universal `component` addon kind.
+ * Renderer for the universal `component` addon type.
  *
  * @codeOnly The `component` loader is a function; this kind is dropped in
  * lenient validation when the config originated from JSON.

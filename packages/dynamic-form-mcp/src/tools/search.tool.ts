@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { TOPICS, TOPIC_ALIASES, TOPIC_DESCRIPTIONS } from './data/lookup-topics.js';
 import { PATTERNS } from './examples.tool.js';
-import { getAddonKinds, getWrappers } from '../registry/index.js';
+import { getAddonTypes, getWrappers } from '../registry/index.js';
 
 interface SearchEntry {
   id: string;
@@ -101,16 +101,16 @@ function buildIndex(): SearchEntry[] {
   }
 
   // Index ADDON KINDS registry
-  for (const addon of getAddonKinds()) {
+  for (const addon of getAddonTypes()) {
     const subcategory = addon.adapter ? `Addon (${addon.adapter})` : `Addon (${addon.category})`;
     entries.push({
-      id: addon.kind,
+      id: addon.type,
       category: 'addon',
       subcategory,
       description: addon.description,
       aliases: [],
-      content: `${addon.kind} addon ${addon.description} ${addon.package}`.toLowerCase(),
-      toolCall: `ngforge_lookup topic="${addon.kind}"`,
+      content: `${addon.type} addon ${addon.description} ${addon.package}`.toLowerCase(),
+      toolCall: `ngforge_lookup topic="${addon.type}"`,
     });
   }
 

@@ -18,7 +18,7 @@ function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionH
 describe('IonButtonAddonComponent', () => {
   it('renders <ion-button> with the configured color', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
@@ -32,7 +32,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('omits the color attribute when none configured (button inherits theme text color)', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
@@ -48,7 +48,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('uses slot="icon-only" when the addon has only an icon', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'search-outline',
       ariaLabel: 'Search',
@@ -60,7 +60,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('uses slot="start" for the icon when a label is also present', async () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'search-outline',
       label: 'Search',
@@ -76,7 +76,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('renders <ion-spinner> in place of the icon while loading() is truthy', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'search-outline',
       ariaLabel: 'Search',
@@ -92,7 +92,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('disables the host button when `disabled` is truthy', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
@@ -105,7 +105,7 @@ describe('IonButtonAddonComponent', () => {
 
   it('disables the button while loading() is truthy', () => {
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'search-outline',
       ariaLabel: 'Search',
@@ -118,7 +118,7 @@ describe('IonButtonAddonComponent', () => {
   it('dispatches the inline `action` handler on click', () => {
     let invoked = 0;
     const fixture = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'add-outline',
       ariaLabel: 'Add',
@@ -143,7 +143,7 @@ describe('IonButtonAddonComponent', () => {
     ]);
     const fixture = setup(
       {
-        kind: 'ion-button',
+        type: 'ion-button',
         slot: 'suffix',
         icon: 'add-outline',
         ariaLabel: 'Add',

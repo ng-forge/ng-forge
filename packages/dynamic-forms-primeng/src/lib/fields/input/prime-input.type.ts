@@ -16,7 +16,7 @@ export interface PrimeInputProps extends InputProps {
 }
 
 /**
- * Module-augmentable seam for adding custom addon kinds to `prime-input` at
+ * Module-augmentable seam for adding custom addon types to `prime-input` at
  * the type level. Pair with `withCustomAddon(...)` for the runtime side:
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
@@ -24,7 +24,7 @@ export interface PrimeAddonExtensions {}
 
 type PrimeAddonExtension = PrimeAddonExtensions[keyof PrimeAddonExtensions];
 
-/** Addon kinds accepted by `prime-input`. */
+/** Addon types accepted by `prime-input`. */
 export type PrimeInputAddon = PrimeIconAddon | PrimeButtonAddon | TextAddon | TemplateAddon | PrimeAddonExtension;
 
 export type PrimeInputField = InputField<PrimeInputProps> & {

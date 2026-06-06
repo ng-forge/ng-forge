@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'bs-button',
+          type: 'bs-button',
           icon: 'eye',
           ariaLabel: 'Toggle password visibility',
           preset: 'toggle-password-visibility',

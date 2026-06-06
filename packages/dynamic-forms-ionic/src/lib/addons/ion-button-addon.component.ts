@@ -5,7 +5,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { IonButtonAddon } from '../types/addons';
 
-/** Renderer for the `ion-button` addon kind. */
+/** Renderer for the `ion-button` addon type. */
 @Component({
   selector: 'df-ion-button-addon',
   imports: [IonButton, IonIcon, IonSpinner, DynamicTextPipe, AsyncPipe],

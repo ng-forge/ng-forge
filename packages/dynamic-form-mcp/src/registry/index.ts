@@ -168,23 +168,23 @@ export function getDocPagesByCategory(category: string): DocPage[] {
   return DOCUMENTATION.filter((d) => d.category === category);
 }
 
-import { ADDON_KINDS, AddonKindInfo, FIELD_ADDON_SUPPORT, FieldAddonSupportInfo } from './addons.js';
+import { ADDON_TYPES, AddonTypeInfo, FIELD_ADDON_SUPPORT, FieldAddonSupportInfo } from './addons.js';
 
-export type { AddonKindInfo, FieldAddonSupportInfo };
+export type { AddonTypeInfo, FieldAddonSupportInfo };
 
-/** Get every registered addon kind. */
-export function getAddonKinds(): AddonKindInfo[] {
-  return ADDON_KINDS;
+/** Get every registered addon type. */
+export function getAddonTypes(): AddonTypeInfo[] {
+  return ADDON_TYPES;
 }
 
-/** Look up a single addon kind by its discriminant. */
-export function getAddonKind(kind: string): AddonKindInfo | undefined {
-  return ADDON_KINDS.find((k) => k.kind === kind);
+/** Look up a single addon type by its discriminant. */
+export function getAddonType(type: string): AddonTypeInfo | undefined {
+  return ADDON_TYPES.find((k) => k.type === type);
 }
 
-/** Filter addon kinds by source (`'core'` / `'adapter'`). */
-export function getAddonKindsByCategory(category: 'core' | 'adapter'): AddonKindInfo[] {
-  return ADDON_KINDS.filter((k) => k.category === category);
+/** Filter addon types by source (`'core'` / `'adapter'`). */
+export function getAddonTypesByCategory(category: 'core' | 'adapter'): AddonTypeInfo[] {
+  return ADDON_TYPES.filter((k) => k.category === category);
 }
 
 /** Get the per-field-type addon support map. */

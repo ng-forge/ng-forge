@@ -54,7 +54,7 @@ export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 
 // IMPORTANT: side-effect imports — these augment global type registries
 // (DynamicFormFieldRegistry, DynamicFormAddonRegistry) so `type: 'input'`,
-// `kind: 'prime-icon'`, and similar resolve at the call site. Without these,
+// `type: 'prime-icon'`, and similar resolve at the call site. Without these,
 // consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
 import './types/addons';
@@ -62,7 +62,7 @@ import './types/addons';
 // Providers
 export { withPrimeNGFields, withPrimeNGAddons } from './providers/primeng-providers';
 
-// Addon kinds
+// Addon types
 export { PrimeIconAddonComponent } from './addons/prime-icon-addon.component';
 export { PrimeButtonAddonComponent } from './addons/prime-button-addon.component';
 export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon } from './types/addons';

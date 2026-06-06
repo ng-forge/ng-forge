@@ -50,7 +50,7 @@ import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field
 import { validateFormConfig } from '../utils/config-validation/config-validator';
 import { walkAndValidateAddons } from '../utils/validate-form-config/validate-field-addons';
 import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
-import { ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
 import { filterFormValue } from '../utils/value-filter/value-filter';
 import { DEV_MODE } from '../utils/dev-mode';
@@ -228,7 +228,7 @@ export class FormStateManager<
   /** Field registry for loading components. */
   private readonly fieldRegistry = injectFieldRegistry();
   /** Addon-kind registry — feeds the addon validator at config-setup time. */
-  private readonly addonKindRegistry = inject(ADDON_KIND_REGISTRY);
+  private readonly addonKindRegistry = inject(ADDON_TYPE_REGISTRY);
   /**
    * Fingerprints of addon warnings emitted by the last config setup.
    * Used to skip re-logging warnings that already fired for the previous

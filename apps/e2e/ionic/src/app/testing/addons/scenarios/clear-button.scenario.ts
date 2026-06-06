@@ -9,8 +9,8 @@ const config = {
       label: 'Search',
       value: 'initial value',
       addons: [
-        { slot: 'prefix', kind: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' },
-        { slot: 'suffix', kind: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' },
+        { slot: 'prefix', type: 'ion-icon', icon: 'search-outline', ariaLabel: 'Search' },
+        { slot: 'suffix', type: 'ion-button', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' },
       ],
     },
   ],

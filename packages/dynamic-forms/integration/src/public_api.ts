@@ -231,12 +231,14 @@ export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';
 // =============================================================================
 
 export { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
-export { runPresetAction } from '@ng-forge/dynamic-forms';
-export type { PresetCollaborators } from '@ng-forge/dynamic-forms';
+export { runPresetAction } from '@ng-forge/dynamic-forms/internal';
+export type { PresetCollaborators } from '@ng-forge/dynamic-forms/internal';
 export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms/internal';
 export type { AddonActionHandler } from '@ng-forge/dynamic-forms/internal';
-export { ADDON_KIND_DEFINITIONS } from '@ng-forge/dynamic-forms';
-export { ADDON_KIND_REGISTRY, ADDON_KIND_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
-export { injectAddonKindRegistry } from '@ng-forge/dynamic-forms';
-export { injectFieldsSupportingAddons } from '@ng-forge/dynamic-forms';
-export type { FieldAddonSupportEntry } from '@ng-forge/dynamic-forms';
+export { ADDON_TYPE_DEFINITIONS } from '@ng-forge/dynamic-forms/internal';
+export { ADDON_TYPE_REGISTRY, ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
+export { DfAddonSlot } from '@ng-forge/dynamic-forms/internal';
+export { injectAddonTypeRegistry } from '@ng-forge/dynamic-forms/internal';
+export { injectFieldsSupportingAddons } from '@ng-forge/dynamic-forms/internal';
+export type { FieldAddonSupportEntry } from '@ng-forge/dynamic-forms/internal';
+export type { AddonTypeDefinition, AddonTypeSchema, AddonShapeValidator, FieldAddonSupport } from '@ng-forge/dynamic-forms/internal';

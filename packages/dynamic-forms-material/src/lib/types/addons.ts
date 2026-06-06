@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Material fields. */
 export interface MatIconAddon extends BaseAddon {
-  readonly kind: 'mat-icon';
+  readonly type: 'mat-icon';
   /** Material Icons name (ligature, e.g., `'search'`, `'close'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -15,7 +15,7 @@ export interface MatIconAddon extends BaseAddon {
  * participate in either XOR axis.
  */
 interface MatButtonBase extends BaseAddon {
-  readonly kind: 'mat-button';
+  readonly type: 'mat-button';
   /** Material button colour variant. */
   readonly color?: 'primary' | 'accent' | 'warn';
   /** Reactive loading state — when truthy the button is disabled. */
@@ -36,7 +36,7 @@ type MatButtonClickPreset = {
 };
 /**
  * Value type for the `actionRef` slot. When no actions have been registered
- * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * via `withAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
  * which would make this variant uninhabitable and break `addon.actionRef`
  * narrowing in the renderer. Fall back to `string` so the variant stays
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
@@ -45,7 +45,7 @@ type MatButtonClickPreset = {
 type MatButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
 type MatButtonClickActionRef = {
   readonly preset?: never;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
   readonly actionRef: MatButtonActionRef;
   readonly action?: never;
 };
@@ -87,7 +87,7 @@ type MatButtonContent = MatButtonContentIconOnly | MatButtonContentLabeled | Mat
 /** Interactive button addon for Material fields. */
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
 
-/** Union of all Material-shipped addon kinds. */
+/** Union of all Material-shipped addon types. */
 export type MatAddon = MatIconAddon | MatButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

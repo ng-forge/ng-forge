@@ -12,7 +12,7 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('icon-prefix');
       await expect(scenario).toBeVisible();
 
-      // prime-icon kind renders <i class="pi pi-search">
+      // prime-icon type renders <i class="pi pi-search">
       const prefixIcon = scenario.locator('p-inputgroup-addon').first().locator('i.pi.pi-search');
       await expect(prefixIcon).toBeVisible();
 

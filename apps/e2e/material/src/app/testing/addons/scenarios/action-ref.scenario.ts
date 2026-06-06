@@ -11,11 +11,11 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'mat-button',
+          type: 'mat-button',
           icon: 'send',
           ariaLabel: 'Send',
           color: 'primary',
-          // `logClick` is registered via `provideAddonActions({...})` in app.config.ts.
+          // `logClick` is registered via `withAddonActions({...})` in app.config.ts.
           // Resolved at click time against `ADDON_ACTION_REGISTRY`.
           actionRef: 'logClick',
         },

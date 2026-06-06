@@ -7,7 +7,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { MatButtonAddon } from '../types/addons';
 
-/** Renderer for the `mat-button` addon kind. */
+/** Renderer for the `mat-button` addon type. */
 @Component({
   selector: 'df-mat-button-addon',
   imports: [MatButton, MatIconButton, MatIcon, MatProgressSpinner, DynamicTextPipe, AsyncPipe],

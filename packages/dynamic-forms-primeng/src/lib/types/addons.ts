@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for PrimeNG fields. */
 export interface PrimeIconAddon extends BaseAddon {
-  readonly kind: 'prime-icon';
+  readonly type: 'prime-icon';
   /** PrimeIcons name without the `pi-` prefix (e.g., `'search'`, `'times'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -15,7 +15,7 @@ export interface PrimeIconAddon extends BaseAddon {
  * participate in either XOR axis.
  */
 interface PiButtonBase extends BaseAddon {
-  readonly kind: 'prime-button';
+  readonly type: 'prime-button';
   /** PrimeNG button severity / colour variant — mirrors PrimeNG's `ButtonSeverity`. */
   readonly severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
   /** Reactive loading state — renders the button's native `[loading]` spinner. */
@@ -35,7 +35,7 @@ type PiButtonClickPreset = {
 };
 /**
  * Value type for the `actionRef` slot. When no actions have been registered
- * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * via `withAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
  * which would make this variant uninhabitable and break `addon.actionRef`
  * narrowing in the renderer. Fall back to `string` so the variant stays
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
@@ -44,14 +44,14 @@ type PiButtonClickPreset = {
 type PiButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
 type PiButtonClickActionRef = {
   readonly preset?: never;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
   readonly actionRef: PiButtonActionRef;
   readonly action?: never;
 };
 type PiButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
-  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
+  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `withAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
 type PiButtonClickNone = {
@@ -86,7 +86,7 @@ type PiButtonContent = PiButtonContentIconOnly | PiButtonContentLabeled | PiButt
 /** Interactive button addon for PrimeNG fields. */
 export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
-/** Union of all PrimeNG-shipped addon kinds. */
+/** Union of all PrimeNG-shipped addon types. */
 export type PrimeAddon = PrimeIconAddon | PrimeButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

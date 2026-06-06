@@ -4,7 +4,7 @@ slug: examples/addon-currency
 description: 'Universal text addons — a dollar sign in the prefix slot and a USD label in the suffix slot. Single config, no per-adapter branching.'
 ---
 
-When the addon content is just text, use `kind: 'text'` — it works the same in every adapter without any per-adapter branching. The config object below is byte-identical regardless of which UI library renders it.
+When the addon content is just text, use `type: 'text'` — it works the same in every adapter without any per-adapter branching. The config object below is byte-identical regardless of which UI library renders it.
 
 ## Live Demo
 
@@ -22,17 +22,17 @@ When the addon content is just text, use `kind: 'text'` — it works the same in
       value: '99.00',
       props: { type: 'number' },
       addons: [
-        { slot: 'prefix', kind: 'text', text: '$' },
-        { slot: 'suffix', kind: 'text', text: 'USD' },
+        { slot: 'prefix', type: 'text', text: '$' },
+        { slot: 'suffix', type: 'text', text: 'USD' },
       ],
     },
   ],
 }
 ```
 
-`text` is one of three universal kinds (alongside `template` and `component`) registered by core. The icon and button kinds — `mat-icon` / `prime-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` kind is the lowest-friction choice.
+`text` is one of three universal types (alongside `template` and `component`) registered by core. The icon and button types — `mat-icon` / `prime-button` / etc. — are per-adapter, but for simple labels and currency markers the universal `text` type is the lowest-friction choice.
 
 ## What to read next
 
-- **[Addons / Overview](/addons/overview)** — kinds catalog, slots, reactive `hidden`.
+- **[Addons / Overview](/addons/overview)** — types catalog, slots, reactive `hidden`.
 - **[Addon Clear Button](/examples/addon-clear-button)** — the adapter-specific icon + button pattern.

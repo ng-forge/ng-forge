@@ -11,11 +11,11 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'bs-button',
+          type: 'bs-button',
           icon: 'send',
           ariaLabel: 'Send',
           severity: 'primary',
-          // `logClick` is registered via `provideAddonActions({...})` in app.config.ts.
+          // `logClick` is registered via `withAddonActions({...})` in app.config.ts.
           // Resolved at click time against `ADDON_ACTION_REGISTRY`.
           actionRef: 'logClick',
         },

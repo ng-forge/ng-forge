@@ -1,10 +1,10 @@
 import { Injector, signal } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { type AddonKindDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { type AddonTypeDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import {
   ADDON_ACTION_REGISTRY,
-  ADDON_KIND_COMPONENT_CACHE,
-  ADDON_KIND_REGISTRY,
+  ADDON_TYPE_COMPONENT_CACHE,
+  ADDON_TYPE_REGISTRY,
   FIELD_SIGNAL_CONTEXT,
   type FieldSignalContext,
 } from '@ng-forge/dynamic-forms/integration';
@@ -17,17 +17,17 @@ import type { MatButtonAddon, MatIconAddon } from '../../types/addons';
 import MatInputFieldComponent from './mat-input.component';
 import type { MatInputAddon } from './mat-input.type';
 
-const MAT_ICON_KIND: AddonKindDefinition = {
-  kind: 'mat-icon',
+const MAT_ICON_KIND: AddonTypeDefinition = {
+  type: 'mat-icon',
   loadComponent: () => Promise.resolve(MatIconAddonComponent),
 };
-const MAT_BUTTON_KIND: AddonKindDefinition = {
-  kind: 'mat-button',
+const MAT_BUTTON_KIND: AddonTypeDefinition = {
+  type: 'mat-button',
   loadComponent: () => Promise.resolve(MatButtonAddonComponent),
 };
 
-function makeKindRegistry(): ReadonlyMap<string, AddonKindDefinition> {
-  return new Map<string, AddonKindDefinition>([
+function makeTypeRegistry(): ReadonlyMap<string, AddonTypeDefinition> {
+  return new Map<string, AddonTypeDefinition>([
     ['mat-icon', MAT_ICON_KIND],
     ['mat-button', MAT_BUTTON_KIND],
   ]);
@@ -54,8 +54,8 @@ function createFixture(addons: ReadonlyArray<MatInputAddon>) {
     inputs: { addons },
     providers: [
       provideAnimations(),
-      { provide: ADDON_KIND_REGISTRY, useValue: makeKindRegistry() },
-      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+      { provide: ADDON_TYPE_REGISTRY, useValue: makeTypeRegistry() },
+      { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
       { provide: FIELD_SIGNAL_CONTEXT, useFactory: stubFieldSignalContext },
       { provide: DynamicFormLogger, useValue: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() } },
@@ -66,7 +66,7 @@ function createFixture(addons: ReadonlyArray<MatInputAddon>) {
 
 describe('MatInputFieldComponent — addon rendering', () => {
   it('renders <df-addon-slot matPrefix> for a prefix-slot addon', async () => {
-    const prefix: MatIconAddon = { kind: 'mat-icon', slot: 'prefix', icon: 'search', ariaLabel: 'Search' };
+    const prefix: MatIconAddon = { type: 'mat-icon', slot: 'prefix', icon: 'search', ariaLabel: 'Search' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -78,7 +78,7 @@ describe('MatInputFieldComponent — addon rendering', () => {
 
   it('renders <df-addon-slot matSuffix> for a suffix-slot addon', async () => {
     const suffix: MatButtonAddon = {
-      kind: 'mat-button',
+      type: 'mat-button',
       slot: 'suffix',
       icon: 'close',
       ariaLabel: 'Clear',
@@ -95,8 +95,8 @@ describe('MatInputFieldComponent — addon rendering', () => {
 
   it('renders both prefix and suffix slots when both addons are supplied', async () => {
     const addons: MatInputAddon[] = [
-      { kind: 'mat-icon', slot: 'prefix', icon: 'search', ariaLabel: 'Search' },
-      { kind: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+      { type: 'mat-icon', slot: 'prefix', icon: 'search', ariaLabel: 'Search' },
+      { type: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();

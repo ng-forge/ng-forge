@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, signal } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { AddonActionContext, AddonActionPreset, DfAddonSlot, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { AddonActionContext, AddonActionPreset, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { DfAddonSlot } from '@ng-forge/dynamic-forms/integration';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe, FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import {

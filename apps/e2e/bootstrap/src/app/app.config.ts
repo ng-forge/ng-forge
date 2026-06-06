@@ -3,7 +3,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, withHashLocation } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { appRoutes } from './app.routes';
-import { provideAddonActions, provideDynamicForm, type AddonActionContext } from '@ng-forge/dynamic-forms';
+import { withAddonActions, provideDynamicForm, type AddonActionContext } from '@ng-forge/dynamic-forms';
 import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';
 import { DEMO_WRAPPERS } from '@ng-forge/examples-shared-ui';
 import { perfMockHttpInterceptor } from '@ng-forge/examples-shared-testing/perf';
@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideDynamicForm(
       ...withBootstrapFields(),
       ...DEMO_WRAPPERS,
-      provideAddonActions({
+      withAddonActions({
         // Used by the `actionRef` e2e scenario: appends '!' to the field value
         // so the dispatch is observable without needing real side effects.
         logClick: (ctx: AddonActionContext) => {

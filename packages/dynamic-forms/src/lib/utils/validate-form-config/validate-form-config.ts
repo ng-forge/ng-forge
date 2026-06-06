@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
@@ -26,7 +26,7 @@ export interface SanitizedFormConfig {
 
 /**
  * Walk a `FormConfig`, validate every field's addons against the active
- * `FIELD_REGISTRY` and `ADDON_KIND_REGISTRY`, and return a sanitized copy
+ * `FIELD_REGISTRY` and `ADDON_TYPE_REGISTRY`, and return a sanitized copy
  * plus a list of dropped-addon warnings.
  *
  * @Component({ ... })
@@ -43,13 +43,13 @@ export interface SanitizedFormConfig {
  */
 export function sanitizeFormConfig(config: FormConfig, options: SanitizeFormConfigOptions = {}): SanitizedFormConfig {
   const fieldRegistry = inject(FIELD_REGISTRY);
-  const kindRegistry = inject(ADDON_KIND_REGISTRY);
+  const typeRegistry = inject(ADDON_TYPE_REGISTRY);
   const source = options.source ?? 'inline';
 
   const { fields, warnings } = walkAndValidateAddons(
     (config.fields ?? []) as readonly FieldDef<unknown>[],
     fieldRegistry,
-    kindRegistry,
+    typeRegistry,
     source,
   );
 
@@ -83,14 +83,14 @@ export function logAddonWarnings(warnings: readonly AddonWarning[], logger?: Log
 export function sanitizeFormConfigPure(
   config: FormConfig,
   fieldRegistry: ReadonlyMap<string, import('@ng-forge/dynamic-forms/internal').FieldTypeDefinition>,
-  kindRegistry: ReadonlyMap<string, import('@ng-forge/dynamic-forms/internal').AddonKindDefinition>,
+  typeRegistry: ReadonlyMap<string, import('@ng-forge/dynamic-forms/internal').AddonTypeDefinition>,
   options: SanitizeFormConfigOptions = {},
 ): SanitizedFormConfig {
   const source = options.source ?? 'inline';
   const { fields, warnings } = walkAndValidateAddons(
     (config.fields ?? []) as readonly FieldDef<unknown>[],
     fieldRegistry,
-    kindRegistry,
+    typeRegistry,
     source,
   );
   return { sanitized: { ...config, fields: fields as FormConfig['fields'] }, warnings };

@@ -15,7 +15,7 @@ import { textCurrencyScenario } from './scenarios/text-currency.scenario';
 export const addonsSuite: TestSuite = {
   id: 'addons',
   title: 'Addons',
-  description: 'Prefix / suffix addon kinds on ion-input — ion-icon, ion-button, text, presets.',
+  description: 'Prefix / suffix addon types on ion-input — ion-icon, ion-button, text, presets.',
   path: '/testing/addons',
   scenarios: [
     iconPrefixScenario,

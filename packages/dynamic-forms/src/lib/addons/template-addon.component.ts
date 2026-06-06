@@ -6,7 +6,7 @@ import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
-/** Renderer for the universal `template` addon kind. */
+/** Renderer for the universal `template` addon type. */
 @Component({
   selector: 'df-template-addon',
   imports: [NgTemplateOutlet],

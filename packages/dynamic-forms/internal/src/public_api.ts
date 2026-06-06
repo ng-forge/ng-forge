@@ -78,9 +78,16 @@ export * from './lib/mappers/types';
 export * from './lib/models/addon/addon-action';
 export * from './lib/models/addon/addon-action-registry';
 export * from './lib/models/addon/addon-def';
-export * from './lib/models/addon/addon-kind';
+export * from './lib/models/addon/addon-type';
 export * from './lib/models/addon/addon-slot';
 export * from './lib/models/addon/df-field-templates.token';
+
+// Addon runtime (adapter-author surface; re-exported via /integration)
+export * from './lib/addons/addon-type-definitions.token';
+export * from './lib/addons/df-addon-slot.component';
+export * from './lib/addons/inject-addon-type-registry';
+export * from './lib/addons/inject-fields-supporting-addons';
+export * from './lib/addons/run-preset-action';
 export * from './lib/models/component-type';
 export * from './lib/models/expressions/conditional-expression';
 export * from './lib/models/expressions/evaluation-context';

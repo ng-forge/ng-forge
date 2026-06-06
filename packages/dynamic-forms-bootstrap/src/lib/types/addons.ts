@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Bootstrap fields. */
 export interface BsIconAddon extends BaseAddon {
-  readonly kind: 'bs-icon';
+  readonly type: 'bs-icon';
   /** Bootstrap Icons name without the `bi-` prefix (e.g., `'search'`, `'x'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -15,7 +15,7 @@ export interface BsIconAddon extends BaseAddon {
  * participate in either XOR axis.
  */
 interface BsButtonBase extends BaseAddon {
-  readonly kind: 'bs-button';
+  readonly type: 'bs-button';
   /** Bootstrap button variant (mapped to `btn-outline-{severity}`). */
   readonly severity?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
   /** Reactive loading state — swaps the button content for a spinner. */
@@ -35,7 +35,7 @@ type BsButtonClickPreset = {
 };
 /**
  * Value type for the `actionRef` slot. When no actions have been registered
- * via `provideAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
+ * via `withAddonActions(...)`, `RegisteredActionRef` resolves to `never` —
  * which would make this variant uninhabitable. Fall back to `string` so the
  * variant stays usable; once the user augments `DynamicFormActionRegistry`,
  * autocomplete tightens to the registered keys.
@@ -43,14 +43,14 @@ type BsButtonClickPreset = {
 type BsButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
 type BsButtonClickActionRef = {
   readonly preset?: never;
-  /** Reference to a handler registered via `provideAddonActions(...)`. JSON-safe. */
+  /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
   readonly actionRef: BsButtonActionRef;
   readonly action?: never;
 };
 type BsButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
-  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `provideAddonActions(...)`. */
+  /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `withAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
 type BsButtonClickNone = {
@@ -85,7 +85,7 @@ type BsButtonContent = BsButtonContentIconOnly | BsButtonContentLabeled | BsButt
 /** Interactive button addon for Bootstrap fields. */
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
-/** Union of all Bootstrap-shipped addon kinds. */
+/** Union of all Bootstrap-shipped addon types. */
 export type BsAddon = BsIconAddon | BsButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

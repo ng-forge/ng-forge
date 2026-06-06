@@ -7,7 +7,7 @@ type UiAdapterName = Exclude<AdapterName, 'custom'>;
 
 type AddonInfoField =
   | 'quickstart'
-  | 'kinds-table'
+  | 'types-table'
   | 'rendering-mechanism'
   | 'provider-setup'
   | 'preset-handler-context'
@@ -15,11 +15,11 @@ type AddonInfoField =
   | 'three-variants'
   | 'reactive-hidden-snippet'
   | 'actions-wiring'
-  | 'custom-kind-invocation';
+  | 'custom-type-invocation';
 
 interface AddonAdapterData {
-  iconKind: string;
-  buttonKind: string;
+  iconType: string;
+  buttonType: string;
   iconLibrary: string;
   iconRender: string;
   searchIcon: string;
@@ -37,8 +37,8 @@ interface AddonAdapterData {
 
 const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
   material: {
-    iconKind: 'mat-icon',
-    buttonKind: 'mat-button',
+    iconType: 'mat-icon',
+    buttonType: 'mat-button',
     iconLibrary: 'Material Icons',
     iconRender: '<mat-icon>search</mat-icon>',
     searchIcon: 'search',
@@ -55,8 +55,8 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       "Addons render as direct <code>&lt;mat-form-field&gt;</code> children with <code>matPrefix</code> / <code>matSuffix</code> attribute directives applied to <code>&lt;df-addon-slot&gt;</code> — Material's native projection API.",
   },
   bootstrap: {
-    iconKind: 'bs-icon',
-    buttonKind: 'bs-button',
+    iconType: 'bs-icon',
+    buttonType: 'bs-button',
     iconLibrary: 'Bootstrap Icons',
     iconRender: '<i class="bi bi-search">',
     searchIcon: 'search',
@@ -73,8 +73,8 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       'The input switches to a <code>&lt;div class=&quot;input-group&quot;&gt;</code> wrapper when any addon is present; addons render in <code>&lt;span class=&quot;input-group-text&quot;&gt;</code> flanking the input. The floating-label branch nests <code>&lt;div class=&quot;form-floating&quot;&gt;</code> inside the group.',
   },
   primeng: {
-    iconKind: 'prime-icon',
-    buttonKind: 'prime-button',
+    iconType: 'prime-icon',
+    buttonType: 'prime-button',
     iconLibrary: 'PrimeIcons',
     iconRender: '<i class="pi pi-search">',
     searchIcon: 'search',
@@ -91,8 +91,8 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       'The input switches to a <code>&lt;p-inputgroup&gt;</code> wrapper with <code>&lt;p-inputgroup-addon&gt;</code> flanking the input. The wrapper is dropped entirely when every addon is reactively hidden.',
   },
   ionic: {
-    iconKind: 'ion-icon',
-    buttonKind: 'ion-button',
+    iconType: 'ion-icon',
+    buttonType: 'ion-button',
     iconLibrary: 'Ionicons',
     iconRender: '<ion-icon name="search-outline">',
     searchIcon: 'search-outline',
@@ -129,12 +129,12 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
         @case ('quickstart') {
           <pre class="addon-code"><code [codeHighlight]="quickstartCode()" language="typescript"></code></pre>
         }
-        @case ('kinds-table') {
+        @case ('types-table') {
           <div class="addon-table-wrap">
             <table class="addon-table">
               <thead>
                 <tr>
-                  <th>Kind</th>
+                  <th>Type</th>
                   <th>Renders</th>
                   <th>Notes</th>
                 </tr>
@@ -142,7 +142,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
               <tbody>
                 <tr>
                   <td>
-                    <code>{{ d.iconKind }}</code>
+                    <code>{{ d.iconType }}</code>
                   </td>
                   <td>
                     <code>{{ d.iconRender }}</code>
@@ -151,7 +151,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
                 </tr>
                 <tr>
                   <td>
-                    <code>{{ d.buttonKind }}</code>
+                    <code>{{ d.buttonType }}</code>
                   </td>
                   <td>
                     <code>{{ buttonRender() }}</code>
@@ -206,8 +206,8 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
         @case ('actions-wiring') {
           <pre class="addon-code"><code [codeHighlight]="actionsWiringCode()" language="typescript"></code></pre>
         }
-        @case ('custom-kind-invocation') {
-          <pre class="addon-code"><code [codeHighlight]="customKindInvocationCode()" language="typescript"></code></pre>
+        @case ('custom-type-invocation') {
+          <pre class="addon-code"><code [codeHighlight]="customTypeInvocationCode()" language="typescript"></code></pre>
         }
       }
     }
@@ -228,9 +228,9 @@ export class DocsAddonInfoComponent {
 
   protected readonly buttonRender = computed(() => {
     const d = this.data();
-    if (d.iconKind.startsWith('mat')) return '<button mat-button> / <button mat-icon-button>';
-    if (d.iconKind.startsWith('bs')) return '<button class="btn btn-outline-{severity}">';
-    if (d.iconKind.startsWith('prime')) return '<p-button> with [loading]';
+    if (d.iconType.startsWith('mat')) return '<button mat-button> / <button mat-icon-button>';
+    if (d.iconType.startsWith('bs')) return '<button class="btn btn-outline-{severity}">';
+    if (d.iconType.startsWith('prime')) return '<p-button> with [loading]';
     return '<ion-button> with <ion-spinner>';
   });
 
@@ -241,8 +241,8 @@ export class DocsAddonInfoComponent {
   type: 'input',
   label: 'Search',
   addons: [
-    { slot: 'prefix', kind: '${d.iconKind}', icon: '${d.searchIcon}', ariaLabel: 'Search' },
-    { slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' },
+    { slot: 'prefix', type: '${d.iconType}', icon: '${d.searchIcon}', ariaLabel: 'Search' },
+    { slot: 'suffix', type: '${d.buttonType}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' },
   ],
 }`;
   });
@@ -252,10 +252,10 @@ export class DocsAddonInfoComponent {
     return `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { ${d.withFieldsHelper} } from '${d.packageName}';
 
-// ${d.iconKind} + ${d.buttonKind} work out of the box.
+// ${d.iconType} + ${d.buttonType} work out of the box.
 provideDynamicForm(...${d.withFieldsHelper}());
 
-// Standalone — addon kinds without the field types:
+// Standalone — addon types without the field types:
 // provideDynamicForm(...myCustomFields(), ${d.withAddonsHelper}());`;
   });
 
@@ -267,20 +267,20 @@ provideDynamicForm(...${d.withFieldsHelper}());
   }
 }
 
-// Now valid in TS — \`kind: 'rating'\` is part of the ${d.inputComponentName} addon union.
-{ type: 'input', key: 'review', addons: [{ slot: 'suffix', kind: 'rating', value: 4 }] }`;
+// Now valid in TS — \`type: 'rating'\` is part of the ${d.inputComponentName} addon union.
+{ type: 'input', key: 'review', addons: [{ slot: 'suffix', type: 'rating', value: 4 }] }`;
   });
 
   protected readonly threeVariantsCode = computed(() => {
     const d = this.data();
     return `// 1. Built-in preset — JSON-safe, no code required.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
+{ slot: 'suffix', type: '${d.buttonType}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
 
 // 2. Registered handler — JSON-safe, looked up by name.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
+{ slot: 'suffix', type: '${d.buttonType}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
 
 // 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
+{ slot: 'suffix', type: '${d.buttonType}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
   action: (ctx) => ctx.setValue?.(((typeof ctx.value === 'string' ? ctx.value : '') + '+')) }`;
   });
 
@@ -290,7 +290,7 @@ provideDynamicForm(...${d.withFieldsHelper}());
 
 {
   slot: 'suffix',
-  kind: '${d.buttonKind}',
+  type: '${d.buttonType}',
   icon: '${d.clearIcon}',
   ariaLabel: 'Clear',
   preset: 'clear',
@@ -301,13 +301,13 @@ provideDynamicForm(...${d.withFieldsHelper}());
   protected readonly actionsWiringCode = computed(() => {
     const d = this.data();
     return `import { ApplicationConfig } from '@angular/core';
-import { provideDynamicForm, provideAddonActions } from '@ng-forge/dynamic-forms';
+import { provideDynamicForm, withAddonActions } from '@ng-forge/dynamic-forms';
 import { ${d.withFieldsHelper} } from '${d.packageName}';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideDynamicForm(...${d.withFieldsHelper}()),
-    provideAddonActions({
+    withAddonActions({
       runSearch: (ctx) => mySearchService.search(ctx.value),
       submitDraft: (ctx) => myDraftService.save(ctx.field.key, ctx.value),
     }),
@@ -315,7 +315,7 @@ export const appConfig: ApplicationConfig = {
 };`;
   });
 
-  protected readonly customKindInvocationCode = computed(() => {
+  protected readonly customTypeInvocationCode = computed(() => {
     const d = this.data();
     return `import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm, withCustomAddon } from '@ng-forge/dynamic-forms';
