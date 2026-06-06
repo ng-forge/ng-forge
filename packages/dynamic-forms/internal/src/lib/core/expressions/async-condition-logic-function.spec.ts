@@ -7,9 +7,9 @@ import { AsyncCondition } from '../../models/expressions/conditional-expression'
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { RootFormRegistryService } from '../registry/root-form-registry.service';
-import { FormStateManager } from '../../state/form-state-manager';
+import { FormStateManager } from '../../../../../src/lib/state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../../../testing/src/mock-logger';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createWarningTracker } from '../../utils/warning-tracker';
 import { createAsyncConditionLogicFunction } from './async-condition-logic-function';

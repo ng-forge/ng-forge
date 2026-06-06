@@ -1,10 +1,10 @@
 import { Component, Injector, runInInjectionContext, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
-import { injectAddonTypeRegistry } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '../errors/dynamic-form-error';
+import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '../models/addon/addon-type';
+import { ADDON_TYPE_COMPONENT_CACHE } from '../models/addon/addon-type';
+import { injectAddonTypeRegistry } from './inject-addon-type-registry';
 
 @Component({ template: '' })
 class IconTypeComponent {}

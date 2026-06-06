@@ -1,12 +1,12 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { AnyAddon, TextAddon } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
-import { DfAddonSlot } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormError } from '../errors/dynamic-form-error';
+import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '../models/addon/addon-type';
+import { AnyAddon, TextAddon } from '../models/addon/addon-def';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { ADDON_TYPE_COMPONENT_CACHE } from '../models/addon/addon-type';
+import { DfAddonSlot } from './df-addon-slot.component';
 
 @Component({ template: 'icon-rendered' })
 class IconAddonStub {}

@@ -1,8 +1,8 @@
 import { signal, type WritableSignal } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AddonActionContext } from '@ng-forge/dynamic-forms/internal';
-import type { Logger } from '@ng-forge/dynamic-forms/internal';
-import { type PresetCollaborators, runPresetAction } from '@ng-forge/dynamic-forms/internal';
+import type { AddonActionContext } from '../models/addon/addon-action';
+import type { Logger } from '../providers/features/logger/logger.interface';
+import { type PresetCollaborators, runPresetAction } from './run-preset-action';
 
 // Core spec for the shared preset runner. Adapter preset-actions specs
 // duplicate-test passthroughs into this runner; the focused coverage here
