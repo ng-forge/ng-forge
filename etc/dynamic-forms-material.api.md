@@ -82,10 +82,6 @@ export type MatAddon = MatIconAddon | MatButtonAddon;
 export interface MatAddonExtensions {
 }
 
-// Warning: (ae-forgotten-export) The symbol "MatButtonBase" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-// Warning: (ae-forgotten-export) The symbol "MatButtonContent" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-// Warning: (ae-forgotten-export) The symbol "MatButtonClick" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-//
 // @public
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
 
@@ -289,8 +285,6 @@ export class MatIconAddonComponent {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatIconAddonComponent, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "MatAddonExtension" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-//
 // @public
 export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | TemplateAddon | MatAddonExtension;
 
@@ -599,18 +593,12 @@ export type ShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>
     arrayKey: string;
 };
 
-// Warning: (ae-forgotten-export) The symbol "MaterialAddonsFeature" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-//
 // @public
 export function withMaterialAddons(): MaterialAddonsFeature;
 
-// Warning: (ae-forgotten-export) The symbol "MaterialFieldsWithAddons" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-//
 // @public
 export function withMaterialFields(): MaterialFieldsWithAddons;
 
-// Warning: (ae-forgotten-export) The symbol "MaterialFieldsWithConfig" needs to be exported by the entry point ng-forge-dynamic-forms-material.d.ts
-//
 // @public (undocumented)
 export function withMaterialFields(config: MaterialConfig): MaterialFieldsWithConfig;
 

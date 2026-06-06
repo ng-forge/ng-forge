@@ -91,10 +91,6 @@ export type PrimeAddon = PrimeIconAddon | PrimeButtonAddon;
 export interface PrimeAddonExtensions {
 }
 
-// Warning: (ae-forgotten-export) The symbol "PiButtonBase" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-// Warning: (ae-forgotten-export) The symbol "PiButtonContent" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-// Warning: (ae-forgotten-export) The symbol "PiButtonClick" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-//
 // @public
 export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
@@ -296,8 +292,6 @@ export class PrimeIconAddonComponent {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeIconAddonComponent, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "PrimeAddonExtension" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-//
 // @public
 export type PrimeInputAddon = PrimeIconAddon | PrimeButtonAddon | TextAddon | TemplateAddon | PrimeAddonExtension;
 
@@ -544,18 +538,12 @@ export type ShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayItemEven
     arrayKey: string;
 };
 
-// Warning: (ae-forgotten-export) The symbol "PrimeNGAddonsFeature" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-//
 // @public
 export function withPrimeNGAddons(): PrimeNGAddonsFeature;
 
-// Warning: (ae-forgotten-export) The symbol "PrimeNGFieldsWithAddons" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-//
 // @public
 export function withPrimeNGFields(): PrimeNGFieldsWithAddons;
 
-// Warning: (ae-forgotten-export) The symbol "PrimeNGFieldsWithConfig" needs to be exported by the entry point ng-forge-dynamic-forms-primeng.d.ts
-//
 // @public (undocumented)
 export function withPrimeNGFields(config: PrimeNGConfig): PrimeNGFieldsWithConfig;
 

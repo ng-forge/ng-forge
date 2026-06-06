@@ -74,10 +74,6 @@ export type IonAddon = IonIconAddon | IonButtonAddon;
 export interface IonAddonExtensions {
 }
 
-// Warning: (ae-forgotten-export) The symbol "IonButtonBase" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-// Warning: (ae-forgotten-export) The symbol "IonButtonContent" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-// Warning: (ae-forgotten-export) The symbol "IonButtonClick" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-//
 // @public
 export type IonButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
 
@@ -292,7 +288,6 @@ export type IonicInputField = InputField<IonicInputProps> & {
 // @public (undocumented)
 export class IonicInputFieldComponent {
     constructor();
-    // Warning: (ae-forgotten-export) The symbol "_ng_forge_dynamic_forms_ionic" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
     protected readonly buttonPrefixAddons: _angular_core.Signal<_ng_forge_dynamic_forms_ionic.IonButtonAddon[]>;
     // (undocumented)
     protected readonly buttonSuffixAddons: _angular_core.Signal<_ng_forge_dynamic_forms_ionic.IonButtonAddon[]>;
@@ -601,8 +596,6 @@ export interface IonicToggleProps {
     labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
 }
 
-// Warning: (ae-forgotten-export) The symbol "IonAddonExtension" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-//
 // @public
 export type IonInputAddon = IonIconAddon | IonButtonAddon | TextAddon | TemplateAddon | IonAddonExtension;
 
@@ -631,18 +624,12 @@ export type ShiftArrayItemButtonField = Omit<IonicButtonField<ShiftArrayItemEven
     arrayKey: string;
 };
 
-// Warning: (ae-forgotten-export) The symbol "IonicAddonsFeature" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-//
 // @public
 export function withIonicAddons(): IonicAddonsFeature;
 
-// Warning: (ae-forgotten-export) The symbol "IonicFieldsWithAddons" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-//
 // @public
 export function withIonicFields(): IonicFieldsWithAddons;
 
-// Warning: (ae-forgotten-export) The symbol "IonicFieldsWithConfig" needs to be exported by the entry point ng-forge-dynamic-forms-ionic.d.ts
-//
 // @public (undocumented)
 export function withIonicFields(config: IonicConfig): IonicFieldsWithConfig;
 

@@ -33,9 +33,6 @@ import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
-// Warning: (ae-forgotten-export) The symbol "_ng_forge_dynamic_forms" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-internal-missing-underscore) The name "ADDON_KIND_DEFINITIONS" should be prefixed with an underscore because the declaration is marked as @internal
-//
 // @internal
 export const ADDON_KIND_DEFINITIONS: InjectionToken<readonly AddonKindDefinition<_ng_forge_dynamic_forms.BaseAddon<_ng_forge_dynamic_forms.AddonSlot>>[]>;
 
@@ -45,8 +42,6 @@ export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<
 // @public
 export type AddonActionPreset = CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry | (string & {});
 
-// Warning: (ae-forgotten-export) The symbol "DynamicFormFeature" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type AddonActionsFeature<K extends string = string> = DynamicFormFeature<'addon-actions'> & {
     readonly __handlerKeys?: K;
@@ -56,7 +51,6 @@ export type AddonActionsFeature<K extends string = string> = DynamicFormFeature<
 export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
     readonly jsonSafe?: boolean;
     readonly kind: string;
-    // Warning: (ae-forgotten-export) The symbol "LazyComponentLoader" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly loadComponent: LazyComponentLoader;
     readonly schema?: AddonKindSchema;
     readonly validate?: AddonShapeValidator<T>;
@@ -194,13 +188,10 @@ export function arrayEvent(arrayKey: string): {
     move: (from: number, to: number) => MoveArrayItemEvent;
 };
 
-// Warning: (ae-forgotten-export) The symbol "ArrayItemDefinition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;
-    // Warning: (ae-forgotten-export) The symbol "ContainerLogicConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly logic?: ContainerLogicConfig[];
     readonly maxLength?: number;
     readonly meta?: never;
@@ -223,8 +214,6 @@ export type ArrayItemDefinitionTemplate = ArrayItemDefinition;
 // @public
 export type ArrayItemTemplate = readonly ArrayAllowedChildren[];
 
-// Warning: (ae-forgotten-export) The symbol "AsyncConditionBase" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type AsyncCondition = (AsyncConditionBase & {
     asyncFunctionName: string;
@@ -248,8 +237,6 @@ export interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResu
 // @public
 export type AsyncDerivationFunction<TFormValue extends Record<string, unknown> = any> = (context: EvaluationContext<unknown, TFormValue>) => Promise<unknown> | Observable<unknown>;
 
-// Warning: (ae-forgotten-export) The symbol "AsyncValidatorConfigShared" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type AsyncValidatorConfig = (AsyncValidatorConfigShared & {
     functionName: string;
@@ -295,8 +282,6 @@ export interface BaseValueField<TProps, TValue, TMeta extends FieldMeta = FieldM
     value?: TNullable extends true ? TValue | null : TValue;
 }
 
-// Warning: (ae-forgotten-export) The symbol "FieldTypeDefinition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export const BUILT_IN_FIELDS: FieldTypeDefinition[];
 
@@ -307,9 +292,6 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
     value?: number | string | RegExp;
 }
 
-// Warning: (ae-forgotten-export) The symbol "Prettify" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "ExcludedKeys$1" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public (undocumented)
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys$1>>>;
 
@@ -336,7 +318,6 @@ export class ComponentAddonComponent {
     constructor();
     // (undocumented)
     readonly addon: _angular_core.InputSignal<ComponentAddon>;
-    // Warning: (ae-forgotten-export) The symbol "WrapperFieldInputs" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     protected readonly inputs: _angular_core.Signal<Record<string, unknown>>;
@@ -348,12 +329,6 @@ export class ComponentAddonComponent {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<ComponentAddonComponent, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "FieldValueCondition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "CustomCondition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "JavascriptCondition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "AndCondition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "OrCondition" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptCondition | HttpCondition | AsyncCondition | AndCondition | OrCondition;
 
@@ -495,9 +470,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     protected environmentInjector: EnvironmentInjector;
     errors: Signal<_angular_forms_signals.ValidationError.WithFieldTree[]>;
     events: _angular_core.OutputRef<_ng_forge_dynamic_forms.FormEvent>;
-    // Warning: (ae-forgotten-export) The symbol "FieldLoadingError" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     fieldLoadingErrors: WritableSignal<FieldLoadingError[]>;
-    // Warning: (ae-forgotten-export) The symbol "_ng_forge_dynamic_forms_internal" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     fieldSignalContext: Signal<_ng_forge_dynamic_forms_internal.FieldSignalContext<TModel>>;
     form: Signal<FieldTree<TModel, string | number, "writable">>;
     formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
@@ -510,12 +483,10 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     invalid: Signal<boolean>;
     protected onNativeSubmit(event: Event): void;
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
-    // Warning: (ae-forgotten-export) The symbol "PageNavigationStateChangeEvent" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     onPageNavigationStateChange: _angular_core.OutputRef<PageNavigationStateChangeEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
     renderPhase: Signal<"teardown" | "render">;
     reset: _angular_core.OutputRef<FormResetEvent>;
-    // Warning: (ae-forgotten-export) The symbol "ResolvedField" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     protected resolvedFields: Signal<ResolvedField[]>;
     // (undocumented)
     shouldRender: Signal<boolean>;
@@ -581,14 +552,11 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
     arrayIndex?: number;
     arrayPath?: string;
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>;
-    // Warning: (ae-forgotten-export) The symbol "WarningTracker" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     deprecationTracker?: WarningTracker;
     externalData?: Record<string, unknown>;
     fieldPath: string;
-    // Warning: (ae-forgotten-export) The symbol "FieldStateContext" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     fieldState?: FieldStateContext;
     fieldValue: TValue;
-    // Warning: (ae-forgotten-export) The symbol "FormFieldStateMap" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     formFieldState?: FormFieldStateMap;
     formValue: TFormValue;
     groupValue?: unknown;
@@ -598,8 +566,6 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
 
 // @public
 export class EventDispatcher {
-    // Warning: (ae-forgotten-export) The symbol "EventBus" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-    //
     // @internal
     connect(bus: EventBus): void;
     // @internal
@@ -611,8 +577,6 @@ export class EventDispatcher {
     static ɵprov: _angular_core.ɵɵInjectableDeclaration<EventDispatcher>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "FieldTypeMap" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type ExtractField<T extends AvailableFieldTypes> = T extends keyof FieldTypeMap ? FieldTypeMap[T] : never;
 
@@ -642,17 +606,12 @@ export interface FieldAddonSupportEntry {
     readonly slots: FieldAddonSupport['slots'];
 }
 
-// Warning: (ae-forgotten-export) The symbol "AddonActionContextBase" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export interface FieldBoundAddonActionContext<TValue = unknown> extends AddonActionContextBase<TValue> {
-    // Warning: (ae-forgotten-export) The symbol "ReadonlyFieldTree" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly form: ReadonlyFieldTree<TValue>;
     readonly setValue: (next: TValue) => void;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IncludedKeys" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type FieldComponent<T extends FieldDef<unknown, FieldMeta>> = Prettify<WithInputSignals<Pick<T, IncludedKeys>>>;
 
@@ -719,8 +678,6 @@ export interface FieldRegistryContainers {
 
 // @public
 export interface FieldRegistryLeaves {
-    // Warning: (ae-forgotten-export) The symbol "HiddenField" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-    //
     // (undocumented)
     hidden: HiddenField;
     // (undocumented)
@@ -731,8 +688,6 @@ export interface FieldRegistryLeaves {
 export interface FieldRegistryWrappers {
     // (undocumented)
     css: CssWrapper;
-    // Warning: (ae-forgotten-export) The symbol "RowWrapper" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-    //
     // (undocumented)
     row: RowWrapper;
 }
@@ -784,7 +739,6 @@ export interface FormConfig<TFields extends NarrowFields | RegisteredFieldTypes[
     externalData?: Record<string, Signal<unknown>>;
     fields: TFields;
     options?: FormOptions;
-    // Warning: (ae-forgotten-export) The symbol "FormSchema" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     schema?: FormSchema<TSchemaValue>;
     schemas?: SchemaDefinition[];
     submission?: SubmissionConfig<TValue>;
@@ -883,7 +837,6 @@ export interface HttpCondition {
 export interface HttpCustomValidator<TValue = unknown, TResult = unknown> {
     readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError_2 | ValidationError_2[] | null;
     readonly onSuccess: (result: TResult, ctx: FieldContext<TValue>) => TreeValidationResult;
-    // Warning: (ae-forgotten-export) The symbol "HttpResourceRequest" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly request: (ctx: FieldContext<TValue>, config?: Record<string, unknown>) => string | HttpResourceRequest | undefined;
 }
 
@@ -905,9 +858,6 @@ export interface HttpValidationResponseMapping {
     validWhen: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ExtractFields" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "InferFormValueWithDepth" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type InferFormValue<T> = ExtractFields<T> extends readonly RegisteredFieldTypes[] ? InferFormValueWithDepth<ExtractFields<T> extends RegisteredFieldTypes[] ? ExtractFields<T> : [...ExtractFields<T>], 5> : never;
 
@@ -920,8 +870,6 @@ export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
     };
 } : never;
 
-// Warning: (ae-forgotten-export) The symbol "AddonKindRegistryRef" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export function injectAddonKindRegistry(): AddonKindRegistryRef;
 
@@ -956,8 +904,6 @@ export function isDisplayOnlyField(field: RegisteredFieldTypes): boolean;
 // @public
 export function isFieldBoundContext<TValue>(ctx: AddonActionContext<TValue>): ctx is FieldBoundAddonActionContext<TValue>;
 
-// Warning: (ae-forgotten-export) The symbol "DerivationLogicConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export function isFormStateCondition(condition: StateLogicConfig['condition'] | DerivationLogicConfig['condition']): condition is FormStateCondition;
 
@@ -1114,15 +1060,9 @@ export class PreviousPageEvent implements FormEvent {
     readonly type: "previous-page";
 }
 
-// Warning: (ae-forgotten-export) The symbol "AddonActionHandler" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export function provideAddonActions<const H extends Record<string, AddonActionHandler>>(handlers: H): AddonActionsFeature<keyof H & string>;
 
-// Warning: (ae-forgotten-export) The symbol "FieldTypeOrFeature" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "ProvideDynamicFormResult" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "ExtractFieldTypes" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(...items: T): ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 
@@ -1225,9 +1165,6 @@ export interface SimplifiedArrayField extends FieldDef<never> {
     readonly value?: readonly unknown[];
 }
 
-// Warning: (ae-forgotten-export) The symbol "ImmediateStateLogicConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-// Warning: (ae-forgotten-export) The symbol "DebouncedStateLogicConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicConfig;
 
@@ -1294,7 +1231,6 @@ export type TextElementType = 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 's
 
 // @public
 export interface TextField extends FieldDef<TextProps> {
-    // Warning: (ae-forgotten-export) The symbol "NonFieldLogicConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
     readonly logic?: NonFieldLogicConfig[];
     // (undocumented)
     type: 'text';
@@ -1342,8 +1278,6 @@ export interface ValidationMessages {
     required?: DynamicText;
 }
 
-// Warning: (ae-forgotten-export) The symbol "FunctionHttpValidatorConfig" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig;
 
@@ -1354,8 +1288,6 @@ export interface ValueExclusionConfig {
     readonly excludeValueIfReadonly?: boolean;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ExcludedKeys" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public (undocumented)
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
 
@@ -1376,8 +1308,6 @@ export type WithInputSignals<T> = {
 // @public
 export function withLegacyStatusClasses(): DynamicFormFeature<'legacy-status-classes'>;
 
-// Warning: (ae-forgotten-export) The symbol "LoggerConfigOptions" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export function withLoggerConfig(config?: boolean | (() => boolean) | LoggerConfigOptions): DynamicFormFeature<'logger'>;
 
@@ -1387,8 +1317,6 @@ export function withValidationExecutionDefaults(config?: Partial<ValidationExecu
 // @public
 export function withValueExclusionDefaults(config?: Partial<ValueExclusionConfig>): DynamicFormFeature<'value-exclusion'>;
 
-// Warning: (ae-forgotten-export) The symbol "RegisteredWrapperTypes" needs to be exported by the entry point ng-forge-dynamic-forms.d.ts
-//
 // @public
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers ? FieldRegistryWrappers[TWrappers] : {
     readonly type: TWrappers;

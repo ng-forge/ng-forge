@@ -84,10 +84,6 @@ export type BsAddon = BsIconAddon | BsButtonAddon;
 export interface BsAddonExtensions {
 }
 
-// Warning: (ae-forgotten-export) The symbol "BsButtonBase" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-// Warning: (ae-forgotten-export) The symbol "BsButtonContent" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-// Warning: (ae-forgotten-export) The symbol "BsButtonClick" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-//
 // @public
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
@@ -282,8 +278,6 @@ export class BsIconAddonComponent {
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsIconAddonComponent, never>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "BsAddonExtension" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-//
 // @public
 export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAddon | BsAddonExtension;
 
@@ -577,18 +571,12 @@ export type ShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent>,
     arrayKey: string;
 };
 
-// Warning: (ae-forgotten-export) The symbol "BootstrapAddonsFeature" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-//
 // @public
 export function withBootstrapAddons(): BootstrapAddonsFeature;
 
-// Warning: (ae-forgotten-export) The symbol "BootstrapFieldsWithAddons" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-//
 // @public
 export function withBootstrapFields(): BootstrapFieldsWithAddons;
 
-// Warning: (ae-forgotten-export) The symbol "BootstrapFieldsWithConfig" needs to be exported by the entry point ng-forge-dynamic-forms-bootstrap.d.ts
-//
 // @public (undocumented)
 export function withBootstrapFields(config: BootstrapConfig): BootstrapFieldsWithConfig;
 
