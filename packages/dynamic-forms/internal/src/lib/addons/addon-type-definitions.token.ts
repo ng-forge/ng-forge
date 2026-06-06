@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import { AddonTypeDefinition } from '../models/addon/addon-type';
 
 /**
  * Multi-provider token used by `withCustomAddon(...)` features to contribute

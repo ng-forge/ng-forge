@@ -6,7 +6,7 @@ import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-form
 import { AnyAddon, TextAddon } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
-import { DfAddonSlot } from './df-addon-slot.component';
+import { DfAddonSlot } from '@ng-forge/dynamic-forms/internal';
 
 @Component({ template: 'icon-rendered' })
 class IconAddonStub {}

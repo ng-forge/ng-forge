@@ -1,11 +1,11 @@
 import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, Injector, input, Signal, signal, Type } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { AnyAddon } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
-import { injectAddonTypeRegistry } from '../utils/inject-addon-type-registry/inject-addon-type-registry';
-import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+import { AnyAddon } from '../models/addon/addon-def';
+import { DynamicFormLogger } from '../providers/features/logger/logger.token';
+import { resolveDynamicValue } from '../utils/dynamic-value/resolve-dynamic-value';
+import { injectAddonTypeRegistry } from './inject-addon-type-registry';
+import { WrapperFieldInputs } from '../wrappers/wrapper-field-inputs';
 
 /**
  * Dispatcher component that renders an addon by looking up its `type` in

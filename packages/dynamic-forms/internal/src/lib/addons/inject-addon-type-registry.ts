@@ -1,7 +1,11 @@
 import { inject, Type } from '@angular/core';
-import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { resolveDefaultExport } from '../wrapper-chain/wrapper-chain';
+import { DynamicFormError } from '../errors/dynamic-form-error';
+import { ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '../models/addon/addon-type';
+
+/** Pick the component class out of whatever a lazy loader returned. */
+function resolveDefaultExport<T>(result: Type<T> | { default: Type<T> }): Type<T> {
+  return typeof result === 'object' && result !== null && 'default' in result ? result.default : result;
+}
 
 /**
  * Public shape returned by {@link injectAddonTypeRegistry}. Pinned explicitly

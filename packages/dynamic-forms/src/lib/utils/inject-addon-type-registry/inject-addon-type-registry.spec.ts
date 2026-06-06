@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
-import { injectAddonTypeRegistry } from './inject-addon-type-registry';
+import { injectAddonTypeRegistry } from '@ng-forge/dynamic-forms/internal';
 
 @Component({ template: '' })
 class IconTypeComponent {}

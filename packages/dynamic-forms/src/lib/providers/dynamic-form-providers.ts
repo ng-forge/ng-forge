@@ -5,7 +5,7 @@ import { BUILT_IN_ADDON_TYPES } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
-import { ADDON_TYPE_DEFINITIONS } from './features/addons/addon-type-definitions.token';
+import { ADDON_TYPE_DEFINITIONS } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '@ng-forge/dynamic-forms/internal';
