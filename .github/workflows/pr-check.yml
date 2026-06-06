@@ -96,6 +96,9 @@ jobs:
           echo "Affected projects and their dependents:"
           pnpm nx show projects --affected --base=origin/main --with-target=build || true
 
+      - name: Validate generated /internal public_api
+        run: node scripts/refactor/gen-public-api.mjs --check
+
       - name: Cache node_modules
         uses: actions/cache/save@v5
         with:
@@ -165,6 +168,9 @@ jobs:
             fi
           done
           echo "✅ Package integrity check complete"
+
+      - name: Check public API surface (affected)
+        run: pnpm nx affected -t api-check --base=origin/main
 
       - name: Cache build artifacts
         uses: actions/cache@v5

@@ -68,6 +68,40 @@
         "packageRoot": "dist/{projectRoot}"
       }
     },
+    "api-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/{projectRoot}/types/**/*.d.ts",
+        "{projectRoot}/api-extractor.json",
+        "{projectRoot}/api-extractor.integration.json",
+        "{workspaceRoot}/config/api-extractor.base.json",
+        "{workspaceRoot}/etc/dynamic-forms.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-integration.api.md"
+      ],
+      "options": {
+        "commands": [
+          "api-extractor run --config packages/dynamic-forms/api-extractor.json",
+          "api-extractor run --config packages/dynamic-forms/api-extractor.integration.json"
+        ],
+        "parallel": false,
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "api-update": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": false,
+      "options": {
+        "commands": [
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.json",
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.integration.json"
+        ],
+        "parallel": false,
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

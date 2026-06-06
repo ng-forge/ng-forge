@@ -10,3 +10,7 @@ graphify-out/
 # Migration guide uses multi-line HTML attributes for side-by-side code samples;
 # prettier reflows them and destroys the indentation inside `<docs-code-compare>`.
 apps/docs/public/content/migrating-from-ngx-formly.md
+# API Extractor public-surface baselines — generated reports, not prettier-formatted.
+# Prettier reflows the embedded ```ts block and fights API Extractor's own output,
+# which would make the api-check target permanently drift. See etc/README.md.
+etc/*.api.md

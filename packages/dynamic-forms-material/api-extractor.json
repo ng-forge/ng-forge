@@ -1,0 +1,9 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "extends": "../../config/api-extractor.base.json",
+  "projectFolder": ".",
+  "mainEntryPointFilePath": "<projectFolder>/../../dist/packages/dynamic-forms-material/types/ng-forge-dynamic-forms-material.d.ts",
+  "apiReport": {
+    "reportFileName": "dynamic-forms-material.api.md"
+  }
+}
