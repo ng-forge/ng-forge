@@ -190,5 +190,5 @@ Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON
 
 ## Where to next
 
-- **[Custom Kinds](/addons/custom-kinds)** — when none of the built-in types fit, register your own type component and augment the type registry.
+- **[Custom Types](/addons/custom-types)** — when none of the built-in types fit, register your own type component and augment the type registry.
 - **[Migrating from ngx-formly](/migrating-from-ngx-formly#addons)** — concept mapping for users coming from formly s per-adapter addon shapes.

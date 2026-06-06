@@ -22,7 +22,7 @@ A universal addon (works the same in every adapter, no per-type branching):
 
 ## Available types
 
-<docs-addon-info field="kinds-table"></docs-addon-info>
+<docs-addon-info field="types-table"></docs-addon-info>
 
 ## How addons render
 
@@ -68,4 +68,4 @@ Icon types emit `aria-hidden="true"` by default. When the icon conveys meaning (
 ## Where to next
 
 1. **[Presets and Actions](/addons/presets-and-actions)** — built-in click presets (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`), `actionRef` for registered handlers, and inline `action` for code-only behaviour.
-2. **[Custom Kinds](/addons/custom-kinds)** — register your own addon type (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level extensions seam.
+2. **[Custom Types](/addons/custom-types)** — register your own addon type (rating widget, status pill, anything) with `withCustomAddon(...)` and augment the type-level extensions seam.

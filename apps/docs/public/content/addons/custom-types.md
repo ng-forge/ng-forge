@@ -1,6 +1,6 @@
 ---
-title: Custom Kinds
-slug: addons/custom-kinds
+title: Custom Types
+slug: addons/custom-types
 description: 'Register a custom addon type component with withCustomAddon() and make it type-safe per field via the InputAddonExtensions module-augmentation seam. Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
 ---
 
@@ -69,7 +69,7 @@ export const RATING_KIND: AddonTypeDefinition<RatingAddon> = {
 
 Then pass it through `withCustomAddon(...)` to `provideDynamicForm` alongside your adapter s field bundle:
 
-<docs-addon-info field="custom-kind-invocation"></docs-addon-info>
+<docs-addon-info field="custom-type-invocation"></docs-addon-info>
 
 `loadComponent` returns a Promise — the type component is loaded lazily on first render and cached.
 
