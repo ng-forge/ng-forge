@@ -248,9 +248,6 @@ export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 
-// Helpers
-export { createField, formConfig } from './helpers';
-
 // Errors
 export { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
