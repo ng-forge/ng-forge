@@ -381,7 +381,7 @@ export interface IonIconAddon extends BaseAddon {
     readonly ariaLabel?: DynamicText;
     readonly icon: string;
     // (undocumented)
-    readonly kind: 'ion-icon';
+    readonly type: 'ion-icon';
 }
 
 // @public

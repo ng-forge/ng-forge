@@ -267,7 +267,7 @@ export interface MatIconAddon extends BaseAddon {
     readonly ariaLabel?: DynamicText;
     readonly icon: string;
     // (undocumented)
-    readonly kind: 'mat-icon';
+    readonly type: 'mat-icon';
 }
 
 // @public

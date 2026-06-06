@@ -258,7 +258,7 @@ export interface BsIconAddon extends BaseAddon {
     readonly ariaLabel?: DynamicText;
     readonly icon: string;
     // (undocumented)
-    readonly kind: 'bs-icon';
+    readonly type: 'bs-icon';
 }
 
 // @public

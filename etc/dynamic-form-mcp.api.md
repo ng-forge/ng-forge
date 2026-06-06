@@ -14,16 +14,16 @@ import { validateFormConfig } from '@ng-forge/dynamic-forms-zod/mcp';
 import { ValidationResult } from '@ng-forge/dynamic-forms-zod/mcp';
 
 // @public (undocumented)
-export interface AddonKindInfo {
+export interface AddonTypeInfo {
     adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
     category: 'core' | 'adapter';
     description: string;
     example: string;
     jsonSafe: boolean;
-    kind: string;
     minimalExample: string;
     package: string;
     props: Record<string, PropertyInfo>;
+    type: string;
 }
 
 // @public
@@ -32,7 +32,7 @@ export function createServer(): McpServer;
 // @public
 export interface FieldAddonSupportInfo {
     adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
-    allowedKinds?: string[];
+    allowedTypes?: string[];
     fieldType: string;
     slots: ('prefix' | 'suffix' | string)[];
 }
@@ -66,13 +66,13 @@ export interface FieldTypeInfo {
 export { FormattedValidationError }
 
 // @public
-export function getAddonKind(kind: string): AddonKindInfo | undefined;
+export function getAddonType(type: string): AddonTypeInfo | undefined;
 
 // @public
-export function getAddonKinds(): AddonKindInfo[];
+export function getAddonTypes(): AddonTypeInfo[];
 
 // @public
-export function getAddonKindsByCategory(category: 'core' | 'adapter'): AddonKindInfo[];
+export function getAddonTypesByCategory(category: 'core' | 'adapter'): AddonTypeInfo[];
 
 // @public
 export function getFieldAddonSupport(): FieldAddonSupportInfo[];

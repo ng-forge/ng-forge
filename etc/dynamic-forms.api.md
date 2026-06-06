@@ -33,9 +33,6 @@ import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
-// @internal
-export const ADDON_KIND_DEFINITIONS: InjectionToken<readonly AddonKindDefinition<_ng_forge_dynamic_forms.BaseAddon<_ng_forge_dynamic_forms.AddonSlot>>[]>;
-
 // @public
 export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
 
@@ -48,70 +45,16 @@ export type AddonActionsFeature<K extends string = string> = DynamicFormFeature<
 };
 
 // @public
-export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
+export type AddonSlot = CommonAddonSlot | keyof DynamicFormAddonSlotRegistry;
+
+// @public
+export interface AddonTypeDefinition<T extends BaseAddon = BaseAddon> {
     readonly jsonSafe?: boolean;
-    readonly kind: string;
     readonly loadComponent: LazyComponentLoader;
-    readonly schema?: AddonKindSchema;
+    readonly schema?: AddonTypeSchema;
+    readonly type: string;
     readonly validate?: AddonShapeValidator<T>;
 }
-
-// @public
-export interface AddonKindSchema {
-    // (undocumented)
-    readonly $ref?: string;
-    // (undocumented)
-    readonly $schema?: string;
-    readonly [key: string]: unknown;
-    // (undocumented)
-    readonly additionalProperties?: boolean | AddonKindSchema;
-    // (undocumented)
-    readonly allOf?: ReadonlyArray<AddonKindSchema>;
-    // (undocumented)
-    readonly anyOf?: ReadonlyArray<AddonKindSchema>;
-    // (undocumented)
-    readonly const?: unknown;
-    // (undocumented)
-    readonly default?: unknown;
-    // (undocumented)
-    readonly description?: string;
-    // (undocumented)
-    readonly enum?: ReadonlyArray<unknown>;
-    // (undocumented)
-    readonly examples?: ReadonlyArray<unknown>;
-    // (undocumented)
-    readonly format?: string;
-    // (undocumented)
-    readonly items?: AddonKindSchema | ReadonlyArray<AddonKindSchema>;
-    // (undocumented)
-    readonly maximum?: number;
-    // (undocumented)
-    readonly maxLength?: number;
-    // (undocumented)
-    readonly minimum?: number;
-    // (undocumented)
-    readonly minLength?: number;
-    // (undocumented)
-    readonly not?: AddonKindSchema;
-    // (undocumented)
-    readonly oneOf?: ReadonlyArray<AddonKindSchema>;
-    // (undocumented)
-    readonly pattern?: string;
-    // (undocumented)
-    readonly properties?: Readonly<Record<string, AddonKindSchema>>;
-    // (undocumented)
-    readonly required?: ReadonlyArray<string>;
-    // (undocumented)
-    readonly title?: string;
-    // (undocumented)
-    readonly type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null' | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
-}
-
-// @public
-export type AddonShapeValidator<T extends BaseAddon = BaseAddon> = (addon: T, fieldKey: string) => void;
-
-// @public
-export type AddonSlot = CommonAddonSlot | keyof DynamicFormAddonSlotRegistry;
 
 // @public
 export type AddonWarning = {
@@ -129,25 +72,25 @@ export type AddonWarning = {
     slot: string;
     allowedSlots: readonly string[];
 } | {
-    type: 'unknown-kind';
+    type: 'unknown-type';
     fieldKey: string;
-    kind: string;
-    registeredKinds: readonly string[];
+    addonType: string;
+    registeredTypes: readonly string[];
 } | {
-    type: 'kind-not-allowed';
+    type: 'type-not-allowed';
     fieldKey: string;
     fieldType: string;
-    kind: string;
-    allowedKinds: readonly string[];
+    addonType: string;
+    allowedTypes: readonly string[];
 } | {
     type: 'shape-violation';
     fieldKey: string;
-    kind: string;
+    addonType: string;
     reason: string;
 } | {
-    type: 'code-only-kind-in-json';
+    type: 'code-only-type-in-json';
     fieldKey: string;
-    kind: string;
+    addonType: string;
 } | {
     type: 'code-only-action-in-json';
     fieldKey: string;
@@ -310,7 +253,7 @@ export interface ComponentAddon extends BaseAddon {
     // (undocumented)
     readonly inputs?: Record<string, unknown>;
     // (undocumented)
-    readonly kind: 'component';
+    readonly type: 'component';
 }
 
 // @public
@@ -411,28 +354,6 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
 
 // @public
 export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, TemplateRef<unknown>>>>;
-
-// @public
-export class DfAddonSlot {
-    constructor();
-    // (undocumented)
-    readonly addon: _angular_core.InputSignal<AnyAddon>;
-    // (undocumented)
-    protected readonly className: Signal<string | null>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    readonly hidden: _angular_core.InputSignal<Signal<boolean> | undefined>;
-    protected readonly isHidden: Signal<boolean>;
-    protected readonly kindInputs: Signal<{
-        addon: AnyAddon;
-        fieldInputs: WrapperFieldInputs | undefined;
-    }>;
-    protected readonly resolvedComponent: Signal<Type<unknown> | undefined>;
-    protected readonly slotAttr: Signal<_ng_forge_dynamic_forms.AddonSlot>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DfAddonSlot, "df-addon-slot", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; "hidden": { "alias": "hidden"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<DfAddonSlot, never>;
-}
 
 // @public
 export class DfTemplate {
@@ -589,22 +510,6 @@ export type ExtractFieldDefs<T> = T extends {
 export type ExtractFormValue<T> = T extends {
     __formValue?: infer V;
 } ? V : never;
-
-// @public
-export interface FieldAddonSupport {
-    readonly allowedKinds?: readonly string[];
-    readonly slots: readonly AddonSlot[];
-}
-
-// @public
-export interface FieldAddonSupportEntry {
-    // (undocumented)
-    readonly allowedKinds: FieldAddonSupport['allowedKinds'];
-    // (undocumented)
-    readonly name: string;
-    // (undocumented)
-    readonly slots: FieldAddonSupport['slots'];
-}
 
 // @public
 export interface FieldBoundAddonActionContext<TValue = unknown> extends AddonActionContextBase<TValue> {
@@ -871,12 +776,6 @@ export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
 } : never;
 
 // @public
-export function injectAddonKindRegistry(): AddonKindRegistryRef;
-
-// @public
-export function injectFieldsSupportingAddons(): FieldAddonSupportEntry[];
-
-// @public
 export class InsertArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {
     constructor(
     arrayKey: string,
@@ -1045,23 +944,11 @@ export class PrependArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate
     readonly type: "prepend-array-item";
 }
 
-// @public
-export interface PresetCollaborators {
-    readonly baselineType?: () => string | undefined;
-    readonly fieldDefaultValueGetter?: () => unknown;
-    readonly fieldValueSetter?: (next: unknown) => void;
-    readonly logger: Logger;
-    readonly typeOverride?: WritableSignal<string | undefined>;
-}
-
 // @public (undocumented)
 export class PreviousPageEvent implements FormEvent {
     // (undocumented)
     readonly type: "previous-page";
 }
-
-// @public
-export function provideAddonActions<const H extends Record<string, AddonActionHandler>>(handlers: H): AddonActionsFeature<keyof H & string>;
 
 // @public
 export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(...items: T): ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
@@ -1104,9 +991,6 @@ export interface RowField<TFields extends readonly RowAllowedChildren[] = readon
     // (undocumented)
     type: 'row';
 }
-
-// @public
-export function runPresetAction(preset: AddonActionPreset, ctx: AddonActionContext, collaborators: PresetCollaborators, adapterLabel: string, fieldLabel: string): Promise<void>;
 
 // @public
 export interface SanitizedFormConfig {
@@ -1185,9 +1069,9 @@ export interface SubmitButtonOptions {
 // @public
 export interface TemplateAddon extends BaseAddon {
     // (undocumented)
-    readonly kind: 'template';
-    // (undocumented)
     readonly templateKey: string;
+    // (undocumented)
+    readonly type: 'template';
 }
 
 // @public
@@ -1210,9 +1094,9 @@ export class TemplateAddonComponent {
 // @public
 export interface TextAddon extends BaseAddon {
     // (undocumented)
-    readonly kind: 'text';
-    // (undocumented)
     readonly text: DynamicText;
+    // (undocumented)
+    readonly type: 'text';
 }
 
 // @public
@@ -1295,7 +1179,10 @@ export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown>
 export type ValueType = string | number | boolean | Date | object | unknown[];
 
 // @public
-export function withCustomAddon<T extends BaseAddon>(definition: AddonKindDefinition<T>): DynamicFormFeature<'addons'>;
+export function withAddonActions<const H extends Record<string, AddonActionHandler>>(handlers: H): AddonActionsFeature<keyof H & string>;
+
+// @public
+export function withCustomAddon<T extends BaseAddon>(definition: AddonTypeDefinition<T>): DynamicFormFeature<'addons'>;
 
 // @public
 export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;

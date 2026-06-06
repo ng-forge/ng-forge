@@ -272,7 +272,7 @@ export interface PrimeIconAddon extends BaseAddon {
     readonly ariaLabel?: DynamicText;
     readonly icon: string;
     // (undocumented)
-    readonly kind: 'prime-icon';
+    readonly type: 'prime-icon';
 }
 
 // @public
