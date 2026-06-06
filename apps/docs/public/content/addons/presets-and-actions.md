@@ -54,7 +54,7 @@ Wire the feature into `provideDynamicForm`:
 The backend can now ship configs like:
 
 ```json
-{ "kind": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
+{ "type": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
 ```
 
 ### Type narrowing
@@ -123,7 +123,7 @@ For prototypes or scenarios where the handler can t live in JSON, pass a functio
 ```typescript
 {
   slot: 'suffix',
-  kind: '<adapter-button-kind>',
+  type: '<adapter-button-kind>',
   icon: 'add',
   ariaLabel: 'Append marker',
   action: (ctx) => {
@@ -138,7 +138,7 @@ The validator drops `action` from JSON-source configs (it can t serialise a func
 
 ## Reactive `loading` and `disabled`
 
-Button kinds expose both:
+Button types expose both:
 
 - `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state. Implies disabled.
 - `disabled?: DynamicValue<boolean>` — independent of loading; click is a no-op.
@@ -148,7 +148,7 @@ const submitting = signal(false);
 
 {
   slot: 'suffix',
-  kind: '<adapter-button-kind>',
+  type: '<adapter-button-kind>',
   icon: 'send',
   ariaLabel: 'Send',
   actionRef: 'submitDraft',
@@ -190,5 +190,5 @@ Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON
 
 ## Where to next
 
-- **[Custom Kinds](/addons/custom-kinds)** — when none of the built-in kinds fit, register your own kind component and augment the type registry.
+- **[Custom Kinds](/addons/custom-kinds)** — when none of the built-in types fit, register your own type component and augment the type registry.
 - **[Migrating from ngx-formly](/migrating-from-ngx-formly#addons)** — concept mapping for users coming from formly s per-adapter addon shapes.

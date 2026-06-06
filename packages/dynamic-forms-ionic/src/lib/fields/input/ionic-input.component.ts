@@ -183,15 +183,15 @@ export default class IonicInputFieldComponent {
   /** Override (set by `toggle-password-visibility` preset) wins over `props().type`. */
   protected readonly type = computed(() => this.typeOverride() ?? this.props()?.type ?? 'text');
 
-  /** Per-kind split: ion-button addons render inline via the attribute-
+  /** Per-type split: ion-button addons render inline via the attribute-
    *  selector inline component (so the slotted element is a native
    *  <ion-button> Ionic can style); everything else (icon/text/template/
-   *  component kinds) goes through the universal <df-addon-slot> dispatcher
+   *  component types) goes through the universal <df-addon-slot> dispatcher
    *  wrapped in <span slot="start|end"> for safe shadow-DOM projection. */
-  protected readonly buttonPrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.kind === 'ion-button'));
-  protected readonly buttonSuffixAddons = computed(() => this.ngfa.suffixAddons().filter((a) => a.kind === 'ion-button'));
-  protected readonly decorativePrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.kind !== 'ion-button'));
-  protected readonly decorativeSuffixAddons = computed(() => this.ngfa.suffixAddons().filter((a) => a.kind !== 'ion-button'));
+  protected readonly buttonPrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.type === 'ion-button'));
+  protected readonly buttonSuffixAddons = computed(() => this.ngfa.suffixAddons().filter((a) => a.type === 'ion-button'));
+  protected readonly decorativePrefixAddons = computed(() => this.ngfa.prefixAddons().filter((a) => a.type !== 'ion-button'));
+  protected readonly decorativeSuffixAddons = computed(() => this.ngfa.suffixAddons().filter((a) => a.type !== 'ion-button'));
 
   /** Set when the component is destroyed — guards async aria-describedby sync against teardown. */
   private destroyed = false;

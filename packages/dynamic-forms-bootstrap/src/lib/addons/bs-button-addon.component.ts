@@ -4,7 +4,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import type { BsButtonAddon } from '../types/addons';
 
-/** Renderer for the `bs-button` addon kind. */
+/** Renderer for the `bs-button` addon type. */
 @Component({
   selector: 'df-bs-button-addon',
   imports: [DynamicTextPipe, AsyncPipe],

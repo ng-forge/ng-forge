@@ -4,9 +4,9 @@ import { EnvironmentProviders, InjectionToken, Provider } from '@angular/core';
 import { provideDynamicForm } from './dynamic-form-providers';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { WrapperTypeDefinition, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
-import { ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
-import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
+import { BUILT_IN_ADDON_TYPES } from './built-in-addons';
 import { createWrappers } from '../wrappers/create-wrappers';
 import { wrapperProps } from '../wrappers/wrapper-props';
 import { withLoggerConfig } from './features/logger/with-logger-config';
@@ -61,7 +61,7 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm();
       const providers = getProviders(envProviders);
 
-      // Logger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_KIND_REGISTRY + ADDON_KIND_COMPONENT_CACHE
+      // Logger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_TYPE_REGISTRY + ADDON_TYPE_COMPONENT_CACHE
       expect(providers).toHaveLength(6);
     });
 
@@ -76,7 +76,7 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField);
       const providers = getProviders(envProviders);
 
-      // Logger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_KIND_REGISTRY + ADDON_KIND_COMPONENT_CACHE
+      // Logger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_TYPE_REGISTRY + ADDON_TYPE_COMPONENT_CACHE
       expect(providers).toHaveLength(6);
     });
   });
@@ -260,7 +260,7 @@ describe('provideDynamicForm', () => {
       const envProviders = provideDynamicForm(customField, withLoggerConfig());
       const providers = getProviders(envProviders);
 
-      // DynamicFormLogger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_KIND_REGISTRY + ADDON_KIND_COMPONENT_CACHE
+      // DynamicFormLogger + FIELD_REGISTRY + WRAPPER_REGISTRY + WRAPPER_AUTO_ASSOCIATIONS + ADDON_TYPE_REGISTRY + ADDON_TYPE_COMPONENT_CACHE
       expect(providers.length).toBe(6);
     });
 
@@ -560,27 +560,27 @@ describe('provideDynamicForm', () => {
     });
   });
 
-  describe('Addon kind registry', () => {
-    it('populates ADDON_KIND_REGISTRY with every BUILT_IN_ADDON_KINDS entry', () => {
+  describe('Addon type registry', () => {
+    it('populates ADDON_TYPE_REGISTRY with every BUILT_IN_ADDON_TYPES entry', () => {
       const envProviders = provideDynamicForm();
       TestBed.configureTestingModule({ providers: [envProviders] });
-      const registry = TestBed.inject(ADDON_KIND_REGISTRY);
+      const registry = TestBed.inject(ADDON_TYPE_REGISTRY);
 
       expect(registry.size).toBeGreaterThan(0);
-      for (const builtin of BUILT_IN_ADDON_KINDS) {
-        expect(registry.has(builtin.kind)).toBe(true);
-        expect(registry.get(builtin.kind)).toBe(builtin);
+      for (const builtin of BUILT_IN_ADDON_TYPES) {
+        expect(registry.has(builtin.type)).toBe(true);
+        expect(registry.get(builtin.type)).toBe(builtin);
       }
     });
 
     it('merges withCustomAddon contributions on top of built-ins', () => {
       const customDef = {
-        kind: 'spec-custom-addon',
+        type: 'spec-custom-addon',
         loadComponent: async () => class {},
       };
       const envProviders = provideDynamicForm(withCustomAddon(customDef));
       TestBed.configureTestingModule({ providers: [envProviders] });
-      const registry = TestBed.inject(ADDON_KIND_REGISTRY);
+      const registry = TestBed.inject(ADDON_TYPE_REGISTRY);
 
       expect(registry.has('spec-custom-addon')).toBe(true);
       expect(registry.get('spec-custom-addon')).toBe(customDef);
@@ -590,8 +590,8 @@ describe('provideDynamicForm', () => {
       expect(registry.has('component')).toBe(true);
     });
 
-    it('warns and overwrites when a custom kind collides with a built-in', () => {
-      const collidingDef = { kind: 'text', loadComponent: async () => class {} };
+    it('warns and overwrites when a custom type collides with a built-in', () => {
+      const collidingDef = { type: 'text', loadComponent: async () => class {} };
       const warnSpy = vi.fn();
       const envProviders = provideDynamicForm(withCustomAddon(collidingDef));
       TestBed.configureTestingModule({
@@ -601,7 +601,7 @@ describe('provideDynamicForm', () => {
         ],
       });
 
-      const registry = TestBed.inject(ADDON_KIND_REGISTRY);
+      const registry = TestBed.inject(ADDON_TYPE_REGISTRY);
       expect(registry.get('text')).toBe(collidingDef);
       expect(warnSpy).toHaveBeenCalled();
       const messages = warnSpy.mock.calls.map((c) => String(c[0]));

@@ -35,7 +35,7 @@ describe('MatButtonAddonComponent', () => {
   describe('content axis', () => {
     it('icon-only (no label) renders <button mat-icon-button> with <mat-icon>', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'close',
         ariaLabel: 'Clear',
@@ -49,7 +49,7 @@ describe('MatButtonAddonComponent', () => {
 
     it('labeled renders <button mat-button> with label text', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         label: 'Search',
       });
@@ -61,7 +61,7 @@ describe('MatButtonAddonComponent', () => {
 
     it('labeled with an icon renders both <mat-icon> and label text on a mat-button', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'search',
         label: 'Search',
@@ -76,7 +76,7 @@ describe('MatButtonAddonComponent', () => {
   describe('color binding', () => {
     it('forwards addon.color onto the underlying mat-button host', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         label: 'Go',
         color: 'primary',
@@ -90,7 +90,7 @@ describe('MatButtonAddonComponent', () => {
   describe('disabled binding', () => {
     it('button is disabled when addon.disabled resolves true', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'close',
         ariaLabel: 'Clear',
@@ -102,7 +102,7 @@ describe('MatButtonAddonComponent', () => {
 
     it('button is enabled when addon.disabled is falsy', () => {
       const { el } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'close',
         ariaLabel: 'Clear',
@@ -116,7 +116,7 @@ describe('MatButtonAddonComponent', () => {
     it('invokes the inline action handler with the action context', () => {
       const action = vi.fn();
       const addon: MatButtonAddon = {
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'add',
         ariaLabel: 'Add',
@@ -133,7 +133,7 @@ describe('MatButtonAddonComponent', () => {
     it('looks up actionRef in the registry and dispatches that handler', () => {
       const handler = vi.fn();
       const registry = new Map<string, AddonActionHandler>([['runIt', handler]]);
-      const { el } = setup({ kind: 'mat-button', slot: 'suffix', icon: 'send', ariaLabel: 'Send', actionRef: 'runIt' }, { registry });
+      const { el } = setup({ type: 'mat-button', slot: 'suffix', icon: 'send', ariaLabel: 'Send', actionRef: 'runIt' }, { registry });
       (el.querySelector('button') as HTMLButtonElement).click();
       expect(handler).toHaveBeenCalledTimes(1);
     });
@@ -141,14 +141,14 @@ describe('MatButtonAddonComponent', () => {
     it('routes preset clicks through the registered ADDON_PRESET_HANDLER', () => {
       const run = vi.fn();
       const preset: AddonPresetHandler = { run };
-      const { el } = setup({ kind: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }, { preset });
+      const { el } = setup({ type: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear', preset: 'clear' }, { preset });
       (el.querySelector('button') as HTMLButtonElement).click();
       expect(run).toHaveBeenCalledWith('clear', expect.any(Object));
     });
 
     it('decorative button (no preset/actionRef/action) absorbs the click as a no-op', () => {
       const { el, logger } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         label: 'Info',
       });
@@ -161,7 +161,7 @@ describe('MatButtonAddonComponent', () => {
   describe('action signal access', () => {
     it('exposes the NgForgeAddonActionBase directive instance via DI', () => {
       const { fixture } = setup({
-        kind: 'mat-button',
+        type: 'mat-button',
         slot: 'suffix',
         icon: 'close',
         ariaLabel: 'Clear',

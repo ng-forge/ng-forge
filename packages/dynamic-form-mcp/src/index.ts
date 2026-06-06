@@ -14,7 +14,7 @@ export type {
   UIAdapterInfo,
   UIAdapterFieldType,
   PropertyInfo,
-  AddonKindInfo,
+  AddonTypeInfo,
   FieldAddonSupportInfo,
 } from './registry/index.js';
 
@@ -28,9 +28,9 @@ export {
   getUIAdapters,
   getUIAdapter,
   getUIAdapterFieldType,
-  getAddonKinds,
-  getAddonKind,
-  getAddonKindsByCategory,
+  getAddonTypes,
+  getAddonType,
+  getAddonTypesByCategory,
   getFieldAddonSupport,
 } from './registry/index.js';
 

@@ -30,9 +30,9 @@ function setupHost(addons?: ReadonlyArray<AnyAddon>): {
   return { fixture, directive };
 }
 
-const PREFIX_TEXT: TextAddon = { kind: 'text', slot: 'prefix', text: 'A' };
-const SUFFIX_TEXT: TextAddon = { kind: 'text', slot: 'suffix', text: 'B' };
-const PREFIX_TEMPLATE: TemplateAddon = { kind: 'template', slot: 'prefix', templateKey: 'x' };
+const PREFIX_TEXT: TextAddon = { type: 'text', slot: 'prefix', text: 'A' };
+const SUFFIX_TEXT: TextAddon = { type: 'text', slot: 'suffix', text: 'B' };
+const PREFIX_TEMPLATE: TemplateAddon = { type: 'template', slot: 'prefix', templateKey: 'x' };
 
 describe('NgForgeAddons', () => {
   describe('defaults', () => {
@@ -55,7 +55,7 @@ describe('NgForgeAddons', () => {
     });
 
     it('exposes a generic slot-keyed map view via `addonsBySlot`', () => {
-      const customSlotAddon = { kind: 'text', slot: 'start', text: 'S' } as unknown as AnyAddon;
+      const customSlotAddon = { type: 'text', slot: 'start', text: 'S' } as unknown as AnyAddon;
       const { directive } = setupHost([PREFIX_TEXT, customSlotAddon]);
       const bySlot = directive.addonsBySlot();
       expect(bySlot.get('prefix')).toEqual([PREFIX_TEXT]);
@@ -136,13 +136,13 @@ describe('NgForgeAddons', () => {
       // keyed on the Observable identity) must hit so we don't spawn a fresh
       // `toSignal` subscription per re-emit.
       const subject = new BehaviorSubject<boolean>(false);
-      const addonA: AnyAddon = { kind: 'text', slot: 'prefix', text: 'A', hidden: subject };
+      const addonA: AnyAddon = { type: 'text', slot: 'prefix', text: 'A', hidden: subject };
       const { fixture, directive } = setupHost([addonA]);
       const resolvedForA = directive.hiddenSignalCache().get(addonA);
       expect(resolvedForA).toBeDefined();
 
       // New addon object, same Observable instance.
-      const addonB: AnyAddon = { kind: 'text', slot: 'prefix', text: 'A', hidden: subject };
+      const addonB: AnyAddon = { type: 'text', slot: 'prefix', text: 'A', hidden: subject };
       fixture.componentRef.setInput('addons', [addonB]);
       fixture.detectChanges();
 

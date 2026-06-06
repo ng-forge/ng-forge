@@ -5,7 +5,7 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { IonIconAddon } from '../types/addons';
 
-/** Renderer for the `ion-icon` addon kind. */
+/** Renderer for the `ion-icon` addon type. */
 @Component({
   selector: 'df-ion-icon-addon',
   imports: [IonIcon, AsyncPipe, DynamicTextPipe],
@@ -17,7 +17,7 @@ import type { IonIconAddon } from '../types/addons';
 })
 export class IonIconAddonComponent {
   readonly addon = input.required<IonIconAddon>();
-  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every type must declare it. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly iconName = computed(() => this.addon().icon);

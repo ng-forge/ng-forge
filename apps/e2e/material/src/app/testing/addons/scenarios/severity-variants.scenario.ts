@@ -14,7 +14,7 @@ const config = {
     addons: [
       {
         slot: 'suffix' as const,
-        kind: 'mat-button' as const,
+        type: 'mat-button' as const,
         label: color,
         color,
         action: () => {

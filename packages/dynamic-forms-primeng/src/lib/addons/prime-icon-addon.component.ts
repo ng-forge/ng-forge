@@ -4,7 +4,7 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { PrimeIconAddon } from '../types/addons';
 
-/** Renderer for the `prime-icon` addon kind. */
+/** Renderer for the `prime-icon` addon type. */
 @Component({
   selector: 'df-prime-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],
@@ -16,7 +16,7 @@ import type { PrimeIconAddon } from '../types/addons';
 })
 export class PrimeIconAddonComponent {
   readonly addon = input.required<PrimeIconAddon>();
-  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every type must declare it. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly iconClass = computed(() => `pi pi-${this.addon().icon}`);

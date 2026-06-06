@@ -26,7 +26,7 @@ function makeLogger(): LoggerStub {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestButtonHostComponent {
-  readonly addon = signal<PrimeButtonAddon>({ kind: 'prime-button', slot: 'suffix', label: 'Click' } as PrimeButtonAddon);
+  readonly addon = signal<PrimeButtonAddon>({ type: 'prime-button', slot: 'suffix', label: 'Click' } as PrimeButtonAddon);
 }
 
 interface SetupOpts {
@@ -54,7 +54,7 @@ function setup(addon: PrimeButtonAddon, opts: SetupOpts = {}) {
 
 describe('PrimeButtonAddonComponent', () => {
   it('renders <p-button> with the label-only branch', async () => {
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Submit' } as PrimeButtonAddon);
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Submit' } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -65,7 +65,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('forwards icon as `pi pi-{icon}` to <p-button>', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear',
@@ -79,7 +79,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('forwards aria-label onto the <p-button> when set', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       icon: 'times',
       ariaLabel: 'Clear field',
@@ -96,7 +96,7 @@ describe('PrimeButtonAddonComponent', () => {
   });
 
   it('defaults severity to "secondary" and applies the matching PrimeNG class', async () => {
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Go' } as PrimeButtonAddon);
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Go' } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -107,7 +107,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('renders the icon-only branch without error when ariaLabel is provided', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       icon: 'search',
       ariaLabel: 'Search',
@@ -122,7 +122,7 @@ describe('PrimeButtonAddonComponent', () => {
   it('dispatches via the preset handler when a preset is configured', async () => {
     const run = vi.fn().mockResolvedValue(undefined);
     const { fixture } = setup(
-      { kind: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
+      { type: 'prime-button', slot: 'suffix', icon: 'times', ariaLabel: 'Clear', preset: 'clear' } as PrimeButtonAddon,
       {
         presetHandler: { run },
       },
@@ -139,7 +139,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('dispatches via inline action() when configured', async () => {
     const action = vi.fn();
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Run', action } as PrimeButtonAddon);
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Run', action } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -161,7 +161,7 @@ describe('PrimeButtonAddonComponent', () => {
     });
     const fixture = TestBed.createComponent(TestButtonHostComponent);
     fixture.componentInstance.addon.set({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       label: 'Log',
       actionRef: 'logClick',
@@ -177,7 +177,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('warns when actionRef is configured but not registered', async () => {
     const logger = makeLogger();
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Send', actionRef: 'missing' } as PrimeButtonAddon, {
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Send', actionRef: 'missing' } as PrimeButtonAddon, {
       logger,
     });
     await fixture.whenStable();
@@ -193,7 +193,7 @@ describe('PrimeButtonAddonComponent', () => {
     // Decorative: just visually a button, no handler. The dispatcher
     // should silently fall through — no warning, no throw.
     const logger = makeLogger();
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Info' } as PrimeButtonAddon, { logger });
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Info' } as PrimeButtonAddon, { logger });
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -204,7 +204,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('forwards static [disabled]=true to the rendered <p-button>', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       label: 'Locked',
       disabled: true,
@@ -217,7 +217,7 @@ describe('PrimeButtonAddonComponent', () => {
   });
 
   it('renders [disabled]=false (default) without setting the disabled attribute', async () => {
-    const { fixture } = setup({ kind: 'prime-button', slot: 'suffix', label: 'Active' } as PrimeButtonAddon);
+    const { fixture } = setup({ type: 'prime-button', slot: 'suffix', label: 'Active' } as PrimeButtonAddon);
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -227,7 +227,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('disables the button when [loading]=true (PrimeNG ties loading→disabled internally)', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       label: 'Submit',
       loading: true,
@@ -243,7 +243,7 @@ describe('PrimeButtonAddonComponent', () => {
 
   it('renders aria-busy="true" while loading (assistive tech parity with bs/mat/ion)', async () => {
     const { fixture } = setup({
-      kind: 'prime-button',
+      type: 'prime-button',
       slot: 'suffix',
       label: 'Submit',
       loading: true,

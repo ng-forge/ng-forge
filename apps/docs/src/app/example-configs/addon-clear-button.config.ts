@@ -9,14 +9,14 @@ const ICON_NAME: Record<ConcreteAdapter, { search: string; clear: string }> = {
   ionic: { search: 'search-outline', clear: 'close-outline' },
 };
 
-const ICON_KIND: Record<ConcreteAdapter, string> = {
+const ICON_TYPE: Record<ConcreteAdapter, string> = {
   material: 'mat-icon',
   bootstrap: 'bs-icon',
   primeng: 'prime-icon',
   ionic: 'ion-icon',
 };
 
-const BUTTON_KIND: Record<ConcreteAdapter, string> = {
+const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
   material: 'mat-button',
   bootstrap: 'bs-button',
   primeng: 'prime-button',
@@ -34,8 +34,8 @@ export function addonClearButtonConfig(adapter: ConcreteAdapter): FormConfig {
         value: 'initial value',
         placeholder: 'Type to search…',
         addons: [
-          { slot: 'prefix', kind: ICON_KIND[adapter], icon: icons.search, ariaLabel: 'Search' },
-          { slot: 'suffix', kind: BUTTON_KIND[adapter], icon: icons.clear, ariaLabel: 'Clear', preset: 'clear' },
+          { slot: 'prefix', type: ICON_TYPE[adapter], icon: icons.search, ariaLabel: 'Search' },
+          { slot: 'suffix', type: BUTTON_TYPE[adapter], icon: icons.clear, ariaLabel: 'Clear', preset: 'clear' },
         ],
       },
     ],

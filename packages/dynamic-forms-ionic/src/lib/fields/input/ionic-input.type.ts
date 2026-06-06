@@ -14,7 +14,7 @@ export interface IonicInputProps extends InputProps {
 }
 
 /**
- * Module-augmentable seam for adding custom addon kinds to `ion-input` at
+ * Module-augmentable seam for adding custom addon types to `ion-input` at
  * the type level. Pair with `withCustomAddon(...)` for the runtime side:
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
@@ -22,7 +22,7 @@ export interface IonAddonExtensions {}
 
 type IonAddonExtension = IonAddonExtensions[keyof IonAddonExtensions];
 
-/** Addon kinds accepted by `ion-input`. */
+/** Addon types accepted by `ion-input`. */
 export type IonInputAddon = IonIconAddon | IonButtonAddon | TextAddon | TemplateAddon | IonAddonExtension;
 
 export type IonicInputField = InputField<IonicInputProps> & {

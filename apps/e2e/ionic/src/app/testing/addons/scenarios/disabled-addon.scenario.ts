@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'ion-button',
+          type: 'ion-button',
           icon: 'close-outline',
           ariaLabel: 'Clear',
           preset: 'clear',

@@ -1,6 +1,6 @@
 import type { Provider } from '@angular/core';
-import { DynamicFormError, type AddonKindDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_KIND_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
 import { BootstrapConfig } from '../models/bootstrap-config';
 import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
@@ -24,7 +24,7 @@ type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature
 
 /**
  * Provides Bootstrap field type definitions for the dynamic form system,
- * with Bootstrap-shipped addon kinds (`bs-icon`, `bs-button`) auto-included
+ * with Bootstrap-shipped addon types (`bs-icon`, `bs-button`) auto-included
  * so addons work out of the box.
  *
  * @param config - Optional global configuration for Bootstrap form fields
@@ -50,20 +50,20 @@ export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldsWi
   return base as BootstrapFieldsWithAddons;
 }
 
-/* -- Bootstrap addon kinds --------------------------------------------- */
+/* -- Bootstrap addon types --------------------------------------------- */
 
-const BS_ICON_KIND: AddonKindDefinition<BsIconAddon> = {
-  kind: 'bs-icon',
+const BS_ICON_KIND: AddonTypeDefinition<BsIconAddon> = {
+  type: 'bs-icon',
   loadComponent: () => import('../addons/bs-icon-addon.component').then((m) => m.BsIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
-      throw new DynamicFormError(`Addon kind 'bs-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
+      throw new DynamicFormError(`Addon type 'bs-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
     }
   },
 };
 
-const BS_BUTTON_KIND: AddonKindDefinition<BsButtonAddon> = {
-  kind: 'bs-button',
+const BS_BUTTON_KIND: AddonTypeDefinition<BsButtonAddon> = {
+  type: 'bs-button',
   loadComponent: () => import('../addons/bs-button-addon.component').then((m) => m.BsButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
@@ -71,19 +71,19 @@ const BS_BUTTON_KIND: AddonKindDefinition<BsButtonAddon> = {
     const set = [addon.preset, addon.actionRef, addon.action].filter((v) => v !== undefined);
     if (set.length > 1) {
       throw new DynamicFormError(
-        `Addon kind 'bs-button' on field '${fieldKey}' has more than one of preset/actionRef/action — exactly one allowed.`,
+        `Addon type 'bs-button' on field '${fieldKey}' has more than one of preset/actionRef/action — exactly one allowed.`,
       );
     }
     // Icon-only buttons require ariaLabel for screen readers.
     if (addon.icon && !addon.label && !addon.ariaLabel) {
-      throw new DynamicFormError(`Addon kind 'bs-button' on field '${fieldKey}' is icon-only — provide 'ariaLabel' for accessibility.`);
+      throw new DynamicFormError(`Addon type 'bs-button' on field '${fieldKey}' is icon-only — provide 'ariaLabel' for accessibility.`);
     }
   },
 };
 
 /**
- * Feature kind discriminant for the Bootstrap addons feature. Matches core's
- * `'addons'` kind so providers flow through the standard addon-kind pipeline
+ * Feature type discriminant for the Bootstrap addons feature. Matches core's
+ * `'addons'` type so providers flow through the standard addon-type pipeline
  * in `provideDynamicForm`.
  */
 type BootstrapAddonsFeature = {
@@ -91,13 +91,13 @@ type BootstrapAddonsFeature = {
   ɵproviders: Provider[];
 };
 
-/** Register Bootstrap-shipped addon kinds (`bs-icon`, `bs-button`) standalone. */
+/** Register Bootstrap-shipped addon types (`bs-icon`, `bs-button`) standalone. */
 export function withBootstrapAddons(): BootstrapAddonsFeature {
   return {
     ɵkind: 'addons',
     ɵproviders: [
-      { provide: ADDON_KIND_DEFINITIONS, useValue: BS_ICON_KIND, multi: true },
-      { provide: ADDON_KIND_DEFINITIONS, useValue: BS_BUTTON_KIND, multi: true },
+      { provide: ADDON_TYPE_DEFINITIONS, useValue: BS_ICON_KIND, multi: true },
+      { provide: ADDON_TYPE_DEFINITIONS, useValue: BS_BUTTON_KIND, multi: true },
     ],
   };
 }

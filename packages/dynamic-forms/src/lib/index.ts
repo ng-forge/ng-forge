@@ -78,8 +78,8 @@ export type {
 export type {
   AddonActionContext,
   AddonActionPreset,
-  AddonKindDefinition,
-  AddonKindSchema,
+  AddonTypeDefinition,
+  AddonTypeSchema,
   AddonShapeValidator,
   CommonAddonActionPreset,
   DynamicFormActionRegistry,
@@ -102,16 +102,16 @@ export { runPresetAction } from './addons/run-preset-action';
 export type { PresetCollaborators } from './addons/run-preset-action';
 
 // Addon Registry helpers (for adapter authors)
-export { injectAddonKindRegistry } from './utils/inject-addon-kind-registry/inject-addon-kind-registry';
-export { injectFieldsSupportingAddons } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
-export type { FieldAddonSupportEntry } from './utils/inject-addon-kind-registry/inject-fields-supporting-addons';
+export { injectAddonTypeRegistry } from './utils/inject-addon-type-registry/inject-addon-type-registry';
+export { injectFieldsSupportingAddons } from './utils/inject-addon-type-registry/inject-fields-supporting-addons';
+export type { FieldAddonSupportEntry } from './utils/inject-addon-type-registry/inject-fields-supporting-addons';
 export { resolveDynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Features (for adapter authors and end users)
 export { withCustomAddon } from './providers/features/addons/with-custom-addon';
 export { withAddonActions } from './providers/features/addons/with-addon-actions';
 export type { AddonActionsFeature } from './providers/features/addons/with-addon-actions';
-export { ADDON_KIND_DEFINITIONS } from './providers/features/addons/addon-kind-definitions.token';
+export { ADDON_TYPE_DEFINITIONS } from './providers/features/addons/addon-type-definitions.token';
 
 // Addon Validation
 export { sanitizeFormConfig } from './utils/validate-form-config/validate-form-config';

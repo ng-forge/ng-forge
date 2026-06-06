@@ -5,12 +5,12 @@ import { AddonSlot } from './addon-slot';
 
 /**
  * Minimal JSON Schema fragment used by the MCP server to surface an addon
- * kind's shape to AI form generators. Covers the common subset
+ * type's shape to AI form generators. Covers the common subset
  * (`type`/`properties`/`required`/`enum`/etc.) without pulling in a full JSON
  * Schema dependency. Extra keys are allowed via the `[key: string]` index so
  * vendor-specific annotations (`x-foo`, `markdownDescription`) still typecheck.
  */
-export interface AddonKindSchema {
+export interface AddonTypeSchema {
   readonly $ref?: string;
   readonly $schema?: string;
   readonly title?: string;
@@ -26,14 +26,14 @@ export interface AddonKindSchema {
     | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
   readonly enum?: ReadonlyArray<unknown>;
   readonly const?: unknown;
-  readonly properties?: Readonly<Record<string, AddonKindSchema>>;
+  readonly properties?: Readonly<Record<string, AddonTypeSchema>>;
   readonly required?: ReadonlyArray<string>;
-  readonly additionalProperties?: boolean | AddonKindSchema;
-  readonly items?: AddonKindSchema | ReadonlyArray<AddonKindSchema>;
-  readonly oneOf?: ReadonlyArray<AddonKindSchema>;
-  readonly anyOf?: ReadonlyArray<AddonKindSchema>;
-  readonly allOf?: ReadonlyArray<AddonKindSchema>;
-  readonly not?: AddonKindSchema;
+  readonly additionalProperties?: boolean | AddonTypeSchema;
+  readonly items?: AddonTypeSchema | ReadonlyArray<AddonTypeSchema>;
+  readonly oneOf?: ReadonlyArray<AddonTypeSchema>;
+  readonly anyOf?: ReadonlyArray<AddonTypeSchema>;
+  readonly allOf?: ReadonlyArray<AddonTypeSchema>;
+  readonly not?: AddonTypeSchema;
   readonly default?: unknown;
   readonly examples?: ReadonlyArray<unknown>;
   readonly minimum?: number;
@@ -47,29 +47,29 @@ export interface AddonKindSchema {
 }
 
 /**
- * Optional shape validator a kind ships to enforce its required fields at
+ * Optional shape validator a type ships to enforce its required fields at
  * runtime. Throws are caught by the validator and converted into lenient
  * warnings; the offending addon is dropped and the form keeps rendering.
  */
 export type AddonShapeValidator<T extends BaseAddon = BaseAddon> = (addon: T, fieldKey: string) => void;
 
-/** Per-kind registration metadata. */
-export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
-  /** Discriminant matching `addon.kind`. */
-  readonly kind: string;
-  /** Lazy loader for the kind's renderer component. */
+/** Per-type registration metadata. */
+export interface AddonTypeDefinition<T extends BaseAddon = BaseAddon> {
+  /** Discriminant matching `addon.type`. */
+  readonly type: string;
+  /** Lazy loader for the type's renderer component. */
   readonly loadComponent: LazyComponentLoader;
   /** Optional shape validator — throw `DynamicFormError` to drop the addon with a warning. */
   readonly validate?: AddonShapeValidator<T>;
   /** Optional JSON Schema fragment for MCP / pre-flight tooling. */
-  readonly schema?: AddonKindSchema;
+  readonly schema?: AddonTypeSchema;
   /**
-   * Whether the kind survives `JSON.stringify` / `JSON.parse`. Kinds whose
+   * Whether the type survives `JSON.stringify` / `JSON.parse`. Types whose
    * shape includes a function payload (e.g., the built-in `'component'`
    * loader, inline `prime-button` `action` handlers) declare `jsonSafe: false`
    * so the validator drops them when the config was loaded from a JSON
    * source (`sanitizeFormConfig(config, { source: 'json' })`). Defaults to
-   * `true` — kinds are JSON-safe unless explicitly opted out.
+   * `true` — types are JSON-safe unless explicitly opted out.
    */
   readonly jsonSafe?: boolean;
 }
@@ -78,20 +78,20 @@ export interface AddonKindDefinition<T extends BaseAddon = BaseAddon> {
 export interface FieldAddonSupport {
   /** Slots a field of this type accepts. */
   readonly slots: readonly AddonSlot[];
-  /** Optional whitelist of allowed addon kinds. Omitted = any registered kind. */
-  readonly allowedKinds?: readonly string[];
+  /** Optional whitelist of allowed addon types. Omitted = any registered type. */
+  readonly allowedTypes?: readonly string[];
 }
 
-/** Global registry of addon kinds. */
-export const ADDON_KIND_REGISTRY = new InjectionToken<Map<string, AddonKindDefinition>>('ADDON_KIND_REGISTRY', {
+/** Global registry of addon types. */
+export const ADDON_TYPE_REGISTRY = new InjectionToken<Map<string, AddonTypeDefinition>>('ADDON_TYPE_REGISTRY', {
   providedIn: 'root',
-  factory: () => new Map<string, AddonKindDefinition>(),
+  factory: () => new Map<string, AddonTypeDefinition>(),
 });
 
 /**
- * Cache for resolved addon-kind components. Provided at form scope by
+ * Cache for resolved addon-type components. Provided at form scope by
  * `provideDynamicForm`.
  *
  * @internal
  */
-export const ADDON_KIND_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_KIND_COMPONENT_CACHE');
+export const ADDON_TYPE_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('ADDON_TYPE_COMPONENT_CACHE');

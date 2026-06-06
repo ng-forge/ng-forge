@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'mat-button',
+          type: 'mat-button',
           icon: 'restart_alt',
           ariaLabel: 'Reset',
           preset: 'reset',

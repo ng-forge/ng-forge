@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'mat-button',
+          type: 'mat-button',
           label: 'Info',
           color: 'accent',
           // No preset / actionRef / action — Decorative content-axis branch.

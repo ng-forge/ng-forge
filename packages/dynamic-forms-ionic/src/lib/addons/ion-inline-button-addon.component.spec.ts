@@ -34,7 +34,7 @@ function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionH
 
 describe('IonInlineButtonAddonComponent', () => {
   it('renders on a host element that already IS <ion-button> (attribute selector)', () => {
-    const { ionButton } = setup({ kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
+    const { ionButton } = setup({ type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
     expect(ionButton).toBeTruthy();
     expect(ionButton.tagName.toLowerCase()).toBe('ion-button');
     expect(ionButton.hasAttribute('df-ion-button-addon')).toBe(true);
@@ -42,7 +42,7 @@ describe('IonInlineButtonAddonComponent', () => {
 
   it('reflects color/fill via [attr.*] bindings (Stencil prop-reflection contract)', () => {
     const { ionButton } = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
@@ -54,12 +54,12 @@ describe('IonInlineButtonAddonComponent', () => {
   });
 
   it('defaults fill to "clear" when unset', () => {
-    const { ionButton } = setup({ kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
+    const { ionButton } = setup({ type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
     expect(ionButton.getAttribute('fill')).toBe('clear');
   });
 
   it('renders <ion-icon slot="icon-only"> when icon-only (no label)', () => {
-    const { ionButton } = setup({ kind: 'ion-button', slot: 'suffix', icon: 'search-outline', ariaLabel: 'Search' });
+    const { ionButton } = setup({ type: 'ion-button', slot: 'suffix', icon: 'search-outline', ariaLabel: 'Search' });
     const icon = ionButton.querySelector('ion-icon');
     expect(icon).toBeTruthy();
     expect(icon?.getAttribute('slot')).toBe('icon-only');
@@ -69,7 +69,7 @@ describe('IonInlineButtonAddonComponent', () => {
 
   it('renders <ion-icon slot="start"> + projected label text when labeled', () => {
     const { ionButton } = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'search-outline',
       label: 'Search',
@@ -82,7 +82,7 @@ describe('IonInlineButtonAddonComponent', () => {
 
   it('disables the host via [attr.disabled] when addon.disabled is true', () => {
     const { ionButton } = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
@@ -95,7 +95,7 @@ describe('IonInlineButtonAddonComponent', () => {
     const handler = vi.fn();
     const handlers = new Map<string, AddonActionHandler>([['my-action', handler]]);
     const { ionButton } = setup(
-      { kind: 'ion-button', slot: 'suffix', icon: 'send-outline', ariaLabel: 'Send', actionRef: 'my-action' },
+      { type: 'ion-button', slot: 'suffix', icon: 'send-outline', ariaLabel: 'Send', actionRef: 'my-action' },
       handlers,
     );
     ionButton.click();
@@ -103,13 +103,13 @@ describe('IonInlineButtonAddonComponent', () => {
   });
 
   it('omits role="status" when not loading', () => {
-    const { ionButton } = setup({ kind: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
+    const { ionButton } = setup({ type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
     expect(ionButton.querySelector('[role="status"]')).toBeNull();
   });
 
   it('resolves a static ariaLabel synchronously via the DynamicText effect', () => {
     const { ionButton } = setup({
-      kind: 'ion-button',
+      type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',

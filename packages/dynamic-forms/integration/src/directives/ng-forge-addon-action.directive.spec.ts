@@ -24,7 +24,7 @@ class TestActionHostComponent {
   protected readonly action = injectNgForgeAddonAction();
 }
 
-function setup(addon: { kind: string; slot: string }, fieldInputs?: WrapperFieldInputs) {
+function setup(addon: { type: string; slot: string }, fieldInputs?: WrapperFieldInputs) {
   const logger = { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() };
   TestBed.configureTestingModule({
     imports: [TestActionHostComponent],
@@ -65,7 +65,7 @@ function makeReadonlyTreeStub<T>(initial: T) {
 
 describe('NgForgeAddonActionBase — buildActionContext', () => {
   it('returns the orphan variant when no fieldInputs bag is supplied', () => {
-    const { directive } = setup({ kind: 'prime-button', slot: 'suffix' });
+    const { directive } = setup({ type: 'prime-button', slot: 'suffix' });
     const ctx = directive.buildActionContext();
     expect(ctx.form).toBeNull();
     expect(ctx.setValue).toBeUndefined();
@@ -74,7 +74,7 @@ describe('NgForgeAddonActionBase — buildActionContext', () => {
 
   it('returns the orphan variant when the bag has no field tree', () => {
     const inputs: WrapperFieldInputs = { key: 'q', type: 'input' };
-    const { directive } = setup({ kind: 'prime-button', slot: 'suffix' }, inputs);
+    const { directive } = setup({ type: 'prime-button', slot: 'suffix' }, inputs);
     const ctx = directive.buildActionContext();
     expect(ctx.form).toBeNull();
     expect(ctx.setValue).toBeUndefined();
@@ -84,7 +84,7 @@ describe('NgForgeAddonActionBase — buildActionContext', () => {
     const { field, value } = makeReadonlyTreeStub('hello');
     const bagSetValue = vi.fn();
     const inputs: WrapperFieldInputs = { key: 'q', type: 'input', field, setValue: bagSetValue };
-    const { directive } = setup({ kind: 'prime-button', slot: 'suffix' }, inputs);
+    const { directive } = setup({ type: 'prime-button', slot: 'suffix' }, inputs);
     const ctx = directive.buildActionContext();
     expect(ctx.form).toBe(field);
     expect(ctx.field).toEqual({ key: 'q', type: 'input' });
@@ -98,7 +98,7 @@ describe('NgForgeAddonActionBase — buildActionContext', () => {
   it('falls back to tree.value cast when bag setValue is absent (production-build race recovery)', () => {
     const { field, value } = makeReadonlyTreeStub('initial');
     const inputs: WrapperFieldInputs = { key: 'q', type: 'input', field }; // no setValue
-    const { directive } = setup({ kind: 'prime-button', slot: 'suffix' }, inputs);
+    const { directive } = setup({ type: 'prime-button', slot: 'suffix' }, inputs);
     const ctx = directive.buildActionContext();
     expect(ctx.form).toBe(field);
     expect(ctx.setValue).toBeDefined();
@@ -110,7 +110,7 @@ describe('NgForgeAddonActionBase — buildActionContext', () => {
   it('value reflects the current tree.value() at construction time', () => {
     const { field, value } = makeReadonlyTreeStub('one');
     const inputs: WrapperFieldInputs = { key: 'q', type: 'input', field, setValue: () => undefined };
-    const { directive } = setup({ kind: 'prime-button', slot: 'suffix' }, inputs);
+    const { directive } = setup({ type: 'prime-button', slot: 'suffix' }, inputs);
     const ctx1 = directive.buildActionContext();
     expect(ctx1.value).toBe('one');
     value.set('two');
@@ -135,7 +135,7 @@ describe('NgForgeAddonActionBase — buildActionContext', () => {
       errors: signal<readonly unknown[]>([]),
     } as unknown as WrapperFieldInputs['field'];
     const inputs: WrapperFieldInputs = { key: 'q', type: 'input', field };
-    const { directive, logger } = setup({ kind: 'prime-button', slot: 'suffix' }, inputs);
+    const { directive, logger } = setup({ type: 'prime-button', slot: 'suffix' }, inputs);
     const ctx = directive.buildActionContext();
     expect(() => ctx.setValue?.('attempt')).not.toThrow();
     // writeToFieldValue logs a warning through the directive's logger.
@@ -157,7 +157,7 @@ describe('NgForgeAddonActionBase — dispatch precedence', () => {
       ],
     });
     const fixture = TestBed.createComponent(TestActionHostComponent);
-    fixture.componentRef.setInput('addon', { kind: 'prime-button', slot: 'suffix', preset });
+    fixture.componentRef.setInput('addon', { type: 'prime-button', slot: 'suffix', preset });
     if (fieldInputs) fixture.componentRef.setInput('fieldInputs', fieldInputs);
     fixture.detectChanges();
     const directive = fixture.componentRef.injector.get(NgForgeAddonActionBase);
@@ -187,7 +187,7 @@ describe('NgForgeAddonActionBase — dispatch precedence', () => {
       ],
     });
     const fixture = TestBed.createComponent(TestActionHostComponent);
-    fixture.componentRef.setInput('addon', { kind: 'prime-button', slot: 'suffix', preset: 'clear' });
+    fixture.componentRef.setInput('addon', { type: 'prime-button', slot: 'suffix', preset: 'clear' });
     fixture.detectChanges();
     const directive = fixture.componentRef.injector.get(NgForgeAddonActionBase);
     directive.dispatch();

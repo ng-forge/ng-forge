@@ -1,35 +1,35 @@
 import { describe, expect, it } from 'vitest';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
-import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { validateFieldAddons, walkAndValidateAddons } from './validate-field-addons';
 
-const TEST_KINDS: ReadonlyArray<AddonKindDefinition> = [
-  { kind: 'text', loadComponent: () => Promise.resolve(class {}) },
+const TEST_TYPES: ReadonlyArray<AddonTypeDefinition> = [
+  { type: 'text', loadComponent: () => Promise.resolve(class {}) },
   {
-    kind: 'prime-icon',
+    type: 'prime-icon',
     loadComponent: () => Promise.resolve(class {}),
     validate: (a) => {
       const icon = (a as { icon?: unknown }).icon;
       if (typeof icon !== 'string' || icon.length === 0) throw new Error("'icon' must be a non-empty string");
     },
   },
-  { kind: 'component', jsonSafe: false, loadComponent: () => Promise.resolve(class {}) },
+  { type: 'component', jsonSafe: false, loadComponent: () => Promise.resolve(class {}) },
 ];
 
 const TEST_FIELDS: ReadonlyArray<FieldTypeDefinition> = [
-  { name: 'prime-input', addons: { slots: ['prefix', 'suffix'], allowedKinds: ['prime-icon', 'text'] } },
+  { name: 'prime-input', addons: { slots: ['prefix', 'suffix'], allowedTypes: ['prime-icon', 'text'] } },
   { name: 'prime-toggle' /* no addons → Tier 3 */ },
-  { name: 'unrestricted-input', addons: { slots: ['prefix', 'suffix'] /* no allowedKinds whitelist */ } },
+  { name: 'unrestricted-input', addons: { slots: ['prefix', 'suffix'] /* no allowedTypes whitelist */ } },
 ];
 
 const fieldRegistry = new Map(TEST_FIELDS.map((f) => [f.name, f]));
-const kindRegistry = new Map(TEST_KINDS.map((k) => [k.kind, k]));
+const typeRegistry = new Map(TEST_TYPES.map((k) => [k.type, k]));
 
 describe('validateFieldAddons', () => {
   it('returns empty + no warnings when field has no addons', () => {
     const field: FieldDef<unknown> = { key: 'q', type: 'prime-input' };
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
     expect(result.warnings).toEqual([]);
   });
@@ -38,9 +38,9 @@ describe('validateFieldAddons', () => {
     const field = {
       key: 'q',
       type: 'mystery-field',
-      addons: [{ slot: 'prefix', kind: 'text', text: 'x' }],
+      addons: [{ slot: 'prefix', type: 'text', text: 'x' }],
     } as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toMatchObject({ type: 'unknown-field-type', fieldKey: 'q', fieldType: 'mystery-field' });
@@ -50,9 +50,9 @@ describe('validateFieldAddons', () => {
     const field = {
       key: 'agree',
       type: 'prime-toggle',
-      addons: [{ slot: 'prefix', kind: 'text', text: 'x' }],
+      addons: [{ slot: 'prefix', type: 'text', text: 'x' }],
     } as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toMatchObject({ type: 'field-type-no-addon-support', fieldKey: 'agree', fieldType: 'prime-toggle' });
@@ -63,69 +63,69 @@ describe('validateFieldAddons', () => {
       key: 'q',
       type: 'prime-input',
       addons: [
-        { slot: 'badSlot' as const, kind: 'text', text: 'a' },
-        { slot: 'prefix', kind: 'text', text: 'b' },
+        { slot: 'badSlot' as const, type: 'text', text: 'a' },
+        { slot: 'prefix', type: 'text', text: 'b' },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toHaveLength(1);
     expect((result.addons[0] as { text: string }).text).toBe('b');
     expect(result.warnings[0]).toMatchObject({ type: 'unknown-slot', slot: 'badSlot' });
   });
 
-  it('drops addons with unregistered kinds and enumerates registered kinds in the warning', () => {
+  it('drops addons with unregistered types and enumerates registered types in the warning', () => {
     const field = {
       key: 'q',
       type: 'prime-input',
-      addons: [{ slot: 'prefix', kind: 'rating' as const, value: 5 }],
+      addons: [{ slot: 'prefix', type: 'rating' as const, value: 5 }],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
-    expect(result.warnings[0]).toMatchObject({ type: 'unknown-kind', kind: 'rating' });
-    if (result.warnings[0].type === 'unknown-kind') {
-      expect(result.warnings[0].registeredKinds).toContain('text');
-      expect(result.warnings[0].registeredKinds).toContain('prime-icon');
+    expect(result.warnings[0]).toMatchObject({ type: 'unknown-type', addonType: 'rating' });
+    if (result.warnings[0].type === 'unknown-type') {
+      expect(result.warnings[0].registeredTypes).toContain('text');
+      expect(result.warnings[0].registeredTypes).toContain('prime-icon');
     }
   });
 
-  it('drops addons whose kind is not in the per-field allowedKinds whitelist', () => {
+  it('drops addons whose type is not in the per-field allowedTypes whitelist', () => {
     // 'component' is registered globally but prime-input restricts to prime-icon + text.
     const field = {
       key: 'q',
       type: 'prime-input',
-      addons: [{ slot: 'prefix', kind: 'component', component: () => Promise.resolve(class {}) }],
+      addons: [{ slot: 'prefix', type: 'component', component: () => Promise.resolve(class {}) }],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
-    expect(result.warnings[0]).toMatchObject({ type: 'kind-not-allowed', kind: 'component' });
+    expect(result.warnings[0]).toMatchObject({ type: 'type-not-allowed', addonType: 'component' });
   });
 
-  it('drops addons that fail per-kind shape validation', () => {
+  it('drops addons that fail per-type shape validation', () => {
     const field = {
       key: 'q',
       type: 'prime-input',
-      addons: [{ slot: 'prefix', kind: 'prime-icon', icon: '' /* empty — fails */ }],
+      addons: [{ slot: 'prefix', type: 'prime-icon', icon: '' /* empty — fails */ }],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     expect(result.addons).toEqual([]);
-    expect(result.warnings[0]).toMatchObject({ type: 'shape-violation', kind: 'prime-icon' });
+    expect(result.warnings[0]).toMatchObject({ type: 'shape-violation', addonType: 'prime-icon' });
   });
 
-  it('keeps `kind: component` in inline mode but drops in JSON mode', () => {
-    // Use unrestricted-input (no allowedKinds whitelist) so the component kind
+  it('keeps `type: component` in inline mode but drops in JSON mode', () => {
+    // Use unrestricted-input (no allowedTypes whitelist) so the component type
     // is gated only by the JSON-source check.
     const make = (): FieldDef<unknown> =>
       ({
         key: 'q',
         type: 'unrestricted-input',
-        addons: [{ slot: 'prefix', kind: 'component', component: () => Promise.resolve(class {}) }],
+        addons: [{ slot: 'prefix', type: 'component', component: () => Promise.resolve(class {}) }],
       }) as unknown as FieldDef<unknown>;
 
-    expect(validateFieldAddons(make(), fieldRegistry, kindRegistry, 'inline').addons).toHaveLength(1);
+    expect(validateFieldAddons(make(), fieldRegistry, typeRegistry, 'inline').addons).toHaveLength(1);
 
-    const jsonResult = validateFieldAddons(make(), fieldRegistry, kindRegistry, 'json');
+    const jsonResult = validateFieldAddons(make(), fieldRegistry, typeRegistry, 'json');
     expect(jsonResult.addons).toEqual([]);
-    expect(jsonResult.warnings[0]).toMatchObject({ type: 'code-only-kind-in-json', kind: 'component' });
+    expect(jsonResult.warnings[0]).toMatchObject({ type: 'code-only-type-in-json', addonType: 'component' });
   });
 
   it('strips inline `action` function in JSON mode but keeps the rest of the addon', () => {
@@ -135,15 +135,15 @@ describe('validateFieldAddons', () => {
       addons: [
         {
           slot: 'suffix',
-          kind: 'text',
+          type: 'text',
           text: 'hello',
-          // function on a kind that doesn't normally have one — exercises the
-          // generic JSON-source action stripper, not a kind-specific check.
+          // function on a type that doesn't normally have one — exercises the
+          // generic JSON-source action stripper, not a type-specific check.
           action: () => undefined,
         },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'json');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'json');
     expect(result.addons).toHaveLength(1);
     expect((result.addons[0] as { action?: unknown }).action).toBeUndefined();
     expect(result.warnings[0]).toMatchObject({ type: 'code-only-action-in-json' });
@@ -156,7 +156,7 @@ describe('validateFieldAddons', () => {
       addons: [
         {
           slot: 'suffix',
-          kind: 'text',
+          type: 'text',
           text: 'hello',
           hidden: () => false,
           disabled: () => true,
@@ -164,7 +164,7 @@ describe('validateFieldAddons', () => {
         },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'json');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'json');
     expect(result.addons).toHaveLength(1);
     const addon = result.addons[0] as { hidden?: unknown; disabled?: unknown; loading?: unknown; text?: string };
     expect(addon.hidden).toBeUndefined();
@@ -183,7 +183,7 @@ describe('validateFieldAddons', () => {
       addons: [
         {
           slot: 'suffix',
-          kind: 'text',
+          type: 'text',
           text: 'hello',
           hidden: () => false,
           disabled: () => true,
@@ -191,7 +191,7 @@ describe('validateFieldAddons', () => {
         },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     const addon = result.addons[0] as { hidden?: unknown; disabled?: unknown; loading?: unknown };
     expect(typeof addon.hidden).toBe('function');
     expect(typeof addon.disabled).toBe('function');
@@ -206,7 +206,7 @@ describe('validateFieldAddons', () => {
       addons: [
         {
           slot: 'suffix',
-          kind: 'text',
+          type: 'text',
           text: 'go',
           preset: 'clear',
           actionRef: 'submit',
@@ -214,7 +214,7 @@ describe('validateFieldAddons', () => {
         },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     const addon = result.addons[0] as { preset?: string; actionRef?: string; action?: unknown };
     expect(addon.preset).toBe('clear');
     expect(addon.actionRef).toBeUndefined();
@@ -231,14 +231,14 @@ describe('validateFieldAddons', () => {
       addons: [
         {
           slot: 'suffix',
-          kind: 'text',
+          type: 'text',
           text: 'go',
           actionRef: 'submit',
           action: () => undefined,
         },
       ],
     } as unknown as FieldDef<unknown>;
-    const result = validateFieldAddons(field, fieldRegistry, kindRegistry, 'inline');
+    const result = validateFieldAddons(field, fieldRegistry, typeRegistry, 'inline');
     const addon = result.addons[0] as { actionRef?: string; action?: unknown };
     expect(addon.actionRef).toBe('submit');
     expect(addon.action).toBeUndefined();
@@ -254,13 +254,13 @@ describe('walkAndValidateAddons', () => {
         // group is NOT in fieldRegistry → its own addons (if any) are dropped, but
         // its `fields` array still recurses.
         fields: [
-          { key: 'q', type: 'prime-input', addons: [{ slot: 'prefix', kind: 'text', text: 'ok' }] },
-          { key: 'agree', type: 'prime-toggle', addons: [{ slot: 'prefix', kind: 'text', text: 'no' }] },
+          { key: 'q', type: 'prime-input', addons: [{ slot: 'prefix', type: 'text', text: 'ok' }] },
+          { key: 'agree', type: 'prime-toggle', addons: [{ slot: 'prefix', type: 'text', text: 'no' }] },
         ],
       },
     ] as unknown as ReadonlyArray<FieldDef<unknown>>;
 
-    const result = walkAndValidateAddons(tree, fieldRegistry, kindRegistry, 'inline');
+    const result = walkAndValidateAddons(tree, fieldRegistry, typeRegistry, 'inline');
     const groupOut = result.fields[0] as { fields: ReadonlyArray<FieldDef<unknown>> };
     expect((groupOut.fields[0].addons ?? []).length).toBe(1); // q kept
     expect((groupOut.fields[1].addons ?? []).length).toBe(0); // agree dropped
@@ -268,10 +268,10 @@ describe('walkAndValidateAddons', () => {
   });
 
   it('returns the original input shape when nothing is dropped', () => {
-    const tree = [{ key: 'q', type: 'prime-input', addons: [{ slot: 'prefix', kind: 'text', text: 'ok' }] }] as unknown as ReadonlyArray<
+    const tree = [{ key: 'q', type: 'prime-input', addons: [{ slot: 'prefix', type: 'text', text: 'ok' }] }] as unknown as ReadonlyArray<
       FieldDef<unknown>
     >;
-    const result = walkAndValidateAddons(tree, fieldRegistry, kindRegistry, 'inline');
+    const result = walkAndValidateAddons(tree, fieldRegistry, typeRegistry, 'inline');
     expect(result.warnings).toEqual([]);
     expect(result.fields[0].addons).toHaveLength(1);
   });

@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'prime-button',
+          type: 'prime-button',
           icon: 'undo',
           ariaLabel: 'Reset',
           preset: 'reset',

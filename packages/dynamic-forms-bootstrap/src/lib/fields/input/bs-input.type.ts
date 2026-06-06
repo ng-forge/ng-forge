@@ -13,7 +13,7 @@ export interface BsInputProps extends InputProps {
 }
 
 /**
- * Module-augmentable seam for adding custom addon kinds to `bs-input` at
+ * Module-augmentable seam for adding custom addon types to `bs-input` at
  * the type level. Pair with `withCustomAddon(...)` for the runtime side:
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
@@ -21,7 +21,7 @@ export interface BsAddonExtensions {}
 
 type BsAddonExtension = BsAddonExtensions[keyof BsAddonExtensions];
 
-/** Addon kinds accepted by `bs-input`. */
+/** Addon types accepted by `bs-input`. */
 export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAddon | BsAddonExtension;
 
 export type BsInputField = InputField<BsInputProps> & {

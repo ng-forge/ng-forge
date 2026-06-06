@@ -17,8 +17,8 @@ export type {
   RegisteredActionRef,
 } from './addon/addon-action';
 export { isFieldBoundContext } from './addon/addon-action';
-export type { AddonKindDefinition, AddonKindSchema, AddonShapeValidator, FieldAddonSupport } from './addon/addon-kind';
-export { ADDON_KIND_REGISTRY } from './addon/addon-kind';
+export type { AddonTypeDefinition, AddonTypeSchema, AddonShapeValidator, FieldAddonSupport } from './addon/addon-type';
+export { ADDON_TYPE_REGISTRY } from './addon/addon-type';
 export { DF_FIELD_TEMPLATES } from './addon/df-field-templates.token';
 export type { WrapperTypeDefinition, FieldWrapper, WrapperConfig } from './wrapper-type';
 export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRAPPER_AUTO_ASSOCIATIONS } from './wrapper-type';

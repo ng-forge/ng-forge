@@ -4,7 +4,7 @@ import { TextAddon } from '@ng-forge/dynamic-forms/internal';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 
-/** Renderer for the universal `text` addon kind. */
+/** Renderer for the universal `text` addon type. */
 @Component({
   selector: 'df-text-addon',
   imports: [AsyncPipe, DynamicTextPipe],

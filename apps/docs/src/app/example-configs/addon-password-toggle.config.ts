@@ -9,7 +9,7 @@ const ICON_NAME: Record<ConcreteAdapter, string> = {
   ionic: 'eye-outline',
 };
 
-const BUTTON_KIND: Record<ConcreteAdapter, string> = {
+const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
   material: 'mat-button',
   bootstrap: 'bs-button',
   primeng: 'prime-button',
@@ -28,7 +28,7 @@ export function addonPasswordToggleConfig(adapter: ConcreteAdapter): FormConfig 
         addons: [
           {
             slot: 'suffix',
-            kind: BUTTON_KIND[adapter],
+            type: BUTTON_TYPE[adapter],
             icon: ICON_NAME[adapter],
             ariaLabel: 'Toggle password visibility',
             preset: 'toggle-password-visibility',

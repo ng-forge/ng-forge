@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'bs-button',
+          type: 'bs-button',
           label: 'Info',
           severity: 'info',
           // No preset / actionRef / action — Decorative content-axis branch.

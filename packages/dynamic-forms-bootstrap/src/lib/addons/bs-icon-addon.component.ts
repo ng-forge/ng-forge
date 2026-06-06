@@ -4,7 +4,7 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import type { BsIconAddon } from '../types/addons';
 
-/** Renderer for the `bs-icon` addon kind. */
+/** Renderer for the `bs-icon` addon type. */
 @Component({
   selector: 'df-bs-icon-addon',
   imports: [AsyncPipe, DynamicTextPipe],
@@ -16,7 +16,7 @@ import type { BsIconAddon } from '../types/addons';
 })
 export class BsIconAddonComponent {
   readonly addon = input.required<BsIconAddon>();
-  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every kind must declare it. */
+  /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every type must declare it. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   protected readonly iconClass = computed(() => `bi bi-${this.addon().icon}`);

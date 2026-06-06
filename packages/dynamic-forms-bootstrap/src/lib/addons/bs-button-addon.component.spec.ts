@@ -29,14 +29,14 @@ function getButton(fixture: ReturnType<typeof setup>): HTMLButtonElement {
 describe('BsButtonAddonComponent', () => {
   describe('class composition', () => {
     it('renders btn.btn-outline-{severity} when severity is set', () => {
-      const fixture = setup({ kind: 'bs-button', slot: 'suffix', icon: 'x', ariaLabel: 'Clear', severity: 'danger' });
+      const fixture = setup({ type: 'bs-button', slot: 'suffix', icon: 'x', ariaLabel: 'Clear', severity: 'danger' });
       const button = getButton(fixture);
       expect(button.className).toContain('btn');
       expect(button.className).toContain('btn-outline-danger');
     });
 
     it('falls back to btn-outline-secondary when severity is unset', () => {
-      const fixture = setup({ kind: 'bs-button', slot: 'suffix', icon: 'x', ariaLabel: 'Clear' });
+      const fixture = setup({ type: 'bs-button', slot: 'suffix', icon: 'x', ariaLabel: 'Clear' });
       const button = getButton(fixture);
       expect(button.className).toContain('btn-outline-secondary');
     });
@@ -44,7 +44,7 @@ describe('BsButtonAddonComponent', () => {
 
   describe('content rendering', () => {
     it('renders icon-only (icon, no label)', () => {
-      const fixture = setup({ kind: 'bs-button', slot: 'suffix', icon: 'search', ariaLabel: 'Search' });
+      const fixture = setup({ type: 'bs-button', slot: 'suffix', icon: 'search', ariaLabel: 'Search' });
       const button = getButton(fixture);
       const i = button.querySelector('i');
       expect(i).toBeTruthy();
@@ -55,7 +55,7 @@ describe('BsButtonAddonComponent', () => {
 
     it('renders labeled with both icon and label', async () => {
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'search',
         label: 'Search',
@@ -69,7 +69,7 @@ describe('BsButtonAddonComponent', () => {
     });
 
     it('renders decorative (label only, no icon)', async () => {
-      const fixture = setup({ kind: 'bs-button', slot: 'suffix', label: 'Info', severity: 'info' });
+      const fixture = setup({ type: 'bs-button', slot: 'suffix', label: 'Info', severity: 'info' });
       await fixture.whenStable();
       fixture.detectChanges();
       const button = getButton(fixture);
@@ -81,7 +81,7 @@ describe('BsButtonAddonComponent', () => {
   describe('loading state', () => {
     it('renders spinner-border when loading is true and hides the icon', () => {
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'search',
         ariaLabel: 'Search',
@@ -98,7 +98,7 @@ describe('BsButtonAddonComponent', () => {
     it('reacts to a Signal-typed loading flipping', () => {
       const loading = signal(false);
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'search',
         ariaLabel: 'Search',
@@ -117,7 +117,7 @@ describe('BsButtonAddonComponent', () => {
   describe('disabled state', () => {
     it('reflects disabled: true on the button element', () => {
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'x',
         ariaLabel: 'Clear',
@@ -128,7 +128,7 @@ describe('BsButtonAddonComponent', () => {
 
     it('disables when loading is true (even if disabled is unset)', () => {
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'x',
         ariaLabel: 'Clear',
@@ -139,7 +139,7 @@ describe('BsButtonAddonComponent', () => {
 
     it('is enabled when both disabled and loading are false', () => {
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'x',
         ariaLabel: 'Clear',
@@ -152,7 +152,7 @@ describe('BsButtonAddonComponent', () => {
     it('invokes the inline action handler on click with an AddonActionContext', () => {
       const calls: Array<{ value: unknown }> = [];
       const fixture = setup({
-        kind: 'bs-button',
+        type: 'bs-button',
         slot: 'suffix',
         icon: 'plus',
         ariaLabel: 'Add',
@@ -166,7 +166,7 @@ describe('BsButtonAddonComponent', () => {
     });
 
     it('does not throw on click when no handler is configured (decorative)', () => {
-      const fixture = setup({ kind: 'bs-button', slot: 'suffix', label: 'Info' });
+      const fixture = setup({ type: 'bs-button', slot: 'suffix', label: 'Info' });
       expect(() => getButton(fixture).click()).not.toThrow();
     });
   });

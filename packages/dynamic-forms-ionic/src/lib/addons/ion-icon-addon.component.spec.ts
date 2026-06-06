@@ -13,7 +13,7 @@ function setup(addon: IonIconAddon) {
 
 describe('IonIconAddonComponent', () => {
   it('renders <ion-icon> bound to the configured name', () => {
-    const fixture = setup({ kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
+    const fixture = setup({ type: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
     const icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };
     expect(icon).toBeTruthy();
     // `name` is a property binding on the Ionic web component, not an attribute.
@@ -21,13 +21,13 @@ describe('IonIconAddonComponent', () => {
   });
 
   it('applies host aria-hidden="true" when ariaLabel is absent', () => {
-    const fixture = setup({ kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
+    const fixture = setup({ type: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
     const host = fixture.nativeElement as HTMLElement;
     expect(host.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('forwards ariaLabel to <ion-icon> and clears host aria-hidden', async () => {
-    const fixture = setup({ kind: 'ion-icon', slot: 'prefix', icon: 'checkmark-outline', ariaLabel: 'Success' });
+    const fixture = setup({ type: 'ion-icon', slot: 'prefix', icon: 'checkmark-outline', ariaLabel: 'Success' });
     // dynamicText|async pipe resolves async — flush microtasks.
     await fixture.whenStable();
     fixture.detectChanges();
@@ -40,11 +40,11 @@ describe('IonIconAddonComponent', () => {
   });
 
   it('rerenders the icon name when the `addon` input changes', () => {
-    const fixture = setup({ kind: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
+    const fixture = setup({ type: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
     let icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };
     expect(icon.name).toBe('search-outline');
 
-    fixture.componentRef.setInput('addon', { kind: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonIconAddon);
+    fixture.componentRef.setInput('addon', { type: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonIconAddon);
     fixture.detectChanges();
 
     icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };

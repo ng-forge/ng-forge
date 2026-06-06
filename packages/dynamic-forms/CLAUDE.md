@@ -131,11 +131,11 @@ Field types that render addon slots must opt in via `addons: { slots: [...] }` o
   loadComponent: () => import('../fields/input/mat-input.component'),
   mapper: valueFieldMapper,
   ...VALUE_FIELD_TYPES_BASE,
-  addons: { slots: ['prefix', 'suffix'], allowedKinds: ['mat-icon', 'mat-button', 'text'] },
+  addons: { slots: ['prefix', 'suffix'], allowedTypes: ['mat-icon', 'mat-button', 'text'] },
 }
 ```
 
-`slots` is required; `allowedKinds` is optional (omit to accept any registered kind). Adapter authors registering a new addon-supporting field type should declare both axes — `renderReadyWhen` for value-bearing render-ready gating AND `addons` for addon validation — at the same registration site.
+`slots` is required; `allowedTypes` is optional (omit to accept any registered type). Adapter authors registering a new addon-supporting field type should declare both axes — `renderReadyWhen` for value-bearing render-ready gating AND `addons` for addon validation — at the same registration site.
 
 ### Teardown timing
 

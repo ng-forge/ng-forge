@@ -12,7 +12,7 @@ const config = {
     addons: [
       {
         slot: 'suffix' as const,
-        kind: 'bs-button' as const,
+        type: 'bs-button' as const,
         label: severity,
         severity,
         action: () => {

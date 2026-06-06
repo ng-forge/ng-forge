@@ -1,5 +1,5 @@
 import { AnyAddon } from '@ng-forge/dynamic-forms/internal';
-import { AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { AddonWarning } from './addon-warning';
@@ -10,14 +10,14 @@ import { AddonWarning } from './addon-warning';
  *
  * @param field        The field to validate.
  * @param fieldRegistry Snapshot of `FIELD_REGISTRY` map.
- * @param kindRegistry  Snapshot of `ADDON_KIND_REGISTRY` map.
+ * @param typeRegistry  Snapshot of `ADDON_TYPE_REGISTRY` map.
  * @param source       Whether the config originated from JSON (lenient drop
- *                      of code-only kinds) or inline TypeScript.
+ *                      of code-only types) or inline TypeScript.
  */
 export function validateFieldAddons(
   field: FieldDef<unknown>,
   fieldRegistry: ReadonlyMap<string, FieldTypeDefinition>,
-  kindRegistry: ReadonlyMap<string, AddonKindDefinition>,
+  typeRegistry: ReadonlyMap<string, AddonTypeDefinition>,
   source: 'json' | 'inline',
 ): { addons: AnyAddon[]; warnings: AddonWarning[] } {
   const warnings: AddonWarning[] = [];
@@ -40,8 +40,8 @@ export function validateFieldAddons(
   }
 
   const allowedSlots = addonSupport.slots;
-  const allowedKinds = addonSupport.allowedKinds;
-  const registeredKinds = Array.from(kindRegistry.keys());
+  const allowedTypes = addonSupport.allowedTypes;
+  const registeredTypes = Array.from(typeRegistry.keys());
 
   const survivors: AnyAddon[] = [];
   for (const addon of incoming) {
@@ -57,38 +57,38 @@ export function validateFieldAddons(
       continue;
     }
 
-    // Kind registered? `AnyAddon.kind` is already a string-literal union via
+    // Type registered? `AnyAddon.type` is already a string-literal union via
     // DynamicFormAddonRegistry; no need to cast.
-    const kindDef = kindRegistry.get(addon.kind);
-    if (!kindDef) {
+    const typeDef = typeRegistry.get(addon.type);
+    if (!typeDef) {
       warnings.push({
-        type: 'unknown-kind',
+        type: 'unknown-type',
         fieldKey: field.key,
-        kind: addon.kind,
-        registeredKinds,
+        addonType: addon.type,
+        registeredTypes,
       });
       continue;
     }
 
-    // Kind whitelisted (if `allowedKinds` was set)?
-    if (allowedKinds && !allowedKinds.includes(kindDef.kind)) {
+    // Type whitelisted (if `allowedTypes` was set)?
+    if (allowedTypes && !allowedTypes.includes(typeDef.type)) {
       warnings.push({
-        type: 'kind-not-allowed',
+        type: 'type-not-allowed',
         fieldKey: field.key,
         fieldType,
-        kind: kindDef.kind,
-        allowedKinds,
+        addonType: typeDef.type,
+        allowedTypes,
       });
       continue;
     }
 
-    // Code-only kind dropped from JSON-source configs. A kind opts out of
-    // JSON-safety via `AddonKindDefinition.jsonSafe: false` (defaults to true).
-    if (source === 'json' && kindDef.jsonSafe === false) {
+    // Code-only type dropped from JSON-source configs. A type opts out of
+    // JSON-safety via `AddonTypeDefinition.jsonSafe: false` (defaults to true).
+    if (source === 'json' && typeDef.jsonSafe === false) {
       warnings.push({
-        type: 'code-only-kind-in-json',
+        type: 'code-only-type-in-json',
         fieldKey: field.key,
-        kind: kindDef.kind,
+        addonType: typeDef.type,
       });
       continue;
     }
@@ -121,7 +121,7 @@ export function validateFieldAddons(
           warnings.push({
             type: 'code-only-action-in-json',
             fieldKey: field.key,
-            reason: `function '${key}' on kind '${kindDef.kind}' (use a signal/observable in code, or omit in JSON)`,
+            reason: `function '${key}' on type '${typeDef.type}' (use a signal/observable in code, or omit in JSON)`,
           });
         }
       };
@@ -131,7 +131,7 @@ export function validateFieldAddons(
         warnings.push({
           type: 'code-only-action-in-json',
           fieldKey: field.key,
-          reason: `inline 'action' function on kind '${kindDef.kind}'`,
+          reason: `inline 'action' function on type '${typeDef.type}'`,
         });
       }
       dropReactiveFn('hidden');
@@ -152,7 +152,7 @@ export function validateFieldAddons(
       warnings.push({
         type: 'code-only-action-in-json',
         fieldKey: field.key,
-        reason: `multiple click variants on kind '${kindDef.kind}' (${declaredVariants.join(', ')}); kept '${declaredVariants[0]}'`,
+        reason: `multiple click variants on type '${typeDef.type}' (${declaredVariants.join(', ')}); kept '${declaredVariants[0]}'`,
       });
     }
 
@@ -161,15 +161,15 @@ export function validateFieldAddons(
       continue;
     }
 
-    // Per-kind shape validator (throws on violation).
-    if (kindDef.validate) {
+    // Per-type shape validator (throws on violation).
+    if (typeDef.validate) {
       try {
-        kindDef.validate(addon, field.key);
+        typeDef.validate(addon, field.key);
       } catch (error) {
         warnings.push({
           type: 'shape-violation',
           fieldKey: field.key,
-          kind: kindDef.kind,
+          addonType: typeDef.type,
           reason: error instanceof Error ? error.message : String(error),
         });
         continue;
@@ -189,7 +189,7 @@ export function validateFieldAddons(
 export function walkAndValidateAddons(
   fields: readonly FieldDef<unknown>[],
   fieldRegistry: ReadonlyMap<string, FieldTypeDefinition>,
-  kindRegistry: ReadonlyMap<string, AddonKindDefinition>,
+  typeRegistry: ReadonlyMap<string, AddonTypeDefinition>,
   source: 'json' | 'inline',
 ): { fields: FieldDef<unknown>[]; warnings: AddonWarning[] } {
   const allWarnings: AddonWarning[] = [];
@@ -197,7 +197,7 @@ export function walkAndValidateAddons(
     let next: FieldDef<unknown> = field;
 
     if (field.addons?.length) {
-      const { addons, warnings } = validateFieldAddons(field, fieldRegistry, kindRegistry, source);
+      const { addons, warnings } = validateFieldAddons(field, fieldRegistry, typeRegistry, source);
       allWarnings.push(...warnings);
       next = { ...next, addons };
     }
@@ -209,7 +209,7 @@ export function walkAndValidateAddons(
       const { fields: visited, warnings } = walkAndValidateAddons(
         children as readonly FieldDef<unknown>[],
         fieldRegistry,
-        kindRegistry,
+        typeRegistry,
         source,
       );
       allWarnings.push(...warnings);

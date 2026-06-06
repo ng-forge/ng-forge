@@ -334,50 +334,50 @@ describe('PrimeInputField - addons', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'prefix', kind: 'prime-icon', icon: 'search' }],
+      addons: [{ slot: 'prefix', type: 'prime-icon', icon: 'search' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-icon'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-icon'>();
   });
 
   it('accepts prime-button addon with preset', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
+      addons: [{ slot: 'suffix', type: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('accepts text addon with DynamicText', () => {
     const field = {
       type: 'input',
       key: 'amount',
-      addons: [{ slot: 'prefix', kind: 'text', text: '$' }],
+      addons: [{ slot: 'prefix', type: 'text', text: '$' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'text'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'text'>();
   });
 
   it('accepts template addon with templateKey', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'template', templateKey: 'mySlot' }],
+      addons: [{ slot: 'suffix', type: 'template', templateKey: 'mySlot' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'template'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'template'>();
   });
 
-  it("base addon kinds are present in PrimeInput's union", () => {
-    // Base kinds always appear; user augmentations via `PrimeAddonExtensions`
+  it("base addon types are present in PrimeInput's union", () => {
+    // Base types always appear; user augmentations via `PrimeAddonExtensions`
     // extend the union further. We assert direction (base → accepted) so the
     // test stays correct when extensions are added in user code.
-    type AcceptedKinds = NonNullable<PrimeInputField['addons']>[number]['kind'];
-    expectTypeOf<'prime-icon' | 'prime-button' | 'text' | 'template'>().toMatchTypeOf<AcceptedKinds>();
+    type AcceptedTypes = NonNullable<PrimeInputField['addons']>[number]['type'];
+    expectTypeOf<'prime-icon' | 'prime-button' | 'text' | 'template'>().toMatchTypeOf<AcceptedTypes>();
   });
 
   it('PrimeAddonExtensions is empty by default — augmentable seam', () => {
     // The interface itself ships empty so `keyof` resolves to `never` and the
     // extension contributes nothing. Users can declare-module-augment it to
-    // bring custom kinds into the typed union.
+    // bring custom types into the typed union.
     expectTypeOf<keyof PrimeAddonExtensions>().toEqualTypeOf<never>();
   });
 
@@ -385,7 +385,7 @@ describe('PrimeInputField - addons', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear', hidden: false }],
+      addons: [{ slot: 'suffix', type: 'prime-button', icon: 'x', ariaLabel: 'Clear', preset: 'clear', hidden: false }],
     } as const satisfies PrimeInputField;
     expectTypeOf(field.addons[0].hidden).toEqualTypeOf<false>();
   });
@@ -394,8 +394,8 @@ describe('PrimeInputField - addons', () => {
     // The PrimeButtonAddon content axis is `IconOnly` | `Labeled` | `Decorative`.
     // An icon-only shape WITHOUT ariaLabel doesn't match any branch — assert
     // that explicitly so a future regression that loosens the XOR fails this test.
-    type IconOnlyMissingAria = { slot: 'suffix'; kind: 'prime-button'; icon: 'times'; preset: 'clear' };
-    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'prime-button' }>;
+    type IconOnlyMissingAria = { slot: 'suffix'; type: 'prime-button'; icon: 'times'; preset: 'clear' };
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { type: 'prime-button' }>;
     expectTypeOf<IconOnlyMissingAria>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
   });
 
@@ -403,80 +403,80 @@ describe('PrimeInputField - addons', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', label: 'Clear', preset: 'clear' }],
+      addons: [{ slot: 'suffix', type: 'prime-button', label: 'Clear', preset: 'clear' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('accepts icon-only prime-button when ariaLabel is provided', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
+      addons: [{ slot: 'suffix', type: 'prime-button', icon: 'times', ariaLabel: 'Clear', preset: 'clear' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('accepts prime-button with actionRef alone (click XOR)', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', label: 'Open', actionRef: 'openProfile' }],
+      addons: [{ slot: 'suffix', type: 'prime-button', label: 'Open', actionRef: 'openProfile' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('accepts prime-button with inline action alone (click XOR)', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', label: 'Run', action: () => undefined }],
+      addons: [{ slot: 'suffix', type: 'prime-button', label: 'Run', action: () => undefined }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('accepts decorative prime-button with no click handler', () => {
     const field = {
       type: 'input',
       key: 'q',
-      addons: [{ slot: 'suffix', kind: 'prime-button', label: 'Static' }],
+      addons: [{ slot: 'suffix', type: 'prime-button', label: 'Static' }],
     } as const satisfies PrimeInputField;
-    expectTypeOf(field.addons[0].kind).toEqualTypeOf<'prime-button'>();
+    expectTypeOf(field.addons[0].type).toEqualTypeOf<'prime-button'>();
   });
 
   it('rejects prime-button combining preset + actionRef via click XOR', () => {
     type PresetAndActionRef = {
       slot: 'suffix';
-      kind: 'prime-button';
+      type: 'prime-button';
       label: 'Bad';
       preset: 'clear';
       actionRef: 'openProfile';
     };
-    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'prime-button' }>;
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { type: 'prime-button' }>;
     expectTypeOf<PresetAndActionRef>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
   });
 
   it('rejects prime-button combining preset + inline action via click XOR', () => {
     type PresetAndAction = {
       slot: 'suffix';
-      kind: 'prime-button';
+      type: 'prime-button';
       label: 'Bad';
       preset: 'clear';
       action: () => void;
     };
-    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'prime-button' }>;
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { type: 'prime-button' }>;
     expectTypeOf<PresetAndAction>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
   });
 
   it('rejects prime-button combining actionRef + inline action via click XOR', () => {
     type ActionRefAndAction = {
       slot: 'suffix';
-      kind: 'prime-button';
+      type: 'prime-button';
       label: 'Bad';
       actionRef: 'openProfile';
       action: () => void;
     };
-    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { kind: 'prime-button' }>;
+    type AcceptedPiButtonShapes = Extract<NonNullable<PrimeInputField['addons']>[number], { type: 'prime-button' }>;
     expectTypeOf<ActionRefAndAction>().not.toMatchTypeOf<AcceptedPiButtonShapes>();
   });
 });

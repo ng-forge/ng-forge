@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Ion fields. */
 export interface IonIconAddon extends BaseAddon {
-  readonly kind: 'ion-icon';
+  readonly type: 'ion-icon';
   /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -21,7 +21,7 @@ type IonButtonFill = 'clear' | 'outline' | 'solid' | 'default';
  * participate in either XOR axis.
  */
 interface IonButtonBase extends BaseAddon {
-  readonly kind: 'ion-button';
+  readonly type: 'ion-button';
   /** Ion button colour. */
   readonly color?: IonButtonColor;
   /** Ion button fill style. */
@@ -94,7 +94,7 @@ type IonButtonContent = IonButtonContentIconOnly | IonButtonContentLabeled | Ion
 /** Interactive button addon for Ion fields. */
 export type IonButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
 
-/** Union of all Ion-shipped addon kinds. */
+/** Union of all Ion-shipped addon types. */
 export type IonAddon = IonIconAddon | IonButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

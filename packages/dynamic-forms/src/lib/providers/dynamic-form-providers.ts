@@ -1,11 +1,11 @@
 import { EnvironmentProviders, inject, makeEnvironmentProviders, Provider, Type } from '@angular/core';
-import { ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY, AddonKindDefinition } from '@ng-forge/dynamic-forms/internal';
+import { ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY, AddonTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { BUILT_IN_ADDON_KINDS } from './built-in-addons';
+import { BUILT_IN_ADDON_TYPES } from './built-in-addons';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormFeature, isDynamicFormFeature } from './features/dynamic-form-feature';
-import { ADDON_KIND_DEFINITIONS } from './features/addons/addon-kind-definitions.token';
+import { ADDON_TYPE_DEFINITIONS } from './features/addons/addon-type-definitions.token';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ConsoleLogger } from './features/logger/console-logger';
 import type { InferFormValue as RealInferFormValue } from '@ng-forge/dynamic-forms/internal';
@@ -131,31 +131,31 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         return autoMap;
       },
     },
-    // Form-scoped addon kind registry. Built from BUILT_IN_ADDON_KINDS plus
+    // Form-scoped addon type registry. Built from BUILT_IN_ADDON_TYPES plus
     // every kind contributed by `withCustomAddon(...)` features (via the
-    // ADDON_KIND_DEFINITIONS multi-provider). Overrides the empty
+    // ADDON_TYPE_DEFINITIONS multi-provider). Overrides the empty
     // `providedIn: 'root'` default so contributions from form-scoped
     // providers are visible.
     {
-      provide: ADDON_KIND_REGISTRY,
+      provide: ADDON_TYPE_REGISTRY,
       useFactory: () => {
         const logger = inject(DynamicFormLogger);
-        const contributed = inject(ADDON_KIND_DEFINITIONS, { optional: true }) ?? [];
-        const registry = new Map<string, AddonKindDefinition>();
-        for (const def of BUILT_IN_ADDON_KINDS) {
-          registry.set(def.kind, def);
+        const contributed = inject(ADDON_TYPE_DEFINITIONS, { optional: true }) ?? [];
+        const registry = new Map<string, AddonTypeDefinition>();
+        for (const def of BUILT_IN_ADDON_TYPES) {
+          registry.set(def.type, def);
         }
         for (const def of contributed) {
-          if (registry.has(def.kind)) {
-            logger.warn(`Addon kind "${def.kind}" is already registered. Overwriting.`);
+          if (registry.has(def.type)) {
+            logger.warn(`Addon type "${def.type}" is already registered. Overwriting.`);
           }
-          registry.set(def.kind, def);
+          registry.set(def.type, def);
         }
         return registry;
       },
     },
     // Per-form addon-component cache (no root fallback — isolated by form scope).
-    { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+    { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
     ...featureProviders,
   ]) as ProvideDynamicFormResult<ExtractFieldTypes<T> extends FieldTypeDefinition[] ? ExtractFieldTypes<T> : FieldTypeDefinition[]>;
 }

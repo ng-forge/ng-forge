@@ -78,7 +78,7 @@ export * from './lib/mappers/types';
 export * from './lib/models/addon/addon-action';
 export * from './lib/models/addon/addon-action-registry';
 export * from './lib/models/addon/addon-def';
-export * from './lib/models/addon/addon-kind';
+export * from './lib/models/addon/addon-type';
 export * from './lib/models/addon/addon-slot';
 export * from './lib/models/addon/df-field-templates.token';
 export * from './lib/models/component-type';

@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 import { FieldDef } from '../definitions/base/field-def';
 import { MapperFn } from '../mappers/types';
-import { FieldAddonSupport } from './addon/addon-kind';
+import { FieldAddonSupport } from './addon/addon-type';
 import { LazyComponentLoader } from './wrapper-type';
 
 /** Defines how a field type handles form values and data collection. */

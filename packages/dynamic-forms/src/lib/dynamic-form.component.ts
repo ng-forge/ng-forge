@@ -110,7 +110,7 @@ export class DynamicForm<
 
   /**
    * How lenient the addon validator is on `config.fields[...].addons`.
-   * `'inline'` (default) keeps everything; `'json'` drops code-only kinds
+   * `'inline'` (default) keeps everything; `'json'` drops code-only types
    * with a warning. Read at form init and on every config swap — change
    * `source` AND the config to force re-validation mid-flight.
    */
@@ -129,7 +129,7 @@ export class DynamicForm<
   private templateRegistry = inject(DfFieldTemplateRegistry);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Projected templates — collected for the `template` addon kind via DI.
+  // Projected templates — collected for the `template` addon type via DI.
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** All `<ng-template dfTemplate="...">` instances projected into this form. */

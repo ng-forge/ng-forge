@@ -3,14 +3,14 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import {
-  getAddonKind,
-  getAddonKinds,
+  getAddonType,
+  getAddonTypes,
   getFieldType,
   getFieldTypes,
   getUIAdapter,
   getWrapper,
   getWrappers,
-  type AddonKindInfo,
+  type AddonTypeInfo,
   type FieldTypeInfo,
   type UIAdapterFieldType,
   type WrapperInfo,
@@ -49,7 +49,7 @@ function getTopicList(): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
   const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
   const wrappers = ['wrappers', ...getWrappers().map((w) => w.type)];
-  const addons = ['addons', ...getAddonKinds().map((k) => k.kind)];
+  const addons = ['addons', ...getAddonTypes().map((k) => k.type)];
   const concepts = [
     'validation',
     'validation-messages',
@@ -294,11 +294,11 @@ const config = {
   return lines.join('\n');
 }
 
-/** Format a single addon-kind registry entry. */
-function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema'): string {
+/** Format a single addon-type registry entry. */
+function formatAddonInfo(addon: AddonTypeInfo, depth: 'brief' | 'full' | 'schema'): string {
   if (depth === 'brief') {
     return [
-      `# ${addon.kind} addon`,
+      `# ${addon.type} addon`,
       '',
       `${addon.description.split('.')[0]}.`,
       '',
@@ -312,7 +312,7 @@ function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema
   }
 
   const lines: string[] = [];
-  lines.push(`# ${addon.kind} addon`);
+  lines.push(`# ${addon.type} addon`);
   lines.push('');
   lines.push(`**Category:** ${addon.category}`);
   lines.push(`**Package:** \`${addon.package}\``);
@@ -344,9 +344,9 @@ function formatAddonInfo(addon: AddonKindInfo, depth: 'brief' | 'full' | 'schema
   return lines.join('\n');
 }
 
-/** List every registered addon kind grouped by core vs adapter. */
+/** List every registered addon type grouped by core vs adapter. */
 function formatAddonsOverview(): string {
-  const kinds = getAddonKinds();
+  const types = getAddonTypes();
   const lines: string[] = [];
 
   lines.push('# Addons');
@@ -363,23 +363,23 @@ function formatAddonsOverview(): string {
   type: 'input',
   label: 'Search',
   addons: [
-    { slot: 'prefix', kind: 'mat-icon', icon: 'search', ariaLabel: 'Search' },
-    { slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+    { slot: 'prefix', type: 'mat-icon', icon: 'search', ariaLabel: 'Search' },
+    { slot: 'suffix', type: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
   ],
 }`);
   lines.push('```');
   lines.push('');
-  lines.push('## Registered Kinds');
+  lines.push('## Registered Types');
   lines.push('');
 
-  const core = kinds.filter((k) => k.category === 'core');
-  const adapter = kinds.filter((k) => k.category === 'adapter');
+  const core = types.filter((k) => k.category === 'core');
+  const adapter = types.filter((k) => k.category === 'adapter');
 
   if (core.length > 0) {
     lines.push('### Core (universal — ship from `@ng-forge/dynamic-forms`)');
     for (const k of core) {
       const json = k.jsonSafe ? '' : ' _(code-only)_';
-      lines.push(`- **${k.kind}**${json} — ${k.description.split('.')[0]}.`);
+      lines.push(`- **${k.type}**${json} — ${k.description.split('.')[0]}.`);
     }
     lines.push('');
   }
@@ -387,12 +387,12 @@ function formatAddonsOverview(): string {
   if (adapter.length > 0) {
     lines.push('### Adapter (provided by UI integration packages)');
     for (const k of adapter) {
-      lines.push(`- **${k.kind}** (${k.adapter}, \`${k.package}\`) — ${k.description.split('.')[0]}.`);
+      lines.push(`- **${k.type}** (${k.adapter}, \`${k.package}\`) — ${k.description.split('.')[0]}.`);
     }
     lines.push('');
   }
 
-  lines.push('Use `ngforge_lookup topic="<kind>"` (e.g., `mat-button`, `pi-icon`) for full details on any individual addon kind.');
+  lines.push('Use `ngforge_lookup topic="<type>"` (e.g., `mat-button`, `pi-icon`) for full details on any individual addon type.');
 
   lines.push('');
   lines.push('## Click variants (mutually exclusive on button-like addons)');
@@ -412,27 +412,27 @@ async function resolveTopicContent(
   depth: 'brief' | 'full' | 'schema',
   uiIntegration?: (typeof UI_INTEGRATIONS)[number],
 ): Promise<string | null> {
-  // Addon meta-topic: list every registered addon kind
-  if (resolvedTopic === 'addons' || resolvedTopic === 'addon' || resolvedTopic === 'addon-kinds') {
+  // Addon meta-topic: list every registered addon type
+  if (resolvedTopic === 'addons' || resolvedTopic === 'addon' || resolvedTopic === 'addon-types') {
     if (depth === 'brief') {
-      const kinds = getAddonKinds();
+      const types = getAddonTypes();
       return [
         '**Addons** render inside a field slot (prefix / suffix / adapter-specific): icons, buttons, inline text, templates, components.',
         '',
-        'Registered kinds:',
-        ...kinds.map((k) => `- \`${k.kind}\` (${k.category}${k.adapter ? `, ${k.adapter}` : ''})${k.jsonSafe ? '' : ' — code-only'}`),
+        'Registered types:',
+        ...types.map((k) => `- \`${k.type}\` (${k.category}${k.adapter ? `, ${k.adapter}` : ''})${k.jsonSafe ? '' : ' — code-only'}`),
         '',
-        'Use `addons: [{ slot: "suffix", kind: "<kind>", ... }]` on an addon-supporting field. See `ngforge_lookup topic="addons"` for full docs.',
+        'Use `addons: [{ slot: "suffix", type: "<type>", ... }]` on an addon-supporting field. See `ngforge_lookup topic="addons"` for full docs.',
       ].join('\n');
     }
     return formatAddonsOverview();
   }
 
-  // Addon-specific kind lookup (e.g., `mat-button`, `bs-icon`, `pi-button`, `ion-button`).
-  // Skipped when the kind name collides with a higher-priority topic (text, template,
-  // component are also field-type/wrapper concepts elsewhere — addon kind lookup falls
+  // Addon-specific type lookup (e.g., `mat-button`, `bs-icon`, `pi-button`, `ion-button`).
+  // Skipped when the type name collides with a higher-priority topic (text, template,
+  // component are also field-type/wrapper concepts elsewhere — addon type lookup falls
   // through to those existing handlers).
-  const addonInfo = getAddonKind(resolvedTopic);
+  const addonInfo = getAddonType(resolvedTopic);
   const collidesWithFieldOrWrapper = resolvedTopic === 'text' || !!getWrapper(resolvedTopic);
   if (addonInfo && !collidesWithFieldOrWrapper) {
     return formatAddonInfo(addonInfo, depth);

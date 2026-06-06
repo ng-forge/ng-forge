@@ -14,7 +14,7 @@ export interface MatInputProps extends InputProps {
 }
 
 /**
- * Module-augmentable seam for adding custom addon kinds to `mat-input` at
+ * Module-augmentable seam for adding custom addon types to `mat-input` at
  * the type level. Pair with `withCustomAddon(...)` for the runtime side:
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
@@ -22,7 +22,7 @@ export interface MatAddonExtensions {}
 
 type MatAddonExtension = MatAddonExtensions[keyof MatAddonExtensions];
 
-/** Addon kinds accepted by `mat-input`. */
+/** Addon types accepted by `mat-input`. */
 export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | TemplateAddon | MatAddonExtension;
 
 export type MatInputField = InputField<MatInputProps> & {

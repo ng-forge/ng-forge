@@ -13,20 +13,20 @@ function setup(addon: PrimeIconAddon) {
 
 describe('PrimeIconAddonComponent', () => {
   it('renders <i> with `pi pi-{icon}` class', () => {
-    const fixture = setup({ kind: 'prime-icon', slot: 'prefix', icon: 'search' });
+    const fixture = setup({ type: 'prime-icon', slot: 'prefix', icon: 'search' });
     const icon = fixture.nativeElement.querySelector('i') as HTMLElement;
     expect(icon).toBeTruthy();
     expect(icon.className).toBe('pi pi-search');
   });
 
   it('applies host aria-hidden="true" when ariaLabel is absent', () => {
-    const fixture = setup({ kind: 'prime-icon', slot: 'prefix', icon: 'search' });
+    const fixture = setup({ type: 'prime-icon', slot: 'prefix', icon: 'search' });
     const host = fixture.nativeElement as HTMLElement;
     expect(host.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('forwards ariaLabel to the inner <i> and clears host aria-hidden', async () => {
-    const fixture = setup({ kind: 'prime-icon', slot: 'prefix', icon: 'check', ariaLabel: 'Success' });
+    const fixture = setup({ type: 'prime-icon', slot: 'prefix', icon: 'check', ariaLabel: 'Success' });
     // dynamicText|async pipe resolves async — flush microtasks.
     await fixture.whenStable();
     fixture.detectChanges();
@@ -39,11 +39,11 @@ describe('PrimeIconAddonComponent', () => {
   });
 
   it('rerenders the icon class when the `addon` input changes', () => {
-    const fixture = setup({ kind: 'prime-icon', slot: 'prefix', icon: 'search' });
+    const fixture = setup({ type: 'prime-icon', slot: 'prefix', icon: 'search' });
     let icon = fixture.nativeElement.querySelector('i') as HTMLElement;
     expect(icon.className).toBe('pi pi-search');
 
-    fixture.componentRef.setInput('addon', { kind: 'prime-icon', slot: 'prefix', icon: 'times' } satisfies PrimeIconAddon);
+    fixture.componentRef.setInput('addon', { type: 'prime-icon', slot: 'prefix', icon: 'times' } satisfies PrimeIconAddon);
     fixture.detectChanges();
 
     icon = fixture.nativeElement.querySelector('i') as HTMLElement;

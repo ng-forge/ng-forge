@@ -12,7 +12,7 @@ const config = {
     addons: [
       {
         slot: 'suffix' as const,
-        kind: 'ion-button' as const,
+        type: 'ion-button' as const,
         label: color,
         color,
         action: () => {

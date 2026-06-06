@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'mat-button',
+          type: 'mat-button',
           icon: 'visibility',
           ariaLabel: 'Toggle password visibility',
           preset: 'toggle-password-visibility',

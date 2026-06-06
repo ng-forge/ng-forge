@@ -9,8 +9,8 @@ const config = {
       label: 'Amount',
       props: { type: 'number' },
       addons: [
-        { slot: 'prefix', kind: 'text', text: '$' },
-        { slot: 'suffix', kind: 'text', text: 'USD' },
+        { slot: 'prefix', type: 'text', text: '$' },
+        { slot: 'suffix', type: 'text', text: 'USD' },
       ],
     },
   ],

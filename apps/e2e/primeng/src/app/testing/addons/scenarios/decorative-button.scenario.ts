@@ -11,7 +11,7 @@ const config = {
       addons: [
         {
           slot: 'suffix',
-          kind: 'prime-button',
+          type: 'prime-button',
           label: 'Info',
           severity: 'info',
           // No preset / actionRef / action — Decorative content-axis branch.

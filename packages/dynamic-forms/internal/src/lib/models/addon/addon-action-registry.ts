@@ -13,7 +13,7 @@ export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TVal
 export const ADDON_ACTION_HANDLERS = new InjectionToken<readonly Record<string, AddonActionHandler>[]>('ADDON_ACTION_HANDLERS');
 
 /**
- * Form-scoped name → handler map. Read by adapter button kinds at click
+ * Form-scoped name → handler map. Read by adapter button types at click
  * time for `actionRef: 'name'` lookups. Provided at form scope (not root)
  * because `ADDON_ACTION_HANDLERS` is form-scoped via `withAddonActions`.
  */

@@ -1,7 +1,7 @@
 import { Injector, signal, type Type } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { type AddonKindDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { ADDON_ACTION_REGISTRY, ADDON_KIND_COMPONENT_CACHE, ADDON_KIND_REGISTRY } from '@ng-forge/dynamic-forms/integration';
+import { type AddonTypeDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
+import { ADDON_ACTION_REGISTRY, ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import {
   FIELD_SIGNAL_CONTEXT,
   type FieldSignalContext,
@@ -31,8 +31,8 @@ function createFixture(inputs: Record<string, unknown>) {
     inputs,
     providers: [
       provideAnimations(),
-      { provide: ADDON_KIND_REGISTRY, useValue: new Map<string, AddonKindDefinition>() },
-      { provide: ADDON_KIND_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
+      { provide: ADDON_TYPE_REGISTRY, useValue: new Map<string, AddonTypeDefinition>() },
+      { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
       { provide: FIELD_SIGNAL_CONTEXT, useFactory: stubFieldSignalContext },
       { provide: DynamicFormLogger, useValue: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() } },

@@ -3,7 +3,7 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Bootstrap fields. */
 export interface BsIconAddon extends BaseAddon {
-  readonly kind: 'bs-icon';
+  readonly type: 'bs-icon';
   /** Bootstrap Icons name without the `bi-` prefix (e.g., `'search'`, `'x'`). */
   readonly icon: string;
   /** Accessible label for icons that convey meaning. */
@@ -15,7 +15,7 @@ export interface BsIconAddon extends BaseAddon {
  * participate in either XOR axis.
  */
 interface BsButtonBase extends BaseAddon {
-  readonly kind: 'bs-button';
+  readonly type: 'bs-button';
   /** Bootstrap button variant (mapped to `btn-outline-{severity}`). */
   readonly severity?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
   /** Reactive loading state — swaps the button content for a spinner. */
@@ -85,7 +85,7 @@ type BsButtonContent = BsButtonContentIconOnly | BsButtonContentLabeled | BsButt
 /** Interactive button addon for Bootstrap fields. */
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
-/** Union of all Bootstrap-shipped addon kinds. */
+/** Union of all Bootstrap-shipped addon types. */
 export type BsAddon = BsIconAddon | BsButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {

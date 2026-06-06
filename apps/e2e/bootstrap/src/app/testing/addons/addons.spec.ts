@@ -12,7 +12,7 @@ test.describe('Addons', () => {
       const scenario = helpers.getScenario('icon-prefix');
       await expect(scenario).toBeVisible();
 
-      // bs-icon kind renders <i class="bi bi-search"> inside .input-group-text
+      // bs-icon type renders <i class="bi bi-search"> inside .input-group-text
       const prefixIcon = scenario.locator('.input-group-text').first().locator('i.bi.bi-search');
       await expect(prefixIcon).toBeVisible();
 

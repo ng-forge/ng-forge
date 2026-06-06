@@ -52,7 +52,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       @for (a of ngfa.prefixAddons(); track $index) {
         <df-addon-slot
           matPrefix
-          [class.df-mat-addon-text]="a.kind === 'text'"
+          [class.df-mat-addon-text]="a.type === 'text'"
           [addon]="a"
           [fieldInputs]="fieldInputs()"
           [hidden]="ngfa.hiddenSignalCache().get(a)"
@@ -70,7 +70,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       @for (a of ngfa.suffixAddons(); track $index) {
         <df-addon-slot
           matSuffix
-          [class.df-mat-addon-text]="a.kind === 'text'"
+          [class.df-mat-addon-text]="a.type === 'text'"
           [addon]="a"
           [fieldInputs]="fieldInputs()"
           [hidden]="ngfa.hiddenSignalCache().get(a)"
@@ -93,7 +93,7 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
         display: none !important;
       }
       /* matPrefix/matSuffix elements have no default Material spacing.
-         All four sides + the text-kind variants are independent CSS custom
+         All four sides + the text-type variants are independent CSS custom
          properties so consumers can tune each individually:
            prefix-outer = prefix slot's left (border-facing) padding
            prefix-inner = prefix slot's right (text-facing) padding

@@ -29,7 +29,7 @@ A migration reference for moving an Angular dynamic-forms app from **ngx-formly*
 | `expressionProperties` (deprecated v6)    | `logic` array + `derivation` for values                                 |
 | `validators` / `asyncValidators`          | `validators[]` on the field + `customFnConfig.{validators,asyncValidators,httpValidators}` on the form |
 | `wrappers: ['form-field']`                | `wrappers: [{ type: 'card', … }]` (config objects)                      |
-| `props.addonLeft` / `props.addonRight` (Bootstrap; demo-only on Material) | `addons: [{ slot, kind, … }]` (universal across all 4 adapters, JSON-safe, preset actions) |
+| `props.addonLeft` / `props.addonRight` (Bootstrap; demo-only on Material) | `addons: [{ slot, type, … }]` (universal across all 4 adapters, JSON-safe, preset actions) |
 | `fieldGroup` (object)                     | `type: 'group'` with `fields: [...]`                                    |
 | `fieldArray` (custom `repeat` type)       | `type: 'array'` (built in; verbose form with explicit add/remove fields, or simplified form with `template` + auto-buttons) |
 | `hooks: { onInit, onChanges, … }`         | Angular component lifecycle inside custom field components, plus `EventBus` / `EventDispatcher` for cross-field events |
@@ -334,7 +334,7 @@ See [Writing a wrapper](/wrappers/writing-a-wrapper) and [Registering and applyi
 
 Formly's addon story is **uneven across adapters** — Bootstrap ships first-class addons via `props.addonLeft` / `props.addonRight`; Material has a demo wrapper users copy into their app; PrimeNG and Ionic have nothing built-in.
 
-ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... }]`. The same `slot` vocabulary (`'prefix'` / `'suffix'`) works everywhere — adapters translate internally to their native projection mechanism. Buttons accept built-in `preset` actions (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`) so common patterns require no handler code.
+ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... }]`. The same `slot` vocabulary (`'prefix'` / `'suffix'`) works everywhere — adapters translate internally to their native projection mechanism. Buttons accept built-in `preset` actions (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`) so common patterns require no handler code.
 
 <docs-code-compare
   title="Bootstrap addons"
@@ -353,10 +353,10 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
   type: 'input',
   label: 'Amount',
   addons: [
-    { slot: 'prefix', kind: 'bs-icon', icon: 'currency-euro' },
-    { slot: 'suffix', kind: 'text', text: 'EUR' },
+    { slot: 'prefix', type: 'bs-icon', icon: 'currency-euro' },
+    { slot: 'suffix', type: 'text', text: 'EUR' },
     // 'save' must be registered once via withAddonActions({ save: (ctx) => ... }) — see /addons/presets-and-actions.
-    { slot: 'suffix', kind: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
+    { slot: 'suffix', type: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
   ],
 }">
 </docs-code-compare>
@@ -378,8 +378,8 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
   type: 'input',
   label: 'Search',
   addons: [
-    { slot: 'prefix', kind: 'mat-icon', icon: 'search' },
-    { slot: 'suffix', kind: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+    { slot: 'prefix', type: 'mat-icon', icon: 'search' },
+    { slot: 'suffix', type: 'mat-button', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
   ],
 }">
 </docs-code-compare>
@@ -387,7 +387,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, kind, ... 
 **What's different:**
 
 - **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions — they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`withAddonActions({...})`), so configs round-trip through JSON.
-- **Typed `kind` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
+- **Typed `type` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
 - **Universal slot vocabulary.** ngx-formly mixes `addonLeft` / `addonRight` (Bootstrap, Material demo) with adapter-native slot names. ng-forge uses universal `slot: 'prefix' | 'suffix'` everywhere; the adapter translates that internally.
 - **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent — every action is a hand-written callback.
 - **First-class on all 4 adapters.** ngx-formly only ships addons for Bootstrap; Material is demo-only, PrimeNG / Ionic have nothing. ng-forge ships first-class addons for all four with a single config shape.

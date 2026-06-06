@@ -134,7 +134,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
             <table class="addon-table">
               <thead>
                 <tr>
-                  <th>Kind</th>
+                  <th>Type</th>
                   <th>Renders</th>
                   <th>Notes</th>
                 </tr>
@@ -241,8 +241,8 @@ export class DocsAddonInfoComponent {
   type: 'input',
   label: 'Search',
   addons: [
-    { slot: 'prefix', kind: '${d.iconKind}', icon: '${d.searchIcon}', ariaLabel: 'Search' },
-    { slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' },
+    { slot: 'prefix', type: '${d.iconKind}', icon: '${d.searchIcon}', ariaLabel: 'Search' },
+    { slot: 'suffix', type: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' },
   ],
 }`;
   });
@@ -255,7 +255,7 @@ import { ${d.withFieldsHelper} } from '${d.packageName}';
 // ${d.iconKind} + ${d.buttonKind} work out of the box.
 provideDynamicForm(...${d.withFieldsHelper}());
 
-// Standalone — addon kinds without the field types:
+// Standalone — addon types without the field types:
 // provideDynamicForm(...myCustomFields(), ${d.withAddonsHelper}());`;
   });
 
@@ -267,20 +267,20 @@ provideDynamicForm(...${d.withFieldsHelper}());
   }
 }
 
-// Now valid in TS — \`kind: 'rating'\` is part of the ${d.inputComponentName} addon union.
-{ type: 'input', key: 'review', addons: [{ slot: 'suffix', kind: 'rating', value: 4 }] }`;
+// Now valid in TS — \`type: 'rating'\` is part of the ${d.inputComponentName} addon union.
+{ type: 'input', key: 'review', addons: [{ slot: 'suffix', type: 'rating', value: 4 }] }`;
   });
 
   protected readonly threeVariantsCode = computed(() => {
     const d = this.data();
     return `// 1. Built-in preset — JSON-safe, no code required.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
+{ slot: 'suffix', type: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
 
 // 2. Registered handler — JSON-safe, looked up by name.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
+{ slot: 'suffix', type: '${d.buttonKind}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
 
 // 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
-{ slot: 'suffix', kind: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
+{ slot: 'suffix', type: '${d.buttonKind}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
   action: (ctx) => ctx.setValue?.(((typeof ctx.value === 'string' ? ctx.value : '') + '+')) }`;
   });
 
@@ -290,7 +290,7 @@ provideDynamicForm(...${d.withFieldsHelper}());
 
 {
   slot: 'suffix',
-  kind: '${d.buttonKind}',
+  type: '${d.buttonKind}',
   icon: '${d.clearIcon}',
   ariaLabel: 'Clear',
   preset: 'clear',
