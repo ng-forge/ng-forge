@@ -45,6 +45,30 @@
       "options": {
         "configFile": "packages/dynamic-form-mcp/vite.config.ts"
       }
+    },
+    "api-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/{projectRoot}/src/**/*.d.ts",
+        "{projectRoot}/api-extractor.json",
+        "{workspaceRoot}/config/api-extractor.base.json",
+        "{workspaceRoot}/etc/dynamic-form-mcp.api.md"
+      ],
+      "options": {
+        "command": "api-extractor run --config packages/dynamic-form-mcp/api-extractor.json",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "api-update": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": false,
+      "options": {
+        "command": "api-extractor run --local --config packages/dynamic-form-mcp/api-extractor.json",
+        "cwd": "{workspaceRoot}"
+      }
     }
   }
 }

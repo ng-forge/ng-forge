@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+
+  "compiler": {
+    "overrideTsconfig": {
+      "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "types": []
+      }
+    }
+  },
+
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "<projectFolder>/../../etc",
+    "reportTempFolder": "<projectFolder>/../../tmp/api-extractor"
+  },
+
+  "newlineKind": "lf",
+
+  "docModel": { "enabled": false },
+  "dtsRollup": { "enabled": false },
+  "tsdocMetadata": { "enabled": false },
+
+  "messages": {
+    "compilerMessageReporting": {
+      "default": { "logLevel": "none" }
+    },
+    "extractorMessageReporting": {
+      "default": { "logLevel": "none" }
+    },
+    "tsdocMessageReporting": {
+      "default": { "logLevel": "none" }
+    }
+  }
+}
