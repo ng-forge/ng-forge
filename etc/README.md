@@ -44,3 +44,27 @@ To verify a baseline without modifying it (the CI behaviour), use
 
 Config lives in `config/api-extractor.base.json` (shared) and
 `packages/<pkg>/api-extractor.json` (per entrypoint).
+
+## Scope and determinism notes
+
+- **Reports are a pure type-surface snapshot.** All API Extractor message
+  annotations are kept out of the report (`addToApiReportFile: false` for
+  `ae-forgotten-export`, `ae-internal-missing-underscore`, and
+  `ae-unresolved-link`). This is deliberate: the "Warnings were encountered
+  during analysis" block embeds the absolute build path of the `.d.ts`, which
+  differs between a contributor's machine and CI (`/home/runner/...`) and would
+  make the check drift across platforms. Stripping the annotations makes the
+  baselines byte-identical everywhere.
+- **Narrow trade-off:** because `ae-forgotten-export` is no longer written to
+  the report, the guard will not specifically flag the "a public type
+  references a symbol that isn't itself exported" case. The resulting signature
+  change is still caught (the declaration line still changes), so real surface
+  drift is not missed; only that meta-warning is lost.
+- **`/schema` is currently unguarded.** It is a published entrypoint but was
+  outside the original guard scope. Add a `packages/dynamic-forms/api-extractor.schema.json`
+  config and a baseline if full coverage is wanted.
+- **TS version skew (latent):** API Extractor 7.58.7 bundles TypeScript 5.9.3
+  while the libraries emit `.d.ts` with a newer TypeScript (a `*** newer than
+the bundled compiler engine` warning prints during extraction). Harmless
+  today; if a future TypeScript emits `.d.ts` syntax the bundled parser cannot
+  read, bump `@microsoft/api-extractor`.
