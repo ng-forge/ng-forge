@@ -9,6 +9,10 @@
  * - FormConfig and field definition types
  * - Event classes (FormSubmitEvent, PageChangeEvent, etc.)
  *
+ * ## Schema API (for end users)
+ * Import from '@ng-forge/dynamic-forms/schema' to validate forms with
+ * Standard Schema libraries (Zod, Valibot, ArkType) via standardSchema().
+ *
  * ## Integration API (for UI library authors)
  * Import from '@ng-forge/dynamic-forms/integration' for:
  * - Specific field types (InputField, SelectField, etc.)

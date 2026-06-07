@@ -36,13 +36,16 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 | Entrypoint                            | Audience            | Stability                        |
 | ------------------------------------- | ------------------- | -------------------------------- |
 | `@ng-forge/dynamic-forms`             | Form consumers      | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/schema`      | Form consumers      | Public API, governed by semver   |
 | `@ng-forge/dynamic-forms/integration` | UI adapter authors  | Public API, governed by semver   |
 | `@ng-forge/dynamic-forms/internal`    | None (build-time)   | Unsupported, no semver guarantee |
 | `@ng-forge/dynamic-forms/testing`     | None (test helpers) | Unsupported, no semver guarantee |
 
+The `/schema` entrypoint is a supported, semver-governed surface for using [Standard Schema](https://standardschema.dev) validation libraries (Zod, Valibot, ArkType) with dynamic forms via `standardSchema()`.
+
 The `/internal` and `/testing` entrypoints are unsupported build and test surfaces with no semver guarantee. They are published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Their contents may change or be removed in any release, including patch releases.
 
-Import only from `@ng-forge/dynamic-forms` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
+Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
 
 ## Installation
 
