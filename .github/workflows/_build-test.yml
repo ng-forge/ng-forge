@@ -59,7 +59,10 @@ jobs:
       - name: Resolve publishable packages
         id: packages
         run: |
-          LIST=$(pnpm nx show projects --projects 'packages/*' --json | jq -r 'sort | join(" ")')
+          # Nx plugins (e.g. @analogjs/vite-plugin-angular) print "[@scope/...]: ..."
+          # lines to stdout during graph construction, ahead of the --json payload.
+          # Grep the JSON array line specifically (it starts with `["`) before jq.
+          LIST=$(NX_DAEMON=false pnpm exec nx show projects --projects 'packages/*' --json 2>/dev/null | grep -E '^\["' | head -1 | jq -r 'sort | join(" ")')
           if [ -z "$LIST" ]; then
             echo "::error::Could not resolve any publishable packages under packages/*"
             exit 1
