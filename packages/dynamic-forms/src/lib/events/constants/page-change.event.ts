@@ -1,5 +1,6 @@
 import { FormEvent } from '@ng-forge/dynamic-forms/internal';
 
+/** Event emitted when the active page of a paged form changes. */
 export class PageChangeEvent implements FormEvent {
   readonly type = 'page-change' as const;
 
