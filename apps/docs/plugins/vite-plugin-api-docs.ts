@@ -76,6 +76,7 @@ interface PackageDef {
 
 const PACKAGES: PackageDef[] = [
   { name: '@ng-forge/dynamic-forms', slug: 'core', entryPoints: ['packages/dynamic-forms/src/index.ts'] },
+  { name: '@ng-forge/dynamic-forms/integration', slug: 'integration', entryPoints: ['packages/dynamic-forms/integration/index.ts'] },
   { name: '@ng-forge/dynamic-forms/schema', slug: 'schema', entryPoints: ['packages/dynamic-forms/schema/index.ts'] },
   { name: '@ng-forge/dynamic-forms-material', slug: 'material', entryPoints: ['packages/dynamic-forms-material/src/index.ts'] },
   { name: '@ng-forge/dynamic-forms-bootstrap', slug: 'bootstrap', entryPoints: ['packages/dynamic-forms-bootstrap/src/index.ts'] },
