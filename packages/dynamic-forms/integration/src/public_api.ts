@@ -23,7 +23,6 @@ export type {
   InputField,
   InputProps,
   InputType,
-  InputTypeToValueType,
   InferInputValue,
   NumericInputType,
   StringInputType,

@@ -45,11 +45,6 @@ export type InputType = Extract<HtmlInputType, 'text' | 'email' | 'password' | '
 export type InferInputValue<T extends HtmlInputType> = T extends 'number' ? number : string;
 
 /**
- * @deprecated Use `InferInputValue` instead. Will be removed in v1.0.0.
- */
-export type InputTypeToValueType<T extends InputType> = InferInputValue<T>;
-
-/**
  * Props for input fields with optional type specification.
  * Generic parameter allows extending InputType with additional HtmlInputType values.
  */
