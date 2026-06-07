@@ -44,8 +44,34 @@ import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.di
 import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 
 /**
- * Dynamic form component — renders a form based on configuration.
- * Delegates state management to `FormStateManager`.
+ * Renders a form from a {@link FormConfig}. Attribute component on a native
+ * `<form>` element (selector `form[dynamic-form]`); state management is
+ * delegated to `FormStateManager`.
+ *
+ * Provide a UI adapter once via {@link provideDynamicForm} (for example
+ * `provideDynamicForm(...withMaterialFields())`), then bind a config and
+ * listen for `submitted`. Field-value types are inferred from the config when
+ * it is authored with `as const satisfies FormConfig`.
+ *
+ * @example
+ * ```ts
+ * @Component({
+ *   imports: [DynamicForm],
+ *   template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
+ * })
+ * export class SignInComponent {
+ *   config = {
+ *     fields: [
+ *       { key: 'email', type: 'input', value: '', label: 'Email', required: true, email: true },
+ *       { type: 'submit', key: 'submit', label: 'Sign in' },
+ *     ],
+ *   } as const satisfies FormConfig;
+ *
+ *   onSubmit(value: InferFormValue<typeof this.config.fields>) {
+ *     console.log(value); // inferred: { email: string }
+ *   }
+ * }
+ * ```
  */
 @Component({
   selector: 'form[dynamic-form]',
