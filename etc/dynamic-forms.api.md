@@ -411,7 +411,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     protected resolvedFields: Signal<ResolvedField[]>;
     // (undocumented)
     shouldRender: Signal<boolean>;
-    source: _angular_core.InputSignal<"json" | "inline">;
+    source: _angular_core.InputSignal<"inline" | "json">;
     submitted: _angular_core.OutputRef<Partial<TModel>>;
     submitting: Signal<boolean>;
     touched: Signal<boolean>;
@@ -702,7 +702,7 @@ export type FormStateCondition =
 /** True when fields on the current page are invalid (for paged forms) */
 | 'pageInvalid';
 
-// @public (undocumented)
+// @public
 export class FormSubmitEvent implements FormEvent {
     // (undocumented)
     readonly type: "submit";
@@ -873,7 +873,7 @@ export interface NextButtonOptions {
     disableWhileSubmitting?: boolean;
 }
 
-// @public (undocumented)
+// @public
 export class NextPageEvent implements FormEvent {
     // (undocumented)
     readonly type: "next-page";
@@ -901,7 +901,7 @@ export interface OrphanAddonActionContext<TValue = unknown> extends AddonActionC
 // @public
 export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField;
 
-// @public (undocumented)
+// @public
 export class PageChangeEvent implements FormEvent {
     constructor(
     currentPageIndex: number,
@@ -944,7 +944,7 @@ export class PrependArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate
     readonly type: "prepend-array-item";
 }
 
-// @public (undocumented)
+// @public
 export class PreviousPageEvent implements FormEvent {
     // (undocumented)
     readonly type: "previous-page";
