@@ -305,9 +305,6 @@ export interface ContainerField<TFields extends readonly ContainerAllowedChildre
 export type ContainerFieldTypes = DynamicFormFieldRegistry['containers'][keyof DynamicFormFieldRegistry['containers']];
 
 // @public
-export function createField<T extends AvailableFieldTypes>(type: T, config: Omit<ExtractField<T>, 'type'>): ExtractField<T>;
-
-// @public
 export function createWrappers<const T extends readonly WrapperRegistration[]>(...registrations: T): WrappersBundle<T>;
 
 // @public
@@ -648,11 +645,6 @@ export interface FormConfig<TFields extends NarrowFields | RegisteredFieldTypes[
     schemas?: SchemaDefinition[];
     submission?: SubmissionConfig<TValue>;
 }
-
-// @public
-export function formConfig<const TFields extends NarrowFields, TProps extends object = Record<string, unknown>>(config: Omit<FormConfig<TFields, InferFormValue<TFields>, TProps>, 'schema'> & {
-    schema?: FormSchema<InferFormValue<TFields>>;
-}): FormConfig<TFields, InferFormValue<TFields>, TProps>;
 
 // @public
 export interface FormEvent {
