@@ -168,15 +168,16 @@ export type InferFormValue<T> =
 /**
  * Default `TModel` for `DynamicForm` / `FormStateManager` generics.
  *
- * Resolves to the inferred form value when it already satisfies the
- * `Record<string, unknown>` constraint (the normal case for any concrete
- * config), and only falls back to `Record<string, unknown>` when inference
- * can't produce a compatible shape (e.g. the base default `RegisteredFieldTypes[]`).
+ * Equal to `InferFormValue<T>` for every real config: inference always yields an
+ * object type (assignable to `Record<string, unknown>`) or `never` (vacuously
+ * assignable), so the `Record<string, unknown>` branch is a constraint guard that
+ * is not reached in practice; it only guarantees `InferFormModel<T> extends
+ * Record<string, unknown>` holds by construction, satisfying the `TModel` bound.
  *
- * Unlike the older `InferFormValue<T> & Record<string, unknown>` default, this
- * does NOT graft an index signature onto the model. That matters at the
- * consumer call site: the index signature made `value['anyTypo']` resolve to
- * `unknown` instead of erroring, silently defeating the typo-safety the
- * inference is meant to provide.
+ * Crucially, unlike the older `InferFormValue<T> & Record<string, unknown>`
+ * default, this does NOT graft an index signature onto the model. That matters at
+ * the consumer call site: the index signature made `value['anyTypo']` resolve to
+ * `unknown` instead of erroring, silently defeating the typo-safety the inference
+ * is meant to provide.
  */
-export type InferFormModel<T> = InferFormValue<T> extends Record<string, unknown> ? InferFormValue<T> : Record<string, unknown>;
+export type InferFormModel<T, M = InferFormValue<T>> = M extends Record<string, unknown> ? M : Record<string, unknown>;

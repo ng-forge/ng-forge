@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { FormConfig, InferFormModel, InferFormValue } from '../..';
+import { FormConfig, InferFormModel, InferFormValue, RegisteredFieldTypes } from '../..';
 
 // =============================================================================
 // Type assertion helpers
@@ -1051,13 +1051,24 @@ describe('InferFormModel', () => {
     expect(config.fields[0].key).toBe('email');
   });
 
-  it('falls back to Record<string, unknown> when inference yields no concrete shape', () => {
-    // Empty form -> InferFormValue is not a usable record; the fallback keeps the
-    // constraint `TModel extends Record<string, unknown>` satisfiable.
+  it('resolves an empty config to never (which still satisfies the TModel bound)', () => {
+    // Inference yields `never` for an empty config; `never extends Record<string, unknown>`
+    // is vacuously true, so the `Record` branch is never taken and the generic bound holds.
     const empty = { fields: [] } as const satisfies FormConfig;
     type EmptyModel = InferFormModel<typeof empty>;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
-    type _Test = Expect<Equal<EmptyModel extends Record<string, unknown> ? true : false, true>>;
+    type _Tests = [Expect<Equal<EmptyModel, never>>, Expect<Equal<EmptyModel extends Record<string, unknown> ? true : false, true>>];
     expect(empty.fields.length).toBe(0);
+  });
+
+  it('always satisfies the `extends Record<string, unknown>` bound (base default included)', () => {
+    // The property the `TModel extends Record<string, unknown>` default actually relies on,
+    // for both a concrete config and the base `RegisteredFieldTypes[]` default.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+    type _Tests = [
+      Expect<Equal<Model extends Record<string, unknown> ? true : false, true>>,
+      Expect<Equal<InferFormModel<RegisteredFieldTypes[]> extends Record<string, unknown> ? true : false, true>>,
+    ];
+    expect(config.fields.length).toBe(4);
   });
 });

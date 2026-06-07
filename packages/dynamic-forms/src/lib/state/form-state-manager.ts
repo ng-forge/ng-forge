@@ -672,7 +672,15 @@ export class FormStateManager<
   // Event Streams (for outputs)
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Stream of submit events when form is valid. */
+  /**
+   * Stream of submit events when form is valid.
+   *
+   * Typed as the full inferred model. The emitted payload is `filteredFormValue()`,
+   * so when `excludeValueIfHidden` / `excludeValueIfDisabled` / `excludeValueIfReadonly`
+   * are enabled a field that is hidden/disabled/readonly at submit time is omitted at
+   * runtime while the type still lists it. Those options default off, so the type is
+   * accurate for the common case; this matches the long-standing `as TModel` cast below.
+   */
   readonly submitted$: Observable<TModel>;
 
   /** Stream of reset events. */
