@@ -107,7 +107,10 @@ jobs:
 
       - name: Alias deployment
         if: inputs.alias != ''
-        run: vercel alias ${{ steps.deploy.outputs.url }} ${{ inputs.alias }} --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          ALIAS: ${{ inputs.alias }}
+        run: vercel alias "$DEPLOY_URL" "$ALIAS" --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Smoke test deployment
         env:
@@ -116,7 +119,7 @@ jobs:
         run: |
           TARGET="${SMOKE_URL:-${DEPLOY_URL}/dynamic-forms/}"
           echo "Verifying deployment is accessible: $TARGET"
-          curl --fail --retry 5 --retry-delay 10 "$TARGET" > /dev/null
+          curl --fail --retry 5 --retry-all-errors --retry-delay 10 "$TARGET" > /dev/null
           echo "Deployment verified successfully"
 
       - name: Output deployment URL

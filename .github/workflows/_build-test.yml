@@ -3,19 +3,15 @@ name: Build & Test
 # Reusable build/test/e2e pipeline shared by ci.yml (push, full) and
 # pr-check.yml (pull_request, affected-only). The single `affected` input is the
 # only real behavioural difference between the two: when true, Nx targets run
-# against `base-ref` and the E2E matrix is computed from affected projects; when
+# against origin/main and the E2E matrix is computed from affected projects; when
 # false, the full publishable set / all example apps are built and tested.
 on:
   workflow_call:
     inputs:
       affected:
-        description: 'Run Nx targets against base-ref instead of the full set'
+        description: 'Run Nx targets against origin/main instead of the full set'
         type: boolean
         default: false
-      base-ref:
-        description: 'Base git ref for affected detection'
-        type: string
-        default: 'origin/main'
 
 permissions:
   contents: read
@@ -93,7 +89,7 @@ jobs:
         if: inputs.affected
         run: |
           echo "Checking code formatting on affected files..."
-          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ inputs.base-ref }}...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
+          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
           if [ -z "$AFFECTED_FILES" ]; then
             echo "No affected files to check"
             exit 0
@@ -121,7 +117,7 @@ jobs:
         if: inputs.affected
         run: |
           echo "Affected projects and their dependents:"
-          pnpm nx show projects --affected --base=${{ inputs.base-ref }} --with-target=build || true
+          pnpm nx show projects --affected --base=origin/main --with-target=build || true
 
       - name: Cache node_modules
         uses: actions/cache/save@v5
@@ -169,7 +165,7 @@ jobs:
 
       - name: Build affected libraries
         if: inputs.affected
-        run: pnpm nx affected -t build --base=${{ inputs.base-ref }} --exclude='docs,*-examples'
+        run: pnpm nx affected -t build --base=origin/main --exclude='docs,*-examples'
 
       - name: Verify package integrity
         run: |
@@ -207,7 +203,7 @@ jobs:
 
       - name: Check public API surface (affected)
         if: inputs.affected
-        run: pnpm nx affected -t api-check --base=${{ inputs.base-ref }}
+        run: pnpm nx affected -t api-check --base=origin/main
 
       - name: Cache build artifacts
         uses: actions/cache/save@v5
@@ -259,7 +255,7 @@ jobs:
       - name: Lint
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t lint --base=${{ inputs.base-ref }}
+            pnpm nx affected -t lint --base=origin/main
           else
             pnpm nx run-many -t lint --parallel=3
           fi
@@ -267,7 +263,7 @@ jobs:
       - name: Test
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t test --base=${{ inputs.base-ref }} --configuration=ci --coverage
+            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
           else
             pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
           fi
@@ -275,7 +271,7 @@ jobs:
       - name: Test schematics
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t test-schematics --base=${{ inputs.base-ref }}
+            pnpm nx affected -t test-schematics --base=origin/main
           else
             pnpm nx run-many -t test-schematics
           fi
@@ -283,7 +279,7 @@ jobs:
       - name: Type test
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t type-test --base=${{ inputs.base-ref }}
+            pnpm nx affected -t type-test --base=origin/main
           else
             pnpm nx run-many -t type-test --parallel=3
           fi
@@ -354,7 +350,7 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
-          if pnpm nx show projects --affected --base=${{ inputs.base-ref }} | grep -q docs; then
+          if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
             echo "Building documentation..."
             pnpm nx build docs --configuration=production
           else
@@ -364,7 +360,7 @@ jobs:
       - name: Build affected example apps
         if: inputs.affected
         run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=${{ inputs.base-ref }})
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main)
           EXAMPLES=$(echo "$AFFECTED" | grep -E "(core-examples|material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
           if [ -n "$EXAMPLES" ]; then
             echo "Building affected example apps:"
@@ -381,7 +377,7 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            AFFECTED=$(pnpm nx show projects --affected --base=${{ inputs.base-ref }} --with-target=e2e 2>/dev/null || echo "")
+            AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || echo "")
           else
             # full run: every example app participates
             AFFECTED="core-examples bootstrap-examples material-examples primeng-examples ionic-examples"
