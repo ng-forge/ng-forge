@@ -4,6 +4,9 @@ on:
   push:
     branches: [main, develop, 'release-*']
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -331,6 +334,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Verify all jobs succeeded
-        uses: re-actors/alls-green@release/v1
+        uses: re-actors/alls-green@v1.2.2
         with:
           jobs: ${{ toJSON(needs) }}

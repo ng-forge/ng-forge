@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -412,7 +415,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Verify all jobs succeeded
-        uses: re-actors/alls-green@release/v1
+        uses: re-actors/alls-green@v1.2.2
         with:
           # e2e may be skipped if no E2E apps are affected
           allowed-skips: setup, build, lint-and-test, build-apps, e2e
