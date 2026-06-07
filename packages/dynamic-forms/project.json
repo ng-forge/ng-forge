@@ -48,8 +48,18 @@
         "configFile": "packages/dynamic-forms/schematics/vitest.config.ts"
       }
     },
+    "gen-public-api": {
+      "//": "Regenerates internal/src/public_api.ts (export * from every internal module) before compile so the /internal barrel is always current. Replaces the old CI --check gate.",
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/refactor/gen-public-api.mjs",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "compile": {
       "executor": "@nx/angular:package",
+      "dependsOn": ["gen-public-api"],
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
         "project": "packages/dynamic-forms/ng-package.json",
