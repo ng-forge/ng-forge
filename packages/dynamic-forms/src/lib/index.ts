@@ -150,6 +150,9 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 export { isRowField, isSimplifiedArrayField } from '@ng-forge/dynamic-forms/internal';
 
+// Hidden Field (display-only, value pass-through)
+export type { HiddenField, HiddenValue, HiddenScalar } from '@ng-forge/dynamic-forms/internal';
+
 // Validation Config Types
 export type {
   AsyncValidatorConfig,
@@ -220,6 +223,7 @@ export {
   isContainerField,
   isDisplayOnlyField,
   isGroupField,
+  isHiddenField,
   isLeafField,
   isPageField,
   isValueBearingField,
