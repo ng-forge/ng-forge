@@ -9,7 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp'
   NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
   PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
 
@@ -18,6 +17,8 @@ jobs:
     name: Setup & Checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      packages: ${{ steps.packages.outputs.list }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -35,6 +36,17 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Resolve publishable packages
+        id: packages
+        run: |
+          LIST=$(pnpm nx show projects --projects 'packages/*' --json | jq -r 'sort | join(" ")')
+          if [ -z "$LIST" ]; then
+            echo "::error::Could not resolve any publishable packages under packages/*"
+            exit 1
+          fi
+          echo "Publishable packages: $LIST"
+          echo "list=$LIST" >> "$GITHUB_OUTPUT"
 
       - name: Check formatting
         run: |
@@ -93,24 +105,24 @@ jobs:
           restore-keys: nx-${{ runner.os }}-
 
       - name: Build all libraries
-        run: pnpm nx run-many -t build -p ${{ env.LIBRARY_PACKAGES }}
+        run: pnpm nx run-many -t build -p ${{ needs.setup.outputs.packages }}
 
       - name: Verify package integrity
         run: |
           echo "Verifying package integrity..."
-          for PKG in ${{ env.LIBRARY_PACKAGES }}; do
+          for PKG in ${{ needs.setup.outputs.packages }}; do
             echo "Checking dist/packages/$PKG..."
             if [ ! -f "dist/packages/$PKG/package.json" ]; then
               echo "❌ Missing package.json in dist/packages/$PKG"
               exit 1
             fi
-            # MCP package has Node.js structure (not Angular)
-            if [ "$PKG" = "dynamic-form-mcp" ]; then
+            # dynamic-form-mcp and openapi-generator are Node bundles (esbuild), not Angular packages
+            if [ "$PKG" = "dynamic-form-mcp" ] || [ "$PKG" = "openapi-generator" ]; then
               if [ ! -f "dist/packages/$PKG/src/index.js" ]; then
                 echo "❌ Missing src/index.js in dist/packages/$PKG"
                 exit 1
               fi
-              echo "✅ $PKG package structure looks valid (MCP server)"
+              echo "✅ $PKG package structure looks valid (Node bundle)"
             elif [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
               echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
             else
@@ -119,19 +131,15 @@ jobs:
           done
           echo "✅ All packages validated successfully"
 
+      # openapi-generator is an esbuild CLI bundle with no .d.ts surface and thus no
+      # api-check target; run-many runs the check only for projects that define it.
       - name: Check public API surface
-        run: pnpm nx run-many -t api-check -p ${{ env.LIBRARY_PACKAGES }}
+        run: pnpm nx run-many -t api-check
 
       - name: Cache build artifacts
         uses: actions/cache/save@v5
         with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-form-mcp
+          path: dist/packages
           key: build-${{ github.sha }}
 
   lint-and-test:
@@ -159,13 +167,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
         with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-form-mcp
+          path: dist/packages
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
 
@@ -212,13 +214,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/cache/restore@v5
         with:
-          path: |
-            dist/packages/dynamic-forms
-            dist/packages/dynamic-forms-material
-            dist/packages/dynamic-forms-bootstrap
-            dist/packages/dynamic-forms-ionic
-            dist/packages/dynamic-forms-primeng
-            dist/packages/dynamic-form-mcp
+          path: dist/packages
           key: build-${{ github.sha }}
           fail-on-cache-miss: true
 
