@@ -81,23 +81,14 @@ export class LoginComponent {
 
 🌍 **i18n Ready** – Observable/Signal support for labels and messages
 
-## ⚠️ Compatibility
+## Compatibility
 
-> **Experimental API Notice:** This library uses Angular's experimental Signal Forms API.
-> Angular may introduce breaking changes in patch releases.
+| Angular | @ng-forge/dynamic-forms |
+| ------- | ----------------------- |
+| 22.x    | 1.x                     |
+| 21.x    | 0.x (experimental)      |
 
-| @ng-forge/dynamic-forms | Angular       |
-| ----------------------- | ------------- |
-| 0.9.x                   | >=21.2.0      |
-| 0.8.x                   | >=21.2.0      |
-| 0.7.x                   | >=21.2.0      |
-| 0.6.x                   | >=21.1.0      |
-| 0.5.x                   | >=21.1.0      |
-| 0.4.x                   | >=21.1.0      |
-| 0.3.x                   | 21.0.7-21.0.x |
-| 0.2.x                   | 21.0.6        |
-| 0.1.1+                  | 21.0.2-21.0.5 |
-| 0.1.0                   | 21.0.0-21.0.1 |
+Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, where Signal Forms were still experimental and could change in patch releases. Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
 
 ## 📦 Packages
 
