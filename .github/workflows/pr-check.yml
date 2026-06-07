@@ -11,12 +11,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-env:
-  NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
-  PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
-
 jobs:
-  # This job determines if the workflow should run
+  # Release branches are versioned/published by release.yml; skip PR checks for them.
   should-run:
     name: Check if should run
     runs-on: ubuntu-latest
@@ -26,394 +22,35 @@ jobs:
     steps:
       - name: Check if release branch
         id: check
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [[ "${{ github.head_ref }}" == release-* ]]; then
-            echo "should-skip=true" >> $GITHUB_OUTPUT
-            echo "Skipping PR check for release branch: ${{ github.head_ref }}"
+          if [[ "$HEAD_REF" == release-* ]]; then
+            echo "should-skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping PR check for release branch: $HEAD_REF"
           else
-            echo "should-skip=false" >> $GITHUB_OUTPUT
+            echo "should-skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-  setup:
-    name: Setup & Checks
+  build-test:
+    name: Build & Test
     needs: should-run
     if: needs.should-run.outputs.should-skip != 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      packages: ${{ steps.packages.outputs.list }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Resolve publishable packages
-        id: packages
-        run: |
-          LIST=$(pnpm nx show projects --projects 'packages/*' --json | jq -r 'sort | join(" ")')
-          if [ -z "$LIST" ]; then
-            echo "::error::Could not resolve any publishable packages under packages/*"
-            exit 1
-          fi
-          echo "Publishable packages: $LIST"
-          echo "list=$LIST" >> "$GITHUB_OUTPUT"
-
-      - name: Validate PR title
-        run: |
-          echo "Validating PR title against Angular convention..."
-          echo "${{ github.event.pull_request.title }}" | pnpm commitlint --verbose
-
-      - name: Check formatting on affected files
-        run: |
-          echo "Checking code formatting on affected files..."
-          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
-          if [ -z "$AFFECTED_FILES" ]; then
-            echo "No affected files to check"
-            exit 0
-          fi
-          echo "Affected files to check:"
-          echo "$AFFECTED_FILES"
-          echo ""
-          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
-            echo ""
-            echo "❌ Formatting issues found in affected files!"
-            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
-            exit 1
-          }
-
-      - name: Validate dependency graph
-        run: |
-          echo "Checking for circular dependencies..."
-          pnpm nx graph --file=graph.json || {
-            echo "❌ Failed to generate dependency graph"
-            exit 1
-          }
-          echo "✅ Dependency graph is valid"
-          echo ""
-          echo "Affected projects and their dependents:"
-          pnpm nx show projects --affected --base=origin/main --with-target=build || true
-
-      - name: Cache node_modules
-        uses: actions/cache/save@v5
-        with:
-          path: node_modules
-          key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Cache Playwright browsers
-        uses: actions/cache/save@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-
-  build:
-    name: Build & Verify
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore Nx computation cache
-        uses: actions/cache@v5
-        with:
-          path: .nx/cache
-          key: nx-${{ runner.os }}-${{ github.sha }}
-          restore-keys: nx-${{ runner.os }}-
-
-      - name: Build affected libraries
-        run: pnpm nx affected -t build --base=origin/main --exclude='docs,*-examples'
-
-      - name: Verify package integrity
-        run: |
-          echo "Verifying package integrity..."
-          for PKG in ${{ needs.setup.outputs.packages }}; do
-            if [ -d "dist/packages/$PKG" ]; then
-              echo "Checking dist/packages/$PKG..."
-              if [ ! -f "dist/packages/$PKG/package.json" ]; then
-                echo "❌ Missing package.json in dist/packages/$PKG"
-                exit 1
-              fi
-              # dynamic-form-mcp and openapi-generator are Node bundles (esbuild), not Angular packages
-              if [ "$PKG" = "dynamic-form-mcp" ] || [ "$PKG" = "openapi-generator" ]; then
-                if [ ! -f "dist/packages/$PKG/src/index.js" ]; then
-                  echo "❌ Missing src/index.js in dist/packages/$PKG"
-                  exit 1
-                fi
-                echo "✅ $PKG package structure looks valid (Node bundle)"
-              elif [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
-                echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
-              else
-                echo "✅ $PKG package structure looks valid"
-              fi
-            else
-              echo "⏭️  Skipping $PKG (not built or not affected)"
-            fi
-          done
-          echo "✅ Package integrity check complete"
-
-      - name: Check public API surface (affected)
-        run: pnpm nx affected -t api-check --base=origin/main
-
-      - name: Cache build artifacts
-        uses: actions/cache@v5
-        with:
-          path: dist/packages
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-  lint-and-test:
-    name: Lint & Test
-    needs: [setup, build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore Playwright browsers
-        uses: actions/cache/restore@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-          fail-on-cache-miss: true
-
-      - name: Restore build artifacts
-        uses: actions/cache@v5
-        with:
-          path: dist/packages
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-      - name: Restore Nx computation cache
-        uses: actions/cache@v5
-        with:
-          path: .nx/cache
-          key: nx-${{ runner.os }}-${{ github.sha }}
-          restore-keys: nx-${{ runner.os }}-
-
-      - name: Lint affected projects
-        run: pnpm nx affected -t lint --base=origin/main
-
-      - name: Test affected projects
-        run: pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
-
-      - name: Test schematics (affected)
-        run: pnpm nx affected -t test-schematics --base=origin/main
-
-      - name: Type test affected projects
-        run: pnpm nx affected -t type-test --base=origin/main
-
-  build-apps:
-    name: Build Apps
-    needs: [setup, build]
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    outputs:
-      e2e-matrix: ${{ steps.set-matrix.outputs.matrix }}
-      has-e2e: ${{ steps.set-matrix.outputs.has-e2e }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Fetch base branch for affected detection
-        run: git fetch origin main:main
-
-      - name: Setup Node and restore cache
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore build artifacts
-        uses: actions/cache@v5
-        with:
-          path: dist/packages
-          key: build-${{ github.sha }}-${{ hashFiles('packages/**') }}
-
-      - name: Build docs if affected
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: |
-          if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
-            echo "Building documentation..."
-            pnpm nx build docs --configuration=production
-          else
-            echo "Documentation not affected, skipping build"
-          fi
-
-      - name: Build affected example apps
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main)
-          EXAMPLES=$(echo "$AFFECTED" | grep -E "(core-examples|material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
-          if [ -n "$EXAMPLES" ]; then
-            echo "Building affected example apps:"
-            echo "$EXAMPLES"
-            for APP in $EXAMPLES; do
-              echo "Building $APP..."
-              pnpm nx build $APP --configuration=production
-            done
-          else
-            echo "No example apps affected, skipping build"
-          fi
-
-      - name: Determine E2E matrix
-        id: set-matrix
-        run: |
-          AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || echo "")
-          echo "Affected E2E projects: $AFFECTED"
-
-          # Build JSON matrix
-          MATRIX='{"include":['
-          FIRST=true
-
-          for APP in core-examples bootstrap-examples material-examples primeng-examples ionic-examples; do
-            if echo "$AFFECTED" | grep -q "$APP"; then
-              SHORT=$(echo "$APP" | sed 's/-examples//')
-              echo "  - $APP (affected)"
-              if [ "$APP" = "core-examples" ]; then
-                # core-examples runs natively (no Docker) with 3 shards — no screenshot tests
-                for SHARD in "1/3" "2/3" "3/3"; do
-                  SHARD_ID=$(echo "$SHARD" | sed 's|/|of|')
-                  if [ "$FIRST" = true ]; then
-                    FIRST=false
-                  else
-                    MATRIX+=','
-                  fi
-                  MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":false,\"shard\":\"$SHARD\",\"shardId\":\"$SHARD_ID\"}"
-                done
-              else
-                if [ "$FIRST" = true ]; then
-                  FIRST=false
-                else
-                  MATRIX+=','
-                fi
-                MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":true,\"shard\":\"\",\"shardId\":\"\"}"
-              fi
-            else
-              echo "  - $APP (not affected, skipping)"
-            fi
-          done
-
-          MATRIX+=']}'
-
-          if [ "$MATRIX" = '{"include":[]}' ]; then
-            echo "No E2E apps affected"
-            echo "has-e2e=false" >> $GITHUB_OUTPUT
-            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
-          else
-            echo "E2E matrix: $MATRIX"
-            echo "has-e2e=true" >> $GITHUB_OUTPUT
-            echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-          fi
-
-  e2e:
-    name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
-    needs: [lint-and-test, build-apps]
-    if: needs.build-apps.outputs.has-e2e == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.build-apps.outputs.e2e-matrix) }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      # Native setup — only needed for core-examples (non-Docker)
-      - name: Setup Node and restore cache
-        if: ${{ !matrix.docker }}
-        uses: ./.github/actions/setup-node-restore
-        with:
-          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
-
-      - name: Restore Playwright browsers
-        if: ${{ !matrix.docker }}
-        uses: actions/cache/restore@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
-          fail-on-cache-miss: true
-
-      - name: Install Playwright system dependencies
-        if: ${{ !matrix.docker }}
-        run: pnpm exec playwright install-deps
-
-      - name: Run E2E tests
-        id: e2e
-        run: |
-          if [[ "${{ matrix.docker }}" == "true" ]]; then
-            ./scripts/playwright-docker.sh ${{ matrix.app }}
-          else
-            pnpm nx run ${{ matrix.app }}:e2e --shard=${{ matrix.shard }}
-          fi
-
-      - name: Generate job summary
-        if: always() && steps.e2e.outcome != 'skipped'
-        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/e2e/${{ matrix.short }}/test-results
-
-      - name: Upload test artifacts on failure
-        uses: actions/upload-artifact@v7
-        if: failure()
-        with:
-          name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
-          path: |
-            apps/e2e/${{ matrix.short }}/test-results/
-            apps/e2e/${{ matrix.short }}/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+    uses: ./.github/workflows/_build-test.yml
+    with:
+      affected: true
+    secrets: inherit
 
   ci-success:
     name: PR Check Complete
     if: always()
-    needs: [should-run, setup, build, lint-and-test, build-apps, e2e]
+    needs: [should-run, build-test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Verify all jobs succeeded
         uses: re-actors/alls-green@v1.2.2
         with:
-          # e2e may be skipped if no E2E apps are affected
-          allowed-skips: setup, build, lint-and-test, build-apps, e2e
+          # build-test is skipped for release branches (see should-run)
+          allowed-skips: build-test
           jobs: ${{ toJSON(needs) }}
