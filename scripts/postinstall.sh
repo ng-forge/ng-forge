@@ -22,9 +22,10 @@ else
   echo "⏭️  Skipping git hooks install (Vercel environment)"
 fi
 
-# Build dynamic-form-mcp for local Claude Code usage
-# Skip on Vercel — build:libs handles this with proper caching
-if [ -z "$VERCEL" ]; then
+# Build dynamic-form-mcp for local Claude Code usage.
+# Skip on Vercel (build:libs handles it) and on CI (the build job rebuilds it,
+# and --skip-nx-cache here would just defeat the cache on every install).
+if [ -z "$VERCEL" ] && [ -z "$CI" ]; then
   echo "🔧 Building dynamic-form-mcp for local development..."
   if command -v nx &> /dev/null; then
     nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
@@ -32,7 +33,7 @@ if [ -z "$VERCEL" ]; then
     pnpm exec nx build dynamic-form-mcp --skip-nx-cache 2>/dev/null || echo "⚠️  MCP build skipped (nx not ready yet)"
   fi
 else
-  echo "⏭️  Skipping MCP build (Vercel environment — build:libs will handle this)"
+  echo "⏭️  Skipping MCP build (Vercel/CI environment — handled by the build pipeline)"
 fi
 
 echo "✅ Postinstall setup completed successfully!"

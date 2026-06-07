@@ -9,7 +9,10 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Don't cancel superseded runs on release-* branches: release.yml's check-ci
+  # looks up the latest completed CI run by branch, and a cancelled run would
+  # fail that gate.
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads/release-') }}
 
 jobs:
   build-test:
