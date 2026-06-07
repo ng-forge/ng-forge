@@ -32,7 +32,7 @@
     "./styles/defaults": "./styles/_defaults.scss"
   },
   "engines": {
-    "node": ">=20"
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },
   "peerDependencies": {
     "@angular/common": "~22.0.0",
