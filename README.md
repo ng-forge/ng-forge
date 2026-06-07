@@ -67,7 +67,7 @@ export class LoginComponent {
 
 ## ✨ Features
 
-⚡ **Signal Forms** – Native Angular 21+ signal forms integration
+⚡ **Signal Forms** – Native Angular 22+ signal forms integration
 
 🎯 **Type-Safe** – Full TypeScript inference for form values
 

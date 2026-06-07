@@ -80,7 +80,7 @@ ng-forge/
 
 - **Node.js**: `>=24.0.0`
 - **pnpm**: `>=10.0.0`
-- **Angular**: `~21.1.0`
+- **Angular**: `~22.0.0`
 - **TypeScript**: `~5.9.2`
 - **Nx**: `22.4.5`
 - **Docs app**: AnalogJS (file-based routing, SSR pre-rendering). Route components use `default` exports. Be aware of Vite/Nx cache issues — suggest cache clearing (`nx reset`) when encountering ghost errors after config changes
