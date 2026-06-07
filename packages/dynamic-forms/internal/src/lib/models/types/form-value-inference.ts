@@ -164,3 +164,19 @@ export type InferFormValue<T> =
   ExtractFields<T> extends readonly RegisteredFieldTypes[]
     ? InferFormValueWithDepth<ExtractFields<T> extends RegisteredFieldTypes[] ? ExtractFields<T> : [...ExtractFields<T>], 5>
     : never;
+
+/**
+ * Default `TModel` for `DynamicForm` / `FormStateManager` generics.
+ *
+ * Resolves to the inferred form value when it already satisfies the
+ * `Record<string, unknown>` constraint (the normal case for any concrete
+ * config), and only falls back to `Record<string, unknown>` when inference
+ * can't produce a compatible shape (e.g. the base default `RegisteredFieldTypes[]`).
+ *
+ * Unlike the older `InferFormValue<T> & Record<string, unknown>` default, this
+ * does NOT graft an index signature onto the model. That matters at the
+ * consumer call site: the index signature made `value['anyTypo']` resolve to
+ * `unknown` instead of erroring, silently defeating the typo-safety the
+ * inference is meant to provide.
+ */
+export type InferFormModel<T> = InferFormValue<T> extends Record<string, unknown> ? InferFormValue<T> : Record<string, unknown>;

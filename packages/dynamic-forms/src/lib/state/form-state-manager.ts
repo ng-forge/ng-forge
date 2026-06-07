@@ -33,7 +33,7 @@ import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { detectFormMode, FormMode } from '@ng-forge/dynamic-forms/internal';
-import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import { InferFormModel } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -183,7 +183,7 @@ function setValueAtPath(target: Record<string, unknown>, segments: readonly stri
 @Injectable()
 export class FormStateManager<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
-  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+  TModel extends Record<string, unknown> = InferFormModel<TFields>,
 > implements OnDestroy {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies (injected)
@@ -673,7 +673,7 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** Stream of submit events when form is valid. */
-  readonly submitted$: Observable<Partial<TModel>>;
+  readonly submitted$: Observable<TModel>;
 
   /** Stream of reset events. */
   readonly reset$: Observable<void>;

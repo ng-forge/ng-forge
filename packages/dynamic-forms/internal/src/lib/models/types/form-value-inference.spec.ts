@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { FormConfig, InferFormValue } from '../..';
+import { FormConfig, InferFormModel, InferFormValue } from '../..';
 
 // =============================================================================
 // Type assertion helpers
@@ -998,5 +998,66 @@ describe('InferFormValue type inference', () => {
 
       expect(config.fields[0].type).toBe('group');
     });
+  });
+});
+
+// =============================================================================
+// InferFormModel (the default `TModel` for DynamicForm / FormStateManager)
+// =============================================================================
+
+describe('InferFormModel', () => {
+  const config = {
+    fields: [
+      { key: 'email', type: 'input', value: '', required: true },
+      { key: 'age', type: 'input', value: 0, props: { type: 'number' }, required: true },
+      { key: 'nickname', type: 'input', value: '' },
+      {
+        key: 'address',
+        type: 'group',
+        fields: [
+          { key: 'city', type: 'input', value: '', required: true },
+          { key: 'zip', type: 'input', value: '' },
+        ],
+      },
+    ],
+  } as const satisfies FormConfig;
+
+  type Model = InferFormModel<typeof config>;
+
+  it('matches InferFormValue for a concrete config (no widening)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+    type _Test = Expect<Equal<Model, InferFormValue<typeof config>>>;
+    expect(config.fields.length).toBe(4);
+  });
+
+  it('preserves required vs optional and value types', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+    type _Tests = [
+      Expect<Equal<Model['email'], string>>,
+      Expect<Equal<Model['age'], number>>,
+      Expect<Equal<Model['nickname'], string | undefined>>,
+      Expect<Equal<Model['address']['city'], string>>,
+      Expect<Equal<Model['address']['zip'], string | undefined>>,
+    ];
+    expect(config.fields[0].required).toBe(true);
+  });
+
+  it('does NOT graft a string index signature (typo-safety regression guard)', () => {
+    // With `& Record<string, unknown>`, `string extends keyof Model` would be true
+    // and `Model['anyTypo']` would resolve to `unknown` instead of erroring.
+    type HasIndexSignature = string extends keyof Model ? true : false;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+    type _Tests = [Expect<Equal<HasIndexSignature, false>>, Expect<Equal<keyof Model, 'email' | 'age' | 'nickname' | 'address'>>];
+    expect(config.fields[0].key).toBe('email');
+  });
+
+  it('falls back to Record<string, unknown> when inference yields no concrete shape', () => {
+    // Empty form -> InferFormValue is not a usable record; the fallback keeps the
+    // constraint `TModel extends Record<string, unknown>` satisfiable.
+    const empty = { fields: [] } as const satisfies FormConfig;
+    type EmptyModel = InferFormModel<typeof empty>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type-level test
+    type _Test = Expect<Equal<EmptyModel extends Record<string, unknown> ? true : false, true>>;
+    expect(empty.fields.length).toBe(0);
   });
 });
