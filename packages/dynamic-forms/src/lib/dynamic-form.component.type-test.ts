@@ -21,6 +21,10 @@ import { expectTypeOf } from 'vitest';
 import type { ModelSignal, OutputRef } from '@angular/core';
 import { DynamicForm } from './dynamic-form.component';
 
+// This program pulls in DI source (DynamicForm -> dynamic-form-di), which evaluates
+// `InferFormValue<RegisteredFieldTypes[]>`; a broad registry overflows TS's union
+// complexity limit, so only the leaves this file needs are registered here. The
+// comprehensive leaf coverage lives in the isolated form-value-inference.type-test.ts.
 interface TestInputLeaf {
   key: string;
   type: 'input';
@@ -35,15 +39,12 @@ interface TestCheckboxLeaf {
   type: 'checkbox';
   value?: boolean;
   required?: boolean;
-  label?: string;
-  nullable?: boolean;
 }
 interface TestSubmitLeaf {
   key: string;
   type: 'submit';
   label?: string;
 }
-
 declare module '@ng-forge/dynamic-forms/internal' {
   interface FieldRegistryLeaves {
     input: TestInputLeaf;

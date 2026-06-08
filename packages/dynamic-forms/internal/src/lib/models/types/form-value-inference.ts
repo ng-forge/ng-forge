@@ -96,25 +96,34 @@ type InferArrayValue<T, D extends number> = T extends { template: unknown; value
       ? InferFormValueWithDepth<[...TArr], Depth[D]>[]
       : InferSingleTemplateValue<TArr, D>[]
     : T extends { fields: infer F }
-      ? F extends RegisteredFieldTypes[]
-        ? InferFormValueWithDepth<F, Depth[D]>[]
-        : unknown[]
+      ? InferContainerChildren<F, Depth[D], unknown>[]
       : unknown[];
+
+/**
+ * Recurse into a container's child fields, but only when they form a fixed-length
+ * tuple — i.e. a config authored with `as const`. A general `RegisteredFieldTypes[]`
+ * array (notably the base default `InferFormValue<RegisteredFieldTypes[]>` over the
+ * whole registry) bails to `TFallback`; recursing there would make the type explode
+ * past TypeScript's union-complexity limit (TS2590) and break consumers of the
+ * abstract `FormConfig`. `[...F]` re-mutabilises the readonly tuple for the inner
+ * `InferFormValueWithDepth` constraint.
+ */
+type InferContainerChildren<F, D extends number, TFallback> = F extends readonly RegisteredFieldTypes[]
+  ? number extends F['length']
+    ? TFallback
+    : InferFormValueWithDepth<[...F], D>
+  : TFallback;
 
 /** Process a single field and determine its contribution to the form value type */
 type ProcessField<T, D extends number = 5> = [D] extends [never]
   ? Record<string, unknown>
   : // Container: page/row - flatten children
     T extends { type: 'page' | 'row'; fields: infer F }
-    ? F extends RegisteredFieldTypes[]
-      ? InferFormValueWithDepth<F, Depth[D]>
-      : never
+    ? InferContainerChildren<F, Depth[D], never>
     : // Container: group - nest under key
       T extends { type: 'group'; key: infer K; fields: infer F }
       ? K extends string
-        ? F extends RegisteredFieldTypes[]
-          ? { [P in K]: InferFormValueWithDepth<F, Depth[D]> }
-          : { [P in K]: Record<string, unknown> }
+        ? { [P in K]: InferContainerChildren<F, Depth[D], Record<string, unknown>> }
         : never
       : // Container: array (simplified or full API) - wrap value in array under key
         T extends { type: 'array'; key: infer K }
@@ -168,11 +177,10 @@ export type InferFormValue<T> =
 /**
  * Default `TModel` for `DynamicForm` / `FormStateManager` generics.
  *
- * Equal to `InferFormValue<T>` for every real config: inference always yields an
- * object type (assignable to `Record<string, unknown>`) or `never` (vacuously
- * assignable), so the `Record<string, unknown>` branch is a constraint guard that
- * is not reached in practice; it only guarantees `InferFormModel<T> extends
- * Record<string, unknown>` holds by construction, satisfying the `TModel` bound.
+ * Equals `InferFormValue<T>` for any concrete config (an object type). Falls back
+ * to `Record<string, unknown>` only when inference yields a non-record — e.g. an
+ * empty `fields` array, where `InferFormValue` is `unknown` — so the `TModel
+ * extends Record<string, unknown>` bound always holds by construction.
  *
  * Crucially, unlike the older `InferFormValue<T> & Record<string, unknown>`
  * default, this does NOT graft an index signature onto the model. That matters at

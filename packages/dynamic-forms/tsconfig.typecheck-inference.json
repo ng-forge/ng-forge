@@ -1,0 +1,4 @@
+{
+  "extends": "../../tsconfig.typecheck-base.json",
+  "include": ["src/lib/form-value-inference.type-test.ts", "src/lib/form-value-inference.test-registry.type-test.ts"]
+}
