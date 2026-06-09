@@ -1,0 +1,43 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0.0'
+paths:
+  /images/{bucket}/upload:
+    post:
+      operationId: uploadImages
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Uploaded
+  /documents:
+    post:
+      operationId: createDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  maxLength: 100
+                attachment:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Created

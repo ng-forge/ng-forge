@@ -1,0 +1,159 @@
+openapi: '3.0.3'
+info:
+  title: API Documentation of the media service
+  version: '1.0'
+paths:
+  /api/media/videos:
+    get:
+      operationId: VideoController_findAll
+      responses:
+        '200':
+          description: The videos have been received successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VideoResponseDto'
+  /api/media/videos/{videoId}:
+    get:
+      operationId: VideoController_findById
+      parameters:
+        - name: videoId
+          required: true
+          in: path
+          schema: {}
+      responses:
+        '200':
+          description: The video has been found successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoResponseDto'
+    put:
+      operationId: VideoController_editById
+      parameters:
+        - name: videoId
+          required: true
+          in: path
+          schema: {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditVideoDto'
+      responses:
+        '200':
+          description: The video has been updated successfully.
+    delete:
+      operationId: VideoController_deleteById
+      parameters:
+        - name: videoId
+          required: true
+          in: path
+          schema: {}
+      responses:
+        '200':
+          description: The video has been deleted successfully.
+  /api/media/videos/{category}/upload:
+    post:
+      operationId: VideoController_upload
+      parameters:
+        - name: category
+          required: true
+          in: path
+          description: The category name
+          schema:
+            enum:
+              - trailer
+              - episode
+              - clip
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                clips:
+                  items:
+                    format: binary
+                    type: string
+                  type: array
+              type: object
+      responses:
+        '200':
+          description: The videos have been uploaded successfully.
+  /api/media/videos/{videoId}/captions:
+    post:
+      operationId: VideoController_uploadCaptions
+      parameters:
+        - name: videoId
+          required: true
+          in: path
+          schema: {}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [language]
+              properties:
+                language:
+                  type: string
+                  enum:
+                    - en
+                    - de
+                    - fr
+                subtitleFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: The captions have been uploaded successfully.
+components:
+  schemas:
+    VideoResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: A primary generated column in `uuid` format.
+          nullable: false
+        title:
+          type: string
+          description: The title of the video.
+          nullable: false
+        description:
+          type: string
+          description: The description of the video.
+          nullable: true
+          default: null
+        durationSeconds:
+          type: number
+          description: The duration of the video in seconds.
+          nullable: true
+          default: null
+      required:
+        - id
+        - title
+    EditVideoDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the video.
+          nullable: true
+          default: null
+        description:
+          type: string
+          description: The description of the video.
+          nullable: true
+          default: null
+        durationSeconds:
+          type: number
+          description: The duration of the video in seconds.
+          nullable: true
+          default: null

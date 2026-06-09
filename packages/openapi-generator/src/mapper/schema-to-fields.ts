@@ -33,6 +33,10 @@ const NULLABLE_SUPPORTED_FIELD_TYPES = new Set([
  */
 const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page', 'container']);
 
+function isBinarySchema(schema: SchemaObject | undefined): boolean {
+  return !!schema && (schema as Record<string, unknown>)['format'] === 'binary';
+}
+
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
   if (label.length >= 4 && label.endsWith('s') && !label.endsWith('ss')) {
@@ -192,6 +196,13 @@ function mapPropertyToField(
   // Skip deprecated properties
   if ((prop.schema as Record<string, unknown>)['deprecated']) {
     warnings.push(`Property '${prop.name}' is deprecated and was skipped`);
+    return undefined;
+  }
+
+  // Skip binary file properties — no file upload field type exists in this release (issue #485)
+  const propItems = (prop.schema as Record<string, unknown>)['items'] as SchemaObject | undefined;
+  if (isBinarySchema(prop.schema) || isBinarySchema(propItems)) {
+    warnings.push(`Property '${prop.name}' is a file upload (format: binary) and was skipped — no file field type is available yet`);
     return undefined;
   }
 

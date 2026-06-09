@@ -217,6 +217,12 @@ OpenAPI schema constraints map directly to `@ng-forge/dynamic-forms` validators:
 | `additionalProperties`    | Skipped      | Warning logged                                      |
 | `$ref`                    | Dereferenced | Resolved at parse time via swagger-parser           |
 
+## Request Body Content Types
+
+Request body schemas are read from `application/json`, `multipart/form-data`, or `application/x-www-form-urlencoded`, in that preference order when an endpoint declares more than one.
+
+Binary file properties (`type: string` with `format: binary`, including arrays of them) are skipped with a warning since no file upload field type exists yet. An endpoint whose body contains only binary properties produces no form and is skipped entirely.
+
 ## Config File
 
 The generator persists your choices in `.ng-forge-generator.json`:

@@ -542,6 +542,38 @@ describe('mapSchemaToFields', () => {
     expect(result.warnings).toContain("Property 'oldField' is deprecated and was skipped");
   });
 
+  it('should skip binary file properties and add warning', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        avatar: { type: 'string', format: 'binary' },
+        name: { type: 'string' },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields).toHaveLength(1);
+    expect(result.fields[0].key).toBe('name');
+    expect(result.warnings).toContain(
+      "Property 'avatar' is a file upload (format: binary) and was skipped — no file field type is available yet",
+    );
+  });
+
+  it('should skip arrays of binary files and add warning', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        files: { type: 'array', items: { type: 'string', format: 'binary' } },
+      },
+    };
+
+    const result = mapSchemaToFields(schema, []);
+    expect(result.fields).toHaveLength(0);
+    expect(result.warnings).toContain(
+      "Property 'files' is a file upload (format: binary) and was skipped — no file field type is available yet",
+    );
+  });
+
   it('should humanize enum labels with toEnumLabel', () => {
     const schema: SchemaObject = {
       type: 'object',

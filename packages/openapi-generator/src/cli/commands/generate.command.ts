@@ -225,6 +225,11 @@ async function runGenerate(options: GenerateOptions): Promise<void> {
       });
     }
 
+    if (result.fields.length === 0) {
+      logger.warn(`${endpoint.method} ${endpoint.path}: No mappable fields (all properties were skipped), skipping`);
+      continue;
+    }
+
     const formFileName = toFormFileName(endpoint.method, endpoint.path, endpoint.operationId);
 
     logger.verbose(`${endpoint.method} ${endpoint.path} → forms/${formFileName}`);

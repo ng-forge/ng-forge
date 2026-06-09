@@ -116,6 +116,85 @@ describe('extractEndpoints', () => {
     expect(endpoints.map((e) => e.method)).toEqual(['PUT', 'PATCH']);
   });
 
+  it('should extract multipart/form-data request body schema', () => {
+    const spec = createSpec({
+      '/images/{bucket}/upload': {
+        post: {
+          operationId: 'uploadImages',
+          requestBody: {
+            required: true,
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                  required: ['files'],
+                  properties: {
+                    files: { type: 'array', items: { type: 'string', format: 'binary' } },
+                    description: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          responses: { '200': { description: 'Uploaded' } },
+        },
+      },
+    });
+
+    const endpoints = extractEndpoints(spec);
+
+    expect(endpoints).toHaveLength(1);
+    expect(endpoints[0].requestBodySchema).toBeDefined();
+    expect(endpoints[0].requestBodySchema?.properties).toHaveProperty('files');
+    expect(endpoints[0].requiredFields).toEqual(['files']);
+  });
+
+  it('should extract application/x-www-form-urlencoded request body schema', () => {
+    const spec = createSpec({
+      '/login': {
+        post: {
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: { type: 'object', properties: { username: { type: 'string' } } },
+              },
+            },
+          },
+          responses: { '200': { description: 'OK' } },
+        },
+      },
+    });
+
+    const endpoints = extractEndpoints(spec);
+
+    expect(endpoints[0].requestBodySchema?.properties).toHaveProperty('username');
+  });
+
+  it('should prefer application/json when multiple content types are declared', () => {
+    const spec = createSpec({
+      '/pets': {
+        post: {
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: { type: 'object', properties: { photo: { type: 'string', format: 'binary' } } },
+              },
+              'application/json': {
+                schema: { type: 'object', properties: { name: { type: 'string' } } },
+              },
+            },
+          },
+          responses: { '201': { description: 'Created' } },
+        },
+      },
+    });
+
+    const endpoints = extractEndpoints(spec);
+
+    expect(endpoints[0].requestBodySchema?.properties).toHaveProperty('name');
+    expect(endpoints[0].requestBodySchema?.properties).not.toHaveProperty('photo');
+  });
+
   it('should skip DELETE and other unsupported methods', () => {
     const spec = createSpec({
       '/pets/{id}': {
