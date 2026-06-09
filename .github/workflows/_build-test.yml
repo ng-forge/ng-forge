@@ -189,8 +189,11 @@ jobs:
               else
                 echo "✅ $PKG package structure looks valid"
               fi
+            elif [ "${{ inputs.affected }}" = "true" ]; then
+              echo "⏭️  Skipping $PKG (not affected)"
             else
-              echo "⏭️  Skipping $PKG (not built or not affected)"
+              echo "❌ Missing dist/packages/$PKG (expected in a full build)"
+              exit 1
             fi
           done
           echo "✅ Package integrity check complete"
@@ -244,6 +247,9 @@ jobs:
         with:
           path: dist/packages
           key: ${{ env.BUILD_CACHE_KEY }}
+          # full mode must hit the cache (build produces all 7); affected mode may
+          # legitimately build nothing, so a miss is tolerated there
+          fail-on-cache-miss: ${{ !inputs.affected }}
 
       - name: Restore Nx computation cache
         uses: actions/cache@v5
@@ -322,6 +328,9 @@ jobs:
         with:
           path: dist/packages
           key: ${{ env.BUILD_CACHE_KEY }}
+          # full mode must hit the cache (build produces all 7); affected mode may
+          # legitimately build nothing, so a miss is tolerated there
+          fail-on-cache-miss: ${{ !inputs.affected }}
 
       - name: Build documentation (full)
         if: ${{ !inputs.affected }}
