@@ -33,7 +33,7 @@ import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { detectFormMode, FormMode } from '@ng-forge/dynamic-forms/internal';
-import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import { InferFormModel } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -183,7 +183,7 @@ function setValueAtPath(target: Record<string, unknown>, segments: readonly stri
 @Injectable()
 export class FormStateManager<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
-  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+  TModel extends Record<string, unknown> = InferFormModel<TFields>,
 > implements OnDestroy {
   // ─────────────────────────────────────────────────────────────────────────────
   // Dependencies (injected)
@@ -672,8 +672,16 @@ export class FormStateManager<
   // Event Streams (for outputs)
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Stream of submit events when form is valid. */
-  readonly submitted$: Observable<Partial<TModel>>;
+  /**
+   * Stream of submit events when form is valid.
+   *
+   * Typed as the full inferred model. The emitted payload is `filteredFormValue()`,
+   * so when `excludeValueIfHidden` / `excludeValueIfDisabled` / `excludeValueIfReadonly`
+   * are enabled a field that is hidden/disabled/readonly at submit time is omitted at
+   * runtime while the type still lists it. Those options default off, so the type is
+   * accurate for the common case; this matches the long-standing `as TModel` cast below.
+   */
+  readonly submitted$: Observable<TModel>;
 
   /** Stream of reset events. */
   readonly reset$: Observable<void>;

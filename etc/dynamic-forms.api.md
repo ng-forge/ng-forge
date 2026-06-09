@@ -363,11 +363,11 @@ export class DfTemplate {
 }
 
 // @public
-export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>> {
+export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormModel<TFields>> {
     constructor();
-    activeConfig: Signal<FormConfig<TFields, InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
+    activeConfig: Signal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
     cleared: _angular_core.OutputRef<FormClearEvent>;
-    config: _angular_core.InputSignal<FormConfig<TFields, InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
+    config: _angular_core.InputSignal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
     defaultValues: WritableSignal<TModel>;
     dirty: Signal<boolean>;
     dirtyChange: _angular_core.OutputRef<boolean>;
@@ -409,7 +409,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     // (undocumented)
     shouldRender: Signal<boolean>;
     source: _angular_core.InputSignal<"json" | "inline">;
-    submitted: _angular_core.OutputRef<Partial<TModel>>;
+    submitted: _angular_core.OutputRef<TModel>;
     submitting: Signal<boolean>;
     touched: Signal<boolean>;
     valid: Signal<boolean>;

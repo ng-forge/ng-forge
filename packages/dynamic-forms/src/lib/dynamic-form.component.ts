@@ -25,7 +25,7 @@ import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
 import { setupInitializationTracking } from '@ng-forge/dynamic-forms/internal';
-import { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import { InferFormModel } from '@ng-forge/dynamic-forms/internal';
 import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
@@ -119,7 +119,7 @@ import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 })
 export class DynamicForm<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
-  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+  TModel extends Record<string, unknown> = InferFormModel<TFields>,
 > {
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs (must be declared BEFORE deps connection and stateManager injection)

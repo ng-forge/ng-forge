@@ -5,7 +5,7 @@ import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
-import type { InferFormValue } from '@ng-forge/dynamic-forms/internal';
+import type { InferFormModel } from '@ng-forge/dynamic-forms/internal';
 import type { Logger } from '@ng-forge/dynamic-forms/internal';
 
 /**
@@ -16,7 +16,7 @@ import type { Logger } from '@ng-forge/dynamic-forms/internal';
  */
 export interface SubmissionHandlerOptions<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
-  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+  TModel extends Record<string, unknown> = InferFormModel<TFields>,
 > {
   /** Event bus instance for listening to submit events */
   eventBus: EventBus;
@@ -59,7 +59,7 @@ function wrapSubmissionAction<TModel extends Record<string, unknown>>(
  */
 export function createSubmissionHandler<
   TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[],
-  TModel extends Record<string, unknown> = InferFormValue<TFields> & Record<string, unknown>,
+  TModel extends Record<string, unknown> = InferFormModel<TFields>,
 >(options: SubmissionHandlerOptions<TFields, TModel>): Observable<unknown> {
   const { eventBus, configSignal, formSignal, validSignal, logger } = options;
 
