@@ -577,9 +577,6 @@ export interface InputProps<T extends HtmlInputType = InputType> {
 // @public
 export type InputType = Extract<HtmlInputType, 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'>;
 
-// @public @deprecated (undocumented)
-export type InputTypeToValueType<T extends InputType> = InferInputValue<T>;
-
 // @public
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>>;
 
