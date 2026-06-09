@@ -1,8 +1,15 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { toInterfaceName, toPascalCase } from '../utils/naming.js';
-import { isReferenceObject } from '../utils/openapi-utils.js';
+import { isBinarySchema, isReferenceObject } from '../utils/openapi-utils.js';
 
 type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject;
+
+// Binary file properties (format: binary, including arrays of binary items) are
+// skipped by the field mapper (issue #485), so the FormValue interface must skip
+// them too — otherwise it would describe a property the form can never produce.
+function isSkippedBinaryProperty(schema: SchemaObject): boolean {
+  return isBinarySchema(schema) || isBinarySchema((schema as Record<string, unknown>)['items']);
+}
 
 export interface InterfaceGeneratorOptions {
   method: string;
@@ -155,6 +162,7 @@ function resolveSchemaProperties(
 
   for (const [name, propSchema] of Object.entries(schema.properties ?? {})) {
     if (isReferenceObject(propSchema)) continue;
+    if (isSkippedBinaryProperty(propSchema)) continue;
     properties.push([name, propSchema]);
   }
 
@@ -296,6 +304,7 @@ function generateNestedInterface(name: string, schema: SchemaObject, seen: WeakS
 
   for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
     if (isReferenceObject(propSchema)) continue;
+    if (isSkippedBinaryProperty(propSchema)) continue;
     const optional = required.has(propName) ? '' : '?';
     const tsType = schemaToTsType(propName, propSchema, name, nestedInterfaces, seen);
     lines.push(`  ${propName}${optional}: ${tsType};`);

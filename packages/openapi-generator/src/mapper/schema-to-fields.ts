@@ -5,6 +5,7 @@ import type { ValidatorConfig } from './validator-mapping.js';
 import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
+import { isBinarySchema } from '../utils/openapi-utils.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -32,10 +33,6 @@ const NULLABLE_SUPPORTED_FIELD_TYPES = new Set([
  * a label on these types causes TS2322 in consumers (issue #348).
  */
 const CONTAINER_FIELD_TYPES = new Set(['group', 'array', 'row', 'page', 'container']);
-
-function isBinarySchema(schema: SchemaObject | undefined): boolean {
-  return !!schema && (schema as Record<string, unknown>)['format'] === 'binary';
-}
 
 function singularize(label: string): string {
   // Only strip trailing 's' if word is 4+ chars and doesn't end in 'ss'
@@ -202,7 +199,7 @@ function mapPropertyToField(
   // Skip binary file properties — no file upload field type exists in this release (issue #485)
   const propItems = (prop.schema as Record<string, unknown>)['items'] as SchemaObject | undefined;
   if (isBinarySchema(prop.schema) || isBinarySchema(propItems)) {
-    warnings.push(`Property '${prop.name}' is a file upload (format: binary) and was skipped — no file field type is available yet`);
+    warnings.push(`Property '${prop.name}' is a file upload (format: binary) and was skipped; no file field type is available yet`);
     return undefined;
   }
 

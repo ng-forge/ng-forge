@@ -555,7 +555,7 @@ describe('mapSchemaToFields', () => {
     expect(result.fields).toHaveLength(1);
     expect(result.fields[0].key).toBe('name');
     expect(result.warnings).toContain(
-      "Property 'avatar' is a file upload (format: binary) and was skipped — no file field type is available yet",
+      "Property 'avatar' is a file upload (format: binary) and was skipped; no file field type is available yet",
     );
   });
 
@@ -570,7 +570,7 @@ describe('mapSchemaToFields', () => {
     const result = mapSchemaToFields(schema, []);
     expect(result.fields).toHaveLength(0);
     expect(result.warnings).toContain(
-      "Property 'files' is a file upload (format: binary) and was skipped — no file field type is available yet",
+      "Property 'files' is a file upload (format: binary) and was skipped; no file field type is available yet",
     );
   });
 

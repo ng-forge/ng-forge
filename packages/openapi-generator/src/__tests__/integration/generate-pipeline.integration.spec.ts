@@ -530,6 +530,14 @@ describe('Multipart request bodies', () => {
     expect(form).not.toContain("key: 'attachment'");
   });
 
+  it('should omit skipped binary properties from the generated types so the interface matches the form', async () => {
+    await generate('multipart-upload.yaml');
+
+    const types = await readGenerated(outputDir, 'types', 'create-document.types.ts');
+    expect(types).toContain('title: string;');
+    expect(types).not.toContain('attachment');
+  });
+
   it('should skip endpoints whose multipart body contains only binary fields', async () => {
     await generate('multipart-upload.yaml');
 
@@ -580,6 +588,10 @@ describe('Storage-like service spec (issue #485 shape)', () => {
     expect(form).toContain("key: 'language'");
     expect(form).toContain("type: 'select'");
     expect(form).not.toContain('subtitleFile');
+
+    const types = await readGenerated(outputDir, 'types', 'video-controller-upload-captions.types.ts');
+    expect(types).toContain("language: 'en' | 'de' | 'fr';");
+    expect(types).not.toContain('subtitleFile');
   });
 
   it('should map the dereferenced edit DTO with nullable fields', async () => {
