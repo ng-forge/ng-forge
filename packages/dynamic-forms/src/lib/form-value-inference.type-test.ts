@@ -323,3 +323,135 @@ describe('InferFormModel', () => {
     expectTypeOf<BaseOk>().toEqualTypeOf<true>();
   });
 });
+
+// ============================================================================
+// Scale / deep nesting — regression net for the InferContainerChildren guard.
+// Large `as const` configs must recurse correctly (tuples) without hitting TS2590.
+// ============================================================================
+
+describe('InferFormValue - scale and deep nesting', () => {
+  // ~55 fields across 4 pages, each with rows + a group of leaves, plus a nested
+  // array. Uses valid nesting (group holds leaves/rows/arrays, page holds groups).
+  const huge = {
+    fields: [
+      {
+        key: 'page1',
+        type: 'page',
+        fields: [
+          {
+            key: 'row1',
+            type: 'row',
+            fields: [
+              { key: 'firstName', type: 'input', value: '', required: true },
+              { key: 'lastName', type: 'input', value: '', required: true },
+            ],
+          },
+          {
+            key: 'identity',
+            type: 'group',
+            fields: [
+              { key: 'age', type: 'input', value: 0, props: { type: 'number' }, required: true },
+              { key: 'dob', type: 'datepicker', value: null },
+              { key: 'newsletter', type: 'checkbox', value: false },
+              { key: 'rating', type: 'slider', value: 5 },
+              { key: 'bio1', type: 'input', value: '' },
+              { key: 'bio2', type: 'input', value: '' },
+              { key: 'aliases', type: 'array', template: { key: 'alias', type: 'input', label: 'Alias' } },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'page2',
+        type: 'page',
+        fields: [
+          {
+            key: 'address',
+            type: 'group',
+            fields: [
+              { key: 'street', type: 'input', value: '', required: true },
+              { key: 'city', type: 'input', value: '', required: true },
+              { key: 'zip', type: 'input', value: '' },
+              { key: 'lat', type: 'input', value: 0, props: { type: 'number' } },
+              { key: 'lng', type: 'input', value: 0, props: { type: 'number' } },
+              { key: 'primary', type: 'checkbox', value: false },
+              { key: 'note1', type: 'input', value: '' },
+              { key: 'note2', type: 'input', value: '' },
+            ],
+          },
+          {
+            key: 'shipping',
+            type: 'group',
+            fields: [
+              { key: 'street', type: 'input', value: '' },
+              { key: 'city', type: 'input', value: '' },
+              { key: 'zip', type: 'input', value: '' },
+              { key: 'sameAsAddress', type: 'toggle', value: true },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'page3',
+        type: 'page',
+        fields: [
+          {
+            key: 'work',
+            type: 'group',
+            fields: [
+              { key: 'company', type: 'input', value: '' },
+              { key: 'title', type: 'input', value: '' },
+              { key: 'salary', type: 'input', value: 0, props: { type: 'number' } },
+              { key: 'startDate', type: 'datepicker', value: null },
+              { key: 'remote', type: 'checkbox', value: false },
+              { key: 'experience', type: 'slider', value: 0 },
+              { key: 'skills', type: 'array', template: { key: 'skill', type: 'input', label: 'Skill' } },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'page4',
+        type: 'page',
+        fields: [
+          {
+            key: 'consent',
+            type: 'group',
+            fields: [
+              { key: 'terms', type: 'checkbox', value: false, required: true },
+              { key: 'privacy', type: 'checkbox', value: false, required: true },
+              { key: 'signature', type: 'input', value: '', required: true },
+              { key: 'signedOn', type: 'datepicker', value: null, required: true },
+              { key: 'comments1', type: 'input', value: '' },
+              { key: 'comments2', type: 'input', value: '' },
+            ],
+          },
+          { key: 'submit', type: 'submit', label: 'Submit' },
+        ],
+      },
+    ],
+  } as const satisfies FormConfig;
+  type V = InferFormValue<typeof huge>;
+
+  it('recurses through the full tree without TS2590', () => {
+    // Page/row hoisting to the top level.
+    expectTypeOf<V['firstName']>().toEqualTypeOf<string>();
+    expectTypeOf<V['lastName']>().toEqualTypeOf<string>();
+    // Group nesting, required-ness, and per-type value inference at depth.
+    expectTypeOf<V['identity']['age']>().toEqualTypeOf<number>();
+    expectTypeOf<V['identity']['newsletter']>().toEqualTypeOf<boolean | undefined>();
+    expectTypeOf<V['identity']['rating']>().toEqualTypeOf<number | undefined>();
+    expectTypeOf<V['identity']['aliases']>().toEqualTypeOf<string[]>();
+    expectTypeOf<V['address']['street']>().toEqualTypeOf<string>();
+    expectTypeOf<V['address']['lat']>().toEqualTypeOf<number | undefined>();
+    expectTypeOf<V['shipping']['sameAsAddress']>().toEqualTypeOf<boolean | undefined>();
+    expectTypeOf<V['work']['salary']>().toEqualTypeOf<number | undefined>();
+    expectTypeOf<V['work']['skills']>().toEqualTypeOf<string[]>();
+    expectTypeOf<V['consent']['terms']>().toEqualTypeOf<boolean>();
+    expectTypeOf<V['consent']['signature']>().toEqualTypeOf<string>();
+  });
+
+  it('excludes the submit button from the model', () => {
+    expectTypeOf<keyof V>().toEqualTypeOf<'firstName' | 'lastName' | 'identity' | 'address' | 'shipping' | 'work' | 'consent'>();
+  });
+});
