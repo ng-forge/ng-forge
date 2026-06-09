@@ -14,6 +14,10 @@ export interface EndpointInfo {
 
 const SUPPORTED_METHODS = ['get', 'post', 'put', 'patch'] as const;
 
+// Request body content types in preference order. JSON wins when both are
+// declared; multipart/urlencoded bodies map to forms the same way (issue #485).
+const REQUEST_BODY_CONTENT_TYPES = ['application/json', 'multipart/form-data', 'application/x-www-form-urlencoded'] as const;
+
 export function extractEndpoints(spec: OpenAPISpec): EndpointInfo[] {
   const endpoints: EndpointInfo[] = [];
 
@@ -35,10 +39,13 @@ export function extractEndpoints(spec: OpenAPISpec): EndpointInfo[] {
       // Extract request body schema (for POST/PUT/PATCH)
       if (operation.requestBody && 'content' in operation.requestBody) {
         const content = operation.requestBody.content;
-        const jsonContent = content['application/json'];
-        if (jsonContent?.schema && !isReferenceObject(jsonContent.schema)) {
-          endpoint.requestBodySchema = jsonContent.schema;
-          endpoint.requiredFields = jsonContent.schema.required ?? [];
+        for (const contentType of REQUEST_BODY_CONTENT_TYPES) {
+          const mediaContent = content[contentType];
+          if (mediaContent?.schema && !isReferenceObject(mediaContent.schema)) {
+            endpoint.requestBodySchema = mediaContent.schema;
+            endpoint.requiredFields = mediaContent.schema.required ?? [];
+            break;
+          }
         }
       }
 

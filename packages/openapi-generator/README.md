@@ -404,6 +404,12 @@ GET endpoints with top-level array responses are always skipped since they don't
 
 To make GET endpoint fields read-only, use `--read-only`.
 
+### Which request body content types are supported?
+
+`application/json`, `multipart/form-data`, and `application/x-www-form-urlencoded`, in that preference order when an endpoint declares more than one.
+
+Binary file properties (`type: string, format: binary`, including arrays of them) are skipped with a warning since there is no file upload field type yet. An endpoint whose body contains only binary properties produces no form and is skipped entirely.
+
 ### Why does the generator say "Swagger 2.0" is not supported?
 
 Only OpenAPI 3.x specs are supported. Convert Swagger 2.0 specs using [converter.swagger.io](https://converter.swagger.io) or the `swagger2openapi` npm package.

@@ -519,6 +519,91 @@ describe('Edge Cases', () => {
   });
 });
 
+// ─── Multipart Request Bodies (issue #485) ───────────────────────────
+
+describe('Multipart request bodies', () => {
+  it('should generate a form from a multipart/form-data body, skipping binary fields', async () => {
+    await generate('multipart-upload.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'create-document.form.ts');
+    expect(form).toContain("key: 'title'");
+    expect(form).not.toContain("key: 'attachment'");
+  });
+
+  it('should omit skipped binary properties from the generated types so the interface matches the form', async () => {
+    await generate('multipart-upload.yaml');
+
+    const types = await readGenerated(outputDir, 'types', 'create-document.types.ts');
+    expect(types).toContain('title: string;');
+    expect(types).not.toContain('attachment');
+  });
+
+  it('should skip endpoints whose multipart body contains only binary fields', async () => {
+    await generate('multipart-upload.yaml');
+
+    const uploadForm = await fileExists(join(outputDir, 'forms', 'upload-images.form.ts'));
+    expect(uploadForm).toBe(false);
+
+    const config = await readConfigFile(outputDir);
+    expect(config['endpoints']).toEqual(['POST:/documents']);
+  });
+});
+
+// ─── Storage-like service spec (issue #485 shape) ────────────────────
+
+describe('Storage-like service spec (issue #485 shape)', () => {
+  it('should generate forms for every endpoint that maps to one', async () => {
+    await generate('media-service.yaml');
+
+    const findById = await fileExists(join(outputDir, 'forms', 'video-controller-find-by-id.form.ts'));
+    const editById = await fileExists(join(outputDir, 'forms', 'video-controller-edit-by-id.form.ts'));
+    const uploadCaptions = await fileExists(join(outputDir, 'forms', 'video-controller-upload-captions.form.ts'));
+
+    expect(findById).toBe(true);
+    expect(editById).toBe(true);
+    expect(uploadCaptions).toBe(true);
+
+    const config = await readConfigFile(outputDir);
+    expect(config['endpoints']).toEqual([
+      'GET:/api/media/videos/{videoId}',
+      'PUT:/api/media/videos/{videoId}',
+      'POST:/api/media/videos/{videoId}/captions',
+    ]);
+  });
+
+  it('should skip the array-response list endpoint and the binary-only upload endpoint', async () => {
+    await generate('media-service.yaml');
+
+    const findAll = await fileExists(join(outputDir, 'forms', 'video-controller-find-all.form.ts'));
+    const upload = await fileExists(join(outputDir, 'forms', 'video-controller-upload.form.ts'));
+
+    expect(findAll).toBe(false);
+    expect(upload).toBe(false);
+  });
+
+  it('should keep non-binary multipart fields and drop the binary one', async () => {
+    await generate('media-service.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'video-controller-upload-captions.form.ts');
+    expect(form).toContain("key: 'language'");
+    expect(form).toContain("type: 'select'");
+    expect(form).not.toContain('subtitleFile');
+
+    const types = await readGenerated(outputDir, 'types', 'video-controller-upload-captions.types.ts');
+    expect(types).toContain("language: 'en' | 'de' | 'fr';");
+    expect(types).not.toContain('subtitleFile');
+  });
+
+  it('should map the dereferenced edit DTO with nullable fields', async () => {
+    await generate('media-service.yaml');
+
+    const form = await readGenerated(outputDir, 'forms', 'video-controller-edit-by-id.form.ts');
+    expect(form).toContain("key: 'title'");
+    expect(form).toContain("key: 'durationSeconds'");
+    expect(form).toContain('nullable: true');
+  });
+});
+
 // ─── N. Nullable Values (issue #341) ─────────────────────────────────
 
 describe('Nullable values', () => {

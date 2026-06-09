@@ -5,6 +5,7 @@ import type { ValidatorConfig } from './validator-mapping.js';
 import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
+import { isBinarySchema } from '../utils/openapi-utils.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -192,6 +193,13 @@ function mapPropertyToField(
   // Skip deprecated properties
   if ((prop.schema as Record<string, unknown>)['deprecated']) {
     warnings.push(`Property '${prop.name}' is deprecated and was skipped`);
+    return undefined;
+  }
+
+  // Skip binary file properties — no file upload field type exists in this release (issue #485)
+  const propItems = (prop.schema as Record<string, unknown>)['items'] as SchemaObject | undefined;
+  if (isBinarySchema(prop.schema) || isBinarySchema(propItems)) {
+    warnings.push(`Property '${prop.name}' is a file upload (format: binary) and was skipped; no file field type is available yet`);
     return undefined;
   }
 

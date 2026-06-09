@@ -518,6 +518,60 @@ describe('generateInterface', () => {
     expect(result).not.toContain('ref');
   });
 
+  // Issue #485: binary properties are skipped by the field mapper, so the
+  // FormValue interface must skip them too — otherwise it describes a property
+  // the form can never produce.
+  it('should skip binary file properties so the interface matches the generated form', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      required: ['name', 'avatar'],
+      properties: {
+        name: { type: 'string' },
+        avatar: { type: 'string', format: 'binary' },
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  name: string;');
+    expect(result).not.toContain('avatar');
+  });
+
+  it('should skip arrays of binary files', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        files: { type: 'array', items: { type: 'string', format: 'binary' } },
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  title?: string;');
+    expect(result).not.toContain('files');
+  });
+
+  it('should skip binary properties inside nested object interfaces', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      properties: {
+        meta: {
+          type: 'object',
+          properties: {
+            label: { type: 'string' },
+            blob: { type: 'string', format: 'binary' },
+          },
+        },
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  label?: string;');
+    expect(result).not.toContain('blob');
+  });
+
   it('should include @generated header', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',
