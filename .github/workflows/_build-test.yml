@@ -52,6 +52,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Fails when any registered sync generator (e.g. the dynamic-forms
+      # public_api barrel) would change files — committed state must be in sync.
+      - name: Check workspace sync
+        run: pnpm nx sync:check
+
       - name: Resolve publishable packages
         id: packages
         run: |

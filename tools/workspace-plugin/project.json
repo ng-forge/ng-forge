@@ -1,0 +1,8 @@
+{
+  "name": "workspace-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/workspace-plugin/src",
+  "projectType": "library",
+  "tags": ["scope:tooling"],
+  "targets": {}
+}
