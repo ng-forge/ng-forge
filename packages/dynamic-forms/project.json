@@ -115,7 +115,7 @@
     },
     "type-test": {
       "executor": "@nx/vitest:test",
-      "dependsOn": ["type-test-inference"],
+      "dependsOn": ["type-test-inference", "type-test-definitions"],
       "options": {
         "configFile": "packages/dynamic-forms/vite.config.typecheck.ts"
       }
@@ -124,6 +124,12 @@
       "executor": "@nx/vitest:test",
       "options": {
         "configFile": "packages/dynamic-forms/vite.config.typecheck-inference.ts"
+      }
+    },
+    "type-test-definitions": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms/vite.config.typecheck-definitions.ts"
       }
     },
     "lint": {
