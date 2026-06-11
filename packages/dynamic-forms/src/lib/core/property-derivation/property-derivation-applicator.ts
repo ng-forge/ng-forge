@@ -233,11 +233,13 @@ function createEvaluationContext(
   // For group-nested fields, formValue is scoped to the parent group so
   // expressions reference siblings directly (matching array item semantics).
   // rootFormValue reaches the whole form for cross-scope references.
-  const scopedToGroup = parentPath !== undefined && groupValue !== undefined;
+  // Scope follows from nesting alone: an unmaterialized group value falls
+  // back to {} rather than silently reverting to root scope.
+  const scopedToGroup = parentPath !== undefined;
 
   return {
     fieldValue,
-    formValue: scopedToGroup ? (groupValue as Record<string, unknown>) : formValue,
+    formValue: scopedToGroup ? ((groupValue ?? {}) as Record<string, unknown>) : formValue,
     fieldPath: entry.fieldKey,
     groupValue,
     customFunctions: context.customFunctions,

@@ -1561,6 +1561,7 @@ describe('ArrayFieldComponent', () => {
 
       const mockEntity = signal<Record<string, unknown>>({});
       const mockFormSignal = signal<unknown>(undefined);
+      const rootValueSignal = signal(rootValue);
 
       TestBed.configureTestingModule({
         imports: [ArrayFieldComponent],
@@ -1576,11 +1577,17 @@ describe('ArrayFieldComponent', () => {
             provide: FIELD_SIGNAL_CONTEXT,
             useFactory: (injector: Injector) => {
               return runInInjectionContext(injector, () => {
-                const valueSignal = signal(rootValue);
-                const groupField = { key: groupKey, type: 'group', fields: [arrayField] } as unknown as FieldDef<unknown>;
+                // Match the e2e shape: group > row > array. The row flattens at
+                // the schema level, so the array tree lives directly under the group.
+                const rowField = { key: 'membersRow', type: 'row', fields: [arrayField] } as unknown as RowField;
+                const groupField = { key: groupKey, type: 'group', fields: [rowField] } as unknown as FieldDef<unknown>;
                 const schema = createSchemaFromFields([groupField], registry);
-                const testForm = form(valueSignal, schema);
+                const testForm = form(rootValueSignal, schema);
+
+                // Force Signal Forms to initialize the structure before the
+                // component navigates it (internal Angular API).
                 testForm();
+                (testForm as unknown as { structure?: () => void }).structure?.();
 
                 mockEntity.set(rootValue);
                 mockFormSignal.set(testForm);
@@ -1588,7 +1595,7 @@ describe('ArrayFieldComponent', () => {
                 const groupTree = (testForm as unknown as Record<string, unknown>)[groupKey];
                 const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
                   injector,
-                  value: valueSignal,
+                  value: rootValueSignal,
                   defaultValues: () => ({}),
                   form: groupTree as FieldSignalContext<Record<string, unknown>>['form'],
                   defaultValidationMessages: undefined,
@@ -1610,7 +1617,7 @@ describe('ArrayFieldComponent', () => {
 
       fixture.detectChanges();
 
-      return { component, fixture };
+      return { component, fixture, rootValueSignal };
     }
 
     it('should render initial items even though the root value scopes them under the group key', async () => {
@@ -1636,7 +1643,7 @@ describe('ArrayFieldComponent', () => {
         fields: [[createSimpleTestField('name', 'Name', 'Alice')]],
       };
 
-      const { component, fixture } = setupGroupNestedArrayTest(field, 'team', {
+      const { component, fixture, rootValueSignal } = setupGroupNestedArrayTest(field, 'team', {
         team: { members: [{ name: 'Alice' }] },
       });
       const eventBus = TestBed.inject(EventBus);
@@ -1649,6 +1656,9 @@ describe('ArrayFieldComponent', () => {
       await waitForItems(component, fixture, (n) => n >= 2);
 
       expect(component.resolvedItems()).toHaveLength(2);
+      // The appended item lands under the group path in the form value.
+      const team = rootValueSignal()['team'] as Record<string, unknown>;
+      expect(team['members'] as unknown[]).toHaveLength(2);
     });
 
     it('should report atMaxLength from the group-scoped array value', async () => {

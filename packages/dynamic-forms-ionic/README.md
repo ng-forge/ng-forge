@@ -32,6 +32,8 @@ Ionic field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/packa
 | 0.1.1+                        | 0.1.1+                  | 21.0.2-21.0.5 |
 | 0.1.0                         | 0.1.0                   | 21.0.0-21.0.1 |
 
+Ionic's official support policy for @ionic/angular 8 lists Angular versions up to 20.x. This package's test suite passes against @ionic/angular 8.x running on Angular 22.
+
 ## Installation
 
 ```bash
