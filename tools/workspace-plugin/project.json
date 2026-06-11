@@ -4,5 +4,15 @@
   "sourceRoot": "tools/workspace-plugin/src",
   "projectType": "library",
   "tags": ["scope:tooling"],
-  "targets": {}
+  "targets": {
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "tools/workspace-plugin/vite.config.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
 }
