@@ -1,0 +1,141 @@
+name: Vercel Deploy
+
+# Reusable Vercel build + deploy pipeline shared by deploy-vercel.yml (manual
+# workflow_dispatch) and deploy-staging.yml (auto on CI success). The caller
+# parameterizes the target environment, optional alias, and smoke URL.
+on:
+  workflow_call:
+    inputs:
+      gh-environment:
+        description: 'GitHub deployment environment name (production / preview / staging)'
+        type: string
+        required: true
+      gh-environment-url:
+        description: 'Fixed URL for the GitHub environment; falls back to the deploy URL when empty'
+        type: string
+        default: ''
+      vercel-environment:
+        description: 'Vercel environment to pull (production or preview)'
+        type: string
+        required: true
+      production:
+        description: 'Build and deploy with --prod'
+        type: boolean
+        default: false
+      ref:
+        description: 'Git ref to check out (empty = default ref)'
+        type: string
+        default: ''
+      alias:
+        description: 'Optional Vercel alias domain to point at the new deployment'
+        type: string
+        default: ''
+      smoke-url:
+        description: 'URL to smoke test after deploy; empty = smoke the deploy URL'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.gh-environment }}
+      url: ${{ inputs.gh-environment-url != '' && inputs.gh-environment-url || steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      # Vercel blocks prebuilt deploys whose HEAD commit author email cannot
+      # be matched to a GitHub account (Pro-plan contributor-seat check).
+      # Squash-merges preserve the PR author's GitHub noreply email, which
+      # often fails the match. Reattribute HEAD locally so the upload is
+      # billed to the repo owner; this only mutates the CI checkout.
+      # TODO: move this to a Vercel project setting and drop the reattribution.
+      - name: Reattribute commit author for Vercel seat check
+        env:
+          DEPLOY_AUTHOR_EMAIL: ${{ secrets.VERCEL_DEPLOY_AUTHOR_EMAIL }}
+          DEPLOY_AUTHOR_NAME: ${{ secrets.VERCEL_DEPLOY_AUTHOR_NAME }}
+        run: |
+          if [ -z "$DEPLOY_AUTHOR_EMAIL" ] || [ -z "$DEPLOY_AUTHOR_NAME" ]; then
+            echo "::error::Repo secrets VERCEL_DEPLOY_AUTHOR_EMAIL and VERCEL_DEPLOY_AUTHOR_NAME must be set (Settings → Secrets and variables → Actions → Secrets)."
+            exit 1
+          fi
+          git config user.email "$DEPLOY_AUTHOR_EMAIL"
+          git config user.name "$DEPLOY_AUTHOR_NAME"
+          git commit --amend --reset-author --no-edit
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=${{ inputs.vercel-environment }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: vercel build ${{ inputs.production && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt ${{ inputs.production && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to: $URL"
+
+      - name: Alias deployment
+        if: inputs.alias != ''
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          ALIAS: ${{ inputs.alias }}
+        run: vercel alias "$DEPLOY_URL" "$ALIAS" --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Smoke test deployment
+        env:
+          SMOKE_URL: ${{ inputs.smoke-url }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          TARGET="${SMOKE_URL:-${DEPLOY_URL}/dynamic-forms/}"
+          echo "Verifying deployment is accessible: $TARGET"
+          curl --fail --retry 5 --retry-all-errors --retry-delay 10 "$TARGET" > /dev/null
+          echo "Deployment verified successfully"
+
+      - name: Output deployment URL
+        env:
+          DEPLOY_URL: ${{ inputs.gh-environment-url != '' && inputs.gh-environment-url || steps.deploy.outputs.url }}
+        run: |
+          {
+            echo "## Deployment Complete"
+            echo ""
+            echo "**Environment:** ${{ inputs.gh-environment }}"
+            echo "**URL:** $DEPLOY_URL"
+            echo ""
+            echo "### Application URLs"
+            echo "- **Docs:** $DEPLOY_URL/dynamic-forms/"
+            echo "- **Material Examples:** $DEPLOY_URL/dynamic-forms/examples/material/"
+            echo "- **Bootstrap Examples:** $DEPLOY_URL/dynamic-forms/examples/bootstrap/"
+            echo "- **PrimeNG Examples:** $DEPLOY_URL/dynamic-forms/examples/primeng/"
+            echo "- **Ionic Examples:** $DEPLOY_URL/dynamic-forms/examples/ionic/"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -50,6 +50,7 @@
     },
     "compile": {
       "executor": "@nx/angular:package",
+      "syncGenerators": ["@ng-forge/workspace-plugin:gen-public-api"],
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
         "project": "packages/dynamic-forms/ng-package.json",

@@ -1,0 +1,10 @@
+{
+  "generators": {
+    "gen-public-api": {
+      "factory": "./src/generators/gen-public-api/generator",
+      "schema": "./src/generators/gen-public-api/schema.json",
+      "description": "Regenerate packages/dynamic-forms/internal/src/public_api.ts from the internal lib modules",
+      "hidden": true
+    }
+  }
+}
