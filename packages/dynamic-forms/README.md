@@ -14,7 +14,7 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 [![Discord](https://img.shields.io/discord/1494269650555371582?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/qpzzvFagj3)
 
 > **Stability:** This library is built on Angular Signal Forms, which is stable as of Angular v22.
-> Requires Angular 22 or newer. Check the [compatibility matrix](#compatibility) below.
+> Check the [compatibility matrix](#compatibility) below for supported Angular versions.
 
 ## Compatibility
 

@@ -299,7 +299,7 @@ Evaluates a JavaScript expression with access to \`formValue\`, \`fieldValue\`, 
 }
 \`\`\`
 
-**Expression scoping:** for fields nested in a group or array, \`formValue\` is scoped to the parent group or the current array item, so expressions reference sibling fields directly (e.g. \`formValue.firstName\` inside a \`person\` group). Use \`rootFormValue\` to reach fields outside the current scope. Fields at form root see the whole form value as \`formValue\`.
+**Condition scoping:** in logic conditions, \`formValue\` is the whole form value regardless of where the field sits, except inside array items where it is scoped to the current item (use \`rootFormValue\` for the rest of the form). Reference group-nested fields by their full path, e.g. \`formValue.person.firstName\`. Note that \`derivation\` expressions scope differently: there \`formValue\` is also scoped to the parent group for group-nested fields.
 
 #### Custom Condition
 

@@ -84,7 +84,7 @@ export class LoginComponent {
 ## Compatibility
 
 > **Stability:** This library is built on Angular Signal Forms, which is stable as of Angular v22.
-> Requires Angular 22 or newer.
+> See the table below for supported Angular versions.
 
 | @ng-forge/dynamic-forms | Angular       |
 | ----------------------- | ------------- |
