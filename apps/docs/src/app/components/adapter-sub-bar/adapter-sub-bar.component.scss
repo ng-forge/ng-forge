@@ -172,7 +172,7 @@
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  min-width: 240px;
+  min-width: 168px;
   background: var(--forge-base-0);
   border: 1px solid var(--forge-border-color);
   border-radius: 8px;
@@ -240,16 +240,6 @@
 
 .option-name {
   flex: 1;
-}
-
-.option-preview {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #fff;
-  background: $ember-core;
-  padding: 0.125rem 0.3rem;
-  border-radius: 3px;
 }
 
 .option-check {

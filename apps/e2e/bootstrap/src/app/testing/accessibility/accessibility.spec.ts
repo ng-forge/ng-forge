@@ -117,14 +117,14 @@ test.describe('Accessibility Tests', () => {
     });
 
     // Radio field tests
-    // TODO: aria-required not currently propagated to individual radio inputs in BsRadioGroupComponent
-    test.skip('radio field should have aria-required="true" when required', async ({ page, helpers }) => {
+    test('radio field should have aria-required="true" when required', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('all-fields-aria');
       await expect(scenario).toBeVisible();
 
-      // Bootstrap radio puts aria attrs on individual radio inputs
-      const radioInput = scenario.locator('#radioField input[type="radio"]').first();
-      await expect(radioInput).toHaveAttribute('aria-required', 'true');
+      // Bootstrap puts group-level aria attrs on the radiogroup host
+      const radioGroup = scenario.locator('#radioField df-bs-radio-group');
+      await expect(radioGroup).toHaveAttribute('role', 'radiogroup');
+      await expect(radioGroup).toHaveAttribute('aria-required', 'true');
     });
 
     test('radio field should have aria-describedby referencing hint', async ({ page, helpers }) => {

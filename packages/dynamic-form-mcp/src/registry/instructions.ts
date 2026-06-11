@@ -299,6 +299,8 @@ Evaluates a JavaScript expression with access to \`formValue\`, \`fieldValue\`, 
 }
 \`\`\`
 
+**Condition scoping:** in logic conditions, \`formValue\` is the whole form value regardless of where the field sits, except inside array items where it is scoped to the current item (use \`rootFormValue\` for the rest of the form). Reference group-nested fields by their full path, e.g. \`formValue.person.firstName\`. Note that \`derivation\` expressions scope differently: there \`formValue\` is also scoped to the parent group for group-nested fields.
+
 #### Custom Condition
 
 Invokes a registered custom function by name:

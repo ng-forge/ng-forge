@@ -126,7 +126,17 @@ export function applyPropertyDerivationsForTrigger(
 function getEntriesForChangedFields(entries: PropertyDerivationEntry[], changedFields: Set<string>): PropertyDerivationEntry[] {
   return entries.filter((entry) => {
     if (entry.dependsOn.includes('*')) return true;
-    return entry.dependsOn.some((dep) => changedFields.has(dep));
+    if (entry.dependsOn.some((dep) => changedFields.has(dep))) return true;
+
+    // Group/array-nested entries have keys like 'person.fullName' but
+    // changedFields contains root keys (e.g. 'person'). Match entries and
+    // dependencies that live under a changed parent.
+    for (const changed of changedFields) {
+      if (entry.fieldKey.startsWith(changed + '.')) return true;
+      if (entry.dependsOn.some((dep) => dep.startsWith(changed + '.'))) return true;
+    }
+
+    return false;
   });
 }
 
@@ -220,14 +230,19 @@ function createEvaluationContext(
   const parentPath = getParentPathInScope(entry.fieldKey);
   const groupValue = parentPath ? getNestedValue(formValue, parentPath) : undefined;
 
+  // Group-nested fields get group-scoped formValue (matching array item
+  // semantics); an unmaterialized group value falls back to {} rather than root.
+  const scopedToGroup = parentPath !== undefined;
+
   return {
     fieldValue,
-    formValue,
+    formValue: scopedToGroup ? ((groupValue ?? {}) as Record<string, unknown>) : formValue,
     fieldPath: entry.fieldKey,
     groupValue,
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
+    rootFormValue: formValue,
   };
 }
 

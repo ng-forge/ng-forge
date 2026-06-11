@@ -782,6 +782,7 @@ logic: [{ type: 'derivation', functionName: 'computeFromGroup', dependsOn: ['$gr
 \`\`\`
 Derivation is always defined ON the field that receives the computed value (self-targeting).
 \`dependsOn\` paths are absolute from the form root (e.g. \`'address.state'\`). Use \`'$self'\` for the field's own absolute path and \`'$group'\` for its nearest parent group/array — both useful in factory-built fields where ancestor keys aren't known at config time.
+**Scoping:** in derivation expressions, \`formValue\` is scoped to the parent group for group-nested fields and to the current item inside arrays, so siblings are referenced directly (e.g. \`formValue.firstName\` inside a \`person\` group). Use \`rootFormValue\` to reach fields outside the current scope.
 **Variables:** \`formValue\`, \`fieldValue\`, \`fieldState\`, \`formFieldState\`, \`externalData\` (see topic: expression-variables)
 **For deriving component properties** (minDate, options, label): use \`targetProperty\` (see topic \`property-derivation\`)`,
 
@@ -1148,7 +1149,8 @@ Wrong: Wrong property names
 
 | Variable | Type | Available In | Description |
 |----------|------|--------------|-------------|
-| \`formValue\` | object | Derivations, conditions, custom validators | Complete form values as nested object |
+| \`formValue\` | object | Derivations, conditions, custom validators | Form values as nested object. Scoped to the current array item in array contexts; in derivations additionally scoped to the parent group for group-nested fields. Conditions on group-nested fields see the root form value |
+| \`rootFormValue\` | object | Scoped contexts (array items, group-nested derivations) | The whole form value when \`formValue\` is scoped |
 | \`fieldValue\` | any | Custom validator expressions only | Current field's value |
 | \`fieldState\` | object | Derivations, conditions | Current field's state (touched, dirty, valid, etc.) |
 | \`formFieldState\` | object | Derivations, conditions | All fields' states keyed by field key |

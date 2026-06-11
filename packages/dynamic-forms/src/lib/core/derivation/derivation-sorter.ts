@@ -55,19 +55,29 @@ export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
   // For each entry B, find all entries A whose field is in B's dependencies
   // If B depends on field X, and A produces X, then A must run before B
   for (const entryB of entries) {
+    // Group-nested entries (e.g. 'person.fullName') have relative dependencies;
+    // resolving them against the entry's own parent path keeps groups with
+    // identically named leaves from coupling to each other.
+    const groupPath =
+      entryB.fieldKey.includes('.') && !entryB.fieldKey.includes('.$.')
+        ? entryB.fieldKey.slice(0, entryB.fieldKey.lastIndexOf('.'))
+        : undefined;
+
     for (const dep of entryB.dependsOn) {
       // Skip wildcards here - handled separately below
       if (dep === '*') continue;
 
-      // O(1) lookup: find all derivations that produce this dependency
-      const producers = derivationsByField.get(dep);
-      if (producers) {
-        for (const entryA of producers) {
-          const entryAEdges = graph.get(entryA);
-          if (entryA !== entryB && entryAEdges && !entryAEdges.has(entryB)) {
-            entryAEdges.add(entryB);
-            inDegree.set(entryB, (inDegree.get(entryB) ?? 0) + 1);
-          }
+      // O(1) lookup: find all derivations that produce this dependency,
+      // by exact key plus the group-scoped key for relative dependencies
+      const producers = [
+        ...(derivationsByField.get(dep) ?? []),
+        ...(groupPath && !dep.includes('.') ? (derivationsByField.get(`${groupPath}.${dep}`) ?? []) : []),
+      ];
+      for (const entryA of producers) {
+        const entryAEdges = graph.get(entryA);
+        if (entryA !== entryB && entryAEdges && !entryAEdges.has(entryB)) {
+          entryAEdges.add(entryB);
+          inDegree.set(entryB, (inDegree.get(entryB) ?? 0) + 1);
         }
       }
     }

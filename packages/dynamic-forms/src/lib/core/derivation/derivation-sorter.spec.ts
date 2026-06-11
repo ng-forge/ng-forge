@@ -108,5 +108,39 @@ describe('derivation-sorter', () => {
       expect(result).toContain(entryEUR);
       expect(result.length).toBe(2);
     });
+
+    it('should order chained group-nested derivations by their relative leaf keys', () => {
+      // fullName derives from firstName/lastName; greeting derives from fullName.
+      // Group-nested entries have absolute keys but relative dependencies.
+      const entryGreeting = createEntry('person.greeting', ['fullName']);
+      const entryFullName = createEntry('person.fullName', ['firstName', 'lastName']);
+
+      const result = topologicalSort([entryGreeting, entryFullName]);
+
+      expect(result.indexOf(entryFullName)).toBeLessThan(result.indexOf(entryGreeting));
+    });
+
+    it('should order group-nested producers before dependents using absolute keys', () => {
+      const entryGreeting = createEntry('person.greeting', ['person.fullName']);
+      const entryFullName = createEntry('person.fullName', ['firstName']);
+
+      const result = topologicalSort([entryGreeting, entryFullName]);
+
+      expect(result.indexOf(entryFullName)).toBeLessThan(result.indexOf(entryGreeting));
+    });
+
+    it('should not couple groups whose entries share a leaf key', () => {
+      // person.greeting depends on its OWN group's fullName. company.fullName
+      // shares the leaf but lives in another group, so it must not become a
+      // producer for person.greeting and force an ordering edge.
+      const entryGreeting = createEntry('person.greeting', ['fullName']);
+      const entryCompanyFullName = createEntry('company.fullName', []);
+
+      const result = topologicalSort([entryGreeting, entryCompanyFullName]);
+
+      // Without a false cross-group edge both entries have no dependencies,
+      // so the input order is preserved.
+      expect(result).toEqual([entryGreeting, entryCompanyFullName]);
+    });
   });
 });

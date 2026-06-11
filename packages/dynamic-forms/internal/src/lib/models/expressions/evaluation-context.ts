@@ -25,7 +25,11 @@ export interface EvaluationContext<TValue = unknown, TFormValue extends Record<s
    */
   groupValue?: unknown;
 
-  /** Root form value when inside an array context. */
+  /**
+   * Root form value. Reaches the whole form when `formValue` is scoped to an
+   * array item or a parent group; equals `formValue` at form root. Always set
+   * in derivation contexts; in condition contexts only set inside array items.
+   */
   rootFormValue?: Record<string, unknown>;
 
   /** Current array index when inside an array derivation. */

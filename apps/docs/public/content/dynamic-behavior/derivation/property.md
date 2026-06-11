@@ -48,7 +48,7 @@ Use JavaScript expressions with access to `formValue`:
 
 **Available variables:**
 
-- `formValue` - Object containing all form field values
+- `formValue` - Object containing the form field values. For fields nested in a group or array item, it is scoped to that group or item; use `rootFormValue` to reach the rest of the form
 - `externalData` - External application state (when configured in FormConfig)
 
 ### Static Value

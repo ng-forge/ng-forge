@@ -445,8 +445,9 @@ function createEvaluationContext(
 ): EvaluationContext {
   const fieldValue = getNestedValue(formValue, entry.fieldKey);
 
-  // Create field state snapshot for this specific field (non-reactive)
-  const fieldAccessor = (context.rootForm as FieldTreeRecord)[entry.fieldKey];
+  // Create field state snapshot for this specific field (non-reactive).
+  // Group-nested keys are dotted, so navigate the FieldTree segment by segment.
+  const fieldAccessor = getFieldTreeByPath(context.rootForm as FieldTreeRecord, entry.fieldKey);
   const fieldState = fieldAccessor ? readFieldStateInfo(fieldAccessor, false) : undefined;
 
   // Parent group value: the absolute path with the trailing field segment
@@ -454,17 +455,36 @@ function createEvaluationContext(
   const parentPath = getParentPathInScope(entry.fieldKey);
   const groupValue = parentPath ? getNestedValue(formValue, parentPath) : undefined;
 
+  // Group-nested fields get group-scoped formValue (matching array item
+  // semantics); an unmaterialized group value falls back to {} rather than root.
+  const scopedToGroup = parentPath !== undefined;
+
   return {
     fieldValue,
-    formValue,
+    formValue: scopedToGroup ? ((groupValue ?? {}) as Record<string, unknown>) : formValue,
     fieldPath: entry.fieldKey,
     groupValue,
     customFunctions: context.customFunctions,
     externalData: context.externalData,
     logger: context.logger,
+    rootFormValue: formValue,
     fieldState,
     formFieldState: chainContext.formFieldState,
   };
+}
+
+/**
+ * Navigates a FieldTree by a dotted path (e.g. `person.fullName`).
+ *
+ * @internal
+ */
+function getFieldTreeByPath(root: FieldTreeRecord, path: string): FieldTreeRecord[string] | undefined {
+  let current: unknown = root;
+  for (const segment of path.split('.')) {
+    if (current === undefined || current === null) return undefined;
+    current = (current as FieldTreeRecord)[segment];
+  }
+  return current as FieldTreeRecord[string] | undefined;
 }
 
 /**

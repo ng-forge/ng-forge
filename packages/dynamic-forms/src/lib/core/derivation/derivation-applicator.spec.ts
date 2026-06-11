@@ -1890,4 +1890,86 @@ describe('derivation-applicator', () => {
       expect(captured).toBeUndefined();
     });
   });
+
+  describe('group-scoped formValue in evaluation context', () => {
+    let logger: Logger;
+    let formValueSignal: WritableSignal<Record<string, unknown>>;
+
+    beforeEach(() => {
+      logger = createMockLogger();
+      formValueSignal = signal({});
+    });
+
+    function createContext(
+      form: Record<string, unknown>,
+      fns: Record<string, (ctx: unknown) => unknown> = {},
+    ): DerivationApplicatorContext {
+      return {
+        formValue: formValueSignal,
+        rootForm: form as unknown as import('@angular/forms/signals').FieldTree<unknown>,
+        derivationFunctions: fns as DerivationApplicatorContext['derivationFunctions'],
+        logger,
+        derivationLogger: createMockDerivationLogger(),
+      };
+    }
+
+    /**
+     * Builds a mock FieldTree with one group containing one leaf field,
+     * mirroring the Signal Forms structure that `applyValueToForm` navigates.
+     * Returns the leaf's writable value signal for assertions.
+     */
+    function createGroupMockForm(groupKey: string, leafKey: string, initialLeafValue: unknown) {
+      const leafValue = signal(initialLeafValue);
+      const leafInstance = { value: leafValue, dirty: signal(false), touched: signal(false) };
+      const leafTree = computed(() => leafInstance);
+
+      const groupInstance = { value: signal({}), dirty: signal(false), touched: signal(false) };
+      const groupTree = Object.assign(
+        computed(() => groupInstance),
+        { [leafKey]: leafTree },
+      );
+
+      return { form: { [groupKey]: groupTree } as Record<string, unknown>, leafValue };
+    }
+
+    it('should scope formValue to the parent group so expressions reference siblings directly', () => {
+      const { form, leafValue } = createGroupMockForm('person', 'fullName', '');
+      formValueSignal.set({ person: { firstName: 'Ada', lastName: 'Lovelace', fullName: '' } });
+
+      const collection = createCollection([
+        createEntry('person.fullName', { expression: 'formValue.firstName + " " + formValue.lastName', dependsOn: ['*'] }),
+      ]);
+
+      const result = applyDerivations(collection, createContext(form));
+
+      expect(result.appliedCount).toBe(1);
+      expect(leafValue()).toBe('Ada Lovelace');
+    });
+
+    it('should expose rootFormValue for cross-scope references from group-nested fields', () => {
+      const { form, leafValue } = createGroupMockForm('person', 'summary', '');
+      formValueSignal.set({ company: 'Forge Inc', person: { firstName: 'Ada', summary: '' } });
+
+      const collection = createCollection([
+        createEntry('person.summary', { expression: 'formValue.firstName + " at " + rootFormValue.company', dependsOn: ['*'] }),
+      ]);
+
+      const result = applyDerivations(collection, createContext(form));
+
+      expect(result.appliedCount).toBe(1);
+      expect(leafValue()).toBe('Ada at Forge Inc');
+    });
+
+    it('should keep root-scoped formValue for fields at form root', () => {
+      const { form, values } = createMockForm({ shadow: '' });
+      formValueSignal.set({ source: 'root', shadow: '' });
+
+      const collection = createCollection([createEntry('shadow', { expression: 'formValue.source', dependsOn: ['*'] })]);
+
+      const result = applyDerivations(collection, createContext(form));
+
+      expect(result.appliedCount).toBe(1);
+      expect(values.shadow).toBe('root');
+    });
+  });
 });
