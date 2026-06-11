@@ -1,0 +1,6 @@
+{
+  "name": "@ng-forge/workspace-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "generators": "./generators.json"
+}

@@ -33,7 +33,7 @@ log_error() {
 # Check if pnpm is installed
 if ! command -v pnpm &> /dev/null; then
     log_error "pnpm is not installed. Please install it first:"
-    log_error "npm install -g pnpm@8.15.1"
+    log_error "npm install -g pnpm@10.28.0"
     exit 1
 fi
 
@@ -125,9 +125,9 @@ log_success "Branch created"
 # Run nx release version to bump versions
 log_info "Bumping version to $NEW_VERSION..."
 if [[ "$VERSION_TYPE" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    pnpm nx release version "$NEW_VERSION" --skip-publish
+    pnpm nx release version "$NEW_VERSION"
 else
-    pnpm nx release version "$VERSION_TYPE" --skip-publish
+    pnpm nx release version "$VERSION_TYPE"
 fi
 log_success "Version bumped"
 

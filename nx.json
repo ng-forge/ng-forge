@@ -34,9 +34,9 @@
     }
   },
   "release": {
-    "projects": ["packages/*", "!dynamic-forms-zod"],
+    "projects": ["packages/*"],
     "version": {
-      "preVersionCommand": "pnpm dlx nx run-many -t build",
+      "preVersionCommand": "nx run-many -t build --projects 'packages/*'",
       "generatorOptions": {
         "updateDependents": "auto"
       }

@@ -44,6 +44,13 @@ describe('SelectField - Exhaustive Whitelist', () => {
     | 'logic'
     | 'derivation'
     | 'schemas'
+    // Wrappers and addons
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
+    | 'addons'
+    // Nullable opt-in
+    | 'nullable'
     // SelectField-specific
     | 'options';
 
@@ -67,8 +74,10 @@ describe('SelectField<string>', () => {
     expectTypeOf<SelectField<string>['options']>().toEqualTypeOf<readonly FieldOption<string>[]>();
   });
 
-  it('value is string', () => {
-    expectTypeOf<SelectField<string>['value']>().toEqualTypeOf<string | undefined>();
+  it('value is string (default TNullable = boolean distributes to | null)', () => {
+    expectTypeOf<SelectField<string>['value']>().toEqualTypeOf<string | null | undefined>();
+    // Pinning nullable: false removes null from the value union.
+    expectTypeOf<SelectField<string, SelectProps, false>['value']>().toEqualTypeOf<string | undefined>();
   });
 });
 
@@ -77,8 +86,8 @@ describe('SelectField<string>', () => {
 // ============================================================================
 
 describe('SelectField<number>', () => {
-  it('value is number', () => {
-    expectTypeOf<SelectField<number>['value']>().toEqualTypeOf<number | undefined>();
+  it('value is number (default TNullable = boolean distributes to | null)', () => {
+    expectTypeOf<SelectField<number>['value']>().toEqualTypeOf<number | null | undefined>();
   });
 
   it('options are FieldOption<number>', () => {
@@ -97,8 +106,8 @@ describe('SelectField<{ id: string; name: string }>', () => {
     expectTypeOf<SelectField<Obj>['options']>().toEqualTypeOf<readonly FieldOption<Obj>[]>();
   });
 
-  it('value is the object type', () => {
-    expectTypeOf<SelectField<Obj>['value']>().toEqualTypeOf<Obj | undefined>();
+  it('value is the object type (default TNullable = boolean distributes to | null)', () => {
+    expectTypeOf<SelectField<Obj>['value']>().toEqualTypeOf<Obj | null | undefined>();
   });
 });
 

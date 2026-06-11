@@ -67,7 +67,7 @@ export class LoginComponent {
 
 ## ✨ Features
 
-⚡ **Signal Forms** – Native Angular 21+ signal forms integration
+⚡ **Signal Forms** – Native Angular 22+ signal forms integration
 
 🎯 **Type-Safe** – Full TypeScript inference for form values
 
@@ -83,22 +83,12 @@ export class LoginComponent {
 
 ## Compatibility
 
-> **Stability:** This library is built on Angular Signal Forms, which is stable as of Angular v22.
-> See the table below for supported Angular versions.
+| Angular | @ng-forge/dynamic-forms |
+| ------- | ----------------------- |
+| 22.x    | 1.x                     |
+| 21.x    | 0.x (experimental)      |
 
-| @ng-forge/dynamic-forms | Angular       |
-| ----------------------- | ------------- |
-| 1.0.x                   | ~22.0.0       |
-| 0.9.x                   | >=21.2.0      |
-| 0.8.x                   | >=21.2.0      |
-| 0.7.x                   | >=21.2.0      |
-| 0.6.x                   | >=21.1.0      |
-| 0.5.x                   | >=21.1.0      |
-| 0.4.x                   | >=21.1.0      |
-| 0.3.x                   | 21.0.7-21.0.x |
-| 0.2.x                   | 21.0.6        |
-| 0.1.1+                  | 21.0.2-21.0.5 |
-| 0.1.0                   | 21.0.0-21.0.1 |
+Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, where Signal Forms were still experimental and could change in patch releases. Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
 
 ## 📦 Packages
 

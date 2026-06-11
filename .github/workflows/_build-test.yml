@@ -1,0 +1,500 @@
+name: Build & Test
+
+# Reusable build/test/e2e pipeline shared by ci.yml (push, full) and
+# pr-check.yml (pull_request, affected-only). The single `affected` input is the
+# only real behavioural difference between the two: when true, Nx targets run
+# against origin/main and the E2E matrix is computed from affected projects; when
+# false, the full publishable set / all example apps are built and tested.
+on:
+  workflow_call:
+    inputs:
+      affected:
+        description: 'Run Nx targets against origin/main instead of the full set'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_MODULES_CACHE_KEY: modules-${{ github.run_id }}
+  PLAYWRIGHT_CACHE_KEY: playwright-${{ github.run_id }}
+  BUILD_CACHE_KEY: build-${{ github.sha }}
+
+jobs:
+  setup:
+    name: Setup & Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      packages: ${{ steps.packages.outputs.list }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: ${{ inputs.affected && '0' || '1' }}
+
+      - name: Fetch base branch for affected detection
+        if: inputs.affected
+        run: git fetch origin main:main
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fails when any registered sync generator (e.g. the dynamic-forms
+      # public_api barrel) would change files — committed state must be in sync.
+      - name: Check workspace sync
+        run: pnpm nx sync:check
+
+      - name: Resolve publishable packages
+        id: packages
+        run: |
+          # Nx plugins (e.g. @analogjs/vite-plugin-angular) print "[@scope/...]: ..."
+          # lines to stdout during graph construction, ahead of the --json payload.
+          # Grep the JSON array line specifically (it starts with `["`) before jq.
+          LIST=$(NX_DAEMON=false pnpm exec nx show projects --projects 'packages/*' --json 2>/dev/null | grep -E '^\["' | head -1 | jq -r 'sort | join(" ")')
+          if [ -z "$LIST" ]; then
+            echo "::error::Could not resolve any publishable packages under packages/*"
+            exit 1
+          fi
+          echo "Publishable packages: $LIST"
+          echo "list=$LIST" >> "$GITHUB_OUTPUT"
+
+      - name: Validate PR title
+        if: inputs.affected
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Validating PR title against Angular convention..."
+          echo "$PR_TITLE" | pnpm commitlint --verbose
+
+      - name: Check formatting (full)
+        if: ${{ !inputs.affected }}
+        run: |
+          echo "Checking code formatting with Prettier..."
+          pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" || {
+            echo ""
+            echo "❌ Formatting issues found!"
+            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
+            exit 1
+          }
+
+      - name: Check formatting on affected files
+        if: inputs.affected
+        run: |
+          echo "Checking code formatting on affected files..."
+          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
+          if [ -z "$AFFECTED_FILES" ]; then
+            echo "No affected files to check"
+            exit 0
+          fi
+          echo "Affected files to check:"
+          echo "$AFFECTED_FILES"
+          echo ""
+          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
+            echo ""
+            echo "❌ Formatting issues found in affected files!"
+            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
+            exit 1
+          }
+
+      - name: Validate dependency graph
+        run: |
+          echo "Checking for circular dependencies..."
+          pnpm nx graph --file=graph.json || {
+            echo "❌ Failed to generate dependency graph"
+            exit 1
+          }
+          echo "✅ Dependency graph is valid"
+
+      - name: Show affected projects
+        if: inputs.affected
+        run: |
+          echo "Affected projects and their dependents:"
+          pnpm nx show projects --affected --base=origin/main --with-target=build || true
+
+      - name: Cache node_modules
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules
+          key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Cache Playwright browsers
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: ${{ inputs.affected && '0' || '1' }}
+
+      - name: Fetch base branch for affected detection
+        if: inputs.affected
+        run: git fetch origin main:main
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore Nx computation cache
+        uses: actions/cache@v5
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
+
+      - name: Build all libraries
+        if: ${{ !inputs.affected }}
+        run: pnpm nx run-many -t build -p ${{ needs.setup.outputs.packages }}
+
+      - name: Build affected libraries
+        if: inputs.affected
+        run: pnpm nx affected -t build --base=origin/main --exclude='docs,*-examples'
+
+      - name: Verify package integrity
+        run: |
+          echo "Verifying package integrity..."
+          for PKG in ${{ needs.setup.outputs.packages }}; do
+            if [ -d "dist/packages/$PKG" ]; then
+              echo "Checking dist/packages/$PKG..."
+              if [ ! -f "dist/packages/$PKG/package.json" ]; then
+                echo "❌ Missing package.json in dist/packages/$PKG"
+                exit 1
+              fi
+              # dynamic-form-mcp and openapi-generator are Node bundles (esbuild), not Angular packages
+              if [ "$PKG" = "dynamic-form-mcp" ] || [ "$PKG" = "openapi-generator" ]; then
+                if [ ! -f "dist/packages/$PKG/src/index.js" ]; then
+                  echo "❌ Missing src/index.js in dist/packages/$PKG"
+                  exit 1
+                fi
+                echo "✅ $PKG package structure looks valid (Node bundle)"
+              elif [ ! -f "dist/packages/$PKG/index.d.ts" ] && [ ! -f "dist/packages/$PKG/fesm2022/index.d.ts" ]; then
+                echo "⚠️  Warning: No index.d.ts found in dist/packages/$PKG"
+              else
+                echo "✅ $PKG package structure looks valid"
+              fi
+            elif [ "${{ inputs.affected }}" = "true" ]; then
+              echo "⏭️  Skipping $PKG (not affected)"
+            else
+              echo "❌ Missing dist/packages/$PKG (expected in a full build)"
+              exit 1
+            fi
+          done
+          echo "✅ Package integrity check complete"
+
+      # openapi-generator is an esbuild CLI bundle with no .d.ts surface and thus no
+      # api-check target; run-many/affected run the check only for projects that define it.
+      - name: Check public API surface
+        if: ${{ !inputs.affected }}
+        run: pnpm nx run-many -t api-check
+
+      - name: Check public API surface (affected)
+        if: inputs.affected
+        run: pnpm nx affected -t api-check --base=origin/main
+
+      - name: Cache build artifacts
+        uses: actions/cache/save@v5
+        with:
+          path: dist/packages
+          key: ${{ env.BUILD_CACHE_KEY }}
+
+  lint-and-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [setup, build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: ${{ inputs.affected && '0' || '1' }}
+
+      - name: Fetch base branch for affected detection
+        if: inputs.affected
+        run: git fetch origin main:main
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore Playwright browsers
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          fail-on-cache-miss: true
+
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v5
+        with:
+          path: dist/packages
+          key: ${{ env.BUILD_CACHE_KEY }}
+          # full mode must hit the cache (build produces all 7); affected mode may
+          # legitimately build nothing, so a miss is tolerated there
+          fail-on-cache-miss: ${{ !inputs.affected }}
+
+      - name: Restore Nx computation cache
+        uses: actions/cache@v5
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
+
+      - name: Lint
+        run: |
+          if [ "${{ inputs.affected }}" = "true" ]; then
+            pnpm nx affected -t lint --base=origin/main
+          else
+            pnpm nx run-many -t lint --parallel=3
+          fi
+
+      - name: Test
+        run: |
+          if [ "${{ inputs.affected }}" = "true" ]; then
+            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
+          else
+            pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
+          fi
+
+      - name: Test schematics
+        run: |
+          if [ "${{ inputs.affected }}" = "true" ]; then
+            pnpm nx affected -t test-schematics --base=origin/main
+          else
+            pnpm nx run-many -t test-schematics
+          fi
+
+      - name: Type test
+        run: |
+          if [ "${{ inputs.affected }}" = "true" ]; then
+            pnpm nx affected -t type-test --base=origin/main
+          else
+            pnpm nx run-many -t type-test --parallel=3
+          fi
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v6
+        with:
+          directory: ./coverage
+          flags: unittests
+          name: codecov-umbrella
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  build-apps:
+    name: Build Apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [setup, build]
+    outputs:
+      e2e-matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has-e2e: ${{ steps.set-matrix.outputs.has-e2e }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: ${{ inputs.affected && '0' || '1' }}
+
+      - name: Fetch base branch for affected detection
+        if: inputs.affected
+        run: git fetch origin main:main
+
+      - name: Setup Node and restore cache
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore build artifacts
+        uses: actions/cache/restore@v5
+        with:
+          path: dist/packages
+          key: ${{ env.BUILD_CACHE_KEY }}
+          # full mode must hit the cache (build produces all 7); affected mode may
+          # legitimately build nothing, so a miss is tolerated there
+          fail-on-cache-miss: ${{ !inputs.affected }}
+
+      - name: Build documentation (full)
+        if: ${{ !inputs.affected }}
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          echo "Building documentation..."
+          pnpm run build:docs
+
+      - name: Build example apps (full)
+        if: ${{ !inputs.affected }}
+        run: |
+          echo "Building all example apps..."
+          pnpm run build:examples
+
+      - name: Upload docs artifacts
+        if: ${{ !inputs.affected }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-dist
+          path: dist/apps/docs/
+          retention-days: 7
+
+      - name: Build docs if affected
+        if: inputs.affected
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          if pnpm nx show projects --affected --base=origin/main | grep -q docs; then
+            echo "Building documentation..."
+            pnpm nx build docs --configuration=production
+          else
+            echo "Documentation not affected, skipping build"
+          fi
+
+      - name: Build affected example apps
+        if: inputs.affected
+        run: |
+          AFFECTED=$(pnpm nx show projects --affected --base=origin/main)
+          EXAMPLES=$(echo "$AFFECTED" | grep -E "(core-examples|material-examples|bootstrap-examples|primeng-examples|ionic-examples)" || true)
+          if [ -n "$EXAMPLES" ]; then
+            echo "Building affected example apps:"
+            echo "$EXAMPLES"
+            for APP in $EXAMPLES; do
+              echo "Building $APP..."
+              pnpm nx build "$APP" --configuration=production
+            done
+          else
+            echo "No example apps affected, skipping build"
+          fi
+
+      - name: Determine E2E matrix
+        id: set-matrix
+        run: |
+          if [ "${{ inputs.affected }}" = "true" ]; then
+            AFFECTED=$(pnpm nx show projects --affected --base=origin/main --with-target=e2e 2>/dev/null || echo "")
+          else
+            # full run: every example app participates
+            AFFECTED="core-examples bootstrap-examples material-examples primeng-examples ionic-examples"
+          fi
+          echo "E2E projects: $AFFECTED"
+
+          # Build JSON matrix
+          MATRIX='{"include":['
+          FIRST=true
+
+          for APP in core-examples bootstrap-examples material-examples primeng-examples ionic-examples; do
+            if echo "$AFFECTED" | grep -q "$APP"; then
+              SHORT=${APP%-examples}
+              echo "  - $APP (included)"
+              if [ "$APP" = "core-examples" ]; then
+                # core-examples runs natively (no Docker) with 3 shards — no screenshot tests
+                for SHARD in "1/3" "2/3" "3/3"; do
+                  SHARD_ID=${SHARD//\//of}
+                  if [ "$FIRST" = true ]; then
+                    FIRST=false
+                  else
+                    MATRIX+=','
+                  fi
+                  MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":false,\"shard\":\"$SHARD\",\"shardId\":\"$SHARD_ID\"}"
+                done
+              else
+                if [ "$FIRST" = true ]; then
+                  FIRST=false
+                else
+                  MATRIX+=','
+                fi
+                MATRIX+="{\"app\":\"$APP\",\"short\":\"$SHORT\",\"docker\":true,\"shard\":\"\",\"shardId\":\"\"}"
+              fi
+            else
+              echo "  - $APP (not included, skipping)"
+            fi
+          done
+
+          MATRIX+=']}'
+
+          if [ "$MATRIX" = '{"include":[]}' ]; then
+            echo "No E2E apps to run"
+            echo "has-e2e=false" >> "$GITHUB_OUTPUT"
+            echo "matrix={\"include\":[]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "E2E matrix: $MATRIX"
+            echo "has-e2e=true" >> "$GITHUB_OUTPUT"
+            echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e:
+    name: E2E Tests (${{ matrix.app }}${{ matrix.shard && format(' [{0}]', matrix.shard) || '' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [lint-and-test, build-apps]
+    if: needs.build-apps.outputs.has-e2e == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-apps.outputs.e2e-matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # Native setup — only needed for core-examples (non-Docker)
+      - name: Setup Node and restore cache
+        if: ${{ !matrix.docker }}
+        uses: ./.github/actions/setup-node-restore
+        with:
+          cache-key: ${{ env.NODE_MODULES_CACHE_KEY }}
+
+      - name: Restore Playwright browsers
+        if: ${{ !matrix.docker }}
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ env.PLAYWRIGHT_CACHE_KEY }}
+          fail-on-cache-miss: true
+
+      - name: Install Playwright system dependencies
+        if: ${{ !matrix.docker }}
+        run: pnpm exec playwright install-deps
+
+      - name: Run E2E tests
+        id: e2e
+        run: |
+          if [[ "${{ matrix.docker }}" == "true" ]]; then
+            ./scripts/playwright-docker.sh ${{ matrix.app }}
+          else
+            pnpm nx run ${{ matrix.app }}:e2e --shard=${{ matrix.shard }}
+          fi
+
+      - name: Generate job summary
+        if: always() && steps.e2e.outcome != 'skipped'
+        run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/e2e/${{ matrix.short }}/test-results
+
+      - name: Upload test artifacts on failure
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
+          path: |
+            apps/e2e/${{ matrix.short }}/test-results/
+            apps/e2e/${{ matrix.short }}/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7

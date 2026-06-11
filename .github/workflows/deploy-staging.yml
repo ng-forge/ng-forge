@@ -15,90 +15,15 @@ concurrency:
 
 jobs:
   deploy-staging:
-    name: Build and Deploy to Staging
+    name: Deploy to Staging
     if: github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment:
-      name: staging
-      url: https://staging.ng-forge.com
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 0
-
-      # Vercel blocks prebuilt deploys whose HEAD commit author email cannot
-      # be matched to a GitHub account (Pro-plan contributor-seat check).
-      # Squash-merges preserve the PR author's GitHub noreply email, which
-      # often fails the match. Reattribute HEAD locally so the upload is
-      # billed to the repo owner; this only mutates the CI checkout.
-      - name: Reattribute commit author for Vercel seat check
-        env:
-          DEPLOY_AUTHOR_EMAIL: ${{ secrets.VERCEL_DEPLOY_AUTHOR_EMAIL }}
-          DEPLOY_AUTHOR_NAME: ${{ secrets.VERCEL_DEPLOY_AUTHOR_NAME }}
-        run: |
-          if [ -z "$DEPLOY_AUTHOR_EMAIL" ] || [ -z "$DEPLOY_AUTHOR_NAME" ]; then
-            echo "::error::Repo secrets VERCEL_DEPLOY_AUTHOR_EMAIL and VERCEL_DEPLOY_AUTHOR_NAME must be set (Settings → Secrets and variables → Actions → Secrets)."
-            exit 1
-          fi
-          git config user.email "$DEPLOY_AUTHOR_EMAIL"
-          git config user.name "$DEPLOY_AUTHOR_NAME"
-          git commit --amend --reset-author --no-edit
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v5
-        with:
-          version: 10.28.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Vercel CLI
-        run: pnpm add -g vercel@latest
-
-      - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to Vercel
-        id: deploy
-        run: |
-          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "Deployed to: $URL"
-
-      - name: Alias to staging.ng-forge.com
-        run: vercel alias ${{ steps.deploy.outputs.url }} staging.ng-forge.com --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Smoke test staging
-        run: |
-          echo "Verifying staging deployment is accessible..."
-          curl --fail --retry 5 --retry-delay 10 "https://staging.ng-forge.com/dynamic-forms/" > /dev/null
-          echo "Staging deployment verified successfully"
-
-      - name: Output Deployment URL
-        run: |
-          echo "## Staging Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** ${{ github.event.workflow_run.head_sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://staging.ng-forge.com" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Application URLs" >> $GITHUB_STEP_SUMMARY
-          echo "- **Docs:** https://staging.ng-forge.com/dynamic-forms/" >> $GITHUB_STEP_SUMMARY
-          echo "- **Material Examples:** https://staging.ng-forge.com/dynamic-forms/examples/material/" >> $GITHUB_STEP_SUMMARY
-          echo "- **Bootstrap Examples:** https://staging.ng-forge.com/dynamic-forms/examples/bootstrap/" >> $GITHUB_STEP_SUMMARY
-          echo "- **PrimeNG Examples:** https://staging.ng-forge.com/dynamic-forms/examples/primeng/" >> $GITHUB_STEP_SUMMARY
-          echo "- **Ionic Examples:** https://staging.ng-forge.com/dynamic-forms/examples/ionic/" >> $GITHUB_STEP_SUMMARY
+    uses: ./.github/workflows/_vercel-deploy.yml
+    with:
+      gh-environment: staging
+      gh-environment-url: https://staging.ng-forge.com
+      vercel-environment: preview
+      production: false
+      ref: ${{ github.event.workflow_run.head_sha }}
+      alias: staging.ng-forge.com
+      smoke-url: https://staging.ng-forge.com/dynamic-forms/
+    secrets: inherit

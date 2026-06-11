@@ -172,7 +172,14 @@ describe('InputField - Keys Whitelist', () => {
     | 'validationMessages'
     | 'logic'
     | 'derivation'
-    | 'schemas';
+    | 'schemas'
+    // Wrappers and addons
+    | 'wrappers'
+    | 'skipAutoWrappers'
+    | 'skipDefaultWrappers'
+    | 'addons'
+    // Nullable opt-in
+    | 'nullable';
 
   // For a union, keyof gives intersection of keys (common keys)
   type ActualKeys = keyof InputField;
@@ -232,9 +239,9 @@ describe('NumberInputField variant', () => {
       value: 100,
     };
 
-    // value on the union is number | string | undefined
+    // value on the union is number | string | null | undefined (default TNullable = boolean)
     // but when narrowed via props.type = 'number', it is number
-    expectTypeOf(field.value).toMatchTypeOf<number | string | undefined>();
+    expectTypeOf(field.value).toMatchTypeOf<number | string | null | undefined>();
   });
 });
 
@@ -272,7 +279,7 @@ describe('StringInputField variant', () => {
       value: 'test',
     };
 
-    expectTypeOf(field.value).toMatchTypeOf<number | string | undefined>();
+    expectTypeOf(field.value).toMatchTypeOf<number | string | null | undefined>();
   });
 });
 
@@ -445,12 +452,14 @@ describe('InputField - Nullable widening', () => {
     type NonNullableField = InputField<import('./input-field').InputProps, false>;
     expectTypeOf<null>().not.toMatchTypeOf<NonNullableField['value']>();
 
-    // Literal assignment must be rejected at compile time.
-    // @ts-expect-error - null is not assignable to value when nullable: false
+    // Literal assignment must be rejected at compile time. The directive sits on
+    // the offending property: TS reports the mismatch on the `value` line, not the
+    // declaration line.
     const field: InputField<import('./input-field').InputProps, false> = {
       type: 'input',
       key: 'name',
       props: { type: 'text' },
+      // @ts-expect-error - null is not assignable to value when nullable: false
       value: null,
     };
     expectTypeOf(field).not.toBeAny();
