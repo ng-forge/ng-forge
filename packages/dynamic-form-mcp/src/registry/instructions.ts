@@ -299,6 +299,8 @@ Evaluates a JavaScript expression with access to \`formValue\`, \`fieldValue\`, 
 }
 \`\`\`
 
+**Expression scoping:** for fields nested in a group or array, \`formValue\` is scoped to the parent group or the current array item, so expressions reference sibling fields directly (e.g. \`formValue.firstName\` inside a \`person\` group). Use \`rootFormValue\` to reach fields outside the current scope. Fields at form root see the whole form value as \`formValue\`.
+
 #### Custom Condition
 
 Invokes a registered custom function by name:

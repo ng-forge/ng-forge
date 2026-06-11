@@ -338,6 +338,42 @@ Inside array items, `formValue` refers to the current array item. Use `rootFormV
 }
 ```
 
+## Group Field Derivations
+
+Inside groups, `formValue` is scoped to the parent group, matching the array item behavior. Expressions reference sibling fields directly:
+
+```typescript
+{
+  key: 'person',
+  type: 'group',
+  fields: [
+    { key: 'firstName', type: 'input', label: 'First Name' },
+    { key: 'lastName', type: 'input', label: 'Last Name' },
+    {
+      key: 'fullName',
+      type: 'input',
+      label: 'Full Name',
+      readonly: true,
+      // formValue is scoped to the person group
+      derivation: 'formValue.firstName + " " + formValue.lastName',
+    },
+  ],
+}
+```
+
+Use `rootFormValue` to reach fields outside the group:
+
+```typescript
+{
+  key: 'summary',
+  type: 'input',
+  readonly: true,
+  // formValue = the person group { firstName, lastName, summary }
+  // rootFormValue = entire form { company, person, ... }
+  derivation: 'formValue.firstName + " at " + rootFormValue.company',
+}
+```
+
 ## Debugging Derivations
 
 Enable derivation logging to troubleshoot issues:

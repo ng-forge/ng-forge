@@ -12,17 +12,15 @@ async function fillVisibleInput(scenario: Locator, selector: string, value: stri
 }
 
 test.describe('Container Nesting E2E Tests', () => {
-  // Array inside group (group > row > array) is a known library limitation.
-  // The array fields inside a row inside a group do not render their items.
   test.describe('Array Inside Group', () => {
-    test.skip(true, 'Library limitation: array inside group via row does not render array items');
     test('should render and interact with array fields inside a group', async ({ page, helpers }) => {
       await page.goto('/#/test/container-nesting/array-inside-group');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('array-inside-group');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const teamNameInput = scenario.locator('#teamName input');
+      // DOM IDs of fields inside a group are scoped: `teamName` becomes `team_teamName`.
+      const teamNameInput = scenario.locator('#team_teamName input');
       await expect(teamNameInput).toBeVisible({ timeout: 5000 });
       await teamNameInput.fill('Engineering');
 
@@ -217,28 +215,27 @@ test.describe('Container Nesting E2E Tests', () => {
     });
   });
 
-  // Deeply nested (group > row > array > group) is a known library limitation.
-  // Same issue as array-inside-group: arrays nested inside groups via rows don't render items.
   test.describe('Deeply Nested Containers', () => {
-    test.skip(true, 'Library limitation: array inside group via row does not render array items');
     test('should handle group > row > array > group nesting', async ({ page, helpers }) => {
       await page.goto('/#/test/container-nesting/deeply-nested');
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('deeply-nested');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const orgNameInput = scenario.locator('#orgName input');
+      // DOM IDs of fields inside a group are scoped: `orgName` becomes `organization_orgName`.
+      const orgNameInput = scenario.locator('#organization_orgName input');
       await expect(orgNameInput).toBeVisible({ timeout: 5000 });
       await orgNameInput.fill('Acme Corp');
 
       const addButton = scenario.locator('button:has-text("Add Department")');
       await addButton.click();
 
-      const deptNameInput = scenario.locator('#name_0 input');
+      // Array items reset the group prefix; the inner `details` group scopes item ids.
+      const deptNameInput = scenario.locator('#details_name_0 input');
       await expect(deptNameInput).toBeVisible({ timeout: 10000 });
       await deptNameInput.fill('R&D');
 
-      const budgetInput = scenario.locator('#budget_0 input');
+      const budgetInput = scenario.locator('#details_budget_0 input');
       await expect(budgetInput).toBeVisible({ timeout: 5000 });
       await budgetInput.fill('50000');
 

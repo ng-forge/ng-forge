@@ -24,7 +24,6 @@ import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { getFieldValueHandling } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { ArrayFieldStateMachine, RunHandle } from './array-field-state-machine';
@@ -183,14 +182,33 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
     });
   });
 
-  private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
-    const arrayKey = this.field().key;
+  /** The array's own FieldTree, navigated from the parent context's (possibly group-scoped) form. */
+  private readonly arrayFieldTree = computed<ArrayFieldTree<unknown> | undefined>(() => {
     const parentForm = this.parentFieldSignalContext.form;
-    const arrayValue = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
+    return (parentForm as Record<string, ArrayFieldTree<unknown> | undefined>)[this.field().key];
+  });
+
+  /**
+   * Current array value, read from the array's own FieldTree when available.
+   * The parent context's `value` signal is root-scoped, so group-nested arrays
+   * (group > row > array) are invisible in it; the FieldTree is authoritative.
+   * Falls back to the root-value lookup during the init window before the tree exists.
+   */
+  private readonly currentArrayValue = computed<unknown[]>(() => {
+    const tree = this.arrayFieldTree();
+    if (tree) {
+      const value = tree().value();
+      return Array.isArray(value) ? value : [];
+    }
+    return getArrayValue(this.parentFieldSignalContext.value(), this.field().key);
+  });
+
+  private readonly arrayFieldTrees = computed<readonly (FieldTree<unknown> | null)[]>(() => {
+    const arrayValue = this.currentArrayValue();
 
     if (arrayValue.length === 0) return [];
 
-    const arrayFieldTree = (parentForm as Record<string, ArrayFieldTree<unknown>>)[arrayKey];
+    const arrayFieldTree = this.arrayFieldTree();
     if (!arrayFieldTree) return arrayValue.map(() => null);
 
     // Access array items via bracket notation - Angular Signal Forms arrays support this
@@ -236,9 +254,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   readonly atMaxLength: Signal<boolean> = computed(() => {
     const maxLength = this.field().maxLength;
     if (maxLength === undefined) return false;
-    const arrayKey = this.field().key;
-    const currentArray = getArrayValue(this.parentFieldSignalContext.value(), arrayKey);
-    return currentArray.length >= maxLength;
+    return this.currentArrayValue().length >= maxLength;
   });
 
   // ─────────────────────────────────────────────────────────────────────────────

@@ -40,6 +40,15 @@ export function topologicalSort(entries: DerivationEntry[]): DerivationEntry[] {
         relativeEntries.push(entry);
         derivationsByField.set(relativePath, relativeEntries);
       }
+    } else if (entry.fieldKey.includes('.')) {
+      // Group-nested entries: index 'person.fullName' under 'fullName' too,
+      // since sibling derivations inside the group depend on the relative key
+      const leaf = entry.fieldKey.slice(entry.fieldKey.lastIndexOf('.') + 1);
+      if (leaf) {
+        const leafEntries = derivationsByField.get(leaf) ?? [];
+        leafEntries.push(entry);
+        derivationsByField.set(leaf, leafEntries);
+      }
     }
   }
 

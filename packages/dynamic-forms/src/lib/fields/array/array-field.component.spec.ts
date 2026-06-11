@@ -1541,4 +1541,131 @@ describe('ArrayFieldComponent', () => {
       expect(valuesOf(context)).toEqual(['A', 'B']);
     });
   });
+
+  describe('group-nested arrays (group > row > array)', () => {
+    /**
+     * Mimics the FIELD_SIGNAL_CONTEXT that GroupFieldComponent provides to its
+     * descendants: `value` stays the ROOT value signal while `form` is the
+     * group-scoped FieldTree. The array must resolve its items from the form
+     * tree, not from the root value.
+     */
+    function setupGroupNestedArrayTest(arrayField: ArrayField<unknown>, groupKey: string, rootValue: Record<string, unknown>) {
+      const mockFieldType: FieldTypeDefinition = {
+        name: 'test',
+        loadComponent: async () => TestFieldComponent,
+        mapper: baseFieldMapper,
+        renderReadyWhen: [],
+      };
+
+      const registry = new Map([['test', mockFieldType]]);
+
+      const mockEntity = signal<Record<string, unknown>>({});
+      const mockFormSignal = signal<unknown>(undefined);
+
+      TestBed.configureTestingModule({
+        imports: [ArrayFieldComponent],
+        providers: [
+          provideDynamicForm(withLoggerConfig()),
+          EventBus,
+          FunctionRegistryService,
+          ArrayItemRegistryService,
+          { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
+          { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
+          { provide: FIELD_REGISTRY, useValue: registry },
+          {
+            provide: FIELD_SIGNAL_CONTEXT,
+            useFactory: (injector: Injector) => {
+              return runInInjectionContext(injector, () => {
+                const valueSignal = signal(rootValue);
+                const groupField = { key: groupKey, type: 'group', fields: [arrayField] } as unknown as FieldDef<unknown>;
+                const schema = createSchemaFromFields([groupField], registry);
+                const testForm = form(valueSignal, schema);
+                testForm();
+
+                mockEntity.set(rootValue);
+                mockFormSignal.set(testForm);
+
+                const groupTree = (testForm as unknown as Record<string, unknown>)[groupKey];
+                const mockFieldSignalContext: FieldSignalContext<Record<string, unknown>> = {
+                  injector,
+                  value: valueSignal,
+                  defaultValues: () => ({}),
+                  form: groupTree as FieldSignalContext<Record<string, unknown>>['form'],
+                  defaultValidationMessages: undefined,
+                };
+
+                return mockFieldSignalContext;
+              });
+            },
+            deps: [Injector],
+          },
+        ],
+      });
+
+      const fixture = TestBed.createComponent(ArrayFieldComponent);
+      const component = fixture.componentInstance;
+
+      fixture.componentRef.setInput('key', arrayField.key);
+      fixture.componentRef.setInput('field', arrayField);
+
+      fixture.detectChanges();
+
+      return { component, fixture };
+    }
+
+    it('should render initial items even though the root value scopes them under the group key', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'members',
+        type: 'array',
+        fields: [[createSimpleTestField('name', 'Name', 'Alice')], [createSimpleTestField('name', 'Name', 'Bob')]],
+      };
+
+      const { component, fixture } = setupGroupNestedArrayTest(field, 'team', {
+        team: { members: [{ name: 'Alice' }, { name: 'Bob' }] },
+      });
+
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      expect(component.resolvedItems()).toHaveLength(2);
+    });
+
+    it('should add an item via AppendArrayItemEvent and write it under the group path', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'members',
+        type: 'array',
+        fields: [[createSimpleTestField('name', 'Name', 'Alice')]],
+      };
+
+      const { component, fixture } = setupGroupNestedArrayTest(field, 'team', {
+        team: { members: [{ name: 'Alice' }] },
+      });
+      const eventBus = TestBed.inject(EventBus);
+
+      await waitForItems(component, fixture, (n) => n >= 1);
+
+      const template = [createSimpleTestField('name', 'Name')];
+      eventBus.dispatch(AppendArrayItemEvent, 'members', template);
+
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      expect(component.resolvedItems()).toHaveLength(2);
+    });
+
+    it('should report atMaxLength from the group-scoped array value', async () => {
+      const field: ArrayField<unknown> = {
+        key: 'members',
+        type: 'array',
+        maxLength: 2,
+        fields: [[createSimpleTestField('name', 'Name', 'Alice')], [createSimpleTestField('name', 'Name', 'Bob')]],
+      };
+
+      const { component, fixture } = setupGroupNestedArrayTest(field, 'team', {
+        team: { members: [{ name: 'Alice' }, { name: 'Bob' }] },
+      });
+
+      await waitForItems(component, fixture, (n) => n >= 2);
+
+      expect(component.atMaxLength()).toBe(true);
+    });
+  });
 });

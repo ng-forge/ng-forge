@@ -435,6 +435,56 @@ describe('applyPropertyDerivations', () => {
       expect(captured[0].groupValue).toBeUndefined();
     });
   });
+
+  describe('group-scoped formValue', () => {
+    it('should scope formValue to the parent group so expressions reference siblings directly', () => {
+      const entry = createEntry({
+        fieldKey: 'address.state',
+        targetProperty: 'label',
+        dependsOn: ['address'],
+        expression: 'formValue.country',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({ address: { country: 'usa', state: 'NY' } });
+
+      const result = applyPropertyDerivations(collection, context);
+
+      expect(result.appliedCount).toBe(1);
+      expect(context.store.getOverrides('address.state')()).toEqual({ label: 'usa' });
+    });
+
+    it('should expose rootFormValue for cross-scope references from group-nested fields', () => {
+      const entry = createEntry({
+        fieldKey: 'address.state',
+        targetProperty: 'label',
+        dependsOn: ['address'],
+        expression: 'rootFormValue.company + " / " + formValue.country',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({ company: 'Forge Inc', address: { country: 'usa', state: 'NY' } });
+
+      const result = applyPropertyDerivations(collection, context);
+
+      expect(result.appliedCount).toBe(1);
+      expect(context.store.getOverrides('address.state')()).toEqual({ label: 'Forge Inc / usa' });
+    });
+
+    it('should select group-nested entries when the group root key is in changedFields', () => {
+      const entry = createEntry({
+        fieldKey: 'address.state',
+        targetProperty: 'label',
+        dependsOn: ['address.country'],
+        expression: 'formValue.country',
+      });
+      const collection: PropertyDerivationCollection = { entries: [entry] };
+      const context = createContext({ address: { country: 'usa', state: 'NY' } });
+
+      const result = applyPropertyDerivations(collection, context, new Set(['address']));
+
+      expect(result.appliedCount).toBe(1);
+      expect(context.store.getOverrides('address.state')()).toEqual({ label: 'usa' });
+    });
+  });
 });
 
 describe('applyPropertyDerivationsForTrigger', () => {

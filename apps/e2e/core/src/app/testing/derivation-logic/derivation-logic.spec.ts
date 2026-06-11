@@ -895,16 +895,16 @@ test.describe('Value Derivation Logic Tests', () => {
   });
 
   test.describe('Derivation in Group', () => {
-    test.skip(true, 'Library limitation: derivation expressions inside group containers do not evaluate correctly');
     test('should derive fullName from firstName and lastName inside a group', async ({ page, helpers }) => {
       await page.goto(testUrl('/test/derivation-logic/derivation-in-group'));
       await page.waitForLoadState('networkidle');
       const scenario = helpers.getScenario('derivation-in-group');
       await expect(scenario).toBeVisible({ timeout: 10000 });
 
-      const firstNameInput = scenario.locator('#person #firstName input');
-      const lastNameInput = scenario.locator('#person #lastName input');
-      const fullNameInput = scenario.locator('#person #fullName input');
+      // DOM IDs of fields inside a group are scoped: `firstName` becomes `person_firstName`.
+      const firstNameInput = scenario.locator('#person_firstName input');
+      const lastNameInput = scenario.locator('#person_lastName input');
+      const fullNameInput = scenario.locator('#person_fullName input');
 
       await expect(firstNameInput).toBeVisible({ timeout: 5000 });
 

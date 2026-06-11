@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, model } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
 import { DynamicText, FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import { NgForgeControl } from '@ng-forge/dynamic-forms/integration';
+import { NgForgeControl, NgForgeField } from '@ng-forge/dynamic-forms/integration';
 import { AsyncPipe } from '@angular/common';
 
 export interface BsRadioGroupProps {
@@ -26,6 +26,12 @@ export interface BsRadioGroupProps {
 @Component({
   selector: 'df-bs-radio-group',
   imports: [DynamicTextPipe, AsyncPipe, NgForgeControl],
+  host: {
+    role: 'radiogroup',
+    '[attr.aria-invalid]': 'parentField?.ariaInvalid() || null',
+    '[attr.aria-required]': 'parentField?.ariaRequired()',
+    '[attr.aria-describedby]': 'parentField?.ariaDescribedBy()',
+  },
   template: `
     @let props = properties();
     @if (props?.buttonGroup) {
@@ -84,6 +90,8 @@ export interface BsRadioGroupProps {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BsRadioGroupComponent implements FormValueControl<ValueType | undefined> {
+  protected readonly parentField = inject(NgForgeField, { optional: true });
+
   // Value model - FormField directive binds form value to this
   readonly value = model<ValueType | undefined>(undefined);
 

@@ -6,7 +6,6 @@ import { ArrayContext, FieldSignalContext, GroupContext } from '@ng-forge/dynami
 import { ARRAY_CONTEXT, FIELD_SIGNAL_CONTEXT, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { mapFieldToInputs } from '../field-mapper/field-mapper';
-import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { isEqual } from '@ng-forge/dynamic-forms/internal';
 
 /** Options for creating an array item injector. */
@@ -45,22 +44,17 @@ export function createArrayItemInjectorAndInputs<TModel extends Record<string, u
 ): ArrayItemInjectorResult {
   const { template, indexSignal, parentFieldSignalContext, parentInjector, registry, arrayField, primitiveFieldKey } = options;
 
-  // Get root form registry - it's guaranteed to be available since root form
-  // is registered before resolvedFields computes (dependency chain ensures this)
-  const rootFormRegistry = parentInjector.get(RootFormRegistryService);
-
-  // Create a computed that derives the array item's FieldTree from root form.
+  // Create a computed that derives the array item's FieldTree from the parent
+  // context's form. The parent form is group-scoped for arrays nested in groups
+  // (group > row > array) and the root form otherwise, so navigating by the bare
+  // array key is correct in both scopes.
   // Uses isEqual to prevent unnecessary re-computation when index changes but value is same.
   const itemFormAccessor = computed(
     () => {
-      const rootForm = rootFormRegistry.rootForm();
-      if (!rootForm) {
-        return undefined;
-      }
-
+      const parentForm = parentFieldSignalContext.form as Record<string, unknown>;
       const index = indexSignal();
-      // Navigate: rootForm['arrayKey'][index]
-      const arrayFieldTree = (rootForm as Record<string, unknown>)[arrayField.key];
+      // Navigate: parentForm['arrayKey'][index]
+      const arrayFieldTree = parentForm[arrayField.key];
       if (!arrayFieldTree) {
         return undefined;
       }
