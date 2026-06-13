@@ -6,24 +6,24 @@ description: Migrate an Angular dynamic-forms app from ngx-formly to ng-forge. C
 
 # Migrating from ngx-formly to ng-forge
 
-A migration reference for moving an Angular dynamic-forms app from **ngx-formly** to **ng-forge**. Angular **Signal Forms** (`@angular/forms/signals`) is the new built-in forms substrate as of Angular 21; ng-forge is built on it, ngx-formly is built on Reactive Forms. That substrate change is the load-bearing difference everything else here flows from. The surface shape is similar — a config object describes the form, the library renders it — so most concepts map directly.
+A migration reference for moving an Angular dynamic-forms app from **ngx-formly** to **ng-forge**. Angular **Signal Forms** (`@angular/forms/signals`) is Angular's built-in signal-based forms system, introduced in Angular 21 and stable since Angular 22; ng-forge is built on it, ngx-formly is built on Reactive Forms. That substrate change is the load-bearing difference everything else here flows from. The surface shape is similar (a config object describes the form, the library renders it), so most concepts map directly.
 
 ## Should you migrate?
 
 | Your situation                                                          | What to do                                                                  |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Standardising on Angular Signal Forms as the form substrate             | Migrate — formly is Reactive Forms, ng-forge is Signal Forms                |
-| Want schema-validation-first design (Zod, Valibot, ArkType)             | Migrate — built in via Standard Schema                                      |
-| Hitting performance limits on large forms or array sections             | Migrate — see [Performance](#performance) below for the substrate reasons   |
-| Heavy reliance on community formly extensions or custom field types     | Evaluate — the porting cost may outweigh the substrate benefits             |
-| Need a stable, low-churn API today                                      | Stay — ng-forge is younger; formly is mature                                |
-| Use a UI library ng-forge does not ship (Kendo, NG-ZORRO, NativeScript) | Build an adapter — see [Building an Adapter](/building-an-adapter)          |
+| Standardising on Angular Signal Forms as the form substrate             | Migrate: formly is Reactive Forms, ng-forge is Signal Forms                |
+| Want schema-validation-first design (Zod, Valibot, ArkType)             | Migrate: built in via Standard Schema                                      |
+| Hitting performance limits on large forms or array sections             | Migrate: see [Performance](#performance) below for the substrate reasons   |
+| Heavy reliance on community formly extensions or custom field types     | Evaluate: the porting cost may outweigh the substrate benefits             |
+| Need a stable, low-churn API today                                      | Stay: ng-forge is younger; formly is mature                                |
+| Use a UI library ng-forge does not ship (Kendo, NG-ZORRO, NativeScript) | Build an adapter; see [Building an Adapter](/building-an-adapter)          |
 
 ## At a glance
 
 | ngx-formly                                | ng-forge                                                                |
 | ----------------------------------------- | ----------------------------------------------------------------------- |
-| `FormlyFieldConfig`                       | `FieldConfig` (registered field type)                                   |
+| `FormlyFieldConfig`                       | `FieldDef` (base interface; each registered field type narrows it)      |
 | `props` (was `templateOptions`)           | UI-adapter-specific keys live in `props`; validation and labelling (`label`, `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`, `placeholder`) live at the top level |
 | `expressions: { hide: '!model.x' }`       | `logic: [{ type: 'hidden', condition: { … } }]` (structured)            |
 | `expressionProperties` (deprecated v6)    | `logic` array + `derivation` for values                                 |
@@ -33,7 +33,7 @@ A migration reference for moving an Angular dynamic-forms app from **ngx-formly*
 | `fieldGroup` (object)                     | `type: 'group'` with `fields: [...]`                                    |
 | `fieldArray` (custom `repeat` type)       | `type: 'array'` (built in; verbose form with explicit add/remove fields, or simplified form with `template` + auto-buttons) |
 | `hooks: { onInit, onChanges, … }`         | Angular component lifecycle inside custom field components, plus `EventBus` / `EventDispatcher` for cross-field events |
-| `FormlyJsonschema.toFieldConfig(schema)`  | `standardSchema(zodSchema)` (different paradigm — see below)            |
+| `FormlyJsonschema.toFieldConfig(schema)`  | `standardSchema(zodSchema)` (different paradigm; see below)            |
 | `[model]` two-way binding                 | `[(value)]` two-way binding (Angular `model()` signal)                   |
 
 The default shifts from **string-first** (formly's `expressions` DSL, template options) to **structured-config-first**. Strings still exist in ng-forge as shorthand (`derivation: 'formValue.x * formValue.y'`) and escape hatches (the `javascript` condition), but the typical condition or derivation is now a typed object the engine can analyse for dependencies, refactor safely, and run under strict CSP.
@@ -65,7 +65,7 @@ export const appConfig: ApplicationConfig = {
 };">
 </docs-code-compare>
 
-The package layout matches one-for-one: `@ngx-formly/material` ↔ `@ng-forge/dynamic-forms-material`, and so on for Bootstrap, PrimeNG, and Ionic.
+The package layout matches one-for-one: `@ngx-formly/material` maps to `@ng-forge/dynamic-forms-material`, and so on for Bootstrap, PrimeNG, and Ionic.
 
 ## Your first form
 
@@ -137,7 +137,7 @@ export class ContactComponent {
 Three things to internalise:
 
 - **`label` / `required` / `email` / `min` / `max` / `minLength` / `maxLength` / `pattern` / `placeholder` live at the top level of the field**, not under `props`. `props` carries the rendered control's attributes (`type: 'email'`, `rows`) and UI-adapter-specific options (`appearance`, `hint` for Material; equivalents elsewhere).
-- **`value` seeds the initial value and the inferred type** — `value: ''` makes the field a string, `value: 0` makes it a number. Optional; omit when the field is computed or hydrated from a backend.
+- **`value` seeds the initial value and the inferred type**: `value: ''` makes the field a string, `value: 0` makes it a number. Optional; omit when the field is computed or hydrated from a backend.
 - **`as const satisfies FormConfig` is how strong typing flows in.** No decorator-style generics; the literal field shapes infer the form value.
 
 Two-way binding is `[(value)]` (Angular `model()` signal); read-only access is `(submitted)`, `(events)`, or the `formValue` signal off a `viewChild` ref.
@@ -160,9 +160,9 @@ The names line up directly except for a few cases.
 | _none_              | `page`                  | Multi-step container                                               |
 | _none_              | `row`                   | Horizontal flex layout                                             |
 | _none_              | `text`                  | Display-only label / heading                                       |
-| _none_              | `submit` / `next` / `previous` / `addArrayItem` / `removeArrayItem` | Built-in action buttons; auto-disabled while the form is invalid  |
+| _none_              | `submit` / `next` / `previous` / `addArrayItem` / `removeArrayItem` | Built-in action buttons; `submit` auto-disables while the form is invalid, `next` while the current page is invalid |
 
-**Selects.** Formly takes `options` inside `props`; ng-forge takes `options` at the top level. The `FieldOption` shape is fixed at `{ value, label, disabled? }` — if your data has custom keys, remap once at the source (`data.map(d => ({ value: d.id, label: d.name }))`) or use a `targetProperty: 'options'` derivation (see [Async data](#async-data-and-dynamic-options)).
+**Selects.** Formly takes `options` inside `props`; ng-forge takes `options` at the top level. The `FieldOption` shape is fixed at `{ value, label, disabled? }`. If your data has custom keys, remap once at the source (`data.map(d => ({ value: d.id, label: d.name }))`) or use a `targetProperty: 'options'` derivation (see [Async data](#async-data-and-dynamic-options)).
 
 <docs-code-compare
   title="Select with static options"
@@ -197,7 +197,7 @@ Both libraries support shorthand validators (`required`, `min`, `max`, `minLengt
 
 <docs-validator-pillars></docs-validator-pillars>
 
-Validator functions return only `{ kind }` — the human-readable message is configured separately via `validationMessages` (per-field) or `defaultValidationMessages` (form-level), so the same `kind` can be localised consistently.
+Validator functions return only `{ kind }`; the human-readable message is configured separately via `validationMessages` (per-field) or `defaultValidationMessages` (form-level), so the same `kind` can be localised consistently.
 
 <docs-code-compare
   title="Custom validator"
@@ -245,7 +245,7 @@ For HTTP-driven and async (`resource()`-API) validators, see [Custom validators]
 
 ## Conditional fields and dynamic props
 
-Formly's `expressions` DSL — string-evaluated functions like `'!model.country'` — becomes ng-forge's structured `logic` array. More verbose, typed end-to-end, CSP-safe by default.
+Formly's `expressions` DSL (string-evaluated functions like `'!model.country'`) becomes ng-forge's structured `logic` array. More verbose, but typed end-to-end and CSP-safe by default.
 
 <docs-code-compare
   title="Hide a field based on another field's value"
@@ -287,13 +287,13 @@ Formly's `expressions` DSL — string-evaluated functions like `'!model.country'
 }">
 </docs-code-compare>
 
-For genuinely complex expressions, ng-forge has an opt-in `javascript` condition (a string evaluated against `formValue`) — see [Conditional logic](/dynamic-behavior/conditional-logic).
+For genuinely complex expressions, ng-forge has an opt-in `javascript` condition (a string evaluated against `formValue`); see [Conditional logic](/dynamic-behavior/conditional-logic).
 
-**Hidden field values work differently.** Formly defaults to actively *resetting* a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value live; the optional `excludeValueIfHidden` form option filters it out at submission time. If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls](/feature-overview#common-pitfalls).
+**Hidden field values work differently.** Formly defaults to actively *resetting* a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value in form state but excludes it from the submitted output by default (`excludeValueIfHidden` defaults to true; override it per field, per form, or globally). If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls](/feature-overview#common-pitfalls).
 
 ## Cross-field validation
 
-Formly puts cross-field validators on the parent `fieldGroup`. ng-forge does the same with a `group` field, but most users find Zod's `.refine()` / `.superRefine()` cleaner for this case:
+Formly puts cross-field validators on the parent `fieldGroup`. ng-forge group fields do not accept validators; the idiomatic port is Zod's `.refine()` / `.superRefine()` attached via `standardSchema`:
 
 ```typescript
 import { z } from 'zod';
@@ -320,7 +320,7 @@ const config = {
 
 ## Custom field types
 
-Both libraries register a Component against a name and let the field config reference it by name. ng-forge custom fields are **plain standalone components** with explicit `input` signals (no base class with magic getters); they receive Angular Signal Forms' `FieldTree<T>` and read/write via `f().value()` / `f().valueChange.set(...)`. The library bridges your component to its internal state via a `mapper` (`valueFieldMapper`, `optionsFieldMapper`, etc.) — for most field shapes you reuse a built-in mapper.
+Both libraries register a Component against a name and let the field config reference it by name. ng-forge custom fields are **plain standalone components** with explicit `input` signals (no base class with magic getters); they receive Angular Signal Forms' `FieldTree<T>` and read/write via `f().value()` / `f().value.set(...)`. The library bridges your component to its internal state via a `mapper` (`valueFieldMapper`, `optionsFieldMapper`, etc.); for most field shapes you reuse a built-in mapper.
 
 See [Adding custom fields](/recipes/custom-fields) for the full walkthrough.
 
@@ -332,13 +332,13 @@ See [Writing a wrapper](/wrappers/writing-a-wrapper) and [Registering and applyi
 
 ## Addons (prefix / suffix slots)
 
-Formly's addon story is **uneven across adapters** — Bootstrap ships first-class addons via `props.addonLeft` / `props.addonRight`; Material has a demo wrapper users copy into their app; PrimeNG and Ionic have nothing built-in.
+Formly's addon story is **uneven across adapters**: Bootstrap ships first-class addons via `props.addonLeft` / `props.addonRight`; Material has a demo wrapper users copy into their app; PrimeNG and Ionic have nothing built-in.
 
-ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... }]`. The same `slot` vocabulary (`'prefix'` / `'suffix'`) works everywhere — adapters translate internally to their native projection mechanism. Buttons accept built-in `preset` actions (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`) so common patterns require no handler code.
+ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... }]`. The same `slot` vocabulary (`'prefix'` / `'suffix'`) works everywhere; adapters translate internally to their native projection mechanism. Buttons accept built-in `preset` actions (`clear`, `reset`, `paste`, `copy`, `toggle-password-visibility`) so common patterns require no handler code.
 
 <docs-code-compare
   title="Bootstrap addons"
-  formly="// ngx-formly (Bootstrap — first-class)
+  formly="// ngx-formly (Bootstrap: first-class)
 {
   key: 'amount',
   type: 'input',
@@ -355,7 +355,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... 
   addons: [
     { slot: 'prefix', type: 'bs-icon', icon: 'currency-euro' },
     { slot: 'suffix', type: 'text', text: 'EUR' },
-    // 'save' must be registered once via withAddonActions({ save: (ctx) => ... }) — see /addons/presets-and-actions.
+    // 'save' must be registered once via withAddonActions({ save: (ctx) => ... }); see /addons/presets-and-actions.
     { slot: 'suffix', type: 'bs-button', icon: 'save', ariaLabel: 'Save', actionRef: 'save' },
   ],
 }">
@@ -363,7 +363,7 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... 
 
 <docs-code-compare
   title="Material addons"
-  formly="// ngx-formly (Material — demo wrapper only; users copy into their app)
+  formly="// ngx-formly (Material: demo wrapper only; users copy into their app)
 {
   key: 'search',
   type: 'input',
@@ -386,10 +386,10 @@ ng-forge unifies all four adapters under one shape: `addons: [{ slot, type, ... 
 
 **What's different:**
 
-- **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions — they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`withAddonActions({...})`), so configs round-trip through JSON.
-- **Typed `type` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter — Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
+- **JSON-safe by default.** ngx-formly's addon clicks are inline `onClick(field, $event) => void` functions; they can't live in JSON or a database. ng-forge addons are plain data; behavior is wired via `actionRef: 'name'` resolved against a registered handler map (`withAddonActions({...})`), so configs round-trip through JSON.
+- **Typed `type` per adapter.** ngx-formly addon props are typed loosely (`{ icon?, text?, class?, onClick? }`) and differ per adapter: Bootstrap uses `class`, Material's demo uses `icon` / `text`. ng-forge uses a discriminated union (`mat-icon | mat-button | bs-icon | bs-button | prime-icon | prime-button | ion-icon | ion-button` plus universal `text | template | component`) so the compiler knows which fields are valid for each adapter.
 - **Universal slot vocabulary.** ngx-formly mixes `addonLeft` / `addonRight` (Bootstrap, Material demo) with adapter-native slot names. ng-forge uses universal `slot: 'prefix' | 'suffix'` everywhere; the adapter translates that internally.
-- **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent — every action is a hand-written callback.
+- **Preset actions.** ng-forge ships `clear`, `reset`, `paste`, `copy`, `toggle-password-visibility` as declarative `preset` values. ngx-formly has nothing equivalent; every action is a hand-written callback.
 - **First-class on all 4 adapters.** ngx-formly only ships addons for Bootstrap; Material is demo-only, PrimeNG / Ionic have nothing. ng-forge ships first-class addons for all four with a single config shape.
 - **Reactive `hidden` / `disabled` / `loading`.** Each axis accepts `boolean | Signal<boolean> | Observable<boolean>` (`DynamicValue<boolean>`). Neither ngx-formly's addon types nor its Material demo wrapper expose reactive visibility.
 
@@ -397,7 +397,7 @@ See [Addons / Overview](/addons/overview) and [Presets and Actions](/addons/pres
 
 ## Repeating sections / arrays
 
-**Formly has no built-in `repeat` type** — apps register a custom `FieldArrayType` with `add()` / `remove()` handlers and a template. ng-forge ships `type: 'array'` directly.
+**Formly has no built-in `repeat` type**: apps register a custom `FieldArrayType` with `add()` / `remove()` handlers and a template. ng-forge ships `type: 'array'` directly.
 
 <docs-code-compare
   title="Repeating array of items"
@@ -430,7 +430,7 @@ provideFormlyCore({
     ],
   },
 }"
-  ngforge="// Simplified form — pass a template, ng-forge auto-generates buttons
+  ngforge="// Simplified form: pass a template, ng-forge auto-generates buttons
 {
   key: 'tags',
   type: 'array',
@@ -440,7 +440,7 @@ provideFormlyCore({
   removeButton: { label: 'Remove' },
 }
 
-// Verbose form — full control over per-item layout and button placement
+// Verbose form: full control over per-item layout and button placement
 {
   key: 'tasks',
   type: 'array',
@@ -459,11 +459,11 @@ provideFormlyCore({
 }">
 </docs-code-compare>
 
-The verbose form gives you placeable button fields (`addArrayItem`, `prependArrayItem`, `insertArrayItem`, `removeArrayItem`, `popArrayItem`, `shiftArrayItem`) — put the add button anywhere, including outside the array.
+The verbose form gives you placeable button fields (`addArrayItem`, `prependArrayItem`, `insertArrayItem`, `removeArrayItem`, `popArrayItem`, `shiftArrayItem`): put the add button anywhere, including outside the array.
 
 ## Multi-step wizards
 
-Formly does not ship a wizard primitive — the canonical "stepper" example is a custom `FieldType` wrapping `mat-stepper`. ng-forge has a built-in `page` field type and `next` / `previous` button types that handle navigation, per-page validation, and disabled-when-invalid state.
+Formly does not ship a wizard primitive; the canonical "stepper" example is a custom `FieldType` wrapping `mat-stepper`. ng-forge has a built-in `page` field type and `next` / `previous` button types that handle navigation, per-page validation, and disabled-when-invalid state.
 
 ```typescript
 {
@@ -495,11 +495,11 @@ Formly does not ship a wizard primitive — the canonical "stepper" example is a
 } as const satisfies FormConfig;
 ```
 
-The form value stays flat — pages are a layout / navigation concern, not a value-shape concern.
+The form value stays flat: pages are a layout and navigation concern, not a value-shape concern.
 
 ## Async data and dynamic options
 
-Reactive options loading — populate a select from an HTTP call, or one select from another's value — is canonical in formly via `hooks.onInit` subscribing to `valueChanges`. In ng-forge it's a `derivation` with a `targetProperty` of `options`:
+Reactive options loading (populate a select from an HTTP call, or one select from another's value) is canonical in formly via `hooks.onInit` subscribing to `valueChanges`. In ng-forge it's a `derivation` with a `targetProperty` of `options`:
 
 <docs-code-compare
   title="Cascade: load departments after a company is picked"
@@ -570,17 +570,17 @@ For non-trivial derivations (HTTP, multiple async sources, debounce), use the lo
 
 Two related concerns: **schema-driven validation** (a schema enforces correctness) and **JSON-driven form generation** (the form structure itself comes from a serialized document, often a backend payload). ng-forge handles both.
 
-**Schema-driven validation.** ngx-formly canonically uses **JSON Schema** for validation via `@ngx-formly/core/json-schema`'s `FormlyJsonschema.toFieldConfig(schema)`. ng-forge integrates with the **[Standard Schema](https://standardschema.dev) spec** — Zod, Valibot, ArkType, and any other library that implements it — via `standardSchema(yourSchema)`.
+**Schema-driven validation.** ngx-formly canonically uses **JSON Schema** for validation via `@ngx-formly/core/json-schema`'s `FormlyJsonschema.toFieldConfig(schema)`. ng-forge integrates with the **[Standard Schema](https://standardschema.dev) spec**: Zod, Valibot, ArkType, and any other library that implements it plug in via `standardSchema(yourSchema)`.
 
-**JSON-driven form generation.** ng-forge's `FormConfig` **is itself a JSON-serializable document** — you can author it as JSON, ship it from a backend, hydrate it on the client. There's no conversion step. If your backend currently emits JSON Schemas to drive formly, you have three options:
+**JSON-driven form generation.** ng-forge's `FormConfig` **is itself a JSON-serializable document**: you can author it as JSON, ship it from a backend, hydrate it on the client. There's no conversion step. If your backend currently emits JSON Schemas to drive formly, you have three options:
 
-1. **Have the backend emit `FormConfig` directly** — most ergonomic; your API now ships ng-forge schemas as JSON.
+1. **Have the backend emit `FormConfig` directly**: most ergonomic; your API now ships ng-forge schemas as JSON.
 2. **Generate `FormConfig` from your OpenAPI 3.x spec at build time** via `@ng-forge/openapi-generator`. Best when the spec is your source of truth.
-3. **Run a one-time `JSON Schema → FormConfig` conversion** during your migration. The two formats are structurally similar; a small adapter (~200 LOC) covers most apps.
+3. **Run a one-time JSON Schema to `FormConfig` conversion** during your migration. The two formats are structurally similar; a small adapter (~200 LOC) covers most apps.
 
 <docs-code-compare
   title="Schema-driven validation"
-  formly="// JSON Schema → FormlyFieldConfig
+  formly="// JSON Schema to FormlyFieldConfig
 import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
 
 const schema = {
@@ -615,13 +615,13 @@ const config = {
 
 ## Things that work differently
 
-- **Strings → structured config.** `'model.foo === "bar"'` becomes a `fieldValue` condition object (or a `javascript` escape-hatch string for genuinely complex expressions).
-- **Hooks → Angular lifecycle + EventBus.** `hooks.onInit` / `onDestroy` map to `effect()` / `OnDestroy` inside a custom field. Cross-field coordination uses the [EventBus / EventDispatcher](/recipes/events).
-- **Dependency tracking.** `fieldValue` conditions and shorthand `derivation` strings auto-detect the field paths they read. Custom-function and HTTP variants need an explicit `dependsOn: [...]` because the engine can't introspect those bodies.
-- **`templateOptions` cascading.** Formly inherits `props` through `defaultOptions` and `extends` chains. ng-forge has form-level `defaultProps` and adapter-level defaults, but no per-type inheritance — type-level defaults become a wrapper or a custom field component instead.
+- **Strings become structured config.** `'model.foo === "bar"'` becomes a `fieldValue` condition object (or a `javascript` escape-hatch string for genuinely complex expressions).
+- **Hooks become Angular lifecycle + EventBus.** `hooks.onInit` / `onDestroy` map to `effect()` / `OnDestroy` inside a custom field. Cross-field coordination uses the [EventBus / EventDispatcher](/recipes/events).
+- **Dependency tracking.** `fieldValue` conditions and shorthand `derivation` strings auto-detect the field paths they read. HTTP and async variants require an explicit `dependsOn: [...]` (enforced at init); sync custom-function derivations accept it optionally and otherwise re-run on every form change.
+- **`templateOptions` cascading.** Formly inherits `props` through `defaultOptions` and `extends` chains. ng-forge has form-level `defaultProps` and adapter-level defaults, but no per-type inheritance; type-level defaults become a wrapper or a custom field component instead.
 - **Wrappers carry their own props.** Wrapper config objects own their props (`{ type: 'panel', title: 'Address' }`), so the wrapped field doesn't need to know it has a wrapper.
 - **`parsers`, `modelOptions.debounce`, `focus: true`.** No direct per-field knobs. Workarounds: a self-targeting `derivation` with `trigger: 'debounced'` covers `parsers`-style transforms; consumers (conditions, derivations) debounce via `debounceMs`; programmatic focus is a `viewChild` + `.nativeElement.focus()` in the host component.
-- **`modelOptions.updateOn: 'blur' | 'submit'`.** No equivalent today — `LogicTrigger` only exposes `'onChange' | 'debounced'`, and the Signal Forms substrate commits on every change. If formly's commit-on-blur was load-bearing for your form, debouncing the consumers (validators, derivations) is the closest workaround. This is a hard wall, not a knob.
+- **`modelOptions.updateOn: 'blur' | 'submit'`.** No equivalent today: `LogicTrigger` only exposes `'onChange' | 'debounced'`, and the Signal Forms substrate commits on every change. If formly's commit-on-blur was load-bearing for your form, debouncing the consumers (validators, derivations) is the closest workaround. This is a hard wall, not a knob.
 
 ## What ng-forge does NOT have an equivalent for
 
@@ -629,10 +629,10 @@ If any of these are blockers, decide upfront before starting the migration.
 
 - **`FormlyJsonschema.toFieldConfig(schema)` as a runtime converter.** No 1:1. See [Schema validation](#schema-validation-and-json-driven-forms) for the three migration paths.
 - **A community plugin / extension ecosystem.** Formly has a long tail of community-built field types and extensions; ng-forge currently has only the four official UI adapters and the OpenAPI / MCP packages.
-- **Two-or-more-dot prop paths in derivations.** Formly's `expressions: { 'props.config.foo': '…' }` lets you compute any nested prop. ng-forge supports up to one level (`options`, `label`, `disabled`, `props.minDate`, …) and **throws `DynamicFormError` at form-initialisation time** if the path goes deeper — restructure your prop shape so the dynamic value sits at the top of `props`, or move the dynamic computation into a custom field component.
+- **Two-or-more-dot prop paths in derivations.** Formly's `expressions: { 'props.config.foo': '…' }` lets you compute any nested prop. ng-forge supports up to one level (`options`, `label`, `disabled`, `props.minDate`, …) and **throws `DynamicFormError` at runtime, when the derived value is applied to the field,** if the path goes deeper. Restructure your prop shape so the dynamic value sits at the top of `props`, or move the dynamic computation into a custom field component.
 - **Custom `valueProp` / `labelProp` for selects.** ng-forge's `FieldOption` is fixed at `{ value, label, disabled? }`; remap source data with `.map()` or a `targetProperty: 'options'` derivation.
-- **`extensions` API for cross-cutting field-construction hooks.** Formly's extensions can mutate every field's config during construction. ng-forge has no public equivalent — those concerns become wrappers, custom field components, or build-time codegen.
-- **Maturity at scale.** ngx-formly has been in production for years; ng-forge is younger — fewer Stack Overflow answers, fewer copy-paste solutions on the long tail. The [MCP server](/ai-integration) and [Discord](https://discord.gg/qpzzvFagj3) help, but they don't replace years of community-tested patterns.
+- **`extensions` API for cross-cutting field-construction hooks.** Formly's extensions can mutate every field's config during construction. ng-forge has no public equivalent; those concerns become wrappers, custom field components, or build-time codegen.
+- **Maturity at scale.** ngx-formly has been in production for years; ng-forge is younger, with fewer Stack Overflow answers and fewer copy-paste solutions on the long tail. The [MCP server](/ai-integration) and [Discord](https://discord.gg/qpzzvFagj3) help, but they don't replace years of community-tested patterns.
 
 ## OpenAPI generator
 
@@ -640,20 +640,20 @@ If your formly forms are driven by an OpenAPI 3.x spec, `@ng-forge/openapi-gener
 
 ## Performance
 
-ng-forge is **built for zoneless** — every default component runs `ChangeDetectionStrategy.OnPush` and the value/validity/dirty-tracking layer is signal-driven, so there is no whole-tree change-detection cycle on every input event the way zone.js + Reactive Forms triggers one. The renderer also uses stable `track` keys on every `@for`, preserves field-instance identity across config updates so unchanged fields don't re-render, defers non-adjacent pages in multi-step forms via `@defer (on idle)`, and updates arrays differentially (appending an item only renders the new one).
+The state layer (value, validity, dirty tracking) is built on signals, and every shipped component uses `ChangeDetectionStrategy.OnPush`, so a value change re-renders only the components that read the affected state. Where formly re-evaluates its field expressions across the whole form on model changes, ng-forge re-runs only the conditions and derivations whose dependencies changed. OnPush and zoneless are complementary here: OnPush narrows how much work each change triggers, zoneless removes zone.js scheduling on top, and since nothing in ng-forge relies on zone.js it runs unchanged under `provideZonelessChangeDetection()`. The renderer also uses stable `track` keys on its `@for` loops, preserves field-instance identity across config updates so unchanged fields don't re-render, defers non-adjacent pages in multi-step forms via `@defer (on idle)`, and updates arrays differentially (appending an item only renders the new one).
 
 <docs-perf-pipeline></docs-perf-pipeline>
 
 ## FAQ
 
 **Can I run both libraries side by side during a migration?**
-Yes. They don't conflict — different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports `@ngx-formly/*`.
+Yes. They don't conflict: different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports `@ngx-formly/*`.
 
-**Does ng-forge support Angular 21?**
-Yes — ng-forge requires Angular 21+ as its baseline (signal-native APIs depend on it). If you're on Angular 20 or earlier, migrating to ng-forge implies an Angular upgrade first.
+**Which Angular versions does ng-forge support?**
+Angular 22. The published packages declare `@angular/*` peer dependencies of `~22.0.0` (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.
 
 **Does ng-forge use Reactive Forms (`FormGroup` / `FormControl`)?**
-No. ng-forge is built on Angular **Signal Forms** (`@angular/forms/signals`), a separate system with a different primitive — `FieldTree<T>` — that holds value, validity, dirty/touched state, and errors as signals. There is no `FormGroup` or `FormControl` involved. If your formly app exposes a `formGroup` to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.
+No. ng-forge is built on Angular **Signal Forms** (`@angular/forms/signals`), a separate system whose primitive, `FieldTree<T>`, holds value, validity, dirty/touched state, and errors as signals. There is no `FormGroup` or `FormControl` involved. If your formly app exposes a `formGroup` to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.
 
 **How do I report bugs / get help?**
 Open an issue at [github.com/ng-forge/ng-forge](https://github.com/ng-forge/ng-forge/issues) or join [Discord](https://discord.gg/qpzzvFagj3). For evaluation help, the [MCP server](/ai-integration) lets an LLM in your IDE scaffold configs for you.
@@ -664,17 +664,17 @@ An order that works for porting a non-trivial app:
 
 1. **Audit blockers** against [What ng-forge does NOT have an equivalent for](#what-ng-forge-does-not-have-an-equivalent-for). Decide upfront whether you'll work around or stay.
 2. **Install ng-forge** and the matching UI adapter (see [Setup](#setup)). Both libraries can coexist.
-3. **Port one read-only form first** — typically a settings page or a profile form. Fewer moving parts; easier sanity check.
+3. **Port one read-only form first**: typically a settings page or a profile form. Fewer moving parts; easier sanity check.
 4. **Translate validators next.** Centralise custom validators on a single `customFnConfig` object you can import everywhere.
 5. **Translate forms in dependency order.** Forms with no cross-form coupling first; complex multi-step / array-heavy ones last.
 6. **Remove formly when nothing imports `@ngx-formly/*`.** `pnpm uninstall @ngx-formly/core @ngx-formly/<theme>` and clean up `provideFormlyCore`.
 
-**Rough effort estimate.** Plan ~half a day per simple form (a login, a profile, a contact form), and ~1–2 days per non-trivial form (multi-step wizards, custom field types, schema-driven forms with non-trivial cross-field validators, anything with custom wrappers or extension hooks). Plus an extra pass for performance verification on array-heavy forms — this is one of the cases where you should see meaningful improvement coming from formly. There is no automated migration tool today; port manually.
+**Rough effort estimate.** Plan ~half a day per simple form (a login, a profile, a contact form), and ~1–2 days per non-trivial form (multi-step wizards, custom field types, schema-driven forms with non-trivial cross-field validators, anything with custom wrappers or extension hooks). Plus an extra pass for performance verification on array-heavy forms; this is one of the cases where you should see meaningful improvement coming from formly. There is no automated migration tool today; port manually.
 
 ## Next steps
 
-- **[Getting started](/getting-started)** — install ng-forge, pick an adapter, render a form.
-- **[Configuration](/configuration)** — `defaultProps`, global validators, schema integration.
-- **[Examples](/examples)** — complete working forms covering most patterns above.
-- **[OpenAPI generator](/openapi-generator)** — for backend-driven forms.
-- **[AI integration (MCP)](/ai-integration)** — scaffold configs from your IDE.
+- **[Getting started](/getting-started)**: install ng-forge, pick an adapter, render a form.
+- **[Configuration](/configuration)**: `defaultProps`, global validators, schema integration.
+- **[Examples](/examples)**: complete working forms covering most patterns above.
+- **[OpenAPI generator](/openapi-generator)**: for backend-driven forms.
+- **[AI integration (MCP)](/ai-integration)**: scaffold configs from your IDE.

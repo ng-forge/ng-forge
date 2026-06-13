@@ -20,14 +20,15 @@ This example showcases a 4-step registration form with:
 
 ## Implementation
 
+Field types come from your UI adapter, registered once in the application config with `provideDynamicForm(...withMaterialFields())`.
+
 ```typescript
 import { Component, signal } from '@angular/core';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
-import '@ng-forge/dynamic-forms-material';
 
 @Component({
   selector: 'app-paginated-form',
-  imports: [DynamicForm, JsonPipe],
+  imports: [DynamicForm],
   template: ` <form [dynamic-form]="config" [(value)]="formValue"></form> `,
 })
 export class PaginatedFormComponent {
@@ -126,7 +127,7 @@ export class PaginatedFormComponent {
             key: 'step2Buttons',
             fields: [
               { type: 'previous', key: 'step2Previous', label: 'Back' },
-              { type: 'next', key: 'step2Next', label: 'Continue' },
+              { type: 'next', key: 'step2Next', label: 'Continue to Address' },
             ],
           },
         ],
@@ -169,6 +170,7 @@ export class PaginatedFormComponent {
                   { value: 'ny', label: 'New York' },
                   { value: 'ca', label: 'California' },
                   { value: 'tx', label: 'Texas' },
+                  { value: 'fl', label: 'Florida' },
                 ],
                 col: 6,
               },
@@ -187,7 +189,7 @@ export class PaginatedFormComponent {
             key: 'step3Buttons',
             fields: [
               { type: 'previous', key: 'step3Previous', label: 'Back' },
-              { type: 'next', key: 'step3Next', label: 'Continue' },
+              { type: 'next', key: 'step3Next', label: 'Continue to Preferences' },
             ],
           },
         ],
@@ -218,6 +220,8 @@ export class PaginatedFormComponent {
               { value: 'sports', label: 'Sports' },
               { value: 'music', label: 'Music' },
               { value: 'travel', label: 'Travel' },
+              { value: 'food', label: 'Food & Cooking' },
+              { value: 'art', label: 'Art & Design' },
             ],
           },
           {
@@ -225,6 +229,12 @@ export class PaginatedFormComponent {
             type: 'checkbox',
             label: 'Subscribe to newsletter',
             value: true,
+          },
+          {
+            key: 'notifications',
+            type: 'toggle',
+            label: 'Enable notifications',
+            value: false,
           },
           {
             key: 'terms',
@@ -265,6 +275,7 @@ Note that page fields use `valueHandling: 'flatten'`, meaning their children are
   "zipCode": "10001",
   "interests": ["technology", "sports"],
   "newsletter": true,
+  "notifications": false,
   "terms": true
 }
 ```
@@ -300,7 +311,7 @@ Each page validates independently. Users cannot proceed to the next page until a
 
 ## Performance & Lazy Loading
 
-Dynamic Forms uses Angular's `@defer` blocks with **smart prefetching** to achieve true lazy loading while maintaining flicker-free navigation.
+Dynamic Forms uses Angular's `@defer` blocks to render the current and adjacent pages immediately and defer distant pages until the browser is idle, so next/previous navigation does not flicker.
 
 ### How It Works
 
@@ -324,11 +335,8 @@ fields: [
 
 **Performance advantages:**
 
-- ⚡ **Zero flicker navigation** - Adjacent pages prefetched for instant next/previous
-- 🚀 **Faster initial load** - Only 3 pages load immediately, distant pages defer until idle
-- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
-- 📱 **Mobile-friendly** - Lower startup cost on slower devices
-- 🎯 **Optimized user experience** - Smooth page transitions without loading states
+- The current and adjacent pages render immediately, so next/previous navigation does not flicker
+- Distant pages defer until the browser is idle, which lowers the initial rendering cost
 
 ### Technical Details
 
@@ -439,15 +447,30 @@ Show/hide pages based on user choices:
 
 ### Progress Indicator
 
-Add a custom progress component:
+The form emits the `onPageChange` output with a `PageChangeEvent` carrying `currentPageIndex` (0-based), `totalPages`, and `previousPageIndex`. Track it in your component to render a progress indicator:
 
 ```typescript
-template: `
-  <div class="progress-bar">
-    Step {{ currentPage() + 1 }} of {{ totalPages }}
-  </div>
-  <form [dynamic-form]="config" [(value)]="formValue" />
-`;
+import { Component, signal } from '@angular/core';
+import { DynamicForm, FormConfig, PageChangeEvent } from '@ng-forge/dynamic-forms';
+
+@Component({
+  selector: 'app-paginated-form',
+  imports: [DynamicForm],
+  template: `
+    <div class="progress-bar">Step {{ currentPage() + 1 }} of {{ totalPages() }}</div>
+    <form [dynamic-form]="config" [(value)]="formValue" (onPageChange)="handlePageChange($event)"></form>
+  `,
+})
+export class PaginatedFormComponent {
+  formValue = signal({});
+  currentPage = signal(0);
+  totalPages = signal(1);
+
+  handlePageChange(event: PageChangeEvent) {
+    this.currentPage.set(event.currentPageIndex);
+    this.totalPages.set(event.totalPages);
+  }
+}
 ```
 
 ### Conditional Validation
@@ -488,6 +511,6 @@ Apply different validation rules per step:
 
 ## Related Documentation
 
-- [Conditional Logic](/dynamic-behavior/overview) - Show/hide pages dynamically
+- [Conditional Logic](/dynamic-behavior/conditional-logic) - Show/hide pages dynamically
 - [Validation](/validation/basics) - Per-page and cross-page validation
 - [Material Integration](/configuration) - Material Design styling

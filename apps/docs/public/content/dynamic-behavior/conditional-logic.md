@@ -11,7 +11,7 @@ Control field behavior dynamically based on form state. Dynamic forms provides a
 The library integrates with Angular's signal forms logic functions:
 
 ```typescript
-import { hidden, readonly, required } from '@angular/forms/signals';
+import { disabled, hidden, readonly, required } from '@angular/forms/signals';
 ```
 
 All conditional logic configuration is applied using these functions, providing:
@@ -39,7 +39,7 @@ Hide a field from view (field still participates in form state):
 }
 ```
 
-The field is hidden from the UI but still included in the form value.
+The field is hidden from the UI but still included in the form value. Note that hidden field values are excluded from the submitted output by default; see [Value Exclusion](/recipes/value-exclusion).
 
 ### disabled
 
@@ -55,7 +55,7 @@ Disable user interaction:
 }
 ```
 
-**Note:** The `disabled` property is handled at the component level and does not use signal forms logic functions. It's a static UI property that prevents user interaction.
+**Note:** The static `disabled: true` property is handled at the component level and does not use signal forms logic functions. Dynamic disabled state configured via the `logic` array does use the `disabled` logic function.
 
 ### readonly
 
@@ -73,17 +73,25 @@ Make a field read-only (displays value but prevents modification):
 
 ## Dynamic Conditional Logic
 
-For conditional behavior based on form state, use the `logic` array with `LogicConfig` objects.
+For conditional behavior based on form state, use the `logic` array with `LogicConfig` objects. State logic entries use `StateLogicConfig`:
 
 ```typescript
-interface LogicConfig {
+type StateLogicConfig = {
   /** Logic type */
   type: 'hidden' | 'readonly' | 'disabled' | 'required';
 
   /** Boolean expression, static value, or form state condition */
   condition: ConditionalExpression | boolean | FormStateCondition;
-}
+
+  /** When to evaluate: 'onChange' (default) or 'debounced' */
+  trigger?: 'onChange' | 'debounced';
+
+  /** Debounce duration in ms when trigger is 'debounced' (default: 500) */
+  debounceMs?: number;
+};
 ```
+
+`LogicConfig` is the union `StateLogicConfig | DerivationLogicConfig`; derivation entries are covered in [Value Derivation](/dynamic-behavior/derivation).
 
 `FormStateCondition` values (`'formInvalid'`, `'formSubmitting'`, `'pageInvalid'`) are primarily used for button disabled logic.
 
@@ -293,22 +301,6 @@ Check a specific field's value - the most common expression type.
 }
 ```
 
-### formValue
-
-Compare the entire form value object against a specific value using operators.
-
-```typescript
-{
-  type: 'formValue',
-  operator: 'equals',
-  value: { status: 'active', role: 'admin' },
-}
-```
-
-**Use when:** Checking if the entire form matches a specific state
-
-**Note:** This type is rarely useful in practice — deep equality on an entire form object is an unusual requirement. For conditions that involve multiple specific fields, use `javascript` or `custom` expressions instead (e.g. `formValue.status === 'active' && formValue.role === 'admin'`).
-
 ### javascript
 
 JavaScript expressions with access to `fieldValue` (current field) and `formValue` (entire form).
@@ -339,7 +331,7 @@ JavaScript expressions with access to `fieldValue` (current field) and `formValu
   }],
 }
 
-// Check multiple form fields (replaces old formValue expression pattern)
+// Check multiple form fields
 {
   key: 'stateProvince',
   type: 'select',
@@ -366,31 +358,30 @@ JavaScript expressions with access to `fieldValue` (current field) and `formValu
 
 ### custom
 
-Advanced custom expressions with access to both field and form values.
+Custom condition functions with access to the full evaluation context. Reference a registered function by name (`functionName`) or pass an inline function (`fn`):
 
 ```typescript
+// Registered function (JSON-serializable config)
 {
   type: 'custom',
-  expression: 'fieldValue > formValue.minAge && fieldValue < formValue.maxAge',
+  functionName: 'isBusinessAccount',
+}
+
+// Inline function (code-only)
+{
+  type: 'custom',
+  fn: (ctx) => ctx.formValue.accountType === 'business' && ctx.formValue.hasTeam === true,
 }
 ```
 
-**Safe member access:** Like `formValue` expressions, nested property access is safe:
-
-```typescript
-{
-  type: 'custom',
-  // Safe even when nested values are null/undefined
-  expression: 'fieldValue !== formValue.user.profile.firstName',
-}
-```
+For expression-string conditions, use the [javascript](#javascript) type instead.
 
 #### Function-based forms (registered vs inline)
 
-For logic that doesn't fit cleanly into an expression — Angular service calls, complex predicates, closures over TS enums/constants — use the function form. Two mutually exclusive variants:
+For logic that doesn't fit cleanly into an expression (Angular service calls, complex predicates, closures over TS enums/constants), use the function form. Two mutually exclusive variants:
 
-- **Registered (`functionName`)** — JSON-serializable; references a function in `customFnConfig.customFunctions`. Use for configs loaded from APIs, OpenAPI, or databases.
-- **Inline (`fn`)** — code-only, type-safe; the function reference is captured directly with no registry indirection. NOT JSON-serializable.
+- **Registered (`functionName`)**: JSON-serializable; references a function in `customFnConfig.customFunctions`. Use for configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)**: code-only, type-safe; the function reference is captured directly with no registry indirection. NOT JSON-serializable.
 
 ```typescript
 // Registered — config can travel over the wire
@@ -412,8 +403,8 @@ TypeScript rejects setting both `fn` and `functionName` at compile time (`?: nev
 
 `javascript` and `custom` expressions have access to two additional variables for querying field interaction state:
 
-- **`fieldState`** — the current field's own state
-- **`formFieldState`** — state of any field in the form, by key
+- **`fieldState`**: the current field's own state
+- **`formFieldState`**: state of any field in the form, by key
 
 #### fieldState
 
@@ -469,7 +460,7 @@ Use `formFieldState` to react to another field's state. Access by field key:
 
 `formFieldState` has the same properties as `fieldState`, keyed by field name.
 
-**Example — show a confirmation field only after the primary field is dirty:**
+**Example (show a confirmation field only after the primary field is dirty):**
 
 ```typescript
 {
@@ -506,7 +497,7 @@ Evaluate a condition by sending an HTTP request and inspecting the response. The
 
 **Use when:** Field visibility or state must be determined server-side (permissions, feature flags, country-specific rules).
 
-**Full example — hide an admin panel based on server permissions:**
+**Full example (hide an admin panel based on server permissions):**
 
 ```typescript
 {
@@ -534,8 +525,8 @@ Evaluate a condition by sending an HTTP request and inspecting the response. The
 
 | Property             | Type                | Required | Default      | Description                                                              |
 | -------------------- | ------------------- | -------- | ------------ | ------------------------------------------------------------------------ |
-| `type`               | `'http'`            | Yes      | —            | Identifies this as an HTTP condition                                     |
-| `http`               | `HttpRequestConfig` | Yes      | —            | Request configuration (see below)                                        |
+| `type`               | `'http'`            | Yes      | (none)       | Identifies this as an HTTP condition                                     |
+| `http`               | `HttpRequestConfig` | Yes      | (none)       | Request configuration (see below)                                        |
 | `responseExpression` | `string`            | No       | `!!response` | Expression evaluated with `{ response }` in scope. Must return a boolean |
 | `pendingValue`       | `boolean`           | No       | `false`      | Value returned while the request is in-flight                            |
 | `cacheDurationMs`    | `number`            | No       | `30000`      | How long to cache responses (ms)                                         |
@@ -553,7 +544,7 @@ Evaluate a condition by sending an HTTP request and inspecting the response. The
 | `evaluateBodyExpressions` | When `true`, top-level `body` string values are evaluated as expressions            |
 | `headers`                 | Request headers                                                                     |
 
-**HTTP condition on `required` — server-driven required fields:**
+**HTTP condition on `required` (server-driven required fields):**
 
 ```typescript
 {
@@ -588,7 +579,7 @@ Evaluate a condition using a custom async function registered in `customFnConfig
 
 **Use when:** Condition logic involves Angular service injection, complex async operations, or anything that `http` conditions cannot express directly.
 
-> **Why `inject()` works here:** `customFnConfig` functions are called within an Angular injection context, so Angular's `inject()` API is available — the same way it works in a constructor or field initializer. Import `inject` from `@angular/core` as usual.
+> **Why `inject()` works here:** `customFnConfig` functions are called within an Angular injection context, so Angular's `inject()` API is available, the same way it works in a constructor or field initializer. Import `inject` from `@angular/core` as usual.
 
 **Registration and usage:**
 
@@ -626,13 +617,13 @@ const formConfig = {
 
 **Async condition properties:**
 
-| Property            | Type                     | Required | Default | Description                                               |
-| ------------------- | ------------------------ | -------- | ------- | --------------------------------------------------------- |
-| `type`              | `'async'`                | Yes      | —       | Identifies this as an async condition                     |
-| `asyncFunctionName` | `string`                 | XOR\*    | —       | Name registered in `customFnConfig.asyncConditions`       |
-| `asyncFn`           | `AsyncConditionFunction` | XOR\*    | —       | Inline async function (code-only — not JSON-serializable) |
-| `pendingValue`      | `boolean`                | No       | `false` | Value returned while the function is resolving            |
-| `debounceMs`        | `number`                 | No       | `300`   | Debounce delay before re-evaluating (ms)                  |
+| Property            | Type                     | Required | Default | Description                                              |
+| ------------------- | ------------------------ | -------- | ------- | -------------------------------------------------------- |
+| `type`              | `'async'`                | Yes      | (none)  | Identifies this as an async condition                    |
+| `asyncFunctionName` | `string`                 | XOR\*    | (none)  | Name registered in `customFnConfig.asyncConditions`      |
+| `asyncFn`           | `AsyncConditionFunction` | XOR\*    | (none)  | Inline async function (code-only, not JSON-serializable) |
+| `pendingValue`      | `boolean`                | No       | `false` | Value returned while the function is resolving           |
+| `debounceMs`        | `number`                 | No       | `300`   | Debounce delay before re-evaluating (ms)                 |
 
 \* Exactly one of `asyncFunctionName` or `asyncFn` must be set. The two are mutually exclusive at the type level; if both keys appear at runtime (e.g. a JSON config that hand-edited both in), the library logs a warning and the inline `asyncFn` wins.
 
@@ -804,6 +795,8 @@ Regular expression match.
 
 ## Combining Conditions
 
+**Note:** `and`/`or` composites accept only synchronous sub-conditions. Nesting `http` or `async` conditions inside them throws an error; declare async conditions as separate `logic` entries on the field.
+
 ### AND Logic
 
 All conditions must be true.
@@ -888,7 +881,7 @@ At least one condition must be true.
 }
 ```
 
-**Use case:** Show field for multiple roles — hide unless role is `admin` or `owner`.
+**Use case:** Show field for multiple roles. Hide unless role is `admin` or `owner`.
 
 ```typescript
 // Hide the panel when role is neither 'admin' nor 'owner'
@@ -1092,7 +1085,7 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 
 // ❌ Avoid - Hard to maintain
 {
-  type: 'formValue',
+  type: 'javascript',
   expression: 'formValue.accountType === "business" && formValue.country !== null && formValue.hasTeam',
 }
 ```
@@ -1105,9 +1098,9 @@ Order items become read-only once order is shipped, delivered, or cancelled.
 // Sync expressions
 type ConditionalExpression =
   | { type: 'fieldValue'; fieldPath: string; operator: Operator; value: unknown }
-  | { type: 'formValue'; operator: Operator; value: unknown }
   | { type: 'javascript'; expression: string }
-  | { type: 'custom'; expression: string }
+  | { type: 'custom'; functionName: string } // Registered (XOR with fn)
+  | { type: 'custom'; fn: CustomFunction } // Inline (XOR with functionName)
   | { type: 'and'; conditions: ConditionalExpression[] }
   | { type: 'or'; conditions: ConditionalExpression[] }
   // Async expressions
@@ -1156,7 +1149,6 @@ type AsyncCondition =
 | Type         | Sync/Async | Key properties                         | Purpose                                                               |
 | ------------ | ---------- | -------------------------------------- | --------------------------------------------------------------------- |
 | `fieldValue` | Sync       | `fieldPath`, `operator`, `value`       | Compare a specific field's value                                      |
-| `formValue`  | Sync       | `operator`, `value`                    | Compare entire form object                                            |
 | `javascript` | Sync       | `expression`                           | Custom JS with `fieldValue`/`formValue`/`fieldState`/`formFieldState` |
 | `custom`     | Sync       | `functionName` \| `fn` (XOR)           | Registered or inline custom function                                  |
 | `and`/`or`   | Sync       | `conditions`                           | Combine multiple conditions                                           |
@@ -1271,9 +1263,9 @@ const config = {
 
 ## Related
 
-- **[Value Derivation](/dynamic-behavior/derivation)** — Computed field values
-- **[Async Derivation](/dynamic-behavior/derivation/async)** — HTTP and async function derivations, stopOnUserOverride
-- **[Validation](/validation/basics)** — Conditional validation
-- **[Custom Validators](/validation/custom-validators)** — Async and HTTP validators
-- **[Type Safety](/recipes/type-safety)** — TypeScript integration
-- **[Examples](/examples)** — Real-world form patterns
+- **[Value Derivation](/dynamic-behavior/derivation)**: Computed field values
+- **[Async Derivation](/dynamic-behavior/derivation/async)**: HTTP and async function derivations, stopOnUserOverride
+- **[Validation](/validation/basics)**: Conditional validation
+- **[Custom Validators](/validation/custom-validators)**: Async and HTTP validators
+- **[Type Safety](/recipes/type-safety)**: TypeScript integration
+- **[Examples](/examples)**: Real-world form patterns

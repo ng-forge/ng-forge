@@ -6,7 +6,7 @@ description: 'Build a custom UI adapter for ng-forge dynamic forms. Compose the 
 
 Build a custom integration so ng-forge field types render with your own component library or design system.
 
-> **Just need one extra field on top of an existing adapter** (Material/Bootstrap/PrimeNG/Ionic)? See the shorter [Custom Fields](/recipes/custom-fields) recipe — same primitive, scoped to a single field type.
+> **Just need one extra field on top of an existing adapter** (Material/Bootstrap/PrimeNG/Ionic)? See the shorter [Custom Fields](/recipes/custom-fields) recipe: same primitive, scoped to a single field type.
 
 ## Overview
 
@@ -16,7 +16,7 @@ An ng-forge adapter provides:
 2. A **provider function** (`withMyAdapterFields()`) that registers all those types with `provideDynamicForm()`.
 3. Optional **adapter-level configuration** that cascades into individual fields (size, appearance, theme color).
 
-Every field component composes the `NgForgeField` directive via `hostDirectives`. That directive owns the standard contract — the 10 forwarded inputs every field accepts, eight derived signals (errors, ARIA helpers, ID derivation), and four universal host bindings — so you only write the parts that are actually adapter-specific: the template and any UI-library quirks.
+Every field component composes the `NgForgeField` directive via `hostDirectives`. That directive owns the standard contract: the nine forwarded inputs every field accepts, eight derived signals (errors, ARIA helpers, ID derivation), and five universal host bindings. You only write the parts that are actually adapter-specific: the template and any UI-library quirks.
 
 Package entrypoints you'll import from:
 
@@ -31,24 +31,24 @@ ng-forge ships three layered directives + two **wrapper** directives that bundle
 
 **Layers:**
 
-- **`NgForgeFieldShell`** — the universal base. Owns the `key` + `className` inputs and the identity host bindings (`[id]`, `[attr.data-testid]`, `[class]`). Every ng-forge component uses this.
-- **`NgForgeField`** — the **value** add-on. Injects Shell. Owns `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`, the error/aria derived signals, meta-tracking, and the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by `field()()`.
-- **`NgForgeAction`** — the **action** add-on. Injects Shell. Owns `label`/`disabled`/`hidden`/`tabIndex`/`event`/`eventArgs`/`eventContext`/`props`, the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by its own inputs, and a `dispatch()` method that resolves event-arg tokens and dispatches through `EventBus`.
+- **`NgForgeFieldShell`**: the universal base. Owns the `key` + `className` inputs and the identity host bindings (`[id]`, `[attr.data-testid]`, `[class]`). Every ng-forge component uses this.
+- **`NgForgeField`**: the **value** add-on. Injects Shell. Owns `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`, the error/aria derived signals, meta-tracking, and the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by `field()()`.
+- **`NgForgeAction`**: the **action** add-on. Injects Shell. Owns `label`/`disabled`/`hidden`/`tabIndex`/`event`/`eventArgs`/`eventContext`/`props`, the `[attr.hidden]`/`[attr.aria-disabled]` host bindings driven by its own inputs, and a `dispatch()` method that resolves event-arg tokens and dispatches through `EventBus`.
 
 **Wrappers:**
 
-- **`NgForgeFieldHost`** — composes `NgForgeFieldShell` + `NgForgeField`. Use for value-bearing components.
-- **`NgForgeActionHost`** — composes `NgForgeFieldShell` + `NgForgeAction`. Use for button / action components.
+- **`NgForgeFieldHost`**: composes `NgForgeFieldShell` + `NgForgeField`. Use for value-bearing components.
+- **`NgForgeActionHost`**: composes `NgForgeFieldShell` + `NgForgeAction`. Use for button / action components.
 
-The wrappers exist because Angular's library partial-compilation can't resolve cross-package const references inside `hostDirectives:` — a wrapper directive's own `hostDirectives` IS resolvable at the integration package's compile time, so consumers compose a single class instead of writing the two-entry literal in every component.
+The wrappers exist because Angular's library partial-compilation can't resolve cross-package const references inside `hostDirectives:`. A wrapper directive's own `hostDirectives` IS resolvable at the integration package's compile time, so consumers compose a single class instead of writing the two-entry literal in every component.
 
 **Forwarded inputs** (per directive):
 
 | Directive           | Input names array (re-export)                                                                                       |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `NgForgeFieldShell` | `NG_FORGE_FIELD_SHELL_INPUTS` → `key`, `className`                                                                  |
-| `NgForgeField`      | `NG_FORGE_VALUE_FIELD_INPUTS` → `field`, `label`, `placeholder`, `tabIndex`, `props`, `meta`, `validationMessages`  |
-| `NgForgeAction`     | `NG_FORGE_ACTION_INPUTS` → `label`, `disabled`, `hidden`, `tabIndex`, `event`, `eventArgs`, `eventContext`, `props` |
+| `NgForgeFieldShell` | `NG_FORGE_FIELD_SHELL_INPUTS` (`key`, `className`)                                                                  |
+| `NgForgeField`      | `NG_FORGE_VALUE_FIELD_INPUTS` (`field`, `label`, `placeholder`, `tabIndex`, `props`, `meta`, `validationMessages`)  |
+| `NgForgeAction`     | `NG_FORGE_ACTION_INPUTS` (`label`, `disabled`, `hidden`, `tabIndex`, `event`, `eventArgs`, `eventContext`, `props`) |
 
 **Derived signals available via `injectNgForgeField<T>()`:**
 
@@ -122,9 +122,9 @@ export default class CustomInputComponent {
 
 What the component does **not** declare:
 
-- Standard inputs (`field`, `key`, `label`, etc.) — those come from `NgForgeField` via `hostDirectives`. The component reads them through `ngf.X()`.
-- Host bindings for `id`/`data-testid`/`class`/`hidden` — `NgForgeField` owns those.
-- Error / ARIA / hint plumbing — derived signals come from the directive.
+- Standard inputs (`field`, `key`, `label`, etc.): those come from `NgForgeField` via `hostDirectives`. The component reads them through `ngf.X()`.
+- Host bindings for `id`/`data-testid`/`class`/`hidden`: `NgForgeField` owns those.
+- Error / ARIA / hint plumbing: derived signals come from the directive.
 
 What the component **does** declare:
 
@@ -135,13 +135,13 @@ What the component **does** declare:
 
 ### Typed access via injectNgForgeField
 
-`injectNgForgeField<T>()` returns the `NgForgeField` instance with `field` narrowed to `Signal<FieldTree<T>>`. The cast is unchecked — the runtime contract is that the field-type registration matches the value type — but it lets `[formField]="ngf.field()"` type-check inside templates that need a strict generic.
+`injectNgForgeField<T>()` returns the `NgForgeField` instance with `field` narrowed to `Signal<FieldTree<T>>`. The cast is unchecked (the runtime contract is that the field-type registration matches the value type), but it lets `[formField]="ngf.field()"` type-check inside templates that need a strict generic.
 
 For boolean fields you'd write `injectNgForgeField<boolean>()`, for `Date | null` datepickers `injectNgForgeField<Date | null>()`, and so on.
 
 ## Anatomy of an action component
 
-Buttons, submits, navigation buttons, and array-mutation buttons all compose `NgForgeFieldShell` + `NgForgeAction` instead of `NgForgeField`. The Action directive owns event dispatch — your component's click handler calls `action.dispatch()` and the directive resolves any `eventArgs` tokens via the ambient `ARRAY_CONTEXT` and dispatches through `EventBus`.
+Buttons, submits, navigation buttons, and array-mutation buttons all compose `NgForgeFieldShell` + `NgForgeAction` instead of `NgForgeField`. The Action directive owns event dispatch: your component's click handler calls `action.dispatch()` and the directive resolves any `eventArgs` tokens via the ambient `ARRAY_CONTEXT` and dispatches through `EventBus`.
 
 ```typescript
 // custom-button.component.ts
@@ -186,13 +186,13 @@ The corresponding `FieldTypeDefinition` opts out of value handling and explicit 
 }
 ```
 
-`buttonFieldMapper` (or `submitButtonFieldMapper` / `nextButtonFieldMapper` / `addArrayItemButtonMapper` / …) emits exactly the keys `NgForgeFieldShell` + `NgForgeAction` accept — same lockstep guarantee as value fields.
+`buttonFieldMapper` (or `submitButtonFieldMapper` / `nextButtonFieldMapper` / `addArrayItemButtonMapper` / …) emits exactly the keys `NgForgeFieldShell` + `NgForgeAction` accept, the same lockstep guarantee as value fields.
 
 ## Meta forwarding
 
-Field meta — the `meta` input on every field — carries native HTML attributes (`data-*`, `autocomplete`, `inputmode`, etc.). Markers also forward the directive's derived aria signals (`aria-invalid`, `aria-required`, `aria-describedby`) onto the same target, so authors don't bind those manually. ng-forge ships two marker directives plus an ambient injection path for sub-components.
+Field meta (the `meta` input on every field) carries native HTML attributes (`data-*`, `autocomplete`, `inputmode`, etc.). Markers also forward the directive's derived aria signals (`aria-invalid`, `aria-required`, `aria-describedby`) onto the same target, so authors don't bind those manually. ng-forge ships two marker directives plus an ambient injection path for sub-components.
 
-### NgForgeControl — the common case
+### NgForgeControl: the common case
 
 A template attribute directive. Place it on the canonical control element in your template:
 
@@ -214,9 +214,9 @@ For dynamic option lists (radio buttons, multi-checkbox), put `ngForgeControl` i
 }
 ```
 
-Each iteration spawns its own directive instance. Adding/removing options via Angular's structural lifecycle creates and destroys those instances naturally — no manual subscription, no `dependents` array.
+Each iteration spawns its own directive instance. Adding/removing options via Angular's structural lifecycle creates and destroys those instances naturally: no manual subscription, no `dependents` array.
 
-### NgForgeHostControl — for shadow-DOM wrappers
+### NgForgeHostControl: for shadow-DOM wrappers
 
 Some component libraries (Ionic web components, certain PrimeNG controls) wrap a native input inside shadow DOM that you can't reach with a template selector. In those cases the wrapper element itself is the canonical control from the user's perspective. Add `NgForgeHostControl` to your component's `hostDirectives` so meta + aria land on the host:
 
@@ -242,19 +242,19 @@ export default class IonicToggleField {
 }
 ```
 
-`NgForgeHostControl` is selectorless — it's only used via `hostDirectives`, never as a template attribute. Reversing the order (`[NgForgeHostControl, NgForgeFieldHost]`) causes `inject(NgForgeField)` inside the marker's constructor to fail with NG0203 because the parent isn't on the element injector yet.
+`NgForgeHostControl` is selectorless: it's only used via `hostDirectives`, never as a template attribute. Reversing the order (`[NgForgeHostControl, NgForgeFieldHost]`) causes `inject(NgForgeField)` inside the marker's constructor to fail with NG0203 because the parent isn't on the element injector yet.
 
 ### Quick decision rule
 
-- The control element is rendered in **your template** (an `input`, `select`, or any custom element) → `[ngForgeControl]` on that element.
-- The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper) → `NgForgeHostControl` in `hostDirectives`.
-- Meta should not be applied at all → omit both.
+- The control element is rendered in **your template** (an `input`, `select`, or any custom element): use `[ngForgeControl]` on that element.
+- The control element is the **component's host** (no inner element to mark, e.g. shadow-DOM wrapper): use `NgForgeHostControl` in `hostDirectives`.
+- Meta should not be applied at all: omit both.
 
 If you set `meta()` on a field but no marker / ambient consumer claims it, ng-forge logs a dev-mode warning so the wiring gap surfaces immediately instead of failing silently.
 
 ### Forwarding to a sub-component
 
-If your field component delegates rendering to a sub-component (e.g. `df-bs-radio-group` inside `df-bs-radio`), put `ngForgeControl` on the canonical control element in the sub-component's template — the marker walks the element-injector tree to find the parent's `NgForgeField` and absorbs meta + aria automatically. For per-iteration shapes (radio buttons, multi-checkbox options), one marker instance per `@for` iteration:
+If your field component delegates rendering to a sub-component (e.g. `df-bs-radio-group` inside `df-bs-radio`), put `ngForgeControl` on the canonical control element in the sub-component's template. The marker walks the element-injector tree to find the parent's `NgForgeField` and absorbs meta + aria automatically. For per-iteration shapes (radio buttons, multi-checkbox options), one marker instance per `@for` iteration:
 
 ```typescript
 @Component({
@@ -280,9 +280,9 @@ export class BsRadioGroupComponent {
 }
 ```
 
-No `[meta]="ngf.meta()"` binding on the parent side is needed and no `setupMetaTracking` call inside the sub-component — each marker instance claims the ambient field on construction. The dev-mode unclaimed-meta warning fires if `meta()` is non-empty and no marker / ambient consumer registered.
+No `[meta]="ngf.meta()"` binding on the parent side is needed and no `setupMetaTracking` call inside the sub-component: each marker instance claims the ambient field on construction. The dev-mode unclaimed-meta warning fires if `meta()` is non-empty and no marker / ambient consumer registered.
 
-> **Warning-race note.** In a normal template-driven render, sub-components construct during the parent's template instantiation (so `markClaimed()` runs before `NgForgeField`'s `afterRenderEffect.write` fires). For programmatic late mounts (Storybook stories, mid-tree manual instantiation) the warning can fire once before the late claim lands — the latch ensures it doesn't repeat.
+> **Warning-race note.** In a normal template-driven render, sub-components construct during the parent's template instantiation (so `markClaimed()` runs before `NgForgeField`'s `afterRenderEffect.write` fires). For programmatic late mounts (Storybook stories, mid-tree manual instantiation) the warning can fire once before the late claim lands; the latch ensures it doesn't repeat.
 
 ## Mappers
 
@@ -292,28 +292,28 @@ A mapper translates a field definition (`FieldDef<...>`) into the inputs that fl
 type MapperFn<T extends FieldDef<unknown>> = (input: T) => Signal<Record<string, unknown>>;
 ```
 
-The signal emits a record of input-name → value. The form engine reads each entry and calls `ref.setInput(name, value)` on the rendered component.
+The signal emits a record mapping input names to values. The form engine reads each entry and calls `ref.setInput(name, value)` on the rendered component.
 
 ng-forge ships mappers for the standard field categories. You'll register field types against these, not write your own most of the time:
 
-| Mapper                  | For                                     | What it emits                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages`. Note: the mapper no longer emits `defaultValidationMessages` as a per-component input — `NgForgeField` reads `DEFAULT_VALIDATION_MESSAGES` from DI directly. The form-level `defaultValidationMessages` config option in `provideDynamicForm` / `FormConfig` is unaffected: it still flows in through the DI token. |
-| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string→Date conversion)                                                                                                                                                                                                                                                                                                                                                               |
-| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                                                                                                                                                                                                                                                                                                                   |
-| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                                                                                                                                                                                                                                                                                                               |
+| Mapper                  | For                                     | What it emits                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `valueFieldMapper`      | input, textarea, datepicker, slider, …  | `field`, `key`, `label`, `placeholder`, `className`, `tabIndex`, `props`, `meta`, `validationMessages`, plus `addons` when the field declares addons. Note: the mapper no longer emits `defaultValidationMessages` as a per-component input; `NgForgeField` reads `DEFAULT_VALIDATION_MESSAGES` from DI directly. The form-level `defaultValidationMessages` config option in `provideDynamicForm` / `FormConfig` is unaffected: it still flows in through the DI token. |
+| `checkboxFieldMapper`   | checkbox, toggle                        | same as `valueFieldMapper`                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `optionsFieldMapper`    | select, radio, multi-checkbox           | adds `options`                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `datepickerFieldMapper` | datepicker                              | adds `minDate`, `maxDate`, `startAt` (string to Date conversion)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `buttonFieldMapper`     | plain buttons                           | `key`, `label`, `disabled`, `event`, `props`, `className`                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Array button mappers    | `addArrayItem`, `removeArrayItem`, etc. | event + event-args wiring for array mutations                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ### Mapper-as-contract
 
-Every key a mapper emits must match a declared input on the component or one of its host directives. If your component exposes the standard 10 inputs (via `NgForgeField` `hostDirectives`) and accepts `props`, every key the built-in mappers emit lines up automatically.
+Every key a mapper emits must match a declared input on the component or one of its host directives. If your component exposes the standard nine inputs (via `NgForgeField` `hostDirectives`) and accepts `props`, every key the built-in mappers emit lines up automatically.
 
-`ComponentRef.setInput` (used by the field outlet to push mapper output onto the rendered component) is **lenient** on unknown input names in Angular 21 — extra keys are silently dropped rather than throwing NG0303. So if a custom mapper emits a key the component doesn't declare, the input is lost without a runtime error. Composing `NgForgeFieldHost` registers all the standard input names on the component (Shell's `key`/`className` + Field's `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`) so built-in mapper output always lines up — that's the recommended authoring shape for third-party adapters.
+`ComponentRef.setInput` (used by the field outlet to push mapper output onto the rendered component) is **lenient** on unknown input names in Angular 22: extra keys are silently dropped rather than throwing NG0303. So if a custom mapper emits a key the component doesn't declare, the input is lost without a runtime error. Composing `NgForgeFieldHost` registers all the standard input names on the component (Shell's `key`/`className` + Field's `field`/`label`/`placeholder`/`tabIndex`/`props`/`meta`/`validationMessages`) so built-in mapper output always lines up. That's the recommended authoring shape for third-party adapters.
 
 ### Writing a custom mapper
 
-Most adapter authors never need this — the built-in mappers handle every standard category. You'd write a custom mapper when your field type doesn't fit any standard category (e.g. a multi-select with grouped options, a tree-picker with a custom data shape).
+Most adapter authors never need this: the built-in mappers handle every standard category. You'd write a custom mapper when your field type doesn't fit any standard category (e.g. a multi-select with grouped options, a tree-picker with a custom data shape).
 
 Example: a hypothetical "weighted choice" field where each option has an associated number:
 
@@ -341,13 +341,13 @@ export function weightedChoiceFieldMapper(fieldDef: WeightedChoiceField): Signal
 }
 ```
 
-Reuse `buildValueFieldInputs` (exported from `/integration`) to get the standard 10 keys without rewriting them, then layer your extra keys on top.
+Reuse `buildValueFieldInputs` (exported from `/integration`) to get the standard value-field keys without rewriting them, then layer your extra keys on top.
 
 ### Writing a custom action / button mapper
 
 Action fields (buttons, submits, array-mutation buttons) compose `NgForgeActionHost` instead of `NgForgeFieldHost`. Their mapper emits a different key set: `key`, `className`, `label`, `disabled`, `hidden`, `tabIndex`, `event`, `eventArgs`, `eventContext`, `props`. `NgForgeAction.dispatch()` reads `event` + `eventArgs` and resolves any tokens (`$key`, `$index`, `$arrayKey`, `formValue`) against the ambient `ARRAY_CONTEXT` injection token, falling back to the static `eventContext` input.
 
-The built-in `buttonFieldMapper` covers the generic case. For preconfigured events (submit, next/previous-page, array mutations) ng-forge ships `submitButtonFieldMapper`, `nextButtonFieldMapper`, `previousButtonFieldMapper`, `addArrayItemButtonMapper`, `prependArrayItemButtonMapper`, `insertArrayItemButtonMapper`, `removeArrayItemButtonMapper`, `popArrayItemButtonMapper`, `shiftArrayItemButtonMapper` — each one wires the `event` class internally so the field definition doesn't have to.
+The built-in `buttonFieldMapper` covers the generic case. For preconfigured events (submit, next/previous-page, array mutations) ng-forge ships `submitButtonFieldMapper`, `nextButtonFieldMapper`, `previousButtonFieldMapper`, `addArrayItemButtonMapper`, `prependArrayItemButtonMapper`, `insertArrayItemButtonMapper`, `removeArrayItemButtonMapper`, `popArrayItemButtonMapper`, `shiftArrayItemButtonMapper`. Each one wires the `event` class internally so the field definition doesn't have to.
 
 You'd write a custom action mapper for a button that dispatches a custom `FormEvent` subclass with a non-standard payload shape, or for a button whose event-arg resolution differs from the built-in tokens.
 
@@ -402,12 +402,12 @@ Register with `valueHandling: 'exclude'` and `renderReadyWhen: []` since action 
 
 ## Required-input forwarding & renderReadyWhen
 
-`NgForgeField` declares `field` and `key` as `input.required()`. The form engine guarantees both are bound before the component renders, but the contract is enforced via the `renderReadyWhen` mechanism on the `FieldTypeDefinition`.
+`NgForgeField` declares `field` as `input.required()`, and `NgForgeFieldShell` declares `key` the same way. The form engine guarantees both are bound before the component renders, but the contract is enforced via the `renderReadyWhen` mechanism on the `FieldTypeDefinition`.
 
 The renderer resolves the effective `renderReadyWhen` per registration in this order:
 
-1. `FieldTypeDefinition.renderReadyWhen` — explicit on the registration. Always wins (escape hatch).
-2. `valueHandling: 'exclude'` — short-circuits to `[]`. Display / action / layout fields don't bind to a form value, so they never wait.
+1. `FieldTypeDefinition.renderReadyWhen`: explicit on the registration. Always wins (escape hatch).
+2. `valueHandling: 'exclude'`: short-circuits to `[]`. Display / action / layout fields don't bind to a form value, so they never wait.
 3. Default `['field']`. In dev mode the renderer also emits a one-time warning via `DynamicFormLogger` so adapter authors learn to declare the contract explicitly.
 
 Every registration in your adapter should declare `renderReadyWhen` (directly or via a shared base constant) so the contract is visible at the registration site. The convention the built-in adapters follow:
@@ -519,7 +519,7 @@ After this declaration, IDE autocomplete on `FormConfig.fields[].type` resolves 
 
 ## Adapter-level configuration
 
-Most design systems have settings that should cascade across every field — appearance variant, size, theme color. The pattern is:
+Most design systems have settings that should cascade across every field: appearance variant, size, theme color. The pattern is:
 
 1. Define an injection token with the config shape.
 2. Make the config optional in your provider function.
@@ -564,7 +564,7 @@ Templates bind the resolved computeds rather than reading `props` directly:
 
 ### propsToMeta
 
-Some "props" are actually native HTML attributes — `type` on inputs, `rows`/`cols` on textareas, `autocomplete`. Listing them in `propsToMeta` on the field type definition causes the form engine to merge those values into `meta` before passing them to your component, which means they flow through `[ngForgeControl]` onto the actual control element automatically.
+Some "props" are actually native HTML attributes: `type` on inputs, `rows`/`cols` on textareas, `autocomplete`. Listing them in `propsToMeta` on the field type definition causes the form engine to merge those values into `meta` before passing them to your component, which means they flow through `[ngForgeControl]` onto the actual control element automatically.
 
 ```typescript
 {
@@ -579,11 +579,11 @@ If `meta` and `props` both carry the same key, `meta` wins.
 
 ## Custom wrappers
 
-Wrappers are "chrome" around a field — sections, accordions, tooltips, badges. ng-forge ships a wrapper-chain registry separate from the field-type registry, so adapters can register custom wrappers alongside field types from the same provider entry point.
+Wrappers are "chrome" around a field: sections, accordions, tooltips, badges. ng-forge ships a wrapper-chain registry separate from the field-type registry, so adapters can register custom wrappers alongside field types from the same provider entry point.
 
 The complete wrapper-authoring guide lives in **[Writing a Wrapper](/wrappers/writing-a-wrapper)** (component shape, slot semantics, `WrapperFieldInputs`, error patterns) and **[Registering and Applying](/wrappers/registering-and-applying)** (the `createWrappers` bundle + module augmentation).
 
-For adapter library packaging, import the wrapper-authoring API from `@ng-forge/dynamic-forms/integration` rather than the root entry point — keeps a single import path across your field components and wrapper components:
+For adapter library packaging, import the wrapper-authoring API from `@ng-forge/dynamic-forms/integration` rather than the root entry point. This keeps a single import path across your field components and wrapper components:
 
 ```typescript
 import {
@@ -595,20 +595,20 @@ import {
 } from '@ng-forge/dynamic-forms/integration';
 ```
 
-Functionally identical to the root entry — same symbols, same `declare module '@ng-forge/dynamic-forms'` augmentation. The integration re-export exists so adapter packages have one import path.
+Functionally identical to the root entry: same symbols, same `declare module '@ng-forge/dynamic-forms'` augmentation. The integration re-export exists so adapter packages have one import path.
 
 ## Reference adapters
 
 The four in-tree adapters are the canonical reference implementations. Each ships ~10 field components, all built on `NgForgeField`. Read them as full working examples:
 
-- [`packages/dynamic-forms-bootstrap`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-bootstrap) — the smallest surface, often the easiest to copy from.
-- [`packages/dynamic-forms-material`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-material) — wraps Angular Material's existing form-field primitives.
-- [`packages/dynamic-forms-primeng`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-primeng) — examples of inner control components for opaque PrimeNG widgets.
-- [`packages/dynamic-forms-ionic`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-ionic) — shadow-DOM wrappers using `NgForgeHostControl`.
+- [`packages/dynamic-forms-bootstrap`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-bootstrap): the smallest surface, often the easiest to copy from.
+- [`packages/dynamic-forms-material`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-material): wraps Angular Material's existing form-field primitives.
+- [`packages/dynamic-forms-primeng`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-primeng): examples of inner control components for opaque PrimeNG widgets.
+- [`packages/dynamic-forms-ionic`](https://github.com/ng-forge/ng-forge/tree/main/packages/dynamic-forms-ionic): shadow-DOM wrappers using `NgForgeHostControl`.
 
 ## Related
 
-- **[Custom Fields](/recipes/custom-fields)** — single-field recipe alongside an existing adapter.
-- **[Field Types](/field-types/text-inputs)** — what the standard field types provide.
-- **[Type Safety](/recipes/type-safety)** — module augmentation patterns.
-- **[Validation](/validation/basics)** — how validation surfaces through `ngf.errorsToDisplay()`.
+- **[Custom Fields](/recipes/custom-fields)**: single-field recipe alongside an existing adapter.
+- **[Field Types](/field-types/text-inputs)**: what the standard field types provide.
+- **[Type Safety](/recipes/type-safety)**: module augmentation patterns.
+- **[Validation](/validation/basics)**: how validation surfaces through `ngf.errorsToDisplay()`.

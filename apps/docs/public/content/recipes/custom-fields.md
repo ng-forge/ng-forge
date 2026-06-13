@@ -1,17 +1,17 @@
 ---
 title: Custom Fields
-slug: advanced/custom-fields
+slug: recipes/custom-fields
 description: 'Add custom field types like rich text editors or file uploaders to any ng-forge adapter without building a full integration from scratch.'
 ---
 
-Add a custom field type alongside an existing ng-forge adapter — Material, Bootstrap, PrimeNG, or Ionic — without writing a full adapter from scratch.
+Add a custom field type alongside an existing ng-forge adapter (Material, Bootstrap, PrimeNG, or Ionic) without writing a full adapter from scratch.
 
 ## When to use this vs build a full adapter
 
-- **One or two extra fields** alongside an existing adapter (a rich text editor, file uploader, signature pad, rating widget) → this recipe.
-- **A whole new design system** (Spartan, an internal kit, a custom theme with many field types) → see [Building an Adapter](/building-an-adapter).
+- **One or two extra fields** alongside an existing adapter (a rich text editor, file uploader, signature pad, rating widget): this recipe.
+- **A whole new design system** (Spartan, an internal kit, a custom theme with many field types): see [Building an Adapter](/building-an-adapter).
 
-The mechanics are the same in both cases — every ng-forge field component composes the `NgForgeField` directive — but the recipe stays focused on registering one type alongside `withMaterialFields()` (or whichever adapter you already use).
+The mechanics are the same in both cases (every ng-forge field component composes the `NgForgeField` directive), but the recipe stays focused on registering one type alongside `withMaterialFields()` (or whichever adapter you already use).
 
 ## 1. Create the field component
 
@@ -61,8 +61,8 @@ export default class RichTextFieldComponent {
 A few things to note:
 
 - **No manual input declarations** for `field`/`key`/`label`/etc. The standard inputs come in via the `NgForgeFieldHost` wrapper (Shell carries `key`/`className`; `NgForgeField` carries the rest); `injectNgForgeField<T>()` returns a typed view of the value-field directive instance and re-exposes `key()`/`className()` for templates.
-- **No host bindings block** — Shell binds `[id]`/`[attr.data-testid]`/`[class]` from `key()`/`className()`, and `NgForgeField` binds `[attr.hidden]`/`[attr.aria-disabled]` from the field tree.
-- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby` — derived from field state) onto that element. The author doesn't bind aria-\* manually — the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
+- **No host bindings block**: Shell binds `[id]`/`[attr.data-testid]`/`[class]` from `key()`/`className()`, and `NgForgeField` binds `[attr.hidden]`/`[attr.aria-disabled]` from the field tree.
+- **`[ngForgeControl]`** on the canonical control element forwards meta attributes (`data-*`, `autocomplete`, etc.) AND aria attributes (`aria-invalid`, `aria-required`, `aria-describedby`, derived from field state) onto that element. The author doesn't bind aria-\* manually; the marker absorbs it. For shadow-DOM wrappers where you can't reach the inner input, see [`NgForgeHostControl`](/building-an-adapter#meta-forwarding) in the integration guide.
 - **`injectNgForgeField<string>()`** narrows `ngf.field()` to `Signal<FieldTree<string>>`, so the `[formField]="f"` binding type-checks. Use the appropriate generic for your value type (`boolean` for checkboxes, `Date | null` for datepickers, `ValueType[]` for multi-selects, etc.).
 
 ## 2. Register the field type
@@ -115,11 +115,11 @@ const config = {
 } as const satisfies FormConfig;
 ```
 
-Custom fields work with everything the built-in field types do — validation, derivations, conditional logic, dynamic text — without any extra wiring.
+Custom fields work with everything the built-in field types do (validation, derivations, conditional logic, dynamic text) without any extra wiring.
 
 ## Testing a custom field
 
-The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly — TestBed, Storybook, sandbox harnesses — bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
+The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly (TestBed, Storybook, sandbox harnesses) bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
 
 Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/integration` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
 
@@ -169,6 +169,6 @@ Both harnesses defer `detectChanges()` to the caller so you can set extra compon
 
 ## Going further
 
-- [Building an Adapter](/building-an-adapter) — full guide for shipping an adapter with many field types, adapter-level configuration cascades, and module augmentation for type-safety.
-- [Type Safety](/recipes/type-safety) — register your custom field shape with `FieldRegistryLeaves` so `FormConfig` autocompletes against it.
-- [Events](/recipes/events) — dispatch and subscribe to events from custom field components.
+- [Building an Adapter](/building-an-adapter): full guide for shipping an adapter with many field types, adapter-level configuration cascades, and module augmentation for type-safety.
+- [Type Safety](/recipes/type-safety): register your custom field shape with `FieldRegistryLeaves` so `FormConfig` autocompletes against it.
+- [Events](/recipes/events): dispatch and subscribe to events from custom field components.

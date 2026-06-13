@@ -109,7 +109,7 @@ fields: [
 
 #### Inline alternative (`fn`)
 
-For code-only configs you can attach the function directly via `fn` and skip the `customFnConfig.derivations` registration. `fn` is mutually exclusive with `functionName` — TypeScript rejects setting both, and the runtime logs a warning + prefers `fn` if a JSON config sets both keys.
+For code-only configs you can attach the function directly via `fn` and skip the `customFnConfig.derivations` registration. `fn` is mutually exclusive with `functionName`: TypeScript rejects setting both, and the runtime logs a warning and prefers `fn` if a JSON config sets both keys.
 
 ```typescript
 import type { CustomFunction } from '@ng-forge/dynamic-forms';
@@ -138,7 +138,7 @@ const config = {
 
 **Default dependencies for function derivations:** if you omit `dependsOn`, both `functionName` and `fn` derivations default to a wildcard (`'*'`), meaning the derivation re-runs on every form change. In development, the library logs a one-time `Derivation: custom functions without explicit dependsOn detected` warning so you can narrow it down. Specify `dependsOn` whenever you know the exact inputs to avoid this.
 
-Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry — especially when the function closes over TS enums, constants, or class-scoped helpers that don't round-trip through a string registry.
+Use `functionName` when the config must survive JSON serialization (APIs, OpenAPI, databases, MCP). Use `fn` for code-only authoring where you'd rather not maintain a separate registry, especially when the function closes over TS enums, constants, or class-scoped helpers that don't round-trip through a string registry.
 
 **See also:** the same XOR pattern applies to [async derivations (`asyncFn`)](/dynamic-behavior/derivation/async#inline-alternative-asyncfn), [conditions (`fn` / `asyncFn`)](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline), and [validators](/validation/custom-validators#inline-functions-vs-registered-names). See [Configuration](/configuration) for setting up `customFnConfig`.
 
@@ -417,8 +417,9 @@ Create two-way bindings between fields:
 The system automatically detects derivation cycles and warns during development:
 
 ```
-Bidirectional derivation detected: celsius <-> fahrenheit
-Bidirectional derivations stabilize via equality check.
+Derivation: bidirectional derivation patterns detected. These patterns stabilize via equality checks,
+but may oscillate with floating-point values (e.g., currency conversions with rounding).
+Consider adding tolerance-based comparisons for numeric values. ['celsius↔fahrenheit']
 ```
 
 ### Floating-Point Precision
@@ -514,13 +515,13 @@ External data values are reactively tracked - when signals change, derivations a
 
 ## Next Steps
 
-- **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state dynamically
-- **[i18n](/dynamic-behavior/i18n)** — Translate labels and messages with Observables and Signals
-- **[Expression Parser](/recipes/expression-parser)** — Understand the security model behind derivation expressions
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)**: Control field visibility, required state, and disabled state dynamically
+- **[i18n](/dynamic-behavior/i18n)**: Translate labels and messages with Observables and Signals
+- **[Expression Parser](/recipes/expression-parser)**: Understand the security model behind derivation expressions
 
 ## Related
 
-- **Property Derivation** (see tab above) — Derive component properties (minDate, options, label) from form values
-- **Async Derivation** (see tab above) — HTTP and async function derivations, stopOnUserOverride
-- **[Array Fields](/prebuilt/form-arrays/simplified)** — Working with array fields
-- **[Examples](/examples)** — Real-world form patterns
+- **Property Derivation** (see tab above): Derive component properties (minDate, options, label) from form values
+- **Async Derivation** (see tab above): HTTP and async function derivations, stopOnUserOverride
+- **[Array Fields](/prebuilt/form-arrays/simplified)**: Working with array fields
+- **[Examples](/examples)**: Real-world form patterns

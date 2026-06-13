@@ -85,7 +85,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: Palette,
         title: 'Pick a UI library',
-        description: 'Material, PrimeNG, Bootstrap, or Ionic — first-party adapters.',
+        description: 'Material, PrimeNG, Bootstrap, or Ionic: first-party adapters.',
         href: '/configuration',
       },
       {
@@ -112,7 +112,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: Type,
         title: 'Text inputs',
-        description: 'input, textarea, datepicker — typing free-form data.',
+        description: 'input, textarea, datepicker: typing free-form data.',
         href: '/field-types/text-inputs',
       },
       {
@@ -145,13 +145,13 @@ const NAV: readonly NavSection[] = [
       {
         icon: Layers,
         title: 'Group fields',
-        description: 'Nest a section under a key — `user.address.street` shape.',
+        description: 'Nest a section under a key for a `user.address.street` shape.',
         href: '/prebuilt/form-groups',
       },
       {
         icon: Rows3,
         title: 'Rows + containers',
-        description: 'Flat layout primitives — no nesting in the form value.',
+        description: 'Flat layout primitives with no nesting in the form value.',
         href: '/prebuilt/form-rows',
       },
       {
@@ -184,7 +184,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: CircleCheck,
         title: 'Built-in shorthand',
-        description: 'required, email, min, max, minLength, pattern — at field top level.',
+        description: 'required, email, min, max, minLength, pattern, all at field top level.',
         href: '/validation/basics',
       },
       {
@@ -196,7 +196,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: FileCode,
         title: 'Schema-first (Zod, Valibot, ArkType)',
-        description: 'Standard Schema spec — one source of truth for shape + validation.',
+        description: 'Standard Schema spec: one source of truth for shape + validation.',
         href: '/schema-validation/zod',
       },
       {
@@ -218,7 +218,7 @@ const NAV: readonly NavSection[] = [
     icon: Zap,
     accent: '#ff4d00',
     title: 'Make fields react',
-    subtitle: 'Show, hide, compute, fetch — fields that respond to other fields.',
+    subtitle: 'Show, hide, compute, fetch: fields that respond to other fields.',
     cards: [
       {
         icon: Eye,
@@ -241,7 +241,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: Send,
         title: 'Submit & events',
-        description: '(submitted), (events), formValue signal — full lifecycle access.',
+        description: '(submitted), (events), formValue signal: full lifecycle access.',
         href: '/dynamic-behavior/submission',
       },
       {
@@ -268,7 +268,7 @@ const NAV: readonly NavSection[] = [
       {
         icon: Funnel,
         title: 'Control submitted values',
-        description: 'excludeValueIfHidden / disabled / readonly — strip server-irrelevant fields.',
+        description: 'excludeValueIfHidden / disabled / readonly strip server-irrelevant fields.',
         href: '/recipes/value-exclusion',
       },
       {
@@ -319,7 +319,7 @@ const PITFALLS: readonly Pitfall[] = [
     href: '/dynamic-behavior/conditional-logic',
   },
   {
-    title: 'Select options blank — backend returns `id` / `name` keys',
+    title: 'Select options blank when the backend returns `id` / `name` keys',
     symptom: 'Dropdown shows empty rows or `[object Object]`.',
     fix: "`FieldOption` is fixed at `{ value, label, disabled? }`. Remap once at the source, or inside a `targetProperty: 'options'` derivation with `responseExpression`.",
     href: '/field-types/selection',
@@ -339,8 +339,8 @@ const PITFALLS: readonly Pitfall[] = [
     <div class="overview">
       <header class="overview__hero">
         <span class="overview__eyebrow">Feature overview</span>
-        <h1 class="overview__title">ng-forge — dynamic forms for Angular</h1>
-        <p class="overview__subtitle">Find your way around — six task-shaped paths into the docs.</p>
+        <h1 class="overview__title">ng-forge: dynamic forms for Angular</h1>
+        <p class="overview__subtitle">Find your way around: six task-shaped paths into the docs.</p>
         <p class="overview__lead">
           Pick what you're trying to do, jump straight to the page that answers it. A general FAQ and the most common pitfalls are at the
           bottom.
@@ -411,7 +411,7 @@ const PITFALLS: readonly Pitfall[] = [
           </span>
           <div>
             <h2 class="overview__h2">Common pitfalls</h2>
-            <p class="overview__h2-sub">The patterns that trip people up — symptom, fix, and a link to the canonical doc.</p>
+            <p class="overview__h2-sub">The patterns that trip people up: symptom, fix, and a link to the canonical doc.</p>
           </div>
         </header>
         <div class="pitfalls">

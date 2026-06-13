@@ -26,6 +26,10 @@ import { Component } from '@angular/core';
 import { FormConfig, DynamicForm } from '@ng-forge/dynamic-forms';
 
 const registrationConfig = {
+  defaultValidationMessages: {
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+  },
   fields: [
     // Step 1: Account Information
     {
@@ -54,7 +58,6 @@ const registrationConfig = {
             pattern: 'Username can only contain letters, numbers, and underscores',
           },
           props: {
-            appearance: 'outline',
             hint: '3-20 characters, letters, numbers, and underscores only',
           },
         },
@@ -71,7 +74,6 @@ const registrationConfig = {
           },
           props: {
             type: 'email',
-            appearance: 'outline',
             hint: "We'll send a verification email",
           },
         },
@@ -90,7 +92,6 @@ const registrationConfig = {
           },
           props: {
             type: 'password',
-            appearance: 'outline',
             hint: 'At least 8 characters with uppercase, lowercase, number, and special character',
           },
         },
@@ -113,14 +114,12 @@ const registrationConfig = {
           },
           props: {
             type: 'password',
-            appearance: 'outline',
           },
         },
         {
           type: 'next',
           key: 'nextToProfile',
           label: 'Continue to Profile',
-          props: { color: 'primary' },
         },
       ],
     },
@@ -141,7 +140,6 @@ const registrationConfig = {
               label: 'First Name',
               required: true,
               col: 6,
-              props: { appearance: 'outline' },
             },
             {
               key: 'lastName',
@@ -150,25 +148,8 @@ const registrationConfig = {
               label: 'Last Name',
               required: true,
               col: 6,
-              props: { appearance: 'outline' },
             },
           ],
-        },
-        {
-          key: 'dateOfBirth',
-          type: 'datepicker',
-          value: null,
-          label: 'Date of Birth',
-          required: true,
-          maxDate: new Date(new Date().getFullYear() - 13, 0, 1),
-          validationMessages: {
-            required: 'Date of birth is required',
-            maxDate: 'You must be at least 13 years old',
-          },
-          props: {
-            appearance: 'outline',
-            hint: 'You must be at least 13 years old',
-          },
         },
         {
           key: 'accountType',
@@ -180,7 +161,6 @@ const registrationConfig = {
             { value: 'personal', label: 'Personal Account' },
             { value: 'business', label: 'Business Account' },
           ],
-          props: { color: 'primary' },
         },
         {
           key: 'companyName',
@@ -207,7 +187,6 @@ const registrationConfig = {
               },
             },
           ],
-          props: { appearance: 'outline' },
         },
         {
           key: 'industry',
@@ -243,9 +222,6 @@ const registrationConfig = {
             },
           ],
           placeholder: 'Select your industry',
-          props: {
-            appearance: 'outline',
-          },
         },
         {
           type: 'row',
@@ -260,7 +236,6 @@ const registrationConfig = {
               type: 'next',
               key: 'nextToPreferences',
               label: 'Continue',
-              props: { color: 'primary' },
             },
           ],
         },
@@ -284,21 +259,18 @@ const registrationConfig = {
             { value: 'marketing', label: 'Marketing & Sales' },
             { value: 'development', label: 'Software Development' },
           ],
-          props: { color: 'primary' },
         },
         {
           key: 'newsletter',
           type: 'checkbox',
           value: false,
           label: 'Subscribe to newsletter',
-          props: { color: 'primary' },
         },
         {
           key: 'notifications',
           type: 'toggle',
           value: true,
           label: 'Enable email notifications',
-          props: { color: 'primary' },
         },
         {
           key: 'terms',
@@ -309,7 +281,6 @@ const registrationConfig = {
           validationMessages: {
             required: 'You must accept the terms and conditions',
           },
-          props: { color: 'primary' },
         },
         {
           key: 'privacy',
@@ -320,7 +291,6 @@ const registrationConfig = {
           validationMessages: {
             required: 'You must accept the privacy policy',
           },
-          props: { color: 'primary' },
         },
         {
           type: 'row',
@@ -335,7 +305,6 @@ const registrationConfig = {
               type: 'submit',
               key: 'submitRegistration',
               label: 'Create Account',
-              props: { color: 'primary' },
             },
           ],
         },
@@ -361,7 +330,7 @@ export class UserRegistrationComponent {
 The form uses page fields to create a wizard-style registration process:
 
 1. **Account Information** - Username, email, password
-2. **Profile Information** - Name, DOB, account type
+2. **Profile Information** - Name, account type
 3. **Preferences & Terms** - Interests, notifications, agreements
 
 Navigation buttons (`next`, `previous`, `submit`) control flow between pages.
@@ -425,21 +394,6 @@ Company name and industry appear only for business accounts:
 }
 ```
 
-### Age Verification
-
-Uses datepicker `maxDate` to ensure users are at least 13 years old:
-
-```typescript
-{
-  key: 'dateOfBirth',
-  type: 'datepicker',
-  maxDate: new Date(new Date().getFullYear() - 13, 0, 1),
-  validationMessages: {
-    maxDate: 'You must be at least 13 years old',
-  },
-}
-```
-
 ### Type Safety
 
 Full type inference for form values:
@@ -455,7 +409,6 @@ type RegistrationValue = InferFormValue<typeof registrationConfig.fields>;
 //   confirmPassword: string;
 //   firstName: string;
 //   lastName: string;
-//   dateOfBirth: Date | null;
 //   accountType: string;
 //   companyName?: string;      // Conditional
 //   industry?: string;          // Conditional
@@ -504,5 +457,5 @@ Add social login buttons before the form:
 - **[Login Form](/examples/login-form)** - Simple authentication form
 - **[Paginated Form](/examples/paginated-form)** - Page field navigation patterns
 - **[Validation](/validation/basics)** - Validation guide
-- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Dynamic field behavior
 - **[Material Integration](/configuration)** - Material Design styling

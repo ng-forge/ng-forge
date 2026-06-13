@@ -1,10 +1,10 @@
 ---
 title: Custom Types
 slug: addons/custom-types
-description: 'Register a custom addon type component with withCustomAddon() and make it type-safe per field via the InputAddonExtensions module-augmentation seam. Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
+description: 'Register a custom addon type component with withCustomAddon() and make it type-safe per field via the per-adapter module-augmentation seams (MatAddonExtensions, BsAddonExtensions, PrimeAddonExtensions, IonAddonExtensions). Covers runtime validation, ARIA defaults, and dropping into per-adapter input fields.'
 ---
 
-When the shipped types — universal `text`, `template`, `component` plus the per-adapter icon and button types (`mat-icon` / `mat-button` for Material, `bs-icon` / `bs-button` for Bootstrap, `prime-icon` / `prime-button` for PrimeNG, `ion-icon` / `ion-button` for Ionic) — don't cover your case (a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling), register a custom type. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
+The shipped types are the universal `text`, `template`, and `component` types plus the per-adapter icon and button types (`mat-icon` / `mat-button` for Material, `bs-icon` / `bs-button` for Bootstrap, `prime-icon` / `prime-button` for PrimeNG, `ion-icon` / `ion-button` for Ionic). When they don't cover your case (a rating widget in the prefix, a status pill in the suffix, a copy-to-clipboard component with bespoke styling), register a custom type. Two independent steps: a runtime registration (`withCustomAddon`) and an optional type-level augmentation.
 
 ## 1. Define the addon shape
 
@@ -20,7 +20,7 @@ export interface RatingAddon extends BaseAddon {
 }
 ```
 
-`BaseAddon` carries the universal axes — `slot`, optional `hidden`, optional `className`, optional `disabled` — so you only declare the type-specific fields.
+`BaseAddon` carries the universal axes (`slot`, optional `hidden`, optional `className`, optional `disabled`) so you only declare the type-specific fields.
 
 ## 2. Build the type component
 
@@ -46,7 +46,7 @@ export class RatingAddonComponent {
 }
 ```
 
-The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-addon-slot>`) wires the addon object via `[addon]` and forwards the `slot` HTML attribute on the host element. ARIA defaults are owned by your component — decorative types typically set `aria-hidden="true"`; interactive types handle their own labelling.
+The contract: declare `addon: input.required<TAddon>()`. The dispatcher (`<df-addon-slot>`) wires the addon object via `[addon]` and forwards the `slot` HTML attribute on the host element. ARIA defaults are owned by your component: decorative types typically set `aria-hidden="true"`; interactive types handle their own labelling.
 
 ## 3. Register at the provider level
 
@@ -67,27 +67,27 @@ export const RATING_KIND: AddonTypeDefinition<RatingAddon> = {
 };
 ```
 
-Then pass it through `withCustomAddon(...)` to `provideDynamicForm` alongside your adapter s field bundle:
+Then pass it through `withCustomAddon(...)` to `provideDynamicForm` alongside your adapter's field bundle:
 
 <docs-addon-info field="custom-type-invocation"></docs-addon-info>
 
-`loadComponent` returns a Promise — the type component is loaded lazily on first render and cached.
+`loadComponent` returns a Promise; the type component is loaded lazily on first render and cached.
 
-`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning and the form keeps rendering — `validate` is a sanitisation hook, not a hard fail.
+`validate` is optional; when provided, the runtime addon validator calls it at config init. Throwing `DynamicFormError` drops the addon with an actionable warning and the form keeps rendering; `validate` is a sanitisation hook, not a hard fail.
 
 ## 4. Type-level augmentation (optional but recommended)
 
-To make `type: 'rating'` autocomplete inside the field s `addons` array, augment the active adapter s addon-extension seam:
+To make `type: 'rating'` autocomplete inside the field's `addons` array, augment the active adapter's addon-extension seam (`MatAddonExtensions`, `BsAddonExtensions`, `PrimeAddonExtensions`, or `IonAddonExtensions`):
 
 <docs-addon-info field="custom-extension-name"></docs-addon-info>
 
-The runtime registration and the type-level augmentation are independent — use either or both. Without augmentation, custom types still work at runtime; you lose IDE narrowing on the `addons` array.
+The runtime registration and the type-level augmentation are independent; use either or both. Without augmentation, custom types still work at runtime; you lose IDE narrowing on the `addons` array.
 
 ## When _not_ to use a custom type
 
-- **Static decoration** — pure CSS / text → `type: 'text'` covers it.
-- **An entirely new field control** (file picker, rich-text editor, color picker) → register a custom **field type**, not an addon type. Addons decorate; field types render the primary control. See [Adding custom fields](/recipes/custom-fields).
-- **One-off behavior** for a specific button — use `action` (code-only) or `actionRef` (registered handler) on a built-in button type.
+- **Static decoration** (pure CSS or text): `type: 'text'` covers it.
+- **An entirely new field control** (file picker, rich-text editor, color picker): register a custom **field type**, not an addon type. Addons decorate; field types render the primary control. See [Adding custom fields](/recipes/custom-fields).
+- **One-off behavior** for a specific button: use `action` (code-only) or `actionRef` (registered handler) on a built-in button type.
 
 ## Verification checklist
 
@@ -97,9 +97,9 @@ When you ship a custom type:
 2. `withCustomAddon(...)` is passed to `provideDynamicForm` after the field-type bundle.
 3. The runtime `validate` function rejects malformed configs with `DynamicFormError`.
 4. The type-level augmentation lives in the same file as the runtime registration so the two stay in sync.
-5. ARIA defaults are explicit — `aria-hidden="true"` for decorative types; `aria-label` for types that convey meaning.
+5. ARIA defaults are explicit: `aria-hidden="true"` for decorative types; `aria-label` for types that convey meaning.
 
 ## Where to next
 
-- **[Building an Adapter](/building-an-adapter)** — adapter authors registering bundled types.
-- **[Custom field types](/recipes/custom-fields)** — when the "addon" you re building is really a new field control.
+- **[Building an Adapter](/building-an-adapter)**: adapter authors registering bundled types.
+- **[Custom field types](/recipes/custom-fields)**: when the "addon" you're building is really a new field control.

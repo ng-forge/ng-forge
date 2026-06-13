@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Two-row pipeline comparing what runs on a single value change in
- * ngx-formly (zone-driven CD + full expression sweep) versus ng-forge
- * (signal-graph dependents only). Used in the migration-reasons section
- * to back up the performance claim with a concrete picture.
+ * ngx-formly (app-wide change detection under zone.js plus a whole-form
+ * expression sweep) versus ng-forge (signal-graph dependents only).
+ * Used on the migration page to back up the performance claim.
  */
 @Component({
   selector: 'docs-perf-pipeline',
@@ -31,7 +31,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
             </svg>
           </span>
           <div class="pp__step pp__step--cost">
-            <code>zone change-detection cycle</code>
+            <code>app-wide change detection</code>
+            <span class="pp__note">under zone.js, the Angular default</span>
           </div>
           <span class="pp__arrow" aria-hidden="true">
             <svg

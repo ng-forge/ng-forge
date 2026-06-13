@@ -24,7 +24,7 @@ Renders static text content inside the form layout. Useful for instructions, sec
 
 **Core Properties:**
 
-- `label`: The text to render (DynamicText — string, signal, or observable)
+- `label`: The text to render (DynamicText: string, signal, or observable)
 - `className`: Optional CSS class applied to the rendered element
 
 **Props:**
@@ -47,4 +47,4 @@ Carries a fixed value through the form without rendering any UI. Useful for meta
 
 - `value`: The value to include in the form result (required)
 
-> Hidden fields always appear in the submitted form value regardless of visibility or conditional logic.
+> Hidden fields are included in the submitted form value by default; they have no reactive hidden state, so conditional logic does not exclude them.

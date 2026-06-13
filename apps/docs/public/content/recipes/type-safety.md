@@ -1,6 +1,6 @@
 ---
 title: Type Safety
-slug: advanced/type-safety
+slug: recipes/type-safety
 description: "Get full compile-time type inference for ng-forge form values using TypeScript's const satisfies pattern. Catch configuration errors before runtime."
 ---
 
@@ -27,7 +27,7 @@ const formConfig = {
 } as const satisfies FormConfig;
 
 // Type is automatically inferred based on value property:
-// { firstName?: string; email?: string; age?: number; newsletter?: boolean }
+// { firstName: string | undefined; email: string | undefined; age: number | undefined; newsletter: boolean | undefined }
 ```
 
 **How it works:**
@@ -46,18 +46,20 @@ const config = {
     { key: 'name', type: 'input', value: '' }, // string
     { key: 'age', type: 'input', value: 0 }, // number
     { key: 'active', type: 'checkbox', value: false }, // boolean
-    { key: 'tags', type: 'multi-checkbox', value: [] }, // string[]
+    { key: 'tags', type: 'multi-checkbox', value: ['news'] }, // string[]
   ],
 } as const satisfies FormConfig;
 
 // Inferred type:
 // {
-//   name?: string;
-//   age?: number;
-//   active?: boolean;
-//   tags?: string[];
+//   name: string | undefined;
+//   age: number | undefined;
+//   active: boolean | undefined;
+//   tags: string[] | undefined;
 // }
 ```
+
+> **Empty array literals:** `value: []` infers `never[]`, not `string[]`. Seed at least one element (as above) or assert the element type with `value: [] as string[]`.
 
 ## Field Registry System
 
@@ -121,11 +123,13 @@ const config = {
 
 // Inferred type:
 // {
-//   email: string;           // Required - no undefined
-//   name?: string;           // Optional - includes undefined
-//   age?: number;            // Optional - includes undefined
+//   email: string;             // Required - never undefined
+//   name: string | undefined;  // Always present; value may be undefined
+//   age: number | undefined;   // Always present; value may be undefined
 // }
 ```
+
+Note that non-required fields stay required **properties** in the inferred model; instead of marking the key optional with `?`, inference adds `undefined` to the value type. Object literals of that type must spell out every key.
 
 **In practice:**
 
@@ -154,9 +158,11 @@ export class UserFormComponent {
     ]
   } as const satisfies FormConfig;
 
-  // Extract type for signal
+  // Extract type for signal. Every inferred key must be present,
+  // so non-required fields are initialized with undefined.
   formValue = signal<InferFormValue<typeof this.config.fields>>({
     username: '',
+    age: undefined,
   });
 
   onSubmit() {
@@ -293,7 +299,7 @@ const config = {
 const config = {
   fields: [{ key: 'name', type: 'input', value: '' }],
 } as const satisfies FormConfig;
-// Type inferred: { name?: string }
+// Type inferred: { name: string | undefined }
 ```
 
 ### `satisfies` vs type annotation
@@ -314,9 +320,9 @@ const config = {
 
 ### Dynamic form configs
 
-Type inference only works for **static**, **compile-time constant** configurations. If your form configuration comes from an API or is built dynamically at runtime, `as const` has no effect — TypeScript can't infer the shape of data it doesn't see at compile time.
+Type inference only works for **static**, **compile-time constant** configurations. If your form configuration comes from an API or is built dynamically at runtime, `as const` has no effect; TypeScript can't infer the shape of data it doesn't see at compile time.
 
-For the complete guide on API-driven forms — including fetching configs, hydrating runtime features, and typing form values — see **[API-Driven Forms](/api-driven-forms)**.
+For the complete guide on API-driven forms (fetching configs, hydrating runtime features, and typing form values), see **[API-Driven Forms](/api-driven-forms)**.
 
 ## Container Fields
 
@@ -355,9 +361,9 @@ const config = {
 // Inferred type:
 // {
 //   address: {
-//     street?: string;
-//     city?: string;
-//     zip?: string;
+//     street: string | undefined;
+//     city: string | undefined;
+//     zip: string | undefined;
 //   }
 // }
 ```
@@ -394,7 +400,7 @@ const config = {
 //     street: string;
 //     city: string;
 //     state: string;
-//     zip?: string;
+//     zip: string | undefined;
 //   }
 // }
 
@@ -414,6 +420,7 @@ Rows organize fields horizontally for layout purposes, but flatten children to t
 const config = {
   fields: [
     {
+      key: 'nameRow',
       type: 'row',
       fields: [
         { key: 'firstName', type: 'input', value: '' },
@@ -425,8 +432,8 @@ const config = {
 
 // Inferred type (flattened):
 // {
-//   firstName?: string;
-//   lastName?: string;
+//   firstName: string | undefined;
+//   lastName: string | undefined;
 // }
 ```
 
@@ -441,13 +448,14 @@ const config = {
 ```typescript
 // Row - fields are flattened
 {
+  key: 'nameRow',
   type: 'row',
   fields: [
     { key: 'firstName', type: 'input', value: '' },
     { key: 'lastName', type: 'input', value: '' },
   ],
 }
-// Result: { firstName?: string, lastName?: string }
+// Result: { firstName: string | undefined, lastName: string | undefined }
 
 // Group - fields are nested
 {
@@ -458,7 +466,7 @@ const config = {
     { key: 'lastName', type: 'input', value: '' },
   ],
 }
-// Result: { name: { firstName?: string, lastName?: string } }
+// Result: { name: { firstName: string | undefined, lastName: string | undefined } }
 ```
 
 ### Page Fields
@@ -491,10 +499,10 @@ const config = {
 
 // Inferred type (all pages flattened):
 // {
-//   email?: string;
-//   password?: string;
-//   firstName?: string;
-//   lastName?: string;
+//   email: string | undefined;
+//   password: string | undefined;
+//   firstName: string | undefined;
+//   lastName: string | undefined;
 // }
 ```
 
@@ -527,13 +535,14 @@ const config1 = {
   ],
 } as const satisfies FormConfig;
 
-// ✗ Invalid: row inside row
+// ✗ Invalid: page inside group
 const config2 = {
   fields: [
     {
-      type: 'row',
+      type: 'group',
+      key: 'profile',
       fields: [
-        { type: 'row', fields: [] }, // TypeScript error!
+        { key: 'step1', type: 'page', fields: [] }, // TypeScript error!
       ],
     },
   ],
@@ -562,10 +571,11 @@ Fields without values are excluded from form values:
 ```typescript
 const config = {
   fields: [
-    { type: 'text', label: 'Enter your details:' }, // ✗ Excluded
+    { key: 'intro', type: 'text', label: 'Enter your details:' }, // ✗ Excluded
     { key: 'name', type: 'input', value: '' }, // ✓ Included
-    { type: 'submit', label: 'Save' }, // ✗ Excluded
+    { key: 'save', type: 'submit', label: 'Save' }, // ✗ Excluded
     {
+      key: 'cityRow',
       type: 'row', // ✗ Excluded (container)
       fields: [
         { key: 'city', type: 'input', value: '' }, // ✓ Included
@@ -576,8 +586,8 @@ const config = {
 
 // Only value-bearing fields:
 // {
-//   name?: string;
-//   city?: string;
+//   name: string | undefined;
+//   city: string | undefined;
 // }
 ```
 
@@ -591,7 +601,7 @@ const config = {
     {
       key: 'skills',
       type: 'select',
-      value: [],
+      value: ['js'],
       props: { multiple: true },
       options: [
         { value: 'js', label: 'JavaScript' },
@@ -602,7 +612,7 @@ const config = {
     {
       key: 'interests',
       type: 'multi-checkbox',
-      value: [],
+      value: ['sports'],
       options: [
         { value: 'sports', label: 'Sports' },
         { value: 'music', label: 'Music' },
@@ -612,7 +622,7 @@ const config = {
   ],
 } as const satisfies FormConfig;
 
-// Type: { skills?: string[]; interests?: string[] }
+// Type: { skills: string[] | undefined; interests: string[] | undefined }
 ```
 
 ## Advanced Patterns
@@ -832,7 +842,7 @@ const config = {
   ],
 } as const satisfies FormConfig;
 
-// Type: { accountType?: string; taxId?: string }
+// Type: { accountType: string | undefined; taxId: string | undefined }
 // Note: Conditional required doesn't affect type inference
 ```
 

@@ -1,10 +1,10 @@
 ---
 title: Addon Clear Button
 slug: examples/addon-clear-button
-description: 'Canonical addon pattern — an icon in the prefix slot and a clear-preset button in the suffix slot. JSON-safe and works the same on every adapter.'
+description: 'Canonical addon pattern: an icon in the prefix slot and a clear-preset button in the suffix slot. JSON-safe and works the same on every adapter.'
 ---
 
-The canonical addon pattern: a search icon in the prefix slot, a clear button in the suffix slot. The button uses the built-in `'clear'` preset — no handler code required.
+The canonical addon pattern: a search icon in the prefix slot, a clear button in the suffix slot. The button uses the built-in `'clear'` preset, so no handler code is required.
 
 ## Live Demo
 
@@ -16,5 +16,5 @@ The canonical addon pattern: a search icon in the prefix slot, a clear button in
 
 ## What to read next
 
-- **[Addons / Overview](/addons/overview)** — kinds, slots, reactive `hidden` / `disabled`.
-- **[Presets and Actions](/addons/presets-and-actions)** — the five built-in presets and how to register your own via `actionRef`.
+- **[Addons / Overview](/addons/overview)**: kinds, slots, reactive `hidden` / `disabled`.
+- **[Presets and Actions](/addons/presets-and-actions)**: the five built-in presets and how to register your own via `actionRef`.

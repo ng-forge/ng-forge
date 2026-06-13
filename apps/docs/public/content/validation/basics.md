@@ -4,7 +4,7 @@ slug: validation/basics
 description: 'Learn how to add type-safe validation to dynamic forms using Angular signal forms, shorthand validators, and conditional rules.'
 ---
 
-Dynamic Forms provides powerful, type-safe validation that integrates directly with Angular's signal forms. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
+Dynamic Forms provides type-safe validation that maps directly to Angular signal forms validators. Start with simple shorthand validators and progress to advanced conditional validation as your needs grow.
 
 ## Signal Forms Integration
 
@@ -104,7 +104,7 @@ Choose based on your validation complexity:
 
 - Dynamic field behavior
 - Conditional required fields
-- See [Conditional Logic](/dynamic-behavior/overview) for details
+- See [Conditional Logic](/dynamic-behavior/conditional-logic) for details
 
 ## Shorthand Validators
 
@@ -198,25 +198,19 @@ All validators must pass for the field to be valid.
 
 ## Validation Messages
 
-### Default Messages
+### Message Resolution
 
-Each validator has a built-in error message:
+Built-in validators map directly to Angular's `required()`, `email()`, `minLength()`, and related functions, which produce errors without any message text. For each error kind, the message is resolved in this order:
 
-```typescript
-{
-  required: true;
-} // → "This field is required"
-{
-  email: true;
-} // → "Please enter a valid email address"
-{
-  minLength: 8;
-} // → "Minimum length is 8 characters"
-```
+1. Field-level `validationMessages[kind]`
+2. Form-level `defaultValidationMessages[kind]`
+3. The error's own `message` property (present on schema validation errors, for example)
+
+If none of these produce a message, a console warning is logged and the error is not displayed. Configure a message for every validator you use.
 
 ### Custom Messages
 
-Override default messages for better UX:
+Configure messages per field:
 
 ```typescript
 {
@@ -302,17 +296,14 @@ const config = {
 
 ## When Validation Runs
 
-Validation occurs:
+Validators run reactively: every value change re-evaluates the field's validation state immediately. There is no `updateOn` setting. What is gated is the display of errors:
 
-- **On blur** - When user leaves a field
-- **On change** - As user types (after first blur)
-- **On submit** - When form is submitted
-
-Invalid fields prevent form submission and display error messages.
+- **Error display** - Error messages appear once a field is both invalid and touched
+- **Submit buttons** - Disabled by default while the form is invalid (configurable via `options.submitButton.disableWhenInvalid`)
 
 ## Next Steps
 
 - **[Validation Advanced](/validation/advanced)** - Conditional validation, dynamic values
 - **[Validation Reference](/validation/reference)** - Complete validator API
-- **[Conditional Logic](/dynamic-behavior/overview)** - Dynamic field behavior
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Dynamic field behavior
 - **[Examples](/examples)** - Real-world validation patterns

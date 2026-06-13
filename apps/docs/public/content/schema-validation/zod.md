@@ -4,7 +4,7 @@ keyword: ZodSchemaPage
 description: 'Validate dynamic forms with Zod schemas using the standardSchema() wrapper for cross-field validation, shared logic, and OpenAPI reuse.'
 ---
 
-Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you reuse existing schemas, share validation logic between frontend and backend, and leverage Zod's powerful cross-field validation like `.refine()`.
+Use [Zod](https://zod.dev) schemas to validate your dynamic forms. This lets you reuse existing schemas, share validation logic between frontend and backend, and use Zod's cross-field validation such as `.refine()`.
 
 ## Installation
 
@@ -170,10 +170,12 @@ Zod errors automatically map to form fields via the `path` property:
   issues: [{ path: ['confirmPassword'], message: 'Passwords must match' }];
 }
 
-// Dynamic Forms maps this to Angular's form errors:
-form.controls.confirmPassword.errors;
-// → { 'Passwords must match': true }
+// Angular's validateStandardSchema converts each issue to a field-level error
+// on the field at issue.path:
+// { kind: 'standardSchema', message: 'Passwords must match' }
 ```
+
+The error's message is displayed through the standard resolution chain: field-level `validationMessages.standardSchema` first, then form-level `defaultValidationMessages.standardSchema`, then the issue message itself.
 
 ## Combining with Field Validators
 
@@ -215,6 +217,6 @@ const config = { schema: standardSchema(schema), fields: [...] };
 
 ## Next Steps
 
-- **[Angular Schema](/schema-validation/angular-schema)** — Native Angular approach without additional dependencies
-- **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
-- **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
+- **[Angular Schema](/schema-validation/angular-schema)**: Native Angular approach without additional dependencies
+- **[Field Validation](/validation/basics)**: Add built-in and custom validators to individual fields
+- **[Schema Validation Overview](/schema-validation/overview)**: Compare Angular and Standard Schema approaches

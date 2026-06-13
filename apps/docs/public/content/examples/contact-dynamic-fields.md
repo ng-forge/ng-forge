@@ -33,6 +33,11 @@ export class ContactFormComponent {
   formValue = signal({});
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+      minlength: 'Value is too short',
+    },
     fields: [
       {
         key: 'name',
@@ -143,6 +148,11 @@ export class ContactFormComponent {
         minLength: 10,
         props: { rows: 4 },
       },
+      {
+        key: 'submit',
+        type: 'submit',
+        label: 'Send Message',
+      },
     ],
   } as const satisfies FormConfig;
 }
@@ -199,6 +209,6 @@ This ensures that visible contact fields are required.
 
 ## Related Documentation
 
-- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Full conditional logic guide
 - **[Validation](/validation/basics)** - Form validation
 - **[Contact Form](/examples/contact-form)** - Basic contact form example

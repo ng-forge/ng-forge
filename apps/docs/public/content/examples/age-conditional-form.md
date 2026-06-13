@@ -33,6 +33,10 @@ export class AgeConditionalFormComponent {
   formValue = signal({});
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+    },
     fields: [
       {
         key: 'name',
@@ -52,11 +56,15 @@ export class AgeConditionalFormComponent {
       {
         key: 'age',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Age',
         required: true,
         min: 0,
         max: 120,
+        validationMessages: {
+          min: 'Age must be at least 0',
+          max: 'Age must be at most 120',
+        },
         props: {
           type: 'number',
           hint: 'Enter your age to see relevant options',
@@ -253,6 +261,6 @@ This example uses numeric comparison operators:
 
 ## Related Documentation
 
-- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Full conditional logic guide
 - **[Validation](/validation/basics)** - Min/max validation
 - **[User Registration](/examples/user-registration)** - Basic registration example

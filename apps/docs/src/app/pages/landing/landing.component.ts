@@ -112,7 +112,7 @@ export class LandingComponent {
   readonly installCommand = computed(() => {
     const pkg = this.packageManagers.find((p) => p.id === this.currentPackageManager());
     const ui = this.uiLibraries.find((u) => u.id === this.currentUiLibrary());
-    return `${pkg?.command ?? 'npm install'} @ng-forge/dynamic-forms ${ui?.package ?? '@ng-forge/material'}`;
+    return `${pkg?.command ?? 'npm install'} @ng-forge/dynamic-forms ${ui?.package ?? '@ng-forge/dynamic-forms-material'}`;
   });
 
   constructor() {

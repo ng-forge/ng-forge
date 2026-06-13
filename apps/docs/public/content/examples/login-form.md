@@ -86,9 +86,6 @@ export class LoginFormComponent {
         type: 'submit',
         key: 'submit',
         label: 'Sign In',
-        props: {
-          color: 'primary',
-        },
       },
     ],
   } as const satisfies FormConfig;
@@ -139,15 +136,17 @@ Simple checkbox for persistent login:
 
 ## Common Enhancements
 
-### Add "Forgot Password" Link
+### Add "Forgot Password" Text
 
 ```typescript
 {
   type: 'text',
   key: 'forgotLink',
-  label: '<a href="/forgot-password">Forgot your password?</a>',
+  label: 'Forgot your password?',
 }
 ```
+
+Text-field labels render as plain text, so HTML in a label appears literally. Place actual links in the host component template around the form.
 
 ### Social Login Buttons
 
@@ -163,15 +162,17 @@ For social login buttons, you can use text fields with links or handle this outs
 
 **Note:** Social login typically involves OAuth flows handled outside the form. Consider placing social login buttons in your component template rather than in the form configuration.
 
-### Add Sign Up Link
+### Add Sign Up Text
 
 ```typescript
 {
   type: 'text',
   key: 'signupText',
-  label: "Don't have an account? <a href='/signup'>Sign up</a>",
+  label: "Don't have an account?",
 }
 ```
+
+As with the forgot-password text, the sign-up link itself belongs in the host component template.
 
 ## Use Cases
 
