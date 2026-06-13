@@ -8,6 +8,11 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin, PluginContext, ViteDevServer } from 'vite';
 import { docsMetaPlugin } from './vite-plugin-docs-meta';
 
+// The sitemap middleware generates the sitemap on demand, which shells out to
+// `git log` once per content file. Give this file headroom over the 5s default
+// so the git-backed paths do not flake under parallel test load.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 type Hook<K extends keyof Plugin> = Plugin[K];
 
 // vite types `hook` as `T | ObjectHook<T>`; resolveId/load are the function form here.

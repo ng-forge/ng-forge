@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dynamic Forms provides a powerful way to create dynamic forms in Angular applications. Instead of manually building form templates, you define form structure through configuration objects, and ng-forge renders the appropriate UI components automatically.
+Dynamic Forms is a configuration-driven way to build forms in Angular applications. Instead of manually building form templates, you define form structure through configuration objects, and ng-forge renders the appropriate UI components automatically.
 
 ## Key Features
 
@@ -15,7 +15,7 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - Value derivation for computed fields
 - Property derivation for dynamic field properties
 - Type-safe form configurations
-- Reactive forms under the hood (Angular Signal Forms)
+- Built on Angular Signal Forms (signal-based reactivity, not Reactive Forms or FormGroup)
 - Value exclusion for controlling submitted form data
 - AI integration via MCP server
 
@@ -26,16 +26,17 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 
 ### Configuration
 - /configuration: Configure your UI library integration (Material, PrimeNG, Ionic, Bootstrap)
+- /api-driven-forms: Drive forms from JSON shipped by a backend API
 
 ### Building an Adapter
 - /building-an-adapter: Creating custom UI library integrations
 
 ### Field Types
-- /field-types/text-inputs: Text input fields (input, textarea, datepicker)
-- /field-types/selection: Selection fields (select, checkbox, radio, toggle, multi-checkbox, slider)
-- /field-types/buttons: Button fields (button, submit, next, previous)
-- /field-types/utility: Utility fields
-- /field-types/advanced-controls: Advanced control fields
+- /field-types/text-inputs: Text input fields (input, textarea)
+- /field-types/selection: Selection fields (select, radio, checkbox, toggle, multi-checkbox)
+- /field-types/buttons: Button fields (submit, button, next, previous, array buttons)
+- /field-types/utility: Utility fields (text, hidden)
+- /field-types/advanced-controls: Advanced control fields (slider, datepicker)
 
 ### Validation
 - /validation/basics: Validation configuration basics
@@ -62,8 +63,19 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /prebuilt/form-rows: Row layout components
 - /prebuilt/form-arrays/simplified: Simplified array API (recommended)
 - /prebuilt/form-arrays/complete: Complete array API (advanced)
+- /prebuilt/container-field: Container for stacking wrappers without nesting form values
 - /prebuilt/text-components: Text and label components
 - /prebuilt/hidden-fields: Hidden field components
+
+### Wrappers
+- /wrappers/overview: Decorate fields with extra UI chrome (cards, panels, indicators)
+- /wrappers/writing-a-wrapper: Build a custom wrapper component
+- /wrappers/registering-and-applying: Register wrappers and apply them to fields
+
+### Addons
+- /addons/overview: Icons, buttons, and text in a field's prefix and suffix slots
+- /addons/presets-and-actions: Built-in presets (clear, reset, paste, copy, password toggle) and registered actions
+- /addons/custom-types: Register your own addon type
 
 ### Examples
 - /examples: Browse all examples
@@ -79,6 +91,10 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 - /examples/enterprise-features: Complex multi-condition form
 - /examples/simplified-array-form: Simplified array API example
 - /examples/array-form: Complete array API example
+- /examples/wrapper-array-actions: Wrapper that owns an array's add button
+- /examples/addon-clear-button: Clear-button addon pattern
+- /examples/addon-currency: Universal text addon (currency prefix)
+- /examples/addon-password-toggle: Password-visibility toggle addon
 
 ### Recipes
 - /recipes/type-safety: TypeScript type safety features
@@ -95,6 +111,9 @@ Dynamic Forms provides a powerful way to create dynamic forms in Angular applica
 
 ### AI Integration
 - /ai-integration: MCP server for AI-assisted form schema generation
+
+### OpenAPI Generator
+- /openapi-generator: Generate FormConfig and typed form values from an OpenAPI 3.x spec
 
 ### API Reference
 - /api-reference: Complete API documentation for all packages

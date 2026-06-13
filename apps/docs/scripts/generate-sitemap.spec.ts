@@ -1,6 +1,12 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { generateSitemap, getGitLastmod } from './generate-sitemap';
 
+// generateSitemap() shells out to `git log` once per content file (60+ calls),
+// so a full run is several seconds of real subprocess I/O and scales with the
+// number of docs pages. Give this file headroom over the 5s default so it does
+// not flake under parallel test load.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 describe('generateSitemap', () => {
   let xml: string;
 
@@ -25,6 +31,12 @@ describe('generateSitemap', () => {
 
   it('includes the migration guide under /material/', () => {
     expect(xml).toContain('<loc>https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly</loc>');
+  });
+
+  it('includes the addons pages', () => {
+    for (const page of ['overview', 'presets-and-actions', 'custom-types']) {
+      expect(xml).toContain(`<loc>https://ng-forge.com/dynamic-forms/material/addons/${page}</loc>`);
+    }
   });
 
   it('omits <lastmod> for the api-reference URL (content is build-time-generated)', () => {
