@@ -89,7 +89,7 @@
     "acorn": "^8.16.0",
     "angular-eslint": "21.4.0",
     "autoprefixer": "^10.5.0",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.10.4",
