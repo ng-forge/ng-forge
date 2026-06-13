@@ -55,7 +55,7 @@ Authoring forms in JSON? Reactive values can't survive serialization; see [React
 
 ## Accessibility
 
-Icon types emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button types (no `label`) require `ariaLabel`; TypeScript and the runtime validator both enforce this.
+Icon types emit `aria-hidden="true"` by default. When the icon conveys meaning (status, action), set `ariaLabel`. Icon-only button types (no `label`) require `ariaLabel`. TypeScript flags it at compile time; at runtime an icon-only addon missing `ariaLabel` is dropped with a `[Dynamic Forms]` warning rather than rendered, and the rest of the form is unaffected.
 
 ## Troubleshooting
 

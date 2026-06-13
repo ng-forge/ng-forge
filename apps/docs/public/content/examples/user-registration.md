@@ -330,7 +330,7 @@ export class UserRegistrationComponent {
 The form uses page fields to create a wizard-style registration process:
 
 1. **Account Information** - Username, email, password
-2. **Profile Information** - Name, account type
+2. **Profile Information** - Name, account type, plus company name and industry shown conditionally for business accounts
 3. **Preferences & Terms** - Interests, notifications, agreements
 
 Navigation buttons (`next`, `previous`, `submit`) control flow between pages.

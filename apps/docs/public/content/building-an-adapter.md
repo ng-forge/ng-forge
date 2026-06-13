@@ -16,7 +16,7 @@ An ng-forge adapter provides:
 2. A **provider function** (`withMyAdapterFields()`) that registers all those types with `provideDynamicForm()`.
 3. Optional **adapter-level configuration** that cascades into individual fields (size, appearance, theme color).
 
-Every field component composes the `NgForgeField` directive via `hostDirectives`. That directive owns the standard contract: the nine forwarded inputs every field accepts, eight derived signals (errors, ARIA helpers, ID derivation), and five universal host bindings. You only write the parts that are actually adapter-specific: the template and any UI-library quirks.
+Every field component composes the `NgForgeField` directive via `hostDirectives`. That directive owns the standard contract: the nine forwarded inputs every field accepts, eight derived signals (errors, ARIA helpers, ID derivation) on top of the re-exported `key` and `className`, and five universal host bindings. You only write the parts that are actually adapter-specific: the template and any UI-library quirks.
 
 Package entrypoints you'll import from:
 
