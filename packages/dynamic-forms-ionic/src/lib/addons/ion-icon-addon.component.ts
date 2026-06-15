@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { IonIcon } from '@ionic/angular/standalone';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import type { IonIconAddon } from '../types/addons';
+import type { IonicIconAddon } from '../types/addons';
 
 /** Renderer for the `ion-icon` addon type. */
 @Component({
@@ -15,8 +15,8 @@ import type { IonIconAddon } from '../types/addons';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IonIconAddonComponent {
-  readonly addon = input.required<IonIconAddon>();
+export class IonicIconAddonComponent {
+  readonly addon = input.required<IonicIconAddon>();
   /** Accepted for contract uniformity — `NgComponentOutlet` setInput is strict; every type must declare it. */
   readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 

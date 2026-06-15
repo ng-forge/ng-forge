@@ -53,13 +53,6 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
-export type AddArrayItemButtonField = Omit<BsButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'addArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
 export const BOOTSTRAP_CONFIG: InjectionToken<BootstrapConfig>;
 
 // @public (undocumented)
@@ -76,6 +69,13 @@ export interface BootstrapConfig {
 
 // @public
 export const BS_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
+
+// @public
+export type BsAddArrayItemButtonField = Omit<BsButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'add-array-item' | 'addArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
 
 // @public
 export type BsAddon = BsIconAddon | BsButtonAddon;
@@ -230,12 +230,12 @@ export const BsField: {
     readonly Submit: "submit";
     readonly Next: "next";
     readonly Previous: "previous";
-    readonly AddArrayItem: "addArrayItem";
-    readonly PrependArrayItem: "prependArrayItem";
-    readonly InsertArrayItem: "insertArrayItem";
-    readonly RemoveArrayItem: "removeArrayItem";
-    readonly PopArrayItem: "popArrayItem";
-    readonly ShiftArrayItem: "shiftArrayItem";
+    readonly AddArrayItem: "add-array-item";
+    readonly PrependArrayItem: "prepend-array-item";
+    readonly InsertArrayItem: "insert-array-item";
+    readonly RemoveArrayItem: "remove-array-item";
+    readonly PopArrayItem: "pop-array-item";
+    readonly ShiftArrayItem: "shift-array-item";
     readonly Textarea: "textarea";
     readonly Radio: "radio";
     readonly MultiCheckbox: "multi-checkbox";
@@ -324,6 +324,14 @@ export interface BsInputProps extends InputProps {
     validFeedback?: DynamicText;
 }
 
+// @public
+export type BsInsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'insert-array-item' | 'insertArrayItem';
+    arrayKey?: string;
+    index: number;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
 // @public (undocumented)
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
 
@@ -365,6 +373,19 @@ export type BsNextButtonField = Omit<BsButtonField<NextPageEvent>, 'event' | 'ty
 };
 
 // @public
+export type BsPopArrayItemButtonField = Omit<BsButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'pop-array-item' | 'popArrayItem';
+    arrayKey: string;
+};
+
+// @public
+export type BsPrependArrayItemButtonField = Omit<BsButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'prepend-array-item' | 'prependArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
 export type BsPreviousButtonField = Omit<BsButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
     type: 'previous';
 };
@@ -399,6 +420,12 @@ export interface BsRadioProps {
     // (undocumented)
     reverse?: boolean;
 }
+
+// @public
+export type BsRemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'remove-array-item' | 'removeArrayItem';
+    arrayKey?: string;
+};
 
 // @public (undocumented)
 export type BsSelectField<T> = SelectField<T, BsSelectProps>;
@@ -440,6 +467,12 @@ export interface BsSelectProps extends SelectProps {
     // (undocumented)
     validFeedback?: DynamicText;
 }
+
+// @public
+export type BsShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'shift-array-item' | 'shiftArrayItem';
+    arrayKey: string;
+};
 
 // @public (undocumented)
 export type BsSliderField = SliderField<BsSliderProps>;
@@ -537,39 +570,6 @@ export interface BsToggleProps {
     // (undocumented)
     size?: 'sm' | 'lg';
 }
-
-// @public
-export type InsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'insertArrayItem';
-    arrayKey?: string;
-    index: number;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type PopArrayItemButtonField = Omit<BsButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'popArrayItem';
-    arrayKey: string;
-};
-
-// @public
-export type PrependArrayItemButtonField = Omit<BsButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'prependArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type RemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'removeArrayItem';
-    arrayKey?: string;
-};
-
-// @public
-export type ShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'shiftArrayItem';
-    arrayKey: string;
-};
 
 // @public
 export function withBootstrapAddons(): BootstrapAddonsFeature;

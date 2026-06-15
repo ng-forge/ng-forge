@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import type { IonIconAddon } from '../types/addons';
-import { IonIconAddonComponent } from './ion-icon-addon.component';
+import type { IonicIconAddon } from '../types/addons';
+import { IonicIconAddonComponent } from './ion-icon-addon.component';
 
-function setup(addon: IonIconAddon) {
-  TestBed.configureTestingModule({ imports: [IonIconAddonComponent] });
-  const fixture = TestBed.createComponent(IonIconAddonComponent);
+function setup(addon: IonicIconAddon) {
+  TestBed.configureTestingModule({ imports: [IonicIconAddonComponent] });
+  const fixture = TestBed.createComponent(IonicIconAddonComponent);
   fixture.componentRef.setInput('addon', addon);
   fixture.detectChanges();
   return fixture;
 }
 
-describe('IonIconAddonComponent', () => {
+describe('IonicIconAddonComponent', () => {
   it('renders <ion-icon> bound to the configured name', () => {
     const fixture = setup({ type: 'ion-icon', slot: 'prefix', icon: 'search-outline' });
     const icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };
@@ -44,7 +44,7 @@ describe('IonIconAddonComponent', () => {
     let icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };
     expect(icon.name).toBe('search-outline');
 
-    fixture.componentRef.setInput('addon', { type: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonIconAddon);
+    fixture.componentRef.setInput('addon', { type: 'ion-icon', slot: 'prefix', icon: 'close-outline' } satisfies IonicIconAddon);
     fixture.detectChanges();
 
     icon = fixture.nativeElement.querySelector('ion-icon') as HTMLElement & { name?: string };

@@ -2,10 +2,10 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
-  AddArrayItemButtonField,
-  InsertArrayItemButtonField,
-  PopArrayItemButtonField,
-  PrependArrayItemButtonField,
+  PrimeAddArrayItemButtonField,
+  PrimeInsertArrayItemButtonField,
+  PrimePopArrayItemButtonField,
+  PrimePrependArrayItemButtonField,
   PrimeButtonField,
   PrimeCheckboxField,
   PrimeDatepickerField,
@@ -19,8 +19,8 @@ import type {
   PrimeSubmitButtonField,
   PrimeTextareaField,
   PrimeToggleField,
-  RemoveArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  PrimeRemoveArrayItemButtonField,
+  PrimeShiftArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -32,12 +32,18 @@ declare module '@ng-forge/dynamic-forms' {
     submit: PrimeSubmitButtonField;
     next: PrimeNextButtonField;
     previous: PrimePreviousButtonField;
-    addArrayItem: AddArrayItemButtonField;
-    prependArrayItem: PrependArrayItemButtonField;
-    insertArrayItem: InsertArrayItemButtonField;
-    removeArrayItem: RemoveArrayItemButtonField;
-    popArrayItem: PopArrayItemButtonField;
-    shiftArrayItem: ShiftArrayItemButtonField;
+    addArrayItem: PrimeAddArrayItemButtonField;
+    'add-array-item': PrimeAddArrayItemButtonField;
+    prependArrayItem: PrimePrependArrayItemButtonField;
+    'prepend-array-item': PrimePrependArrayItemButtonField;
+    insertArrayItem: PrimeInsertArrayItemButtonField;
+    'insert-array-item': PrimeInsertArrayItemButtonField;
+    removeArrayItem: PrimeRemoveArrayItemButtonField;
+    'remove-array-item': PrimeRemoveArrayItemButtonField;
+    popArrayItem: PrimePopArrayItemButtonField;
+    'pop-array-item': PrimePopArrayItemButtonField;
+    shiftArrayItem: PrimeShiftArrayItemButtonField;
+    'shift-array-item': PrimeShiftArrayItemButtonField;
     textarea: PrimeTextareaField;
     radio: PrimeRadioField<unknown>;
     'multi-checkbox': PrimeMultiCheckboxField<unknown>;

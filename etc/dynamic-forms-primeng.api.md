@@ -54,35 +54,14 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
-export type AddArrayItemButtonField = Omit<PrimeButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'addArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type InsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'insertArrayItem';
-    arrayKey?: string;
-    index: number;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type PopArrayItemButtonField = Omit<PrimeButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'popArrayItem';
-    arrayKey: string;
-};
-
-// @public
-export type PrependArrayItemButtonField = Omit<PrimeButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'prependArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
 export const PRIME_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
+
+// @public
+export type PrimeAddArrayItemButtonField = Omit<PrimeButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'add-array-item' | 'addArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
 
 // @public
 export type PrimeAddon = PrimeIconAddon | PrimeButtonAddon;
@@ -123,7 +102,7 @@ export class PrimeButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"reset" | "button" | "submit">;
+    readonly buttonType: _angular_core.Signal<"button" | "submit" | "reset">;
     // (undocumented)
     onClick(): void;
     // (undocumented)
@@ -219,7 +198,7 @@ export interface PrimeDatepickerProps extends DatepickerProps {
 // @public
 export enum PrimeField {
     // (undocumented)
-    AddArrayItem = "addArrayItem",
+    AddArrayItem = "add-array-item",
     // (undocumented)
     Button = "button",
     // (undocumented)
@@ -229,25 +208,25 @@ export enum PrimeField {
     // (undocumented)
     Input = "input",
     // (undocumented)
-    InsertArrayItem = "insertArrayItem",
+    InsertArrayItem = "insert-array-item",
     // (undocumented)
     MultiCheckbox = "multi-checkbox",
     // (undocumented)
     Next = "next",
     // (undocumented)
-    PopArrayItem = "popArrayItem",
+    PopArrayItem = "pop-array-item",
     // (undocumented)
-    PrependArrayItem = "prependArrayItem",
+    PrependArrayItem = "prepend-array-item",
     // (undocumented)
     Previous = "previous",
     // (undocumented)
     Radio = "radio",
     // (undocumented)
-    RemoveArrayItem = "removeArrayItem",
+    RemoveArrayItem = "remove-array-item",
     // (undocumented)
     Select = "select",
     // (undocumented)
-    ShiftArrayItem = "shiftArrayItem",
+    ShiftArrayItem = "shift-array-item",
     // (undocumented)
     Slider = "slider",
     // (undocumented)
@@ -333,6 +312,14 @@ export interface PrimeInputProps extends InputProps {
     variant?: 'outlined' | 'filled';
 }
 
+// @public
+export type PrimeInsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'insert-array-item' | 'insertArrayItem';
+    arrayKey?: string;
+    index: number;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
 // @public (undocumented)
 export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckboxProps>;
 
@@ -385,6 +372,19 @@ export interface PrimeNGConfig {
 }
 
 // @public
+export type PrimePopArrayItemButtonField = Omit<PrimeButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'pop-array-item' | 'popArrayItem';
+    arrayKey: string;
+};
+
+// @public
+export type PrimePrependArrayItemButtonField = Omit<PrimeButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'prepend-array-item' | 'prependArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
 export type PrimePreviousButtonField = Omit<PrimeButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
     type: 'previous';
 };
@@ -412,6 +412,12 @@ export interface PrimeRadioProps {
     name?: string;
     styleClass?: string;
 }
+
+// @public
+export type PrimeRemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'remove-array-item' | 'removeArrayItem';
+    arrayKey?: string;
+};
 
 // @public (undocumented)
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
@@ -443,6 +449,12 @@ export interface PrimeSelectProps extends SelectProps {
     showClear?: boolean;
     styleClass?: string;
 }
+
+// @public
+export type PrimeShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+    type: 'shift-array-item' | 'shiftArrayItem';
+    arrayKey: string;
+};
 
 // @public (undocumented)
 export type PrimeSliderField = SliderField<PrimeSliderProps>;
@@ -525,18 +537,6 @@ export interface PrimeToggleProps {
     hint?: DynamicText;
     styleClass?: string;
 }
-
-// @public
-export type RemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'removeArrayItem';
-    arrayKey?: string;
-};
-
-// @public
-export type ShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'shiftArrayItem';
-    arrayKey: string;
-};
 
 // @public
 export function withPrimeNGAddons(): PrimeNGAddonsFeature;

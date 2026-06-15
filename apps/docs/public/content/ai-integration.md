@@ -90,12 +90,12 @@ Get documentation about any ng-forge topic.
 
 **Available Topics:**
 
-| Category    | Topics                                                                                                                                                                                                                                                     |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Field Types | `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`, `hidden`, `text`, `button`, `submit`, `next`, `previous`, `addArrayItem`, `prependArrayItem`, `insertArrayItem`, `removeArrayItem`, `popArrayItem`, `shiftArrayItem` |
-| Containers  | `group`, `row`, `array`, `page`                                                                                                                                                                                                                            |
-| Concepts    | `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`, `async-validators`, `validation-messages`                                                                                                                             |
-| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `workflow`                                                                                                                                                                                                |
+| Category    | Topics                                                                                                                                                                                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Field Types | `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`, `hidden`, `text`, `button`, `submit`, `next`, `previous`, `add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item` |
+| Containers  | `group`, `row`, `array`, `page`                                                                                                                                                                                                                                        |
+| Concepts    | `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`, `async-validators`, `validation-messages`                                                                                                                                         |
+| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `workflow`                                                                                                                                                                                                            |
 
 **Examples:**
 

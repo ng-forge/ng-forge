@@ -17,7 +17,7 @@ const tagItemTemplate = [
   },
   {
     key: 'removeTag',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: 'Remove',
     props: { color: 'warn' },
   },
@@ -49,7 +49,7 @@ export const wrapperArrayActionsConfig: FormConfig = {
           },
           {
             key: 'removeTag',
-            type: 'removeArrayItem',
+            type: 'remove-array-item',
             label: 'Remove',
             props: { color: 'warn' },
           },
@@ -66,7 +66,7 @@ export const wrapperArrayActionsConfig: FormConfig = {
           },
           {
             key: 'removeTag',
-            type: 'removeArrayItem',
+            type: 'remove-array-item',
             label: 'Remove',
             props: { color: 'warn' },
           },

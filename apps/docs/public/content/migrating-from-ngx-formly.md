@@ -160,7 +160,7 @@ The names line up directly except for a few cases.
 | _none_              | `page`                  | Multi-step container                                               |
 | _none_              | `row`                   | Horizontal flex layout                                             |
 | _none_              | `text`                  | Display-only label / heading                                       |
-| _none_              | `submit` / `next` / `previous` / `addArrayItem` / `removeArrayItem` | Built-in action buttons; auto-disabled while the form is invalid  |
+| _none_              | `submit` / `next` / `previous` / `add-array-item` / `remove-array-item` | Built-in action buttons; auto-disabled while the form is invalid  |
 
 **Selects.** Formly takes `options` inside `props`; ng-forge takes `options` at the top level. The `FieldOption` shape is fixed at `{ value, label, disabled? }` — if your data has custom keys, remap once at the source (`data.map(d => ({ value: d.id, label: d.name }))`) or use a `targetProperty: 'options'` derivation (see [Async data](#async-data-and-dynamic-options)).
 
@@ -451,7 +451,7 @@ provideFormlyCore({
         type: 'row',
         fields: [
           { key: 'name', type: 'input', value: '', label: 'Task name', required: true },
-          { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+          { key: 'remove', type: 'remove-array-item', label: 'Remove' },
         ],
       },
     ],
@@ -459,7 +459,7 @@ provideFormlyCore({
 }">
 </docs-code-compare>
 
-The verbose form gives you placeable button fields (`addArrayItem`, `prependArrayItem`, `insertArrayItem`, `removeArrayItem`, `popArrayItem`, `shiftArrayItem`) — put the add button anywhere, including outside the array.
+The verbose form gives you placeable button fields (`add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item`) — put the add button anywhere, including outside the array.
 
 ## Multi-step wizards
 

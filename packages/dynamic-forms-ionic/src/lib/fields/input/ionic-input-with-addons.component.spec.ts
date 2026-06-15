@@ -3,19 +3,19 @@ import { type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
 import { ADDON_ACTION_REGISTRY, ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
-import { IonButtonAddonComponent } from '../../addons/ion-button-addon.component';
-import { IonIconAddonComponent } from '../../addons/ion-icon-addon.component';
-import type { IonButtonAddon, IonIconAddon } from '../../types/addons';
-import type { IonInputAddon } from './ionic-input.type';
+import { IonicButtonAddonComponent } from '../../addons/ion-button-addon.component';
+import { IonicIconAddonComponent } from '../../addons/ion-icon-addon.component';
+import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
+import type { IonicInputAddon } from './ionic-input.type';
 import IonicInputFieldComponent from './ionic-input.component';
 
 const ION_ICON_KIND: AddonTypeDefinition = {
   type: 'ion-icon',
-  loadComponent: () => Promise.resolve(IonIconAddonComponent),
+  loadComponent: () => Promise.resolve(IonicIconAddonComponent),
 };
 const ION_BUTTON_KIND: AddonTypeDefinition = {
   type: 'ion-button',
-  loadComponent: () => Promise.resolve(IonButtonAddonComponent),
+  loadComponent: () => Promise.resolve(IonicButtonAddonComponent),
 };
 
 function makeTypeRegistry(): ReadonlyMap<string, AddonTypeDefinition> {
@@ -25,7 +25,7 @@ function makeTypeRegistry(): ReadonlyMap<string, AddonTypeDefinition> {
   ]);
 }
 
-function createFixture(addons: ReadonlyArray<IonInputAddon>) {
+function createFixture(addons: ReadonlyArray<IonicInputAddon>) {
   return createNgForgeFieldFixture<IonicInputFieldComponent, string>(IonicInputFieldComponent, {
     key: 'field-1',
     value: '',
@@ -51,7 +51,7 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('renders a <span slot="start"> wrapper for a prefix addon', async () => {
-    const prefix: IonIconAddon = { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
+    const prefix: IonicIconAddon = { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -73,13 +73,13 @@ describe('IonicInputFieldComponent — addon rendering', () => {
     // attribute-selector inline component). This satisfies Ionic's
     // `::slotted(ion-button[slot=end])` shadow-CSS rule, which provides the
     // native icon-only styling — no flex-sibling workaround needed.
-    const suffix: IonButtonAddon = {
+    const suffix: IonicButtonAddon = {
       type: 'ion-button',
       slot: 'suffix',
       icon: 'close-outline',
       ariaLabel: 'Clear',
       preset: 'clear',
-    } as IonButtonAddon;
+    } as IonicButtonAddon;
     const { fixture } = createFixture([suffix]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -96,9 +96,9 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('renders decorative addons in slot wrappers + button addons as direct ion-button children', async () => {
-    const addons: IonInputAddon[] = [
-      { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonIconAddon,
-      { type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonButtonAddon,
+    const addons: IonicInputAddon[] = [
+      { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' } as IonicIconAddon,
+      { type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear', preset: 'clear' } as IonicButtonAddon,
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();
@@ -113,7 +113,7 @@ describe('IonicInputFieldComponent — addon rendering', () => {
   });
 
   it('keeps the aria-describedby plumbing intact when addons are present', async () => {
-    const prefix: IonIconAddon = { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
+    const prefix: IonicIconAddon = { type: 'ion-icon', slot: 'prefix', icon: 'search-outline' };
     const { fixture } = createFixture([prefix]);
     fixture.detectChanges();
     await fixture.whenStable();

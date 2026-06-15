@@ -12,8 +12,8 @@ import type {
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  AddArrayItemButtonField,
-  RemoveArrayItemButtonField,
+  MatAddArrayItemButtonField,
+  MatRemoveArrayItemButtonField,
 } from './mat-button.type';
 
 // ============================================================================
@@ -213,10 +213,10 @@ describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
 });
 
 // ============================================================================
-// AddArrayItemButtonField - Whitelist Test
+// MatAddArrayItemButtonField - Whitelist Test
 // ============================================================================
 
-describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
+describe('MatAddArrayItemButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys =
     | 'key'
     | 'type'
@@ -242,7 +242,7 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'arrayKey'
     | 'template';
 
-  type ActualKeys = keyof AddArrayItemButtonField;
+  type ActualKeys = keyof MatAddArrayItemButtonField;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -250,34 +250,34 @@ describe('AddArrayItemButtonField - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('type is required and literal', () => {
-      expectTypeOf<AddArrayItemButtonField['type']>().toEqualTypeOf<'addArrayItem'>();
+      expectTypeOf<MatAddArrayItemButtonField['type']>().toEqualTypeOf<'add-array-item' | 'addArrayItem'>();
     });
 
     it('key is required', () => {
-      expectTypeOf<AddArrayItemButtonField['key']>().toEqualTypeOf<string>();
+      expectTypeOf<MatAddArrayItemButtonField['key']>().toEqualTypeOf<string>();
     });
 
     it('template is required', () => {
-      expectTypeOf<AddArrayItemButtonField['template']>().not.toEqualTypeOf<undefined>();
+      expectTypeOf<MatAddArrayItemButtonField['template']>().not.toEqualTypeOf<undefined>();
     });
   });
 
   describe('optional keys', () => {
     it('disabled', () => {
-      expectTypeOf<AddArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<MatAddArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('props', () => {
-      expectTypeOf<AddArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
+      expectTypeOf<MatAddArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
     });
   });
 });
 
 // ============================================================================
-// RemoveArrayItemButtonField - Whitelist Test
+// MatRemoveArrayItemButtonField - Whitelist Test
 // ============================================================================
 
-describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
+describe('MatRemoveArrayItemButtonField - Exhaustive Whitelist', () => {
   type ExpectedKeys =
     | 'key'
     | 'type'
@@ -302,7 +302,7 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'logic'
     | 'arrayKey';
 
-  type ActualKeys = keyof RemoveArrayItemButtonField;
+  type ActualKeys = keyof MatRemoveArrayItemButtonField;
 
   it('should have exactly the expected keys', () => {
     expectTypeOf<ActualKeys>().toEqualTypeOf<ExpectedKeys>();
@@ -310,21 +310,21 @@ describe('RemoveArrayItemButtonField - Exhaustive Whitelist', () => {
 
   describe('required keys', () => {
     it('type is required and literal', () => {
-      expectTypeOf<RemoveArrayItemButtonField['type']>().toEqualTypeOf<'removeArrayItem'>();
+      expectTypeOf<MatRemoveArrayItemButtonField['type']>().toEqualTypeOf<'remove-array-item' | 'removeArrayItem'>();
     });
 
     it('key is required', () => {
-      expectTypeOf<RemoveArrayItemButtonField['key']>().toEqualTypeOf<string>();
+      expectTypeOf<MatRemoveArrayItemButtonField['key']>().toEqualTypeOf<string>();
     });
   });
 
   describe('optional keys', () => {
     it('disabled', () => {
-      expectTypeOf<RemoveArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
+      expectTypeOf<MatRemoveArrayItemButtonField['disabled']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('props', () => {
-      expectTypeOf<RemoveArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
+      expectTypeOf<MatRemoveArrayItemButtonField['props']>().toEqualTypeOf<MatButtonProps | undefined>();
     });
   });
 });
@@ -377,7 +377,7 @@ describe('Button Fields - Usage', () => {
       label: 'Add Item',
       arrayKey: 'items',
       template: [{ key: 'name', type: 'input' }],
-    } as const satisfies AddArrayItemButtonField;
+    } as const satisfies MatAddArrayItemButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'addArrayItem'>();
   });
@@ -388,7 +388,7 @@ describe('Button Fields - Usage', () => {
       key: 'removeItem',
       label: 'Remove',
       arrayKey: 'items',
-    } as const satisfies RemoveArrayItemButtonField;
+    } as const satisfies MatRemoveArrayItemButtonField;
 
     expectTypeOf(field.type).toEqualTypeOf<'removeArrayItem'>();
   });

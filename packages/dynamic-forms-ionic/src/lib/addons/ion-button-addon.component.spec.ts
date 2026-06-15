@@ -1,21 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
-import type { IonButtonAddon } from '../types/addons';
-import { IonButtonAddonComponent } from './ion-button-addon.component';
+import type { IonicButtonAddon } from '../types/addons';
+import { IonicButtonAddonComponent } from './ion-button-addon.component';
 
-function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
+function setup(addon: IonicButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
   TestBed.configureTestingModule({
-    imports: [IonButtonAddonComponent],
+    imports: [IonicButtonAddonComponent],
     providers: [{ provide: ADDON_ACTION_REGISTRY, useValue: handlers }],
   });
-  const fixture = TestBed.createComponent(IonButtonAddonComponent);
+  const fixture = TestBed.createComponent(IonicButtonAddonComponent);
   fixture.componentRef.setInput('addon', addon);
   fixture.detectChanges();
   return fixture;
 }
 
-describe('IonButtonAddonComponent', () => {
+describe('IonicButtonAddonComponent', () => {
   it('renders <ion-button> with the configured color', () => {
     const fixture = setup({
       type: 'ion-button',

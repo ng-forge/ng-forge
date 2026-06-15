@@ -5,12 +5,12 @@ export type {
   PrimeSubmitButtonField,
   PrimeNextButtonField,
   PrimePreviousButtonField,
-  AddArrayItemButtonField,
-  PrependArrayItemButtonField,
-  InsertArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  PopArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  PrimeAddArrayItemButtonField,
+  PrimePrependArrayItemButtonField,
+  PrimeInsertArrayItemButtonField,
+  PrimeRemoveArrayItemButtonField,
+  PrimePopArrayItemButtonField,
+  PrimeShiftArrayItemButtonField,
 } from './prime-button.type';
 
 // Public API - component

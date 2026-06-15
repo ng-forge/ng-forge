@@ -3,24 +3,24 @@ import { TestBed } from '@angular/core/testing';
 import { type WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import type { IonButtonAddon } from '../types/addons';
-import { IonInlineButtonAddonComponent } from './ion-inline-button-addon.component';
+import type { IonicButtonAddon } from '../types/addons';
+import { IonicInlineButtonAddonComponent } from './ion-inline-button-addon.component';
 
 // The inline component uses an attribute selector on <ion-button>, so TestBed
 // can't instantiate it directly (the host tag falls back to <div>). A wrapper
 // component declares the selector match in its template.
 @Component({
   selector: 'df-ion-test-host',
-  imports: [IonInlineButtonAddonComponent],
+  imports: [IonicInlineButtonAddonComponent],
   template: '<ion-button df-ion-button-addon [addon]="addon()" [fieldInputs]="fieldInputs()"></ion-button>',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestHostComponent {
-  readonly addon = input.required<IonButtonAddon>();
+  readonly addon = input.required<IonicButtonAddon>();
   readonly fieldInputs = input<WrapperFieldInputs | undefined>(undefined);
 }
 
-function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
+function setup(addon: IonicButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {
   TestBed.configureTestingModule({
     imports: [TestHostComponent],
     providers: [{ provide: ADDON_ACTION_REGISTRY, useValue: handlers }],
@@ -32,7 +32,7 @@ function setup(addon: IonButtonAddon, handlers: ReadonlyMap<string, AddonActionH
   return { fixture, ionButton };
 }
 
-describe('IonInlineButtonAddonComponent', () => {
+describe('IonicInlineButtonAddonComponent', () => {
   it('renders on a host element that already IS <ion-button> (attribute selector)', () => {
     const { ionButton } = setup({ type: 'ion-button', slot: 'suffix', icon: 'close-outline', ariaLabel: 'Clear' });
     expect(ionButton).toBeTruthy();

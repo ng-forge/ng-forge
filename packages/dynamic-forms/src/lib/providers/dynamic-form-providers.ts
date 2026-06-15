@@ -94,6 +94,21 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
           }
           registry.set(fieldType.name, fieldType);
         });
+        // Back-compat: legacy camelCase array-action discriminants resolve to their
+        // kebab-case canonical definitions. kebab is canonical as of 1.0; the camelCase
+        // spellings are deprecated aliases kept so older/serialized configs keep working.
+        const legacyTypeAliases: Record<string, string> = {
+          addArrayItem: 'add-array-item',
+          prependArrayItem: 'prepend-array-item',
+          insertArrayItem: 'insert-array-item',
+          removeArrayItem: 'remove-array-item',
+          popArrayItem: 'pop-array-item',
+          shiftArrayItem: 'shift-array-item',
+        };
+        for (const [legacy, canonical] of Object.entries(legacyTypeAliases)) {
+          const def = registry.get(canonical);
+          if (def && !registry.has(legacy)) registry.set(legacy, def);
+        }
         return registry;
       },
     },

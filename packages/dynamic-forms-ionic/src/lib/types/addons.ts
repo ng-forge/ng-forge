@@ -2,7 +2,7 @@ import type { AddonActionPreset, BaseAddon, DynamicText, DynamicValue, Registere
 import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
 /** Decorative icon addon for Ion fields. */
-export interface IonIconAddon extends BaseAddon {
+export interface IonicIconAddon extends BaseAddon {
   readonly type: 'ion-icon';
   /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
   readonly icon: string;
@@ -92,14 +92,14 @@ type IonButtonContentDecorative = {
 type IonButtonContent = IonButtonContentIconOnly | IonButtonContentLabeled | IonButtonContentDecorative;
 
 /** Interactive button addon for Ion fields. */
-export type IonButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
+export type IonicButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
 
 /** Union of all Ion-shipped addon types. */
-export type IonAddon = IonIconAddon | IonButtonAddon;
+export type IonicAddon = IonicIconAddon | IonicButtonAddon;
 
 declare module '@ng-forge/dynamic-forms' {
   interface DynamicFormAddonRegistry {
-    'ion-icon': IonIconAddon;
-    'ion-button': IonButtonAddon;
+    'ion-icon': IonicIconAddon;
+    'ion-button': IonicButtonAddon;
   }
 }
