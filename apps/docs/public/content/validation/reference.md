@@ -127,7 +127,7 @@ Regular expression validation.
 
 ## Conditional Expressions
 
-Validators support a `when` property for conditional validation. See **[Conditional Logic](/dynamic-behavior/overview)** for the complete reference on:
+Validators support a `when` property for conditional validation. See **[Conditional Logic](/dynamic-behavior/conditional-logic)** for the complete reference on:
 
 - All operators (`equals`, `notEquals`, `greater`, `less`, `contains`, `matches`, etc.)
 - Expression types (`fieldValue`, `javascript`, `custom`)
@@ -166,6 +166,7 @@ interface BuiltInValidatorConfig {
 interface CustomValidatorConfig {
   type: 'custom';
   functionName?: string;
+  fn?: CustomValidator; // inline validator; mutually exclusive with functionName
   params?: Record<string, unknown>;
   expression?: string;
   kind?: string;
@@ -173,21 +174,21 @@ interface CustomValidatorConfig {
   when?: ConditionalExpression;
 }
 
-// Async validators (for debounced validation, database lookups)
-interface AsyncValidatorConfig {
+// Async validators (database lookups, resource-based async checks)
+// Exactly one of functionName or fn must be set (XOR)
+type AsyncValidatorConfig = {
   type: 'async';
-  functionName: string;
   params?: Record<string, unknown>;
   when?: ConditionalExpression;
-}
+} & ({ functionName: string; fn?: never } | { fn: AsyncCustomValidator; functionName?: never });
 
-// Function-based HTTP validators (requires a registered function)
-interface FunctionHttpValidatorConfig {
+// Function-based HTTP validators (registered function or inline fn)
+// Exactly one of functionName or fn must be set (XOR)
+type FunctionHttpValidatorConfig = {
   type: 'http';
-  functionName: string;
   params?: Record<string, unknown>;
   when?: ConditionalExpression;
-}
+} & ({ functionName: string; fn?: never } | { fn: HttpCustomValidator; functionName?: never });
 
 // Declarative HTTP validators (fully JSON-serializable, no function registration)
 interface DeclarativeHttpValidatorConfig {
@@ -205,7 +206,7 @@ type ValidatorConfig =
   | DeclarativeHttpValidatorConfig;
 ```
 
-> **Note:** `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`. They are discriminated by property presence: `functionName` indicates function-based, `http` + `responseMapping` indicates declarative.
+> **Note:** `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`. They are discriminated by property presence: `functionName` or `fn` indicates function-based, `http` + `responseMapping` indicates declarative.
 
 ### HttpRequestConfig
 
@@ -215,6 +216,7 @@ Used by `DeclarativeHttpValidatorConfig` to define the HTTP request:
 interface HttpRequestConfig {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'; // defaults to 'GET'
+  params?: Record<string, string>; // URL path parameters for :key placeholders; values are expressions
   queryParams?: Record<string, string>; // values are expressions
   body?: Record<string, unknown>;
   evaluateBodyExpressions?: boolean; // when true, top-level string values in body are evaluated as expressions
@@ -228,7 +230,7 @@ Used by `DeclarativeHttpValidatorConfig` to interpret the HTTP response:
 
 ```typescript
 interface HttpValidationResponseMapping {
-  validWhen: string; // expression evaluated with { response } scope; truthy = valid
+  validWhen: string; // expression evaluated with { response } scope; must evaluate to boolean true
   errorKind: string; // error kind for validationMessages lookup
   errorParams?: Record<string, string>; // parameter expressions evaluated against { response }
 }
@@ -236,7 +238,7 @@ interface HttpValidationResponseMapping {
 
 ## ConditionalExpression Types
 
-`ConditionalExpression` is a discriminated union of six condition types. Each variant only allows the properties relevant to its type, providing compile-time safety against invalid property combinations.
+`ConditionalExpression` is a discriminated union of seven condition types. Each variant only allows the properties relevant to its type, providing compile-time safety against invalid property combinations.
 
 ```typescript
 // Compare a specific field's value
@@ -247,17 +249,33 @@ interface FieldValueCondition {
   value?: unknown;
 }
 
-// Invoke a registered custom function by name
-interface CustomCondition {
-  type: 'custom';
-  functionName: string;
-}
+// Invoke a registered custom function by name, or an inline function
+// Exactly one of functionName or fn must be set (XOR)
+type CustomCondition = { type: 'custom'; functionName: string; fn?: never } | { type: 'custom'; fn: CustomFunction; functionName?: never };
 
 // Evaluate a JavaScript expression via the secure AST-based parser
 interface JavascriptCondition {
   type: 'javascript';
   expression: string; // has access to formValue, fieldValue, externalData, etc.
 }
+
+// Evaluate based on an HTTP response
+interface HttpCondition {
+  type: 'http';
+  http: HttpRequestConfig;
+  responseExpression?: string; // expression with { response } scope; defaults to !!response
+  pendingValue?: boolean; // value while the request is in flight; defaults to false
+  cacheDurationMs?: number; // response cache duration; defaults to 30000
+  debounceMs?: number; // re-evaluation debounce; defaults to 300
+}
+
+// Resolve asynchronously via a custom function
+// Exactly one of asyncFunctionName or asyncFn must be set (XOR)
+type AsyncCondition = {
+  type: 'async';
+  pendingValue?: boolean; // value while resolution is pending; defaults to false
+  debounceMs?: number; // re-evaluation debounce; defaults to 300
+} & ({ asyncFunctionName: string; asyncFn?: never } | { asyncFn: AsyncConditionFunction; asyncFunctionName?: never });
 
 // Logical AND — all sub-conditions must be true
 interface AndCondition {
@@ -283,7 +301,14 @@ type ComparisonOperator =
   | 'endsWith'
   | 'matches';
 
-type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptCondition | AndCondition | OrCondition;
+type ConditionalExpression =
+  | FieldValueCondition
+  | CustomCondition
+  | JavascriptCondition
+  | HttpCondition
+  | AsyncCondition
+  | AndCondition
+  | OrCondition;
 ```
 
 ## Validation Messages
@@ -426,5 +451,5 @@ type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptC
 
 - **[Validation Basics](/validation/basics)** - Getting started with validation
 - **[Validation Advanced](/validation/advanced)** - Conditional validators
-- **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Field behavior changes
 - **[Type Safety](/recipes/type-safety)** - TypeScript integration

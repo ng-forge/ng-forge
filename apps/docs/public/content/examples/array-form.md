@@ -134,7 +134,6 @@ export class ArrayFormComponent {
         label: 'Add Tag',
         arrayKey: 'tags',
         template: [tagTemplate],
-        props: { color: 'primary' },
       },
 
       // Object array with multiple fields per item
@@ -181,16 +180,17 @@ export class ArrayFormComponent {
             label: 'Add Contact',
             arrayKey: 'contacts',
             template: contactTemplate,
-            props: { color: 'primary' },
           },
         ],
       },
 
-      { key: 'submit', type: 'submit', label: 'Save All', props: { color: 'primary' } },
+      { key: 'submit', type: 'submit', label: 'Save All' },
     ],
   } as const satisfies FormConfig;
 }
 ```
+
+The live demo config additionally contains section heading and description text fields, omitted here for brevity.
 
 ## Key Features
 

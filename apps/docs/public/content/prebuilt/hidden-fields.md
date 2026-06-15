@@ -135,7 +135,7 @@ Hidden fields can be placed:
 - Inside page fields
 - Inside group fields
 
-**Note:** Placing hidden fields inside row fields will generate a validation warning. Rows are meant for horizontal layouts, and since hidden fields don't render anything, placing them in rows serves no purpose. Place hidden fields outside of rows instead.
+**Note:** Rows are layout containers for horizontal arrangement, and hidden fields render nothing, so placing them in rows serves no purpose. Prefer top-level placement for non-rendering fields.
 
 ## Type Safety
 
@@ -171,10 +171,10 @@ if (isHiddenField(field)) {
 
 ## Value Exclusion
 
-The `HiddenField` type (`type: 'hidden'`) is **not affected** by value exclusion. Hidden fields:
+The `HiddenField` type (`type: 'hidden'`) is mostly unaffected by value exclusion. Hidden fields:
 
 - Have no reactive `hidden()` state (they don't render a component)
-- Are always included in submission output, regardless of `excludeValueIfHidden` settings
+- Are included in submission output by default; value exclusion only applies if the field or a flattened ancestor is statically marked hidden
 
 This is different from regular fields with `hidden: true` or fields hidden via conditional logic. Those fields have a reactive `hidden()` state that value exclusion checks.
 
@@ -188,6 +188,6 @@ See the **Value Exclusion** page under Recipes for full details.
 
 ## Next Steps
 
-- **[Text Components](/prebuilt/text-components)** — Display static or dynamic text content in forms
-- **[Value Exclusion](/recipes/value-exclusion)** — Control which field values are included in submission output
-- **[Field Types](/field-types/text-inputs)** — Explore all available input field types and their props
+- **[Text Components](/prebuilt/text-components)**: Display static or dynamic text content in forms
+- **[Value Exclusion](/recipes/value-exclusion)**: Control which field values are included in submission output
+- **[Field Types](/field-types/text-inputs)**: Explore all available input field types and their props

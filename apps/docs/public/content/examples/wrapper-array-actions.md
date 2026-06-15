@@ -2,7 +2,7 @@
 description: 'Wrap an array field in a custom wrapper whose header hosts its own Add button. The wrapper dispatches arrayEvent(key).append(template), so the consumer config stays free of separate action fields.'
 ---
 
-Action buttons for an array (Add, Clear, etc.) don't have to be separate fields in the config — a wrapper can own the button and the behaviour. Here, `arraySection` renders a titled card whose header contains an Add button; clicking it dispatches `arrayEvent(key).append(itemTemplate)` against the array it wraps.
+Action buttons for an array (Add, Clear, etc.) don't have to be separate fields in the config; a wrapper can own the button and the behaviour. Here, `arraySection` renders a titled card whose header contains an Add button; clicking it dispatches `arrayEvent(key).append(itemTemplate)` against the array it wraps.
 
 ## Live Demo
 
@@ -70,11 +70,11 @@ export default class ArraySectionWrapper implements FieldWrapper {
 ## Why this pattern
 
 - **Config stays focused.** The array owns the data shape; the wrapper owns the chrome plus the add action.
-- **Reusable.** Apply the same wrapper to any array by changing the `itemTemplate` — no custom buttons to wire up.
+- **Reusable.** Apply the same wrapper to any array by changing the `itemTemplate`, with no custom buttons to wire up.
 - **Consistent placement.** Every array wrapped this way has the Add button in the same visual position.
 
 ## Related
 
-- **[Wrappers overview](/wrappers/overview)** — concept and built-ins
-- **[Writing a wrapper](/wrappers/writing-a-wrapper)** — the component contract
-- **[Complete Array API](/prebuilt/form-arrays/complete)** — alternative: add button as a separate field
+- **[Wrappers overview](/wrappers/overview)**: concept and built-ins
+- **[Writing a wrapper](/wrappers/writing-a-wrapper)**: the component contract
+- **[Complete Array API](/prebuilt/form-arrays/complete)**: alternative with the add button as a separate field

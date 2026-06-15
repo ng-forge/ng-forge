@@ -52,7 +52,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     packageName: '@ng-forge/dynamic-forms-material',
     buttonShortName: 'mat-button',
     prefixSlotDescription:
-      "Addons render as direct <code>&lt;mat-form-field&gt;</code> children with <code>matPrefix</code> / <code>matSuffix</code> attribute directives applied to <code>&lt;df-addon-slot&gt;</code> — Material's native projection API.",
+      "Addons render as direct <code>&lt;mat-form-field&gt;</code> children with <code>matPrefix</code> / <code>matSuffix</code> attribute directives applied to <code>&lt;df-addon-slot&gt;</code>, Material's native projection API.",
   },
   bootstrap: {
     iconType: 'bs-icon',
@@ -119,7 +119,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       <div class="addon-info-empty">
         <p>
           Pick a UI adapter (Material, Bootstrap, PrimeNG, or Ionic) from the adapter switcher to view its addon-specific reference. The
-          Custom adapter docs the underlying building blocks — addon configuration is identical to whichever UI adapter your custom adapter
+          Custom adapter docs the underlying building blocks; addon configuration is identical to whichever UI adapter your custom adapter
           is layered on top of.
         </p>
       </div>
@@ -169,12 +169,12 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
                 <tr>
                   <td><code>template</code></td>
                   <td>Named <code>&lt;ng-template&gt;</code></td>
-                  <td>Reference by <code>templateKey</code>. JSON-safe — backend ships the key, FE supplies the template.</td>
+                  <td>Reference by <code>templateKey</code>. JSON-safe: backend ships the key, FE supplies the template.</td>
                 </tr>
                 <tr>
                   <td><code>component</code></td>
                   <td>Arbitrary Angular component</td>
-                  <td>Code-only — dropped from JSON-derived configs.</td>
+                  <td>Code-only; dropped from JSON-derived configs.</td>
                 </tr>
               </tbody>
             </table>
@@ -255,7 +255,7 @@ import { ${d.withFieldsHelper} } from '${d.packageName}';
 // ${d.iconType} + ${d.buttonType} work out of the box.
 provideDynamicForm(...${d.withFieldsHelper}());
 
-// Standalone — addon types without the field types:
+// Standalone: addon types without the field types.
 // provideDynamicForm(...myCustomFields(), ${d.withAddonsHelper}());`;
   });
 
@@ -267,19 +267,19 @@ provideDynamicForm(...${d.withFieldsHelper}());
   }
 }
 
-// Now valid in TS — \`type: 'rating'\` is part of the ${d.inputComponentName} addon union.
+// Now valid in TS: \`type: 'rating'\` is part of the ${d.inputComponentName} addon union.
 { type: 'input', key: 'review', addons: [{ slot: 'suffix', type: 'rating', value: 4 }] }`;
   });
 
   protected readonly threeVariantsCode = computed(() => {
     const d = this.data();
-    return `// 1. Built-in preset — JSON-safe, no code required.
+    return `// 1. Built-in preset: JSON-safe, no code required.
 { slot: 'suffix', type: '${d.buttonType}', icon: '${d.clearIcon}', ariaLabel: 'Clear', preset: 'clear' }
 
-// 2. Registered handler — JSON-safe, looked up by name.
+// 2. Registered handler: JSON-safe, looked up by name.
 { slot: 'suffix', type: '${d.buttonType}', icon: '${d.searchIcon}', ariaLabel: 'Search', actionRef: 'runSearch' }
 
-// 3. Inline function — code-only, dropped from JSON-derived configs by the validator.
+// 3. Inline function: code-only, dropped from JSON-derived configs by the validator.
 { slot: 'suffix', type: '${d.buttonType}', icon: '${d.clearIcon}', ariaLabel: 'Append marker',
   action: (ctx) => ctx.setValue?.(((typeof ctx.value === 'string' ? ctx.value : '') + '+')) }`;
   });

@@ -25,7 +25,7 @@ export interface MigrationStep {
 export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
   {
     q: 'How do I add a field type ng-forge does not ship?',
-    a: "`provideDynamicForm(...)` is variadic — it takes a list of field-type registrations. Spread an adapter's bundle (`...withMaterialFields()` registers all the built-in Material fields), then append your own: `{ name: 'rich-text', loadComponent: () => import('./rich-text'), mapper: valueFieldMapper }`. Your component is a plain standalone Angular component that receives Signal Forms' `FieldTree<T>` via `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
+    a: "`provideDynamicForm(...)` is variadic: it takes a list of field-type registrations. Spread an adapter's bundle (`...withMaterialFields()` registers all the built-in Material fields), then append your own: `{ name: 'rich-text', loadComponent: () => import('./rich-text'), mapper: valueFieldMapper }`. Your component is a plain standalone Angular component that receives Signal Forms' `FieldTree<T>` via `input.required()`. See [Adding custom fields](/recipes/custom-fields).",
   },
   {
     q: 'How do I add icons, buttons, or text inside an input (prefix / suffix)?',
@@ -41,35 +41,35 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
   },
   {
     q: 'How do I share a config across multiple forms?',
-    a: "`FormConfig` is a plain TypeScript object — extract reusable pieces (a field, a validator entry, a default `props` object) as named consts and import them. For application-wide defaults, use `defaultProps` on the form or adapter-level providers like `withMaterialFields({ appearance: 'fill' })`.",
+    a: "`FormConfig` is a plain TypeScript object: extract reusable pieces (a field, a validator entry, a default `props` object) as named consts and import them. For application-wide defaults, use `defaultProps` on the form or adapter-level providers like `withMaterialFields({ appearance: 'fill' })`.",
   },
   {
     q: 'How do I localise labels and validation messages?',
-    a: 'Labels, placeholders, and hint text accept `string | Signal<string> | Observable<string>` — wire them to your i18n service. Validation `kind`s map to messages via per-field `validationMessages` or form-level `defaultValidationMessages`. See the [i18n guide](/dynamic-behavior/i18n).',
+    a: 'Labels, placeholders, and hint text accept `string | Signal<string> | Observable<string>`; wire them to your i18n service. Validation `kind`s map to messages via per-field `validationMessages` or form-level `defaultValidationMessages`. See the [i18n guide](/dynamic-behavior/i18n).',
   },
   {
     q: 'How do I export the submitted form value as plain JSON?',
-    a: 'The `(submitted)` event emits the form value directly — `JSON.stringify(value)` is enough. To strip hidden, disabled, or readonly fields, set `excludeValueIfHidden` (and the sibling options) on the form config or via `withValueExclusionDefaults()`. See [Value exclusion](/recipes/value-exclusion).',
+    a: 'The `(submitted)` event emits the form value directly, so `JSON.stringify(value)` is enough. To strip hidden, disabled, or readonly fields, set `excludeValueIfHidden` (and the sibling options) on the form config or via `withValueExclusionDefaults()`. See [Value exclusion](/recipes/value-exclusion).',
   },
   {
     q: 'Are hidden field values still in the submitted form value?',
-    a: "Yes by default — ng-forge keeps hidden values live so a hide/show toggle preserves what the user typed. Opt out with `excludeValueIfHidden: true` to strip them at submission output time, or wire a `derivation` that clears the value when the hide condition is true (formly's `resetOnHide` behaviour).",
+    a: "Yes by default. ng-forge keeps hidden values live so a hide/show toggle preserves what the user typed. Opt out with `excludeValueIfHidden: true` to strip them at submission output time, or wire a `derivation` that clears the value when the hide condition is true (formly's `resetOnHide` behaviour).",
   },
   {
     q: 'How do I debounce a field, an HTTP derivation, or a custom condition?',
-    a: "Debouncing happens on the consumer side: set `trigger: 'debounced'` and `debounceMs` on the derivation, condition, or HTTP validator that reads the value. The Signal Forms substrate commits on every change — there is no `updateOn: 'blur'` equivalent today, so debouncing the consumers is the closest workaround for blur-style commit timing.",
+    a: "Debouncing happens on the consumer side: set `trigger: 'debounced'` and `debounceMs` on the derivation or condition that reads the value. HTTP validators do not currently debounce. The Signal Forms substrate commits on every change; there is no `updateOn: 'blur'` equivalent today, so debouncing the consumers is the closest workaround for blur-style commit timing.",
   },
   {
     q: 'Does ng-forge work without one of the four official UI adapters?',
-    a: 'Yes — every adapter is built on the same public surface, so you can ship a custom adapter for Kendo, NG-ZORRO, NativeScript, or an in-house design system. See [Building an adapter](/building-an-adapter).',
+    a: 'Yes. Every adapter is built on the same public surface, so you can ship a custom adapter for Kendo, NG-ZORRO, NativeScript, or an in-house design system. See [Building an adapter](/building-an-adapter).',
   },
   {
     q: 'Does ng-forge use Reactive Forms (`FormGroup` / `FormControl`)?',
-    a: "No. ng-forge is built on Angular Signal Forms (`@angular/forms/signals`). The primitive is `FieldTree<T>` — a signal-native tree of value, validity, dirty/touched state, and errors. Reactive Forms still works in Angular, but the two systems don't share types or APIs.",
+    a: "No. ng-forge is built on Angular Signal Forms (`@angular/forms/signals`). The primitive is `FieldTree<T>`, a signal-native tree of value, validity, dirty/touched state, and errors. Reactive Forms still works in Angular, but the two systems don't share types or APIs.",
   },
   {
     q: 'Is there a built-in file-upload field?',
-    a: "Not today — file inputs are not a built-in field type in any adapter. Implement one as a custom field with `valueFieldMapper`: a standalone component that renders an `<input type='file'>`, captures `File | FileList` into the field's value, and (optionally) uploads to your backend via a custom validator or value-derivation. See [Adding custom fields](/recipes/custom-fields).",
+    a: "Not today. File inputs are not a built-in field type in any adapter. Implement one as a custom field with `valueFieldMapper`: a standalone component that renders an `<input type='file'>`, captures `File | FileList` into the field's value, and (optionally) uploads to your backend via a custom validator or value-derivation. See [Adding custom fields](/recipes/custom-fields).",
   },
   {
     q: 'Is ng-forge SSR / hydration safe?',
@@ -77,15 +77,15 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
   },
   {
     q: 'Is there a codemod or automated migration tool from formly?',
-    a: 'No automated migration tool today — port manually. The concept-mapping table in the [migration guide](/migrating-from-ngx-formly) is the closest thing to a porting cheatsheet; the [MCP server](/ai-integration) lets an LLM in your IDE generate large chunks of the new config from a description of the old one. A codemod is on the wishlist but not committed work.',
+    a: 'No automated migration tool today; port manually. The concept-mapping table in the [migration guide](/migrating-from-ngx-formly) is the closest thing to a porting cheatsheet; the [MCP server](/ai-integration) lets an LLM in your IDE generate large chunks of the new config from a description of the old one. A codemod is on the wishlist but not committed work.',
   },
   {
     q: 'How big is the bundle?',
-    a: 'ng-forge is a **batteries-included framework** — the engine itself is intentionally large because it ships the full validation, conditional logic, derivation, schema, and array-management surface needed for API-driven forms (where the form shape is unknown at build time). What you do **not** pay for upfront: every adapter loads its field components via dynamic `import()` per field `type`, so a form that only uses `input` and `select` only fetches those two component bundles. UI adapters (Material, PrimeNG, Bootstrap, Ionic) themselves are independent packages — only the one you install ships.',
+    a: 'ng-forge is a **batteries-included framework**: the engine itself is intentionally large because it ships the full validation, conditional logic, derivation, schema, and array-management surface needed for API-driven forms (where the form shape is unknown at build time). What you do **not** pay for upfront: every adapter loads its field components via dynamic `import()` per field `type`, so a form that only uses `input` and `select` only fetches those two component bundles. UI adapters (Material, PrimeNG, Bootstrap, Ionic) themselves are independent packages, and only the one you install ships.',
   },
   {
     q: 'Which Angular and browser versions are supported?',
-    a: 'Angular 21+ (signal-native APIs depend on it). Browser-wise, ng-forge supports the same matrix as Angular 21 — modern evergreen browsers (Chrome / Edge / Firefox / Safari current and previous major). No IE 11.',
+    a: 'Angular 22. The published packages declare @angular/* peer dependencies of ~22.0.0 (Signal Forms became stable in Angular 22). Browser-wise, ng-forge supports the same matrix as Angular 22: modern evergreen browsers (Chrome / Edge / Firefox / Safari current and previous major). No IE 11.',
   },
 ];
 
@@ -100,15 +100,15 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
 export const MIGRATION_FAQ: readonly FaqEntry[] = [
   {
     q: 'Can I run ngx-formly and ng-forge side by side during a migration?',
-    a: 'Yes. They do not conflict — different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports @ngx-formly/*.',
+    a: 'Yes. They do not conflict: different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports @ngx-formly/*.',
   },
   {
-    q: 'Does ng-forge support Angular 21?',
-    a: 'Yes — ng-forge requires Angular 21+ as its baseline (signal-native APIs depend on it). If you are on Angular 20 or earlier, migrating to ng-forge implies an Angular upgrade first.',
+    q: 'Which Angular versions does ng-forge support?',
+    a: "Angular 22. The published packages declare @angular/* peer dependencies of ~22.0.0 (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.",
   },
   {
     q: 'Does ng-forge use Reactive Forms (FormGroup / FormControl)?',
-    a: 'No. ng-forge is built on Angular Signal Forms (@angular/forms/signals), a separate system with a different primitive — FieldTree<T> — that holds value, validity, dirty/touched state, and errors as signals. There is no FormGroup or FormControl involved. If your formly app exposes a formGroup to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.',
+    a: 'No. ng-forge is built on Angular Signal Forms (@angular/forms/signals), a separate system with a different primitive, FieldTree<T>, that holds value, validity, dirty/touched state, and errors as signals. There is no FormGroup or FormControl involved. If your formly app exposes a formGroup to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.',
   },
   {
     q: 'How do I report bugs or get help migrating?',
@@ -149,7 +149,7 @@ export const MIGRATION_CHECKLIST: readonly MigrationStep[] = [
   },
   {
     name: 'Port one read-only form first',
-    text: 'Port one read-only form first — typically a settings page or profile form. Fewer moving parts means an easier sanity check.',
+    text: 'Port one read-only form first, typically a settings page or profile form. Fewer moving parts means an easier sanity check.',
   },
   {
     name: 'Translate validators',

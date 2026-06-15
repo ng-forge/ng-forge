@@ -364,5 +364,5 @@ when: {
 
 - **[Validation Basics](/validation/basics)** - Shorthand validators
 - **[Validation Reference](/validation/reference)** - Complete API
-- **[Conditional Logic](/dynamic-behavior/overview)** - Field behavior changes
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Field behavior changes
 - **[Examples](/examples)** - Real-world patterns

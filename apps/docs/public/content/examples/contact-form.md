@@ -1,5 +1,5 @@
 ---
-description: 'Create a contact form with text inputs, textarea, date picker, and real-time validation feedback using ng-forge dynamic forms.'
+description: 'Create a contact form with text inputs, a subject select, a message textarea, and real-time validation feedback using ng-forge dynamic forms.'
 ---
 
 Simple contact form demonstrating basic form fields, validation, and user input.
@@ -13,8 +13,9 @@ Simple contact form demonstrating basic form fields, validation, and user input.
 This example shows a basic contact form with:
 
 - Text inputs (name, email, phone)
+- Subject select
 - Textarea for messages
-- Date selection
+- Newsletter checkbox
 - Basic validation (required, email format)
 - Real-time validation feedback
 
@@ -31,6 +32,10 @@ import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 })
 export class ContactFormComponent {
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+    },
     fields: [
       {
         key: 'firstName',
@@ -112,7 +117,6 @@ export class ContactFormComponent {
         type: 'submit',
         key: 'submit',
         label: 'Send Message',
-        props: { color: 'primary' },
       },
     ],
   } as const satisfies FormConfig;

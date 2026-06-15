@@ -25,10 +25,13 @@ Text-based input with HTML5 type support.
 }
 ```
 
+**Core Properties:**
+
+- `placeholder`: Input placeholder text (at field level, not in props)
+
 **Core Props:**
 
 - `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
-- `placeholder`: Input placeholder text
 
 #### Adapter Props
 
@@ -54,9 +57,12 @@ Multi-line text input.
 }
 ```
 
+**Core Properties:**
+
+- `placeholder`: Placeholder text (at field level, not in props)
+
 **Core Props:**
 
-- `placeholder`: Placeholder text
 - `rows`: Number of visible text rows
 
 #### Adapter Props

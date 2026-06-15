@@ -1,15 +1,15 @@
 ---
 title: Container Fields
 slug: prebuilt/container-field
-description: 'Wrap a group of fields in a chain of wrapper components — titled sections, cards, collapsible panels — without adding nesting to your form values.'
+description: 'Wrap a group of fields in a chain of wrapper components (titled sections, cards, collapsible panels) without adding nesting to your form values.'
 ---
 
-A `container` is a layout-only field that chains [wrapper components](/wrappers/overview) around its children. It gives you a place to stack wrappers without the wrappers having to know about each other — no form nesting, no new form context, values flatten to the parent just like a [row](/prebuilt/form-rows).
+A `container` is a layout-only field that chains [wrapper components](/wrappers/overview) around its children. It gives you a place to stack wrappers without the wrappers having to know about each other: no form nesting, no new form context, values flatten to the parent just like a [row](/prebuilt/form-rows).
 
 ## When to reach for a container
 
 - You want one wrapper (or several stacked) around a **group of sibling fields**, not a single field.
-- You don't want a new form key or nested value shape — the fields should flatten.
+- You don't want a new form key or nested value shape; the fields should flatten.
 - You want a purely visual grouping: a section header, a card, a collapsible panel.
 
 If you need a nested value shape (e.g. `user.address.street`), use a [form group](/prebuilt/form-groups) instead. If you only need horizontal layout, use a [form row](/prebuilt/form-rows).
@@ -46,6 +46,8 @@ The `wrappers` array chains outermost-first: the first wrapper wraps everything 
 }
 ```
 
+> The `section` wrapper used in the examples on this page is a custom wrapper shown for illustration; it must be registered before use. Only the `css` and `row` wrappers ship built in.
+
 See [Writing a Wrapper](/wrappers/writing-a-wrapper) for how to build your own, and [Registering and Applying](/wrappers/registering-and-applying) for how to make a custom wrapper type available.
 
 ## Container vs row vs group
@@ -56,7 +58,7 @@ See [Writing a Wrapper](/wrappers/writing-a-wrapper) for how to build your own, 
 | [`group`](/prebuilt/form-groups)         | Yes (under `key`)  | No                 | No             |
 | [`container`](/prebuilt/container-field) | No (flat)          | No                 | Yes (explicit) |
 
-A `row` is itself a container-field under the hood — the `row` type resolves to the container renderer with an auto-injected `row` wrapper. Keep writing `type: 'row'` for horizontal layouts; use `type: 'container'` when the wrappers are the point.
+A `row` is itself a container-field under the hood: the `row` type resolves to the container renderer with an auto-injected `row` wrapper. Keep writing `type: 'row'` for horizontal layouts; use `type: 'container'` when the wrappers are the point.
 
 ## Value Structure
 
@@ -89,7 +91,7 @@ The `key` on the container itself is used for DOM id / test selectors only. It n
 
 ## Nesting Rules
 
-Containers follow the same rules as rows — they are layout-only.
+Containers follow the same rules as rows: they are layout-only.
 
 **Containers can appear inside:**
 
@@ -98,10 +100,7 @@ Containers follow the same rules as rows — they are layout-only.
 - Groups
 - Array items
 
-**Containers cannot appear inside:**
-
-- Rows
-- Other containers _(treat each container as a single wrapping layer — stack wrappers on one container instead)_
+The types also allow containers inside rows and inside other containers. Treat each container as a single wrapping layer; in most cases, stacking wrappers on one container is clearer than nesting containers.
 
 **Containers can contain:**
 
@@ -175,7 +174,7 @@ export class ProfileFormComponent {
 }
 ```
 
-The resulting form value is flat — containers contribute structure to the UI, not the data:
+The resulting form value is flat: containers contribute structure to the UI, not the data.
 
 ```typescript
 {
@@ -188,8 +187,8 @@ The resulting form value is flat — containers contribute structure to the UI, 
 
 ## Next Steps
 
-- **[Wrappers Overview](/wrappers/overview)** — what wrappers are and when to use them
-- **[Writing a Wrapper](/wrappers/writing-a-wrapper)** — build your own wrapper component
-- **[Registering and Applying](/wrappers/registering-and-applying)** — make a custom wrapper type available
-- **[Form Rows](/prebuilt/form-rows)** — horizontal layout without a wrapper chain
-- **[Form Groups](/prebuilt/form-groups)** — add a nested value shape instead of flattening
+- **[Wrappers Overview](/wrappers/overview)**: what wrappers are and when to use them
+- **[Writing a Wrapper](/wrappers/writing-a-wrapper)**: build your own wrapper component
+- **[Registering and Applying](/wrappers/registering-and-applying)**: make a custom wrapper type available
+- **[Form Rows](/prebuilt/form-rows)**: horizontal layout without a wrapper chain
+- **[Form Groups](/prebuilt/form-groups)**: add a nested value shape instead of flattening

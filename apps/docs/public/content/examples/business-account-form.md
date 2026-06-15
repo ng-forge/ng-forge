@@ -33,6 +33,10 @@ export class BusinessAccountFormComponent {
   formValue = signal({});
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+      email: 'Please enter a valid email address',
+    },
     fields: [
       {
         key: 'accountType',
@@ -118,7 +122,7 @@ export class BusinessAccountFormComponent {
       {
         key: 'numberOfEmployees',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Number of Employees',
         props: { type: 'number' },
         logic: [
@@ -216,6 +220,6 @@ Business fields are hidden when personal is selected:
 
 ## Related Documentation
 
-- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Full conditional logic guide
 - **[User Registration](/examples/user-registration)** - Basic registration example
 - **[Radio Buttons](/field-types/selection)** - Field types reference

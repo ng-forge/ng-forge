@@ -53,14 +53,10 @@ Date selection control.
 
 **Core Properties (all optional):**
 
-- `minDate`: Minimum selectable date — `Date | string | null`
-- `maxDate`: Maximum selectable date — `Date | string | null`
-- `startAt`: Initial calendar view date — `Date | null`
-
-**Core Props:**
-
-- `placeholder`: Placeholder text
-- `format`: Date format string (UI-integration specific)
+- `minDate`: Minimum selectable date (`Date | string | null`)
+- `maxDate`: Maximum selectable date (`Date | string | null`)
+- `startAt`: Initial calendar view date (`Date | null`)
+- `placeholder`: Placeholder text (at field level, not in props)
 
 #### Adapter Props
 

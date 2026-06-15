@@ -1,7 +1,7 @@
 ---
 title: Custom Validators
 slug: validation/custom-validators
-description: 'Create custom sync, async, and HTTP validators for ng-forge dynamic forms with full FieldContext access and strict message resolution.'
+description: 'Create custom sync, async, and HTTP validators for ng-forge dynamic forms, with FieldContext access and configurable message resolution.'
 ---
 
 Custom validation functions for complex validation logic that goes beyond built-in validators.
@@ -23,15 +23,17 @@ Try the interactive example below to see both expression-based and function-base
 
 <docs-live-example scenario="examples/expression-validators-demo"></docs-live-example>
 
-## Message Resolution (STRICT)
+## Message Resolution
 
-All error messages MUST be explicitly configured. The framework enforces this strictly:
+Error messages are resolved per error kind in this order:
 
 1. **Field-level `validationMessages[kind]`** (highest priority - per-field customization)
 2. **Form-level `defaultValidationMessages[kind]`** (fallback for common messages)
-3. **No message configured = Console warning + error NOT displayed**
+3. **The error's own `message` property** (final fallback, used when the validator attaches one)
 
-**Important:** Validator-returned messages are NOT used as fallbacks. This enforces proper separation of concerns and i18n patterns.
+If none of these produce a message, a console warning is logged and the error is not displayed.
+
+**Recommendation:** Prefer configured messages over validator-returned ones. Returning only the error `kind` and configuring messages at the field or form level keeps validation logic separate from presentation and supports i18n.
 
 You can define messages at the form level for common validation errors:
 
@@ -54,10 +56,10 @@ ng-forge supports two patterns for custom validators:
 
 Function-based validators have two interchangeable authoring forms:
 
-- **Registered (`functionName`)** — JSON-serializable; safe to ship in configs loaded from APIs, OpenAPI, or databases.
-- **Inline (`fn`)** — code-only, type-safe; skips the registry round-trip but cannot survive JSON serialization. `fn` and `functionName` are mutually exclusive — TypeScript rejects setting both, and at runtime an explicit warning is logged before the inline form wins.
+- **Registered (`functionName`)**: JSON-serializable; safe to ship in configs loaded from APIs, OpenAPI, or databases.
+- **Inline (`fn`)**: code-only, type-safe; skips the registry round-trip but cannot survive JSON serialization. `fn` and `functionName` are mutually exclusive: TypeScript rejects setting both, and at runtime an explicit warning is logged before the inline form wins.
 
-The same `fn` / `asyncFn` alternative is available on conditions and derivations — see [Inline functions vs registered names](#inline-functions-vs-registered-names) below.
+The same `fn` / `asyncFn` alternative is available on conditions and derivations; see [Inline functions vs registered names](#inline-functions-vs-registered-names) below.
 
 ## Expression-Based Validators
 
@@ -177,7 +179,7 @@ Expressions use **secure AST-based parsing**. Only safe JavaScript operations ar
 
 ## Function-Based Validators
 
-Best for validation that needs field value and access to other fields via FieldContext.
+Best for reusable validation logic on the field's own value.
 
 ### Basic Example
 
@@ -238,37 +240,25 @@ const config = {
 };
 ```
 
-`fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable — for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
+`fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable; for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
 
 **See also:** the same XOR pattern applies to [conditions](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline) and [derivations](/dynamic-behavior/derivation/values#inline-alternative-fn). See [Configuration](/configuration) for `customFnConfig` setup and [AI Integration (MCP)](/ai-integration) for the MCP server, which emits configs using `functionName` exclusively.
 
 ### FieldContext API
 
-The `FieldContext` API provides access to:
+Custom validator functions receive Angular's raw `FieldContext`:
 
 - **`ctx.value()`** - Current field value (signal)
 - **`ctx.state`** - Field state (errors, touched, dirty, etc.)
-- **`ctx.valueOf(path)`** - Access other field values (PUBLIC API for cross-field validation)
-- **`ctx.stateOf(path)`** - Access other field states
-- **`ctx.field`** - Current field tree
+- **`ctx.fieldTree`** - The current field
+
+`FieldContext` also exposes `valueOf(path)` and `stateOf(path)`, but these take a `FieldPath` object from Angular's schema path tree, not a string. Custom validator functions have no access to path objects, so they cannot use `valueOf` to read other fields. For cross-field rules, use an expression-based validator (which can read `formValue`) or a form-level [schema](/schema-validation/angular-schema).
 
 ### Cross-Field Validation
 
-Use `ctx.valueOf()` to access other field values for comparison validators:
+Use an expression-based validator that reads `formValue` to compare against other fields:
 
 ```typescript
-import { CustomValidator } from '@ng-forge/dynamic-forms';
-
-const greaterThanMin: CustomValidator = (ctx) => {
-  const value = ctx.value();
-  const minValue = ctx.valueOf('minAge');
-
-  if (minValue !== undefined && value <= minValue) {
-    return { kind: 'notGreaterThanMin' };
-  }
-  return null;
-};
-
 // Note: Custom validators return only 'kind'. Built-in validators (min, max, etc.)
 // automatically include params for interpolation (e.g., {{min}}, {{max}}, etc.)
 const config = {
@@ -281,7 +271,8 @@ const config = {
       validators: [
         {
           type: 'custom',
-          functionName: 'greaterThanMin',
+          expression: 'fieldValue > formValue.minAge',
+          kind: 'notGreaterThanMin',
         },
       ],
       validationMessages: {
@@ -289,9 +280,6 @@ const config = {
       },
     },
   ],
-  customFnConfig: {
-    validators: { greaterThanMin },
-  },
 };
 ```
 
@@ -305,25 +293,15 @@ const config = {
 ### Password Confirmation Example
 
 ```typescript
-const passwordMatch: CustomValidator = (ctx) => {
-  const confirmPassword = ctx.value();
-  const password = ctx.valueOf('password');
-
-  if (!confirmPassword || !password) {
-    return null; // Let required validator handle empty case
-  }
-
-  if (password !== confirmPassword) {
-    return { kind: 'passwordMismatch' };
-  }
-  return null;
-};
-
-// In field config:
 {
   key: 'confirmPassword',
   type: 'input',
-  validators: [{ type: 'custom', functionName: 'passwordMatch' }],
+  validators: [{
+    type: 'custom',
+    // Pass while either field is empty so the required validator handles that case
+    expression: '!fieldValue || !formValue.password || fieldValue === formValue.password',
+    kind: 'passwordMismatch',
+  }],
   validationMessages: {
     passwordMismatch: 'Passwords do not match'
   }
@@ -351,10 +329,10 @@ const checkUsernameAvailable: AsyncCustomValidator = {
   factory: (params) => {
     const userService = inject(UserService);
     return rxResource({
-      request: params,
-      loader: ({ request }) => {
-        if (!request?.username) return of(null);
-        return userService.checkAvailability(request.username);
+      params,
+      stream: ({ params }) => {
+        if (!params?.username) return of(null);
+        return userService.checkAvailability(params.username);
       },
     });
   },
@@ -418,7 +396,7 @@ interface AsyncCustomValidator<TValue, TParams, TResult> {
 
 ## Declarative HTTP Validators
 
-The simplest way to validate against an HTTP endpoint. No function registration required — configure the request and response mapping inline.
+The simplest way to validate against an HTTP endpoint. No function registration required: configure the request and response mapping inline.
 
 ### Basic Example
 
@@ -437,7 +415,7 @@ The simplest way to validate against an HTTP endpoint. No function registration 
         },
       },
       responseMapping: {
-        validWhen: 'response.available', // Truthy = valid
+        validWhen: 'response.available', // Must evaluate to boolean true
         errorKind: 'usernameTaken',
       },
     },
@@ -452,7 +430,7 @@ The simplest way to validate against an HTTP endpoint. No function registration 
 
 - `fieldValue` is available as an expression in `params`, `queryParams`, and `body` (refers to the current field's value)
 - Use `params` with `:key` URL placeholders for path parameters (e.g. `url: '/api/users/:id'` + `params: { id: 'fieldValue' }`)
-- `validWhen` is evaluated with `{ response }` in scope — truthy means validation passed
+- `validWhen` is evaluated with `{ response }` in scope and must return boolean `true` for the field to be valid; non-boolean results log a warning
 - **Fail-closed:** if the HTTP request errors, the validator returns `{ kind: errorKind }` by default (prevents submission on network failure)
 
 ### POST with Body Expressions
@@ -501,10 +479,10 @@ Use `errorParams` to include response data in validation messages:
 
 ```typescript
 interface HttpValidationResponseMapping {
-  /** Expression evaluated with { response }. Truthy = valid (no error). */
+  /** Expression evaluated with { response }. Must evaluate to boolean true to be valid. */
   validWhen: string;
 
-  /** Error kind returned when validWhen is falsy — maps to validationMessages. */
+  /** Error kind returned when validWhen is not true; maps to validationMessages. */
   errorKind: string;
 
   /**
@@ -582,8 +560,7 @@ const config = {
 
 **Key Benefits:**
 
-- Automatic request cancellation when field changes
-- Built-in debouncing via resource API
+- Automatic cancellation of in-flight requests when the value changes
 - Prevents race conditions
 - Optimized for HTTP-specific validation
 
@@ -591,7 +568,7 @@ const config = {
 
 ### Inline Alternative (`fn`)
 
-For code-only projects, skip the `customFnConfig.httpValidators` registration and attach the validator inline. `FunctionHttpValidatorConfig.fn` is XOR with `functionName` — TypeScript rejects both keys at compile time, and the runtime warns + prefers inline if a JSON-loaded config sets them both.
+For code-only projects, skip the `customFnConfig.httpValidators` registration and attach the validator inline. `FunctionHttpValidatorConfig.fn` is XOR with `functionName`: TypeScript rejects both keys at compile time, and the runtime warns + prefers inline if a JSON-loaded config sets them both.
 
 ```typescript
 import type { HttpCustomValidator } from '@ng-forge/dynamic-forms';
@@ -627,8 +604,8 @@ interface HttpCustomValidator<TValue, TResult> {
   // Build HTTP request from field context
   readonly request: (ctx: FieldContext<TValue>) => HttpResourceRequest | string | undefined;
 
-  // Map successful response to validation error
-  readonly onSuccess?: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
+  // REQUIRED: map successful response to validation error
+  readonly onSuccess: (result: TResult, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
 
   // Handle HTTP errors
   readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError | ValidationError[] | null;
@@ -637,7 +614,7 @@ interface HttpCustomValidator<TValue, TResult> {
 interface HttpResourceRequest {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string | string[]>;
 }
 ```
@@ -697,7 +674,7 @@ const config = {
 };
 ```
 
-The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](/dynamic-behavior/overview) for all expression types and operators.
+The validator is only active when the `when` condition evaluates to `true`, allowing dynamic validation based on form state. See [Conditional Logic](/dynamic-behavior/conditional-logic) for all expression types and operators.
 
 ## Common Validation Patterns
 
@@ -733,48 +710,49 @@ const ageValidator: CustomValidator = (ctx) => {
 ### Conditional Required
 
 ```typescript
-const conditionalRequiredValidator: CustomValidator = (ctx) => {
-  const value = ctx.value();
-  const employmentStatus = ctx.valueOf('employmentStatus');
-
-  // Company name required if employed
-  if (employmentStatus === 'employed' && !value) {
-    return { kind: 'required' };
-  }
-  return null;
-};
+// Company name required if employed
+{
+  key: 'companyName',
+  type: 'input',
+  validators: [{
+    type: 'custom',
+    expression: "formValue.employmentStatus !== 'employed' || !!fieldValue",
+    kind: 'required',
+  }],
+}
 ```
 
 ### Date Range Validation
 
 ```typescript
-const dateRangeValidator: CustomValidator = (ctx) => {
-  const endDate = ctx.value();
-  const startDate = ctx.valueOf('startDate');
-
-  if (startDate && endDate && startDate > endDate) {
-    return { kind: 'invalidDateRange' };
-  }
-  return null;
-};
+{
+  key: 'endDate',
+  type: 'datepicker',
+  validators: [{
+    type: 'custom',
+    expression: '!formValue.startDate || !fieldValue || formValue.startDate <= fieldValue',
+    kind: 'invalidDateRange',
+  }],
+  validationMessages: {
+    invalidDateRange: 'End date must be after start date',
+  },
+}
 ```
 
 ## Multiple Errors
 
-Validators can return multiple errors for cross-field validation:
+Validators can return multiple errors:
 
 ```typescript
-const validateDateRange: CustomValidator = (ctx) => {
+const passwordStrength: CustomValidator = (ctx) => {
+  const value = ctx.value();
+  if (typeof value !== 'string' || !value) return null;
+
   const errors: ValidationError[] = [];
 
-  const startDate = ctx.valueOf('startDate');
-  const endDate = ctx.valueOf('endDate');
-
-  if (!startDate) errors.push({ kind: 'startDateRequired' });
-  if (!endDate) errors.push({ kind: 'endDateRequired' });
-  if (startDate && endDate && startDate > endDate) {
-    errors.push({ kind: 'invalidDateRange' });
-  }
+  if (!/[A-Z]/.test(value)) errors.push({ kind: 'missingUppercase' });
+  if (!/[0-9]/.test(value)) errors.push({ kind: 'missingNumber' });
+  if (value.length < 12) errors.push({ kind: 'tooShort' });
 
   return errors.length > 0 ? errors : null;
 };
@@ -824,13 +802,19 @@ import { TranslateService } from '@ngx-translate/core';
 
 ### Parameterized Messages
 
-Messages can interpolate params from ValidatorConfig using Angular template syntax (double curly braces around the param name).
+Messages interpolate values from the returned validation error's properties using double curly braces (same syntax as Angular templates). Interpolation reads the error object, not `ValidatorConfig.params`:
 
-**Syntax:** To interpolate a param, wrap its name in double curly braces (same syntax as Angular templates).
-
-**Example:** To access `params.label`, write the param name `label` wrapped in double curly braces in your message string.
+- Expression-based validators attach evaluated `errorParams` to the error automatically.
+- Declarative HTTP validators attach `responseMapping.errorParams` automatically.
+- Function-based validators must copy any values they want interpolated onto the returned error object.
 
 ```typescript
+const lessThanField: CustomValidator = (ctx, params) => {
+  // ... validation logic ...
+  // Copy interpolation values onto the returned error
+  return { kind: 'notLessThan', label: params?.['label'] };
+};
+
 {
   validators: [
     {
@@ -840,13 +824,13 @@ Messages can interpolate params from ValidatorConfig using Angular template synt
     }
   ],
   validationMessages: {
-    // Interpolate params.label using double curly braces
+    // Interpolates the error's label property
     notLessThan: 'Must be less than {{label}}'
   }
 }
 ```
 
-The validation message will render as **"Must be less than Minimum Age"** by interpolating the `label` param value.
+The validation message renders as **"Must be less than Minimum Age"** because the returned error carries `label: 'Minimum Age'`.
 
 ## Type Safety
 
@@ -900,8 +884,8 @@ const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
 1. **Separation of Concerns**: Return only error `kind`, configure messages separately
 2. **i18n Support**: Use Observable/Signal for validation messages
 3. **Graceful Degradation**: Handle async/HTTP errors without blocking the form
-4. **Cross-Field Validation**: Use `ctx.valueOf()` for accessing related fields
-5. **Type Safety**: Leverage TypeScript generics for type-safe validation
+4. **Cross-Field Validation**: Use expression-based validators that read `formValue`, or a form-level schema
+5. **Type Safety**: Use TypeScript generics for type-safe validation
 6. **Message Priority**: Use field-level messages for customization, form-level for common errors
 7. **Conditional Validation**: Use `when` property with `ConditionalExpression` for dynamic validators
 8. **Inverted Logic**: HTTP validators check validity, not data fetching success
@@ -922,7 +906,7 @@ Every validator/condition/derivation surface that accepts a `functionName` (or `
 
 Rules of thumb:
 
-- Use **`functionName` / `asyncFunctionName`** for configs that travel over the wire — API responses, OpenAPI schemas, JSON files, database rows. The MCP server only emits the registered form.
+- Use **`functionName` / `asyncFunctionName`** for configs that travel over the wire: API responses, OpenAPI schemas, JSON files, database rows. The MCP server only emits the registered form.
 - Use **`fn` / `asyncFn`** for code-only configs in TypeScript when you don't need JSON serializability. The function reference is captured directly, with no registry indirection.
 - The two are **mutually exclusive**. TypeScript rejects setting both at compile time; if a JSON-loaded config sneaks both keys through at runtime, a warning is logged and the inline form wins.
 

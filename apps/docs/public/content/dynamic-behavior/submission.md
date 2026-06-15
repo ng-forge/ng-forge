@@ -1,17 +1,17 @@
 ---
 title: Submission
 slug: dynamic-behavior/submission
-description: 'Handle form submission with automatic loading states, submit button disabling, and server-side validation error mapping.'
+description: 'Handle form submission with automatic loading states and submit button disabling.'
 ---
 
-Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling, loading states, and server error handling.
+Form submission in dynamic forms integrates with Angular Signal Forms' native `submit()` function, providing automatic button disabling and loading states.
 
 ## Overview
 
 The submission system provides:
 
 - Async form submission with automatic loading state
-- Server-side validation error handling
+- Thrown action errors caught and logged
 - Automatic submit button disabling during submission
 - Configurable button disabled behavior
 - Custom disabled logic via `FormStateCondition`
@@ -25,6 +25,7 @@ Configure form submission with the `submission` property:
 ```typescript
 import { Component, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { FieldTree } from '@angular/forms/signals';
 import { FormConfig, InferFormValue } from '@ng-forge/dynamic-forms';
 
 const formFields = {
@@ -44,7 +45,7 @@ export class LoginFormComponent {
   config = {
     ...formFields,
     submission: {
-      action: (form: LoginForm) => this.http.post('/api/login', form),
+      action: (form: FieldTree<LoginForm>) => this.http.post('/api/login', form().value()),
     },
   };
 }
@@ -52,34 +53,27 @@ export class LoginFormComponent {
 
 ## SubmissionConfig
 
-The `submission.action` function receives the typed form value and can return an Observable or Promise:
+The `submission.action` function receives the form's `FieldTree` instance and can return an Observable or Promise. Read the current value with `form().value()`.
 
-| Return Value           | Meaning                                    |
-| ---------------------- | ------------------------------------------ |
-| Completes successfully | Successful submission                      |
-| `TreeValidationResult` | Server validation errors (single or array) |
+While the action is executing, the form is in a submitting state, enabling automatic button disabling and loading states. Errors thrown by the action are caught and logged by the library, and the form exits the submitting state.
 
-**Note:** `TreeValidationResult` from Angular Signal Forms supports both single errors and arrays. You can return a single error object or an array of errors.
-
-While the action is executing, the form is in a submitting state, enabling automatic button disabling and loading states.
+**Note:** The action's resolved value is discarded. Returned validation results (such as `TreeValidationResult`) are not currently applied to form fields.
 
 ### Server Error Handling
 
-Return validation errors to apply them to specific fields using `catchError`:
+Returned validation results are not applied to fields, so handle server errors inside your action for now, for example by mapping them to your own notification or error state:
 
 ```typescript
-import { catchError, of } from 'rxjs';
+import { catchError, EMPTY } from 'rxjs';
 
 submission: {
-  action: (form: FormValue) => this.http.post('/api/register', form).pipe(
+  action: (form) => this.http.post('/api/register', form().value()).pipe(
     catchError((error) => {
       if (error.error?.code === 'EMAIL_EXISTS') {
-        return of([{
-          field: 'email',
-          error: { kind: 'server', message: 'Email already exists' },
-        }]);
+        this.notifications.error('Email already exists');
+        return EMPTY;
       }
-      throw error; // Re-throw unexpected errors
+      throw error; // Unexpected errors are caught and logged by the library
     }),
   ),
 }
@@ -187,7 +181,7 @@ Combine form state conditions with custom expressions:
 
 By default, field values are excluded from the `(submitted)` output when the field is hidden, disabled, or readonly. This prevents stale or irrelevant data from being submitted.
 
-Value exclusion supports a 3-tier configuration hierarchy: **Global > Form > Field**, where the most specific level wins. Internal form state and two-way binding are unaffected.
+Value exclusion supports a 3-tier configuration hierarchy: **Field > Form > Global** (the most specific level wins). Internal form state and two-way binding are unaffected.
 
 ```typescript
 // Disable hidden value exclusion for this form
@@ -218,6 +212,6 @@ export class MyFormComponent {
 
 ## Next Steps
 
-- **[Events](/recipes/events)** — Dispatch and subscribe to form events from inside or outside the form
-- **[Schema Validation](/schema-validation/overview)** — Add cross-field validation rules with Angular schemas or Zod
-- **[Value Exclusion](/recipes/value-exclusion)** — Control which field values are included in submission output
+- **[Events](/recipes/events)**: Dispatch and subscribe to form events from inside or outside the form
+- **[Schema Validation](/schema-validation/overview)**: Add cross-field validation rules with Angular schemas or Zod
+- **[Value Exclusion](/recipes/value-exclusion)**: Control which field values are included in submission output

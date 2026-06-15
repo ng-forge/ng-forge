@@ -1,5 +1,5 @@
 ---
-description: "Implement the 'same as billing' checkout pattern by toggling an entire shipping address group with a single checkbox condition."
+description: "Implement the 'same as billing' checkout pattern by hiding the shipping address fields with a checkbox-driven condition."
 ---
 
 Checkout form demonstrating the common "same as billing" pattern for shipping addresses.
@@ -10,11 +10,11 @@ Checkout form demonstrating the common "same as billing" pattern for shipping ad
 
 ## Overview
 
-This example shows how to toggle an entire group of fields based on a checkbox. When "Shipping same as billing" is checked, the shipping address fields are hidden.
+This example shows how to toggle a set of fields based on a checkbox. When "Shipping same as billing" is checked, every shipping address field is hidden.
 
 **Key patterns demonstrated:**
 
-- Entire group hidden/shown with single condition
+- Each shipping field hidden and required based on the same checkbox condition
 - Checkbox controls form complexity
 - Reduces user effort when addresses are the same
 
@@ -33,6 +33,9 @@ export class ShippingBillingFormComponent {
   formValue = signal({});
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'billingTitle',
@@ -98,8 +101,10 @@ export class ShippingBillingFormComponent {
         ],
       },
       {
-        key: 'shippingAddress',
-        type: 'group',
+        key: 'shippingStreet',
+        type: 'input',
+        value: '',
+        label: 'Street Address',
         logic: [
           {
             type: 'hidden',
@@ -110,35 +115,92 @@ export class ShippingBillingFormComponent {
               value: true,
             },
           },
+          {
+            type: 'required',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'notEquals',
+              value: true,
+            },
+          },
         ],
-        fields: [
+      },
+      {
+        key: 'shippingCity',
+        type: 'input',
+        value: '',
+        label: 'City',
+        logic: [
           {
-            key: 'street',
-            type: 'input',
-            value: '',
-            label: 'Street Address',
-            required: true,
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'equals',
+              value: true,
+            },
           },
           {
-            key: 'city',
-            type: 'input',
-            value: '',
-            label: 'City',
-            required: true,
+            type: 'required',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'notEquals',
+              value: true,
+            },
+          },
+        ],
+      },
+      {
+        key: 'shippingState',
+        type: 'input',
+        value: '',
+        label: 'State/Province',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'equals',
+              value: true,
+            },
           },
           {
-            key: 'state',
-            type: 'input',
-            value: '',
-            label: 'State/Province',
-            required: true,
+            type: 'required',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'notEquals',
+              value: true,
+            },
+          },
+        ],
+      },
+      {
+        key: 'shippingZipCode',
+        type: 'input',
+        value: '',
+        label: 'ZIP/Postal Code',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'equals',
+              value: true,
+            },
           },
           {
-            key: 'zipCode',
-            type: 'input',
-            value: '',
-            label: 'ZIP/Postal Code',
-            required: true,
+            type: 'required',
+            condition: {
+              type: 'fieldValue',
+              fieldPath: 'sameAsBilling',
+              operator: 'notEquals',
+              value: true,
+            },
           },
         ],
       },
@@ -167,32 +229,44 @@ A simple checkbox controls whether shipping fields are visible:
 }
 ```
 
-### Group Visibility
+### Per-Field Visibility
 
-The entire shipping address group is hidden when the checkbox is checked:
+Each shipping field carries the same pair of rules: hidden when the checkbox is checked, required when it is not:
 
 ```typescript
 {
-  key: 'shippingAddress',
-  type: 'group',
-  logic: [{
-    type: 'hidden',
-    condition: {
-      type: 'fieldValue',
-      fieldPath: 'sameAsBilling',
-      operator: 'equals',
-      value: true,
+  key: 'shippingStreet',
+  type: 'input',
+  value: '',
+  label: 'Street Address',
+  logic: [
+    {
+      type: 'hidden',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'sameAsBilling',
+        operator: 'equals',
+        value: true,
+      },
     },
-  }],
-  fields: [
-    // All shipping fields...
+    {
+      type: 'required',
+      condition: {
+        type: 'fieldValue',
+        fieldPath: 'sameAsBilling',
+        operator: 'notEquals',
+        value: true,
+      },
+    },
   ],
 }
 ```
 
+Because the shipping fields are flat (not nested in a group), the form value keeps them at the top level: `shippingStreet`, `shippingCity`, `shippingState`, and `shippingZipCode` sit alongside `billingAddress` and `sameAsBilling`. As an alternative, you can wrap the four fields in a `group` with a single `hidden` rule, which nests them under the group key in the form value.
+
 ### Section Titles
 
-The section title is also hidden along with the group:
+The section title is also hidden along with the shipping fields:
 
 ```typescript
 {
@@ -220,6 +294,6 @@ The section title is also hidden along with the group:
 
 ## Related Documentation
 
-- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Full conditional logic guide
 - **[Form Groups](/prebuilt/form-groups)** - Working with groups
 - **[Checkbox Fields](/field-types/selection)** - Field types reference

@@ -95,14 +95,14 @@ export const EXAMPLES_REGISTRY: ExampleItem[] = [
     id: 'wrapper-array-actions',
     title: 'Array With Wrapper Chrome',
     description:
-      'Wrap an array and its add button with a section wrapper — titles, framing, and action grouping without touching the array config',
+      'Wrap an array and its add button with a section wrapper: titles, framing, and action grouping without touching the array config',
     tags: ['Layout', 'Arrays', 'Wrappers'],
     path: '/examples/wrapper-array-actions',
   },
   {
     id: 'addon-clear-button',
     title: 'Addon Clear Button',
-    description: 'Canonical addon pattern — icon prefix + clear-preset button suffix, JSON-safe across all four adapters',
+    description: 'Canonical addon pattern: icon prefix + clear-preset button suffix, JSON-safe across all four adapters',
     tags: ['Addons'],
     path: '/examples/addon-clear-button',
   },
@@ -116,7 +116,7 @@ export const EXAMPLES_REGISTRY: ExampleItem[] = [
   {
     id: 'addon-currency',
     title: 'Addon Currency',
-    description: 'Universal text addons — dollar sign prefix and USD suffix on a numeric input',
+    description: 'Universal text addons: dollar sign prefix and USD suffix on a numeric input',
     tags: ['Addons'],
     path: '/examples/addon-currency',
   },

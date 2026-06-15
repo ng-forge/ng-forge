@@ -1,7 +1,7 @@
 ---
 title: Feature Overview
 slug: feature-overview
-description: Task-oriented navigator into the ng-forge docs — pick what you're trying to do, plus a general FAQ and the most common pitfalls.
+description: Task-oriented navigator into the ng-forge docs. Pick what you're trying to do, plus a general FAQ and the most common pitfalls.
 ---
 
 > [!TIP]

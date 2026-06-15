@@ -4,7 +4,7 @@ keyword: AngularSchemaPage
 description: "Use Angular's native signal forms Schema API for form-level validation in dynamic forms with zero extra dependencies."
 ---
 
-Angular's signal forms include a native `Schema<T>` API for form-level validation. This approach requires no additional dependencies and integrates seamlessly with Dynamic Forms.
+Angular's signal forms include native schema APIs for form-level validation. This approach requires no additional dependencies and works directly with Dynamic Forms.
 
 ## Raw Callback Pattern (Recommended)
 
@@ -44,46 +44,41 @@ This pattern gives you full access to Angular's validation APIs including `valid
 
 ## Combining Field and Schema Validation
 
-Field-level validators (like `required`, `minLength`) run **first**, then the schema callback runs for cross-field validation. Both work together seamlessly.
+Field-level validators (like `required`, `minLength`) and the schema callback both run reactively, and their errors are combined on the affected fields.
 
-## Using schema() Wrapper
+## The schema() Wrapper
 
-Alternatively, you can use Angular's `schema()` function to wrap your callback:
+Angular also exports a `schema()` function that wraps a callback into a `Schema<T>` object. Dynamic Forms does not accept this wrapper: the `schema` property of `FormConfig` takes either a raw callback `(path) => void` or a `standardSchema()` marker. A `Schema` object created with `schema()` is ignored.
 
-```typescript
-import { schema, required, validate } from '@angular/forms/signals';
-```
-
-Define your schema with cross-field validation:
+To reuse validation logic across forms, type and export the callback itself:
 
 ```typescript
+import { validate, SchemaPathTree } from '@angular/forms/signals';
+
 interface PasswordForm {
   password: string;
   confirmPassword: string;
 }
 
-const passwordSchema = schema<PasswordForm>(({ value }) =>
-  validate(value.password === value.confirmPassword, { confirmPassword: { passwordMismatch: true } }),
-);
+const passwordSchema = (p: SchemaPathTree<PasswordForm>) => {
+  validate(p.confirmPassword, ({ value, valueOf }) => (value() === valueOf(p.password) ? null : { kind: 'passwordMismatch' }));
+};
 ```
+
+The returned `passwordMismatch` kind maps to display text via the field's `validationMessages` (or form-level `defaultValidationMessages`).
 
 ## Using with Dynamic Forms
 
-Pass the Angular schema directly to your form configuration:
+Pass the raw callback to your form configuration. The callback receives the schema path tree, and you bind validators to paths inside it:
 
 ```typescript
 import { FormConfig } from '@ng-forge/dynamic-forms';
-import { schema, validate } from '@angular/forms/signals';
-
-interface PasswordForm {
-  password: string;
-  confirmPassword: string;
-}
+import { validate } from '@angular/forms/signals';
 
 const config = {
-  schema: schema<PasswordForm>(({ value }) =>
-    validate(value.password === value.confirmPassword, { confirmPassword: { passwordMismatch: true } }),
-  ),
+  schema: (path) => {
+    validate(path.confirmPassword, ({ value, valueOf }) => (value() === valueOf(path.password) ? null : { kind: 'passwordMismatch' }));
+  },
   fields: [
     {
       key: 'password',
@@ -114,44 +109,53 @@ const config = {
 
 ## Schema API Reference
 
-### `schema<T>(validator)`
+### The schema callback
 
-Creates a form-level schema validator.
+Dynamic Forms invokes your callback with the schema path tree for the form value. Navigate to a field's path with property access (`path.email`, `path.address.city`) and bind validation logic to it:
 
 ```typescript
-const mySchema = schema<MyFormType>(({ value, touched, dirty }) => {
-  // value: current form value
-  // touched: whether form has been touched
-  // dirty: whether form has been modified
-  return validate(/* condition */, /* errors */);
+schema: (path) => {
+  // path.fieldKey is a path object, not a value
+  // bind logic with validate(), validateTree(), required(), ...
+};
+```
+
+### `validate(path, logic)`
+
+Binds a validator to a path and returns `void`. The logic function receives a `FieldContext` and returns `ValidationError | ValidationError[] | null`. Use `value()` for the bound field's value and `valueOf(otherPath)` for other fields:
+
+```typescript
+validate(path.endDate, ({ value, valueOf }) => {
+  const start = valueOf(path.startDate);
+  const end = value();
+  if (!start || !end) return null;
+  return end >= start ? null : { kind: 'invalidRange' };
 });
 ```
 
-### `validate(condition, errors)`
+### `validateTree(path, logic)`
 
-Returns validation errors when condition is false.
+Like `validate`, but the returned errors can target specific fields in the subtree via `fieldTree` (see the password example above). Useful when one rule produces errors on several fields.
 
-```typescript
-validate(endDate > startDate, { endDate: { invalidRange: true } });
-```
+### `required(path, config?)`
 
-### `required(path)`
-
-Marks a field as conditionally required.
+Marks a field as required. Pass `when` for conditional requiredness:
 
 ```typescript
-schema<MyForm>(({ value }) => (value.hasEndDate ? required('endDate') : null));
+required(path.endDate, {
+  when: ({ valueOf }) => valueOf(path.hasEndDate) === true,
+});
 ```
 
 ### Combining Validators
 
-Return multiple validation results:
+Call as many validation functions as you need inside one callback:
 
 ```typescript
-schema<MyForm>(({ value }) => [
-  validate(value.password === value.confirmPassword, { confirmPassword: { passwordMismatch: true } }),
-  validate(value.endDate > value.startDate, { endDate: { invalidRange: true } }),
-]);
+schema: (path) => {
+  validate(path.confirmPassword, ({ value, valueOf }) => (value() === valueOf(path.password) ? null : { kind: 'passwordMismatch' }));
+  validate(path.endDate, ({ value, valueOf }) => (!value() || value() > valueOf(path.startDate) ? null : { kind: 'invalidRange' }));
+};
 ```
 
 ## Examples
@@ -159,17 +163,15 @@ schema<MyForm>(({ value }) => [
 ### Date Range Validation
 
 ```typescript
-interface DateRangeForm {
-  startDate: string;
-  endDate: string;
-}
-
-const dateRangeSchema = schema<DateRangeForm>(({ value }) =>
-  validate(!value.startDate || !value.endDate || new Date(value.endDate) >= new Date(value.startDate), { endDate: { invalidRange: true } }),
-);
-
 const config = {
-  schema: dateRangeSchema,
+  schema: (path) => {
+    validate(path.endDate, ({ value, valueOf }) => {
+      const start = valueOf(path.startDate);
+      const end = value();
+      if (!start || !end) return null;
+      return new Date(end) >= new Date(start) ? null : { kind: 'invalidRange' };
+    });
+  },
   fields: [
     {
       key: 'startDate',
@@ -193,51 +195,36 @@ const config = {
 ### Conditional Required Fields
 
 ```typescript
-interface ContactForm {
-  preferredContact: 'email' | 'phone';
-  email: string;
-  phone: string;
-}
-
-const contactSchema = schema<ContactForm>(({ value }) => [
-  value.preferredContact === 'email' && !value.email ? validate(false, { email: { required: true } }) : null,
-  value.preferredContact === 'phone' && !value.phone ? validate(false, { phone: { required: true } }) : null,
-]);
+const config = {
+  schema: (path) => {
+    required(path.email, { when: ({ valueOf }) => valueOf(path.preferredContact) === 'email' });
+    required(path.phone, { when: ({ valueOf }) => valueOf(path.preferredContact) === 'phone' });
+  },
+  fields: [
+    /* preferredContact, email, phone */
+  ],
+} as const satisfies FormConfig;
 ```
 
 ### Complex Business Rules
 
 ```typescript
-interface OrderForm {
-  quantity: number;
-  discount: number;
-  discountType: 'percentage' | 'fixed';
-  total: number;
-}
-
-const orderSchema = schema<OrderForm>(({ value }) => {
-  const errors = [];
-
-  // Percentage discount can't exceed 100%
-  if (value.discountType === 'percentage' && value.discount > 100) {
-    errors.push(
-      validate(false, {
-        discount: { maxPercentage: true },
-      }),
+const config = {
+  schema: (path) => {
+    // Percentage discount cannot exceed 100%
+    validate(path.discount, ({ value, valueOf }) =>
+      valueOf(path.discountType) === 'percentage' && value() > 100 ? { kind: 'maxPercentage' } : null,
     );
-  }
 
-  // Fixed discount can't exceed total
-  if (value.discountType === 'fixed' && value.discount > value.total) {
-    errors.push(
-      validate(false, {
-        discount: { exceedsTotal: true },
-      }),
+    // Fixed discount cannot exceed total
+    validate(path.discount, ({ value, valueOf }) =>
+      valueOf(path.discountType) === 'fixed' && value() > valueOf(path.total) ? { kind: 'exceedsTotal' } : null,
     );
-  }
-
-  return errors;
-});
+  },
+  fields: [
+    /* quantity, discount, discountType, total */
+  ],
+} as const satisfies FormConfig;
 ```
 
 ## Best Practices
@@ -246,14 +233,14 @@ const orderSchema = schema<OrderForm>(({ value }) => {
 
 ```typescript
 // Good - single responsibility
-const passwordMatchSchema = schema<PasswordForm>(({ value }) =>
-  validate(value.password === value.confirmPassword, { confirmPassword: { passwordMismatch: true } }),
-);
+schema: (path) => {
+  validate(path.confirmPassword, ({ value, valueOf }) => (value() === valueOf(path.password) ? null : { kind: 'passwordMismatch' }));
+};
 
-// Avoid - too many concerns
-const everythingSchema = schema<BigForm>(({ value }) => [
+// Avoid - too many concerns in one callback
+schema: (path) => {
   // 10+ validations...
-]);
+};
 ```
 
 **Use field validators for simple cases:**
@@ -267,11 +254,11 @@ const everythingSchema = schema<BigForm>(({ value }) => [
 }
 
 // Use schema for cross-field only
-schema: schema<Form>(({ value }) =>
-  validate(value.email !== value.alternateEmail, {
-    alternateEmail: { sameAsEmail: true }
-  })
-)
+schema: (path) => {
+  validate(path.alternateEmail, ({ value, valueOf }) =>
+    value() !== valueOf(path.email) ? null : { kind: 'sameAsEmail' },
+  );
+};
 ```
 
 ## When to Use Standard Schema Instead
@@ -285,6 +272,6 @@ Consider [Standard Schema (Zod)](/schema-validation/zod) if you:
 
 ## Next Steps
 
-- **[Standard Schema (Zod)](/schema-validation/zod)** — Use Zod, Valibot, or ArkType for cross-platform schema validation
-- **[Field Validation](/validation/basics)** — Add built-in and custom validators to individual fields
-- **[Schema Validation Overview](/schema-validation/overview)** — Compare Angular and Standard Schema approaches
+- **[Standard Schema (Zod)](/schema-validation/zod)**: Use Zod, Valibot, or ArkType for cross-platform schema validation
+- **[Field Validation](/validation/basics)**: Add built-in and custom validators to individual fields
+- **[Schema Validation Overview](/schema-validation/overview)**: Compare Angular and Standard Schema approaches
