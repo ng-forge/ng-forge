@@ -113,6 +113,7 @@ See [Addons / Overview](https://ng-forge.com/primeng/addons/overview), [Presets 
 
 ## Documentation
 
+- [Feature overview](https://ng-forge.com/primeng/feature-overview)
 - [PrimeNG Integration](https://ng-forge.com/primeng)
 - [Field Types](https://ng-forge.com/primeng/field-types/text-inputs)
 - [Validation](https://ng-forge.com/primeng/validation/basics)

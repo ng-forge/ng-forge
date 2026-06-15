@@ -115,6 +115,7 @@ Or [create your own](https://ng-forge.com/material/building-an-adapter).
 
 ## Documentation
 
+- [Feature overview](https://ng-forge.com/material/feature-overview)
 - [Installation](https://ng-forge.com/material/getting-started)
 - [Field Types](https://ng-forge.com/material/field-types/text-inputs)
 - [Validation](https://ng-forge.com/material/validation/basics)

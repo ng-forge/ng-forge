@@ -96,6 +96,7 @@ Input, Select, Checkbox, Toggle, Button, Submit, Next, Previous, Textarea, Radio
 
 ## Documentation
 
+- [Feature overview](https://ng-forge.com/bootstrap/feature-overview)
 - [Bootstrap Integration](https://ng-forge.com/bootstrap)
 - [Field Types](https://ng-forge.com/bootstrap/field-types/text-inputs)
 - [Validation](https://ng-forge.com/bootstrap/validation/basics)

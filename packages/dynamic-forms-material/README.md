@@ -99,6 +99,7 @@ Input, Textarea, Select, Checkbox, Radio, Datepicker, Slider, Toggle, Multi-Chec
 
 ## Documentation
 
+- [Feature overview](https://ng-forge.com/material/feature-overview)
 - [Material Integration](https://ng-forge.com/material)
 - [Field Types](https://ng-forge.com/material/field-types/text-inputs)
 - [Validation](https://ng-forge.com/material/validation/basics)

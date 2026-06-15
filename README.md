@@ -104,6 +104,7 @@ Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, whe
 
 ## 📖 Documentation
 
+- [Feature overview](https://ng-forge.com/material/feature-overview)
 - [Installation](https://ng-forge.com/material/getting-started)
 - [Field Types](https://ng-forge.com/material/field-types/text-inputs)
 - [Validation](https://ng-forge.com/material/validation/basics)
