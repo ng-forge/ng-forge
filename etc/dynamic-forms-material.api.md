@@ -104,7 +104,7 @@ export class MatButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"button" | "submit" | "reset">;
+    readonly buttonType: _angular_core.Signal<"reset" | "button" | "submit">;
     // (undocumented)
     onClick(): void;
     // (undocumented)

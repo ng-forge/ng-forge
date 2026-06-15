@@ -76,7 +76,7 @@ export interface IonicAddonExtensions {
 }
 
 // @public
-export type IonicButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
+export type IonicButtonAddon = IonicButtonBase & IonicButtonContent & IonicButtonClick;
 
 // @public
 export class IonicButtonAddonComponent {
@@ -298,7 +298,7 @@ export class IonicIconAddonComponent {
 }
 
 // @public
-export type IonicInputAddon = IonicIconAddon | IonicButtonAddon | TextAddon | TemplateAddon | IonAddonExtension;
+export type IonicInputAddon = IonicIconAddon | IonicButtonAddon | TextAddon | TemplateAddon | IonicAddonExtension;
 
 // @public (undocumented)
 export type IonicInputField = InputField<IonicInputProps> & {
