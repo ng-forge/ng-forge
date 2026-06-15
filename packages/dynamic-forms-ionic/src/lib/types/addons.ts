@@ -1,7 +1,7 @@
 import type { AddonActionPreset, BaseAddon, DynamicText, DynamicValue, RegisteredActionRef } from '@ng-forge/dynamic-forms';
 import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 
-/** Decorative icon addon for Ion fields. */
+/** Decorative icon addon for Ionic fields. */
 export interface IonicIconAddon extends BaseAddon {
   readonly type: 'ion-icon';
   /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
@@ -11,21 +11,21 @@ export interface IonicIconAddon extends BaseAddon {
 }
 
 /** Ionic-supported button colour palette. */
-type IonButtonColor = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
+type IonicButtonColor = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
 
 /** Ionic-supported button fill variants. */
-type IonButtonFill = 'clear' | 'outline' | 'solid' | 'default';
+type IonicButtonFill = 'clear' | 'outline' | 'solid' | 'default';
 
 /**
  * Common shape of every `ion-button` addon — properties that don't
  * participate in either XOR axis.
  */
-interface IonButtonBase extends BaseAddon {
+interface IonicButtonBase extends BaseAddon {
   readonly type: 'ion-button';
   /** Ion button colour. */
-  readonly color?: IonButtonColor;
+  readonly color?: IonicButtonColor;
   /** Ion button fill style. */
-  readonly fill?: IonButtonFill;
+  readonly fill?: IonicButtonFill;
   /** Reactive loading state — renders an `<ion-spinner>` when truthy. */
   readonly loading?: DynamicValue<boolean>;
 }
@@ -35,7 +35,7 @@ interface IonButtonBase extends BaseAddon {
  * two click handlers (e.g., `preset` AND `actionRef`) are rejected by
  * TypeScript. The four shapes:
  */
-type IonButtonClickPreset = {
+type IonicButtonClickPreset = {
   /** Built-in preset action (e.g., `'clear'`, `'toggle-password-visibility'`). JSON-safe. */
   readonly preset: AddonActionPreset;
   readonly actionRef?: never;
@@ -49,50 +49,50 @@ type IonButtonClickPreset = {
  * usable; once the user augments `DynamicFormActionRegistry`, autocomplete
  * tightens to the registered keys.
  */
-type IonButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
-type IonButtonClickActionRef = {
+type IonicButtonActionRef = [RegisteredActionRef] extends [never] ? string : RegisteredActionRef;
+type IonicButtonClickActionRef = {
   readonly preset?: never;
   /** Reference to a handler registered via `withAddonActions(...)`. JSON-safe. */
-  readonly actionRef: IonButtonActionRef;
+  readonly actionRef: IonicButtonActionRef;
   readonly action?: never;
 };
-type IonButtonClickAction = {
+type IonicButtonClickAction = {
   readonly preset?: never;
   readonly actionRef?: never;
   /** Inline handler — code-only; dropped from JSON-derived configs. Matches the generic `AddonActionHandler` shape used by `withAddonActions(...)`. */
   readonly action: AddonActionHandler;
 };
-type IonButtonClickNone = {
+type IonicButtonClickNone = {
   readonly preset?: never;
   readonly actionRef?: never;
   readonly action?: never;
 };
-type IonButtonClick = IonButtonClickPreset | IonButtonClickActionRef | IonButtonClickAction | IonButtonClickNone;
+type IonicButtonClick = IonicButtonClickPreset | IonicButtonClickActionRef | IonicButtonClickAction | IonicButtonClickNone;
 
 /**
  * Content axis — XOR enforced at type level so an icon-only button is
  * forced to declare `ariaLabel`. The three shapes:
  */
-type IonButtonContentIconOnly = {
+type IonicButtonContentIconOnly = {
   readonly icon: string;
   readonly label?: never;
   /** REQUIRED: icon-only buttons must carry an accessible label. */
   readonly ariaLabel: DynamicText;
 };
-type IonButtonContentLabeled = {
+type IonicButtonContentLabeled = {
   readonly icon?: string;
   readonly label: DynamicText;
   readonly ariaLabel?: DynamicText;
 };
-type IonButtonContentDecorative = {
+type IonicButtonContentDecorative = {
   readonly icon?: never;
   readonly label?: never;
   readonly ariaLabel?: DynamicText;
 };
-type IonButtonContent = IonButtonContentIconOnly | IonButtonContentLabeled | IonButtonContentDecorative;
+type IonicButtonContent = IonicButtonContentIconOnly | IonicButtonContentLabeled | IonicButtonContentDecorative;
 
-/** Interactive button addon for Ion fields. */
-export type IonicButtonAddon = IonButtonBase & IonButtonContent & IonButtonClick;
+/** Interactive button addon for Ionic fields. */
+export type IonicButtonAddon = IonicButtonBase & IonicButtonContent & IonicButtonClick;
 
 /** Union of all Ion-shipped addon types. */
 export type IonicAddon = IonicIconAddon | IonicButtonAddon;
