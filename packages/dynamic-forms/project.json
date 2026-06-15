@@ -78,16 +78,19 @@
         "{projectRoot}/api-extractor.json",
         "{projectRoot}/api-extractor.integration.json",
         "{projectRoot}/api-extractor.schema.json",
+        "{projectRoot}/api-extractor.internal.json",
         "{workspaceRoot}/config/api-extractor.base.json",
         "{workspaceRoot}/etc/dynamic-forms.api.md",
         "{workspaceRoot}/etc/dynamic-forms-integration.api.md",
-        "{workspaceRoot}/etc/dynamic-forms-schema.api.md"
+        "{workspaceRoot}/etc/dynamic-forms-schema.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-internal.api.md"
       ],
       "options": {
         "commands": [
           "api-extractor run --config packages/dynamic-forms/api-extractor.json",
           "api-extractor run --config packages/dynamic-forms/api-extractor.integration.json",
-          "api-extractor run --config packages/dynamic-forms/api-extractor.schema.json"
+          "api-extractor run --config packages/dynamic-forms/api-extractor.schema.json",
+          "api-extractor run --config packages/dynamic-forms/api-extractor.internal.json"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"
@@ -101,7 +104,8 @@
         "commands": [
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.json",
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.integration.json",
-          "api-extractor run --local --config packages/dynamic-forms/api-extractor.schema.json"
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.schema.json",
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.internal.json"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"
