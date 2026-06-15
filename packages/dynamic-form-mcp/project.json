@@ -69,6 +69,20 @@
         "command": "api-extractor run --local --config packages/dynamic-form-mcp/api-extractor.json",
         "cwd": "{workspaceRoot}"
       }
+    },
+    "smoke": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/{projectRoot}/**/*.js",
+        "{workspaceRoot}/dist/{projectRoot}/package.json",
+        "{workspaceRoot}/scripts/mcp-smoke-test.mjs"
+      ],
+      "options": {
+        "command": "node scripts/mcp-smoke-test.mjs",
+        "cwd": "{workspaceRoot}"
+      }
     }
   }
 }

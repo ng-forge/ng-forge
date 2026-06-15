@@ -37,7 +37,7 @@
     "clean": "nx reset && rm -rf dist node_modules/.cache",
     "mcp:build": "nx build dynamic-form-mcp",
     "mcp:dev": "nx build dynamic-form-mcp && node dist/packages/dynamic-form-mcp/bin/ng-forge-mcp.js",
-    "mcp:smoke": "nx build dynamic-form-mcp && node scripts/mcp-smoke-test.mjs",
+    "mcp:smoke": "nx run dynamic-form-mcp:smoke",
     "release:branch:patch": "bash scripts/create-release-branch.sh patch",
     "release:branch:minor": "bash scripts/create-release-branch.sh minor",
     "release:branch:major": "bash scripts/create-release-branch.sh major"

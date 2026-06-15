@@ -213,6 +213,16 @@ jobs:
         if: inputs.affected
         run: pnpm nx affected -t api-check --base=origin/main
 
+      # Fails when the bundled MCP CLI imports an npm specifier not declared in its
+      # published dependencies (the class of bug B1 fixed). Only dynamic-form-mcp defines it.
+      - name: MCP publish smoke test
+        if: ${{ !inputs.affected }}
+        run: pnpm nx run-many -t smoke
+
+      - name: MCP publish smoke test (affected)
+        if: inputs.affected
+        run: pnpm nx affected -t smoke --base=origin/main
+
       - name: Cache build artifacts
         uses: actions/cache/save@v5
         with:
