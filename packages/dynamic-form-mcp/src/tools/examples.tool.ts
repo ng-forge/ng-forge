@@ -375,7 +375,7 @@ For full control, use the \`fields\`-based API with explicit add/remove buttons:
     ]
   ]
 }
-// + separate addArrayItem button with arrayKey
+// + separate add-array-item button with arrayKey
 \`\`\``,
 
     explained: `# Array Fields - Complete Explanation
@@ -448,7 +448,7 @@ For full control, use \`fields\` with explicit item definitions and manual add/r
 // ADD button - place OUTSIDE the array
 {
   key: 'addContact',
-  type: 'addArrayItem',
+  type: 'add-array-item',
   label: 'Add Contact',
   arrayKey: 'contacts',  // ⚠️ AT FIELD LEVEL!
 }
@@ -460,7 +460,7 @@ For full control, use \`fields\` with explicit item definitions and manual add/r
   fields: [
     [
       { key: 'name', type: 'input', label: 'Name' },
-      { key: 'remove', type: 'removeArrayItem', label: 'Remove' }
+      { key: 'remove', type: 'remove-array-item', label: 'Remove' }
     ]
   ]
 }
@@ -494,8 +494,8 @@ expression: '(formValue.items || []).reduce((sum, item) => sum + (item.price || 
 
 ❌ Putting \`arrayKey\` in props (full API):
 \`\`\`typescript
-{ type: 'addArrayItem', props: { arrayKey: 'x' } }  // WRONG
-{ type: 'addArrayItem', arrayKey: 'x' }             // CORRECT
+{ type: 'add-array-item', props: { arrayKey: 'x' } }  // WRONG
+{ type: 'add-array-item', arrayKey: 'x' }             // CORRECT
 \`\`\``,
   },
 

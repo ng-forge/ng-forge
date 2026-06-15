@@ -81,7 +81,7 @@ export const MatPreviousButtonFieldSchema = BaseFieldDefSchema.extend({
  * Schema for add array item button field.
  */
 export const MatAddArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('addArrayItem'),
+  type: z.literal('add-array-item'),
   /**
    * Key of the array field to add items to.
    * If omitted, uses the parent array context.
@@ -94,9 +94,65 @@ export const MatAddArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
  * Schema for remove array item button field.
  */
 export const MatRemoveArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('removeArrayItem'),
+  type: z.literal('remove-array-item'),
   /**
    * Key of the array field to remove items from.
+   * If omitted, uses the parent array context.
+   */
+  arrayKey: z.string().optional(),
+  props: MatButtonPropsSchema.optional(),
+});
+
+/**
+ * Schema for prepend array item button field.
+ */
+export const MatPrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('prepend-array-item'),
+  /**
+   * Key of the array field to prepend items to.
+   * If omitted, uses the parent array context.
+   */
+  arrayKey: z.string().optional(),
+  props: MatButtonPropsSchema.optional(),
+});
+
+/**
+ * Schema for insert array item button field.
+ */
+export const MatInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('insert-array-item'),
+  /**
+   * Key of the array field to insert items into.
+   * If omitted, uses the parent array context.
+   */
+  arrayKey: z.string().optional(),
+  /**
+   * Index at which to insert the new item.
+   */
+  index: z.number().optional(),
+  props: MatButtonPropsSchema.optional(),
+});
+
+/**
+ * Schema for pop array item button field.
+ */
+export const MatPopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('pop-array-item'),
+  /**
+   * Key of the array field to pop items from.
+   * If omitted, uses the parent array context.
+   */
+  arrayKey: z.string().optional(),
+  props: MatButtonPropsSchema.optional(),
+});
+
+/**
+ * Schema for shift array item button field.
+ */
+export const MatShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('shift-array-item'),
+  /**
+   * Key of the array field to shift items from.
    * If omitted, uses the parent array context.
    */
   arrayKey: z.string().optional(),

@@ -17,6 +17,10 @@ import {
   BsPreviousButtonFieldSchema,
   BsAddArrayItemButtonFieldSchema,
   BsRemoveArrayItemButtonFieldSchema,
+  BsPrependArrayItemButtonFieldSchema,
+  BsInsertArrayItemButtonFieldSchema,
+  BsPopArrayItemButtonFieldSchema,
+  BsShiftArrayItemButtonFieldSchema,
 } from './fields';
 
 /**
@@ -41,6 +45,10 @@ export const BsLeafFieldSchema = z
     BsPreviousButtonFieldSchema,
     BsAddArrayItemButtonFieldSchema,
     BsRemoveArrayItemButtonFieldSchema,
+    BsPrependArrayItemButtonFieldSchema,
+    BsInsertArrayItemButtonFieldSchema,
+    BsPopArrayItemButtonFieldSchema,
+    BsShiftArrayItemButtonFieldSchema,
   ])
   .superRefine(nullableValueRefine);
 

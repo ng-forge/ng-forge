@@ -655,9 +655,10 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     minimalExample: `{ key: 'submit', type: 'submit', label: 'Submit' }`,
   },
   {
-    type: 'addArrayItem',
+    type: 'add-array-item',
     category: 'button',
-    description: 'Button to add a new item to an array field. Must be placed within or near the array container.',
+    description:
+      'Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {},
@@ -666,15 +667,52 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     allowedIn: ['array', 'row', 'group'],
     example: `{
   key: 'addContact',
-  type: 'addArrayItem',
+  type: 'add-array-item',
   label: 'Add Contact'
 }`,
-    minimalExample: `{ key: 'add', type: 'addArrayItem', label: 'Add Item' }`,
+    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item' }`,
   },
   {
-    type: 'removeArrayItem',
+    type: 'prepend-array-item',
     category: 'button',
-    description: 'Button to remove the current item from an array field. Typically placed within each array item template.',
+    description: 'Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'prependContact',
+  type: 'prepend-array-item',
+  label: 'Add to Top'
+}`,
+    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First' }`,
+  },
+  {
+    type: 'insert-array-item',
+    category: 'button',
+    description:
+      'Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'insertContact',
+  type: 'insert-array-item',
+  label: 'Insert',
+  index: 1
+}`,
+    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0 }`,
+  },
+  {
+    type: 'remove-array-item',
+    category: 'button',
+    description:
+      'Button to remove the current item from an array field. Typically placed within each array item template. (Legacy alias: removeArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {},
@@ -683,9 +721,43 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     allowedIn: ['array', 'row', 'group'],
     example: `{
   key: 'removeContact',
-  type: 'removeArrayItem',
+  type: 'remove-array-item',
   label: 'Remove'
 }`,
-    minimalExample: `{ key: 'remove', type: 'removeArrayItem', label: 'Remove' }`,
+    minimalExample: `{ key: 'remove', type: 'remove-array-item', label: 'Remove' }`,
+  },
+  {
+    type: 'pop-array-item',
+    category: 'button',
+    description: 'Button to remove the last item from an array field. (Legacy alias: popArrayItem.)',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'popContact',
+  type: 'pop-array-item',
+  label: 'Remove Last'
+}`,
+    minimalExample: `{ key: 'pop', type: 'pop-array-item', label: 'Remove Last' }`,
+  },
+  {
+    type: 'shift-array-item',
+    category: 'button',
+    description: 'Button to remove the first item from an array field. (Legacy alias: shiftArrayItem.)',
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {},
+    validationSupported: false,
+    source: 'adapter',
+    allowedIn: ['array', 'row', 'group'],
+    example: `{
+  key: 'shiftContact',
+  type: 'shift-array-item',
+  label: 'Remove First'
+}`,
+    minimalExample: `{ key: 'shift', type: 'shift-array-item', label: 'Remove First' }`,
   },
 ];

@@ -82,7 +82,7 @@ export const WRAPPERS: WrapperInfo[] = [
     availability: 'demo-only',
     package: '@internal/examples-shared-ui',
     description:
-      'Demo wrapper used by the docs sandbox. Wraps an array field in a titled card whose header contains an "Add" button — the wrapper owns the append behaviour, dispatching `arrayEvent(key).append(itemTemplate)` on click via the `EventBus`. Lets the consumer config drop the separate `addArrayItem` button field. NOT a shipping primitive; copy the component out of `internal/examples-shared-ui/src/lib/demo-wrappers/` or author your own if you want this pattern in production.',
+      'Demo wrapper used by the docs sandbox. Wraps an array field in a titled card whose header contains an "Add" button — the wrapper owns the append behaviour, dispatching `arrayEvent(key).append(itemTemplate)` on click via the `EventBus`. Lets the consumer config drop the separate `add-array-item` button field. NOT a shipping primitive; copy the component out of `internal/examples-shared-ui/src/lib/demo-wrappers/` or author your own if you want this pattern in production.',
     props: {
       title: {
         name: 'title',

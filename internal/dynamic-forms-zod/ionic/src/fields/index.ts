@@ -205,13 +205,38 @@ export const IonicPreviousButtonFieldSchema = BaseFieldDefSchema.extend({
 });
 
 export const IonicAddArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('addArrayItem'),
+  type: z.literal('add-array-item'),
   arrayKey: z.string().optional(),
   props: IonicButtonPropsSchema.optional(),
 });
 
 export const IonicRemoveArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('removeArrayItem'),
+  type: z.literal('remove-array-item'),
+  arrayKey: z.string().optional(),
+  props: IonicButtonPropsSchema.optional(),
+});
+
+export const IonicPrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('prepend-array-item'),
+  arrayKey: z.string().optional(),
+  props: IonicButtonPropsSchema.optional(),
+});
+
+export const IonicInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('insert-array-item'),
+  arrayKey: z.string().optional(),
+  index: z.number().optional(),
+  props: IonicButtonPropsSchema.optional(),
+});
+
+export const IonicPopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('pop-array-item'),
+  arrayKey: z.string().optional(),
+  props: IonicButtonPropsSchema.optional(),
+});
+
+export const IonicShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('shift-array-item'),
   arrayKey: z.string().optional(),
   props: IonicButtonPropsSchema.optional(),
 });

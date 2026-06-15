@@ -17,6 +17,10 @@ import {
   PrimePreviousButtonFieldSchema,
   PrimeAddArrayItemButtonFieldSchema,
   PrimeRemoveArrayItemButtonFieldSchema,
+  PrimePrependArrayItemButtonFieldSchema,
+  PrimeInsertArrayItemButtonFieldSchema,
+  PrimePopArrayItemButtonFieldSchema,
+  PrimeShiftArrayItemButtonFieldSchema,
 } from './fields';
 
 /**
@@ -41,6 +45,10 @@ export const PrimeLeafFieldSchema = z
     PrimePreviousButtonFieldSchema,
     PrimeAddArrayItemButtonFieldSchema,
     PrimeRemoveArrayItemButtonFieldSchema,
+    PrimePrependArrayItemButtonFieldSchema,
+    PrimeInsertArrayItemButtonFieldSchema,
+    PrimePopArrayItemButtonFieldSchema,
+    PrimeShiftArrayItemButtonFieldSchema,
   ])
   .superRefine(nullableValueRefine);
 

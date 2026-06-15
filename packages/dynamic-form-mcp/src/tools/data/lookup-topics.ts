@@ -560,8 +560,8 @@ interface SimplifiedArrayField {
 
 The simplified API is normalized into the full API at runtime:
 1. Each \`value\` element creates an item using the \`template\` structure
-2. An \`addArrayItem\` button is auto-generated after the array (unless \`addButton: false\`)
-3. A \`removeArrayItem\` button is added to each item (unless \`removeButton: false\`)
+2. An \`add-array-item\` button is auto-generated after the array (unless \`addButton: false\`)
+3. A \`remove-array-item\` button is added to each item (unless \`removeButton: false\`)
 
 ## Conditional Visibility
 
@@ -2359,20 +2359,20 @@ const config = { fields: [...] } as const satisfies FormConfig;
   },
 
   'array-buttons': {
-    brief: `**Add:** \`{ type: 'addArrayItem', key: 'add', label: 'Add', arrayKey: 'contacts' }\`
-**Remove:** \`{ type: 'removeArrayItem', key: 'remove', label: 'Remove' }\` (inside array template)
+    brief: `**Add:** \`{ type: 'add-array-item', key: 'add', label: 'Add', arrayKey: 'contacts' }\`
+**Remove:** \`{ type: 'remove-array-item', key: 'remove', label: 'Remove' }\` (inside array template)
 ⚠️ arrayKey at FIELD level, NOT in props!`,
 
     full: `# Array Buttons (Add/Remove Items)
 
-**UI libraries provide \`addArrayItem\` and \`removeArrayItem\` button types.**
+**UI libraries provide \`add-array-item\` and \`remove-array-item\` button types.**
 
 ## Add Item Button
 
 \`\`\`typescript
 {
   key: 'addPhone',
-  type: 'addArrayItem',
+  type: 'add-array-item',
   label: 'Add Phone',
   arrayKey: 'phones',          // ⚠️ AT FIELD LEVEL, NOT IN PROPS!
   props: {
@@ -2394,7 +2394,7 @@ const config = { fields: [...] } as const satisfies FormConfig;
       { key: 'number', type: 'input', label: 'Phone Number' },
       {
         key: 'removePhone',
-        type: 'removeArrayItem',
+        type: 'remove-array-item',
         label: 'Remove',
         // arrayKey not needed - inferred from parent array
         props: { color: 'warn' }
@@ -2409,13 +2409,13 @@ const config = { fields: [...] } as const satisfies FormConfig;
 \`\`\`typescript
 // WRONG - arrayKey in props
 {
-  type: 'addArrayItem',
+  type: 'add-array-item',
   props: { arrayKey: 'phones' }  // ❌ WRONG LOCATION
 }
 
 // CORRECT - arrayKey at field level
 {
-  type: 'addArrayItem',
+  type: 'add-array-item',
   arrayKey: 'phones',            // ✅ CORRECT
   props: { color: 'primary' }
 }
@@ -2695,8 +2695,19 @@ export const TOPIC_ALIASES: Record<string, string> = {
   valueof: 'context-api',
   'add-array': 'array-buttons',
   'remove-array': 'array-buttons',
+  // Array-action field types: kebab-case canonical + camelCase legacy aliases
+  'add-array-item': 'array-buttons',
+  'prepend-array-item': 'array-buttons',
+  'insert-array-item': 'array-buttons',
+  'remove-array-item': 'array-buttons',
+  'pop-array-item': 'array-buttons',
+  'shift-array-item': 'array-buttons',
   addarrayitem: 'array-buttons',
+  prependarrayitem: 'array-buttons',
+  insertarrayitem: 'array-buttons',
   removearrayitem: 'array-buttons',
+  poparrayitem: 'array-buttons',
+  shiftarrayitem: 'array-buttons',
   'custom-validator': 'custom-validators',
   customvalidator: 'custom-validators',
   mistakes: 'pitfalls',
