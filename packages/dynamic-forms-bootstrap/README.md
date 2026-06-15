@@ -96,10 +96,10 @@ Input, Select, Checkbox, Toggle, Button, Submit, Next, Previous, Textarea, Radio
 
 ## Documentation
 
-- [Bootstrap Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/bootstrap)
-- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
+- [Bootstrap Integration](https://ng-forge.com/bootstrap)
+- [Field Types](https://ng-forge.com/bootstrap/field-types/text-inputs)
+- [Validation](https://ng-forge.com/bootstrap/validation/basics)
+- [Conditional Logic](https://ng-forge.com/bootstrap/dynamic-behavior/conditional-logic)
 
 ## Changelog
 

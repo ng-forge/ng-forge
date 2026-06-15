@@ -112,19 +112,19 @@ This core library requires a UI integration. Choose one:
 | [@ng-forge/dynamic-forms-primeng](https://www.npmjs.com/package/@ng-forge/dynamic-forms-primeng)     | PrimeNG          |
 | [@ng-forge/dynamic-forms-ionic](https://www.npmjs.com/package/@ng-forge/dynamic-forms-ionic)         | Ionic            |
 
-Or [create your own](https://ng-forge.com/dynamic-forms/advanced/custom-integrations).
+Or [create your own](https://ng-forge.com/material/building-an-adapter).
 
 ## Documentation
 
-- [Installation](https://ng-forge.com/dynamic-forms/installation)
-- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
-- [Value Derivation](https://ng-forge.com/dynamic-forms/dynamic-behavior/derivation)
-- [Type Safety](https://ng-forge.com/dynamic-forms/advanced/basics)
-- [Events](https://ng-forge.com/dynamic-forms/advanced/events)
-- [i18n](https://ng-forge.com/dynamic-forms/dynamic-behavior/i18n)
-- [Custom Integrations](https://ng-forge.com/dynamic-forms/advanced/custom-integrations)
+- [Installation](https://ng-forge.com/material/getting-started)
+- [Field Types](https://ng-forge.com/material/field-types/text-inputs)
+- [Validation](https://ng-forge.com/material/validation/basics)
+- [Conditional Logic](https://ng-forge.com/material/dynamic-behavior/conditional-logic)
+- [Value Derivation](https://ng-forge.com/material/dynamic-behavior/derivation/values)
+- [Type Safety](https://ng-forge.com/material/recipes/type-safety)
+- [Events](https://ng-forge.com/material/recipes/events)
+- [i18n](https://ng-forge.com/material/dynamic-behavior/i18n)
+- [Custom Integrations](https://ng-forge.com/material/building-an-adapter)
 
 ## Changelog
 
