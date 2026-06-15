@@ -67,7 +67,7 @@ export class LoginComponent {
 
 ## ✨ Features
 
-⚡ **Signal Forms** – Native Angular 22+ signal forms integration
+⚡ **Signal Forms** – Native Angular Signal Forms integration
 
 🎯 **Type-Safe** – Full TypeScript inference for form values
 
@@ -92,13 +92,15 @@ Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, whe
 
 ## 📦 Packages
 
-| Package                                                                 | Description     |
-| ----------------------------------------------------------------------- | --------------- |
-| [@ng-forge/dynamic-forms](./packages/dynamic-forms)                     | Core library    |
-| [@ng-forge/dynamic-forms-material](./packages/dynamic-forms-material)   | Material Design |
-| [@ng-forge/dynamic-forms-primeng](./packages/dynamic-forms-primeng)     | PrimeNG         |
-| [@ng-forge/dynamic-forms-ionic](./packages/dynamic-forms-ionic)         | Ionic           |
-| [@ng-forge/dynamic-forms-bootstrap](./packages/dynamic-forms-bootstrap) | Bootstrap 5     |
+| Package                                                                 | Description                                |
+| ----------------------------------------------------------------------- | ------------------------------------------ |
+| [@ng-forge/dynamic-forms](./packages/dynamic-forms)                     | Core library                               |
+| [@ng-forge/dynamic-forms-material](./packages/dynamic-forms-material)   | Material Design                            |
+| [@ng-forge/dynamic-forms-primeng](./packages/dynamic-forms-primeng)     | PrimeNG                                    |
+| [@ng-forge/dynamic-forms-ionic](./packages/dynamic-forms-ionic)         | Ionic                                      |
+| [@ng-forge/dynamic-forms-bootstrap](./packages/dynamic-forms-bootstrap) | Bootstrap 5                                |
+| [@ng-forge/dynamic-form-mcp](./packages/dynamic-form-mcp)               | MCP server for AI-assisted form generation |
+| [@ng-forge/openapi-generator](./packages/openapi-generator)             | Generate forms from OpenAPI specs          |
 
 ## 📖 Documentation
 

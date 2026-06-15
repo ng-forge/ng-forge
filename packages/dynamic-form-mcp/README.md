@@ -17,9 +17,7 @@ MCP (Model Context Protocol) server for ng-forge dynamic forms - enables AI assi
 
 ## Installation
 
-```bash
-npm install @ng-forge/dynamic-form-mcp
-```
+No manual install needed. This is a stdio MCP server (bin: `ng-forge-mcp`) that your MCP client launches on demand via `npx`; see the per-client config in Setup below.
 
 ## Setup
 
@@ -93,14 +91,15 @@ For development within the ng-forge monorepo:
 
 ## Available Tools
 
-The server provides 4 focused tools:
+The server provides 5 focused tools:
 
-| Tool               | Description                                                 | Read-only |
-| ------------------ | ----------------------------------------------------------- | --------- |
-| `ngforge_lookup`   | Get documentation about field types, concepts, and patterns | ✅        |
-| `ngforge_examples` | Get working code examples for common form patterns          | ✅        |
-| `ngforge_validate` | Validate FormConfig and get detailed error feedback         | ✅        |
-| `ngforge_scaffold` | Generate valid FormConfig skeletons                         | ✅        |
+| Tool               | Description                                                    | Read-only |
+| ------------------ | -------------------------------------------------------------- | --------- |
+| `ngforge_lookup`   | Get documentation about field types, concepts, and patterns    | ✅        |
+| `ngforge_examples` | Get working code examples for common form patterns             | ✅        |
+| `ngforge_validate` | Validate FormConfig and get detailed error feedback            | ✅        |
+| `ngforge_scaffold` | Generate valid FormConfig skeletons                            | ✅        |
+| `ngforge_search`   | Free-text search across topics, patterns, wrappers, and addons | ✅        |
 
 ---
 
@@ -116,12 +115,7 @@ Get documentation about any ng-forge topic.
 
 **Available Topics:**
 
-| Category    | Topics                                                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------ |
-| Field Types | `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`, `hidden`, `text` |
-| Containers  | `group`, `row`, `array`, `page`                                                                        |
-| Concepts    | `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`                    |
-| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `workflow`                                            |
+Run `ngforge_lookup topic="list"` for the complete, always-current list of topics. Categories include field types (`input`, `select`, `multi-checkbox`, ...), containers (`group`, `row`, `array`, `page`), concepts (`validation`, `conditional`, `derivation`, ...), wrappers, and addons.
 
 ---
 
@@ -136,15 +130,18 @@ Get working code examples for common patterns.
 
 **Available Patterns:**
 
-| Pattern               | Description                              |
-| --------------------- | ---------------------------------------- |
-| `minimal-multipage`   | Simplest 2-page wizard form              |
-| `minimal-array`       | Array with add/remove buttons            |
-| `minimal-conditional` | Show/hide field based on condition       |
-| `minimal-validation`  | Password confirmation validation         |
-| `minimal-hidden`      | Hidden fields in multi-page form         |
-| `complete`            | Full form with all major features        |
-| `mega`                | Kitchen sink demonstrating every feature |
+| Pattern                    | Description                                |
+| -------------------------- | ------------------------------------------ |
+| `minimal-multipage`        | Simplest 2-page wizard form                |
+| `minimal-array`            | Array with add/remove buttons              |
+| `minimal-simplified-array` | Array using the simplified-array shorthand |
+| `minimal-conditional`      | Show/hide a field based on a condition     |
+| `minimal-validation`       | Password confirmation validation           |
+| `minimal-hidden`           | Hidden fields in a multi-page form         |
+| `multi-page`               | Multi-page wizard with navigation buttons  |
+| `property-derivation`      | Derive a field property from another field |
+
+Run `ngforge_examples pattern="list"` for the current set of patterns.
 
 ---
 
@@ -199,6 +196,8 @@ Generate valid FormConfig skeletons.
 | `ng-forge://examples/{id}` | Specific example by ID                         |
 | `ng-forge://field-types`   | Field type reference                           |
 | `ng-forge://validators`    | Validator reference                            |
+| `ng-forge://wrappers`      | Wrapper reference                              |
+| `ng-forge://schemas`       | Standard Schema validation reference           |
 | `ng-forge://ui-adapters`   | UI library configurations                      |
 | `ng-forge://docs`          | Full documentation index                       |
 

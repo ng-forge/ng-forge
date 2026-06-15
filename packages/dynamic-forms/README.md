@@ -34,17 +34,16 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 
 ## Supported entrypoints
 
-| Entrypoint                            | Audience            | Stability                        |
-| ------------------------------------- | ------------------- | -------------------------------- |
-| `@ng-forge/dynamic-forms`             | Form consumers      | Public API, governed by semver   |
-| `@ng-forge/dynamic-forms/schema`      | Form consumers      | Public API, governed by semver   |
-| `@ng-forge/dynamic-forms/integration` | UI adapter authors  | Public API, governed by semver   |
-| `@ng-forge/dynamic-forms/internal`    | None (build-time)   | Unsupported, no semver guarantee |
-| `@ng-forge/dynamic-forms/testing`     | None (test helpers) | Unsupported, no semver guarantee |
+| Entrypoint                            | Audience           | Stability                        |
+| ------------------------------------- | ------------------ | -------------------------------- |
+| `@ng-forge/dynamic-forms`             | Form consumers     | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/schema`      | Form consumers     | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/integration` | UI adapter authors | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/internal`    | None (build-time)  | Unsupported, no semver guarantee |
 
 The `/schema` entrypoint is a supported, semver-governed surface for using [Standard Schema](https://standardschema.dev) validation libraries (Zod, Valibot, ArkType) with dynamic forms via `standardSchema()`.
 
-The `/internal` and `/testing` entrypoints are unsupported build and test surfaces with no semver guarantee. They are published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Their contents may change or be removed in any release, including patch releases.
+The `/internal` entrypoint is an unsupported build surface with no semver guarantee. It is published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Its contents may change or be removed in any release, including patch releases.
 
 Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
 
@@ -91,7 +90,7 @@ export class UserFormComponent {
 
 ## Features
 
-- **Signal Forms** - Native Angular 21+ signal forms integration
+- **Signal Forms** - Native Angular Signal Forms integration
 - **Type-Safe** - Full TypeScript inference with `InferFormValue`
 - **UI Agnostic** - Bring your own UI or use official integrations
 - **Validation** - Shorthand validators (`required`, `email`, `minLength`) and custom validators
