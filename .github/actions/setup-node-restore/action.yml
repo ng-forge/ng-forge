@@ -28,16 +28,23 @@ runs:
         node-version: ${{ inputs.node-version }}
 
     - name: Restore node_modules
+      id: cache
       uses: actions/cache/restore@v5
       with:
         path: node_modules
         key: ${{ inputs.cache-key }}
-        fail-on-cache-miss: true
 
-    - name: Verify cache restored
+    - name: Install dependencies (cache miss fallback)
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "::warning::node_modules cache miss for '${{ inputs.cache-key }}' — installing from lockfile"
+        pnpm install --frozen-lockfile
+
+    - name: Verify node_modules
       shell: bash
       run: |
         if [ ! -d "node_modules" ] || [ ! -f "node_modules/.pnpm/lock.yaml" ]; then
-          echo "::error::node_modules cache appears corrupted or incomplete"
+          echo "::error::node_modules missing or incomplete after restore/install"
           exit 1
         fi

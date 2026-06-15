@@ -1,6 +1,6 @@
 ---
 title: Expression Parser
-slug: advanced/expression-parser
+slug: recipes/expression-parser
 description: 'Learn how ng-forge safely evaluates JavaScript expressions for conditional logic, dynamic values, and validations while preventing code injection.'
 ---
 
@@ -77,12 +77,14 @@ Only safe methods can be called in expressions:
 
 ### Whitelisted Methods Reference
 
-| Category   | Methods                                                                                                                                                           |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **String** | `toUpperCase`, `toLowerCase`, `trim`, `includes`, `startsWith`, `endsWith`, `slice`, `substring`, `charAt`, `indexOf`, `lastIndexOf`, `split`, `replace`, `match` |
-| **Array**  | `map`, `filter`, `some`, `every`, `find`, `findIndex`, `includes`, `indexOf`, `join`, `slice`, `flat`, `flatMap`                                                  |
-| **Number** | `toFixed`, `toString`, `valueOf`                                                                                                                                  |
-| **Object** | `hasOwnProperty`, `toString`, `valueOf`                                                                                                                           |
+| Category   | Methods                                                                                                                                                                                                                                                                 |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **String** | `charAt`, `charCodeAt`, `concat`, `endsWith`, `includes`, `indexOf`, `lastIndexOf`, `match`, `padEnd`, `padStart`, `repeat`, `replace`, `search`, `slice`, `split`, `startsWith`, `substring`, `toLowerCase`, `toUpperCase`, `trim`, `trimEnd`, `trimStart`, `toString` |
+| **Array**  | `concat`, `every`, `filter`, `find`, `findIndex`, `flat`, `flatMap`, `includes`, `indexOf`, `join`, `lastIndexOf`, `map`, `reduce`, `reduceRight`, `slice`, `some`, `toString`, `entries`, `keys`, `values`                                                             |
+| **Number** | `toExponential`, `toFixed`, `toPrecision`, `toString`                                                                                                                                                                                                                   |
+| **Date**   | `getDate`, `getDay`, `getFullYear`, `getHours`, `getMilliseconds`, `getMinutes`, `getMonth`, `getSeconds`, `getTime`, `getTimezoneOffset`, the matching `getUTC*` variants, `toDateString`, `toISOString`, `toJSON`, `toString`, `toTimeString`, `toUTCString`          |
+
+These lists mirror the parser's whitelists exactly. No methods are callable on plain objects: property access works, method calls do not.
 
 ### Properties: Open Access (Except Dangerous Ones)
 
@@ -257,30 +259,30 @@ const config = {
 
 For dynamic forms, the parser prevents:
 
-- ✅ **Code Injection**: Can't execute arbitrary code or create new code
-- ✅ **Prototype Pollution**: Can't access `constructor` or `__proto__`
-- ✅ **Unsafe Operations**: Can't call methods that modify state or access globals
+- **Code Injection**: Can't execute arbitrary code or create new code
+- **Prototype Pollution**: Can't access `constructor` or `__proto__`
+- **Unsafe Operations**: Can't call methods that modify state or access globals
 
 ## Custom Functions
 
-When providing custom functions for use in expressions, register them with the FunctionRegistryService:
+Register custom functions on the form config via `customFnConfig.customFunctions`:
 
 ```typescript
 // ✅ GOOD - Pure functions
-import { FunctionRegistryService } from '@ng-forge/dynamic-forms';
-
-const functionRegistry = inject(FunctionRegistryService);
-
-functionRegistry.registerCustomFunction('isValidEmail', (ctx) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ctx.fieldValue);
-});
-
-functionRegistry.registerCustomFunction('isAdult', (ctx) => {
-  return ctx.formValue.age >= 18;
-});
+const config = {
+  customFnConfig: {
+    customFunctions: {
+      isValidEmail: (ctx) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(ctx.fieldValue)),
+      isAdult: (ctx) => ctx.formValue.age >= 18,
+    },
+  },
+  fields: [
+    // ...
+  ],
+} satisfies FormConfig;
 ```
 
-Then use them with `type: 'custom'`:
+Then reference them by name with `type: 'custom'` and `functionName`:
 
 ```typescript
 {
@@ -293,7 +295,7 @@ Then use them with `type: 'custom'`:
       type: 'hidden',
       condition: {
         type: 'custom',
-        expression: 'isAdult'
+        functionName: 'isAdult'
       }
     }
   ]
@@ -304,11 +306,15 @@ Then use them with `type: 'custom'`:
 
 ```typescript
 // ❌ BAD - Side effects
-functionRegistry.registerCustomFunction('logValue', (ctx) => {
-  console.log(ctx.fieldValue); // Side effect!
-  trackAnalytics(ctx); // Side effect!
-  return true;
-});
+customFnConfig: {
+  customFunctions: {
+    logValue: (ctx) => {
+      console.log(ctx.fieldValue); // Side effect!
+      trackAnalytics(ctx); // Side effect!
+      return true;
+    },
+  },
+},
 ```
 
 ## Supported Expression Features
@@ -335,7 +341,7 @@ In JavaScript expressions (`type: 'javascript'`), you can use:
 expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
 ```
 
-**Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only — arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
+**Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only; arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
 
 ## Summary
 
@@ -348,6 +354,6 @@ The expression parser lets you write flexible conditional logic while preventing
 
 ## Next Steps
 
-- **[Conditional Logic](/dynamic-behavior/overview)** — Use expressions to control field visibility and state
-- **[Type Safety](/recipes/type-safety)** — Leverage TypeScript inference for form values and field types
-- **[Value Derivation](/dynamic-behavior/derivation)** — Use expressions to compute field values dynamically
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)**: Use expressions to control field visibility and state
+- **[Type Safety](/recipes/type-safety)**: Leverage TypeScript inference for form values and field types
+- **[Value Derivation](/dynamic-behavior/derivation)**: Use expressions to compute field values dynamically

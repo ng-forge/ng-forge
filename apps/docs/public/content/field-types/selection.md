@@ -27,11 +27,8 @@ Single or multi-select dropdown.
 
 **Core Properties:**
 
-- `options`: Array of `{ value: T, label: string }` objects (at field level, not in props)
-
-**Core Props:**
-
-- `placeholder`: Placeholder text when no value selected
+- `options`: Array of `{ label: DynamicText, value: T, disabled?: boolean }` objects (at field level, not in props). `label` accepts static strings, signals, or observables; `disabled` makes the option non-selectable
+- `placeholder`: Placeholder text when no value selected (at field level, not in props)
 
 #### Adapter Props
 
@@ -60,7 +57,7 @@ Single selection from multiple options.
 
 **Core Properties:**
 
-- `options`: Array of `{ value: string, label: string }` objects (at field level, not in props)
+- `options`: Array of `{ label: DynamicText, value: string, disabled?: boolean }` objects (at field level, not in props). `label` accepts static strings, signals, or observables; `disabled` makes the option non-selectable
 
 #### Adapter Props
 
@@ -126,7 +123,7 @@ Multiple selection from a list of checkboxes. Value is an array of selected valu
 
 **Core Properties:**
 
-- `options`: Array of `{ value: T, label: string }` objects (at field level, not in props)
+- `options`: Array of `{ label: DynamicText, value: T, disabled?: boolean }` objects (at field level, not in props). `label` accepts static strings, signals, or observables; `disabled` makes the option non-selectable
 
 #### Adapter Props
 

@@ -10,7 +10,7 @@ The `@ng-forge/dynamic-form-mcp` package provides a [Model Context Protocol (MCP
 
 ## Available Tools
 
-The MCP server provides 4 focused tools:
+The MCP server provides 5 focused tools:
 
 | Tool               | Description                                                 | Read-only |
 | ------------------ | ----------------------------------------------------------- | --------- |
@@ -18,6 +18,7 @@ The MCP server provides 4 focused tools:
 | `ngforge_examples` | Get working code examples for common form patterns          | ✅        |
 | `ngforge_validate` | Validate FormConfig and get detailed error feedback         | ✅        |
 | `ngforge_scaffold` | Generate valid FormConfig skeletons                         | ✅        |
+| `ngforge_search`   | Keyword search across all documentation topics and examples | ✅        |
 
 ## Get Started
 
@@ -90,12 +91,16 @@ Get documentation about any ng-forge topic.
 
 **Available Topics:**
 
-| Category    | Topics                                                                                                                                                                                                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Field Types | `input`, `select`, `radio`, `checkbox`, `textarea`, `datepicker`, `slider`, `toggle`, `hidden`, `text`, `button`, `submit`, `next`, `previous`, `add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item` |
-| Containers  | `group`, `row`, `array`, `page`                                                                                                                                                                                                                                        |
-| Concepts    | `validation`, `conditional`, `derivation`, `options-format`, `expression-variables`, `async-validators`, `validation-messages`                                                                                                                                         |
-| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `workflow`                                                                                                                                                                                                            |
+| Category    | Topics                                                                                                                                                                                                                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Field Types | `input`, `select`, `slider`, `radio`, `checkbox`, `multi-checkbox`, `textarea`, `datepicker`, `toggle`, `text`, `hidden`, `button`, `submit`, `next`, `previous`, `add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item` |
+| Containers  | `group`, `row`, `array`, `simplified-array`, `page`                                                                                                                                                                                                                                      |
+| Wrappers    | `wrappers`, `css`, `arraySection`, `section`                                                                                                                                                                                                                                             |
+| Addons      | `addons`, `template`, `component`, `mat-icon`, `mat-button`, `bs-icon`, `bs-button`, `prime-icon`, `prime-button`, `ion-icon`, `ion-button`                                                                                                                                              |
+| Concepts    | `validation`, `validation-messages`, `conditional`, `derivation`, `property-derivation`, `options-format`, `expression-variables`, `async-validators`, `buttons`, `external-data`                                                                                                        |
+| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `field-placement`, `logic-matrix`, `context-api`, `containers`, `array-buttons`, `custom-validators`, `conditions`, `common-expressions`, `type-narrowing`, `workflow`                                                                  |
+
+Wrapper and addon topics are read from the registry at runtime, so use `topic="list"` to get the complete, current set with descriptions.
 
 **Examples:**
 
@@ -111,26 +116,28 @@ ngforge_lookup topic="input" depth="schema" uiIntegration="material"
 
 Get working code examples for common patterns.
 
-| Parameter | Type                                                  | Default    | Description     |
-| --------- | ----------------------------------------------------- | ---------- | --------------- |
-| `pattern` | string                                                | (required) | Pattern name    |
-| `depth`   | `"minimal"` \| `"brief"` \| `"full"` \| `"explained"` | `"full"`   | Level of detail |
+| Parameter | Type                                                  | Default    | Description                                                   |
+| --------- | ----------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `pattern` | string                                                | (optional) | Pattern name; omit it (or pass `"list"`) to list all patterns |
+| `depth`   | `"minimal"` \| `"brief"` \| `"full"` \| `"explained"` | `"full"`   | Level of detail                                               |
 
 **Available Patterns:**
 
-| Pattern               | Description                              | Lines |
-| --------------------- | ---------------------------------------- | ----- |
-| `minimal-multipage`   | Simplest 2-page wizard form              | ~50   |
-| `minimal-array`       | Array with add/remove buttons            | ~30   |
-| `minimal-conditional` | Show/hide field based on condition       | ~25   |
-| `minimal-validation`  | Password confirmation validation         | ~20   |
-| `minimal-hidden`      | Hidden fields in multi-page form         | ~15   |
-| `derivation`          | Value derivation (computed fields)       | -     |
-| `conditional`         | Conditional visibility patterns          | -     |
-| `multi-page`          | Multi-step wizard forms                  | -     |
-| `validation`          | Form validation patterns                 | -     |
-| `complete`            | Full form with all major features        | -     |
-| `mega`                | Kitchen sink demonstrating every feature | -     |
+| Pattern                    | Description                                        | Lines |
+| -------------------------- | -------------------------------------------------- | ----- |
+| `minimal-multipage`        | Simplest 2-page wizard form                        | ~50   |
+| `minimal-array`            | Array with add/remove buttons                      | ~30   |
+| `minimal-conditional`      | Show/hide field based on condition                 | ~25   |
+| `minimal-validation`       | Password confirmation validation                   | ~20   |
+| `minimal-hidden`           | Hidden fields in multi-page form                   | ~15   |
+| `minimal-simplified-array` | Simplified array with template and value           | -     |
+| `derivation`               | Value derivation (computed fields)                 | -     |
+| `property-derivation`      | Dynamic field properties (label, options, min/max) | -     |
+| `conditional`              | Conditional visibility patterns                    | -     |
+| `multi-page`               | Multi-step wizard forms                            | -     |
+| `validation`               | Form validation patterns                           | -     |
+| `complete`                 | Full form with all major features                  | -     |
+| `mega`                     | Kitchen sink demonstrating every feature           | -     |
 
 **Examples:**
 
@@ -162,7 +169,7 @@ Validate FormConfig and get detailed error feedback.
 
 - "Hidden field missing REQUIRED value property"
 - "options MUST be at FIELD level, NOT inside props"
-- "row containers do NOT support logic blocks"
+- "Containers (group, row, array) only support 'hidden' logic type"
 
 **Examples:**
 
@@ -204,15 +211,24 @@ ngforge_scaffold hidden=["userId:abc123","source:web"]
 
 In addition to tools, the server exposes resources that AI can read:
 
-| Resource URI               | Description                                    |
-| -------------------------- | ---------------------------------------------- |
-| `ng-forge://instructions`  | Best practices guide for generating FormConfig |
-| `ng-forge://examples`      | Curated FormConfig examples                    |
-| `ng-forge://examples/{id}` | Specific example by ID                         |
-| `ng-forge://field-types`   | Field type reference                           |
-| `ng-forge://validators`    | Validator reference                            |
-| `ng-forge://ui-adapters`   | UI library configurations                      |
-| `ng-forge://docs`          | Full documentation index                       |
+| Resource URI                       | Description                                                    |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `ng-forge://instructions`          | Best practices guide for generating FormConfig                 |
+| `ng-forge://schemas`               | Schema reference (UI integrations, field types, tool overview) |
+| `ng-forge://examples`              | Curated FormConfig examples                                    |
+| `ng-forge://examples/{id}`         | Specific example by ID                                         |
+| `ng-forge://field-types`           | Field type reference                                           |
+| `ng-forge://field-types/{type}`    | Details for a specific field type                              |
+| `ng-forge://validators`            | Validator reference                                            |
+| `ng-forge://validators/{type}`     | Details for a specific validator                               |
+| `ng-forge://wrappers`              | Wrapper reference                                              |
+| `ng-forge://wrappers/{type}`       | Details for a specific wrapper                                 |
+| `ng-forge://ui-adapters`           | UI library configurations                                      |
+| `ng-forge://ui-adapters/{library}` | Details for a specific UI library                              |
+| `ng-forge://docs`                  | Full documentation index                                       |
+| `ng-forge://docs/{topic}`          | Documentation for a specific topic                             |
+
+Category-filtered URIs also exist for field types, validators, and wrappers (`ng-forge://field-types/category/{category}`, and the equivalents for validators and wrappers).
 
 ---
 

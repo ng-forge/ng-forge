@@ -312,7 +312,7 @@ const config = {
         <section class="config-view__section">
           <h3 class="config-view__heading">Custom Adapter Config</h3>
           <p class="config-view__desc">
-            Custom adapters define their own config interface. The cascade pattern works the same way — implement a config merger in your
+            Custom adapters define their own config interface. The cascade pattern works the same way: implement a config merger in your
             adapter to support library-level and form-level defaults. See
             <a href="/building-an-adapter">Building an Adapter</a> for a full guide.
           </p>

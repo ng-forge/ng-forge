@@ -18,7 +18,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       <div class="vp__pillar">
         <div class="vp__chip vp__chip--http">HTTP</div>
         <code class="vp__code">customFnConfig.httpValidators</code>
-        <p class="vp__desc">"Ping the server with this value" — uniqueness, availability, address lookup.</p>
+        <p class="vp__desc">"Ping the server with this value": uniqueness, availability, address lookup.</p>
         <code class="vp__sig">&#123; request, onSuccess &#125;</code>
       </div>
       <div class="vp__pillar">

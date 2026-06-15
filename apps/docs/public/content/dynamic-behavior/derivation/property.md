@@ -109,7 +109,7 @@ fields: [
 
 ### HTTP
 
-Use `source: 'http'` to derive a property from an HTTP response — typically used to populate a select's `options` from a backend search endpoint. The request fires when any `dependsOn` field changes, with automatic in-flight cancellation when dependencies change again.
+Use `source: 'http'` to derive a property from an HTTP response, typically used to populate a select's `options` from a backend search endpoint. The request fires when any `dependsOn` field changes, with automatic in-flight cancellation when dependencies change again.
 
 ```typescript
 {
@@ -128,23 +128,22 @@ Use `source: 'http'` to derive a property from an HTTP response — typically us
     },
     responseExpression: 'response.map(d => ({ value: d.id, label: d.streetNameShort }))',
     dependsOn: ['street'],
-    trigger: 'debounced',
     debounceMs: 300,
   }],
 }
 ```
 
 - `source: 'http'` is required.
-- `dependsOn` is required and must be non-empty — wildcards (`'*'`) are rejected.
+- `dependsOn` is required and must be non-empty; wildcards (`'*'`) are rejected.
 - `responseExpression` is evaluated against `{ response }`. Object literals and arrow functions are supported, so you can map response rows into the `FieldOption` shape inline.
-- `trigger: 'debounced'` with a `debounceMs` is strongly recommended for autocomplete-style inputs to avoid spamming the server on every keystroke.
+- HTTP property derivations are always debounced (300ms default); `trigger` has no effect on them. Set `debounceMs` to tune the delay for autocomplete-style inputs.
 - Requires `provideHttpClient()` in your application providers.
 
-See [Async Derivations → HTTP](/dynamic-behavior/derivation/async#http-derivations) for the full request configuration (path params, headers, POST bodies, conditional firing).
+See [Async Derivations: HTTP](/dynamic-behavior/derivation/async#http-derivations) for the full request configuration (path params, headers, POST bodies, conditional firing).
 
 ### Async Function
 
-Use `source: 'asyncFunction'` when you need custom client-side logic — Angular service injection, complex transformations, or any async computation that's not a plain HTTP call. The function receives the full `EvaluationContext` and can return a `Promise` or `Observable`.
+Use `source: 'asyncFunction'` when you need custom client-side logic: Angular service injection, complex transformations, or any async computation that's not a plain HTTP call. The function receives the full `EvaluationContext` and can return a `Promise` or `Observable`.
 
 ```typescript
 import { inject } from '@angular/core';
@@ -506,23 +505,47 @@ interface DerivationLogicConfig {
   /** When to evaluate: 'onChange' (default) or 'debounced' */
   trigger?: 'onChange' | 'debounced';
 
-  /** Debounce duration in ms (default: 500) */
+  /** Debounce duration in ms (default: 500 for synchronous derivations) */
   debounceMs?: number;
 
-  /** Static value to set (mutually exclusive) */
+  /** Async source discriminator. Omit for synchronous derivations */
+  source?: 'http' | 'asyncFunction';
+
+  /** Static value to set (sync; mutually exclusive with other sources) */
   value?: unknown;
 
-  /** JavaScript expression (mutually exclusive) */
+  /** JavaScript expression (sync; mutually exclusive with other sources) */
   expression?: string;
 
-  /** Name of registered custom function (mutually exclusive) */
+  /** Name of registered custom function (sync; XOR with fn) */
   functionName?: string;
 
-  /** Explicit field dependencies */
+  /** Inline custom function, code-only (sync; XOR with functionName) */
+  fn?: CustomFunction;
+
+  /** HTTP request configuration (required when source: 'http') */
+  http?: HttpRequestConfig;
+
+  /** Expression extracting the derived value from the HTTP response (required when source: 'http') */
+  responseExpression?: string;
+
+  /** Name of registered async function (source: 'asyncFunction'; XOR with asyncFn) */
+  asyncFunctionName?: string;
+
+  /** Inline async function, code-only (source: 'asyncFunction'; XOR with asyncFunctionName) */
+  asyncFn?: AsyncDerivationFunction;
+
+  /** Explicit field dependencies (required for http and asyncFunction sources) */
   dependsOn?: string[];
 
   /** Condition for when derivation applies (default: true) */
   condition?: ConditionalExpression | boolean;
+
+  /** Stop running after the user manually edits the target field */
+  stopOnUserOverride?: boolean;
+
+  /** With stopOnUserOverride, clear the override when a declared dependency changes */
+  reEngageOnDependencyChange?: boolean;
 }
 ```
 
@@ -575,5 +598,5 @@ External data values are reactively tracked - when signals change, property deri
 ## Related
 
 - **Value Derivation** (see tab above) - Compute field form values
-- **[Conditional Logic](/dynamic-behavior/overview)** - Control field visibility and state
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Control field visibility and state
 - **[Array Fields](/prebuilt/form-arrays/simplified)** - Working with array fields

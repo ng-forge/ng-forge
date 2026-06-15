@@ -4,7 +4,7 @@ slug: api-driven-forms
 description: 'Render Angular forms from API responses or backend JSON. Fetch form configs at runtime, type form values, and hydrate client-side features like submission handlers and validation.'
 ---
 
-Build dynamic forms from JSON returned by your backend or CMS. When your form configuration is fetched at runtime instead of defined statically, you don't need `as const satisfies FormConfig` — the plain `FormConfig` type works out of the box.
+Build dynamic forms from JSON returned by your backend or CMS. When your form configuration is fetched at runtime instead of defined statically, you don't need `as const satisfies FormConfig`: the plain `FormConfig` type works out of the box.
 
 This is the recommended pattern for server-driven forms, JSON-based form builders, and any scenario where the form structure isn't known at compile time.
 
@@ -44,27 +44,28 @@ export class MyPageComponent {
 }
 ```
 
-No `as const`, no `satisfies` — the `FormConfig` interface accepts any valid field configuration at its default generic parameters.
+No `as const`, no `satisfies`: the `FormConfig` interface accepts any valid field configuration at its default generic parameters.
 
 ## What's Serializable
 
 Not every `FormConfig` property can come from a JSON API. Some require runtime code:
 
-| Property                    | Serializable | Notes                                                                       |
-| --------------------------- | ------------ | --------------------------------------------------------------------------- |
-| `fields`                    | Yes          | Core form structure — field types, keys, values, options, validators, logic |
-| `options`                   | Yes          | Disabled state, button behavior, value exclusion                            |
-| `schemas`                   | Yes          | Reusable validation schemas                                                 |
-| `defaultValidationMessages` | Yes          | Fallback error messages                                                     |
-| `defaultProps`              | Yes          | Default UI props (appearance, sizing)                                       |
-| `submission`                | No           | Requires an `action` function                                               |
-| `customFnConfig`            | No           | Custom validators, derivation functions, condition functions                |
-| `externalData`              | No           | Angular `Signal` instances                                                  |
-| `schema`                    | No           | Standard Schema objects (Zod, Valibot, etc.)                                |
+| Property                    | Serializable | Notes                                                                      |
+| --------------------------- | ------------ | -------------------------------------------------------------------------- |
+| `fields`                    | Yes          | Core form structure: field types, keys, values, options, validators, logic |
+| `options`                   | Yes          | Disabled state, button behavior, value exclusion                           |
+| `schemas`                   | Yes          | Reusable validation schemas                                                |
+| `defaultValidationMessages` | Yes          | Fallback error messages                                                    |
+| `defaultProps`              | Yes          | Default UI props (appearance, sizing)                                      |
+| `defaultWrappers`           | Yes          | Form-wide default wrapper configs                                          |
+| `submission`                | No           | Requires an `action` function                                              |
+| `customFnConfig`            | No           | Custom validators, derivation functions, condition functions               |
+| `externalData`              | No           | Angular `Signal` instances                                                 |
+| `schema`                    | No           | Standard Schema objects (Zod, Valibot, etc.)                               |
 
 The serializable properties cover the vast majority of form configuration. The non-serializable ones are for advanced features that inherently require client-side code.
 
-Fields accept a [`nullable: true`](/configuration#nullable-values) flag to preserve `null` through defaults and submission — useful when mirroring OpenAPI schemas that distinguish null from empty.
+Fields accept a [`nullable: true`](/configuration#nullable-values) flag to preserve `null` through defaults and submission, useful when mirroring OpenAPI schemas that distinguish null from empty.
 
 ## Hydrating Runtime Features
 
@@ -161,6 +162,6 @@ function onSubmit(value: unknown) {
 
 ## Related
 
-- **[Configuration](/configuration)** — Global form setup and provider options
-- **[Type Safety](/recipes/type-safety)** — Compile-time type inference with `as const satisfies`
-- **[Form Submission](/dynamic-behavior/submission)** — Submission handlers and server error mapping
+- **[Configuration](/configuration)**: Global form setup and provider options
+- **[Type Safety](/recipes/type-safety)**: Compile-time type inference with `as const satisfies`
+- **[Form Submission](/dynamic-behavior/submission)**: Submission handlers and server error mapping

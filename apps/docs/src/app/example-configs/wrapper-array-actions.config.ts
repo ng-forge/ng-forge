@@ -4,7 +4,7 @@ import { FormConfig } from '@ng-forge/dynamic-forms';
  * `arraySection` is a custom demo wrapper whose header hosts an Add button.
  * It reads the array key from `fieldInputs` and dispatches
  * `arrayEvent(key).append(itemTemplate)` on click — the consumer config just
- * lists wrappers and a template, no separate addArrayItem field needed.
+ * lists wrappers and a template, no separate add-array-item field needed.
  */
 const tagItemTemplate = [
   {

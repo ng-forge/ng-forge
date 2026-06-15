@@ -18,7 +18,7 @@ interface IntegrationData {
 const INTEGRATION_DATA: Record<AdapterName, IntegrationData> = {
   material: {
     packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-material @angular/material @angular/cdk',
-    stylesCode: `// styles.scss — add a prebuilt Material theme (required)
+    stylesCode: `// styles.scss: add a prebuilt Material theme (required)
 @import '@angular/material/prebuilt-themes/azure-blue.css';`,
     setupCode: `import { provideDynamicForm, withLegacyStatusClasses } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
@@ -154,7 +154,7 @@ export const appConfig: ApplicationConfig = {
       { name: 'FieldTypeDefinition', description: 'A field key, the Angular component to render, and an optional value mapper' },
       {
         name: 'NgForgeField',
-        description: 'Compose via hostDirectives — owns the 10 standard inputs + error/aria signals + universal host bindings',
+        description: 'Compose via hostDirectives; owns the nine standard inputs + error/aria signals + universal host bindings',
       },
       {
         name: 'NgForgeControl / NgForgeHostControl',
@@ -162,7 +162,7 @@ export const appConfig: ApplicationConfig = {
       },
       {
         name: 'withCustomFields()',
-        description: 'Bundle your field definitions into a provider factory — mirrors withMaterialFields() in structure',
+        description: 'Bundle your field definitions into a provider factory that mirrors withMaterialFields() in structure',
       },
     ],
   },

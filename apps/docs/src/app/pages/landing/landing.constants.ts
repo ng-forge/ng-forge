@@ -54,7 +54,7 @@ export const INTEGRATIONS: Integration[] = [
     icon: 'assets/icons/primeng.webp',
     title: 'PrimeNG integration documentation',
     package: '@ng-forge/dynamic-forms-primeng',
-    importLine: "import { withPrimeNgFields } from '@ng-forge/dynamic-forms-primeng';",
+    importLine: "import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';",
   },
   {
     name: 'Ionic',
@@ -172,67 +172,6 @@ const config = {
   ],
 }`,
 
-  validation: `{ key: 'email', type: 'input', required: true, email: true },
-{ key: 'age', type: 'input', min: 18, max: 120 },
-{ key: 'username', type: 'input', minLength: 3, maxLength: 20 },
-{ key: 'website', type: 'input', pattern: /^https?:\\/\\/.+/ }`,
-
-  validationShowcase: `{
-  key: 'email',
-  type: 'input',
-  label: 'Email',
-  required: true,
-  email: true,
-},
-{
-  key: 'password',
-  type: 'input',
-  label: 'Password',
-  required: true,
-  minLength: 8,
-  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$/,
-  validationMessages: {
-    pattern: 'Need uppercase, lowercase & number',
-  },
-},
-{
-  key: 'age',
-  type: 'input',
-  label: 'Age',
-  min: 18,
-  max: 120,
-},
-{
-  key: 'username',
-  type: 'input',
-  label: 'Username',
-  minLength: 3,
-  maxLength: 15,
-  pattern: /^[a-z0-9_]+$/,
-}`,
-
-  jsonConfig: `{
-  "fields": [
-    {
-      "key": "name",
-      "type": "input",
-      "label": "Full Name",
-      "required": true
-    },
-    {
-      "key": "feedback",
-      "type": "textarea",
-      "label": "Your Feedback"
-    },
-    {
-      "key": "rating",
-      "type": "select",
-      "label": "Rating",
-      "options": ["Excellent", "Good", "Average", "Poor"]
-    }
-  ]
-}`,
-
   jsonFetch: `export class SurveyComponent {
   private http = inject(HttpClient);
 
@@ -247,7 +186,6 @@ const config = {
   arrayField: `{
   key: 'contacts',
   type: 'array',
-  label: 'Contacts',
   fields: [
     {
       key: 'name',
@@ -280,6 +218,7 @@ const config = {
     {
       key: 'age',
       type: 'input',
+      required: true,
       props: { type: 'number' },
     },
   ],
@@ -350,13 +289,13 @@ export const CAPABILITIES: Capability[] = [
   {
     icon: 'workflow',
     title: 'Multi-step wizards',
-    description: 'Split a long form into pages that validate one step at a time, with navigation and a progress bar.',
+    description: 'Split a long form into pages that validate one step at a time, with next and previous navigation.',
     snippetKey: 'multiStepWizard',
   },
   {
     icon: 'layers',
     title: 'Repeatable arrays',
-    description: 'Repeatable rows, nested groups included, that users can add and reorder from the config.',
+    description: 'Repeatable rows, nested groups included, that users can add and remove from the config.',
     snippetKey: 'arrayField',
   },
 ];
@@ -375,8 +314,7 @@ export const USE_CASES: UseCase[] = [
   {
     icon: 'users',
     title: 'Accessible',
-    description:
-      'Built on adapter components that are accessible already, with ARIA and focus handled on top and verified against axe for WCAG AA.',
+    description: 'Built on adapter components that are accessible already, with ARIA and focus handled on top.',
   },
   {
     icon: 'book',

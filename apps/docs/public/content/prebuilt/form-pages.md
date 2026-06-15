@@ -4,7 +4,7 @@ slug: prebuilt/form-pages
 description: 'Build multi-step wizard forms with page fields. Automatically enables paged mode with navigation controls and per-page validation.'
 ---
 
-Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and renders with navigation controls.
+Create multi-step forms by using page fields. When your form contains page fields, it automatically enters "paged mode" and shows one page at a time. Navigation is added as `next` and `previous` button fields inside each page.
 
 ## Basic Multi-Step Form
 
@@ -20,6 +20,7 @@ Create a multi-step form by adding multiple page fields to your form configurati
         { key: 'accountTitle', type: 'text', label: 'Account Information', props: { elementType: 'h3' } },
         { key: 'username', type: 'input', label: 'Username', value: '', required: true },
         { key: 'password', type: 'input', label: 'Password', value: '', props: { type: 'password' }, required: true },
+        { key: 'accountNext', type: 'next', label: 'Continue' },
       ],
     },
     {
@@ -29,6 +30,8 @@ Create a multi-step form by adding multiple page fields to your form configurati
         { key: 'profileTitle', type: 'text', label: 'Profile Details', props: { elementType: 'h3' } },
         { key: 'firstName', type: 'input', label: 'First Name', value: '' },
         { key: 'lastName', type: 'input', label: 'Last Name', value: '' },
+        { key: 'profilePrevious', type: 'previous', label: 'Back' },
+        { key: 'submit', type: 'submit', label: 'Create Account' },
       ],
     },
   ],
@@ -43,7 +46,7 @@ Each page field supports:
 - `type: 'page'` (required) - Field type identifier
 - `fields` (required) - Array of child fields to render on this page
 
-## Page with Description
+## Example: Preferences Page
 
 ```typescript
 {
@@ -61,13 +64,13 @@ Each page field supports:
 When your form contains page fields:
 
 - **Automatic Detection**: Form automatically enters "paged mode"
-- **Navigation Controls**: Previous/Next buttons are rendered automatically
+- **Navigation Controls**: Add `next` and `previous` button fields inside each page to move between pages
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
 
 ## Performance & Lazy Loading
 
-ng-forge uses Angular's `@defer` blocks with smart prefetching to optimize page rendering while maintaining flicker-free navigation.
+ng-forge renders the current and adjacent pages immediately and defers distant pages until the browser is idle, keeping navigation flicker free.
 
 ### How It Works
 
@@ -76,7 +79,7 @@ The page orchestrator uses a **2-tier loading strategy**:
 **Tier 1: Current + Adjacent Pages (±1)**
 
 - Render immediately using `@defer (on immediate)`
-- Initially, only 3 pages load (current + 2 adjacent)
+- Only the current page and its immediate neighbors render immediately (2 pages on load, up to 3 mid-form)
 - Adjacent pages are fully rendered but hidden with `display: none`
 - Ensures zero flicker when navigating forward/backward
 
@@ -102,10 +105,8 @@ fields: [
 
 **Performance advantages:**
 
-- ⚡ **Zero navigation flicker** - Adjacent pages already rendered
-- 🚀 **Faster initial load** - Only 3 pages render immediately, distant pages defer until idle
-- ⏱️ **Better Time to Interactive (TTI)** - Reduced initial JavaScript parsing/compilation
-- 📱 **Mobile-friendly** - Lower startup cost on slower devices
+- **No navigation flicker**: adjacent pages are already rendered
+- **Less initial rendering work**: distant pages defer until the browser is idle
 
 **Note:** Once loaded, pages remain in the DOM (hidden with CSS). The primary benefit is optimizing **initial load performance**, not ongoing memory usage.
 
@@ -161,6 +162,8 @@ Pages can contain:
 - Leaf fields (input, select, checkbox, etc.)
 - Row fields (for horizontal layouts)
 - Group fields (for nested data structures)
+- Array fields (for repeating sections)
+- Container fields (for wrapper chains)
 
 ## Conditional Visibility
 
@@ -170,7 +173,6 @@ Pages support the `logic` property to conditionally skip a page (hide it from th
 {
   key: 'businessDetails',
   type: 'page',
-  label: 'Business Details',
   logic: [{
     type: 'hidden',
     condition: {
@@ -187,21 +189,21 @@ Pages support the `logic` property to conditionally skip a page (hide it from th
 }
 ```
 
-When a page is hidden, it is excluded from the multi-step navigation — users skip directly past it. Only `'hidden'` is supported as a logic type on containers.
+When a page is hidden, it is excluded from the multi-step navigation; users skip directly past it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/conditional-logic).
 
 ## CSS Classes
 
 Page fields use these classes for styling:
 
-- `.df-page` - Applied to the page container
+- `.df-page-orchestrator` - Applied to the host element that wraps all pages
+- `.df-page-field` - Applied to each page field component
 - `.df-page-visible` - Applied to the currently visible page
 - `.df-page-hidden` - Applied to hidden pages
-- `.df-page-field` - Applied to the page field component
 
 ## Next Steps
 
-- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
-- **[Dynamic Behavior](/dynamic-behavior/overview)** — Conditional logic, value derivation, and form submission
-- **[Form Rows](/prebuilt/form-rows)** — Arrange fields side-by-side within pages
+- **[Form Arrays](/prebuilt/form-arrays/simplified)**: Create repeating sections with add/remove controls
+- **[Dynamic Behavior](/dynamic-behavior/conditional-logic)**: Conditional logic, value derivation, and form submission
+- **[Form Rows](/prebuilt/form-rows)**: Arrange fields side-by-side within pages

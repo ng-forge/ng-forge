@@ -47,7 +47,7 @@ export class SimplifiedArrayFormComponent {
           placeholder: 'Enter a tag',
         },
         value: ['angular', 'typescript'],
-        addButton: { label: 'Add Tag', props: { color: 'primary' } },
+        addButton: { label: 'Add Tag' },
         removeButton: { label: 'Remove', props: { color: 'warn' } },
       },
 
@@ -76,7 +76,7 @@ export class SimplifiedArrayFormComponent {
           { name: 'Jane Smith', phone: '5551234567' },
           { name: 'John Doe', phone: '5559876543' },
         ],
-        addButton: { label: 'Add Contact', props: { color: 'primary' } },
+        addButton: { label: 'Add Contact' },
       },
 
       // Empty array — notes
@@ -102,11 +102,13 @@ export class SimplifiedArrayFormComponent {
         addButton: { label: 'Add Category' },
       },
 
-      { key: 'submit', type: 'submit', label: 'Save All', props: { color: 'primary' } },
+      { key: 'submit', type: 'submit', label: 'Save All' },
     ],
   } as const satisfies FormConfig;
 }
 ```
+
+The live demo config additionally contains section heading and description text fields, omitted here for brevity.
 
 ## Key Features
 

@@ -1,6 +1,6 @@
 ---
 title: Events
-slug: advanced/events
+slug: recipes/events
 description: 'Dispatch and subscribe to form events using EventBus (inside fields) and EventDispatcher (from host components). Drive array actions, resets, and more.'
 ---
 
@@ -13,15 +13,15 @@ The events API provides two complementary services for working with form events.
 | **Where to use**  | Inside DynamicForm (field components) | Outside DynamicForm (host components)                      |
 | **How to get it** | `inject(EventBus)`                    | `providers: [EventDispatcher]` + `inject(EventDispatcher)` |
 | **Dispatches**    | Constructor + args                    | Pre-built event instances                                  |
-| **Subscribes**    | Yes — `.on()` method                  | No                                                         |
+| **Subscribes**    | Yes, via `.on()`                      | No                                                         |
 
-> **Important:** `EventBus` is scoped to the `DynamicForm` component's injector tree. It is **only available to components rendered inside DynamicForm** (i.e. custom field components). If you inject `EventBus` in a parent or host component, you get a completely separate, disconnected instance that the form knows nothing about. Use `EventDispatcher` instead.
+> **Important:** `EventBus` is scoped to the `DynamicForm` component's injector tree. It is **only available to components rendered inside DynamicForm** (i.e. custom field components). Injecting `EventBus` in a parent or host component fails with a `NullInjectorError` (there is no provider at that level); providing your own `EventBus` only yields a disconnected instance the form knows nothing about. Use `EventDispatcher` from the host instead.
 
 ---
 
-## EventDispatcher — dispatching from outside DynamicForm
+## EventDispatcher: dispatching from outside DynamicForm
 
-Use `EventDispatcher` when you need to drive form behaviour **from the host component** — for example, appending array items in response to a field value change, triggering a form reset from a toolbar button, or reacting to external application state.
+Use `EventDispatcher` when you need to drive form behaviour **from the host component**: for example, appending array items in response to a field value change, triggering a form reset from a toolbar button, or reacting to external application state.
 
 ### Setup
 
@@ -85,17 +85,17 @@ For observing events from a host component, use the output bindings exposed dire
 
 ### Output bindings
 
-| Output                          | Emits                                                     |
-| ------------------------------- | --------------------------------------------------------- |
-| `(events)`                      | Every form event (full stream)                            |
-| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent) |
-| `(reset)`                       | When the form is reset to default values                  |
-| `(cleared)`                     | When the form is cleared to empty state                   |
-| `(onPageChange)`                | PageChangeEvent on each wizard page navigation            |
-| `(onPageNavigationStateChange)` | Navigation state changes (canGoNext, canGoPrevious, etc.) |
-| `(validityChange)`              | Boolean — whenever form validity changes                  |
-| `(dirtyChange)`                 | Boolean — whenever form dirty state changes               |
-| `(initialized)`                 | Once all field components are rendered and ready          |
+| Output                          | Emits                                                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `(events)`                      | Every form event (full stream)                                                                                 |
+| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent)                                                      |
+| `(reset)`                       | When the form is reset to default values                                                                       |
+| `(cleared)`                     | When the form is cleared to empty state                                                                        |
+| `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                                 |
+| `(onPageNavigationStateChange)` | Navigation state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`, `navigationDisabled`) |
+| `(validityChange)`              | Boolean, whenever form validity changes                                                                        |
+| `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                     |
+| `(initialized)`                 | Once all field components are rendered and ready                                                               |
 
 ### Examples
 
@@ -143,11 +143,11 @@ export class MyFormComponent {
 
 ---
 
-## EventBus — dispatching from inside DynamicForm
+## EventBus: dispatching from inside DynamicForm
 
 `EventBus` is the internal event bus scoped to each `DynamicForm` instance. Inject it inside **custom field components** to communicate with the parent form or other fields within the same form.
 
-> **Scoping reminder:** `EventBus` is provided by `DynamicForm` via its component injector. It is only resolvable from within field components rendered by that form. Do not inject it in host or parent components — you will get a disconnected, standalone instance.
+> **Scoping reminder:** `EventBus` is provided by `DynamicForm` via its component injector. It is only resolvable from within field components rendered by that form. Do not inject it in host or parent components: the injection fails with a `NullInjectorError` unless you provide your own instance, and a self-provided instance is disconnected from the form. Use `EventDispatcher` instead.
 
 ### Usage in custom field components
 
@@ -270,8 +270,8 @@ import { arrayEvent } from '@ng-forge/dynamic-forms';
 
 **Important:** A template is required for all add operations. The template defines the structure of the new item:
 
-- **Single FieldDef** → creates a **primitive item** (field value extracted directly)
-- **Array of FieldDefs** → creates an **object item** (fields merged into object)
+- **Single FieldDef** creates a **primitive item** (field value extracted directly)
+- **Array of FieldDefs** creates an **object item** (fields merged into object)
 
 ```typescript
 // Define templates
@@ -482,6 +482,6 @@ This is useful when you need the complete form state at the time an event occurr
 
 ## Next Steps
 
-- **[Form Submission](/dynamic-behavior/submission)** — Configure async submission with loading states and server errors
-- **[Custom Fields](/recipes/custom-fields)** — Build custom field components that use EventBus
-- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Use array events to add and remove items programmatically
+- **[Form Submission](/dynamic-behavior/submission)**: Configure async submission with loading states and server errors
+- **[Custom Fields](/recipes/custom-fields)**: Build custom field components that use EventBus
+- **[Form Arrays](/prebuilt/form-arrays/simplified)**: Use array events to add and remove items programmatically

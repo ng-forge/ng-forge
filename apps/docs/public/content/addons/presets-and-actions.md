@@ -4,7 +4,7 @@ slug: addons/presets-and-actions
 description: 'Wire button addons to behavior. Five built-in presets cover the common patterns (clear, reset, paste, copy, toggle-password-visibility). For custom behavior, register named handlers with withAddonActions and reference them by string, or pass an inline action for code-only configs.'
 ---
 
-Button addons accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level — setting two is a compile error.
+Button addons accept exactly one click variant: `preset`, `actionRef`, or `action`. The variants are mutually exclusive at the type level; setting two is a compile error.
 
 ## The three variants
 
@@ -19,12 +19,12 @@ Five presets ship with the library, available in every adapter:
 | Preset                         | Behaviour                                                                                                                                                                                       |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `'clear'`                      | Empties the field value. Writes `''` for string fields and `undefined` for non-string fields (numeric, date, object) so the field's declared type is preserved.                                 |
-| `'reset'`                      | Restores the field s configured default value from the form s `defaultValues` map (resolved at click time). Falls back to `''` / `undefined` (matching `'clear'`) when no default is reachable. |
+| `'reset'`                      | Restores the field's configured default value from the form's `defaultValues` map (resolved at click time). Falls back to `''` / `undefined` (matching `'clear'`) when no default is reachable. |
 | `'paste'`                      | Reads from the system clipboard (`navigator.clipboard.readText()`) and writes the result to the field.                                                                                          |
-| `'copy'`                       | Writes the field s current value to the system clipboard (`navigator.clipboard.writeText`).                                                                                                     |
-| `'toggle-password-visibility'` | Flips the host input s `type` between `'password'` and `'text'`. No-op (warning logged) when used outside an input-style field that exposes a type-override token.                              |
+| `'copy'`                       | Writes the field's current value to the system clipboard (`navigator.clipboard.writeText`).                                                                                                     |
+| `'toggle-password-visibility'` | Flips the host input's `type` between `'password'` and `'text'`. No-op (warning logged) when used outside an input-style field that exposes a type-override token.                              |
 
-All presets are JSON-safe. For form submission, use the dedicated `'submit'` field type — it is intentionally not exposed as a preset.
+All presets are JSON-safe. For form submission, use the dedicated `'submit'` field type; it is intentionally not exposed as a preset.
 
 ### Password toggle live demo
 
@@ -54,12 +54,12 @@ Wire the feature into `provideDynamicForm`:
 The backend can now ship configs like:
 
 ```json
-{ "type": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
+{ "slot": "suffix", "type": "<adapter-button-kind>", "icon": "send", "ariaLabel": "Send", "actionRef": "submitDraft" }
 ```
 
 ### Type narrowing
 
-`withAddonActions(...)` returns a feature whose `__handlerKeys` phantom field captures the registered names — derive the global `DynamicFormActionRegistry` augmentation from it in one line so `actionRef` autocompletes everywhere:
+`withAddonActions(...)` returns a feature whose `__handlerKeys` phantom field captures the registered names; derive the global `DynamicFormActionRegistry` augmentation from it in one line so `actionRef` autocompletes everywhere:
 
 ```typescript
 export const appActions = withAddonActions({
@@ -91,7 +91,7 @@ interface FieldBoundAddonActionContext<TValue = unknown> {
 }
 ```
 
-Narrow with the `isFieldBoundContext` guard so write-back handlers don t need `ctx.setValue?.(…)` everywhere:
+Narrow with the `isFieldBoundContext` guard so write-back handlers don't need `ctx.setValue?.(…)` everywhere:
 
 ```typescript
 import { isFieldBoundContext, withAddonActions } from '@ng-forge/dynamic-forms';
@@ -104,7 +104,7 @@ withAddonActions({
 });
 ```
 
-For broader field state, use the form-tree projection ng-forge already supplies to wrappers — `field.key` is intentionally the only stable identity surface across the addon contract.
+For broader field state, use the form-tree projection ng-forge already supplies to wrappers; `field.key` is intentionally the only stable identity surface across the addon contract.
 
 ## JSON-safety quick reference
 
@@ -114,11 +114,11 @@ For broader field state, use the form-tree projection ng-forge already supplies 
 | `actionRef`   | yes        | Custom behaviour registered once via `withAddonActions`.                        |
 | `action`      | code-only  | Prototypes / scenarios where the config is hand-authored and never round-trips. |
 
-Reactive axes are similarly tiered: `boolean` values are JSON-safe, `Signal<boolean>` / `Observable<boolean>` / function values are stripped from JSON-source configs by the validator (with a warning). See [Reactive addons from JSON](#reactive-from-json) below.
+Reactive axes are similarly tiered: `boolean` values are JSON-safe. On JSON-source configs the validator strips any function value (signals are functions, so they are stripped too) with a warning; Observables cannot appear in parsed JSON in the first place. See [Reactive addons from JSON](#reactive-addons-from-json) below.
 
 ## Inline `action` (code-only)
 
-For prototypes or scenarios where the handler can t live in JSON, pass a function directly:
+For prototypes or scenarios where the handler can't live in JSON, pass a function directly:
 
 ```typescript
 {
@@ -134,14 +134,14 @@ For prototypes or scenarios where the handler can t live in JSON, pass a functio
 }
 ```
 
-The validator drops `action` from JSON-source configs (it can t serialise a function), so reach for `actionRef` if the config might round-trip through a backend.
+The validator drops `action` from JSON-source configs (it can't serialise a function), so reach for `actionRef` if the config might round-trip through a backend.
 
 ## Reactive `loading` and `disabled`
 
 Button types expose both:
 
-- `loading?: DynamicValue<boolean>` — when truthy, the button shows the adapter s spinner state. Implies disabled.
-- `disabled?: DynamicValue<boolean>` — independent of loading; click is a no-op.
+- `loading?: DynamicValue<boolean>`: when truthy, the button shows the adapter's spinner state. Implies disabled.
+- `disabled?: DynamicValue<boolean>`: independent of loading; click is a no-op.
 
 ```typescript
 const submitting = signal(false);
@@ -159,9 +159,9 @@ const submitting = signal(false);
 
 ## Multi-set rule
 
-Exactly one of `preset` / `actionRef` / `action` may be set. The TypeScript types enforce this via an XOR union; the runtime validator additionally drops any addon that smuggles multiple values past the type checker (with an actionable warning). Decorative buttons that simply look like buttons but do nothing are valid — omit all three.
+Exactly one of `preset` / `actionRef` / `action` may be set. The TypeScript types enforce this via an XOR union; when an addon smuggles multiple variants past the type checker, the runtime validator keeps the highest-precedence one (`preset`, then `actionRef`, then `action`), strips the rest, and logs a warning. Decorative buttons that simply look like buttons but do nothing are valid; omit all three.
 
-## Reactive addons from JSON {#reactive-from-json}
+## Reactive addons from JSON
 
 JSON cannot carry `Signal` / `Observable` / function values, so two questions come up when you ship configs from a backend:
 
@@ -170,7 +170,7 @@ JSON cannot carry `Signal` / `Observable` / function values, so two questions co
 
 Three patterns, in order of preference:
 
-1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, walk the parsed tree and replace reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive — your bridge code is the only place that needs to know app state.
+1. **Pre-process the JSON in app code.** Before passing the parsed config to `DynamicForm`, walk the parsed tree and replace reactive axes with `computed(...)` against your app's signals. This keeps the wire format JSON-safe and the runtime reactive; your bridge code is the only place that needs to know app state.
 
    ```typescript
    const config = JSON.parse(jsonFromApi) as FormConfig;
@@ -186,9 +186,9 @@ Three patterns, in order of preference:
 
 3. **Skip reactivity at the addon layer.** If the addon's visibility is purely a function of static form metadata, render it unconditionally and let the field's own validation/state hide the value semantically. Reach for this when (1) and (2) feel heavy.
 
-Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON-source configs at validation time with a logged warning — you'll see them in the console if a config carries an inline function. `preset` and `actionRef` are the JSON-safe escape hatches for behaviour; `computed`/`Observable` are the code-side escape hatches for reactivity.
+Functions on `hidden` / `disabled` / `loading` / `action` are stripped from JSON-source configs at validation time with a logged warning; you'll see them in the console if a config carries an inline function. `preset` and `actionRef` are the JSON-safe escape hatches for behaviour; `computed`/`Observable` are the code-side escape hatches for reactivity.
 
 ## Where to next
 
-- **[Custom Types](/addons/custom-types)** — when none of the built-in types fit, register your own type component and augment the type registry.
-- **[Migrating from ngx-formly](/migrating-from-ngx-formly#addons)** — concept mapping for users coming from formly s per-adapter addon shapes.
+- **[Custom Types](/addons/custom-types)**: when none of the built-in types fit, register your own type component and augment the type registry.
+- **[Migrating from ngx-formly](/migrating-from-ngx-formly#addons-prefix-suffix-slots)**: concept mapping for users coming from formly's per-adapter addon shapes.

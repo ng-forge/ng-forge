@@ -6,7 +6,7 @@ description: 'Generate @ng-forge/dynamic-forms FormConfig objects and TypeScript
 
 # OpenAPI Generator
 
-The `@ng-forge/openapi-generator` reads your OpenAPI 3.x spec and produces ready-to-use `FormConfig` objects and TypeScript interfaces. No manual field wiring — your API contract drives your forms.
+The `@ng-forge/openapi-generator` reads your OpenAPI 3.x spec and produces ready-to-use `FormConfig` objects and TypeScript interfaces. No manual field wiring: your API contract drives your forms.
 
 **Key features:**
 
@@ -134,19 +134,20 @@ Both directories include barrel `index.ts` files for convenient imports.
 ng-forge-generator [options]
 ```
 
-| Flag                   | Type                 | Default        | Description                                                             |
-| ---------------------- | -------------------- | -------------- | ----------------------------------------------------------------------- |
-| `--spec <path>`        | `string`             | **(required)** | Path to OpenAPI 3.x spec file (JSON or YAML)                            |
-| `--output <path>`      | `string`             | **(required)** | Output directory for generated files                                    |
-| `--interactive <mode>` | `'full'` \| `'none'` | `'full'`       | `'full'` prompts for ambiguous fields; `'none'` uses defaults           |
-| `--endpoints <list>`   | `string`             | —              | Comma-separated endpoints: `POST:/pets,GET:/pets/{id}`                  |
-| `--read-only`          | `boolean`            | `false`        | Generate GET endpoint forms with all fields disabled                    |
-| `--watch`              | `boolean`            | `false`        | Watch spec file and regenerate on changes                               |
-| `--config <path>`      | `string`             | `<output>`     | Directory containing `.ng-forge-generator.json`                         |
-| `--dry-run`            | `boolean`            | `false`        | List files that would be generated without writing them                 |
-| `--skip-existing`      | `boolean`            | `false`        | Skip files that already exist on disk                                   |
-| `--verbose`            | `boolean`            | `false`        | Show detailed output including field mapping decisions                  |
-| `--quiet`              | `boolean`            | `false`        | Suppress info output; still shows success summary, warnings, and errors |
+| Flag                       | Type                 | Default        | Description                                                                                      |
+| -------------------------- | -------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| `--spec <path>`            | `string`             | **(required)** | Path to OpenAPI 3.x spec file (JSON or YAML)                                                     |
+| `--output <path>`          | `string`             | **(required)** | Output directory for generated files                                                             |
+| `--interactive <mode>`     | `'full'` \| `'none'` | `'full'`       | `'full'` prompts for ambiguous fields; `'none'` uses defaults                                    |
+| `--endpoints <list>`       | `string`             | _(none)_       | Comma-separated endpoints: `POST:/pets,GET:/pets/{id}`                                           |
+| `--read-only`              | `boolean`            | `false`        | Generate GET endpoint forms with all fields disabled                                             |
+| `--watch`                  | `boolean`            | `false`        | Watch spec file and regenerate on changes                                                        |
+| `--config <path>`          | `string`             | `<output>`     | Directory containing `.ng-forge-generator.json`                                                  |
+| `--dry-run`                | `boolean`            | `false`        | List files that would be generated without writing them                                          |
+| `--skip-existing`          | `boolean`            | `false`        | Skip files that already exist on disk                                                            |
+| `--barrel-extension <ext>` | `string`             | `""`           | Extension used in barrel file exports, e.g. `.js` for Node ESM; empty for bundler/Angular setups |
+| `--verbose`                | `boolean`            | `false`        | Show detailed output including field mapping decisions                                           |
+| `--quiet`                  | `boolean`            | `false`        | Suppress info output; still shows success summary, warnings, and errors                          |
 
 ## OpenAPI to Field Type Mapping
 
@@ -156,13 +157,13 @@ The generator maps OpenAPI schema types and formats to `@ng-forge/dynamic-forms`
 | -------------------- | -------------------- | ---------------- | ---------------------- |
 | `string`             | `email`              | `input`          | `{ type: 'email' }`    |
 | `string`             | `uri` / `url`        | `input`          | `{ type: 'url' }`      |
-| `string`             | `date` / `date-time` | `datepicker`     | —                      |
+| `string`             | `date` / `date-time` | `datepicker`     | _(none)_               |
 | `string`             | `password`           | `input`          | `{ type: 'password' }` |
 | `string`             | _(none)_             | `input`          | `{ type: 'text' }`     |
-| `string`             | + `enum`             | `select`         | —                      |
+| `string`             | + `enum`             | `select`         | _(none)_               |
 | `integer` / `number` | _(any)_              | `input`          | `{ type: 'number' }`   |
-| `boolean`            | _(any)_              | `checkbox`       | —                      |
-| `array`              | + enum items         | `multi-checkbox` | —                      |
+| `boolean`            | _(any)_              | `checkbox`       | _(none)_               |
+| `array`              | + enum items         | `multi-checkbox` | _(none)_               |
 | `array`              | + object items       | `array`          | _(container)_          |
 | `object`             | _(any)_              | `group`          | _(container)_          |
 
@@ -176,7 +177,7 @@ OpenAPI nullability is preserved end-to-end:
 | 3.1          | `{ type: ['string', 'null'] }`       | `nullable: true`              |
 | Either       | `{ nullable: true, default: null }`  | `nullable: true, value: null` |
 
-See [Configuration → Nullable values](/configuration#nullable-values) for runtime behavior and the read-side caveat.
+See [Nullable values in Configuration](/configuration#nullable-values) for runtime behavior and the read-side caveat.
 
 ### Ambiguous Field Types
 
@@ -197,13 +198,13 @@ OpenAPI schema constraints map directly to `@ng-forge/dynamic-forms` validators:
 
 | OpenAPI Property          | Validator   | Value        |
 | ------------------------- | ----------- | ------------ |
-| Field in `required` array | `required`  | —            |
+| Field in `required` array | `required`  | _(none)_     |
 | `minLength`               | `minLength` | number       |
 | `maxLength`               | `maxLength` | number       |
 | `minimum`                 | `min`       | number       |
 | `maximum`                 | `max`       | number       |
 | `pattern`                 | `pattern`   | regex string |
-| `format: 'email'`         | `email`     | —            |
+| `format: 'email'`         | `email`     | _(none)_     |
 
 ## Schema Support
 
@@ -240,13 +241,13 @@ The generator persists your choices in `.ng-forge-generator.json`:
 }
 ```
 
-On subsequent runs, persisted decisions are reused — so interactive prompts only appear for new or changed fields.
+On subsequent runs, persisted decisions are reused, so interactive prompts only appear for new or changed fields.
 
 ## Interactive vs Non-Interactive Mode
 
-**Interactive (`--interactive full`)** — the default:
+**Interactive (`--interactive full`)** is the default:
 
-1. Prompts you to select which endpoints to generate forms for (POST/PUT/PATCH are pre-selected, GET is unchecked)
+1. Prompts you to select which endpoints to generate forms for (all endpoints are pre-selected; uncheck the ones you don't want)
 2. Prompts for each ambiguous field type choice
 3. Saves decisions to the config file
 
@@ -254,7 +255,7 @@ On subsequent runs, persisted decisions are reused — so interactive prompts on
 
 - Uses all endpoints, or filters by `--endpoints` flag
 - Uses default field type choices for ambiguous fields
-- No prompts — suitable for CI/CD pipelines
+- No prompts, suitable for CI/CD pipelines
 
 ## Watch Mode
 
@@ -287,7 +288,7 @@ Generated files follow this layout:
     └── index.ts
 ```
 
-File names are derived from `operationId` if available, otherwise from the HTTP method and path (e.g. `POST /pets/{id}/tags` → `post-pets-by-id-tags`).
+File names are derived from `operationId` if available, otherwise from the HTTP method and path (e.g. `POST /pets/{id}/tags` becomes `post-pets-by-id-tags`).
 
 ## GET Endpoints
 

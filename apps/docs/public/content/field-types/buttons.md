@@ -23,10 +23,10 @@ Renders a submit button that triggers form submission. Automatically disabled wh
 }
 ```
 
-**Core Props:**
+**Core Properties:**
 
-- `label`: Button text (also set via top-level `label`)
-- `disabled`: Whether the button is disabled
+- `label`: Button text (a top-level field property, not in props)
+- `disabled`: Whether the button is disabled (a top-level field property, not in props)
 
 #### Adapter Props
 
@@ -36,7 +36,7 @@ Renders a submit button that triggers form submission. Automatically disabled wh
 
 ## button
 
-Generic action button. Dispatches a form `event` when clicked — subscribe to the event on the form to handle the click.
+Generic action button. Dispatches a form `event` when clicked; subscribe to the event on the form to handle the click.
 
 ```typescript
 import { FormResetEvent } from '@ng-forge/dynamic-forms';
@@ -54,7 +54,7 @@ import { FormResetEvent } from '@ng-forge/dynamic-forms';
 
 **Core Properties:**
 
-- `event`: Form event constructor dispatched on click (e.g. `FormResetEvent`, `FormClearEvent`, or a custom `FormEvent` subclass) — **required**
+- `event`: Form event constructor dispatched on click (e.g. `FormResetEvent`, `FormClearEvent`, or a custom `FormEvent` subclass). **Required**
 - `label`: Button text
 
 #### Adapter Props
@@ -63,7 +63,7 @@ import { FormResetEvent } from '@ng-forge/dynamic-forms';
 
 ## next
 
-Advances to the next page in a multi-step form. Only valid inside a `page` container. Validates the current page before advancing.
+Advances to the next page in a multi-step form. Only valid inside a `page` container. Automatically disabled while the current page is invalid, so users cannot advance until it is valid.
 
 ```typescript
 {
@@ -123,7 +123,7 @@ Appends a new item to the end of the target array.
 **Core Properties:**
 
 - `arrayKey`: Key of the target array field (required if placed outside the array)
-- `template`: Field definition(s) for the new item — single `FieldDef` for primitive items, array of `FieldDef` for object items (**required**)
+- `template`: Field definition(s) for the new item: a single `FieldDef` for primitive items, an array of `FieldDef` for object items (**required**)
 
 ### prepend-array-item
 
@@ -184,7 +184,7 @@ Removes the current item from the array. Typically placed inside each array item
 
 **Core Properties:**
 
-- `arrayKey`: Key of the target array field (optional when placed inside the array — automatically inferred)
+- `arrayKey`: Key of the target array field (optional when placed inside the array, where it is inferred automatically)
 
 ### pop-array-item
 

@@ -1,6 +1,6 @@
 ---
 title: Value Exclusion
-slug: advanced/value-exclusion
+slug: recipes/value-exclusion
 description: 'Control which field values appear in form submission output based on visibility, disabled, or readonly state. Configure at provider, form, or field level.'
 ---
 
@@ -10,7 +10,7 @@ Value exclusion controls which field values are included in the form submission 
 
 By default, field values are **excluded** from the `(submitted)` output when the field is hidden, disabled, or readonly. This prevents stale or irrelevant data from being sent to the server.
 
-**Key point:** Value exclusion always applies to the submission output. It also applies to the two-way bound model (`[value]` / `[(value)]`) **only when you opt in explicitly** at the field or form level — the global defaults configured via `withValueExclusionDefaults()` are intentionally not applied to the bound model, so the host's view of the form remains predictable. Internal form controls retain their values so they can be restored when an explicitly excluded field becomes visible, enabled, or editable again.
+**Key point:** Value exclusion always applies to the submission output. It also applies to the two-way bound model (`[value]` / `[(value)]`) **only when you opt in explicitly** at the field or form level; the global defaults configured via `withValueExclusionDefaults()` are intentionally not applied to the bound model, so the host's view of the form remains predictable. Internal form controls retain their values so they can be restored when an explicitly excluded field becomes visible, enabled, or editable again.
 
 ## Default Behavior
 
@@ -111,8 +111,8 @@ Given these settings:
 
 Resolution:
 
-- **Field A** uses form-level (`false`) because field-level is `undefined` &rarr; value is **included** when hidden
-- **Field B** uses field-level (`true`) &rarr; value is **excluded** when hidden
+- **Field A** uses form-level (`false`) because field-level is `undefined`, so its value is **included** when hidden
+- **Field B** uses field-level (`true`), so its value is **excluded** when hidden
 
 ## HiddenField Type
 
@@ -126,13 +126,12 @@ Value exclusion applies to the `hidden` **property** on regular fields (e.g., `{
 
 ## What's Excluded vs Retained
 
-| Aspect                     | Affected by exclusion?  | Details                                                                              |
-| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------ |
-| `(submitted)` output       | Yes                     | Excluded fields are omitted (full Field > Form > Global hierarchy applies)           |
-| `filteredFormValue` signal | Yes                     | Same filtering as submission                                                         |
-| `formValue` signal         | No                      | Always contains all values                                                           |
-| `[(value)]` binding        | Only on explicit opt-in | Field- or form-level `excludeValueIf*: true` filters the bound model; global doesn't |
-| Internal form controls     | No                      | Fields keep their values for restoration                                             |
+| Aspect                 | Affected by exclusion?  | Details                                                                              |
+| ---------------------- | ----------------------- | ------------------------------------------------------------------------------------ |
+| `(submitted)` output   | Yes                     | Excluded fields are omitted (full Field > Form > Global hierarchy applies)           |
+| `formValue` signal     | No                      | Always contains all values                                                           |
+| `[(value)]` binding    | Only on explicit opt-in | Field- or form-level `excludeValueIf*: true` filters the bound model; global doesn't |
+| Internal form controls | No                      | Fields keep their values for restoration                                             |
 
 ## Migration from Previous Versions
 
@@ -164,6 +163,6 @@ const config: FormConfig = {
 
 ## Next Steps
 
-- **[Form Submission](/dynamic-behavior/submission)** — Configure async submission with automatic button disabling
-- **[Events](/recipes/events)** — Dispatch and subscribe to form events from inside or outside the form
-- **[Conditional Logic](/dynamic-behavior/overview)** — Control field visibility, required state, and disabled state
+- **[Form Submission](/dynamic-behavior/submission)**: Configure async submission with automatic button disabling
+- **[Events](/recipes/events)**: Dispatch and subscribe to form events from inside or outside the form
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)**: Control field visibility, required state, and disabled state

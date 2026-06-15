@@ -14,6 +14,7 @@ Organize fields into horizontal rows for compact layouts. Rows display fields si
 
 ```typescript
 {
+  key: 'nameRow',
   type: 'row',
   fields: [
     { key: 'firstName', type: 'input', label: 'First Name', value: '', col: 6 },
@@ -30,6 +31,7 @@ Control field widths within rows using the `col` property:
 
 ```typescript
 {
+  key: 'addressRow',
   type: 'row',
   fields: [
     { key: 'city', type: 'input', label: 'City', value: '', col: 6 },
@@ -60,13 +62,13 @@ import { DynamicForm } from '@ng-forge/dynamic-forms';
 @Component({
   selector: 'app-address-form',
   imports: [DynamicForm],
-  template: `<form [dynamic-form]="formConfig"></form>
-    >`,
+  template: `<form [dynamic-form]="formConfig"></form>`,
 })
 export class AddressFormComponent {
   formConfig = {
     fields: [
       {
+        key: 'nameRow',
         type: 'row',
         fields: [
           {
@@ -96,6 +98,7 @@ export class AddressFormComponent {
         email: true,
       },
       {
+        key: 'addressRow',
         type: 'row',
         fields: [
           {
@@ -153,6 +156,7 @@ Rows are layout containers - they don't add nesting to your form values. Fields 
 {
   fields: [
     {
+      key: 'nameRow',
       type: 'row',
       fields: [
         { key: 'firstName', type: 'input', value: '', col: 6 },
@@ -178,9 +182,7 @@ Row fields can be used within:
 - Groups (for layouts within grouped data)
 - Arrays (for layouts within array items)
 
-Rows **cannot** be nested inside:
-
-- Other row fields
+Nesting rows inside other rows is allowed by the types, but it is usually a sign the layout should be flattened into a single row with `col` sizing.
 
 ## Allowed Children
 
@@ -214,10 +216,10 @@ Row containers support the `logic` property to conditionally show or hide the en
 }
 ```
 
-Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
+Only `'hidden'` is supported as a logic type on containers. For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/conditional-logic).
 
 ## Next Steps
 
-- **[Form Groups](/prebuilt/form-groups)** — Nest fields under a single key for structured form data
-- **[Form Arrays](/prebuilt/form-arrays/simplified)** — Create repeating sections with add/remove controls
-- **[Form Pages](/prebuilt/form-pages)** — Build multi-step wizard forms with page navigation
+- **[Form Groups](/prebuilt/form-groups)**: Nest fields under a single key for structured form data
+- **[Form Arrays](/prebuilt/form-arrays/simplified)**: Create repeating sections with add/remove controls
+- **[Form Pages](/prebuilt/form-pages)**: Build multi-step wizard forms with page navigation

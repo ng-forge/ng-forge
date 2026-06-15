@@ -126,6 +126,11 @@ function collectEntries(): SitemapEntry[] {
     entries.push({ slug: `material/wrappers/${page}`, filePath: contentFile(`wrappers/${page}`) });
   }
 
+  // Addons
+  for (const page of ['overview', 'presets-and-actions', 'custom-types']) {
+    entries.push({ slug: `material/addons/${page}`, filePath: contentFile(`addons/${page}`) });
+  }
+
   // Recipes
   for (const page of ['custom-fields', 'expression-parser', 'type-safety', 'events', 'value-exclusion']) {
     entries.push({ slug: `material/recipes/${page}`, filePath: contentFile(`recipes/${page}`) });

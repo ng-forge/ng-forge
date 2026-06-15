@@ -16,8 +16,8 @@ Arrays create dynamic collections of field values. Each item in the `fields` arr
 
 The `fields` property supports two item formats:
 
-- **Single FieldDef** (not wrapped in array) → **Primitive item** - extracts field value directly
-- **Array of FieldDefs** → **Object item** - merges fields into an object
+- **Single FieldDef** (not wrapped in an array) creates a **primitive item**: the field value is extracted directly
+- **Array of FieldDefs** creates an **object item**: the fields are merged into an object
 
 ```typescript
 // Primitive array: ['angular', 'typescript']
@@ -211,14 +211,14 @@ This creates a heterogeneous array:
 
 Use button field types directly in your form configuration for declarative array manipulation:
 
-| Button Type        | Placement        | Description                                      |
-| ------------------ | ---------------- | ------------------------------------------------ |
-| `addArrayItem`     | Outside array    | Appends a new item to the end of the array       |
-| `prependArrayItem` | Outside array    | Inserts a new item at the beginning of the array |
-| `insertArrayItem`  | Outside array    | Inserts a new item at a specific index           |
-| `removeArrayItem`  | Inside each item | Removes the current item from the array          |
-| `popArrayItem`     | Outside array    | Removes the last item from the array             |
-| `shiftArrayItem`   | Outside array    | Removes the first item from the array            |
+| Button Type          | Placement        | Description                                      |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| `add-array-item`     | Outside array    | Appends a new item to the end of the array       |
+| `prepend-array-item` | Outside array    | Inserts a new item at the beginning of the array |
+| `insert-array-item`  | Outside array    | Inserts a new item at a specific index           |
+| `remove-array-item`  | Inside each item | Removes the current item from the array          |
+| `pop-array-item`     | Outside array    | Removes the last item from the array             |
+| `shift-array-item`   | Outside array    | Removes the first item from the array            |
 
 **Important:** Add/prepend/insert buttons **require** a `template` property defining the new item structure. There is no fallback to the array's `fields[0]` - each button must explicitly define what structure to add.
 
@@ -236,7 +236,7 @@ const contactTemplate = [
   { key: 'name', type: 'input', label: 'Name' },
   { key: 'phone', type: 'input', label: 'Phone' },
   // Remove button inside each item (no template needed)
-  { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+  { key: 'remove', type: 'remove-array-item', label: 'Remove' },
 ];
 
 // Form configuration
@@ -250,7 +250,7 @@ const contactTemplate = [
     // Add button for primitive items
     {
       key: 'addTag',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Tag',
       arrayKey: 'tags',
       template: tagTemplate, // Single field = primitive item
@@ -263,7 +263,7 @@ const contactTemplate = [
     // Add button for object items
     {
       key: 'addContact',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Contact',
       arrayKey: 'contacts',
       template: contactTemplate, // Array of fields = object item
@@ -278,8 +278,8 @@ For more control, use the `arrayEvent` builder to dispatch array operations dire
 
 **Which API to use depends on where your code lives:**
 
-- **Inside a custom field component** → inject `EventBus` (it is scoped to the form's DI tree)
-- **From a host/parent component** → provide and inject `EventDispatcher` (see [Events](/recipes/events))
+- **Inside a custom field component**: inject `EventBus` (it is scoped to the form's DI tree)
+- **From a host/parent component**: provide and inject `EventDispatcher` (see [Events](/recipes/events))
 
 **From a host component (most common case):**
 
@@ -364,9 +364,9 @@ Arrays are ideal for:
 - Dynamic collections where items can be added/removed
 - Collection-based data structures where order matters
 
-## Complete Example: Primitive Array with Initial Values
+## Complete Example: Object Array with Row Items
 
-Here's a complete working example of a primitive array field (simple value list) with initial values and declarative add/remove buttons:
+Here's a complete working example of a tag list with initial values and declarative add/remove buttons. Each item is a row wrapping an input and a remove button; rows flatten, so each item produces an object like `{ value: 'featured' }`:
 
 ```typescript
 import { FormConfig } from '@ng-forge/dynamic-forms';
@@ -385,7 +385,7 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'removeArrayItem',
+      type: 'remove-array-item',
       label: 'Remove',
       props: { color: 'warn' },
     },
@@ -405,7 +405,7 @@ const formConfig = {
             type: 'row',
             fields: [
               { key: 'value', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 },
-              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+              { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
             ],
           },
         ],
@@ -415,7 +415,7 @@ const formConfig = {
             type: 'row',
             fields: [
               { key: 'value', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 },
-              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+              { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
             ],
           },
         ],
@@ -424,7 +424,7 @@ const formConfig = {
     // Declarative add button - no EventBus needed
     {
       key: 'addTag',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Tag',
       arrayKey: 'tags',
       template: [tagTemplate],
@@ -433,7 +433,7 @@ const formConfig = {
   ],
 } as const satisfies FormConfig;
 
-// Form value: { tags: [{ tag: { value: 'featured' } }, { tag: { value: 'popular' } }] }
+// Form value: { tags: [{ value: 'featured' }, { value: 'popular' }] }
 ```
 
 ## Complete Example: Object Array with Initial Values
@@ -459,7 +459,7 @@ const contactTemplate = [
   },
   {
     key: 'removeContact',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: 'Remove Contact',
     props: { color: 'warn' },
   },
@@ -495,7 +495,7 @@ const formConfig = {
           },
           {
             key: 'removeContact',
-            type: 'removeArrayItem',
+            type: 'remove-array-item',
             label: 'Remove Contact',
             props: { color: 'warn' },
           },
@@ -505,7 +505,7 @@ const formConfig = {
     // Declarative add button - no EventBus needed
     {
       key: 'addContact',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Contact',
       arrayKey: 'contacts',
       template: contactTemplate,
@@ -566,9 +566,9 @@ Arrays **cannot** contain:
 
 Arrays can contain these field types:
 
-- Leaf fields (input, select, checkbox, etc.) -> creates flat or object arrays
-- Group fields with key -> creates nested object arrays `[{groupKey: {...}}, ...]`
-- Row fields -> creates flat object arrays `[{...}, {...}]` (rows don't add nesting)
+- Leaf fields (input, select, checkbox, etc.), which create flat or object arrays
+- Group fields with a key, which create nested object arrays `[{groupKey: {...}}, ...]`
+- Row fields, which create flat object arrays `[{...}, {...}]` (rows don't add nesting)
 - Button fields (for remove operations inside each item)
 
 See [Type Safety & Inference](/recipes/type-safety) for details on how arrays affect type inference.
@@ -596,7 +596,7 @@ Array containers support the `logic` property to conditionally show or hide the 
 
 When the array is hidden, all items and add/remove buttons are hidden with it. Only `'hidden'` is supported as a logic type on containers.
 
-For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/overview).
+For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/conditional-logic).
 
 ## When to Use the Complete API
 

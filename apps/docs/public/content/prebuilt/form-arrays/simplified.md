@@ -14,7 +14,7 @@ The simplified array API provides a concise way to define dynamic arrays. Instea
 
 ## Overview
 
-The simplified API uses two key properties:
+The simplified API is built around `template` and `value`, plus optional `minLength`/`maxLength`:
 
 | Property    | Description                                                                |
 | ----------- | -------------------------------------------------------------------------- |
@@ -177,7 +177,7 @@ Set `addButton: false` or `removeButton: false` to suppress the corresponding au
 }
 ```
 
-When `removeButton: false` is set for a primitive array, each item renders as a plain field without being wrapped in a row. When set for an object array, the remove button is simply omitted from the item's field list.
+Setting `removeButton: false` simply omits the auto-generated remove control. Primitive items always render as plain fields, never wrapped in a row; for object arrays, the remove button is omitted from the item's field list.
 
 ## Complete Example: Primitive Array
 
@@ -318,6 +318,5 @@ Simplified arrays support `logic` for conditional visibility, just like the comp
 | Custom button placement (buttons outside array) | Complete        |
 | Programmatic control via EventDispatcher        | Complete        |
 | Multiple add buttons (append, prepend, insert)  | Complete        |
-| Nested arrays inside item templates             | Complete        |
 
 As a rule of thumb: **start with the simplified API**. If you hit a limitation, switch to the [complete API](/prebuilt/form-arrays/complete).

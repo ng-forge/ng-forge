@@ -89,7 +89,7 @@ export const arrayConfig = {
     {
       key: 'description1',
       type: 'text',
-      label: 'Tags use addArrayItem (outside) and removeArrayItem (inside each item) buttons.',
+      label: 'Tags use add-array-item (outside) and remove-array-item (inside each item) buttons.',
     },
     {
       key: 'tags',
@@ -168,7 +168,7 @@ export const arrayConfig = {
     {
       key: 'description2',
       type: 'text',
-      label: 'Contacts demonstrate addArrayItem and prependArrayItem buttons outside the array.',
+      label: 'Contacts demonstrate add-array-item and prepend-array-item buttons outside the array.',
     },
     {
       key: 'contacts',

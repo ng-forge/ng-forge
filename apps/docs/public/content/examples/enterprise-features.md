@@ -33,6 +33,9 @@ export class EnterpriseFeaturesFormComponent {
   formValue = signal({});
 
   config = {
+    defaultValidationMessages: {
+      required: 'This field is required',
+    },
     fields: [
       {
         key: 'accountType',
@@ -49,9 +52,12 @@ export class EnterpriseFeaturesFormComponent {
       {
         key: 'teamSize',
         type: 'input',
-        value: null,
+        value: undefined,
         label: 'Team Size',
         min: 1,
+        validationMessages: {
+          min: 'Team size must be at least 1',
+        },
         props: {
           type: 'number',
           hint: 'Number of team members',
@@ -308,6 +314,8 @@ Different tiers have different feature access:
 | Custom Branding   | ✗    | ✗   | ✓                |
 | Dedicated Support | ✗    | ✗   | ✓                |
 
+Note: Custom Branding depends only on the account type. It is hidden for Free and Pro accounts and shown for Enterprise regardless of team size. The team size threshold (10+) applies to SSO and Dedicated Support.
+
 ## Using AND Conditions
 
 For features that require ALL conditions to be met, use `type: 'and'`:
@@ -335,6 +343,6 @@ For features that require ALL conditions to be met, use `type: 'and'`:
 
 ## Related Documentation
 
-- **[Conditional Logic](/dynamic-behavior/overview)** - Full conditional logic guide
+- **[Conditional Logic](/dynamic-behavior/conditional-logic)** - Full conditional logic guide
 - **[Combining Conditions](/dynamic-behavior/conditional-logic)** - AND/OR logic
 - **[Form Groups](/prebuilt/form-groups)** - Organizing fields

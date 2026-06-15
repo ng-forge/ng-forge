@@ -262,14 +262,14 @@
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
               <strong>Validation that hits your API.</strong>
-              An HTTP check is a declared request; debouncing and cancellation come with it.
+              An HTTP check is a declared request; in-flight requests are cancelled when inputs change.
             </div>
           </li>
           <li>
             <span class="serializable-check icon icon--check" aria-hidden="true"></span>
             <div>
               <strong>Computed values as expressions.</strong>
-              <code>derivation: 'qty * price'</code>, not a subscription you wire up by hand.
+              <code>derivation: 'formValue.qty * formValue.price'</code> replaces the subscription you'd otherwise wire up by hand.
             </div>
           </li>
           <li>

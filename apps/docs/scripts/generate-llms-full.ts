@@ -40,7 +40,7 @@ export function generateLlmsFull(): string {
   const mdFiles = collectMarkdownFiles(CONTENT_DIR).sort();
 
   const sections: string[] = [
-    '# ng-forge Dynamic Forms — Full Documentation',
+    '# ng-forge Dynamic Forms: Full Documentation',
     '',
     `> Generated from ${mdFiles.length} documentation files.`,
     `> Source: https://ng-forge.com/dynamic-forms/`,

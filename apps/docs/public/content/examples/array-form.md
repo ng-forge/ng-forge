@@ -40,7 +40,7 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'removeArrayItem',
+      type: 'remove-array-item',
       label: 'Remove',
       className: 'remove-tag-button',
       props: { color: 'warn' },
@@ -83,7 +83,7 @@ const contactTemplate = [
   },
   {
     key: 'removeContact',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: 'Remove Contact',
     className: 'remove-contact-button',
     props: { color: 'warn' },
@@ -111,7 +111,7 @@ export class ArrayFormComponent {
               type: 'row',
               fields: [
                 { key: 'value', type: 'input', label: 'Tag', value: 'angular', required: true, minLength: 2 },
-                { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+                { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
               ],
             },
           ],
@@ -121,7 +121,7 @@ export class ArrayFormComponent {
               type: 'row',
               fields: [
                 { key: 'value', type: 'input', label: 'Tag', value: 'typescript', required: true, minLength: 2 },
-                { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+                { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
               ],
             },
           ],
@@ -130,11 +130,10 @@ export class ArrayFormComponent {
       // Add button placed outside the array
       {
         key: 'addTagButton',
-        type: 'addArrayItem',
+        type: 'add-array-item',
         label: 'Add Tag',
         arrayKey: 'tags',
         template: [tagTemplate],
-        props: { color: 'primary' },
       },
 
       // Object array with multiple fields per item
@@ -158,7 +157,7 @@ export class ArrayFormComponent {
                 { label: 'Other', value: 'other' },
               ],
             },
-            { key: 'removeContact', type: 'removeArrayItem', label: 'Remove Contact', props: { color: 'warn' } },
+            { key: 'removeContact', type: 'remove-array-item', label: 'Remove Contact', props: { color: 'warn' } },
           ],
         ],
       },
@@ -169,7 +168,7 @@ export class ArrayFormComponent {
         fields: [
           {
             key: 'prependContactButton',
-            type: 'prependArrayItem',
+            type: 'prepend-array-item',
             label: 'Add First',
             arrayKey: 'contacts',
             template: contactTemplate,
@@ -177,32 +176,33 @@ export class ArrayFormComponent {
           },
           {
             key: 'addContactButton',
-            type: 'addArrayItem',
+            type: 'add-array-item',
             label: 'Add Contact',
             arrayKey: 'contacts',
             template: contactTemplate,
-            props: { color: 'primary' },
           },
         ],
       },
 
-      { key: 'submit', type: 'submit', label: 'Save All', props: { color: 'primary' } },
+      { key: 'submit', type: 'submit', label: 'Save All' },
     ],
   } as const satisfies FormConfig;
 }
 ```
 
+The live demo config additionally contains section heading and description text fields, omitted here for brevity.
+
 ## Key Features
 
 ### Declarative Add/Remove Buttons
 
-Use `addArrayItem`, `prependArrayItem`, and `removeArrayItem` button types directly in your config:
+Use `add-array-item`, `prepend-array-item`, and `remove-array-item` button types directly in your config:
 
 ```typescript
 // Add button outside the array
 {
   key: 'addTag',
-  type: 'addArrayItem',
+  type: 'add-array-item',
   label: 'Add Tag',
   arrayKey: 'tags',        // Points to the array field
   template: tagTemplate,   // Defines the new item structure
@@ -211,7 +211,7 @@ Use `addArrayItem`, `prependArrayItem`, and `removeArrayItem` button types direc
 // Remove button inside each array item
 {
   key: 'removeTag',
-  type: 'removeArrayItem',
+  type: 'remove-array-item',
   label: 'Remove',
 }
 ```
@@ -225,8 +225,8 @@ Place add/prepend buttons anywhere in the form layout:
   key: 'contactButtons',
   type: 'row',
   fields: [
-    { key: 'prepend', type: 'prependArrayItem', label: 'Add First', arrayKey: 'contacts', template: contactTemplate },
-    { key: 'append', type: 'addArrayItem', label: 'Add Last', arrayKey: 'contacts', template: contactTemplate },
+    { key: 'prepend', type: 'prepend-array-item', label: 'Add First', arrayKey: 'contacts', template: contactTemplate },
+    { key: 'append', type: 'add-array-item', label: 'Add Last', arrayKey: 'contacts', template: contactTemplate },
   ],
 }
 ```
@@ -239,7 +239,7 @@ Each add button defines its own template for what to insert:
 const contactTemplate = [
   { key: 'name', type: 'input', label: 'Name' },
   { key: 'phone', type: 'input', label: 'Phone' },
-  { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+  { key: 'remove', type: 'remove-array-item', label: 'Remove' },
 ];
 ```
 

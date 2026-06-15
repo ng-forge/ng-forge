@@ -1,7 +1,7 @@
 ---
 title: Async
 route: async
-description: 'Derive field values from HTTP endpoints or custom async functions with automatic debouncing, cancellation, and loading state management.'
+description: 'Derive field values from HTTP endpoints or custom async functions with automatic debouncing and in-flight request cancellation.'
 ---
 
 Derive field values from HTTP responses or custom async functions. Async derivations are ideal for server-driven computed values, address/zip lookups, exchange rates, and any value that requires a network call.
@@ -110,12 +110,12 @@ responseExpression: 'response.items[0].value'; // Array access
 
 `source: 'http'` enforces two fields at the TypeScript level:
 
-- **`dependsOn: string[]`** — Explicit field dependencies. The request only re-fires when these fields change.
-- **`responseExpression: string`** — Expression to extract the derived value from the response body.
+- **`dependsOn: string[]`**: Explicit field dependencies. The request only re-fires when these fields change.
+- **`responseExpression: string`**: Expression to extract the derived value from the response body.
 
 ### Controlling Request Timing
 
-Use `trigger` and `debounceMs` to control when requests fire:
+HTTP and async function derivations are always debounced, regardless of `trigger`. Requests wait for dependencies to stop changing (default: 300ms). Use `debounceMs` to adjust the delay:
 
 ```typescript
 {
@@ -127,7 +127,6 @@ Use `trigger` and `debounceMs` to control when requests fire:
   },
   responseExpression: 'response.suggestion',
   dependsOn: ['companyName'],
-  trigger: 'debounced',
   debounceMs: 400,
 }
 ```
@@ -164,7 +163,7 @@ Add a `condition` to only send the request when certain criteria are met:
 
 ## Async Function Derivations
 
-Use `source: 'asyncFunction'` when you need custom logic — Angular service injection, complex transformations, or any async computation not expressible as a plain HTTP config. Functions receive the full evaluation context and can return a `Promise` or `Observable`.
+Use `source: 'asyncFunction'` when you need custom logic: Angular service injection, complex transformations, or any async computation not expressible as a plain HTTP config. Functions receive the full evaluation context and can return a `Promise` or `Observable`.
 
 ### Basic Example
 
@@ -259,8 +258,8 @@ The async function is only called when `enableLookup === true`.
 
 `source: 'asyncFunction'` requires:
 
-- **One of `asyncFunctionName: string` or `asyncFn: AsyncDerivationFunction`** — see [Inline alternative](#inline-alternative-asyncfn) below. The two are mutually exclusive.
-- **`dependsOn: string[]`** — Explicit field dependencies. Without this, the function would re-run on every form change.
+- **One of `asyncFunctionName: string` or `asyncFn: AsyncDerivationFunction`**: see [Inline alternative](#inline-alternative-asyncfn) below. The two are mutually exclusive.
+- **`dependsOn: string[]`**: Explicit field dependencies. Without this, the function would re-run on every form change.
 
 ### Inline alternative (`asyncFn`)
 
@@ -295,7 +294,7 @@ const formConfig = {
 } as const satisfies FormConfig;
 ```
 
-Inject Angular services inside `asyncFn` the same way you would inside a registered function — both run in the form's injection context.
+Inject Angular services inside `asyncFn` the same way you would inside a registered function. Both run in the form's injection context.
 
 Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); use `asyncFn` for code-only configs. TypeScript rejects setting both keys, and the runtime warns + prefers `asyncFn` if a JSON config sneaks both through.
 
@@ -303,7 +302,7 @@ Use `asyncFunctionName` for configs loaded over the wire (APIs, OpenAPI, MCP); u
 
 ## Stop On User Override
 
-`stopOnUserOverride` turns a derivation into a "smart default" — the field is auto-filled initially, but derivation stops once the user manually edits it.
+`stopOnUserOverride` turns a derivation into a "smart default": the field is auto-filled initially, but derivation stops once the user manually edits it.
 
 ### Basic Example
 
@@ -352,7 +351,7 @@ Use `reEngageOnDependencyChange: true` to clear the user override when a depende
 }
 ```
 
-When the user changes the country, the phone prefix is auto-filled again — overriding any previous manual edit.
+When the user changes the country, the phone prefix is auto-filled again, overriding any previous manual edit.
 
 **Without** `reEngageOnDependencyChange`: once the user edits the field, the derivation never runs again for that field instance.
 
@@ -401,8 +400,8 @@ When the user changes the country, the phone prefix is auto-filled again — ove
   responseExpression: string; // Required — expression to extract value from response
 
   // Shared optional fields
-  trigger?: 'onChange' | 'debounced'; // Default: 'onChange'
-  debounceMs?: number;                // Default: 500 (when trigger: 'debounced')
+  trigger?: 'onChange' | 'debounced'; // No effect here: HTTP requests are always debounced
+  debounceMs?: number;                // Default: 300
   condition?: ConditionalExpression | boolean;
   stopOnUserOverride?: boolean;
   reEngageOnDependencyChange?: boolean;
@@ -427,8 +426,8 @@ When the user changes the country, the phone prefix is auto-filled again — ove
   dependsOn: string[];       // Required — explicit field dependencies
 
   // Shared optional fields
-  trigger?: 'onChange' | 'debounced';
-  debounceMs?: number;
+  trigger?: 'onChange' | 'debounced'; // No effect here: async functions are always debounced
+  debounceMs?: number;                // Default: 300
   condition?: ConditionalExpression | boolean;
   stopOnUserOverride?: boolean;
   reEngageOnDependencyChange?: boolean;
@@ -438,7 +437,7 @@ When the user changes the country, the phone prefix is auto-filled again — ove
 
 ## Related
 
-- **[Values](/dynamic-behavior/derivation/values)** — Expression, static value, and function-based derivations
-- **[Properties](/dynamic-behavior/derivation/property)** — Derive component properties from form values
-- **[HTTP Conditions](/dynamic-behavior/conditional-logic)** — HTTP-driven field visibility and state
-- **[Custom Validators](/validation/custom-validators)** — Async and HTTP validation
+- **[Values](/dynamic-behavior/derivation/values)**: Expression, static value, and function-based derivations
+- **[Properties](/dynamic-behavior/derivation/property)**: Derive component properties from form values
+- **[HTTP Conditions](/dynamic-behavior/conditional-logic)**: HTTP-driven field visibility and state
+- **[Custom Validators](/validation/custom-validators)**: Async and HTTP validation
