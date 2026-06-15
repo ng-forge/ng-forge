@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check CI workflow status
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -140,7 +140,7 @@ jobs:
       tag_ns: ${{ steps.gate.outputs.tag_ns }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: main
           fetch-depth: 0
@@ -311,7 +311,7 @@ jobs:
         # the output is actually emitted.
         if: steps.gate.outputs.should_publish == 'true'
         id: ci-check
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             // Fail-safe default: if anything below throws before we explicitly flip this
@@ -364,7 +364,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           # Pin to an immutable SHA so a commit landing between gate/check-ci and release
           # can't be silently published:
@@ -377,12 +377,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
         with:
           version: 10.28.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: '24'
           cache: 'pnpm'
@@ -447,7 +447,7 @@ jobs:
         # schedule|next), so a single shared token is sufficient.
         if: inputs.mode == 'publish' || github.event_name == 'schedule' || inputs.mode == 'next'
         id: app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
@@ -561,7 +561,7 @@ jobs:
         # `id` is consumed by the Notify Discord step below to gate on actual success.
         id: gh-release
         if: inputs.mode == 'publish'
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           tag_name: v${{ env.VERSION }}
           target_commitish: ${{ github.sha }}
@@ -611,7 +611,7 @@ jobs:
         id: gh-prerelease
         if: github.event_name == 'schedule' || inputs.mode == 'next'
         continue-on-error: true
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: ${{ needs.next-gate.outputs.sha }}
