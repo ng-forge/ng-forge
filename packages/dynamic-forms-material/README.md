@@ -20,7 +20,7 @@ Material Design field components for [@ng-forge/dynamic-forms](https://www.npmjs
 
 | @ng-forge/dynamic-forms-material | @ng-forge/dynamic-forms | Angular       |
 | -------------------------------- | ----------------------- | ------------- |
-| 1.0.x                            | 1.0.x                   | ~22.0.0       |
+| 1.0.x                            | 1.0.x                   | ^22.0.0       |
 | 0.9.x                            | 0.9.x                   | >=21.2.0      |
 | 0.8.x                            | 0.8.x                   | >=21.2.0      |
 | 0.7.x                            | 0.7.x                   | >=21.2.0      |

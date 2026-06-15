@@ -20,7 +20,7 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 
 | @ng-forge/dynamic-forms | Angular       |
 | ----------------------- | ------------- |
-| 1.0.x                   | ~22.0.0       |
+| 1.0.x                   | ^22.0.0       |
 | 0.9.x                   | >=21.2.0      |
 | 0.8.x                   | >=21.2.0      |
 | 0.7.x                   | >=21.2.0      |

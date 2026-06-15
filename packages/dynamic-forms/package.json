@@ -36,9 +36,9 @@
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },
   "peerDependencies": {
-    "@angular/common": "~22.0.0",
-    "@angular/core": "~22.0.0",
-    "@angular/forms": "~22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
     "@standard-schema/spec": "^1.0.0",
     "rxjs": ">=7.0.0"
   },
