@@ -62,14 +62,14 @@ export const IONIC_FIELD_TYPES: FieldTypeDefinition[];
 export const IONIC_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
 
 // @public
-export type IonicAddArrayItemButtonField = Omit<IonicButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicAddArrayItemButtonField = Omit<IonicButtonField<AppendArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'add-array-item' | 'addArrayItem';
     arrayKey?: string;
     template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 // @public
-export type IonicAddon = IonicIconAddon | IonicButtonAddon;
+export type IonicAddon = IonicButtonAddon | IonicIconAddon;
 
 // @public
 export interface IonicAddonExtensions {
@@ -85,9 +85,9 @@ export class IonicButtonAddonComponent {
     protected readonly addon: _angular_core.Signal<IonicButtonAddon>;
     // (undocumented)
     protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    protected readonly color: _angular_core.Signal<("primary" | "secondary" | "tertiary" | "success" | "warning" | "danger" | "light" | "medium" | "dark") | undefined>;
+    protected readonly color: _angular_core.Signal<("danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning") | undefined>;
     // (undocumented)
-    protected readonly fill: _angular_core.Signal<"clear" | "outline" | "solid" | "default">;
+    protected readonly fill: _angular_core.Signal<"clear" | "default" | "outline" | "solid">;
     // (undocumented)
     protected readonly icon: _angular_core.Signal<string | undefined>;
     protected readonly iconOnly: _angular_core.Signal<boolean>;
@@ -109,7 +109,7 @@ export class IonicButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"button" | "submit" | "reset">;
+    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
     // (undocumented)
     onClick(): void;
     // (undocumented)
@@ -123,19 +123,19 @@ export class IonicButtonFieldComponent<TEvent extends FormEvent> {
 // @public (undocumented)
 export interface IonicButtonProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
-    expand?: 'full' | 'block';
+    expand?: 'block' | 'full';
     // (undocumented)
-    fill?: 'clear' | 'outline' | 'solid' | 'default';
+    fill?: 'clear' | 'default' | 'outline' | 'solid';
     // (undocumented)
     shape?: 'round';
     // (undocumented)
-    size?: 'small' | 'default' | 'large';
+    size?: 'default' | 'large' | 'small';
     // (undocumented)
     strong?: boolean;
     // (undocumented)
-    type?: 'button' | 'submit' | 'reset';
+    type?: 'button' | 'reset' | 'submit';
 }
 
 // @public (undocumented)
@@ -156,26 +156,26 @@ export class IonicCheckboxFieldComponent {
 // @public (undocumented)
 export interface IonicCheckboxProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
     indeterminate?: boolean;
     // (undocumented)
-    justify?: 'start' | 'end' | 'space-between';
+    justify?: 'end' | 'space-between' | 'start';
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+    labelPlacement?: 'end' | 'fixed' | 'stacked' | 'start';
 }
 
 // @public
 export interface IonicConfig {
-    buttonFill?: 'clear' | 'outline' | 'solid' | 'default';
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
-    expand?: 'full' | 'block';
-    fill?: 'solid' | 'outline';
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
+    buttonFill?: 'clear' | 'default' | 'outline' | 'solid';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    expand?: 'block' | 'full';
+    fill?: 'outline' | 'solid';
+    labelPlacement?: 'end' | 'fixed' | 'floating' | 'stacked' | 'start';
     shape?: 'round';
-    size?: 'small' | 'default' | 'large';
+    size?: 'default' | 'large' | 'small';
     strong?: boolean;
 }
 
@@ -217,7 +217,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
     // (undocumented)
     cancelText?: string;
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     doneText?: string;
     // (undocumented)
@@ -227,7 +227,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
     // (undocumented)
     preferWheel?: boolean;
     // (undocumented)
-    presentation?: 'date' | 'date-time' | 'time' | 'time-date' | 'month' | 'month-year' | 'year';
+    presentation?: 'date' | 'date-time' | 'month' | 'month-year' | 'time' | 'time-date' | 'year';
     // (undocumented)
     showClearButton?: boolean;
     // (undocumented)
@@ -298,7 +298,7 @@ export class IonicIconAddonComponent {
 }
 
 // @public
-export type IonicInputAddon = IonicIconAddon | IonicButtonAddon | TextAddon | TemplateAddon | IonicAddonExtension;
+export type IonicInputAddon = IonicAddonExtension | IonicButtonAddon | IonicIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type IonicInputField = InputField<IonicInputProps> & {
@@ -312,15 +312,15 @@ export class IonicInputFieldComponent {
     // (undocumented)
     protected readonly buttonSuffixAddons: _angular_core.Signal<_ng_forge_dynamic_forms_ionic.IonicButtonAddon[]>;
     // (undocumented)
-    protected readonly color: _angular_core.Signal<"primary" | "secondary" | "tertiary" | "success" | "warning" | "danger" | "light" | "medium" | "dark" | undefined>;
+    protected readonly color: _angular_core.Signal<"danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning" | undefined>;
     // (undocumented)
-    protected readonly decorativePrefixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
+    protected readonly decorativePrefixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
     // (undocumented)
-    protected readonly decorativeSuffixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
+    protected readonly decorativeSuffixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
     readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     protected readonly fill: _angular_core.Signal<"outline" | "solid">;
-    protected readonly labelPlacement: _angular_core.Signal<"start" | "end" | "fixed" | "stacked" | "floating">;
+    protected readonly labelPlacement: _angular_core.Signal<"end" | "fixed" | "floating" | "stacked" | "start">;
     // (undocumented)
     protected readonly ngf: i1.TypedNgForgeField<string>;
     // (undocumented)
@@ -341,23 +341,23 @@ export interface IonicInputProps extends InputProps {
     // (undocumented)
     clearInput?: boolean;
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     counter?: boolean;
     // (undocumented)
     errorText?: DynamicText;
     // (undocumented)
-    fill?: 'solid' | 'outline';
+    fill?: 'outline' | 'solid';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
+    labelPlacement?: 'end' | 'fixed' | 'floating' | 'stacked' | 'start';
     // (undocumented)
     shape?: 'round';
 }
 
 // @public
-export type IonicInsertArrayItemButtonField = Omit<IonicButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicInsertArrayItemButtonField = Omit<IonicButtonField<InsertArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'insert-array-item' | 'insertArrayItem';
     arrayKey?: string;
     index: number;
@@ -390,35 +390,35 @@ export class IonicMultiCheckboxFieldComponent {
 // @public (undocumented)
 export interface IonicMultiCheckboxProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    justify?: 'start' | 'end' | 'space-between';
+    justify?: 'end' | 'space-between' | 'start';
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+    labelPlacement?: 'end' | 'fixed' | 'stacked' | 'start';
 }
 
 // @public
-export type IonicNextButtonField = Omit<IonicButtonField<NextPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicNextButtonField = Omit<IonicButtonField<NextPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'next';
 };
 
 // @public
-export type IonicPopArrayItemButtonField = Omit<IonicButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicPopArrayItemButtonField = Omit<IonicButtonField<PopArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'pop-array-item' | 'popArrayItem';
     arrayKey: string;
 };
 
 // @public
-export type IonicPrependArrayItemButtonField = Omit<IonicButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicPrependArrayItemButtonField = Omit<IonicButtonField<PrependArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'prepend-array-item' | 'prependArrayItem';
     arrayKey?: string;
     template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 // @public
-export type IonicPreviousButtonField = Omit<IonicButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicPreviousButtonField = Omit<IonicButtonField<PreviousPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'previous';
 };
 
@@ -444,19 +444,19 @@ export class IonicRadioFieldComponent {
 // @public (undocumented)
 export interface IonicRadioProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     compareWith?: (o1: ValueType, o2: ValueType) => boolean;
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    justify?: 'start' | 'end' | 'space-between';
+    justify?: 'end' | 'space-between' | 'start';
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+    labelPlacement?: 'end' | 'fixed' | 'stacked' | 'start';
 }
 
 // @public
-export type IonicRemoveArrayItemButtonField = Omit<IonicButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicRemoveArrayItemButtonField = Omit<IonicButtonField<RemoveAtIndexEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'remove-array-item' | 'removeArrayItem';
     arrayKey?: string;
 };
@@ -485,19 +485,19 @@ export interface IonicSelectProps extends SelectProps {
     // (undocumented)
     cancelText?: string;
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     compareWith?: (o1: ValueType, o2: ValueType) => boolean;
     // (undocumented)
-    fill?: 'solid' | 'outline';
+    fill?: 'outline' | 'solid';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    interface?: 'action-sheet' | 'popover' | 'alert';
+    interface?: 'action-sheet' | 'alert' | 'popover';
     // (undocumented)
     interfaceOptions?: unknown;
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
+    labelPlacement?: 'end' | 'fixed' | 'floating' | 'stacked' | 'start';
     // (undocumented)
     multiple?: boolean;
     // (undocumented)
@@ -507,7 +507,7 @@ export interface IonicSelectProps extends SelectProps {
 }
 
 // @public
-export type IonicShiftArrayItemButtonField = Omit<IonicButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicShiftArrayItemButtonField = Omit<IonicButtonField<ShiftArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'shift-array-item' | 'shiftArrayItem';
     arrayKey: string;
 };
@@ -534,19 +534,19 @@ export class IonicSliderFieldComponent {
 // @public (undocumented)
 export interface IonicSliderProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     dualKnobs?: boolean;
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+    labelPlacement?: 'end' | 'fixed' | 'stacked' | 'start';
     max?: number;
     min?: number;
     // (undocumented)
     pin?: boolean;
     // (undocumented)
-    pinFormatter?: (value: number) => string | number;
+    pinFormatter?: (value: number) => number | string;
     // (undocumented)
     snaps?: boolean;
     step?: number;
@@ -555,7 +555,7 @@ export interface IonicSliderProps {
 }
 
 // @public
-export type IonicSubmitButtonField = Omit<IonicButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type IonicSubmitButtonField = Omit<IonicButtonField<FormSubmitEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'submit';
 };
 
@@ -580,17 +580,17 @@ export interface IonicTextareaProps extends TextareaProps {
     // (undocumented)
     autoGrow?: boolean;
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     counter?: boolean;
     // (undocumented)
     errorText?: DynamicText;
     // (undocumented)
-    fill?: 'solid' | 'outline';
+    fill?: 'outline' | 'solid';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
+    labelPlacement?: 'end' | 'fixed' | 'floating' | 'stacked' | 'start';
     // (undocumented)
     shape?: 'round';
 }
@@ -613,15 +613,15 @@ export class IonicToggleFieldComponent {
 // @public (undocumented)
 export interface IonicToggleProps {
     // (undocumented)
-    color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     enableOnOffLabels?: boolean;
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    justify?: 'start' | 'end' | 'space-between';
+    justify?: 'end' | 'space-between' | 'start';
     // (undocumented)
-    labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
+    labelPlacement?: 'end' | 'fixed' | 'stacked' | 'start';
 }
 
 // @public

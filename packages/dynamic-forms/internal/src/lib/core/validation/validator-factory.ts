@@ -171,9 +171,7 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
   } else if (config.fn || config.functionName) {
     validatorFn = createFunctionValidator(config);
   } else {
-    const logger = inject(DynamicFormLogger);
-    logger.warn('Custom validator must have one of "expression", "functionName", or "fn"');
-    return;
+    throw new DynamicFormError('Custom validator requires one of "expression", "functionName", or "fn".');
   }
 
   const whenLogic = createConditionalLogic(config.when);
@@ -199,8 +197,7 @@ function createFunctionValidator(
 
   const functionName = config.functionName;
   if (!functionName) {
-    logger.warn('Custom validator missing functionName');
-    return () => null;
+    throw new DynamicFormError('Custom validator requires one of "functionName" or "fn".');
   }
 
   const registry = inject(FunctionRegistryService);
@@ -219,8 +216,7 @@ function createExpressionValidator(
   const logger = inject(DynamicFormLogger);
   const expression = config.expression;
   if (!expression) {
-    logger.warn('Custom validator missing expression');
-    return () => null;
+    throw new DynamicFormError('Custom validator requires a non-empty "expression".');
   }
 
   const fieldContextRegistry = inject(FieldContextRegistryService);

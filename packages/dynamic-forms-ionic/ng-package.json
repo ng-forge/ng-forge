@@ -4,6 +4,6 @@
   "lib": {
     "entryFile": "src/index.ts"
   },
-  "assets": ["styles/_defaults.scss"],
+  "assets": ["styles/_defaults.scss", "LICENSE"],
   "allowedNonPeerDependencies": ["@ng-forge/dynamic-forms", "date-fns", "ngxtension"]
 }

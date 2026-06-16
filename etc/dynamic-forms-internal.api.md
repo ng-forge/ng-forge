@@ -36,7 +36,7 @@ export const ADDON_ACTION_REGISTRY: InjectionToken<ReadonlyMap<string, AddonActi
 // @internal
 export const ADDON_TYPE_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
-// @internal
+// @public
 export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<_ng_forge_dynamic_forms_internal.BaseAddon<_ng_forge_dynamic_forms_internal.AddonSlot>>[]>;
 
 // @public
@@ -49,7 +49,7 @@ export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<
 export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TValue>) => void;
 
 // @public
-export type AddonActionPreset = CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry | (string & {});
+export type AddonActionPreset = (string & {}) | CommonAddonActionPreset | keyof DynamicFormAddonActionPresetRegistry;
 
 // @public
 export type AddonShapeValidator<T extends BaseAddon = BaseAddon> = (addon: T, fieldKey: string) => void;
@@ -90,7 +90,7 @@ export interface AddonTypeSchema {
     readonly $schema?: string;
     readonly [key: string]: unknown;
     // (undocumented)
-    readonly additionalProperties?: boolean | AddonTypeSchema;
+    readonly additionalProperties?: AddonTypeSchema | boolean;
     // (undocumented)
     readonly allOf?: ReadonlyArray<AddonTypeSchema>;
     // (undocumented)
@@ -130,7 +130,7 @@ export interface AddonTypeSchema {
     // (undocumented)
     readonly title?: string;
     // (undocumented)
-    readonly type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null' | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
+    readonly type?: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string' | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
 }
 
 // @public
@@ -156,7 +156,7 @@ export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPat
 export const ARRAY_CONTEXT: InjectionToken<ArrayContext>;
 
 // @public
-export type ArrayAllowedChildren = LeafFieldTypes | RowField | GroupField | ContainerField;
+export type ArrayAllowedChildren = ContainerField | GroupField | LeafFieldTypes | RowField;
 
 // @public
 export interface ArrayButtonConfig {
@@ -223,19 +223,19 @@ export interface ArrowFunctionNode {
 export function assertNever(value: never): never;
 
 // @public
-export type ASTNode = LiteralNode | IdentifierNode | MemberAccessNode | ComputedMemberAccessNode | BinaryOpNode | UnaryOpNode | CallExpressionNode | ConditionalNode | ArrayLiteralNode | ObjectLiteralNode | ArrowFunctionNode;
+export type ASTNode = ArrayLiteralNode | ArrowFunctionNode | BinaryOpNode | CallExpressionNode | ComputedMemberAccessNode | ConditionalNode | IdentifierNode | LiteralNode | MemberAccessNode | ObjectLiteralNode | UnaryOpNode;
 
 // @public
 export type AsyncCondition = (AsyncConditionBase & {
-    asyncFunctionName: string;
-    asyncFn?: never;
-}) | (AsyncConditionBase & {
     asyncFn: AsyncConditionFunction;
     asyncFunctionName?: never;
+}) | (AsyncConditionBase & {
+    asyncFunctionName: string;
+    asyncFn?: never;
 });
 
 // @public
-export type AsyncConditionFunction<TFormValue extends Record<string, unknown> = any> = (context: EvaluationContext<unknown, TFormValue>) => Promise<boolean> | Observable<boolean>;
+export type AsyncConditionFunction<TFormValue extends Record<string, unknown> = Record<string, unknown>> = (context: EvaluationContext<unknown, TFormValue>) => Observable<boolean> | Promise<boolean>;
 
 // @public
 export class AsyncConditionFunctionCacheService {
@@ -251,15 +251,15 @@ export interface AsyncCustomValidator<TValue = unknown, TParams = unknown, TResu
 }
 
 // @public
-export type AsyncDerivationFunction<TFormValue extends Record<string, unknown> = any> = (context: EvaluationContext<unknown, TFormValue>) => Promise<unknown> | Observable<unknown>;
+export type AsyncDerivationFunction<TFormValue extends Record<string, unknown> = Record<string, unknown>> = (context: EvaluationContext<unknown, TFormValue>) => Observable<unknown> | Promise<unknown>;
 
 // @public
 export type AsyncValidatorConfig = (AsyncValidatorConfigShared & {
-    functionName: string;
-    fn?: never;
-}) | (AsyncValidatorConfigShared & {
     fn: AsyncCustomValidator;
     functionName?: never;
+}) | (AsyncValidatorConfigShared & {
+    functionName: string;
+    fn?: never;
 });
 
 // @public
@@ -319,8 +319,8 @@ export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Reco
 // @public
 export interface BuiltInValidatorConfig extends BaseValidatorConfig {
     expression?: string;
-    type: 'required' | 'email' | 'min' | 'max' | 'minLength' | 'maxLength' | 'pattern';
-    value?: number | string | RegExp;
+    type: 'email' | 'max' | 'maxLength' | 'min' | 'minLength' | 'pattern' | 'required';
+    value?: RegExp | number | string;
 }
 
 // @public
@@ -328,7 +328,7 @@ export interface ButtonLogicContext {
     currentPageValid?: Signal<boolean>;
     explicitlyDisabled?: boolean;
     fieldLogic?: LogicConfig[];
-    form: FieldTree<unknown, string | number>;
+    form: FieldTree<unknown, number | string>;
     formOptions?: FormOptions;
     formValue?: unknown;
     logger?: Logger;
@@ -349,7 +349,7 @@ export interface CallExpressionNode {
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys$1>>>;
 
 // @public
-export type CommonAddonActionPreset = 'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility';
+export type CommonAddonActionPreset = 'clear' | 'copy' | 'paste' | 'reset' | 'toggle-password-visibility';
 
 // @public
 export type CommonAddonSlot = 'prefix' | 'suffix';
@@ -358,7 +358,7 @@ export type CommonAddonSlot = 'prefix' | 'suffix';
 export function compareValues(actual: unknown, expected: unknown, operator: string): boolean;
 
 // @public
-export type ComparisonOperator = 'equals' | 'notEquals' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'contains' | 'startsWith' | 'endsWith' | 'matches';
+export type ComparisonOperator = 'contains' | 'endsWith' | 'equals' | 'greater' | 'greaterOrEqual' | 'less' | 'lessOrEqual' | 'matches' | 'notEquals' | 'startsWith';
 
 // @public
 export interface ComponentAddon extends BaseAddon {
@@ -374,11 +374,11 @@ export interface ComponentAddon extends BaseAddon {
 
 // @public (undocumented)
 export class ComponentInitializedEvent implements FormEvent {
-    constructor(componentType: 'dynamic-form' | 'page' | 'group' | 'array' | 'container', componentId: string);
+    constructor(componentType: 'array' | 'container' | 'dynamic-form' | 'group' | 'page', componentId: string);
     // (undocumented)
     componentId: string;
     // (undocumented)
-    componentType: 'dynamic-form' | 'page' | 'group' | 'array' | 'container';
+    componentType: 'array' | 'container' | 'dynamic-form' | 'group' | 'page';
     // (undocumented)
     readonly type: "component-initialized";
 }
@@ -394,7 +394,7 @@ export interface ComputedMemberAccessNode {
 }
 
 // @public
-export type ConditionalExpression = FieldValueCondition | CustomCondition | JavascriptCondition | HttpCondition | AsyncCondition | AndCondition | OrCondition;
+export type ConditionalExpression = AndCondition | AsyncCondition | CustomCondition | FieldValueCondition | HttpCondition | JavascriptCondition | OrCondition;
 
 // @public (undocumented)
 export interface ConditionalNode {
@@ -409,7 +409,7 @@ export interface ConditionalNode {
 }
 
 // @public
-export type ContainerAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField;
+export type ContainerAllowedChildren = ArrayField | ContainerField | GroupField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public (undocumented)
 export type ContainerComponent = FieldComponent<ContainerField<ContainerAllowedChildren[]>>;
@@ -476,12 +476,12 @@ export interface CssWrapper {
 // @public
 export type CustomCondition = {
     type: 'custom';
-    functionName: string;
-    fn?: never;
-} | {
-    type: 'custom';
     fn: CustomFunction;
     functionName?: never;
+} | {
+    type: 'custom';
+    functionName: string;
+    fn?: never;
 };
 
 // @public
@@ -496,7 +496,7 @@ export interface CustomFnConfig<TFormValue extends Record<string, unknown> = Rec
 }
 
 // @public
-export type CustomFunction<TFormValue extends Record<string, unknown> = any> = (context: EvaluationContext<unknown, TFormValue>) => unknown;
+export type CustomFunction<TFormValue extends Record<string, unknown> = Record<string, unknown>> = (context: EvaluationContext<unknown, TFormValue>) => unknown;
 
 // @public
 export interface CustomFunctionOptions {
@@ -548,7 +548,7 @@ export interface DerivationLogConfig {
 }
 
 // @public
-export type DerivationLogicConfig = OnChangeHttpDerivationLogicConfig | DebouncedHttpDerivationLogicConfig | OnChangeAsyncFunctionDerivationLogicConfig | DebouncedAsyncFunctionDerivationLogicConfig | OnChangeExpressionDerivationLogicConfig | DebouncedExpressionDerivationLogicConfig | OnChangeValueDerivationLogicConfig | DebouncedValueDerivationLogicConfig | OnChangeFunctionDerivationLogicConfig | DebouncedFunctionDerivationLogicConfig;
+export type DerivationLogicConfig = DebouncedAsyncFunctionDerivationLogicConfig | DebouncedExpressionDerivationLogicConfig | DebouncedFunctionDerivationLogicConfig | DebouncedHttpDerivationLogicConfig | DebouncedValueDerivationLogicConfig | OnChangeAsyncFunctionDerivationLogicConfig | OnChangeExpressionDerivationLogicConfig | OnChangeFunctionDerivationLogicConfig | OnChangeHttpDerivationLogicConfig | OnChangeValueDerivationLogicConfig;
 
 // @public
 export type DerivationLogLevel = 'none' | 'summary' | 'verbose';
@@ -582,7 +582,7 @@ export class DfAddonSlot {
     // (undocumented)
     readonly addon: i0.InputSignal<AnyAddon>;
     // (undocumented)
-    protected readonly className: Signal<string | null>;
+    protected readonly className: Signal<null | string>;
     readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
     readonly hidden: i0.InputSignal<Signal<boolean> | undefined>;
     protected readonly isHidden: Signal<boolean>;
@@ -636,7 +636,7 @@ export interface DynamicFormFieldRegistry {
 export const DynamicFormLogger: InjectionToken<Logger>;
 
 // @public (undocumented)
-export type DynamicText = string | Observable<string> | Signal<string>;
+export type DynamicText = Observable<string> | Signal<string> | string;
 
 // @public
 export class DynamicTextPipe implements PipeTransform {
@@ -651,7 +651,7 @@ export class DynamicTextPipe implements PipeTransform {
 export function dynamicTextToObservable(value: DynamicText | undefined, injector?: Injector): Observable<string>;
 
 // @public
-export type DynamicValue<T> = T | Signal<T> | Observable<T>;
+export type DynamicValue<T> = Observable<T> | Signal<T> | T;
 
 // @public
 export class DynamicValueFunctionCacheService {
@@ -671,7 +671,7 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean;
 export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean;
 
 // @public (undocumented)
-export interface EvaluationContext<TValue = unknown, TFormValue extends Record<string, unknown> = any> {
+export interface EvaluationContext<TValue = unknown, TFormValue extends Record<string, unknown> = Record<string, unknown>> {
     [key: string]: unknown;
     arrayIndex?: number;
     arrayPath?: string;
@@ -797,16 +797,16 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
     skipAutoWrappers?: boolean;
     skipDefaultWrappers?: boolean;
     tabIndex?: number | undefined;
-    type: RegisteredFieldTypes['type'] | (string & {});
+    type: (string & {}) | RegisteredFieldTypes['type'];
     validateWhenHidden?: boolean;
-    wrappers?: readonly WrapperConfig[] | null;
+    wrappers?: null | readonly WrapperConfig[];
 }
 
 // @public
 export interface FieldMeta {
     [key: `data-${string}`]: string | undefined;
-    [key: `aria-${string}`]: string | boolean | undefined;
-    [key: string]: string | number | boolean | undefined;
+    [key: `aria-${string}`]: boolean | string | undefined;
+    [key: string]: boolean | number | string | undefined;
 }
 
 // @public (undocumented)
@@ -857,7 +857,7 @@ export interface FieldRegistryWrappers {
 }
 
 // @public
-export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-input' | 'numeric' | 'date';
+export type FieldScope = 'boolean' | 'date' | 'multi-select' | 'numeric' | 'single-select' | 'text-input';
 
 // @public
 export interface FieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>> {
@@ -934,7 +934,7 @@ export interface FieldWithValidation {
     // (undocumented)
     readonly minLength?: number;
     // (undocumented)
-    readonly pattern?: string | RegExp;
+    readonly pattern?: RegExp | string;
     // (undocumented)
     readonly required?: boolean;
     // (undocumented)
@@ -983,7 +983,7 @@ export type FormEventConstructor<T extends FormEvent = FormEvent> = new (...args
 export type FormFieldStateMap = Record<string, FieldStateInfo | undefined>;
 
 // @public
-export type FormMode = 'paged' | 'non-paged';
+export type FormMode = 'non-paged' | 'paged';
 
 // @public
 export interface FormModeDetectionResult {
@@ -1009,19 +1009,15 @@ export interface FormOptions {
 // @public
 export type FormStateCondition =
 /** True when form.valid() === false */
-'formInvalid'
-/** True when form.submitting() === true */
-| 'formSubmitting'
-/** True when fields on the current page are invalid (for paged forms) */
-| 'pageInvalid';
+'formInvalid' | 'formSubmitting' | 'pageInvalid';
 
 // @public
 export type FunctionHttpValidatorConfig = (FunctionHttpValidatorConfigShared & {
-    functionName: string;
-    fn?: never;
-}) | (FunctionHttpValidatorConfigShared & {
     fn: HttpCustomValidator;
     functionName?: never;
+}) | (FunctionHttpValidatorConfigShared & {
+    functionName: string;
+    fn?: never;
 });
 
 // @public
@@ -1049,14 +1045,14 @@ export class FunctionRegistryService {
     registerAsyncConditionFunction(name: string, fn: AsyncConditionFunction): void;
     registerAsyncDerivationFunction(name: string, fn: AsyncDerivationFunction): void;
     registerAsyncValidator(name: string, fn: AsyncCustomValidator): void;
-    registerCustomFunction(name: string, fn: CustomFunction, options?: CustomFunctionOptions): void;
+    registerCustomFunction<TFormValue extends Record<string, unknown> = Record<string, unknown>>(name: string, fn: CustomFunction<TFormValue>, options?: CustomFunctionOptions): void;
     registerDerivationFunction(name: string, fn: CustomFunction): void;
     registerHttpValidator(name: string, config: HttpCustomValidator): void;
     registerValidator(name: string, fn: CustomValidator): void;
-    setAsyncConditionFunctions(fns: Record<string, AsyncConditionFunction> | undefined): void;
-    setAsyncDerivationFunctions(fns: Record<string, AsyncDerivationFunction> | undefined): void;
+    setAsyncConditionFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(fns: Record<string, AsyncConditionFunction<TFormValue>> | undefined): void;
+    setAsyncDerivationFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(fns: Record<string, AsyncDerivationFunction<TFormValue>> | undefined): void;
     setAsyncValidators(asyncValidators: Record<string, AsyncCustomValidator> | undefined): void;
-    setDerivationFunctions(derivations: Record<string, CustomFunction> | undefined): void;
+    setDerivationFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(derivations: Record<string, CustomFunction<TFormValue>> | undefined): void;
     setHttpValidators(httpValidators: Record<string, HttpCustomValidator> | undefined): void;
     setValidators(validators: Record<string, CustomValidator> | undefined): void;
     // (undocumented)
@@ -1081,7 +1077,7 @@ export function getNestedValue(obj: unknown, path: string): unknown;
 export const GROUP_CONTEXT: InjectionToken<GroupContext>;
 
 // @public
-export type GroupAllowedChildren = LeafFieldTypes | RowField | ArrayField | SimplifiedArrayField | ContainerField;
+export type GroupAllowedChildren = ArrayField | ContainerField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public (undocumented)
 export type GroupComponent<T extends GroupAllowedChildren[]> = FieldComponent<GroupField<T>>;
@@ -1133,7 +1129,7 @@ export interface HiddenField<TValue extends HiddenValue = HiddenValue> extends F
 }
 
 // @public
-export type HiddenScalar = string | number | boolean;
+export type HiddenScalar = boolean | number | string;
 
 // @public
 export type HiddenValue = HiddenScalar | HiddenScalar[];
@@ -1172,7 +1168,7 @@ export class HttpConditionFunctionCacheService {
 export interface HttpCustomValidator<TValue = unknown, TResult = unknown> {
     readonly onError?: (error: unknown, ctx: FieldContext<TValue>) => ValidationError_2 | ValidationError_2[] | null;
     readonly onSuccess: (result: TResult, ctx: FieldContext<TValue>) => TreeValidationResult;
-    readonly request: (ctx: FieldContext<TValue>, config?: Record<string, unknown>) => string | HttpResourceRequest | undefined;
+    readonly request: (ctx: FieldContext<TValue>, config?: Record<string, unknown>) => HttpResourceRequest | string | undefined;
 }
 
 // @public
@@ -1180,7 +1176,7 @@ export interface HttpRequestConfig {
     body?: Record<string, unknown>;
     evaluateBodyExpressions?: boolean;
     headers?: Record<string, string>;
-    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method?: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT';
     params?: Record<string, string>;
     queryParams?: Record<string, string>;
     url: string;
@@ -1193,7 +1189,7 @@ export interface HttpResourceRequest {
     // (undocumented)
     headers?: Record<string, string | string[]>;
     // (undocumented)
-    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method?: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT';
     // (undocumented)
     url: string;
 }
@@ -1262,7 +1258,7 @@ export function isContainerField(field: FieldDef<unknown>): boolean;
 export function isCrossFieldBuiltInValidator(config: ValidatorConfig): boolean;
 
 // @public
-export function isCrossFieldExpression(expr: ConditionalExpression | boolean | FormStateCondition | undefined, context?: CrossFieldDetectionContext): boolean;
+export function isCrossFieldExpression(expr: ConditionalExpression | FormStateCondition | boolean | undefined, context?: CrossFieldDetectionContext): boolean;
 
 // @public
 export function isCrossFieldSchema(config: SchemaApplicationConfig, context?: CrossFieldDetectionContext): boolean;
@@ -1286,10 +1282,10 @@ export function isEqual(a: unknown, b: unknown): boolean;
 export function isFieldBoundContext<TValue>(ctx: AddonActionContext<TValue>): ctx is FieldBoundAddonActionContext<TValue>;
 
 // @public
-export function isFormStateCondition(condition: StateLogicConfig['condition'] | DerivationLogicConfig['condition']): condition is FormStateCondition;
+export function isFormStateCondition(condition: DerivationLogicConfig['condition'] | StateLogicConfig['condition']): condition is FormStateCondition;
 
 // @public
-export function isFunctionHttpValidator(config: FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig): config is FunctionHttpValidatorConfig;
+export function isFunctionHttpValidator(config: DeclarativeHttpValidatorConfig | FunctionHttpValidatorConfig): config is FunctionHttpValidatorConfig;
 
 // @public
 export function isGenericContainerField(field: FieldDef<any>): field is ContainerField;
@@ -1364,7 +1360,7 @@ export interface LiteralNode {
     // (undocumented)
     type: 'Literal';
     // (undocumented)
-    value: string | number | boolean | null | undefined;
+    value: boolean | null | number | string | undefined;
 }
 
 // @public
@@ -1376,7 +1372,7 @@ export interface Logger {
 }
 
 // @public
-export type LogicConfig = StateLogicConfig | DerivationLogicConfig;
+export type LogicConfig = DerivationLogicConfig | StateLogicConfig;
 
 // @public
 export class LogicFunctionCacheService {
@@ -1386,7 +1382,7 @@ export class LogicFunctionCacheService {
 }
 
 // @public
-export type LogicTrigger = 'onChange' | 'debounced';
+export type LogicTrigger = 'debounced' | 'onChange';
 
 // @public
 export type MapperFn<T extends FieldDef<unknown>> = (input: T) => Signal<Record<string, unknown>>;
@@ -1411,7 +1407,7 @@ export function memoize<TFunc extends (...args: any[]) => any>(fn: TFunc, resolv
 // @public (undocumented)
 export interface MemoizeOptions<TFunc extends (...args: never[]) => unknown> {
     maxSize?: number;
-    resolver?: (...args: Parameters<TFunc>) => string | number;
+    resolver?: (...args: Parameters<TFunc>) => number | string;
 }
 
 // @public
@@ -1437,13 +1433,13 @@ export type NonFieldLogicConfig = LogicConfig & {
 export interface NonFieldLogicContext {
     explicitValue?: boolean;
     fieldLogic?: LogicConfig[];
-    form: FieldTree<unknown, string | number>;
+    form: FieldTree<unknown, number | string>;
     formValue?: unknown;
     logger?: Logger;
 }
 
 // @public
-export type NonFieldLogicType = 'hidden' | 'disabled';
+export type NonFieldLogicType = 'disabled' | 'hidden';
 
 // @public
 export class NoopLogger implements Logger {
@@ -1458,7 +1454,7 @@ export class NoopLogger implements Logger {
 }
 
 // @public
-export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>): T[];
+export function normalizeFieldsArray<T>(fields: Record<string, T> | readonly T[]): T[];
 
 // @public (undocumented)
 export interface ObjectLiteralNode {
@@ -1489,7 +1485,7 @@ export interface OrphanAddonActionContext<TValue = unknown> extends AddonActionC
 }
 
 // @public
-export type PageAllowedChildren = LeafFieldTypes | RowField | GroupField | ArrayField | SimplifiedArrayField | ContainerField;
+export type PageAllowedChildren = ArrayField | ContainerField | GroupField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public
 export interface PageField<TFields extends readonly PageAllowedChildren[] = PageAllowedChildren[]> extends FieldDef<never> {
@@ -1583,7 +1579,7 @@ export function resolveNonFieldHidden(ctx: NonFieldLogicContext): Signal<boolean
 export function resolveSubmitButtonDisabled(ctx: ButtonLogicContext): Signal<boolean>;
 
 // @public
-export function resolveTokens(args: readonly (string | number | boolean | null | undefined)[], context: TokenContext): (string | number | boolean | null | undefined | unknown)[];
+export function resolveTokens(args: readonly (boolean | null | number | string | undefined)[], context: TokenContext): (boolean | null | number | string | undefined | unknown)[];
 
 // @public
 export class RootFormRegistryService {
@@ -1625,8 +1621,8 @@ export function runPresetAction(preset: AddonActionPreset, ctx: AddonActionConte
 // @public
 export interface SchemaApplicationConfig {
     condition?: ConditionalExpression;
-    schema: string | SchemaDefinition;
-    type: 'apply' | 'applyWhen' | 'applyWhenValue' | 'applyEach';
+    schema: SchemaDefinition | string;
+    type: 'apply' | 'applyEach' | 'applyWhen' | 'applyWhenValue';
     typePredicate?: string;
 }
 
@@ -1663,13 +1659,13 @@ export interface SimplifiedArrayField extends FieldDef<never> {
 }
 
 // @public
-export type StateLogicConfig = ImmediateStateLogicConfig | DebouncedStateLogicConfig;
+export type StateLogicConfig = DebouncedStateLogicConfig | ImmediateStateLogicConfig;
 
 // @public
-export type StateLogicType = 'hidden' | 'readonly' | 'disabled' | 'required';
+export type StateLogicType = 'disabled' | 'hidden' | 'readonly' | 'required';
 
 // @public
-export type SubmissionActionResult = Promise<TreeValidationResult> | Observable<TreeValidationResult | unknown>;
+export type SubmissionActionResult = Observable<TreeValidationResult | unknown> | Promise<TreeValidationResult>;
 
 // @public
 export interface SubmissionConfig<TValue = unknown> {
@@ -1699,7 +1695,7 @@ export interface TextAddon extends BaseAddon {
 }
 
 // @public
-export type TextElementType = 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'span';
+export type TextElementType = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
 
 // @public
 export interface TextField extends FieldDef<TextProps> {
@@ -1855,7 +1851,7 @@ export interface ValidationMessages {
 }
 
 // @public
-export type ValidatorConfig = BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig;
+export type ValidatorConfig = AsyncValidatorConfig | BuiltInValidatorConfig | CustomValidatorConfig | DeclarativeHttpValidatorConfig | FunctionHttpValidatorConfig;
 
 // @public
 export interface ValueExclusionConfig {
@@ -1868,10 +1864,10 @@ export interface ValueExclusionConfig {
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys>>>;
 
 // @public
-export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
+export type ValueHandlingMode = 'exclude' | 'flatten' | 'include';
 
 // @public
-export type ValueType = string | number | boolean | Date | object | unknown[];
+export type ValueType = Date | boolean | number | object | string | unknown[];
 
 // @internal
 export interface WarningTracker {
@@ -1894,7 +1890,7 @@ export const WRAPPER_AUTO_ASSOCIATIONS: InjectionToken<WrapperAutoAssociations>;
 export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.RowWrapper | _ng_forge_dynamic_forms_internal.CssWrapper>>>;
+export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
 
 // @public
 export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;

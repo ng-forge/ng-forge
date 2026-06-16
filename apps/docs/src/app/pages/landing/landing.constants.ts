@@ -229,7 +229,7 @@ type Value = InferFormValue<typeof config.fields>;`,
 
   openapiCommand: `# Turn an OpenAPI document into
 # typed, ready-to-render FormConfigs
-npx @ng-forge/openapi-generator \\
+npx ng-forge-generator \\
   --spec ./openapi.yaml \\
   --output ./src/forms`,
 

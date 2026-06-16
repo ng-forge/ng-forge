@@ -27,7 +27,7 @@
           "external": ["commander", "@inquirer/prompts", "@apidevtools/swagger-parser", "chokidar", "chalk", "openapi-types"]
         },
         "additionalEntryPoints": ["packages/openapi-generator/bin/ng-forge-generator.ts"],
-        "assets": ["packages/openapi-generator/README.md", "packages/openapi-generator/package.json"]
+        "assets": ["packages/openapi-generator/README.md", "packages/openapi-generator/package.json", "packages/openapi-generator/LICENSE"]
       }
     },
     "nx-release-publish": {
@@ -43,7 +43,12 @@
       "options": {
         "configFile": "packages/openapi-generator/vite.config.ts"
       },
-      "dependsOn": [{ "target": "build", "projects": ["dynamic-forms", "dynamic-forms-material"] }]
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["dynamic-forms", "dynamic-forms-material"]
+        }
+      ]
     },
     "api-check": {
       "executor": "nx:run-commands",
@@ -53,10 +58,12 @@
         "{workspaceRoot}/dist/{projectRoot}/src/**/*.d.ts",
         "{projectRoot}/api-extractor.json",
         "{workspaceRoot}/config/api-extractor.base.json",
-        "{workspaceRoot}/etc/openapi-generator.api.md"
+        "{workspaceRoot}/etc/openapi-generator.api.md",
+        "{workspaceRoot}/scripts/api-check.mjs",
+        "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
-        "command": "api-extractor run --config packages/openapi-generator/api-extractor.json",
+        "command": "node scripts/api-check.mjs packages/openapi-generator/api-extractor.json",
         "cwd": "{workspaceRoot}"
       }
     },
@@ -66,7 +73,8 @@
       "options": {
         "commands": [
           "nx run openapi-generator:build --skip-nx-cache",
-          "api-extractor run --local --config packages/openapi-generator/api-extractor.json"
+          "api-extractor run --local --config packages/openapi-generator/api-extractor.json",
+          "node scripts/normalize-api-unions.mjs etc/openapi-generator.api.md"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"

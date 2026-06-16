@@ -12,7 +12,7 @@ import { StandardSchemaV1 } from '@standard-schema/spec';
 export type AngularSchemaCallback<T = unknown> = (path: SchemaPath<T> & SchemaPathTree<T>) => void;
 
 // @public
-export type FormSchema<T = unknown> = StandardSchemaMarker<T> | AngularSchemaCallback<T>;
+export type FormSchema<T = unknown> = AngularSchemaCallback<T> | StandardSchemaMarker<T>;
 
 // @public
 export type InferSchemaOutput<T> = T extends StandardSchemaV1<infer Output> ? Output : never;

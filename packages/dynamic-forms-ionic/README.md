@@ -20,10 +20,9 @@ Ionic field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/packa
 
 | Angular | @ng-forge/dynamic-forms-ionic |
 | ------- | ----------------------------- |
-| 22.x    | 1.x                           |
-| 21.x    | 0.x (experimental)            |
+| 22.x    | 0.x (current), 1.x (upcoming) |
 
-Versioned in lockstep with `@ng-forge/dynamic-forms`. The `0.x` line targets Angular 21 (experimental Signal Forms). Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
+Versioned in lockstep with `@ng-forge/dynamic-forms`. The current `0.x` line targets Angular 22, where Signal Forms are stable: the published package declares `@angular/core ^22.0.0` in `peerDependencies`, and npm warns on a mismatch.
 
 Ionic's official support policy for @ionic/angular 8 lists Angular versions up to 20.x. This package's test suite passes against @ionic/angular 8.x running on Angular 22.
 

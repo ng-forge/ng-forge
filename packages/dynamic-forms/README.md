@@ -18,12 +18,11 @@ Core library for building type-safe, dynamic Angular forms with signal forms int
 
 ## Compatibility
 
-| Angular | @ng-forge/dynamic-forms |
-| ------- | ----------------------- |
-| 22.x    | 1.x                     |
-| 21.x    | 0.x (experimental)      |
+| Angular | @ng-forge/dynamic-forms       |
+| ------- | ----------------------------- |
+| 22.x    | 0.x (current), 1.x (upcoming) |
 
-Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, where Signal Forms were still experimental and could change in patch releases. Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
+Signal Forms are stable as of Angular 22. The current `0.x` line targets Angular 22: the published package declares `@angular/core ^22.0.0` in `peerDependencies`, and npm warns on a mismatch.
 
 ## Supported entrypoints
 
@@ -39,6 +38,22 @@ The `/schema` entrypoint is a supported, semver-governed surface for using [Stan
 The `/internal` entrypoint is an unsupported build surface with no semver guarantee. It is published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Its contents may change or be removed in any release, including patch releases.
 
 Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
+
+## Versioning & stability
+
+The library follows [semantic versioning](https://semver.org). The semver contract covers the public `exports` entrypoints listed above (`@ng-forge/dynamic-forms`, `/schema`, and `/integration`). The `/internal` entrypoint is excluded and may change in any release.
+
+A change is considered breaking when it removes or renames a public export, changes the runtime behavior or type signature of a documented API in an incompatible way, or raises the minimum Angular peer version. Additive changes (new field types, new optional config options, new exports) ship in minor releases. Bug fixes ship in patches.
+
+Deprecations are announced in the release notes and, where practical, surface as a runtime or type-level warning. A deprecated public API stays available for at least one minor release before it can be removed in the next major.
+
+### Upgrading from 0.x
+
+The `0.x` line is the current pre-1.0 line and runs on Angular 22. While the version stays below `1.0`, minor releases may still contain breaking changes; check the [release notes](https://github.com/ng-forge/ng-forge/releases) before upgrading. Once the library reaches `1.0`, the deprecation and breaking-change policy above applies in full.
+
+### Tested browsers
+
+The end-to-end suite is verified against Chromium-class browsers in CI. The core form logic is rendering-agnostic (it produces field definitions that the UI adapters render), so it does not depend on browser-specific behavior, but cross-browser rendering beyond Chromium is not exercised in CI.
 
 ## Installation
 

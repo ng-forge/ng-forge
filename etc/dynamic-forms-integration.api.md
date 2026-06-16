@@ -33,9 +33,6 @@ import { WritableSignal } from '@angular/core';
 // @public
 export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>>;
 
-// @internal
-export const ADDON_ACTION_HANDLERS: InjectionToken<readonly Record<string, AddonActionHandler<unknown>>[]>;
-
 // @public
 export const ADDON_ACTION_REGISTRY: InjectionToken<ReadonlyMap<string, AddonActionHandler<unknown>>>;
 
@@ -45,7 +42,7 @@ export const ADDON_PRESET_HANDLER: InjectionToken<AddonPresetHandler>;
 // @internal
 export const ADDON_TYPE_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
-// @internal
+// @public
 export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<_ng_forge_dynamic_forms_internal.BaseAddon<_ng_forge_dynamic_forms_internal.AddonSlot>>[]>;
 
 // @public
@@ -57,7 +54,7 @@ export type AddonActionHandler<TValue = unknown> = (ctx: AddonActionContext<TVal
 // @public
 export interface AddonPresetHandler {
     // (undocumented)
-    run(preset: string, ctx: AddonActionContext): void | Promise<void>;
+    run(preset: string, ctx: AddonActionContext): Promise<void> | void;
 }
 
 // @public
@@ -80,7 +77,7 @@ export interface AddonTypeSchema {
     readonly $schema?: string;
     readonly [key: string]: unknown;
     // (undocumented)
-    readonly additionalProperties?: boolean | AddonTypeSchema;
+    readonly additionalProperties?: AddonTypeSchema | boolean;
     // (undocumented)
     readonly allOf?: ReadonlyArray<AddonTypeSchema>;
     // (undocumented)
@@ -120,7 +117,7 @@ export interface AddonTypeSchema {
     // (undocumented)
     readonly title?: string;
     // (undocumented)
-    readonly type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null' | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
+    readonly type?: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string' | ReadonlyArray<'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'>;
 }
 
 // @public
@@ -169,10 +166,10 @@ export type ArrayFieldTree<T> = FieldTree<T[]> & {
 };
 
 // @public
-export type Autocapitalize = 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+export type Autocapitalize = 'characters' | 'none' | 'off' | 'on' | 'sentences' | 'words';
 
 // @public
-export type AutocompleteValue = 'off' | 'on' | 'name' | 'honorific-prefix' | 'given-name' | 'additional-name' | 'family-name' | 'honorific-suffix' | 'nickname' | 'email' | 'username' | 'new-password' | 'current-password' | 'one-time-code' | 'organization-title' | 'organization' | 'street-address' | 'address-line1' | 'address-line2' | 'address-line3' | 'address-level4' | 'address-level3' | 'address-level2' | 'address-level1' | 'country' | 'country-name' | 'postal-code' | 'cc-name' | 'cc-given-name' | 'cc-additional-name' | 'cc-family-name' | 'cc-number' | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-csc' | 'cc-type' | 'transaction-currency' | 'transaction-amount' | 'language' | 'bday' | 'bday-day' | 'bday-month' | 'bday-year' | 'sex' | 'tel' | 'tel-country-code' | 'tel-national' | 'tel-area-code' | 'tel-local' | 'tel-extension' | 'impp' | 'url' | 'photo';
+export type AutocompleteValue = 'additional-name' | 'address-level1' | 'address-level2' | 'address-level3' | 'address-level4' | 'address-line1' | 'address-line2' | 'address-line3' | 'bday' | 'bday-day' | 'bday-month' | 'bday-year' | 'cc-additional-name' | 'cc-csc' | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-family-name' | 'cc-given-name' | 'cc-name' | 'cc-number' | 'cc-type' | 'country' | 'country-name' | 'current-password' | 'email' | 'family-name' | 'given-name' | 'honorific-prefix' | 'honorific-suffix' | 'impp' | 'language' | 'name' | 'new-password' | 'nickname' | 'off' | 'on' | 'one-time-code' | 'organization' | 'organization-title' | 'photo' | 'postal-code' | 'sex' | 'street-address' | 'tel' | 'tel-area-code' | 'tel-country-code' | 'tel-extension' | 'tel-local' | 'tel-national' | 'transaction-amount' | 'transaction-currency' | 'url' | 'username';
 
 // @public
 export interface BaseArrayAddButtonField<TProps = unknown> {
@@ -272,7 +269,7 @@ export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unkn
 export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<string, unknown>>;
 
 // @public
-export function createAriaDescribedBySignal(errorsToDisplay: Signal<ResolvedError[]>, errorId: Signal<string>, hintId: Signal<string>, hasHint: () => boolean): Signal<string | null>;
+export function createAriaDescribedBySignal(errorsToDisplay: Signal<ResolvedError[]>, errorId: Signal<string>, hintId: Signal<string>, hasHint: () => boolean): Signal<null | string>;
 
 // @public
 export function createNgForgeActionFixture<C, TEvent extends FormEvent = FormEvent>(component: Type<C>, options: CreateNgForgeActionFixtureOptions<TEvent>): NgForgeActionFixture<C>;
@@ -319,9 +316,9 @@ export function createWrappers<const T extends readonly WrapperRegistration[]>(.
 // @public (undocumented)
 export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, Date | string, FieldMeta, TNullable> {
     // (undocumented)
-    maxDate?: Date | string | null;
+    maxDate?: Date | null | string;
     // (undocumented)
-    minDate?: Date | string | null;
+    minDate?: Date | null | string;
     // (undocumented)
     startAt?: Date | null;
     // (undocumented)
@@ -349,7 +346,7 @@ export class DfAddonSlot {
     // (undocumented)
     readonly addon: i0.InputSignal<AnyAddon>;
     // (undocumented)
-    protected readonly className: Signal<string | null>;
+    protected readonly className: Signal<null | string>;
     readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
     readonly hidden: i0.InputSignal<Signal<boolean> | undefined>;
     protected readonly isHidden: Signal<boolean>;
@@ -378,13 +375,13 @@ export class DynamicTextPipe implements PipeTransform {
 export function dynamicTextToObservable(value: DynamicText | undefined, injector?: Injector): Observable<string>;
 
 // @public
-export type EnterKeyHint = 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+export type EnterKeyHint = 'done' | 'enter' | 'go' | 'next' | 'previous' | 'search' | 'send';
 
 // @public
-export type EventArg = string | number | boolean | null | undefined;
+export type EventArg = boolean | null | number | string | undefined;
 
 // @public
-export type EventArgs = readonly (string | number | boolean | null | undefined)[];
+export type EventArgs = readonly (boolean | null | number | string | undefined)[];
 
 // @public (undocumented)
 export class EventBus {
@@ -425,7 +422,7 @@ export interface FieldAddonSupportEntry {
 }
 
 // @public
-export type FieldScope = 'boolean' | 'single-select' | 'multi-select' | 'text-input' | 'numeric' | 'date';
+export type FieldScope = 'boolean' | 'date' | 'multi-select' | 'numeric' | 'single-select' | 'text-input';
 
 // @public
 export interface FieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>> {
@@ -475,7 +472,7 @@ export interface FieldTypeDefinition<T extends FieldDef<any> = any> {
 }
 
 // @public
-export type FieldWithOptions<T = unknown, TProps = unknown> = SelectField<T, TProps> | RadioField<T, TProps> | MultiCheckboxField<T, TProps>;
+export type FieldWithOptions<T = unknown, TProps = unknown> = MultiCheckboxField<T, TProps> | RadioField<T, TProps> | SelectField<T, TProps>;
 
 // @public
 export interface FieldWrapper {
@@ -498,7 +495,7 @@ export const GROUP_CONTEXT: InjectionToken<GroupContext>;
 export function groupFieldMapper(fieldDef: GroupField): Signal<Record<string, unknown>>;
 
 // @public
-export type HtmlInputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date' | 'datetime-local' | 'month' | 'week' | 'time' | 'color' | 'range' | 'checkbox' | 'radio' | 'file' | 'hidden' | 'button' | 'submit' | 'reset' | 'image';
+export type HtmlInputType = 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' | 'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' | 'password' | 'radio' | 'range' | 'reset' | 'search' | 'submit' | 'tel' | 'text' | 'time' | 'url' | 'week';
 
 // @public
 export interface HttpResourceRequest {
@@ -507,7 +504,7 @@ export interface HttpResourceRequest {
     // (undocumented)
     headers?: Record<string, string | string[]>;
     // (undocumented)
-    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method?: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT';
     // (undocumented)
     url: string;
 }
@@ -567,7 +564,7 @@ export interface InputMeta extends FieldMeta {
 }
 
 // @public
-export type InputMode = 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+export type InputMode = 'decimal' | 'email' | 'none' | 'numeric' | 'search' | 'tel' | 'text' | 'url';
 
 // @public
 export interface InputProps<T extends HtmlInputType = InputType> {
@@ -575,7 +572,7 @@ export interface InputProps<T extends HtmlInputType = InputType> {
 }
 
 // @public
-export type InputType = Extract<HtmlInputType, 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'>;
+export type InputType = Extract<HtmlInputType, 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url'>;
 
 // @public
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>>;
@@ -746,11 +743,11 @@ export class NgForgeControl {
 export class NgForgeField {
     constructor();
     // (undocumented)
-    readonly ariaDescribedBy: Signal<string | null>;
+    readonly ariaDescribedBy: Signal<null | string>;
     // (undocumented)
     readonly ariaInvalid: Signal<boolean>;
     // (undocumented)
-    readonly ariaRequired: Signal<true | null>;
+    readonly ariaRequired: Signal<null | true>;
     readonly className: Signal<string>;
     // (undocumented)
     readonly errorId: Signal<string>;
@@ -833,13 +830,13 @@ export type NonFieldLogicConfig = LogicConfig & {
 export interface NonFieldLogicContext {
     explicitValue?: boolean;
     fieldLogic?: LogicConfig[];
-    form: FieldTree<unknown, string | number>;
+    form: FieldTree<unknown, number | string>;
     formValue?: unknown;
     logger?: Logger;
 }
 
 // @public
-export type NonFieldLogicType = 'hidden' | 'disabled';
+export type NonFieldLogicType = 'disabled' | 'hidden';
 
 // @public
 export type NumericInputType<T extends HtmlInputType = InputType> = Extract<T, 'number'>;
@@ -928,7 +925,7 @@ export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boole
 export function resolveNonFieldHidden(ctx: NonFieldLogicContext): Signal<boolean>;
 
 // @public
-export function resolveTokens(args: readonly (string | number | boolean | null | undefined)[], context: TokenContext): (string | number | boolean | null | undefined | unknown)[];
+export function resolveTokens(args: readonly (boolean | null | number | string | undefined)[], context: TokenContext): (boolean | null | number | string | undefined | unknown)[];
 
 // @public
 export function resolveValueFieldContext(): ValueFieldContext;
@@ -1014,7 +1011,7 @@ export interface TextareaProps {
 }
 
 // @public
-export type TextareaWrap = 'hard' | 'soft' | 'off';
+export type TextareaWrap = 'hard' | 'off' | 'soft';
 
 // @public
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>>;
@@ -1034,7 +1031,7 @@ export type TypedNgForgeAddonAction<TAddon extends ActionAddonShape = ActionAddo
 };
 
 // @public
-export type TypedNgForgeAddons<TAddon extends AnyAddon = AnyAddon> = Omit<NgForgeAddonsBase, 'addons' | 'visibleAddons' | 'prefixAddons' | 'suffixAddons'> & {
+export type TypedNgForgeAddons<TAddon extends AnyAddon = AnyAddon> = Omit<NgForgeAddonsBase, 'addons' | 'prefixAddons' | 'suffixAddons' | 'visibleAddons'> & {
     readonly addons: Signal<ReadonlyArray<TAddon> | undefined>;
     readonly visibleAddons: Signal<ReadonlyArray<TAddon>>;
     readonly prefixAddons: Signal<ReadonlyArray<TAddon>>;
@@ -1058,7 +1055,7 @@ export interface ValueFieldContext {
 export function valueFieldMapper<TProps = unknown, TValue = unknown>(fieldDef: BaseValueField<TProps, TValue, FieldMeta, boolean>): Signal<Record<string, unknown>>;
 
 // @public
-export type ValueHandlingMode = 'include' | 'exclude' | 'flatten';
+export type ValueHandlingMode = 'exclude' | 'flatten' | 'include';
 
 // @public
 export function withPreviousValue<T>(input: Resource<T>): Resource<T>;

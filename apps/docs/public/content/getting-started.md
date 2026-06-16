@@ -51,8 +51,16 @@ Try it out: select a contact method and watch fields appear. Switch to the "Conf
 
 ## Requirements
 
-- **Angular 22**: the published packages declare `@angular/*` peers of `~22.0.0`. Signal Forms, which ng-forge builds on, is stable in Angular 22
+- **Angular 22**: the published packages declare `@angular/*` peers of `^22.0.0`. Signal Forms, which ng-forge builds on, is stable in Angular 22
 - **TypeScript 6.0**: required by the Angular 22 toolchain
+
+---
+
+## Versioning & stability
+
+ng-forge follows [semantic versioning](https://semver.org). The semver contract covers the public package entrypoints (`@ng-forge/dynamic-forms`, `/schema`, and `/integration`); the `/internal` entrypoint is unsupported and may change in any release. Removing or renaming a public export, an incompatible change to a documented API, or raising the minimum Angular version counts as breaking. Deprecated public APIs stay available for at least one minor release before removal in the next major.
+
+The current `0.x` line runs on Angular 22. While the version is below `1.0`, minor releases may still contain breaking changes, so check the [release notes](https://github.com/ng-forge/ng-forge/releases) before upgrading.
 
 ---
 

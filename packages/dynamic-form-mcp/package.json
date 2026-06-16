@@ -32,15 +32,16 @@
   "types": "./index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.js",
-      "types": "./index.d.ts"
+      "types": "./index.d.ts",
+      "import": "./src/index.js"
     }
   },
   "files": [
     "src",
     "bin",
     "index.d.ts",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=24.0.0"

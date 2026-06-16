@@ -52,7 +52,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<form [dynamic-form]="config"></form>`,
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
 })
 export class LoginComponent {
   config = {
@@ -62,6 +62,10 @@ export class LoginComponent {
       { type: 'submit', key: 'submit', label: 'Sign In' },
     ],
   } as const satisfies FormConfig;
+
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
+    console.log('Form submitted:', value); // TypeScript infers: { email: string, password: string }
+  }
 }
 ```
 
@@ -83,12 +87,11 @@ export class LoginComponent {
 
 ## Compatibility
 
-| Angular | @ng-forge/dynamic-forms |
-| ------- | ----------------------- |
-| 22.x    | 1.x                     |
-| 21.x    | 0.x (experimental)      |
+| Angular | @ng-forge/dynamic-forms       |
+| ------- | ----------------------------- |
+| 22.x    | 0.x (current), 1.x (upcoming) |
 
-Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, where Signal Forms were still experimental and could change in patch releases. Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
+Signal Forms are stable as of Angular 22. The current `0.x` line targets Angular 22: the published package declares `@angular/core ^22.0.0` in `peerDependencies`, and npm warns on a mismatch.
 
 ## 📦 Packages
 

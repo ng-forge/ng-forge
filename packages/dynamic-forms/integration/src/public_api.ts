@@ -232,9 +232,10 @@ export { withPreviousValue } from '@ng-forge/dynamic-forms/internal';
 export { BUILT_IN_FIELDS } from '@ng-forge/dynamic-forms';
 export { runPresetAction } from '@ng-forge/dynamic-forms/internal';
 export type { PresetCollaborators } from '@ng-forge/dynamic-forms/internal';
-export { ADDON_ACTION_REGISTRY, ADDON_ACTION_HANDLERS } from '@ng-forge/dynamic-forms/internal';
+export { ADDON_ACTION_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 export type { AddonActionHandler } from '@ng-forge/dynamic-forms/internal';
 export { ADDON_TYPE_DEFINITIONS } from '@ng-forge/dynamic-forms/internal';
+// ADDON_TYPE_COMPONENT_CACHE stays re-exported: adapter component tests provide it in TestBed.
 export { ADDON_TYPE_REGISTRY, ADDON_TYPE_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
 export { DfAddonSlot } from '@ng-forge/dynamic-forms/internal';
 export { injectAddonTypeRegistry } from '@ng-forge/dynamic-forms/internal';

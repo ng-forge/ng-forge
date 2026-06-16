@@ -1,6 +1,7 @@
 /** UI Adapters Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
 import { getUIAdapters, getUIAdapter } from '../registry/index.js';
 
 export function registerUIAdaptersResource(server: McpServer): void {
@@ -47,7 +48,7 @@ export const appConfig: ApplicationConfig = {
   // Get specific UI adapter details
   server.resource('UI Adapter Details', 'ng-forge://ui-adapters/{library}', async (uri: URL) => {
     const match = uri.href.match(/ng-forge:\/\/ui-adapters\/(.+)/);
-    const library = match?.[1] as 'material' | 'bootstrap' | 'primeng' | 'ionic';
+    const library = match?.[1] as UiIntegration;
 
     if (!library) {
       return {

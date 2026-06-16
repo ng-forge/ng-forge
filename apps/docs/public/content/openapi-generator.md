@@ -21,7 +21,7 @@ The `@ng-forge/openapi-generator` reads your OpenAPI 3.x spec and produces ready
 Run directly with `npx`:
 
 ```bash
-npx @ng-forge/openapi-generator --spec ./openapi.yaml --output ./src/forms
+npx ng-forge-generator --spec ./openapi.yaml --output ./src/forms
 ```
 
 Or install as a dev dependency:
@@ -66,7 +66,7 @@ paths:
 Run the generator:
 
 ```bash
-npx @ng-forge/openapi-generator --spec ./petstore.yaml --output ./src/forms
+npx ng-forge-generator --spec ./petstore.yaml --output ./src/forms
 ```
 
 This produces:
@@ -260,7 +260,7 @@ On subsequent runs, persisted decisions are reused, so interactive prompts only 
 ## Watch Mode
 
 ```bash
-npx @ng-forge/openapi-generator \
+npx ng-forge-generator \
   --spec ./openapi.yaml \
   --output ./src/forms \
   --watch
@@ -295,7 +295,7 @@ File names are derived from `operationId` if available, otherwise from the HTTP 
 By default, GET endpoints are included with editable fields, just like POST/PUT/PATCH. Use the `--read-only` flag to generate GET endpoint fields with `disabled: true`:
 
 ```bash
-npx @ng-forge/openapi-generator \
+npx ng-forge-generator \
   --spec ./openapi.yaml \
   --output ./src/forms \
   --read-only

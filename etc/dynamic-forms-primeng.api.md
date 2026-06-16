@@ -57,14 +57,14 @@ import { WritableSignal } from '@angular/core';
 export const PRIME_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
 
 // @public
-export type PrimeAddArrayItemButtonField = Omit<PrimeButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeAddArrayItemButtonField = Omit<PrimeButtonField<AppendArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'add-array-item' | 'addArrayItem';
     arrayKey?: string;
     template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 // @public
-export type PrimeAddon = PrimeIconAddon | PrimeButtonAddon;
+export type PrimeAddon = PrimeButtonAddon | PrimeIconAddon;
 
 // @public
 export interface PrimeAddonExtensions {
@@ -102,7 +102,7 @@ export class PrimeButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"reset" | "button" | "submit">;
+    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
     // (undocumented)
     onClick(): void;
     // (undocumented)
@@ -118,7 +118,7 @@ export interface PrimeButtonProps {
     // (undocumented)
     icon?: string;
     // (undocumented)
-    iconPos?: 'left' | 'right' | 'top' | 'bottom';
+    iconPos?: 'bottom' | 'left' | 'right' | 'top';
     // (undocumented)
     outlined?: boolean;
     // (undocumented)
@@ -126,11 +126,11 @@ export interface PrimeButtonProps {
     // (undocumented)
     rounded?: boolean;
     // (undocumented)
-    severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
+    severity?: 'contrast' | 'danger' | 'help' | 'info' | 'primary' | 'secondary' | 'success' | 'warn';
     // (undocumented)
     text?: boolean;
     // (undocumented)
-    type?: 'button' | 'submit' | 'reset';
+    type?: 'button' | 'reset' | 'submit';
 }
 
 // @public (undocumented)
@@ -187,7 +187,7 @@ export interface PrimeDatepickerProps extends DatepickerProps {
     dateFormat?: string;
     hint?: DynamicText;
     inline?: boolean;
-    selectionMode?: 'single' | 'multiple' | 'range';
+    selectionMode?: 'multiple' | 'range' | 'single';
     showButtonBar?: boolean;
     showIcon?: boolean;
     styleClass?: string;
@@ -253,7 +253,7 @@ export class PrimeIconAddonComponent {
 }
 
 // @public
-export type PrimeInputAddon = PrimeIconAddon | PrimeButtonAddon | TextAddon | TemplateAddon | PrimeAddonExtension;
+export type PrimeInputAddon = PrimeAddonExtension | PrimeButtonAddon | PrimeIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type PrimeInputField = InputField<PrimeInputProps> & {
@@ -274,10 +274,10 @@ export class PrimeInputFieldComponent {
     // (undocumented)
     readonly props: _angular_core.InputSignal<PrimeInputProps | undefined>;
     // (undocumented)
-    protected readonly size: _angular_core.Signal<"small" | "large" | undefined>;
+    protected readonly size: _angular_core.Signal<"large" | "small" | undefined>;
     protected readonly type: _angular_core.Signal<string>;
     // (undocumented)
-    protected readonly variant: _angular_core.Signal<"outlined" | "filled" | undefined>;
+    protected readonly variant: _angular_core.Signal<"filled" | "outlined" | undefined>;
     // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeInputFieldComponent, "df-prime-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
     // (undocumented)
@@ -287,14 +287,14 @@ export class PrimeInputFieldComponent {
 // @public (undocumented)
 export interface PrimeInputProps extends InputProps {
     hint?: DynamicText;
-    size?: 'small' | 'large';
+    size?: 'large' | 'small';
     styleClass?: string;
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
-    variant?: 'outlined' | 'filled';
+    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
+    variant?: 'filled' | 'outlined';
 }
 
 // @public
-export type PrimeInsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeInsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'insert-array-item' | 'insertArrayItem';
     arrayKey?: string;
     index: number;
@@ -331,7 +331,7 @@ export interface PrimeMultiCheckboxProps {
 }
 
 // @public
-export type PrimeNextButtonField = Omit<PrimeButtonField<NextPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeNextButtonField = Omit<PrimeButtonField<NextPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'next';
 };
 
@@ -346,27 +346,27 @@ export interface PrimeNGConfig {
     outlined?: boolean;
     raised?: boolean;
     rounded?: boolean;
-    severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
-    size?: 'small' | 'large';
+    severity?: 'contrast' | 'danger' | 'help' | 'info' | 'primary' | 'secondary' | 'success' | 'warn';
+    size?: 'large' | 'small';
     text?: boolean;
-    variant?: 'outlined' | 'filled';
+    variant?: 'filled' | 'outlined';
 }
 
 // @public
-export type PrimePopArrayItemButtonField = Omit<PrimeButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimePopArrayItemButtonField = Omit<PrimeButtonField<PopArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'pop-array-item' | 'popArrayItem';
     arrayKey: string;
 };
 
 // @public
-export type PrimePrependArrayItemButtonField = Omit<PrimeButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimePrependArrayItemButtonField = Omit<PrimeButtonField<PrependArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'prepend-array-item' | 'prependArrayItem';
     arrayKey?: string;
     template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
 };
 
 // @public
-export type PrimePreviousButtonField = Omit<PrimeButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimePreviousButtonField = Omit<PrimeButtonField<PreviousPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'previous';
 };
 
@@ -395,7 +395,7 @@ export interface PrimeRadioProps {
 }
 
 // @public
-export type PrimeRemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeRemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtIndexEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'remove-array-item' | 'removeArrayItem';
     arrayKey?: string;
 };
@@ -432,7 +432,7 @@ export interface PrimeSelectProps extends SelectProps {
 }
 
 // @public
-export type PrimeShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'shift-array-item' | 'shiftArrayItem';
     arrayKey: string;
 };
@@ -466,7 +466,7 @@ export interface PrimeSliderProps {
 }
 
 // @public
-export type PrimeSubmitButtonField = Omit<PrimeButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type PrimeSubmitButtonField = Omit<PrimeButtonField<FormSubmitEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'submit';
 };
 

@@ -51,10 +51,10 @@ export function extractEndpoints(spec: OpenAPISpec): EndpointInfo[];
 // @public (undocumented)
 export interface FieldConfig {
     // (undocumented)
-    addButton?: {
+    addButton?: false | {
         label: string;
         props?: Record<string, unknown>;
-    } | false;
+    };
     // (undocumented)
     disabled?: boolean;
     // (undocumented)
@@ -81,10 +81,10 @@ export interface FieldConfig {
     // (undocumented)
     props?: Record<string, unknown>;
     // (undocumented)
-    removeButton?: {
+    removeButton?: false | {
         label: string;
         props?: Record<string, unknown>;
-    } | false;
+    };
     // (undocumented)
     template?: FieldConfig | FieldConfig[];
     // (undocumented)

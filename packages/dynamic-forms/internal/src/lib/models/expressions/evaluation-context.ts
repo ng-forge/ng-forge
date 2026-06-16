@@ -2,8 +2,7 @@ import type { Logger } from '../../providers/features/logger/logger.interface';
 import type { WarningTracker } from '../../utils/warning-tracker';
 import type { FieldStateContext, FormFieldStateMap } from './field-state-context';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- default `any` for TFormValue ensures backward compatibility at registry boundaries
-export interface EvaluationContext<TValue = unknown, TFormValue extends Record<string, unknown> = any> {
+export interface EvaluationContext<TValue = unknown, TFormValue extends Record<string, unknown> = Record<string, unknown>> {
   /** Current field value */
   fieldValue: TValue;
 

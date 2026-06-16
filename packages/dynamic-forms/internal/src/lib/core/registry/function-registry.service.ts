@@ -22,8 +22,13 @@ export class FunctionRegistryService {
    * @param fn - Function that receives EvaluationContext and returns any value
    * @param options - Optional configuration for the function
    */
-  registerCustomFunction(name: string, fn: CustomFunction, options?: CustomFunctionOptions): void {
-    this.customFunctions.set(name, fn);
+  registerCustomFunction<TFormValue extends Record<string, unknown> = Record<string, unknown>>(
+    name: string,
+    fn: CustomFunction<TFormValue>,
+    options?: CustomFunctionOptions,
+  ): void {
+    // Registry stores type-erased functions; the caller's strongly-typed fn is safe to widen here.
+    this.customFunctions.set(name, fn as CustomFunction);
     // Store scope (default to 'form' for conservative cross-field detection)
     this.customFunctionScopes.set(name, options?.scope ?? 'form');
   }
@@ -89,8 +94,10 @@ export class FunctionRegistryService {
    *
    * @param derivations - Object mapping function names to derivation functions
    */
-  setDerivationFunctions(derivations: Record<string, CustomFunction> | undefined): void {
-    this.setRegistryIfChanged(this.derivationFunctions, derivations);
+  setDerivationFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(
+    derivations: Record<string, CustomFunction<TFormValue>> | undefined,
+  ): void {
+    this.setRegistryIfChanged(this.derivationFunctions, derivations as Record<string, CustomFunction> | undefined);
   }
 
   /** Clear all derivation functions */
@@ -128,8 +135,10 @@ export class FunctionRegistryService {
    *
    * @param fns - Object mapping function names to async derivation functions
    */
-  setAsyncDerivationFunctions(fns: Record<string, AsyncDerivationFunction> | undefined): void {
-    this.setRegistryIfChanged(this.asyncDerivationFunctions, fns);
+  setAsyncDerivationFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(
+    fns: Record<string, AsyncDerivationFunction<TFormValue>> | undefined,
+  ): void {
+    this.setRegistryIfChanged(this.asyncDerivationFunctions, fns as Record<string, AsyncDerivationFunction> | undefined);
   }
 
   /** Clear all async derivation functions */
@@ -167,8 +176,10 @@ export class FunctionRegistryService {
    *
    * @param fns - Object mapping function names to async condition functions
    */
-  setAsyncConditionFunctions(fns: Record<string, AsyncConditionFunction> | undefined): void {
-    this.setRegistryIfChanged(this.asyncConditionFunctions, fns);
+  setAsyncConditionFunctions<TFormValue extends Record<string, unknown> = Record<string, unknown>>(
+    fns: Record<string, AsyncConditionFunction<TFormValue>> | undefined,
+  ): void {
+    this.setRegistryIfChanged(this.asyncConditionFunctions, fns as Record<string, AsyncConditionFunction> | undefined);
   }
 
   /** Clear all async condition functions */

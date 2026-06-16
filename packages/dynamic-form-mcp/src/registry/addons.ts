@@ -1,5 +1,6 @@
 /** Addon Registry Data */
 
+import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
 import type { PropertyInfo } from './index.js';
 
 export interface AddonTypeInfo {
@@ -10,7 +11,7 @@ export interface AddonTypeInfo {
   /** Provider package; `'core'` means @ng-forge/dynamic-forms. */
   package: string;
   /** Adapter that ships this type, or `null` for core types. */
-  adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
+  adapter: UiIntegration | null;
   /** One-line description of what this type renders. */
   description: string;
   /**
@@ -460,7 +461,7 @@ export interface FieldAddonSupportInfo {
   /** Field type discriminant (matches `FieldDef.type`). */
   fieldType: string;
   /** Adapter shipping the field — null for core fields. */
-  adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
+  adapter: UiIntegration | null;
   /** Slots this field accepts. */
   slots: ('prefix' | 'suffix' | string)[];
   /** Whitelist of allowed types (omitted = any registered type). */
