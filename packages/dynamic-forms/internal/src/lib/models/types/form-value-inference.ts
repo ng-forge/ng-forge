@@ -142,8 +142,16 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
                   | 'previous'
                   | 'addArrayItem'
                   | 'add-array-item'
+                  | 'prependArrayItem'
+                  | 'prepend-array-item'
+                  | 'insertArrayItem'
+                  | 'insert-array-item'
                   | 'removeArrayItem'
-                  | 'remove-array-item';
+                  | 'remove-array-item'
+                  | 'popArrayItem'
+                  | 'pop-array-item'
+                  | 'shiftArrayItem'
+                  | 'shift-array-item';
               }
             ? never
             : // Value fields with explicit value: infer type and optionality

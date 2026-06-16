@@ -69,6 +69,30 @@ describe('InferFormValue - leaf value types', () => {
 });
 
 // ============================================================================
+// Array-action buttons hold no value and must be excluded from InferFormValue.
+// Regression guard: all 6 array-action discriminants (not just add/remove) must
+// be in ProcessField's button-exclusion union, or they leak phantom keys.
+// ============================================================================
+
+describe('InferFormValue - array-action buttons are excluded', () => {
+  it('does not leak keys for any of the 6 array-action button types', () => {
+    const config = {
+      fields: [
+        { key: 'name', type: 'input', value: '' },
+        { key: 'add', type: 'add-array-item' },
+        { key: 'prepend', type: 'prepend-array-item' },
+        { key: 'insert', type: 'insert-array-item' },
+        { key: 'remove', type: 'remove-array-item' },
+        { key: 'pop', type: 'pop-array-item' },
+        { key: 'shift', type: 'shift-array-item' },
+      ],
+    } as const satisfies FormConfig;
+    // Only the value-bearing field contributes a key; every button is excluded.
+    expectTypeOf<keyof InferFormValue<typeof config>>().toEqualTypeOf<'name'>();
+  });
+});
+
+// ============================================================================
 // Required vs optional (and the hidden special case)
 // ============================================================================
 

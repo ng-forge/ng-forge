@@ -65,6 +65,14 @@ export interface TestButtonLeaf {
   label?: string;
 }
 
+// Array-action buttons hold no value and must be excluded from InferFormValue.
+export interface TestArrayActionLeaf<T extends string> {
+  key: string;
+  type: T;
+  label?: string;
+  arrayKey?: string;
+}
+
 declare module '@ng-forge/dynamic-forms/internal' {
   interface FieldRegistryLeaves {
     input: TestInputLeaf;
@@ -75,6 +83,12 @@ declare module '@ng-forge/dynamic-forms/internal' {
     'multi-checkbox': TestMultiCheckboxLeaf;
     submit: TestButtonLeaf;
     button: TestButtonLeaf;
+    'add-array-item': TestArrayActionLeaf<'add-array-item'>;
+    'prepend-array-item': TestArrayActionLeaf<'prepend-array-item'>;
+    'insert-array-item': TestArrayActionLeaf<'insert-array-item'>;
+    'remove-array-item': TestArrayActionLeaf<'remove-array-item'>;
+    'pop-array-item': TestArrayActionLeaf<'pop-array-item'>;
+    'shift-array-item': TestArrayActionLeaf<'shift-array-item'>;
   }
 }
 
