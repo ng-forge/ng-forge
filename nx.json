@@ -37,6 +37,7 @@
     "projects": ["packages/*"],
     "version": {
       "preVersionCommand": "nx run-many -t build --projects 'packages/*'",
+      "preserveMatchingDependencyRanges": false,
       "generatorOptions": {
         "updateDependents": "auto"
       }
