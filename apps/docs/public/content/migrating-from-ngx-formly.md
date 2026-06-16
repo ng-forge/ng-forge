@@ -650,7 +650,7 @@ The state layer (value, validity, dirty tracking) is built on signals, and every
 Yes. They don't conflict: different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports `@ngx-formly/*`.
 
 **Which Angular versions does ng-forge support?**
-Angular 22. The published packages declare `@angular/*` peer dependencies of `~22.0.0` (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.
+Angular 22. The published packages declare `@angular/*` peer dependencies of `^22.0.0` (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.
 
 **Does ng-forge use Reactive Forms (`FormGroup` / `FormControl`)?**
 No. ng-forge is built on Angular **Signal Forms** (`@angular/forms/signals`), a separate system whose primitive, `FieldTree<T>`, holds value, validity, dirty/touched state, and errors as signals. There is no `FormGroup` or `FormControl` involved. If your formly app exposes a `formGroup` to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.

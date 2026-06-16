@@ -85,7 +85,7 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
   },
   {
     q: 'Which Angular and browser versions are supported?',
-    a: 'Angular 22. The published packages declare @angular/* peer dependencies of ~22.0.0 (Signal Forms became stable in Angular 22). Browser-wise, ng-forge supports the same matrix as Angular 22: modern evergreen browsers (Chrome / Edge / Firefox / Safari current and previous major). No IE 11.',
+    a: 'Angular 22. The published packages declare @angular/* peer dependencies of ^22.0.0 (Signal Forms became stable in Angular 22). Browser-wise, ng-forge supports the same matrix as Angular 22: modern evergreen browsers (Chrome / Edge / Firefox / Safari current and previous major). No IE 11.',
   },
 ];
 
@@ -104,7 +104,7 @@ export const MIGRATION_FAQ: readonly FaqEntry[] = [
   },
   {
     q: 'Which Angular versions does ng-forge support?',
-    a: "Angular 22. The published packages declare @angular/* peer dependencies of ~22.0.0 (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.",
+    a: "Angular 22. The published packages declare @angular/* peer dependencies of ^22.0.0 (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.",
   },
   {
     q: 'Does ng-forge use Reactive Forms (FormGroup / FormControl)?',

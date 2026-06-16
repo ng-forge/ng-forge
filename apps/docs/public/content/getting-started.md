@@ -51,7 +51,7 @@ Try it out: select a contact method and watch fields appear. Switch to the "Conf
 
 ## Requirements
 
-- **Angular 22**: the published packages declare `@angular/*` peers of `~22.0.0`. Signal Forms, which ng-forge builds on, is stable in Angular 22
+- **Angular 22**: the published packages declare `@angular/*` peers of `^22.0.0`. Signal Forms, which ng-forge builds on, is stable in Angular 22
 - **TypeScript 6.0**: required by the Angular 22 toolchain
 
 ---
