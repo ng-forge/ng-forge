@@ -83,10 +83,13 @@
     },
     "api-update": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "cache": false,
       "options": {
-        "command": "api-extractor run --local --config packages/dynamic-forms-bootstrap/api-extractor.json",
+        "commands": [
+          "nx run dynamic-forms-bootstrap:build --skip-nx-cache",
+          "api-extractor run --local --config packages/dynamic-forms-bootstrap/api-extractor.json"
+        ],
+        "parallel": false,
         "cwd": "{workspaceRoot}"
       }
     }

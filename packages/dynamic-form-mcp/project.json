@@ -78,10 +78,13 @@
     },
     "api-update": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "cache": false,
       "options": {
-        "command": "api-extractor run --local --config packages/dynamic-form-mcp/api-extractor.json",
+        "commands": [
+          "nx run dynamic-form-mcp:build --skip-nx-cache",
+          "api-extractor run --local --config packages/dynamic-form-mcp/api-extractor.json"
+        ],
+        "parallel": false,
         "cwd": "{workspaceRoot}"
       }
     },
