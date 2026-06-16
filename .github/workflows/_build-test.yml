@@ -211,8 +211,8 @@ jobs:
           done
           echo "✅ Package integrity check complete"
 
-      # openapi-generator is an esbuild CLI bundle with no .d.ts surface and thus no
-      # api-check target; run-many/affected run the check only for projects that define it.
+      # api-check runs only for projects that define the target (dynamic-form-mcp
+      # and openapi-generator); run-many/affected skip projects without it.
       - name: Check public API surface
         if: ${{ !inputs.affected }}
         run: pnpm nx run-many -t api-check
