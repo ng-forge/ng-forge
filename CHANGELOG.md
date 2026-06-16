@@ -4,6 +4,293 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [1.0.0](https://github.com/ng-forge/ng-forge/compare/v0.9.0...v1.0.0) (2026-06-17)
+
+First stable release of `@ng-forge/dynamic-forms` and its UI adapters. The public API now follows Semantic Versioning, with the `@ng-forge/dynamic-forms/internal` entrypoint explicitly excluded. This release re-tiers the public API surface for 1.0, so anyone upgrading from 0.9.0 should read the migration guide at the end of this entry.
+
+### 🚀 Features
+
+- **docs:** seo foundation — sitemap CI, schema enrichment, migration page polish ([#423](https://github.com/ng-forge/ng-forge/pull/423))
+- **docs:** redesign landing page with live form demos and ember motion ([#453](https://github.com/ng-forge/ng-forge/pull/453))
+- **dynamic-forms:** support HTTP/async property derivations and extend expression parser ([#431](https://github.com/ng-forge/ng-forge/pull/431))
+- **dynamic-forms:** add ng add schematic + Nx generator for adapter setup ([#443](https://github.com/ng-forge/ng-forge/pull/443))
+- **dynamic-forms:** export HiddenField type and isHiddenField guard ([#475](https://github.com/ng-forge/ng-forge/pull/475))
+- **dynamic-forms:** graduate core and ui adapters to stable ([#488](https://github.com/ng-forge/ng-forge/pull/488))
+
+### 🐛 Bug Fixes
+
+- **config:** tighten push-to-main hook to avoid false positives ([e6ac45328](https://github.com/ng-forge/ng-forge/commit/e6ac45328))
+- **config:** address PR #434 review feedback ([#434](https://github.com/ng-forge/ng-forge/issues/434))
+- **config:** remove inverted ignoreCommand that skipped production builds ([#468](https://github.com/ng-forge/ng-forge/pull/468))
+- **deps:** remediate dependabot security advisories ([#497](https://github.com/ng-forge/ng-forge/pull/497))
+- **docs:** SSR-render landing defers and add SEO redirects ([#440](https://github.com/ng-forge/ng-forge/pull/440))
+- **docs:** self-host adapter icon fonts instead of loading from CDN ([#460](https://github.com/ng-forge/ng-forge/pull/460))
+- **dynamic-forms:** scope DOM ids per form to prevent collisions ([#444](https://github.com/ng-forge/ng-forge/pull/444))
+- **dynamic-forms:** allow array fields as children of group fields ([#448](https://github.com/ng-forge/ng-forge/pull/448))
+- **dynamic-forms:** value/validation/derivation coverage-gap fixes and footgun guards ([#449](https://github.com/ng-forge/ng-forge/pull/449))
+- **dynamic-forms:** align primeng to @primeuix/themes + wire test-schematics into CI ([#451](https://github.com/ng-forge/ng-forge/pull/451))
+- **dynamic-forms:** preserve required-ness and typo-safety in inferred form model ([#480](https://github.com/ng-forge/ng-forge/pull/480))
+- **dynamic-forms:** resolve 1.0 graduation blockers across peers, api surface, and mcp ([#496](https://github.com/ng-forge/ng-forge/pull/496))
+- **openapi-generator:** drop description hint on container field types ([#426](https://github.com/ng-forge/ng-forge/pull/426))
+- **openapi-generator:** map numeric enums to select instead of number input ([#447](https://github.com/ng-forge/ng-forge/pull/447))
+- **openapi-generator:** extract multipart and urlencoded request body schemas ([9366c2825](https://github.com/ng-forge/ng-forge/commit/9366c2825))
+- **openapi-generator:** omit skipped binary properties from generated types ([b901856a2](https://github.com/ng-forge/ng-forge/commit/b901856a2))
+- **openapi-generator:** extract multipart and urlencoded request body schemas ([#486](https://github.com/ng-forge/ng-forge/pull/486))
+
+### ⚡ Performance Improvements
+
+- strip comments from FESM bundles to cut gzip size by ~49% ([#437](https://github.com/ng-forge/ng-forge/pull/437))
+- **docs:** client-render API reference and add legacy URL redirects ([#470](https://github.com/ng-forge/ng-forge/pull/470))
+- **dynamic-forms:** unmount hidden pages + cross-adapter perf bench infra ([#435](https://github.com/ng-forge/ng-forge/pull/435))
+- **dynamic-forms:** lazy-load the derivation engine ([#464](https://github.com/ng-forge/ng-forge/pull/464))
+
+### ♻️ Code Refactoring
+
+- remove unused internal barrels and dead files ([#458](https://github.com/ng-forge/ng-forge/pull/458))
+- ⚠️ **dynamic-forms:** unify derivation orchestrators (single class, one DI instance) ([#436](https://github.com/ng-forge/ng-forge/pull/436))
+- **dynamic-forms:** extract shared debounced-rxResource LogicFn scaffolding ([#439](https://github.com/ng-forge/ng-forge/pull/439))
+- **dynamic-forms:** single-traversal derivation collector ([#438](https://github.com/ng-forge/ng-forge/pull/438), [#436](https://github.com/ng-forge/ng-forge/issues/436))
+- ⚠️ **dynamic-forms:** split public / internal / integration entrypoints ([#450](https://github.com/ng-forge/ng-forge/pull/450))
+- ⚠️ **dynamic-forms:** trim and re-tier public API surface for 1.0 ([#469](https://github.com/ng-forge/ng-forge/pull/469))
+- ⚠️ **dynamic-forms:** addon API consistency (kind to type, withAddonActions, /integration) ([#473](https://github.com/ng-forge/ng-forge/pull/473))
+- ⚠️ **dynamic-forms:** remove createField and formConfig helpers ([#474](https://github.com/ng-forge/ng-forge/pull/474))
+- **dynamic-forms:** drop deprecated InputTypeToValueType and tidy adapter testing exports ([#477](https://github.com/ng-forge/ng-forge/pull/477))
+- ⚠️ **forms:** remove deprecated value-field aliases, deprecate button aliases ([#465](https://github.com/ng-forge/ng-forge/pull/465))
+
+### 📚 Documentation
+
+- add default behavioral rules to CLAUDE.md ([5c970d6fd](https://github.com/ng-forge/ng-forge/commit/5c970d6fd))
+- trim verbose JSDoc and @example blocks from shipped libraries ([#442](https://github.com/ng-forge/ng-forge/pull/442))
+- fix API inaccuracies and tighten prose across the docs site ([#490](https://github.com/ng-forge/ng-forge/pull/490))
+- **docs:** add /integration to the API-reference generator ([#481](https://github.com/ng-forge/ng-forge/pull/481))
+- **dynamic-forms:** document /internal as unsupported (no semver guarantee) ([#471](https://github.com/ng-forge/ng-forge/pull/471))
+- **dynamic-forms:** add JSDoc to public event classes and DynamicForm ([#476](https://github.com/ng-forge/ng-forge/pull/476))
+- **dynamic-forms:** surface /schema as a first-class public entrypoint ([#478](https://github.com/ng-forge/ng-forge/pull/478))
+
+### 📦 Build System
+
+- **docs:** export NODE_OPTIONS via wrapper script for Vercel build ([#432](https://github.com/ng-forge/ng-forge/pull/432))
+
+### ✅ Tests
+
+- **dynamic-forms:** enforce internal and integration definition type-tests in CI ([#487](https://github.com/ng-forge/ng-forge/pull/487))
+- **ionic:** refresh grid-layout snapshots after Playwright 1.60 bump ([4aa9ba277](https://github.com/ng-forge/ng-forge/commit/4aa9ba277))
+
+### Migration guide: 0.9.0 to 1.0.0
+
+1.0.0 is the first stable release of `@ng-forge/dynamic-forms` and its adapters. From this release the public API follows SemVer: the main `@ng-forge/dynamic-forms` entrypoint, the adapter packages, and the `/schema` and `/integration` entrypoints are covered. The `@ng-forge/dynamic-forms/internal` entrypoint is explicitly unsupported and carries no semver guarantee, so do not import from it.
+
+#### Version requirements
+
+1.0.0 drops Angular 21 and Node 20/21. Bump these before upgrading:
+
+- Angular: `@angular/common`, `@angular/core`, `@angular/forms` move to `^22.0.0`.
+- Node: `^22.22.3 || ^24.15.0 || >=26.0.0` (core and all adapters). `@ng-forge/dynamic-form-mcp` requires Node `>=24.0.0`.
+- Material adapter: `@angular/material` `^22.0.0`.
+- PrimeNG adapter: `primeng` `>=21.0.0` (was `>=17.0.0`).
+- Ionic adapter: `@ionic/angular` `>=8.0.0` (was `>=7.0.0`).
+- Bootstrap adapter: no UI peer beyond Angular.
+- Unchanged: `rxjs` `>=7.0.0`, `@standard-schema/spec` `^1.0.0`, and the `ngxtension` `>=4.0.0` dependency.
+
+Bump all `@ng-forge/dynamic-forms*` packages to 1.0.0 together; they are fixed-versioned and must match. Angular's `ng update` flow handles the framework and Material bumps; pnpm/npm will surface the remaining peer mismatches at install time.
+
+#### Adapter-author symbols moved to the `/integration` entrypoint
+
+Symbols used to build custom field types, custom field components, or custom UI adapters were removed from the main `@ng-forge/dynamic-forms` entrypoint and are now exported only from `@ng-forge/dynamic-forms/integration`. This includes field mappers (`baseFieldMapper`, `buildBaseInputs`, `arrayFieldMapper`, `groupFieldMapper`, `pageFieldMapper`, `rowFieldMapper`, `textFieldMapper`, `containerFieldMapper`), field-type registration (`FieldTypeDefinition`, `FieldScope`, `ValueHandlingMode`, `FIELD_REGISTRY`), DI context tokens (`ARRAY_CONTEXT`, `GROUP_CONTEXT`, `FIELD_SIGNAL_CONTEXT`, `FORM_OPTIONS`, `DEFAULT_PROPS`, `injectFieldSignalContext`), FieldTree utilities (`getArrayLength`, `toReadonlyFieldTree`, `writeToFieldValue`), `RootFormRegistryService`, `EventBus`, `resolveTokens`, `applyValidator`, `applyValidators`, `DynamicTextPipe`, `dynamicTextToObservable`, `interpolateParams`, `applyMetaToElement`, and the FieldState types.
+
+The consumer API (`DynamicForm`, `provideDynamicForm`, `FormConfig`, `FieldDef`, validators, logic, events, helpers) is unchanged and stays on `@ng-forge/dynamic-forms`. Pure consumer apps need no changes.
+
+**Before**
+
+```ts
+import { FieldTypeDefinition, FIELD_REGISTRY, FIELD_SIGNAL_CONTEXT, baseFieldMapper, DynamicTextPipe } from '@ng-forge/dynamic-forms';
+```
+
+**After**
+
+```ts
+import {
+  FieldTypeDefinition,
+  FIELD_REGISTRY,
+  FIELD_SIGNAL_CONTEXT,
+  baseFieldMapper,
+  DynamicTextPipe,
+} from '@ng-forge/dynamic-forms/integration';
+```
+
+- If a single import statement mixes consumer-API and adapter-tier symbols, split it into two statements so the consumer symbols stay on `@ng-forge/dynamic-forms`.
+- `resolveDynamicValue`, `ValueFieldComponent`, and `CheckedFieldComponent` remain available from both `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/integration`, so imports of those three can be left as-is.
+- Users on the official adapter packages (`-material`, `-bootstrap`, `-primeng`, `-ionic`) are not affected; those packages were updated in the same change.
+- Not auto-migratable: a blind find/replace would also rewrite the unchanged consumer-API imports.
+
+#### `createField` and `formConfig` helpers removed
+
+`createField(type, config)` and `formConfig(config)` are deleted from `@ng-forge/dynamic-forms`. `formConfig` was an identity function for type narrowing; `createField` returned `{ type, ...config }`. Author fields as plain object literals inside a `FormConfig` and type the config with `as const satisfies FormConfig`. The `FormConfig` type is still exported.
+
+**Before**
+
+```ts
+import { formConfig, createField, DynamicForm } from '@ng-forge/dynamic-forms';
+
+const config = formConfig({
+  fields: [
+    createField('input', { key: 'email', label: 'Email', required: true }),
+    createField('submit', { key: 'submit', label: 'Submit' }),
+  ],
+});
+```
+
+**After**
+
+```ts
+import { FormConfig, DynamicForm } from '@ng-forge/dynamic-forms';
+
+const config = {
+  fields: [
+    { type: 'input', key: 'email', label: 'Email', required: true },
+    { type: 'submit', key: 'submit', label: 'Submit' },
+  ],
+} as const satisfies FormConfig;
+```
+
+- `createField`'s eager dev-time validation messages are gone. `FormStateManager` still validates the config at runtime, so verify your config still builds and runs.
+
+#### `SubmitEvent` renamed to `FormSubmitEvent`; `field` shorthand removed
+
+The event class `SubmitEvent` is renamed to `FormSubmitEvent`. The runtime discriminator stays `type: 'submit'`, so string subscriptions like `eventBus.on('submit')` still work; only the imported class name and any `eventBus.on<SubmitEvent>(...)` type parameter must change. Separately, the `field` shorthand was removed alongside `createField` and `formConfig` (the entire `./helpers` module is gone). There is no drop-in function replacement; author fields as object literals (see the section above).
+
+Several adapter-author symbols were also removed from `@ng-forge/dynamic-forms` and must now be imported from `@ng-forge/dynamic-forms/integration`: `WRAPPER_REGISTRY`, the addon registry tokens, the type guards `isCheckedField`, `isValueField`, `isContainerTypedField`, and the non-field/button logic resolvers (`resolveSubmitButtonDisabled`, `resolveNextButtonDisabled`, `resolveNonFieldHidden`, `resolveNonFieldDisabled`) with their context types. A few internals (`formatAddonWarning`, `logAddonWarnings`, `sanitizeFormConfigPure`, `validateFieldAddons`, `walkAndValidateAddons`, `Prettify`) have no integration export; `sanitizeFormConfig` remains.
+
+**Before**
+
+```ts
+import { SubmitEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/integration';
+
+// ...
+this.eventBus.dispatch(SubmitEvent);
+```
+
+**After**
+
+```ts
+import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
+import { EventBus } from '@ng-forge/dynamic-forms/integration';
+
+// ...
+this.eventBus.dispatch(FormSubmitEvent);
+```
+
+- The `SubmitEvent` rename is a pure find/replace and is auto-migratable. The helper removal and the import-path move for adapter-author symbols are not.
+
+#### Addon `kind` renamed to `type`; `provideAddonActions` renamed to `withAddonActions`
+
+Three changes to addons:
+
+1. In every field's `addons: [...]` array, the discriminant key `kind` is renamed to `type` (for example `{ slot: 'prefix', kind: 'text' }` becomes `{ slot: 'prefix', type: 'text' }`). The unrelated Angular Signal Forms validator-error `kind` (`{ kind: 'errorName' }`) is unchanged.
+2. The provider `provideAddonActions(...)` is renamed to `withAddonActions(...)`; the call shape and placement inside `provideDynamicForm(...)` are identical.
+3. The adapter-author addon surface moved to `@ng-forge/dynamic-forms/integration`: `DfAddonSlot`, `ADDON_TYPE_DEFINITIONS` (was `ADDON_KIND_DEFINITIONS`), `injectAddonTypeRegistry` (was `injectAddonKindRegistry`), `injectFieldsSupportingAddons`, `runPresetAction`, and the types `FieldAddonSupport`, `FieldAddonSupportEntry`, `AddonTypeSchema` (was `AddonKindSchema`), `AddonShapeValidator`. Registry renames in `/internal`: `AddonKindDefinition` to `AddonTypeDefinition`, `ADDON_KIND_REGISTRY` to `ADDON_TYPE_REGISTRY`, `getKind`/`hasKind` to `getType`/`hasType`.
+
+`AddonTypeDefinition`, `withCustomAddon`, `withAddonActions`, `DfTemplate`, and the built-in renderer components (`TextAddonComponent`, `TemplateAddonComponent`, `ComponentAddonComponent`) stay on the main `@ng-forge/dynamic-forms` barrel.
+
+**Before**
+
+```ts
+import { provideDynamicForm, provideAddonActions, type AddonActionContext } from '@ng-forge/dynamic-forms';
+
+const field = {
+  type: 'text',
+  key: 'amount',
+  addons: [
+    { slot: 'prefix', kind: 'text', text: '$' },
+    { slot: 'suffix', kind: 'mat-button', icon: 'close', preset: 'clear' },
+  ],
+};
+
+provideDynamicForm(
+  ...withMaterialFields(),
+  provideAddonActions({
+    logClick: (ctx: AddonActionContext) => console.log(ctx),
+  }),
+);
+```
+
+**After**
+
+```ts
+import { provideDynamicForm, withAddonActions, type AddonActionContext } from '@ng-forge/dynamic-forms';
+
+const field = {
+  type: 'text',
+  key: 'amount',
+  addons: [
+    { slot: 'prefix', type: 'text', text: '$' },
+    { slot: 'suffix', type: 'mat-button', icon: 'close', preset: 'clear' },
+  ],
+};
+
+provideDynamicForm(
+  ...withMaterialFields(),
+  withAddonActions({
+    logClick: (ctx: AddonActionContext) => console.log(ctx),
+  }),
+);
+```
+
+- Scope the `kind` to `type` rename to addon objects inside `addons: [...]` only; do not touch validator-error `kind`.
+- The provider rename and import-path move are mechanical, but the scoped `kind` rename is not, so this change is not auto-migratable as a whole.
+
+#### Per-field value directive-access type aliases removed from adapter packages
+
+36 type aliases are removed from the four adapter packages: the cross product of prefixes `{Mat, Bs, Prime, Ionic}` and field types `{Input, Textarea, Select, Checkbox, Radio, MultiCheckbox, Datepicker, Slider, Toggle}`, each named `<Prefix><FieldType>Component` (for example `MatInputComponent`, `BsSelectComponent`, `PrimeToggleComponent`, `IonicCheckboxComponent`). Each was a type alias for `ValueFieldComponent<XxxField>` used for typed directive access. The replacement is the runtime helper `injectNgForgeField<T>()` from `@ng-forge/dynamic-forms/integration`. The `<Prefix>ButtonComponent` aliases are only deprecated in this release and still compile.
+
+**Before**
+
+```ts
+import type { MatInputComponent } from '@ng-forge/dynamic-forms-material';
+
+// typed handle to the input field's directive instance
+let fieldRef: MatInputComponent;
+```
+
+**After**
+
+```ts
+import { injectNgForgeField } from '@ng-forge/dynamic-forms/integration';
+
+// inside a component constructor / field initializer
+const fieldRef = injectNgForgeField<string>();
+// fieldRef.field is Signal<FieldTree<string>>
+```
+
+- `injectNgForgeField<T>()` must run in an Angular injection context (constructor or field initializer); `T` is the field's value type.
+- Plan to migrate `<Prefix>ButtonComponent` usages to `injectNgForgeAction<TEvent>()` before their later removal.
+- Not auto-migratable: the call and its generic value type cannot be reconstructed from the removed type alias.
+
+#### `InputTypeToValueType` type alias removed
+
+The deprecated type `InputTypeToValueType<T>` is removed from `@ng-forge/dynamic-forms/integration`. Use `InferInputValue<T>` from the same entrypoint; it produces the identical result for any `InputType` argument. This is type-only with no runtime symbol.
+
+**Before**
+
+```ts
+import type { InputTypeToValueType } from '@ng-forge/dynamic-forms/integration';
+
+type EmailValue = InputTypeToValueType<'email'>; // string
+type AmountValue = InputTypeToValueType<'number'>; // number
+```
+
+**After**
+
+```ts
+import type { InferInputValue } from '@ng-forge/dynamic-forms/integration';
+
+type EmailValue = InferInputValue<'email'>; // string
+type AmountValue = InferInputValue<'number'>; // number
+```
+
+- Pure rename with the same type argument. Auto-migratable.
+
 ## [0.9.0](https://github.com/ng-forge/ng-forge/compare/v0.8.0...v0.9.0) (2026-05-23)
 
 ### 🚀 Features
