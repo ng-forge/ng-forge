@@ -1,6 +1,6 @@
 {
   "name": "@ng-forge/dynamic-forms-bootstrap",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "Bootstrap 5 integration for @ng-forge/dynamic-forms. Pre-built Bootstrap form components.",
   "type": "module",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
-    "@ng-forge/dynamic-forms": "~0.9.0",
+    "@ng-forge/dynamic-forms": "~1.0.0",
     "rxjs": ">=7.0.0"
   },
   "dependencies": {
