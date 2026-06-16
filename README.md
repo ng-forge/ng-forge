@@ -52,7 +52,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<form [dynamic-form]="config"></form>`,
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
 })
 export class LoginComponent {
   config = {
@@ -62,6 +62,10 @@ export class LoginComponent {
       { type: 'submit', key: 'submit', label: 'Sign In' },
     ],
   } as const satisfies FormConfig;
+
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
+    console.log('Form submitted:', value); // inferred: { email: string; password: string }
+  }
 }
 ```
 

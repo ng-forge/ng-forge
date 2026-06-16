@@ -40,6 +40,18 @@ The `/internal` entrypoint is an unsupported build surface with no semver guaran
 
 Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
 
+## Versioning & stability
+
+The library follows [semantic versioning](https://semver.org). The semver contract covers the public `exports` entrypoints listed above (`@ng-forge/dynamic-forms`, `/schema`, and `/integration`). The `/internal` entrypoint is excluded and may change in any release.
+
+A change is considered breaking when it removes or renames a public export, changes the runtime behavior or type signature of a documented API in an incompatible way, or raises the minimum Angular peer version. Additive changes (new field types, new optional config options, new exports) ship in minor releases. Bug fixes ship in patches.
+
+Deprecations are announced in the release notes and, where practical, surface as a runtime or type-level warning. A deprecated public API stays available for at least one minor release before it can be removed in the next major.
+
+## Tested browsers
+
+The end-to-end suite is verified against Chromium-class browsers in CI. The core form logic is rendering-agnostic (it produces field definitions that the UI adapters render), so it does not depend on browser-specific behavior, but cross-browser rendering beyond Chromium is not exercised in CI.
+
 ## Installation
 
 ```bash
