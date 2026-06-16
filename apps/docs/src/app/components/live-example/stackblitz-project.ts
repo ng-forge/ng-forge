@@ -25,8 +25,8 @@ const ADAPTER_META: Record<SupportedAdapter, AdapterMeta> = {
     configProviders:
       "    provideAnimations(),\n    provideDynamicForm(...withMaterialFields({ appearance: 'outline', color: 'primary' }), withLegacyStatusClasses()),",
     extraDeps: {
-      '@angular/material': '~22.0.0',
-      '@angular/cdk': '~22.0.0',
+      '@angular/material': '~22.0.1',
+      '@angular/cdk': '~22.0.1',
     },
     globalStyles: 'body { font-family: Roboto, sans-serif; margin: 0; }',
     extraStyles: ['@angular/material/prebuilt-themes/azure-blue.css'],
@@ -210,14 +210,14 @@ bootstrapApplication(AppComponent, appConfig);
 `;
 
   const deps: Record<string, string> = {
-    '@angular/animations': '~22.0.0',
-    '@angular/common': '~22.0.0',
-    '@angular/compiler': '~22.0.0',
-    '@angular/core': '~22.0.0',
-    '@angular/forms': '~22.0.0',
-    '@angular/platform-browser': '~22.0.0',
-    '@angular/platform-browser-dynamic': '~22.0.0',
-    '@angular/router': '~22.0.0',
+    '@angular/animations': '~22.0.1',
+    '@angular/common': '~22.0.1',
+    '@angular/compiler': '~22.0.1',
+    '@angular/core': '~22.0.1',
+    '@angular/forms': '~22.0.1',
+    '@angular/platform-browser': '~22.0.1',
+    '@angular/platform-browser-dynamic': '~22.0.1',
+    '@angular/router': '~22.0.1',
     '@ng-forge/dynamic-forms': 'latest',
     [meta.pkg]: 'latest',
     ...meta.extraDeps,
@@ -237,9 +237,9 @@ bootstrapApplication(AppComponent, appConfig);
       },
       dependencies: deps,
       devDependencies: {
-        '@angular/cli': '~22.0.0',
-        '@angular/compiler-cli': '~22.0.0',
-        '@angular-devkit/build-angular': '~22.0.0',
+        '@angular/cli': '~22.0.1',
+        '@angular/compiler-cli': '~22.0.1',
+        '@angular-devkit/build-angular': '~22.0.1',
         typescript: '~6.0.3',
       },
     },
