@@ -17,7 +17,7 @@ MCP (Model Context Protocol) server for ng-forge dynamic forms - enables AI assi
 
 ## Installation
 
-No manual install needed. This is a stdio MCP server (bin: `ng-forge-mcp`) that your MCP client launches on demand via `npx`; see the per-client config in Setup below.
+No manual install needed. This is a stdio MCP server that your MCP client launches on demand via `npx` (using the package name `@ng-forge/dynamic-form-mcp`); see the per-client config in Setup below.
 
 ## Setup
 
