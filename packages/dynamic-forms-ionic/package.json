@@ -43,6 +43,7 @@
     "rxjs": ">=7.0.0"
   },
   "dependencies": {
+    "ngxtension": ">=4.0.0",
     "date-fns": "^4.0.0"
   }
 }

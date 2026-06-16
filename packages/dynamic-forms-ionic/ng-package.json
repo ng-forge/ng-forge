@@ -5,5 +5,5 @@
     "entryFile": "src/index.ts"
   },
   "assets": ["styles/_defaults.scss"],
-  "allowedNonPeerDependencies": ["@ng-forge/dynamic-forms", "date-fns"]
+  "allowedNonPeerDependencies": ["@ng-forge/dynamic-forms", "date-fns", "ngxtension"]
 }

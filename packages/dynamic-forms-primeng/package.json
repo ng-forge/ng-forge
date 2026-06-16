@@ -40,5 +40,8 @@
     "@ng-forge/dynamic-forms": "~0.9.0",
     "primeng": ">=21.0.0",
     "rxjs": ">=7.0.0"
+  },
+  "dependencies": {
+    "ngxtension": ">=4.0.0"
   }
 }
