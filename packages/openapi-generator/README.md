@@ -45,7 +45,7 @@ paths:
 **2. Run the generator:**
 
 ```bash
-npx ng-forge-generator --spec openapi.yaml --output src/generated
+npx @ng-forge/openapi-generator --spec openapi.yaml --output src/generated
 ```
 
 **3. Import and use in your Angular component:**

@@ -20,9 +20,10 @@ Bootstrap 5 field components for [@ng-forge/dynamic-forms](https://www.npmjs.com
 
 | Angular | @ng-forge/dynamic-forms-bootstrap |
 | ------- | --------------------------------- |
-| 22.x    | 0.x (current), 1.x (upcoming)     |
+| 22.x    | 1.x                               |
+| 21.x    | 0.x (experimental)                |
 
-Versioned in lockstep with `@ng-forge/dynamic-forms`. The current `0.x` line targets Angular 22, where Signal Forms are stable: the published package declares `@angular/core ^22.0.0` in `peerDependencies`, and npm warns on a mismatch.
+Versioned in lockstep with `@ng-forge/dynamic-forms`. The `0.x` line targets Angular 21 (experimental Signal Forms). Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
 
 ## Installation
 
