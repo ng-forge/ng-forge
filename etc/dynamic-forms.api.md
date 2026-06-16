@@ -408,7 +408,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     protected resolvedFields: Signal<ResolvedField[]>;
     // (undocumented)
     shouldRender: Signal<boolean>;
-    source: _angular_core.InputSignal<"inline" | "json">;
+    source: _angular_core.InputSignal<"json" | "inline">;
     submitted: _angular_core.OutputRef<TModel>;
     submitting: Signal<boolean>;
     touched: Signal<boolean>;
