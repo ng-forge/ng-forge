@@ -102,7 +102,7 @@ export class PrimeButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"reset" | "button" | "submit">;
+    readonly buttonType: _angular_core.Signal<"button" | "submit" | "reset">;
     // (undocumented)
     onClick(): void;
     // (undocumented)
@@ -196,49 +196,30 @@ export interface PrimeDatepickerProps extends DatepickerProps {
 }
 
 // @public
-export enum PrimeField {
-    // (undocumented)
-    AddArrayItem = "add-array-item",
-    // (undocumented)
-    Button = "button",
-    // (undocumented)
-    Checkbox = "checkbox",
-    // (undocumented)
-    Datepicker = "datepicker",
-    // (undocumented)
-    Input = "input",
-    // (undocumented)
-    InsertArrayItem = "insert-array-item",
-    // (undocumented)
-    MultiCheckbox = "multi-checkbox",
-    // (undocumented)
-    Next = "next",
-    // (undocumented)
-    PopArrayItem = "pop-array-item",
-    // (undocumented)
-    PrependArrayItem = "prepend-array-item",
-    // (undocumented)
-    Previous = "previous",
-    // (undocumented)
-    Radio = "radio",
-    // (undocumented)
-    RemoveArrayItem = "remove-array-item",
-    // (undocumented)
-    Select = "select",
-    // (undocumented)
-    ShiftArrayItem = "shift-array-item",
-    // (undocumented)
-    Slider = "slider",
-    // (undocumented)
-    Submit = "submit",
-    // (undocumented)
-    Textarea = "textarea",
-    // (undocumented)
-    Toggle = "toggle"
-}
+export const PrimeField: {
+    readonly Input: "input";
+    readonly Select: "select";
+    readonly Checkbox: "checkbox";
+    readonly Button: "button";
+    readonly Submit: "submit";
+    readonly Next: "next";
+    readonly Previous: "previous";
+    readonly AddArrayItem: "add-array-item";
+    readonly PrependArrayItem: "prepend-array-item";
+    readonly InsertArrayItem: "insert-array-item";
+    readonly RemoveArrayItem: "remove-array-item";
+    readonly PopArrayItem: "pop-array-item";
+    readonly ShiftArrayItem: "shift-array-item";
+    readonly Textarea: "textarea";
+    readonly Radio: "radio";
+    readonly MultiCheckbox: "multi-checkbox";
+    readonly Datepicker: "datepicker";
+    readonly Slider: "slider";
+    readonly Toggle: "toggle";
+};
 
 // @public (undocumented)
-export type PrimeFieldType = `${PrimeField}`;
+export type PrimeFieldType = (typeof PrimeField)[keyof typeof PrimeField];
 
 // @public
 export type PrimeFormConfig<TFields extends NarrowFields | RegisteredFieldTypes[] = RegisteredFieldTypes[], TValue = InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>> = FormConfig<TFields, TValue, PrimeFormProps>;
