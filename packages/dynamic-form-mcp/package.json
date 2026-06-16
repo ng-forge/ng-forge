@@ -29,16 +29,17 @@
     "ng-forge-mcp": "./bin/ng-forge-mcp.js"
   },
   "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
       "import": "./src/index.js",
-      "types": "./src/index.d.ts"
+      "types": "./index.d.ts"
     }
   },
   "files": [
     "src",
     "bin",
+    "index.d.ts",
     "README.md"
   ],
   "engines": {
