@@ -226,19 +226,19 @@ export const BsPrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
 export const BsInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('insert-array-item'),
   arrayKey: z.string().optional(),
-  index: z.number().optional(),
+  index: z.number(),
   props: BsButtonPropsSchema.optional(),
 });
 
 export const BsPopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('pop-array-item'),
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: BsButtonPropsSchema.optional(),
 });
 
 export const BsShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('shift-array-item'),
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: BsButtonPropsSchema.optional(),
 });
 

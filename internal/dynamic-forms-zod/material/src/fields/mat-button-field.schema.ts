@@ -129,7 +129,7 @@ export const MatInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   /**
    * Index at which to insert the new item.
    */
-  index: z.number().optional(),
+  index: z.number(),
   props: MatButtonPropsSchema.optional(),
 });
 
@@ -140,9 +140,8 @@ export const MatPopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('pop-array-item'),
   /**
    * Key of the array field to pop items from.
-   * If omitted, uses the parent array context.
    */
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: MatButtonPropsSchema.optional(),
 });
 
@@ -153,9 +152,8 @@ export const MatShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('shift-array-item'),
   /**
    * Key of the array field to shift items from.
-   * If omitted, uses the parent array context.
    */
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: MatButtonPropsSchema.optional(),
 });
 

@@ -225,18 +225,18 @@ export const PrimePrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend(
 export const PrimeInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('insert-array-item'),
   arrayKey: z.string().optional(),
-  index: z.number().optional(),
+  index: z.number(),
   props: PrimeButtonPropsSchema.optional(),
 });
 
 export const PrimePopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('pop-array-item'),
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: PrimeButtonPropsSchema.optional(),
 });
 
 export const PrimeShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
   type: z.literal('shift-array-item'),
-  arrayKey: z.string().optional(),
+  arrayKey: z.string(),
   props: PrimeButtonPropsSchema.optional(),
 });

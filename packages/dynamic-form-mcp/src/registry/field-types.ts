@@ -739,9 +739,10 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'popContact',
   type: 'pop-array-item',
-  label: 'Remove Last'
+  label: 'Remove Last',
+  arrayKey: 'contacts'
 }`,
-    minimalExample: `{ key: 'pop', type: 'pop-array-item', label: 'Remove Last' }`,
+    minimalExample: `{ key: 'pop', type: 'pop-array-item', label: 'Remove Last', arrayKey: 'items' }`,
   },
   {
     type: 'shift-array-item',
@@ -756,8 +757,9 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'shiftContact',
   type: 'shift-array-item',
-  label: 'Remove First'
+  label: 'Remove First',
+  arrayKey: 'contacts'
 }`,
-    minimalExample: `{ key: 'shift', type: 'shift-array-item', label: 'Remove First' }`,
+    minimalExample: `{ key: 'shift', type: 'shift-array-item', label: 'Remove First', arrayKey: 'items' }`,
   },
 ];
