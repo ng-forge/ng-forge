@@ -6,7 +6,7 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
-  AddArrayItemButtonField,
+  BsAddArrayItemButtonField,
   BsButtonField,
   BsCheckboxField,
   BsDatepickerField,
@@ -20,11 +20,11 @@ import type {
   BsSubmitButtonField,
   BsTextareaField,
   BsToggleField,
-  InsertArrayItemButtonField,
-  PopArrayItemButtonField,
-  PrependArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  BsInsertArrayItemButtonField,
+  BsPopArrayItemButtonField,
+  BsPrependArrayItemButtonField,
+  BsRemoveArrayItemButtonField,
+  BsShiftArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -36,12 +36,18 @@ declare module '@ng-forge/dynamic-forms' {
     submit: BsSubmitButtonField;
     next: BsNextButtonField;
     previous: BsPreviousButtonField;
-    addArrayItem: AddArrayItemButtonField;
-    prependArrayItem: PrependArrayItemButtonField;
-    insertArrayItem: InsertArrayItemButtonField;
-    removeArrayItem: RemoveArrayItemButtonField;
-    popArrayItem: PopArrayItemButtonField;
-    shiftArrayItem: ShiftArrayItemButtonField;
+    addArrayItem: BsAddArrayItemButtonField;
+    'add-array-item': BsAddArrayItemButtonField;
+    prependArrayItem: BsPrependArrayItemButtonField;
+    'prepend-array-item': BsPrependArrayItemButtonField;
+    insertArrayItem: BsInsertArrayItemButtonField;
+    'insert-array-item': BsInsertArrayItemButtonField;
+    removeArrayItem: BsRemoveArrayItemButtonField;
+    'remove-array-item': BsRemoveArrayItemButtonField;
+    popArrayItem: BsPopArrayItemButtonField;
+    'pop-array-item': BsPopArrayItemButtonField;
+    shiftArrayItem: BsShiftArrayItemButtonField;
+    'shift-array-item': BsShiftArrayItemButtonField;
     textarea: BsTextareaField;
     radio: BsRadioField<unknown>;
     'multi-checkbox': BsMultiCheckboxField<unknown>;

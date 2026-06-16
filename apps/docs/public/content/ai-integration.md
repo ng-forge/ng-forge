@@ -91,14 +91,14 @@ Get documentation about any ng-forge topic.
 
 **Available Topics:**
 
-| Category    | Topics                                                                                                                                                                                                                  |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Field Types | `input`, `select`, `slider`, `radio`, `checkbox`, `multi-checkbox`, `textarea`, `datepicker`, `toggle`, `text`, `hidden`, `button`, `submit`, `next`, `previous`, `addArrayItem`, `removeArrayItem`                     |
-| Containers  | `group`, `row`, `array`, `simplified-array`, `page`                                                                                                                                                                     |
-| Wrappers    | `wrappers`, `css`, `arraySection`, `section`                                                                                                                                                                            |
-| Addons      | `addons`, `template`, `component`, `mat-icon`, `mat-button`, `bs-icon`, `bs-button`, `prime-icon`, `prime-button`, `ion-icon`, `ion-button`                                                                             |
-| Concepts    | `validation`, `validation-messages`, `conditional`, `derivation`, `property-derivation`, `options-format`, `expression-variables`, `async-validators`, `buttons`, `external-data`                                       |
-| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `field-placement`, `logic-matrix`, `context-api`, `containers`, `array-buttons`, `custom-validators`, `conditions`, `common-expressions`, `type-narrowing`, `workflow` |
+| Category    | Topics                                                                                                                                                                                                                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Field Types | `input`, `select`, `slider`, `radio`, `checkbox`, `multi-checkbox`, `textarea`, `datepicker`, `toggle`, `text`, `hidden`, `button`, `submit`, `next`, `previous`, `add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item` |
+| Containers  | `group`, `row`, `array`, `simplified-array`, `page`                                                                                                                                                                                                                                      |
+| Wrappers    | `wrappers`, `css`, `arraySection`, `section`                                                                                                                                                                                                                                             |
+| Addons      | `addons`, `template`, `component`, `mat-icon`, `mat-button`, `bs-icon`, `bs-button`, `prime-icon`, `prime-button`, `ion-icon`, `ion-button`                                                                                                                                              |
+| Concepts    | `validation`, `validation-messages`, `conditional`, `derivation`, `property-derivation`, `options-format`, `expression-variables`, `async-validators`, `buttons`, `external-data`                                                                                                        |
+| Patterns    | `golden-path`, `multi-page-gotchas`, `pitfalls`, `field-placement`, `logic-matrix`, `context-api`, `containers`, `array-buttons`, `custom-validators`, `conditions`, `common-expressions`, `type-narrowing`, `workflow`                                                                  |
 
 Wrapper and addon topics are read from the registry at runtime, so use `topic="list"` to get the complete, current set with descriptions.
 

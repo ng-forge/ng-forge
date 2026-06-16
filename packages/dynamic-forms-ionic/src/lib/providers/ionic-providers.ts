@@ -4,7 +4,7 @@ import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dyna
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';
-import type { IonButtonAddon, IonIconAddon } from '../types/addons';
+import type { IonicButtonAddon, IonicIconAddon } from '../types/addons';
 
 /** Field type definitions for Ionic components. */
 export type IonicFieldTypes = FieldTypeDefinition[];
@@ -52,9 +52,9 @@ export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | I
 
 /* -- Ionic addon types ------------------------------------------------- */
 
-const ION_ICON_KIND: AddonTypeDefinition<IonIconAddon> = {
+const ION_ICON_KIND: AddonTypeDefinition<IonicIconAddon> = {
   type: 'ion-icon',
-  loadComponent: () => import('../addons/ion-icon-addon.component').then((m) => m.IonIconAddonComponent),
+  loadComponent: () => import('../addons/ion-icon-addon.component').then((m) => m.IonicIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'ion-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -62,9 +62,9 @@ const ION_ICON_KIND: AddonTypeDefinition<IonIconAddon> = {
   },
 };
 
-const ION_BUTTON_KIND: AddonTypeDefinition<IonButtonAddon> = {
+const ION_BUTTON_KIND: AddonTypeDefinition<IonicButtonAddon> = {
   type: 'ion-button',
-  loadComponent: () => import('../addons/ion-button-addon.component').then((m) => m.IonButtonAddonComponent),
+  loadComponent: () => import('../addons/ion-button-addon.component').then((m) => m.IonicButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

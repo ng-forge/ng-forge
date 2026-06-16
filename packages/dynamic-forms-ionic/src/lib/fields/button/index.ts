@@ -5,12 +5,12 @@ export type {
   IonicSubmitButtonField,
   IonicNextButtonField,
   IonicPreviousButtonField,
-  AddArrayItemButtonField,
-  PrependArrayItemButtonField,
-  InsertArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  PopArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  IonicAddArrayItemButtonField,
+  IonicPrependArrayItemButtonField,
+  IonicInsertArrayItemButtonField,
+  IonicRemoveArrayItemButtonField,
+  IonicPopArrayItemButtonField,
+  IonicShiftArrayItemButtonField,
 } from './ionic-button.type';
 
 // Public API - component

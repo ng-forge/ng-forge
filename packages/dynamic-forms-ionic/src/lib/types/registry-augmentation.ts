@@ -6,8 +6,8 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
-  AddArrayItemButtonField,
-  InsertArrayItemButtonField,
+  IonicAddArrayItemButtonField,
+  IonicInsertArrayItemButtonField,
   IonicButtonField,
   IonicCheckboxField,
   IonicDatepickerField,
@@ -21,10 +21,10 @@ import type {
   IonicSubmitButtonField,
   IonicTextareaField,
   IonicToggleField,
-  PopArrayItemButtonField,
-  PrependArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  IonicPopArrayItemButtonField,
+  IonicPrependArrayItemButtonField,
+  IonicRemoveArrayItemButtonField,
+  IonicShiftArrayItemButtonField,
 } from '../fields';
 
 declare module '@ng-forge/dynamic-forms' {
@@ -42,11 +42,17 @@ declare module '@ng-forge/dynamic-forms' {
     datepicker: IonicDatepickerField;
     slider: IonicSliderField;
     toggle: IonicToggleField;
-    addArrayItem: AddArrayItemButtonField;
-    prependArrayItem: PrependArrayItemButtonField;
-    insertArrayItem: InsertArrayItemButtonField;
-    removeArrayItem: RemoveArrayItemButtonField;
-    popArrayItem: PopArrayItemButtonField;
-    shiftArrayItem: ShiftArrayItemButtonField;
+    addArrayItem: IonicAddArrayItemButtonField;
+    'add-array-item': IonicAddArrayItemButtonField;
+    prependArrayItem: IonicPrependArrayItemButtonField;
+    'prepend-array-item': IonicPrependArrayItemButtonField;
+    insertArrayItem: IonicInsertArrayItemButtonField;
+    'insert-array-item': IonicInsertArrayItemButtonField;
+    removeArrayItem: IonicRemoveArrayItemButtonField;
+    'remove-array-item': IonicRemoveArrayItemButtonField;
+    popArrayItem: IonicPopArrayItemButtonField;
+    'pop-array-item': IonicPopArrayItemButtonField;
+    shiftArrayItem: IonicShiftArrayItemButtonField;
+    'shift-array-item': IonicShiftArrayItemButtonField;
   }
 }

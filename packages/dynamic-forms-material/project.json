@@ -67,19 +67,25 @@
         "{workspaceRoot}/dist/{projectRoot}/types/**/*.d.ts",
         "{projectRoot}/api-extractor.json",
         "{workspaceRoot}/config/api-extractor.base.json",
-        "{workspaceRoot}/etc/dynamic-forms-material.api.md"
+        "{workspaceRoot}/etc/dynamic-forms-material.api.md",
+        "{workspaceRoot}/scripts/api-check.mjs",
+        "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
-        "command": "api-extractor run --config packages/dynamic-forms-material/api-extractor.json",
+        "command": "node scripts/api-check.mjs packages/dynamic-forms-material/api-extractor.json",
         "cwd": "{workspaceRoot}"
       }
     },
     "api-update": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "cache": false,
       "options": {
-        "command": "api-extractor run --local --config packages/dynamic-forms-material/api-extractor.json",
+        "commands": [
+          "nx run dynamic-forms-material:build --skip-nx-cache",
+          "api-extractor run --local --config packages/dynamic-forms-material/api-extractor.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-material.api.md"
+        ],
+        "parallel": false,
         "cwd": "{workspaceRoot}"
       }
     }

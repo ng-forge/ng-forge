@@ -1,5 +1,7 @@
 /** Registry module for field type, validator, and UI adapter metadata */
 
+import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
+
 export interface PropertyInfo {
   name: string;
   type: string;
@@ -125,15 +127,12 @@ export function getUIAdapters(): UIAdapterInfo[] {
 }
 
 /** Get a specific UI adapter by library name */
-export function getUIAdapter(library: 'material' | 'bootstrap' | 'primeng' | 'ionic'): UIAdapterInfo | undefined {
+export function getUIAdapter(library: UiIntegration): UIAdapterInfo | undefined {
   return UI_ADAPTERS.find((a) => a.library === library);
 }
 
 /** Get UI adapter field type configuration */
-export function getUIAdapterFieldType(
-  library: 'material' | 'bootstrap' | 'primeng' | 'ionic',
-  fieldType: string,
-): UIAdapterFieldType | undefined {
+export function getUIAdapterFieldType(library: UiIntegration, fieldType: string): UIAdapterFieldType | undefined {
   const adapter = getUIAdapter(library);
   return adapter?.fieldTypes.find((ft) => ft.type === fieldType);
 }

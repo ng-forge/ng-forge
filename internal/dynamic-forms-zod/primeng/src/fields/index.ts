@@ -205,13 +205,38 @@ export const PrimePreviousButtonFieldSchema = BaseFieldDefSchema.extend({
 });
 
 export const PrimeAddArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('addArrayItem'),
+  type: z.literal('add-array-item'),
   arrayKey: z.string().optional(),
   props: PrimeButtonPropsSchema.optional(),
 });
 
 export const PrimeRemoveArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
-  type: z.literal('removeArrayItem'),
+  type: z.literal('remove-array-item'),
   arrayKey: z.string().optional(),
+  props: PrimeButtonPropsSchema.optional(),
+});
+
+export const PrimePrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('prepend-array-item'),
+  arrayKey: z.string().optional(),
+  props: PrimeButtonPropsSchema.optional(),
+});
+
+export const PrimeInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('insert-array-item'),
+  arrayKey: z.string().optional(),
+  index: z.number(),
+  props: PrimeButtonPropsSchema.optional(),
+});
+
+export const PrimePopArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('pop-array-item'),
+  arrayKey: z.string(),
+  props: PrimeButtonPropsSchema.optional(),
+});
+
+export const PrimeShiftArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  type: z.literal('shift-array-item'),
+  arrayKey: z.string(),
   props: PrimeButtonPropsSchema.optional(),
 });

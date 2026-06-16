@@ -10,12 +10,12 @@ Action buttons for an array (Add, Clear, etc.) don't have to be separate fields 
 
 ## Config
 
-The consumer only lists the wrapper and the item template. No separate `addArrayItem` field; no button placement logic.
+The consumer only lists the wrapper and the item template. No separate `add-array-item` field; no button placement logic.
 
 ```typescript
 const tagItemTemplate = [
   { key: 'value', type: 'input', label: 'Tag', required: true, minLength: 2 },
-  { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+  { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
 ] as const;
 
 const config = {

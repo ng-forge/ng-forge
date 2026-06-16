@@ -8,6 +8,8 @@ export default [
       '@nx/dependency-checks': [
         'error',
         {
+          // esbuild target is `bundle`; `build` runs the d.ts rollup.
+          buildTargets: ['bundle'],
           ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
           ignoredDependencies: [
             'vite',
@@ -16,6 +18,7 @@ export default [
             'tsx',
             'ts-morph',
             '@ng-forge/dynamic-forms-zod', // Internal package, bundled by esbuild
+            'zod-to-json-schema', // Required by the bundled dynamic-forms-zod/mcp code (not a direct src import)
           ],
         },
       ],

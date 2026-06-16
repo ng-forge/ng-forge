@@ -41,8 +41,8 @@ export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'ev
 };
 
 /** Add array item button field - dispatches AppendArrayItemEvent */
-export type AddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'addArrayItem';
+export type MatAddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'add-array-item' | 'addArrayItem';
   /**
    * The key of the array field to add items to.
    * Required when the button is placed outside the array.
@@ -58,8 +58,8 @@ export type AddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>,
 };
 
 /** Prepend array item button field - dispatches PrependArrayItemEvent (adds at beginning) */
-export type PrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'prependArrayItem';
+export type MatPrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'prepend-array-item' | 'prependArrayItem';
   /**
    * The key of the array field to prepend items to.
    * Required when the button is placed outside the array.
@@ -75,8 +75,8 @@ export type PrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEv
 };
 
 /** Insert array item button field - dispatches InsertArrayItemEvent (adds at specific index) */
-export type InsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'insertArrayItem';
+export type MatInsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'insert-array-item' | 'insertArrayItem';
   /**
    * The key of the array field to insert items into.
    * Required when the button is placed outside the array.
@@ -94,8 +94,8 @@ export type InsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEven
 };
 
 /** Remove array item button field - dispatches RemoveAtIndexEvent or PopArrayItemEvent */
-export type RemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'removeArrayItem';
+export type MatRemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'remove-array-item' | 'removeArrayItem';
   /**
    * The key of the array field to remove items from.
    * Required when the button is placed outside the array.
@@ -105,8 +105,8 @@ export type RemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>
 };
 
 /** Pop array item button field - dispatches PopArrayItemEvent (removes last item) */
-export type PopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'popArrayItem';
+export type MatPopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'pop-array-item' | 'popArrayItem';
   /**
    * The key of the array field to remove the last item from.
    * REQUIRED - must specify which array to pop from.
@@ -115,8 +115,8 @@ export type PopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'e
 };
 
 /** Shift array item button field - dispatches ShiftArrayItemEvent (removes first item) */
-export type ShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-  type: 'shiftArrayItem';
+export type MatShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
+  type: 'shift-array-item' | 'shiftArrayItem';
   /**
    * The key of the array field to remove the first item from.
    * REQUIRED - must specify which array to shift from.

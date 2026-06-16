@@ -211,14 +211,14 @@ This creates a heterogeneous array:
 
 Use button field types directly in your form configuration for declarative array manipulation:
 
-| Button Type        | Placement        | Description                                      |
-| ------------------ | ---------------- | ------------------------------------------------ |
-| `addArrayItem`     | Outside array    | Appends a new item to the end of the array       |
-| `prependArrayItem` | Outside array    | Inserts a new item at the beginning of the array |
-| `insertArrayItem`  | Outside array    | Inserts a new item at a specific index           |
-| `removeArrayItem`  | Inside each item | Removes the current item from the array          |
-| `popArrayItem`     | Outside array    | Removes the last item from the array             |
-| `shiftArrayItem`   | Outside array    | Removes the first item from the array            |
+| Button Type          | Placement        | Description                                      |
+| -------------------- | ---------------- | ------------------------------------------------ |
+| `add-array-item`     | Outside array    | Appends a new item to the end of the array       |
+| `prepend-array-item` | Outside array    | Inserts a new item at the beginning of the array |
+| `insert-array-item`  | Outside array    | Inserts a new item at a specific index           |
+| `remove-array-item`  | Inside each item | Removes the current item from the array          |
+| `pop-array-item`     | Outside array    | Removes the last item from the array             |
+| `shift-array-item`   | Outside array    | Removes the first item from the array            |
 
 **Important:** Add/prepend/insert buttons **require** a `template` property defining the new item structure. There is no fallback to the array's `fields[0]` - each button must explicitly define what structure to add.
 
@@ -236,7 +236,7 @@ const contactTemplate = [
   { key: 'name', type: 'input', label: 'Name' },
   { key: 'phone', type: 'input', label: 'Phone' },
   // Remove button inside each item (no template needed)
-  { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+  { key: 'remove', type: 'remove-array-item', label: 'Remove' },
 ];
 
 // Form configuration
@@ -250,7 +250,7 @@ const contactTemplate = [
     // Add button for primitive items
     {
       key: 'addTag',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Tag',
       arrayKey: 'tags',
       template: tagTemplate, // Single field = primitive item
@@ -263,7 +263,7 @@ const contactTemplate = [
     // Add button for object items
     {
       key: 'addContact',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Contact',
       arrayKey: 'contacts',
       template: contactTemplate, // Array of fields = object item
@@ -385,7 +385,7 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'removeArrayItem',
+      type: 'remove-array-item',
       label: 'Remove',
       props: { color: 'warn' },
     },
@@ -405,7 +405,7 @@ const formConfig = {
             type: 'row',
             fields: [
               { key: 'value', type: 'input', label: 'Tag', value: 'featured', required: true, minLength: 2 },
-              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+              { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
             ],
           },
         ],
@@ -415,7 +415,7 @@ const formConfig = {
             type: 'row',
             fields: [
               { key: 'value', type: 'input', label: 'Tag', value: 'popular', required: true, minLength: 2 },
-              { key: 'removeTag', type: 'removeArrayItem', label: 'Remove', props: { color: 'warn' } },
+              { key: 'removeTag', type: 'remove-array-item', label: 'Remove', props: { color: 'warn' } },
             ],
           },
         ],
@@ -424,7 +424,7 @@ const formConfig = {
     // Declarative add button - no EventBus needed
     {
       key: 'addTag',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Tag',
       arrayKey: 'tags',
       template: [tagTemplate],
@@ -459,7 +459,7 @@ const contactTemplate = [
   },
   {
     key: 'removeContact',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: 'Remove Contact',
     props: { color: 'warn' },
   },
@@ -495,7 +495,7 @@ const formConfig = {
           },
           {
             key: 'removeContact',
-            type: 'removeArrayItem',
+            type: 'remove-array-item',
             label: 'Remove Contact',
             props: { color: 'warn' },
           },
@@ -505,7 +505,7 @@ const formConfig = {
     // Declarative add button - no EventBus needed
     {
       key: 'addContact',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Contact',
       arrayKey: 'contacts',
       template: contactTemplate,

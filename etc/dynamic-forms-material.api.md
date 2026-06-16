@@ -58,25 +58,17 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
-export type AddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'addArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type InsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'insertArrayItem';
-    arrayKey?: string;
-    index: number;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
 export const MAT_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
 
 // @public
-export type MatAddon = MatIconAddon | MatButtonAddon;
+export type MatAddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'add-array-item' | 'addArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
+export type MatAddon = MatButtonAddon | MatIconAddon;
 
 // @public
 export interface MatAddonExtensions {
@@ -112,7 +104,7 @@ export class MatButtonFieldComponent<TEvent extends FormEvent> {
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
     // (undocumented)
-    readonly buttonType: _angular_core.Signal<"reset" | "button" | "submit">;
+    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
     // (undocumented)
     onClick(): void;
     // (undocumented)
@@ -126,9 +118,9 @@ export class MatButtonFieldComponent<TEvent extends FormEvent> {
 // @public (undocumented)
 export interface MatButtonProps {
     // (undocumented)
-    color?: 'primary' | 'accent' | 'warn';
+    color?: 'accent' | 'primary' | 'warn';
     // (undocumented)
-    type?: 'button' | 'submit' | 'reset';
+    type?: 'button' | 'reset' | 'submit';
 }
 
 // @public (undocumented)
@@ -159,7 +151,7 @@ export interface MatCheckboxProps {
     // (undocumented)
     indeterminate?: boolean;
     // (undocumented)
-    labelPosition?: 'before' | 'after';
+    labelPosition?: 'after' | 'before';
 }
 
 // @public (undocumented)
@@ -196,7 +188,7 @@ export interface MatDatepickerProps extends DatepickerProps {
     // (undocumented)
     appearance?: MatFormFieldAppearance;
     // (undocumented)
-    color?: 'primary' | 'accent' | 'warn';
+    color?: 'accent' | 'primary' | 'warn';
     // (undocumented)
     disableRipple?: boolean;
     // (undocumented)
@@ -206,7 +198,7 @@ export interface MatDatepickerProps extends DatepickerProps {
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    startView?: 'month' | 'year' | 'multi-year';
+    startView?: 'month' | 'multi-year' | 'year';
     // (undocumented)
     subscriptSizing?: SubscriptSizing;
     // (undocumented)
@@ -226,7 +218,7 @@ export interface MaterialConfig {
     disableRipple?: boolean;
     floatLabel?: FloatLabelType;
     hideRequiredMarker?: boolean;
-    labelPosition?: 'before' | 'after';
+    labelPosition?: 'after' | 'before';
     subscriptSizing?: SubscriptSizing;
 }
 
@@ -239,12 +231,12 @@ export const MatField: {
     readonly Submit: "submit";
     readonly Next: "next";
     readonly Previous: "previous";
-    readonly AddArrayItem: "addArrayItem";
-    readonly PrependArrayItem: "prependArrayItem";
-    readonly InsertArrayItem: "insertArrayItem";
-    readonly RemoveArrayItem: "removeArrayItem";
-    readonly PopArrayItem: "popArrayItem";
-    readonly ShiftArrayItem: "shiftArrayItem";
+    readonly AddArrayItem: "add-array-item";
+    readonly PrependArrayItem: "prepend-array-item";
+    readonly InsertArrayItem: "insert-array-item";
+    readonly RemoveArrayItem: "remove-array-item";
+    readonly PopArrayItem: "pop-array-item";
+    readonly ShiftArrayItem: "shift-array-item";
     readonly Textarea: "textarea";
     readonly Radio: "radio";
     readonly MultiCheckbox: "multi-checkbox";
@@ -286,7 +278,7 @@ export class MatIconAddonComponent {
 }
 
 // @public
-export type MatInputAddon = MatIconAddon | MatButtonAddon | TextAddon | TemplateAddon | MatAddonExtension;
+export type MatInputAddon = MatAddonExtension | MatButtonAddon | MatIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type MatInputField = InputField<MatInputProps> & {
@@ -332,8 +324,16 @@ export interface MatInputProps extends InputProps {
     // (undocumented)
     subscriptSizing?: SubscriptSizing;
     // (undocumented)
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
 }
+
+// @public
+export type MatInsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'insert-array-item' | 'insertArrayItem';
+    arrayKey?: string;
+    index: number;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
 
 // @public (undocumented)
 export type MatMultiCheckboxField<T> = MultiCheckboxField<T, MatMultiCheckboxProps>;
@@ -367,16 +367,29 @@ export interface MatMultiCheckboxProps {
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPosition?: 'before' | 'after';
+    labelPosition?: 'after' | 'before';
 }
 
 // @public
-export type MatNextButtonField = Omit<MatButtonField<NextPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type MatNextButtonField = Omit<MatButtonField<NextPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'next';
 };
 
 // @public
-export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type MatPopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'pop-array-item' | 'popArrayItem';
+    arrayKey: string;
+};
+
+// @public
+export type MatPrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'prepend-array-item' | 'prependArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
+export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'previous';
 };
 
@@ -406,8 +419,14 @@ export interface MatRadioProps {
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPosition?: 'before' | 'after';
+    labelPosition?: 'after' | 'before';
 }
+
+// @public
+export type MatRemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'remove-array-item' | 'removeArrayItem';
+    arrayKey?: string;
+};
 
 // @public (undocumented)
 export type MatSelectField<T> = SelectField<T, MatSelectProps>;
@@ -456,6 +475,12 @@ export interface MatSelectProps extends SelectProps {
     subscriptSizing?: SubscriptSizing;
 }
 
+// @public
+export type MatShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'shift-array-item' | 'shiftArrayItem';
+    arrayKey: string;
+};
+
 // @public (undocumented)
 export type MatSliderField = SliderField<MatSliderProps>;
 
@@ -478,7 +503,7 @@ export interface MatSliderProps {
     // (undocumented)
     appearance?: MatFormFieldAppearance;
     // (undocumented)
-    color?: 'primary' | 'accent' | 'warn';
+    color?: 'accent' | 'primary' | 'warn';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
@@ -488,11 +513,11 @@ export interface MatSliderProps {
     // (undocumented)
     thumbLabel?: boolean;
     // (undocumented)
-    tickInterval?: number | 'auto';
+    tickInterval?: 'auto' | number;
 }
 
 // @public
-export type MatSubmitButtonField = Omit<MatButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type MatSubmitButtonField = Omit<MatButtonField<FormSubmitEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'submit';
 };
 
@@ -530,7 +555,7 @@ export interface MatTextareaProps extends TextareaProps {
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    resize?: 'none' | 'both' | 'horizontal' | 'vertical';
+    resize?: 'both' | 'horizontal' | 'none' | 'vertical';
     // (undocumented)
     subscriptSizing?: SubscriptSizing;
 }
@@ -565,33 +590,8 @@ export interface MatToggleProps {
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
-    labelPosition?: 'before' | 'after';
+    labelPosition?: 'after' | 'before';
 }
-
-// @public
-export type PopArrayItemButtonField = Omit<MatButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'popArrayItem';
-    arrayKey: string;
-};
-
-// @public
-export type PrependArrayItemButtonField = Omit<MatButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'prependArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type RemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'removeArrayItem';
-    arrayKey?: string;
-};
-
-// @public
-export type ShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'shiftArrayItem';
-    arrayKey: string;
-};
 
 // @public
 export function withMaterialAddons(): MaterialAddonsFeature;

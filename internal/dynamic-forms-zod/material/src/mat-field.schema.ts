@@ -73,8 +73,12 @@ export const MatFieldTypes = [
   'submit',
   'next',
   'previous',
-  'addArrayItem',
-  'removeArrayItem',
+  'add-array-item',
+  'prepend-array-item',
+  'insert-array-item',
+  'remove-array-item',
+  'pop-array-item',
+  'shift-array-item',
 ] as const;
 
 export type MatFieldType = (typeof MatFieldTypes)[number];

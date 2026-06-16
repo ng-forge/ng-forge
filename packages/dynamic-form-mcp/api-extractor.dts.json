@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "projectFolder": ".",
+  "mainEntryPointFilePath": "<projectFolder>/../../dist/packages/dynamic-form-mcp/src/index.d.ts",
+  "bundledPackages": ["@ng-forge/dynamic-forms-zod"],
+  "compiler": {
+    "overrideTsconfig": {
+      "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "types": [],
+        "baseUrl": "../..",
+        "paths": {
+          "@ng-forge/dynamic-forms-zod": ["./dist/internal/dynamic-forms-zod/src/index.d.ts"],
+          "@ng-forge/dynamic-forms-zod/*": ["./dist/internal/dynamic-forms-zod/*/src/index.d.ts"]
+        }
+      }
+    }
+  },
+  "apiReport": { "enabled": false },
+  "docModel": { "enabled": false },
+  "tsdocMetadata": { "enabled": false },
+  "dtsRollup": {
+    "enabled": true,
+    "untrimmedFilePath": "<projectFolder>/../../dist/packages/dynamic-form-mcp/index.d.ts"
+  },
+  "messages": {
+    "compilerMessageReporting": { "default": { "logLevel": "warning" } },
+    "extractorMessageReporting": {
+      "default": { "logLevel": "warning" },
+      "ae-forgotten-export": { "logLevel": "none" },
+      "ae-missing-release-tag": { "logLevel": "none" },
+      "ae-unresolved-link": { "logLevel": "none" }
+    },
+    "tsdocMessageReporting": { "default": { "logLevel": "none" } }
+  }
+}

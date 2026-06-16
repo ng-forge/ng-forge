@@ -160,7 +160,7 @@ The names line up directly except for a few cases.
 | _none_              | `page`                  | Multi-step container                                               |
 | _none_              | `row`                   | Horizontal flex layout                                             |
 | _none_              | `text`                  | Display-only label / heading                                       |
-| _none_              | `submit` / `next` / `previous` / `addArrayItem` / `removeArrayItem` | Built-in action buttons; `submit` auto-disables while the form is invalid, `next` while the current page is invalid |
+| _none_              | `submit` / `next` / `previous` / `add-array-item` / `remove-array-item` | Built-in action buttons; `submit` auto-disables while the form is invalid, `next` while the current page is invalid |
 
 **Selects.** Formly takes `options` inside `props`; ng-forge takes `options` at the top level. The `FieldOption` shape is fixed at `{ value, label, disabled? }`. If your data has custom keys, remap once at the source (`data.map(d => ({ value: d.id, label: d.name }))`) or use a `targetProperty: 'options'` derivation (see [Async data](#async-data-and-dynamic-options)).
 
@@ -451,7 +451,7 @@ provideFormlyCore({
         type: 'row',
         fields: [
           { key: 'name', type: 'input', value: '', label: 'Task name', required: true },
-          { key: 'remove', type: 'removeArrayItem', label: 'Remove' },
+          { key: 'remove', type: 'remove-array-item', label: 'Remove' },
         ],
       },
     ],
@@ -459,7 +459,7 @@ provideFormlyCore({
 }">
 </docs-code-compare>
 
-The verbose form gives you placeable button fields (`addArrayItem`, `prependArrayItem`, `insertArrayItem`, `removeArrayItem`, `popArrayItem`, `shiftArrayItem`): put the add button anywhere, including outside the array.
+The verbose form gives you placeable button fields (`add-array-item`, `prepend-array-item`, `insert-array-item`, `remove-array-item`, `pop-array-item`, `shift-array-item`): put the add button anywhere, including outside the array.
 
 ## Multi-step wizards
 
@@ -650,7 +650,7 @@ The state layer (value, validity, dirty tracking) is built on signals, and every
 Yes. They don't conflict: different package names, different injection tokens, different component selectors. Install ng-forge, port one form at a time, deprecate formly only when nothing imports `@ngx-formly/*`.
 
 **Which Angular versions does ng-forge support?**
-Angular 22. The published packages declare `@angular/*` peer dependencies of `~22.0.0` (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.
+Angular 22. The published packages declare `@angular/*` peer dependencies of `^22.0.0` (Signal Forms became stable in Angular 22). If you're on Angular 21 or earlier, migrating to ng-forge implies an Angular upgrade first.
 
 **Does ng-forge use Reactive Forms (`FormGroup` / `FormControl`)?**
 No. ng-forge is built on Angular **Signal Forms** (`@angular/forms/signals`), a separate system whose primitive, `FieldTree<T>`, holds value, validity, dirty/touched state, and errors as signals. There is no `FormGroup` or `FormControl` involved. If your formly app exposes a `formGroup` to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.

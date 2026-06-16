@@ -23,29 +23,32 @@ ${UI_INTEGRATIONS.map((ui) => `- ${ui}`).join('\n')}
 ## Field Types
 ${fieldTypes.map((ft) => `- ${ft}`).join('\n')}
 
-## Tools (4 total - consolidated)
+## Tools (5 total - consolidated)
 
-**1. START HERE - One-shot reference:**
-\`ngforge_get_cheatsheet(uiIntegration?)\`
+**1. START HERE - Documentation lookup:**
+\`ngforge_lookup(topic, depth?, uiIntegration?)\`
+- topic="workflow" for the recommended tool-usage guide
 - Property placement rules, condition syntax, copy-paste patterns, common errors
-- Component API (template binding, event names)
-- **Use this first** - it has 90% of what you need in one call
+- depth="brief|full|schema" (default full); uiIntegration filters schema output
 
-**2. Validation:**
-\`ngforge_validate_form_config(uiIntegration, config)\`
+**2. Search:**
+\`ngforge_search(query)\`
+- Free-text keyword search across all topics and examples
+- Use when you don't know the exact topic name
+
+**3. Validation:**
+\`ngforge_validate(config, uiIntegration?)\`
 - Validates config against actual TypeScript types
 - Catches errors before runtime
 
-**3. Field info + schema:**
-\`ngforge_get_field_info(fieldType?, uiIntegration?, includeSchema?)\`
-- Properties, validators, and examples for a specific field type
-- Set includeSchema=true for JSON Schema (machine-readable)
-
-**4. Examples + deep explanations:**
-\`ngforge_get_example(pattern?, depth?)\`
+**4. Examples:**
+\`ngforge_examples(pattern, depth?)\`
 - Patterns: complete, derivation, conditional, multi-page, validation
-- depth="example" (default) = working code
-- depth="deep" = conceptual explanation + code + edge cases
+- depth controls how much detail (working code vs. deep explanation)
+
+**5. Scaffold:**
+\`ngforge_scaffold(fields?, pages?, arrays?, groups?, hidden?, uiIntegration?)\`
+- Generates a compilable FormConfig skeleton
 `,
         },
       ],

@@ -65,7 +65,7 @@ describe('Examples Tool', () => {
 
       expect(content).toContain('Array');
       expect(content).toContain("type: 'array'");
-      expect(content).toContain('addArrayItem');
+      expect(content).toContain('add-array-item');
       expect(content).toContain('arrayKey');
     });
 

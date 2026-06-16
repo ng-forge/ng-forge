@@ -175,10 +175,10 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   let addButtonField: FieldDef<unknown> | undefined;
   if (addButton !== false) {
     const buttonConfig = (typeof addButton === 'object' ? addButton : {}) as ArrayButtonConfig;
-    // Safe cast: we're constructing a valid addArrayItem field shape
+    // Safe cast: we're constructing a valid add-array-item field shape
     addButtonField = {
       key: `${key}__add`,
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: buttonConfig.label ?? 'Add',
       arrayKey: key,
       template: addTemplate,
@@ -233,10 +233,10 @@ function buildObjectItemTemplate(
 /** Builds a remove button field definition. */
 function buildRemoveButton(config: ArrayButtonConfig | undefined): ArrayAllowedChildren {
   const buttonConfig = (typeof config === 'object' ? config : {}) as ArrayButtonConfig;
-  // Safe cast: removeArrayItem fields are valid ArrayAllowedChildren but not in the static union
+  // Safe cast: remove-array-item fields are valid ArrayAllowedChildren but not in the static union
   return {
     key: '__remove',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: buttonConfig.label ?? 'Remove',
     ...(buttonConfig.props && { props: buttonConfig.props }),
   } as unknown as ArrayAllowedChildren;

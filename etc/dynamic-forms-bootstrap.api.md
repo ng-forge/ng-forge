@@ -53,13 +53,6 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
-export type AddArrayItemButtonField = Omit<BsButtonField<AppendArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'addArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
 export const BOOTSTRAP_CONFIG: InjectionToken<BootstrapConfig>;
 
 // @public (undocumented)
@@ -70,15 +63,22 @@ export interface BootstrapConfig {
     block?: boolean;
     floatingLabel?: boolean;
     outline?: boolean;
-    size?: 'sm' | 'lg';
-    variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link';
+    size?: 'lg' | 'sm';
+    variant?: 'danger' | 'dark' | 'info' | 'light' | 'link' | 'primary' | 'secondary' | 'success' | 'warning';
 }
 
 // @public
 export const BS_INPUT_TYPE_OVERRIDE: InjectionToken<WritableSignal<string | undefined>>;
 
 // @public
-export type BsAddon = BsIconAddon | BsButtonAddon;
+export type BsAddArrayItemButtonField = Omit<BsButtonField<AppendArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'add-array-item' | 'addArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
+export type BsAddon = BsButtonAddon | BsIconAddon;
 
 // @public
 export interface BsAddonExtensions {
@@ -117,7 +117,7 @@ export class BsButtonFieldComponent<TEvent extends FormEvent> {
     readonly buttonClasses: _angular_core.Signal<string>;
     // (undocumented)
     readonly buttonTestId: _angular_core.Signal<string>;
-    readonly buttonType: _angular_core.Signal<"button" | "submit" | "reset">;
+    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
     onClick(): void;
     // (undocumented)
     readonly props: _angular_core.InputSignal<BsButtonProps | undefined>;
@@ -136,11 +136,11 @@ export interface BsButtonProps {
     // (undocumented)
     outline?: boolean;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
     // (undocumented)
-    type?: 'button' | 'submit' | 'reset';
+    type?: 'button' | 'reset' | 'submit';
     // (undocumented)
-    variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark' | 'link';
+    variant?: 'danger' | 'dark' | 'info' | 'light' | 'link' | 'primary' | 'secondary' | 'success' | 'warning';
 }
 
 // @public (undocumented)
@@ -178,13 +178,13 @@ export type BsDatepickerField = DatepickerField<BsDatepickerProps>;
 // @public (undocumented)
 export class BsDatepickerFieldComponent {
     // (undocumented)
-    readonly maxAsString: _angular_core.Signal<string | null>;
+    readonly maxAsString: _angular_core.Signal<null | string>;
     // (undocumented)
-    readonly maxDate: _angular_core.InputSignal<string | Date | null>;
+    readonly maxDate: _angular_core.InputSignal<Date | null | string>;
     // (undocumented)
-    readonly minAsString: _angular_core.Signal<string | null>;
+    readonly minAsString: _angular_core.Signal<null | string>;
     // (undocumented)
-    readonly minDate: _angular_core.InputSignal<string | Date | null>;
+    readonly minDate: _angular_core.InputSignal<Date | null | string>;
     // (undocumented)
     protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
     // (undocumented)
@@ -208,13 +208,13 @@ export interface BsDatepickerProps extends DatepickerProps {
     // (undocumented)
     invalidFeedback?: DynamicText;
     // (undocumented)
-    navigation?: 'select' | 'arrows' | 'none';
+    navigation?: 'arrows' | 'none' | 'select';
     // (undocumented)
-    outsideDays?: 'visible' | 'collapsed' | 'hidden';
+    outsideDays?: 'collapsed' | 'hidden' | 'visible';
     // (undocumented)
     showWeekNumbers?: boolean;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
     // (undocumented)
     useNgBootstrap?: boolean;
     // (undocumented)
@@ -230,12 +230,12 @@ export const BsField: {
     readonly Submit: "submit";
     readonly Next: "next";
     readonly Previous: "previous";
-    readonly AddArrayItem: "addArrayItem";
-    readonly PrependArrayItem: "prependArrayItem";
-    readonly InsertArrayItem: "insertArrayItem";
-    readonly RemoveArrayItem: "removeArrayItem";
-    readonly PopArrayItem: "popArrayItem";
-    readonly ShiftArrayItem: "shiftArrayItem";
+    readonly AddArrayItem: "add-array-item";
+    readonly PrependArrayItem: "prepend-array-item";
+    readonly InsertArrayItem: "insert-array-item";
+    readonly RemoveArrayItem: "remove-array-item";
+    readonly PopArrayItem: "pop-array-item";
+    readonly ShiftArrayItem: "shift-array-item";
     readonly Textarea: "textarea";
     readonly Radio: "radio";
     readonly MultiCheckbox: "multi-checkbox";
@@ -279,7 +279,7 @@ export class BsIconAddonComponent {
 }
 
 // @public
-export type BsInputAddon = BsIconAddon | BsButtonAddon | TextAddon | TemplateAddon | BsAddonExtension;
+export type BsInputAddon = BsAddonExtension | BsButtonAddon | BsIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type BsInputField = InputField<BsInputProps> & {
@@ -298,7 +298,7 @@ export class BsInputFieldComponent {
     // (undocumented)
     readonly props: _angular_core.InputSignal<BsInputProps | undefined>;
     // (undocumented)
-    readonly size: _angular_core.Signal<"sm" | "lg" | undefined>;
+    readonly size: _angular_core.Signal<"lg" | "sm" | undefined>;
     protected readonly type: _angular_core.Signal<string>;
     // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsInputFieldComponent, "df-bs-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
@@ -317,12 +317,20 @@ export interface BsInputProps extends InputProps {
     // (undocumented)
     plaintext?: boolean;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
     // (undocumented)
-    type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
     // (undocumented)
     validFeedback?: DynamicText;
 }
+
+// @public
+export type BsInsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'insert-array-item' | 'insertArrayItem';
+    arrayKey?: string;
+    index: number;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
 
 // @public (undocumented)
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
@@ -360,12 +368,25 @@ export interface BsMultiCheckboxProps {
 }
 
 // @public
-export type BsNextButtonField = Omit<BsButtonField<NextPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type BsNextButtonField = Omit<BsButtonField<NextPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'next';
 };
 
 // @public
-export type BsPreviousButtonField = Omit<BsButtonField<PreviousPageEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type BsPopArrayItemButtonField = Omit<BsButtonField<PopArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'pop-array-item' | 'popArrayItem';
+    arrayKey: string;
+};
+
+// @public
+export type BsPrependArrayItemButtonField = Omit<BsButtonField<PrependArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'prepend-array-item' | 'prependArrayItem';
+    arrayKey?: string;
+    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
+};
+
+// @public
+export type BsPreviousButtonField = Omit<BsButtonField<PreviousPageEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'previous';
 };
 
@@ -391,7 +412,7 @@ export interface BsRadioProps {
     // (undocumented)
     buttonGroup?: boolean;
     // (undocumented)
-    buttonSize?: 'sm' | 'lg';
+    buttonSize?: 'lg' | 'sm';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
@@ -399,6 +420,12 @@ export interface BsRadioProps {
     // (undocumented)
     reverse?: boolean;
 }
+
+// @public
+export type BsRemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'remove-array-item' | 'removeArrayItem';
+    arrayKey?: string;
+};
 
 // @public (undocumented)
 export type BsSelectField<T> = SelectField<T, BsSelectProps>;
@@ -408,7 +435,7 @@ export class BsSelectFieldComponent {
     // (undocumented)
     defaultCompare: (value1: any, value2: any) => boolean;
     // (undocumented)
-    protected isSelected(optionValue: string, fieldValue: string | string[] | null): boolean;
+    protected isSelected(optionValue: string, fieldValue: null | string | string[]): boolean;
     // (undocumented)
     protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
     // (undocumented)
@@ -436,10 +463,16 @@ export interface BsSelectProps extends SelectProps {
     // (undocumented)
     multiple?: boolean;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
     // (undocumented)
     validFeedback?: DynamicText;
 }
+
+// @public
+export type BsShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent>, 'event' | 'eventArgs' | 'type'> & {
+    type: 'shift-array-item' | 'shiftArrayItem';
+    arrayKey: string;
+};
 
 // @public (undocumented)
 export type BsSliderField = SliderField<BsSliderProps>;
@@ -478,7 +511,7 @@ export interface BsSliderProps {
 }
 
 // @public
-export type BsSubmitButtonField = Omit<BsButtonField<FormSubmitEvent>, 'event' | 'type' | 'eventArgs'> & {
+export type BsSubmitButtonField = Omit<BsButtonField<FormSubmitEvent>, 'event' | 'eventArgs' | 'type'> & {
     type: 'submit';
 };
 
@@ -506,7 +539,7 @@ export interface BsTextareaProps extends TextareaProps {
     // (undocumented)
     invalidFeedback?: DynamicText;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
     // (undocumented)
     validFeedback?: DynamicText;
 }
@@ -535,41 +568,8 @@ export interface BsToggleProps {
     // (undocumented)
     reverse?: boolean;
     // (undocumented)
-    size?: 'sm' | 'lg';
+    size?: 'lg' | 'sm';
 }
-
-// @public
-export type InsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'insertArrayItem';
-    arrayKey?: string;
-    index: number;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type PopArrayItemButtonField = Omit<BsButtonField<PopArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'popArrayItem';
-    arrayKey: string;
-};
-
-// @public
-export type PrependArrayItemButtonField = Omit<BsButtonField<PrependArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'prependArrayItem';
-    arrayKey?: string;
-    template: ArrayAllowedChildren | readonly ArrayAllowedChildren[];
-};
-
-// @public
-export type RemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'removeArrayItem';
-    arrayKey?: string;
-};
-
-// @public
-export type ShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent>, 'event' | 'type' | 'eventArgs'> & {
-    type: 'shiftArrayItem';
-    arrayKey: string;
-};
 
 // @public
 export function withBootstrapAddons(): BootstrapAddonsFeature;

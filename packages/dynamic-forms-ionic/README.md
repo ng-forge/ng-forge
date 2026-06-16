@@ -18,19 +18,12 @@ Ionic field components for [@ng-forge/dynamic-forms](https://www.npmjs.com/packa
 
 ## Compatibility
 
-| @ng-forge/dynamic-forms-ionic | @ng-forge/dynamic-forms | Angular       |
-| ----------------------------- | ----------------------- | ------------- |
-| 1.0.x                         | 1.0.x                   | ~22.0.0       |
-| 0.9.x                         | 0.9.x                   | >=21.2.0      |
-| 0.8.x                         | 0.8.x                   | >=21.2.0      |
-| 0.7.x                         | 0.7.x                   | >=21.2.0      |
-| 0.6.x                         | 0.6.x                   | >=21.1.0      |
-| 0.5.x                         | 0.5.x                   | >=21.1.0      |
-| 0.4.x                         | 0.4.x                   | >=21.1.0      |
-| 0.3.x                         | 0.3.x                   | 21.0.7-21.0.x |
-| 0.2.x                         | 0.2.x                   | 21.0.6        |
-| 0.1.1+                        | 0.1.1+                  | 21.0.2-21.0.5 |
-| 0.1.0                         | 0.1.0                   | 21.0.0-21.0.1 |
+| Angular | @ng-forge/dynamic-forms-ionic |
+| ------- | ----------------------------- |
+| 22.x    | 1.x                           |
+| 21.x    | 0.x (experimental)            |
+
+Versioned in lockstep with `@ng-forge/dynamic-forms`. The `0.x` line targets Angular 21 (experimental Signal Forms). Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
 
 Ionic's official support policy for @ionic/angular 8 lists Angular versions up to 20.x. This package's test suite passes against @ionic/angular 8.x running on Angular 22.
 
@@ -113,10 +106,11 @@ Input, Textarea, Select, Checkbox, Radio, Toggle, Datepicker, Slider, Multi-Chec
 
 ## Documentation
 
-- [Ionic Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/ionic)
-- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
+- [Feature overview](https://ng-forge.com/ionic/feature-overview)
+- [Ionic Integration](https://ng-forge.com/ionic)
+- [Field Types](https://ng-forge.com/ionic/field-types/text-inputs)
+- [Validation](https://ng-forge.com/ionic/validation/basics)
+- [Conditional Logic](https://ng-forge.com/ionic/dynamic-behavior/conditional-logic)
 
 ## Changelog
 

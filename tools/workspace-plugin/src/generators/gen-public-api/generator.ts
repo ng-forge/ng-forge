@@ -9,7 +9,27 @@ import type { SyncGeneratorResult } from 'nx/src/utils/sync-generators';
  */
 const LIB = 'packages/dynamic-forms/internal/src/lib';
 const OUT = 'packages/dynamic-forms/internal/src/public_api.ts';
-const EXCLUDE = new Set<string>(); // module relpaths (no ext) to skip on collision
+// Modules whose exports are NOT imported via the '@ng-forge/dynamic-forms/internal'
+// specifier by ANY other entrypoint/package (verified against the externally-needed
+// symbol set). They are pure build-internal guts — expression-parser internals,
+// logic-function factories, and low-level helpers — so they must not be part of the
+// published /internal surface. Internal-lib siblings still reach them via relative
+// imports, so excluding them here is build-safe.
+const EXCLUDE = new Set<string>([
+  './lib/core/expressions/async-condition-logic-function',
+  './lib/core/expressions/debounced-resource-logic-fn',
+  './lib/core/expressions/http-condition-logic-function',
+  './lib/core/expressions/parser/evaluator',
+  './lib/core/expressions/parser/parser',
+  './lib/core/expressions/parser/tokenizer',
+  './lib/core/http/http-response-evaluator',
+  './lib/mappers/apply-hidden-logic',
+  './lib/models/prettify',
+  './lib/utils/grid-classes/grid-classes',
+  './lib/utils/grid-classes/index',
+  './lib/utils/safe-read-path-keys',
+  './lib/utils/stable-stringify',
+]); // module relpaths (no ext) to skip — see note above
 
 const isSkip = (f: string) => f.endsWith('.spec.ts') || f.endsWith('.type-test.ts');
 

@@ -78,30 +78,31 @@
         "{projectRoot}/api-extractor.json",
         "{projectRoot}/api-extractor.integration.json",
         "{projectRoot}/api-extractor.schema.json",
+        "{projectRoot}/api-extractor.internal.json",
         "{workspaceRoot}/config/api-extractor.base.json",
         "{workspaceRoot}/etc/dynamic-forms.api.md",
         "{workspaceRoot}/etc/dynamic-forms-integration.api.md",
-        "{workspaceRoot}/etc/dynamic-forms-schema.api.md"
+        "{workspaceRoot}/etc/dynamic-forms-schema.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-internal.api.md",
+        "{workspaceRoot}/scripts/api-check.mjs",
+        "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
-        "commands": [
-          "api-extractor run --config packages/dynamic-forms/api-extractor.json",
-          "api-extractor run --config packages/dynamic-forms/api-extractor.integration.json",
-          "api-extractor run --config packages/dynamic-forms/api-extractor.schema.json"
-        ],
-        "parallel": false,
-        "cwd": "{workspaceRoot}"
+        "cwd": "{workspaceRoot}",
+        "command": "node scripts/api-check.mjs packages/dynamic-forms/api-extractor.json packages/dynamic-forms/api-extractor.integration.json packages/dynamic-forms/api-extractor.schema.json packages/dynamic-forms/api-extractor.internal.json"
       }
     },
     "api-update": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "cache": false,
       "options": {
         "commands": [
+          "nx run dynamic-forms:build --skip-nx-cache",
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.json",
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.integration.json",
-          "api-extractor run --local --config packages/dynamic-forms/api-extractor.schema.json"
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.schema.json",
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.internal.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms.api.md etc/dynamic-forms-integration.api.md etc/dynamic-forms-schema.api.md etc/dynamic-forms-internal.api.md"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"

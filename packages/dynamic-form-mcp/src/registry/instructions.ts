@@ -478,7 +478,7 @@ All features are exported from \`@ng-forge/dynamic-forms\`.
 
 ## CRITICAL: UI Library Differences
 
-Different UI libraries support different properties. Always validate against the correct library using \`ngforge_validate_form_config\` with the appropriate \`uiIntegration\` parameter.
+Different UI libraries support different properties. Always validate against the correct library using \`ngforge_validate\` with the appropriate \`uiIntegration\` parameter.
 
 ### Property Differences by Library
 
@@ -521,23 +521,23 @@ Container fields (\`page\`, \`group\`, \`row\`) do NOT support these properties:
    { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
    \`\`\`
 
-5. **Using unsupported field types** - Each UI library supports specific field types. Use \`ngforge_get_field_schema\` to see available types.
+5. **Using unsupported field types** - Each UI library supports specific field types. Use \`ngforge_lookup\` with \`depth: "schema"\` to see available types.
 
 ## Validation Before Use
 
-Always validate your FormConfig using the \`ngforge_validate_form_config\` tool before using it. This tool uses the actual TypeScript/Zod schemas, so if validation passes, the config will work correctly at runtime.
+Always validate your FormConfig using the \`ngforge_validate\` tool before using it. This tool uses the actual TypeScript/Zod schemas, so if validation passes, the config will work correctly at runtime.
 
 \`\`\`typescript
 // Always specify the UI integration you're using
-ngforge_validate_form_config({
+ngforge_validate({
   uiIntegration: 'material',  // or 'bootstrap', 'primeng', 'ionic'
   config: { fields: [...] }
 })
 \`\`\`
 
-To understand what properties are supported for each field type, use \`ngforge_get_field_schema\`:
+To understand what properties are supported for each field type, use \`ngforge_lookup\` with \`depth: "schema"\`:
 
 \`\`\`typescript
-ngforge_get_field_schema({ uiIntegration: 'material' })
+ngforge_lookup({ topic: 'input', depth: 'schema', uiIntegration: 'material' })
 \`\`\`
 `;

@@ -17,10 +17,10 @@ import {
 } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { runIonicPresetAction } from '../../addons/preset-actions';
-import { IonInlineButtonAddonComponent } from '../../addons/ion-inline-button-addon.component';
+import { IonicInlineButtonAddonComponent } from '../../addons/ion-inline-button-addon.component';
 import { IONIC_CONFIG } from '../../models/ionic-config.token';
 import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
-import { IonInputAddon, IonicInputProps } from './ionic-input.type';
+import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
 
 // minlength/maxlength bindings: Signal Forms auto-syncs these on NATIVE
 // inputs; <ion-input> is a Stencil web component so we bind directly from
@@ -29,8 +29,8 @@ import { IonInputAddon, IonicInputProps } from './ionic-input.type';
 @Component({
   selector: 'df-ion-input',
   // IonButton intentionally NOT imported — it would collide with
-  // IonInlineButtonAddonComponent on `<ion-button>` (NG0300).
-  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot, IonInlineButtonAddonComponent],
+  // IonicInlineButtonAddonComponent on `<ion-button>` (NG0300).
+  imports: [IonInput, IonNote, FormField, DynamicTextPipe, AsyncPipe, NgForgeControl, DfAddonSlot, IonicInlineButtonAddonComponent],
   hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let f = ngf.field();
@@ -161,7 +161,7 @@ export default class IonicInputFieldComponent {
   private ionicConfig = inject(IONIC_CONFIG, { optional: true });
 
   protected readonly ngf = injectNgForgeField<string>();
-  protected readonly ngfa = injectNgForgeAddons<IonInputAddon>();
+  protected readonly ngfa = injectNgForgeAddons<IonicInputAddon>();
 
   readonly props = input<IonicInputProps>();
 

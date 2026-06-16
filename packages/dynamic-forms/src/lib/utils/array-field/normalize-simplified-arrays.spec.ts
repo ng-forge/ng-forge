@@ -76,13 +76,13 @@ describe('normalizeSimplifiedArrays', () => {
       expect(metadata).toBeDefined();
       expect(metadata!.autoRemoveButton).toBeDefined();
       const autoRemove = metadata!.autoRemoveButton as Record<string, unknown>;
-      expect(autoRemove.type).toBe('removeArrayItem');
+      expect(autoRemove.type).toBe('remove-array-item');
       expect(autoRemove.label).toBe('Remove');
 
       // Add button
       const addButton = result[1] as Record<string, unknown>;
       expect(addButton.key).toBe('tags__add');
-      expect(addButton.type).toBe('addArrayItem');
+      expect(addButton.type).toBe('add-array-item');
       expect(addButton.label).toBe('Add');
       expect(addButton.arrayKey).toBe('tags');
     });
@@ -103,7 +103,7 @@ describe('normalizeSimplifiedArrays', () => {
       // Add button should still be generated
       expect(result[1]).toBeDefined();
       const addButton = result[1] as Record<string, unknown>;
-      expect(addButton.type).toBe('addArrayItem');
+      expect(addButton.type).toBe('add-array-item');
     });
 
     it('should handle value: [] for primitive array', () => {
@@ -149,7 +149,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(firstItem[0].value).toBe('Jane');
       expect(firstItem[1].key).toBe('phone');
       expect(firstItem[1].value).toBe('555');
-      expect(firstItem[2].type).toBe('removeArrayItem');
+      expect(firstItem[2].type).toBe('remove-array-item');
     });
 
     it('should handle empty value for object array', () => {
@@ -274,7 +274,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(addTemplate).toHaveLength(3);
       expect(addTemplate[0].key).toBe('name');
       expect(addTemplate[1].key).toBe('phone');
-      expect(addTemplate[2].type).toBe('removeArrayItem');
+      expect(addTemplate[2].type).toBe('remove-array-item');
     });
   });
 
@@ -301,7 +301,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(metadata).toBeDefined();
       const removeBtn = metadata!.autoRemoveButton as Record<string, unknown>;
       expect(removeBtn).toBeDefined();
-      expect(removeBtn.type).toBe('removeArrayItem');
+      expect(removeBtn.type).toBe('remove-array-item');
       expect(removeBtn.label).toBe('Remove');
     });
 
@@ -428,7 +428,7 @@ describe('normalizeSimplifiedArrays', () => {
       // Should have array + add button inside the page
       expect(pageFields).toHaveLength(2);
       expect(pageFields[0].type).toBe('array');
-      expect(pageFields[1].type).toBe('addArrayItem');
+      expect(pageFields[1].type).toBe('add-array-item');
     });
 
     it('should normalize simplified arrays inside group containers', () => {
@@ -452,7 +452,7 @@ describe('normalizeSimplifiedArrays', () => {
 
       expect(groupFields).toHaveLength(2);
       expect(groupFields[0].type).toBe('array');
-      expect(groupFields[1].type).toBe('addArrayItem');
+      expect(groupFields[1].type).toBe('add-array-item');
     });
 
     it('should normalize simplified arrays inside row containers', () => {
@@ -476,7 +476,7 @@ describe('normalizeSimplifiedArrays', () => {
 
       expect(rowFields).toHaveLength(2);
       expect(rowFields[0].type).toBe('array');
-      expect(rowFields[1].type).toBe('addArrayItem');
+      expect(rowFields[1].type).toBe('add-array-item');
     });
   });
 
@@ -760,7 +760,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(result).toHaveLength(4);
       expect(result[0].type).toBe('array');
       expect(result[0].key).toBe('simpleTags');
-      expect(result[1].type).toBe('addArrayItem');
+      expect(result[1].type).toBe('add-array-item');
       expect(result[2].type).toBe('array');
       expect(result[2].key).toBe('fullContacts');
       expect(result[3].type).toBe('input');
@@ -805,7 +805,7 @@ describe('normalizeSimplifiedArrays', () => {
       expect(stored).toHaveLength(objectTemplate.length + 1);
       expect(stored[0].key).toBe('name');
       expect(stored[1].key).toBe('phone');
-      expect(stored[stored.length - 1].type).toBe('removeArrayItem');
+      expect(stored[stored.length - 1].type).toBe('remove-array-item');
     });
 
     it('should populate metadata.template even when no values are provided', () => {

@@ -45,17 +45,19 @@ paths:
 **2. Run the generator:**
 
 ```bash
-npx ng-forge-generator --spec openapi.yaml --output src/generated
+npx @ng-forge/openapi-generator --spec openapi.yaml --output src/generated
 ```
 
 **3. Import and use in your Angular component:**
 
 ```typescript
+import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { registerUserFormConfig } from './generated/forms';
 import type { RegisterUserFormValue } from './generated/types';
 
 @Component({
-  template: `<ngf-dynamic-form [config]="formConfig" (formSubmit)="onSubmit($event)" />`,
+  imports: [DynamicForm],
+  template: `<form [dynamic-form]="formConfig" (submitted)="onSubmit($event)"></form>`,
 })
 export class RegisterComponent {
   formConfig = registerUserFormConfig;
@@ -65,6 +67,8 @@ export class RegisterComponent {
   }
 }
 ```
+
+> The form needs a UI adapter registered once in your app providers, for example `provideDynamicForm(...withMaterialFields())`. See any `@ng-forge/dynamic-forms-*` adapter package for setup.
 
 The generator produces a typed FormConfig and a matching TypeScript interface:
 

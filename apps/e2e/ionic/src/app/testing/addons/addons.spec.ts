@@ -5,7 +5,7 @@ setupConsoleCheck();
 
 // Ionic ion-button addons render INSIDE <ion-input> as native
 // ion-button[df-ion-button-addon slot=start|end] via an attribute-selector
-// component (IonInlineButtonAddonComponent), so Ionic's
+// component (IonicInlineButtonAddonComponent), so Ionic's
 // `::slotted(ion-button[slot=start|end])` shadow CSS fires natively.
 // Decorative types (icon/text/template/component) render via the universal
 // df-addon-slot dispatcher wrapped in <span slot="start|end">. Selectors

@@ -17,6 +17,10 @@ import {
   IonicPreviousButtonFieldSchema,
   IonicAddArrayItemButtonFieldSchema,
   IonicRemoveArrayItemButtonFieldSchema,
+  IonicPrependArrayItemButtonFieldSchema,
+  IonicInsertArrayItemButtonFieldSchema,
+  IonicPopArrayItemButtonFieldSchema,
+  IonicShiftArrayItemButtonFieldSchema,
 } from './fields';
 
 /**
@@ -41,6 +45,10 @@ export const IonicLeafFieldSchema = z
     IonicPreviousButtonFieldSchema,
     IonicAddArrayItemButtonFieldSchema,
     IonicRemoveArrayItemButtonFieldSchema,
+    IonicPrependArrayItemButtonFieldSchema,
+    IonicInsertArrayItemButtonFieldSchema,
+    IonicPopArrayItemButtonFieldSchema,
+    IonicShiftArrayItemButtonFieldSchema,
   ])
   .superRefine(nullableValueRefine);
 

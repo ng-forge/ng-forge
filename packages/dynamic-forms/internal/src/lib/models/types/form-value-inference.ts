@@ -134,7 +134,25 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
           T extends { type: 'text' }
           ? never
           : // Button fields - exclude (they don't hold values)
-            T extends { type: 'submit' | 'button' | 'next' | 'previous' | 'addArrayItem' | 'removeArrayItem' }
+            T extends {
+                type:
+                  | 'submit'
+                  | 'button'
+                  | 'next'
+                  | 'previous'
+                  | 'addArrayItem'
+                  | 'add-array-item'
+                  | 'prependArrayItem'
+                  | 'prepend-array-item'
+                  | 'insertArrayItem'
+                  | 'insert-array-item'
+                  | 'removeArrayItem'
+                  | 'remove-array-item'
+                  | 'popArrayItem'
+                  | 'pop-array-item'
+                  | 'shiftArrayItem'
+                  | 'shift-array-item';
+              }
             ? never
             : // Value fields with explicit value: infer type and optionality
               T extends { key: infer K; value: infer V }

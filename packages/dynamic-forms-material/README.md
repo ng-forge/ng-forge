@@ -18,19 +18,12 @@ Material Design field components for [@ng-forge/dynamic-forms](https://www.npmjs
 
 ## Compatibility
 
-| @ng-forge/dynamic-forms-material | @ng-forge/dynamic-forms | Angular       |
-| -------------------------------- | ----------------------- | ------------- |
-| 1.0.x                            | 1.0.x                   | ~22.0.0       |
-| 0.9.x                            | 0.9.x                   | >=21.2.0      |
-| 0.8.x                            | 0.8.x                   | >=21.2.0      |
-| 0.7.x                            | 0.7.x                   | >=21.2.0      |
-| 0.6.x                            | 0.6.x                   | >=21.1.0      |
-| 0.5.x                            | 0.5.x                   | >=21.1.0      |
-| 0.4.x                            | 0.4.x                   | >=21.1.0      |
-| 0.3.x                            | 0.3.x                   | 21.0.7-21.0.x |
-| 0.2.x                            | 0.2.x                   | 21.0.6        |
-| 0.1.1+                           | 0.1.1+                  | 21.0.2-21.0.5 |
-| 0.1.0                            | 0.1.0                   | 21.0.0-21.0.1 |
+| Angular | @ng-forge/dynamic-forms-material |
+| ------- | -------------------------------- |
+| 22.x    | 1.x                              |
+| 21.x    | 0.x (experimental)               |
+
+Versioned in lockstep with `@ng-forge/dynamic-forms`. The `0.x` line targets Angular 21 (experimental Signal Forms). Each release pins its Angular requirement via `peerDependencies`; npm warns on a mismatch.
 
 ## Installation
 
@@ -99,10 +92,11 @@ Input, Textarea, Select, Checkbox, Radio, Datepicker, Slider, Toggle, Multi-Chec
 
 ## Documentation
 
-- [Material Integration](https://ng-forge.com/dynamic-forms/ui-libs-integrations/material)
-- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
+- [Feature overview](https://ng-forge.com/material/feature-overview)
+- [Material Integration](https://ng-forge.com/material)
+- [Field Types](https://ng-forge.com/material/field-types/text-inputs)
+- [Validation](https://ng-forge.com/material/validation/basics)
+- [Conditional Logic](https://ng-forge.com/material/dynamic-behavior/conditional-logic)
 
 ## Changelog
 

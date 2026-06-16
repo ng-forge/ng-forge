@@ -374,8 +374,12 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'submit',
       'next',
       'previous',
-      'addArrayItem',
-      'removeArrayItem',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     forbidden: ['page'],
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
@@ -398,8 +402,12 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'submit',
       'next',
       'previous',
-      'addArrayItem',
-      'removeArrayItem',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     forbidden: ['page', 'row', 'hidden'],
     message: 'Rows cannot contain pages, other rows, or hidden fields. Hidden fields should be at page or form level.',
@@ -422,8 +430,12 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'submit',
       'next',
       'previous',
-      'addArrayItem',
-      'removeArrayItem',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     forbidden: ['page', 'group'],
     message: 'Groups cannot contain pages or other groups (no nested groups).',
@@ -447,8 +459,12 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'submit',
       'next',
       'previous',
-      'addArrayItem',
-      'removeArrayItem',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     forbidden: ['page', 'array'],
     message: 'Arrays cannot contain pages or other arrays (no nested arrays).',
@@ -784,6 +800,41 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
  * }
  * ```
  */
+/**
+ * Legacy camelCase array-action discriminants mapped to their kebab-case
+ * canonical form. kebab is canonical as of 1.0; camelCase is a deprecated alias.
+ */
+const LEGACY_ARRAY_ACTION_TYPES: Record<string, string> = {
+  addArrayItem: 'add-array-item',
+  prependArrayItem: 'prepend-array-item',
+  insertArrayItem: 'insert-array-item',
+  removeArrayItem: 'remove-array-item',
+  popArrayItem: 'pop-array-item',
+  shiftArrayItem: 'shift-array-item',
+};
+
+/**
+ * Deep-clones a config, rewriting any legacy camelCase array-action `type`
+ * discriminant to its kebab-case canonical form so older/serialized configs
+ * validate against the kebab-only schemas. Mirrors the library's runtime alias.
+ */
+function normalizeLegacyArrayActionTypes(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(normalizeLegacyArrayActionTypes);
+  }
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      out[key] =
+        key === 'type' && typeof val === 'string' && LEGACY_ARRAY_ACTION_TYPES[val]
+          ? LEGACY_ARRAY_ACTION_TYPES[val]
+          : normalizeLegacyArrayActionTypes(val);
+    }
+    return out;
+  }
+  return value;
+}
+
 export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult {
   const schema = formConfigSchemas[uiIntegration];
 
@@ -800,10 +851,15 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
     };
   }
 
-  // Pre-validate for common mistakes that Zod would silently strip
-  const preErrors = preValidateConfig(config);
+  // Normalize legacy camelCase array-action discriminants to their kebab-case
+  // canonical form so older/serialized configs validate against the kebab-only
+  // schemas. Mirrors the library's runtime alias.
+  const normalizedConfig = normalizeLegacyArrayActionTypes(config);
 
-  const result = schema.safeParse(config);
+  // Pre-validate for common mistakes that Zod would silently strip
+  const preErrors = preValidateConfig(normalizedConfig);
+
+  const result = schema.safeParse(normalizedConfig);
 
   if (result.success && preErrors.length === 0) {
     return {
@@ -813,7 +869,7 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
   }
 
   // Combine pre-validation errors with Zod errors
-  const zodErrors = result.success ? [] : formatZodError(result.error, config);
+  const zodErrors = result.success ? [] : formatZodError(result.error, normalizedConfig);
   const allErrors = [...preErrors, ...zodErrors];
 
   return {

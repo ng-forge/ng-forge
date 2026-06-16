@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { IonButtonAddon, IonIconAddon } from '../../types/addons';
+import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
 
 export interface IonicInputProps extends InputProps {
   fill?: 'solid' | 'outline';
@@ -18,13 +18,13 @@ export interface IonicInputProps extends InputProps {
  * the type level. Pair with `withCustomAddon(...)` for the runtime side:
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type -- Intentionally empty: module-augmentation seam
-export interface IonAddonExtensions {}
+export interface IonicAddonExtensions {}
 
-type IonAddonExtension = IonAddonExtensions[keyof IonAddonExtensions];
+type IonicAddonExtension = IonicAddonExtensions[keyof IonicAddonExtensions];
 
 /** Addon types accepted by `ion-input`. */
-export type IonInputAddon = IonIconAddon | IonButtonAddon | TextAddon | TemplateAddon | IonAddonExtension;
+export type IonicInputAddon = IonicIconAddon | IonicButtonAddon | TextAddon | TemplateAddon | IonicAddonExtension;
 
 export type IonicInputField = InputField<IonicInputProps> & {
-  addons?: ReadonlyArray<IonInputAddon>;
+  addons?: ReadonlyArray<IonicInputAddon>;
 };

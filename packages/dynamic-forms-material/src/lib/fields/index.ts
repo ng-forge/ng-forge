@@ -28,12 +28,12 @@ export type {
   MatSubmitButtonField,
   MatNextButtonField,
   MatPreviousButtonField,
-  AddArrayItemButtonField,
-  PrependArrayItemButtonField,
-  InsertArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  PopArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  MatAddArrayItemButtonField,
+  MatPrependArrayItemButtonField,
+  MatInsertArrayItemButtonField,
+  MatRemoveArrayItemButtonField,
+  MatPopArrayItemButtonField,
+  MatShiftArrayItemButtonField,
 } from './button';
 
 export { MatTextareaFieldComponent } from './textarea';

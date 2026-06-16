@@ -19,12 +19,12 @@ type FieldType =
   | 'button'
   | 'next'
   | 'previous'
-  | 'addArrayItem'
-  | 'prependArrayItem'
-  | 'insertArrayItem'
-  | 'removeArrayItem'
-  | 'popArrayItem'
-  | 'shiftArrayItem';
+  | 'add-array-item'
+  | 'prepend-array-item'
+  | 'insert-array-item'
+  | 'remove-array-item'
+  | 'pop-array-item'
+  | 'shift-array-item';
 
 interface AdapterProp {
   prop: string;
@@ -329,12 +329,12 @@ const ADAPTER_PROPS_DATA = {
   button: BUTTON_PROPS,
   next: BUTTON_PROPS,
   previous: BUTTON_PROPS,
-  addArrayItem: BUTTON_PROPS,
-  prependArrayItem: BUTTON_PROPS,
-  insertArrayItem: BUTTON_PROPS,
-  removeArrayItem: BUTTON_PROPS,
-  popArrayItem: BUTTON_PROPS,
-  shiftArrayItem: BUTTON_PROPS,
+  'add-array-item': BUTTON_PROPS,
+  'prepend-array-item': BUTTON_PROPS,
+  'insert-array-item': BUTTON_PROPS,
+  'remove-array-item': BUTTON_PROPS,
+  'pop-array-item': BUTTON_PROPS,
+  'shift-array-item': BUTTON_PROPS,
 } satisfies AdapterPropsData;
 
 type CustomFieldGuide =
@@ -363,12 +363,12 @@ const CUSTOM_FIELD_GUIDES: Partial<Record<string, CustomFieldGuide>> = {
   submit: { kind: 'button', mapper: 'submitButtonFieldMapper' },
   next: { kind: 'button', mapper: 'nextButtonFieldMapper' },
   previous: { kind: 'button', mapper: 'previousButtonFieldMapper' },
-  addArrayItem: { kind: 'button', mapper: 'addArrayItemButtonMapper' },
-  prependArrayItem: { kind: 'button', mapper: 'prependArrayItemButtonMapper' },
-  insertArrayItem: { kind: 'button', mapper: 'insertArrayItemButtonMapper' },
-  removeArrayItem: { kind: 'button', mapper: 'removeArrayItemButtonMapper' },
-  popArrayItem: { kind: 'button', mapper: 'popArrayItemButtonMapper' },
-  shiftArrayItem: { kind: 'button', mapper: 'shiftArrayItemButtonMapper' },
+  'add-array-item': { kind: 'button', mapper: 'addArrayItemButtonMapper' },
+  'prepend-array-item': { kind: 'button', mapper: 'prependArrayItemButtonMapper' },
+  'insert-array-item': { kind: 'button', mapper: 'insertArrayItemButtonMapper' },
+  'remove-array-item': { kind: 'button', mapper: 'removeArrayItemButtonMapper' },
+  'pop-array-item': { kind: 'button', mapper: 'popArrayItemButtonMapper' },
+  'shift-array-item': { kind: 'button', mapper: 'shiftArrayItemButtonMapper' },
 };
 
 @Component({

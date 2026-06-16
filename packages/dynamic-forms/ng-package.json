@@ -6,6 +6,7 @@
   },
   "assets": [
     ".npmignore",
+    "LICENSE",
     { "glob": "**/*.json", "input": "schematics", "output": "schematics", "ignore": ["tsconfig.json", "node_modules/**"] }
   ],
   "allowedNonPeerDependencies": ["ngxtension"]

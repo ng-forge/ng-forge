@@ -17,15 +17,15 @@
 </p>
 
 <p align="center">
-  <a href="https://ng-forge.com/dynamic-forms/">📚 Documentation</a> •
-  <a href="https://ng-forge.com/dynamic-forms/installation">🚀 Getting Started</a> •
-  <a href="https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly">🔁 Migrating from ngx-formly</a> •
+  <a href="https://ng-forge.com/material/getting-started">📚 Documentation</a> •
+  <a href="https://ng-forge.com/material/getting-started">🚀 Getting Started</a> •
+  <a href="https://ng-forge.com/material/migrating-from-ngx-formly">🔁 Migrating from ngx-formly</a> •
   <a href="https://discord.gg/qpzzvFagj3">💬 Discord</a> •
   <a href="https://github.com/ng-forge/ng-forge/issues">🐛 Issues</a>
 </p>
 
 > **Coming from [ngx-formly](https://formly.dev)?** ng-forge is built on Angular Signal Forms — see the
-> [side-by-side migration guide](https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly) for a
+> [side-by-side migration guide](https://ng-forge.com/material/migrating-from-ngx-formly) for a
 > concept-by-concept mapping with full working code on both sides.
 
 ---
@@ -52,7 +52,7 @@ import { DynamicForm, type FormConfig, type InferFormValue } from '@ng-forge/dyn
 
 @Component({
   imports: [DynamicForm],
-  template: `<form [dynamic-form]="config"></form>`,
+  template: `<form [dynamic-form]="config" (submitted)="onSubmit($event)"></form>`,
 })
 export class LoginComponent {
   config = {
@@ -62,12 +62,16 @@ export class LoginComponent {
       { type: 'submit', key: 'submit', label: 'Sign In' },
     ],
   } as const satisfies FormConfig;
+
+  onSubmit(value: InferFormValue<typeof this.config.fields>) {
+    console.log('Form submitted:', value); // inferred: { email: string; password: string }
+  }
 }
 ```
 
 ## ✨ Features
 
-⚡ **Signal Forms** – Native Angular 22+ signal forms integration
+⚡ **Signal Forms** – Native Angular Signal Forms integration
 
 🎯 **Type-Safe** – Full TypeScript inference for form values
 
@@ -92,23 +96,26 @@ Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, whe
 
 ## 📦 Packages
 
-| Package                                                                 | Description     |
-| ----------------------------------------------------------------------- | --------------- |
-| [@ng-forge/dynamic-forms](./packages/dynamic-forms)                     | Core library    |
-| [@ng-forge/dynamic-forms-material](./packages/dynamic-forms-material)   | Material Design |
-| [@ng-forge/dynamic-forms-primeng](./packages/dynamic-forms-primeng)     | PrimeNG         |
-| [@ng-forge/dynamic-forms-ionic](./packages/dynamic-forms-ionic)         | Ionic           |
-| [@ng-forge/dynamic-forms-bootstrap](./packages/dynamic-forms-bootstrap) | Bootstrap 5     |
+| Package                                                                 | Description                                |
+| ----------------------------------------------------------------------- | ------------------------------------------ |
+| [@ng-forge/dynamic-forms](./packages/dynamic-forms)                     | Core library                               |
+| [@ng-forge/dynamic-forms-material](./packages/dynamic-forms-material)   | Material Design                            |
+| [@ng-forge/dynamic-forms-primeng](./packages/dynamic-forms-primeng)     | PrimeNG                                    |
+| [@ng-forge/dynamic-forms-ionic](./packages/dynamic-forms-ionic)         | Ionic                                      |
+| [@ng-forge/dynamic-forms-bootstrap](./packages/dynamic-forms-bootstrap) | Bootstrap 5                                |
+| [@ng-forge/dynamic-form-mcp](./packages/dynamic-form-mcp)               | MCP server for AI-assisted form generation |
+| [@ng-forge/openapi-generator](./packages/openapi-generator)             | Generate forms from OpenAPI specs          |
 
 ## 📖 Documentation
 
-- [Installation](https://ng-forge.com/dynamic-forms/installation)
-- [Field Types](https://ng-forge.com/dynamic-forms/field-types)
-- [Validation](https://ng-forge.com/dynamic-forms/validation/basics)
-- [Conditional Logic](https://ng-forge.com/dynamic-forms/dynamic-behavior/overview)
-- [Type Safety](https://ng-forge.com/dynamic-forms/advanced/basics)
-- [i18n](https://ng-forge.com/dynamic-forms/dynamic-behavior/i18n)
-- [Custom Integrations](https://ng-forge.com/dynamic-forms/advanced/custom-integrations)
+- [Feature overview](https://ng-forge.com/material/feature-overview)
+- [Installation](https://ng-forge.com/material/getting-started)
+- [Field Types](https://ng-forge.com/material/field-types/text-inputs)
+- [Validation](https://ng-forge.com/material/validation/basics)
+- [Conditional Logic](https://ng-forge.com/material/dynamic-behavior/conditional-logic)
+- [Type Safety](https://ng-forge.com/material/recipes/type-safety)
+- [i18n](https://ng-forge.com/material/dynamic-behavior/i18n)
+- [Custom Integrations](https://ng-forge.com/material/building-an-adapter)
 
 ## 🛠️ Development
 

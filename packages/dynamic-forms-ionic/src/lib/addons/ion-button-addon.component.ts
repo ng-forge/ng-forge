@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
-import type { IonButtonAddon } from '../types/addons';
+import type { IonicButtonAddon } from '../types/addons';
 
 /** Renderer for the `ion-button` addon type. */
 @Component({
@@ -49,8 +49,8 @@ import type { IonButtonAddon } from '../types/addons';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IonButtonAddonComponent {
-  protected readonly action = injectNgForgeAddonAction<IonButtonAddon>();
+export class IonicButtonAddonComponent {
+  protected readonly action = injectNgForgeAddonAction<IonicButtonAddon>();
 
   /** Re-exposed for template binding — same signal stored on the directive. */
   protected readonly addon = this.action.addon;

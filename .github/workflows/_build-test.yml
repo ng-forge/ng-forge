@@ -211,8 +211,8 @@ jobs:
           done
           echo "✅ Package integrity check complete"
 
-      # openapi-generator is an esbuild CLI bundle with no .d.ts surface and thus no
-      # api-check target; run-many/affected run the check only for projects that define it.
+      # api-check runs only for projects that define the target (dynamic-form-mcp
+      # and openapi-generator); run-many/affected skip projects without it.
       - name: Check public API surface
         if: ${{ !inputs.affected }}
         run: pnpm nx run-many -t api-check
@@ -220,6 +220,16 @@ jobs:
       - name: Check public API surface (affected)
         if: inputs.affected
         run: pnpm nx affected -t api-check --base=origin/main
+
+      # Fails when the bundled MCP CLI imports an npm specifier not declared in its
+      # published dependencies (the class of bug B1 fixed). Only dynamic-form-mcp defines it.
+      - name: MCP publish smoke test
+        if: ${{ !inputs.affected }}
+        run: pnpm nx run-many -t smoke
+
+      - name: MCP publish smoke test (affected)
+        if: inputs.affected
+        run: pnpm nx affected -t smoke --base=origin/main
 
       - name: Cache build artifacts
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5

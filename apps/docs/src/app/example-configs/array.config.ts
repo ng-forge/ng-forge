@@ -17,7 +17,7 @@ const tagTemplate = {
     },
     {
       key: 'removeTag',
-      type: 'removeArrayItem',
+      type: 'remove-array-item',
       label: 'Remove',
       className: 'remove-tag-button',
       props: { color: 'warn' },
@@ -67,7 +67,7 @@ const contactTemplate = [
   },
   {
     key: 'removeContact',
-    type: 'removeArrayItem',
+    type: 'remove-array-item',
     label: 'Remove Contact',
     className: 'remove-contact-button',
     props: { color: 'warn' },
@@ -89,7 +89,7 @@ export const arrayConfig = {
     {
       key: 'description1',
       type: 'text',
-      label: 'Tags use addArrayItem (outside) and removeArrayItem (inside each item) buttons.',
+      label: 'Tags use add-array-item (outside) and remove-array-item (inside each item) buttons.',
     },
     {
       key: 'tags',
@@ -114,7 +114,7 @@ export const arrayConfig = {
               },
               {
                 key: 'removeTag',
-                type: 'removeArrayItem',
+                type: 'remove-array-item',
                 label: 'Remove',
                 className: 'remove-tag-button',
                 props: { color: 'warn' },
@@ -141,7 +141,7 @@ export const arrayConfig = {
               },
               {
                 key: 'removeTag',
-                type: 'removeArrayItem',
+                type: 'remove-array-item',
                 label: 'Remove',
                 className: 'remove-tag-button',
                 props: { color: 'warn' },
@@ -153,7 +153,7 @@ export const arrayConfig = {
     },
     {
       key: 'addTagButton',
-      type: 'addArrayItem',
+      type: 'add-array-item',
       label: 'Add Tag',
       arrayKey: 'tags',
       template: [tagTemplate],
@@ -168,7 +168,7 @@ export const arrayConfig = {
     {
       key: 'description2',
       type: 'text',
-      label: 'Contacts demonstrate addArrayItem and prependArrayItem buttons outside the array.',
+      label: 'Contacts demonstrate add-array-item and prepend-array-item buttons outside the array.',
     },
     {
       key: 'contacts',
@@ -219,7 +219,7 @@ export const arrayConfig = {
           },
           {
             key: 'removeContact',
-            type: 'removeArrayItem',
+            type: 'remove-array-item',
             label: 'Remove Contact',
             className: 'remove-contact-button',
             props: { color: 'warn' },
@@ -234,7 +234,7 @@ export const arrayConfig = {
       fields: [
         {
           key: 'prependContactButton',
-          type: 'prependArrayItem',
+          type: 'prepend-array-item',
           label: 'Add First',
           arrayKey: 'contacts',
           template: contactTemplate,
@@ -243,7 +243,7 @@ export const arrayConfig = {
         },
         {
           key: 'addContactButton',
-          type: 'addArrayItem',
+          type: 'add-array-item',
           label: 'Add Contact',
           arrayKey: 'contacts',
           template: contactTemplate,

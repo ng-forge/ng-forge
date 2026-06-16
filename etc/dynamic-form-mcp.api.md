@@ -4,19 +4,12 @@
 
 ```ts
 
-import { FormattedValidationError } from '@ng-forge/dynamic-forms-zod/mcp';
-import { getFormConfigJsonSchema } from '@ng-forge/dynamic-forms-zod/mcp';
-import { getLeafFieldJsonSchema } from '@ng-forge/dynamic-forms-zod/mcp';
-import { isValidFormConfig } from '@ng-forge/dynamic-forms-zod/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
-import { validateFormConfig } from '@ng-forge/dynamic-forms-zod/mcp';
-import { ValidationResult } from '@ng-forge/dynamic-forms-zod/mcp';
 
 // @public (undocumented)
 export interface AddonTypeInfo {
-    adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
-    category: 'core' | 'adapter';
+    adapter: UiIntegration | null;
+    category: 'adapter' | 'core';
     description: string;
     example: string;
     jsonSafe: boolean;
@@ -31,7 +24,7 @@ export function createServer(): McpServer;
 
 // @public
 export interface FieldAddonSupportInfo {
-    adapter: 'material' | 'primeng' | 'bootstrap' | 'ionic' | null;
+    adapter: UiIntegration | null;
     allowedTypes?: string[];
     fieldType: string;
     slots: ('prefix' | 'suffix' | string)[];
@@ -45,7 +38,7 @@ export interface FieldTypeInfo {
     canContain?: string[];
     cannotContain?: string[];
     // (undocumented)
-    category: 'value' | 'container' | 'button' | 'display';
+    category: 'button' | 'container' | 'display' | 'value';
     // (undocumented)
     description: string;
     // (undocumented)
@@ -54,7 +47,7 @@ export interface FieldTypeInfo {
     notAllowedIn?: string[];
     // (undocumented)
     props: Record<string, PropertyInfo>;
-    source: 'core' | 'adapter';
+    source: 'adapter' | 'core';
     // (undocumented)
     type: string;
     // (undocumented)
@@ -63,7 +56,13 @@ export interface FieldTypeInfo {
     valueType?: string;
 }
 
-export { FormattedValidationError }
+// @public
+export interface FormattedValidationError {
+    expected?: string;
+    message: string;
+    path: string;
+    received?: string;
+}
 
 // @public
 export function getAddonType(type: string): AddonTypeInfo | undefined;
@@ -72,7 +71,7 @@ export function getAddonType(type: string): AddonTypeInfo | undefined;
 export function getAddonTypes(): AddonTypeInfo[];
 
 // @public
-export function getAddonTypesByCategory(category: 'core' | 'adapter'): AddonTypeInfo[];
+export function getAddonTypesByCategory(category: 'adapter' | 'core'): AddonTypeInfo[];
 
 // @public
 export function getFieldAddonSupport(): FieldAddonSupportInfo[];
@@ -84,17 +83,19 @@ export function getFieldType(type: string): FieldTypeInfo | undefined;
 export function getFieldTypes(): FieldTypeInfo[];
 
 // @public
-export function getFieldTypesByCategory(category: 'value' | 'container' | 'button' | 'display'): FieldTypeInfo[];
-
-export { getFormConfigJsonSchema }
-
-export { getLeafFieldJsonSchema }
+export function getFieldTypesByCategory(category: 'button' | 'container' | 'display' | 'value'): FieldTypeInfo[];
 
 // @public
-export function getUIAdapter(library: 'material' | 'bootstrap' | 'primeng' | 'ionic'): UIAdapterInfo | undefined;
+export function getFormConfigJsonSchema(uiIntegration: UiIntegration, options?: JsonSchemaOptions): JsonSchemaType;
 
 // @public
-export function getUIAdapterFieldType(library: 'material' | 'bootstrap' | 'primeng' | 'ionic', fieldType: string): UIAdapterFieldType | undefined;
+export function getLeafFieldJsonSchema(uiIntegration: UiIntegration): JsonSchemaType;
+
+// @public
+export function getUIAdapter(library: UiIntegration): UIAdapterInfo | undefined;
+
+// @public
+export function getUIAdapterFieldType(library: UiIntegration, fieldType: string): UIAdapterFieldType | undefined;
 
 // @public
 export function getUIAdapters(): UIAdapterInfo[];
@@ -106,11 +107,12 @@ export function getValidator(type: string): ValidatorInfo | undefined;
 export function getValidators(): ValidatorInfo[];
 
 // @public
-export function getValidatorsByCategory(category: 'built-in' | 'custom' | 'async' | 'http'): ValidatorInfo[];
-
-export { isValidFormConfig }
+export function getValidatorsByCategory(category: 'async' | 'built-in' | 'custom' | 'http'): ValidatorInfo[];
 
 // @public
+export function isValidFormConfig(uiIntegration: UiIntegration, config: unknown): boolean;
+
+// @public (undocumented)
 export interface PropertyInfo {
     // (undocumented)
     default?: unknown;
@@ -155,16 +157,24 @@ export interface UIAdapterInfo {
     providerFunction: string;
 }
 
-export { UiIntegration }
+// @public
+export type UiIntegration = 'bootstrap' | 'ionic' | 'material' | 'primeng';
 
-export { validateFormConfig }
+// @public (undocumented)
+export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult;
 
-export { ValidationResult }
+// @public
+export interface ValidationResult {
+    data?: unknown;
+    errors?: FormattedValidationError[];
+    errorSummary?: string;
+    valid: boolean;
+}
 
 // @public (undocumented)
 export interface ValidatorInfo {
     // (undocumented)
-    category: 'built-in' | 'custom' | 'async' | 'http';
+    category: 'async' | 'built-in' | 'custom' | 'http';
     // (undocumented)
     description: string;
     // (undocumented)

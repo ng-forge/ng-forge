@@ -587,6 +587,28 @@ describe('validator-factory', () => {
         });
       });
 
+      it('throws when none of expression, functionName, or fn is set on custom validator', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ username: 'test' });
+          // Cast — XOR rejects neither-set at compile time; JSON-loaded configs can produce it.
+          const config = { type: 'custom' } as unknown as ValidatorConfig;
+
+          let caught: unknown;
+          form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              try {
+                applyValidator(config, path.username);
+              } catch (err) {
+                caught = err;
+              }
+            }),
+          );
+          expect(caught).toBeInstanceOf(Error);
+          expect(String(caught)).toMatch(/Custom validator requires/);
+        });
+      });
+
       it('warns when both fn and functionName are set on custom validator', () => {
         runInInjectionContext(injector, () => {
           const registry = TestBed.inject(FunctionRegistryService);

@@ -6,8 +6,8 @@
 
 import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type {
-  AddArrayItemButtonField,
-  InsertArrayItemButtonField,
+  MatAddArrayItemButtonField,
+  MatInsertArrayItemButtonField,
   MatButtonField,
   MatCheckboxField,
   MatDatepickerField,
@@ -16,11 +16,11 @@ import type {
   MatNextButtonField,
   MatPreviousButtonField,
   MatRadioField,
-  PopArrayItemButtonField,
-  PrependArrayItemButtonField,
-  RemoveArrayItemButtonField,
+  MatPopArrayItemButtonField,
+  MatPrependArrayItemButtonField,
+  MatRemoveArrayItemButtonField,
   MatSelectField,
-  ShiftArrayItemButtonField,
+  MatShiftArrayItemButtonField,
   MatSliderField,
   MatSubmitButtonField,
   MatTextareaField,
@@ -36,12 +36,18 @@ declare module '@ng-forge/dynamic-forms' {
     submit: MatSubmitButtonField;
     next: MatNextButtonField;
     previous: MatPreviousButtonField;
-    addArrayItem: AddArrayItemButtonField;
-    prependArrayItem: PrependArrayItemButtonField;
-    insertArrayItem: InsertArrayItemButtonField;
-    removeArrayItem: RemoveArrayItemButtonField;
-    popArrayItem: PopArrayItemButtonField;
-    shiftArrayItem: ShiftArrayItemButtonField;
+    addArrayItem: MatAddArrayItemButtonField;
+    'add-array-item': MatAddArrayItemButtonField;
+    prependArrayItem: MatPrependArrayItemButtonField;
+    'prepend-array-item': MatPrependArrayItemButtonField;
+    insertArrayItem: MatInsertArrayItemButtonField;
+    'insert-array-item': MatInsertArrayItemButtonField;
+    removeArrayItem: MatRemoveArrayItemButtonField;
+    'remove-array-item': MatRemoveArrayItemButtonField;
+    popArrayItem: MatPopArrayItemButtonField;
+    'pop-array-item': MatPopArrayItemButtonField;
+    shiftArrayItem: MatShiftArrayItemButtonField;
+    'shift-array-item': MatShiftArrayItemButtonField;
     textarea: MatTextareaField;
     radio: MatRadioField<unknown>;
     'multi-checkbox': MatMultiCheckboxField<unknown>;

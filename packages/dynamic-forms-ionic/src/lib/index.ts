@@ -17,12 +17,12 @@ export type {
   IonicSubmitButtonField,
   IonicNextButtonField,
   IonicPreviousButtonField,
-  AddArrayItemButtonField,
-  PrependArrayItemButtonField,
-  InsertArrayItemButtonField,
-  RemoveArrayItemButtonField,
-  PopArrayItemButtonField,
-  ShiftArrayItemButtonField,
+  IonicAddArrayItemButtonField,
+  IonicPrependArrayItemButtonField,
+  IonicInsertArrayItemButtonField,
+  IonicRemoveArrayItemButtonField,
+  IonicPopArrayItemButtonField,
+  IonicShiftArrayItemButtonField,
   IonicCheckboxProps,
   IonicCheckboxField,
   IonicDatepickerProps,
@@ -59,11 +59,11 @@ import './types/registry-augmentation';
 export { withIonicAddons, withIonicFields } from './providers/ionic-providers';
 
 // Addons
-export { IonButtonAddonComponent } from './addons/ion-button-addon.component';
-export { IonIconAddonComponent } from './addons/ion-icon-addon.component';
-export { IonInlineButtonAddonComponent } from './addons/ion-inline-button-addon.component';
-export type { IonAddon, IonButtonAddon, IonIconAddon } from './types/addons';
-export type { IonInputAddon, IonAddonExtensions } from './fields/input/ionic-input.type';
+export { IonicButtonAddonComponent } from './addons/ion-button-addon.component';
+export { IonicIconAddonComponent } from './addons/ion-icon-addon.component';
+export { IonicInlineButtonAddonComponent } from './addons/ion-inline-button-addon.component';
+export type { IonicAddon, IonicButtonAddon, IonicIconAddon } from './types/addons';
+export type { IonicInputAddon, IonicAddonExtensions } from './fields/input/ionic-input.type';
 
 // Tokens
 export { IONIC_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

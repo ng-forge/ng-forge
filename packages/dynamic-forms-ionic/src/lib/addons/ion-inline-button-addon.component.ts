@@ -5,12 +5,12 @@ import { IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { DynamicText } from '@ng-forge/dynamic-forms';
 import { DynamicTextPipe, resolveDynamicValue } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
-import type { IonButtonAddon } from '../types/addons';
+import type { IonicButtonAddon } from '../types/addons';
 
 /**
  * Inline `ion-button` addon — the host element IS `<ion-button>` so Ionic's
  * `::slotted(ion-button[slot=start|end])` shadow CSS matches and applies its
- * native icon-only sizing. `IonButtonAddonComponent` (tag selector) stays
+ * native icon-only sizing. `IonicButtonAddonComponent` (tag selector) stays
  * for the universal `<df-addon-slot>` dispatcher when the addon is rendered
  * outside an `<ion-input>` host.
  */
@@ -55,9 +55,9 @@ import type { IonButtonAddon } from '../types/addons';
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IonInlineButtonAddonComponent {
+export class IonicInlineButtonAddonComponent {
   private readonly injector = inject(Injector);
-  protected readonly action = injectNgForgeAddonAction<IonButtonAddon>();
+  protected readonly action = injectNgForgeAddonAction<IonicButtonAddon>();
 
   protected readonly addon = this.action.addon;
   protected readonly label = computed(() => this.addon().label);

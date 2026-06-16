@@ -101,7 +101,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
     withFieldsHelper: 'withIonicFields',
     withAddonsHelper: 'withIonicAddons',
     typeOverrideToken: 'IONIC_INPUT_TYPE_OVERRIDE',
-    customExtensionInterface: 'IonAddonExtensions',
+    customExtensionInterface: 'IonicAddonExtensions',
     presetRunner: 'runIonicPresetAction',
     packageName: '@ng-forge/dynamic-forms-ionic',
     buttonShortName: 'ion-button',

@@ -26,6 +26,10 @@ import {
   MatPreviousButtonFieldSchema,
   MatAddArrayItemButtonFieldSchema,
   MatRemoveArrayItemButtonFieldSchema,
+  MatPrependArrayItemButtonFieldSchema,
+  MatInsertArrayItemButtonFieldSchema,
+  MatPopArrayItemButtonFieldSchema,
+  MatShiftArrayItemButtonFieldSchema,
 } from './fields/mat-button-field.schema';
 
 /**
@@ -58,6 +62,10 @@ export const MatLeafFieldSchema = z
     MatPreviousButtonFieldSchema,
     MatAddArrayItemButtonFieldSchema,
     MatRemoveArrayItemButtonFieldSchema,
+    MatPrependArrayItemButtonFieldSchema,
+    MatInsertArrayItemButtonFieldSchema,
+    MatPopArrayItemButtonFieldSchema,
+    MatShiftArrayItemButtonFieldSchema,
   ])
   .superRefine(nullableValueRefine);
 
@@ -85,8 +93,12 @@ export const MatLeafFieldTypes = [
   'submit',
   'next',
   'previous',
-  'addArrayItem',
-  'removeArrayItem',
+  'add-array-item',
+  'prepend-array-item',
+  'insert-array-item',
+  'remove-array-item',
+  'pop-array-item',
+  'shift-array-item',
 ] as const;
 
 export type MatLeafFieldType = (typeof MatLeafFieldTypes)[number];

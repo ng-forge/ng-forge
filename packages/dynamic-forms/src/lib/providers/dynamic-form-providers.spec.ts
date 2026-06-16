@@ -118,6 +118,37 @@ describe('provideDynamicForm', () => {
     });
   });
 
+  describe('Legacy array-action type aliases', () => {
+    it('registers a camelCase alias for a kebab-case array-action canonical', () => {
+      const addField: FieldTypeDefinition = {
+        name: 'add-array-item',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'exclude',
+      };
+
+      const registry = createRegistryWithInjection(provideDynamicForm(addField));
+
+      // Canonical kebab key and the deprecated camelCase spelling resolve to the same definition.
+      expect(registry.get('add-array-item')).toBe(addField);
+      expect(registry.get('addArrayItem')).toBe(addField);
+    });
+
+    it('does not invent aliases for unrelated field types', () => {
+      const customField: FieldTypeDefinition = {
+        name: 'custom',
+        loadComponent: () => import('../fields/text/text-field.component'),
+        mapper: vi.fn(),
+        valueHandling: 'exclude',
+      };
+
+      const registry = createRegistryWithInjection(provideDynamicForm(customField));
+
+      expect(registry.has('add-array-item')).toBe(false);
+      expect(registry.has('addArrayItem')).toBe(false);
+    });
+  });
+
   describe('Custom fields registration', () => {
     it('should register single custom field', () => {
       const customField: FieldTypeDefinition = {

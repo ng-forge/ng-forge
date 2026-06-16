@@ -101,14 +101,16 @@ Navigates back to the previous page in a multi-step form. Only valid inside a `p
 
 Button types for declarative array manipulation. See [Form Arrays (Complete)](/prebuilt/form-arrays/complete) for full usage details and interactive examples.
 
-### addArrayItem
+> The kebab-case type names below (`add-array-item`, `remove-array-item`, and the rest) are canonical. The earlier camelCase spellings (`addArrayItem`, `removeArrayItem`) are still accepted as deprecated aliases for backward compatibility.
+
+### add-array-item
 
 Appends a new item to the end of the target array.
 
 ```typescript
 {
   key: 'addContact',
-  type: 'addArrayItem',
+  type: 'add-array-item',
   label: 'Add Contact',
   arrayKey: 'contacts',
   template: [
@@ -123,14 +125,14 @@ Appends a new item to the end of the target array.
 - `arrayKey`: Key of the target array field (required if placed outside the array)
 - `template`: Field definition(s) for the new item: a single `FieldDef` for primitive items, an array of `FieldDef` for object items (**required**)
 
-### prependArrayItem
+### prepend-array-item
 
 Inserts a new item at the beginning of the target array.
 
 ```typescript
 {
   key: 'prependContact',
-  type: 'prependArrayItem',
+  type: 'prepend-array-item',
   label: 'Add to Top',
   arrayKey: 'contacts',
   template: [
@@ -144,14 +146,14 @@ Inserts a new item at the beginning of the target array.
 - `arrayKey`: Key of the target array field (required if placed outside the array)
 - `template`: Field definition(s) for the new item (**required**)
 
-### insertArrayItem
+### insert-array-item
 
 Inserts a new item at a specific index in the target array.
 
 ```typescript
 {
   key: 'insertContact',
-  type: 'insertArrayItem',
+  type: 'insert-array-item',
   label: 'Insert at Position 1',
   arrayKey: 'contacts',
   index: 1,
@@ -167,14 +169,14 @@ Inserts a new item at a specific index in the target array.
 - `template`: Field definition(s) for the new item (**required**)
 - `index`: Position at which to insert the new item (**required**)
 
-### removeArrayItem
+### remove-array-item
 
 Removes the current item from the array. Typically placed inside each array item.
 
 ```typescript
 {
   key: 'remove',
-  type: 'removeArrayItem',
+  type: 'remove-array-item',
   label: 'Remove',
   props: { color: 'warn' },
 }
@@ -184,14 +186,14 @@ Removes the current item from the array. Typically placed inside each array item
 
 - `arrayKey`: Key of the target array field (optional when placed inside the array, where it is inferred automatically)
 
-### popArrayItem
+### pop-array-item
 
 Removes the last item from the target array.
 
 ```typescript
 {
   key: 'removeLast',
-  type: 'popArrayItem',
+  type: 'pop-array-item',
   label: 'Remove Last',
   arrayKey: 'contacts',
 }
@@ -201,14 +203,14 @@ Removes the last item from the target array.
 
 - `arrayKey`: Key of the target array field (**required**)
 
-### shiftArrayItem
+### shift-array-item
 
 Removes the first item from the target array.
 
 ```typescript
 {
   key: 'removeFirst',
-  type: 'shiftArrayItem',
+  type: 'shift-array-item',
   label: 'Remove First',
   arrayKey: 'contacts',
 }
