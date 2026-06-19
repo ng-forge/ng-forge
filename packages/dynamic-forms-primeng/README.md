@@ -107,7 +107,7 @@ See [Addons / Overview](https://ng-forge.com/dynamic-forms/primeng/addons/overvi
 ## Documentation
 
 - [Feature overview](https://ng-forge.com/dynamic-forms/primeng/feature-overview)
-- [PrimeNG Integration](https://ng-forge.com/dynamic-forms/primeng/configuration)
+- [Getting Started](https://ng-forge.com/dynamic-forms/primeng/getting-started)
 - [Field Types](https://ng-forge.com/dynamic-forms/primeng/field-types/text-inputs)
 - [Validation](https://ng-forge.com/dynamic-forms/primeng/validation/basics)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/primeng/dynamic-behavior/conditional-logic)

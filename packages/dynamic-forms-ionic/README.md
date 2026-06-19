@@ -107,7 +107,7 @@ Input, Textarea, Select, Checkbox, Radio, Toggle, Datepicker, Slider, Multi-Chec
 ## Documentation
 
 - [Feature overview](https://ng-forge.com/dynamic-forms/ionic/feature-overview)
-- [Ionic Integration](https://ng-forge.com/dynamic-forms/ionic/configuration)
+- [Getting Started](https://ng-forge.com/dynamic-forms/ionic/getting-started)
 - [Field Types](https://ng-forge.com/dynamic-forms/ionic/field-types/text-inputs)
 - [Validation](https://ng-forge.com/dynamic-forms/ionic/validation/basics)
 - [Conditional Logic](https://ng-forge.com/dynamic-forms/ionic/dynamic-behavior/conditional-logic)
