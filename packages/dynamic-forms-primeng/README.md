@@ -102,15 +102,15 @@ Input, Textarea, Select, Checkbox, Toggle, Radio, Multi-Checkbox, Datepicker, Sl
 
 `prime-input` ships first-class `prefix` / `suffix` addon slots accepting the PrimeNG-specific `prime-icon` / `prime-button` kinds plus the universal `text` / `template` / `component` kinds. `withPrimeNGFields()` auto-registers them — no extra setup needed.
 
-See [Addons / Overview](https://ng-forge.com/primeng/addons/overview), [Presets and Actions](https://ng-forge.com/primeng/addons/presets-and-actions), and [Custom Kinds](https://ng-forge.com/primeng/addons/custom-types) for the full surface (slots, kinds, presets, `actionRef`, reactive `hidden` / `disabled`, custom kind registration).
+See [Addons / Overview](https://ng-forge.com/dynamic-forms/primeng/addons/overview), [Presets and Actions](https://ng-forge.com/dynamic-forms/primeng/addons/presets-and-actions), and [Custom Kinds](https://ng-forge.com/dynamic-forms/primeng/addons/custom-types) for the full surface (slots, kinds, presets, `actionRef`, reactive `hidden` / `disabled`, custom kind registration).
 
 ## Documentation
 
-- [Feature overview](https://ng-forge.com/primeng/feature-overview)
-- [PrimeNG Integration](https://ng-forge.com/primeng)
-- [Field Types](https://ng-forge.com/primeng/field-types/text-inputs)
-- [Validation](https://ng-forge.com/primeng/validation/basics)
-- [Conditional Logic](https://ng-forge.com/primeng/dynamic-behavior/conditional-logic)
+- [Feature overview](https://ng-forge.com/dynamic-forms/primeng/feature-overview)
+- [PrimeNG Integration](https://ng-forge.com/dynamic-forms/primeng/configuration)
+- [Field Types](https://ng-forge.com/dynamic-forms/primeng/field-types/text-inputs)
+- [Validation](https://ng-forge.com/dynamic-forms/primeng/validation/basics)
+- [Conditional Logic](https://ng-forge.com/dynamic-forms/primeng/dynamic-behavior/conditional-logic)
 
 ## Changelog
 

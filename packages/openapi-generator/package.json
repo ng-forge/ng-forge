@@ -5,7 +5,7 @@
   "type": "module",
   "license": "MIT",
   "author": "ng-forge",
-  "homepage": "https://ng-forge.com/dynamic-forms/openapi-generator",
+  "homepage": "https://ng-forge.com/dynamic-forms/material/openapi-generator",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ng-forge/ng-forge.git",
