@@ -561,7 +561,7 @@ jobs:
         # `id` is consumed by the Notify Discord step below to gate on actual success.
         id: gh-release
         if: inputs.mode == 'publish'
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
           tag_name: v${{ env.VERSION }}
           target_commitish: ${{ github.sha }}
@@ -611,7 +611,7 @@ jobs:
         id: gh-prerelease
         if: github.event_name == 'schedule' || inputs.mode == 'next'
         continue-on-error: true
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: ${{ needs.next-gate.outputs.sha }}
