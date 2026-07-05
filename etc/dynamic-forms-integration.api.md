@@ -828,6 +828,7 @@ export type NonFieldLogicConfig = LogicConfig & {
 
 // @public
 export interface NonFieldLogicContext {
+    evaluationContext?: () => EvaluationContext;
     explicitValue?: boolean;
     fieldLogic?: LogicConfig[];
     form: FieldTree<unknown, number | string>;

@@ -326,6 +326,7 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
 // @public
 export interface ButtonLogicContext {
     currentPageValid?: Signal<boolean>;
+    evaluationContext?: () => EvaluationContext;
     explicitlyDisabled?: boolean;
     fieldLogic?: LogicConfig[];
     form: FieldTree<unknown, number | string>;
@@ -1431,6 +1432,7 @@ export type NonFieldLogicConfig = LogicConfig & {
 
 // @public
 export interface NonFieldLogicContext {
+    evaluationContext?: () => EvaluationContext;
     explicitValue?: boolean;
     fieldLogic?: LogicConfig[];
     form: FieldTree<unknown, number | string>;
