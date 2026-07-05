@@ -4,6 +4,7 @@ import { FormOptions, NextButtonOptions, SubmitButtonOptions } from '../../model
 import { LogicConfig, FormStateCondition, isFormStateCondition } from '../../models/logic';
 import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
+import type { EvaluationContext } from '../../models/expressions/evaluation-context';
 import type { Logger } from '../../providers/features/logger/logger.interface';
 
 /**
@@ -41,6 +42,14 @@ export interface ButtonLogicContext {
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
 
+  /**
+   * Optional factory returning the full evaluation context (including `externalData`
+   * and `customFunctions`) used to evaluate `ConditionalExpression` conditions.
+   * Invoked lazily during evaluation so external-data signal reads stay reactive.
+   * When omitted, a minimal context (form value only) is used.
+   */
+  evaluationContext?: () => EvaluationContext;
+
   /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
   logger?: Logger;
 }
@@ -74,6 +83,14 @@ export interface NonFieldLogicContext {
 
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
+
+  /**
+   * Optional factory returning the full evaluation context (including `externalData`
+   * and `customFunctions`) used to evaluate `ConditionalExpression` conditions.
+   * Invoked lazily during evaluation so external-data signal reads stay reactive.
+   * When omitted, a minimal context (form value only) is used.
+   */
+  evaluationContext?: () => EvaluationContext;
 
   /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
   logger?: Logger;
@@ -134,7 +151,12 @@ function evaluateLogicCondition(condition: LogicConfig['condition'], ctx: Button
     return evaluateFormStateCondition(condition, ctx);
   }
 
-  // ConditionalExpression
+  // ConditionalExpression — prefer the full context (with externalData/customFunctions)
+  // when the caller supplies one, so container/button conditions match leaf-field scope.
+  if (ctx.evaluationContext) {
+    return evaluateCondition(condition as ConditionalExpression, ctx.evaluationContext());
+  }
+
   const formValue = (ctx.formValue ?? ctx.form().value()) as Record<string, unknown>;
   const evaluationContext = {
     fieldValue: undefined,
@@ -187,7 +209,7 @@ function hasCustomLogicOfType(fieldLogic: LogicConfig[] | undefined, logicType: 
 function evaluateLogicOfType(
   fieldLogic: LogicConfig[] | undefined,
   logicType: LogicConfig['type'],
-  ctx: { form: FieldTree<unknown, string | number>; formValue?: unknown; logger?: Logger },
+  ctx: { form: FieldTree<unknown, string | number>; formValue?: unknown; evaluationContext?: () => EvaluationContext; logger?: Logger },
 ): boolean {
   if (!fieldLogic || fieldLogic.length === 0) {
     return false;
@@ -196,6 +218,7 @@ function evaluateLogicOfType(
   const buttonCtx: ButtonLogicContext = {
     form: ctx.form,
     formValue: ctx.formValue,
+    evaluationContext: ctx.evaluationContext,
     logger: ctx.logger,
   };
 
@@ -295,6 +318,7 @@ export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean {
     return evaluateLogicOfType(ctx.fieldLogic, 'hidden', {
       form: ctx.form,
       formValue: ctx.formValue,
+      evaluationContext: ctx.evaluationContext,
       logger: ctx.logger,
     });
   }
@@ -330,6 +354,7 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
     return evaluateLogicOfType(ctx.fieldLogic, 'disabled', {
       form: ctx.form,
       formValue: ctx.formValue,
+      evaluationContext: ctx.evaluationContext,
       logger: ctx.logger,
     });
   }

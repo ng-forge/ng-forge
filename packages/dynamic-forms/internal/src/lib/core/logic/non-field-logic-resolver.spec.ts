@@ -1,5 +1,6 @@
 import { resolveNonFieldHidden, resolveNonFieldDisabled, NonFieldLogicContext } from './non-field-logic-resolver';
 import { LogicConfig } from '../../models/logic';
+import { EvaluationContext } from '../../models/expressions/evaluation-context';
 import { vi } from 'vitest';
 
 describe('Non-Field Logic Resolvers', () => {
@@ -358,6 +359,66 @@ describe('Non-Field Logic Resolvers', () => {
       expect(hiddenResult()).toBe(false);
       // Disabled should be true (status is 'locked')
       expect(disabledResult()).toBe(true);
+    });
+  });
+
+  describe('evaluationContext (externalData + customFunctions)', () => {
+    // Builds a minimal full evaluation-context factory the way the container/button
+    // mappers do — carrying externalData and registered custom functions into scope.
+    function buildEvaluationContext(overrides: Partial<EvaluationContext>): () => EvaluationContext {
+      return () =>
+        ({
+          fieldValue: undefined,
+          formValue: {},
+          fieldPath: '',
+          customFunctions: {},
+          externalData: undefined,
+          logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+          ...overrides,
+        }) as EvaluationContext;
+    }
+
+    it('hidden: evaluates a javascript condition against externalData in scope', () => {
+      const ctx: NonFieldLogicContext = {
+        form: createMockForm(),
+        fieldLogic: [{ type: 'hidden', condition: { type: 'javascript', expression: "externalData.mode === 'active'" } }],
+        evaluationContext: buildEvaluationContext({ externalData: { mode: 'active' } }),
+      };
+
+      expect(resolveNonFieldHidden(ctx)()).toBe(true);
+    });
+
+    it('hidden: invokes a registered custom function from the evaluation context', () => {
+      const probe = vi.fn((c: EvaluationContext) => c.externalData?.['mode'] === 'active');
+      const ctx: NonFieldLogicContext = {
+        form: createMockForm(),
+        fieldLogic: [{ type: 'hidden', condition: { type: 'custom', functionName: 'probe' } }],
+        evaluationContext: buildEvaluationContext({ externalData: { mode: 'active' }, customFunctions: { probe } }),
+      };
+
+      expect(resolveNonFieldHidden(ctx)()).toBe(true);
+      expect(probe).toHaveBeenCalled();
+    });
+
+    it('disabled: invokes a registered custom function from the evaluation context', () => {
+      const probe = vi.fn((c: EvaluationContext) => c.externalData?.['locked'] === true);
+      const ctx: NonFieldLogicContext = {
+        form: createMockForm(),
+        fieldLogic: [{ type: 'disabled', condition: { type: 'custom', functionName: 'probe' } }],
+        evaluationContext: buildEvaluationContext({ externalData: { locked: true }, customFunctions: { probe } }),
+      };
+
+      expect(resolveNonFieldDisabled(ctx)()).toBe(true);
+      expect(probe).toHaveBeenCalled();
+    });
+
+    it('without an evaluationContext, a custom condition cannot resolve and stays falsy', () => {
+      const ctx: NonFieldLogicContext = {
+        form: createMockForm(),
+        fieldLogic: [{ type: 'hidden', condition: { type: 'custom', functionName: 'probe' } }],
+      };
+
+      expect(resolveNonFieldHidden(ctx)()).toBe(false);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Injector, runInInjectionContext, signal, WritableSignal } from '@angular/core';
+import { Injector, runInInjectionContext, signal, Signal, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
   addArrayItemButtonMapper,
@@ -10,7 +10,15 @@ import {
   BaseArrayRemoveButtonField,
 } from './array-button.mapper';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { ARRAY_CONTEXT, DEFAULT_PROPS, RootFormRegistryService, NonFieldLogicConfig } from '@ng-forge/dynamic-forms/internal';
+import {
+  ARRAY_CONTEXT,
+  DEFAULT_PROPS,
+  EXTERNAL_DATA,
+  FieldContextRegistryService,
+  FunctionRegistryService,
+  RootFormRegistryService,
+  NonFieldLogicConfig,
+} from '@ng-forge/dynamic-forms/internal';
 import { vi } from 'vitest';
 
 describe('Array Button Mappers with Logic', () => {
@@ -26,6 +34,7 @@ describe('Array Button Mappers with Logic', () => {
 
   let rootFormSignal: WritableSignal<FieldTree<Record<string, unknown>> | undefined>;
   let formValueSignal: WritableSignal<Record<string, unknown>>;
+  let externalDataSignal: WritableSignal<Record<string, Signal<unknown>> | undefined>;
 
   function setRegistry(formValue: Record<string, unknown> = {}): void {
     formValueSignal.set(formValue);
@@ -35,6 +44,7 @@ describe('Array Button Mappers with Logic', () => {
   beforeEach(() => {
     rootFormSignal = signal<FieldTree<Record<string, unknown>> | undefined>(undefined);
     formValueSignal = signal<Record<string, unknown>>({});
+    externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
   });
 
   function createTestInjector(arrayContext?: { arrayKey: string; index: number }): Injector {
@@ -55,6 +65,9 @@ describe('Array Button Mappers with Logic', () => {
         },
         { provide: DEFAULT_PROPS, useValue: signal(undefined) },
         { provide: ARRAY_CONTEXT, useValue: ctxValue },
+        { provide: EXTERNAL_DATA, useValue: externalDataSignal },
+        { provide: FunctionRegistryService, useClass: FunctionRegistryService, deps: [] },
+        { provide: FieldContextRegistryService, useClass: FieldContextRegistryService, deps: [] },
         {
           provide: DynamicFormLogger,
           useValue: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -85,6 +98,29 @@ describe('Array Button Mappers with Logic', () => {
 
         const inputs = runMapper(fieldDef, injector);
         expect(inputs['hidden']).toBe(true);
+      });
+
+      it('evaluates externalData and custom-function conditions in scope', () => {
+        setRegistry();
+        externalDataSignal.set({ mode: signal('active') });
+        const injector = createTestInjector({ arrayKey: 'items', index: 0 });
+        injector.get(FunctionRegistryService).registerCustomFunction('probe', (c) => c.externalData?.['mode'] === 'active');
+
+        const fieldDef: BaseArrayAddButtonField = {
+          key: 'addItem',
+          type: 'addArrayItem',
+          label: 'Add Item',
+          arrayKey: 'items',
+          template: { key: 'name', type: 'input' },
+          logic: [
+            { type: 'hidden', condition: { type: 'custom', functionName: 'probe' } },
+            { type: 'disabled', condition: { type: 'javascript', expression: "externalData.mode === 'active'" } },
+          ],
+        };
+
+        const inputs = runMapper(fieldDef, injector);
+        expect(inputs['hidden']).toBe(true);
+        expect(inputs['disabled']).toBe(true);
       });
 
       it('should return hidden=true when hidden logic condition is true', () => {

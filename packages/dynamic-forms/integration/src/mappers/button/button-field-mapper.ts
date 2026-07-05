@@ -2,7 +2,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 import { buildBaseInputs, DEFAULT_PROPS, RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
-import { applyNonFieldLogic } from './non-field-logic.utils';
+import { applyNonFieldLogic, injectNonFieldEvaluationContext } from './non-field-logic.utils';
 
 /**
  * Maps a button field to component inputs.
@@ -15,6 +15,7 @@ export function buttonFieldMapper<TProps, TEvent extends FormEvent>(
 ): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
 
   return computed(() => {
     const inputs = buildBaseInputs(fieldDef, defaultProps());
@@ -29,7 +30,7 @@ export function buttonFieldMapper<TProps, TEvent extends FormEvent>(
     // Apply hidden/disabled logic
     return {
       ...inputs,
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }

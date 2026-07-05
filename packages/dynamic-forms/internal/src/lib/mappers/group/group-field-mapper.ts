@@ -2,6 +2,8 @@ import { computed, inject, Signal } from '@angular/core';
 import { GroupField } from '../../definitions/default/group-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
 /**
@@ -12,6 +14,8 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
  */
 export function groupFieldMapper(fieldDef: GroupField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
+  const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
   const className = buildClassName(fieldDef);
 
   return computed(() => {
@@ -21,7 +25,7 @@ export function groupFieldMapper(fieldDef: GroupField): Signal<Record<string, un
       ...(className !== undefined && { className }),
     };
 
-    applyHiddenLogic(inputs, fieldDef, rootFormRegistry);
+    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, fieldContextRegistry, functionRegistry);
 
     return inputs;
   });

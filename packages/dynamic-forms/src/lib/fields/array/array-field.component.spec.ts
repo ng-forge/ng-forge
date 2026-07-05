@@ -27,6 +27,7 @@ import { vi } from 'vitest';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../../core/registry/array-item-registry.service';
 import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { getFieldDefaultValue } from '../../utils/default-value/default-value';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 import { setNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
@@ -71,6 +72,7 @@ describe('ArrayFieldComponent', () => {
         provideDynamicForm(withLoggerConfig()),
         EventBus,
         FunctionRegistryService,
+        FieldContextRegistryService,
         ArrayItemRegistryService,
         { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
@@ -429,6 +431,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(),
           EventBus,
           FunctionRegistryService,
+          FieldContextRegistryService,
           ArrayItemRegistryService,
           { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
           { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
@@ -1569,6 +1572,7 @@ describe('ArrayFieldComponent', () => {
           provideDynamicForm(withLoggerConfig()),
           EventBus,
           FunctionRegistryService,
+          FieldContextRegistryService,
           ArrayItemRegistryService,
           { provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore },
           { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
