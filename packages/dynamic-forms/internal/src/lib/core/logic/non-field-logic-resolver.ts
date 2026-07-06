@@ -6,6 +6,7 @@ import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
+import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
 import type { EvaluationContext } from '../../models/expressions/evaluation-context';
 import type { Logger } from '../../providers/features/logger/logger.interface';
 
@@ -392,5 +393,12 @@ export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boole
 export function injectNonFieldEvaluationContext(fieldDef: { key?: string }): () => EvaluationContext {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  return () => fieldContextRegistry.createDisplayOnlyContext(fieldDef.key ?? '', functionRegistry.getCustomFunctions());
+  // Present only inside an array item; scopes the element's conditions to that item.
+  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  return () => {
+    const arrayScope = arrayContext
+      ? { arrayKey: arrayContext.arrayKey, index: arrayContext.index(), localKey: fieldDef.key ?? '' }
+      : undefined;
+    return fieldContextRegistry.createDisplayOnlyContext(fieldDef.key ?? '', functionRegistry.getCustomFunctions(), arrayScope);
+  };
 }

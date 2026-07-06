@@ -257,6 +257,28 @@ describe('FieldContextRegistryService', () => {
 
       expect(result.formValue).toEqual({});
     });
+
+    describe('array scoping', () => {
+      it('scopes formValue to the array item when arrayScope is provided', () => {
+        mockEntity.set({ contacts: [{ name: 'A' }, { name: 'B' }] });
+
+        const result = service.createDisplayOnlyContext('name', {}, { arrayKey: 'contacts', index: 1, localKey: 'name' });
+
+        expect(result.formValue).toEqual({ name: 'B' });
+        expect(result.rootFormValue).toEqual({ contacts: [{ name: 'A' }, { name: 'B' }] });
+        expect(result.arrayIndex).toBe(1);
+        expect(result.arrayPath).toBe('contacts');
+        expect(result.fieldPath).toBe('contacts.1.name');
+      });
+
+      it('falls back to root form value when the array item is missing', () => {
+        mockEntity.set({ contacts: [] });
+
+        const result = service.createDisplayOnlyContext('name', {}, { arrayKey: 'contacts', index: 3, localKey: 'name' });
+
+        expect(result.formValue).toEqual({ contacts: [] });
+      });
+    });
   });
 
   describe('createReactiveEvaluationContext', () => {

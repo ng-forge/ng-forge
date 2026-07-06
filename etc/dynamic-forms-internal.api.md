@@ -771,7 +771,11 @@ export type FieldComponent<T extends FieldDef<unknown, FieldMeta>> = Prettify<Wi
 
 // @public
 export class FieldContextRegistryService {
-    createDisplayOnlyContext(fieldPath: string, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
+    createDisplayOnlyContext(fieldPath: string, customFunctions?: Record<string, (context: EvaluationContext) => unknown>, arrayScope?: {
+        arrayKey: string;
+        index: number;
+        localKey: string;
+    }): EvaluationContext;
     createEvaluationContext<TValue>(fieldContext: FieldContext<TValue>, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
     createReactiveEvaluationContext<TValue>(fieldContext: FieldContext<TValue>, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
     // (undocumented)

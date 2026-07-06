@@ -502,5 +502,22 @@ describe('Array Button Mappers with Logic', () => {
       expect(result.hidden).toBe(true);
       expect(result.disabled).toBe(true);
     });
+
+    it('scopes conditions to the enclosing array item', () => {
+      setRegistry({ items: [{ locked: false }, { locked: true }] });
+      const injector = createTestInjector({ arrayKey: 'items', index: 1 });
+
+      const fieldDef = {
+        key: 'removeBtn',
+        logic: [
+          { type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'locked', operator: 'equals', value: true } },
+        ] as NonFieldLogicConfig[],
+      };
+
+      const resolveLogic = runInInjectionContext(injector, () => injectNonFieldLogicResolver(fieldDef));
+
+      // items[1].locked === true → hidden; against root scope `locked` is undefined → not hidden.
+      expect(resolveLogic().hidden).toBe(true);
+    });
   });
 });
