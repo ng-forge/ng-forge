@@ -3,8 +3,7 @@ import { TextField } from '../../definitions/default/text-field';
 import { buildBaseInputs } from '../base/base-field-mapper';
 import { DEFAULT_PROPS } from '../../models/field-signal-context.token';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { injectNonFieldEvaluationContext } from '../../core/logic/non-field-logic-resolver';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
 /**
@@ -15,8 +14,7 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
  */
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const fieldContextRegistry = inject(FieldContextRegistryService);
-  const functionRegistry = inject(FunctionRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const defaultProps = inject(DEFAULT_PROPS);
 
   // Return computed signal for reactive updates
@@ -24,7 +22,7 @@ export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unkn
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
     const inputs: Record<string, unknown> = { ...baseInputs };
 
-    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, fieldContextRegistry, functionRegistry);
+    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, evaluationContext);
 
     return inputs;
   });

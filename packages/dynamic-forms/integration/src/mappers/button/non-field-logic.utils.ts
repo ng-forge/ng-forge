@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import {
   EvaluationContext,
-  FieldContextRegistryService,
-  FunctionRegistryService,
+  injectNonFieldEvaluationContext,
   LogicConfig,
   NonFieldLogicConfig,
   resolveNonFieldDisabled,
@@ -10,6 +9,10 @@ import {
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms/internal';
 import { FieldTree } from '@angular/forms/signals';
+
+// Single source lives in @ng-forge/dynamic-forms/internal; re-exported so the button
+// mappers keep importing it from this module.
+export { injectNonFieldEvaluationContext };
 
 /**
  * Field definition with optional hidden/disabled and logic properties.
@@ -20,18 +23,6 @@ export interface FieldDefWithLogic {
   hidden?: boolean;
   disabled?: boolean;
   logic?: NonFieldLogicConfig[] | LogicConfig[];
-}
-
-/**
- * Builds a lazy full evaluation-context factory (with `externalData` and
- * `customFunctions`) for a non-form-bound element. Call from a mapper factory body
- * (injection context); the returned thunk is invoked lazily inside the resolver's
- * computed so external-data signal reads stay reactive. Mirrors the container path.
- */
-export function injectNonFieldEvaluationContext(fieldDef: { key?: string }): () => EvaluationContext {
-  const fieldContextRegistry = inject(FieldContextRegistryService);
-  const functionRegistry = inject(FunctionRegistryService);
-  return () => fieldContextRegistry.createDisplayOnlyContext(fieldDef.key ?? '', functionRegistry.getCustomFunctions());
 }
 
 /**
@@ -117,4 +108,16 @@ export function resolveHiddenValue(
   }
 
   return undefined;
+}
+
+/**
+ * Injects everything a non-form-bound button mapper needs to evaluate hidden/disabled logic,
+ * returning a thunk to invoke inside the mapper's computed. Used by adapter button mappers so a
+ * generic `{ type: 'button', logic: [...] }` evaluates its conditions with `externalData` and
+ * custom functions in scope, matching the built-in button field types.
+ */
+export function injectNonFieldLogicResolver(fieldDef: FieldDefWithLogic): () => NonFieldLogicResult {
+  const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
+  return () => applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext);
 }

@@ -546,6 +546,9 @@ export function injectNgForgeAddons<TAddon extends AnyAddon = AnyAddon>(): Typed
 export function injectNgForgeField<T = unknown>(): TypedNgForgeField<T>;
 
 // @public
+export function injectNonFieldLogicResolver(fieldDef: FieldDefWithLogic): () => NonFieldLogicResult;
+
+// @public
 export type InputField<TProps extends {
     type?: string;
 } = InputProps, TNullable extends boolean = boolean> = BuildInputFieldUnion<TProps, TNullable>;

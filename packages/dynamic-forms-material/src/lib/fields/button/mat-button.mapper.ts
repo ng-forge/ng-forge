@@ -1,6 +1,6 @@
 import { computed, inject, isSignal, Signal } from '@angular/core';
 import { FieldDef } from '@ng-forge/dynamic-forms';
-import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic-forms/integration';
+import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS, injectNonFieldLogicResolver } from '@ng-forge/dynamic-forms/integration';
 
 /**
  * Generic button mapper for custom events or basic buttons.
@@ -13,21 +13,15 @@ import { ARRAY_CONTEXT, buildBaseInputs, DEFAULT_PROPS } from '@ng-forge/dynamic
 export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  const resolveLogic = injectNonFieldLogicResolver(fieldDef);
 
   return computed(() => {
     const baseInputs = buildBaseInputs(fieldDef, defaultProps());
 
     const inputs: Record<string, unknown> = {
       ...baseInputs,
+      ...resolveLogic(),
     };
-
-    if (fieldDef.disabled !== undefined) {
-      inputs['disabled'] = fieldDef.disabled;
-    }
-
-    if (fieldDef.hidden !== undefined) {
-      inputs['hidden'] = fieldDef.hidden;
-    }
 
     // Add event binding for button events
     if ('event' in fieldDef && fieldDef.event !== undefined) {

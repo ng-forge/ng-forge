@@ -2,8 +2,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { ArrayField } from '../../definitions/default/array-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { injectNonFieldEvaluationContext } from '../../core/logic/non-field-logic-resolver';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
 /**
@@ -14,8 +13,7 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
  */
 export function arrayFieldMapper(fieldDef: ArrayField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const fieldContextRegistry = inject(FieldContextRegistryService);
-  const functionRegistry = inject(FunctionRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const className = buildClassName(fieldDef);
 
   return computed(() => {
@@ -25,7 +23,7 @@ export function arrayFieldMapper(fieldDef: ArrayField): Signal<Record<string, un
       ...(className !== undefined && { className }),
     };
 
-    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, fieldContextRegistry, functionRegistry);
+    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, evaluationContext);
 
     return inputs;
   });

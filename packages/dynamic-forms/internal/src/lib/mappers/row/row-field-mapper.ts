@@ -2,8 +2,7 @@ import { computed, inject, Signal } from '@angular/core';
 import { RowField } from '../../definitions/default/row-field';
 import { buildClassName } from '../../utils/grid-classes/grid-classes';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
-import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
-import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { injectNonFieldEvaluationContext } from '../../core/logic/non-field-logic-resolver';
 import { applyHiddenLogic } from '../apply-hidden-logic';
 
 const ROW_WRAPPERS = [{ type: 'row' }] as const;
@@ -11,8 +10,7 @@ const ROW_WRAPPERS = [{ type: 'row' }] as const;
 /** Maps a row field definition to container component inputs. */
 export function rowFieldMapper(fieldDef: RowField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const fieldContextRegistry = inject(FieldContextRegistryService);
-  const functionRegistry = inject(FunctionRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const className = buildClassName(fieldDef);
 
   return computed(() => {
@@ -30,7 +28,7 @@ export function rowFieldMapper(fieldDef: RowField): Signal<Record<string, unknow
       ...(className !== undefined && { className }),
     };
 
-    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, fieldContextRegistry, functionRegistry);
+    applyHiddenLogic(inputs, fieldDef, rootFormRegistry, evaluationContext);
 
     return inputs;
   });

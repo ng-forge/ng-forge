@@ -1241,6 +1241,11 @@ export function injectFieldSignalContext<TModel extends Record<string, unknown> 
 export function injectFieldsSupportingAddons(): FieldAddonSupportEntry[];
 
 // @public
+export function injectNonFieldEvaluationContext(fieldDef: {
+    key?: string;
+}): () => EvaluationContext;
+
+// @public
 export function interpolateParams(message: string, error: ValidationError): string;
 
 // @public

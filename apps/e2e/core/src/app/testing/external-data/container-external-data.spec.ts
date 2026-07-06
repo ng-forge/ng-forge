@@ -26,6 +26,8 @@ test.describe('Container Hidden Logic with External Data', () => {
     await expect(scenario.locator('#jsGroup_jsChild input')).not.toBeVisible({ timeout: 5000 });
     await expect(scenario.locator('#customGroup_customChild input')).not.toBeVisible({ timeout: 5000 });
     await expect(scenario.locator('#outerGroup_nestedChild input')).not.toBeVisible({ timeout: 5000 });
+    // Generic adapter button, hidden via a custom function.
+    await expect(scenario.locator('#actionButton button')).not.toBeVisible({ timeout: 5000 });
   });
 
   test('shows containers again when the condition flips', async ({ page, helpers }) => {
@@ -40,5 +42,6 @@ test.describe('Container Hidden Logic with External Data', () => {
     await expect(scenario.locator('#jsGroup_jsChild input')).toBeVisible({ timeout: 5000 });
     await expect(scenario.locator('#customGroup_customChild input')).toBeVisible({ timeout: 5000 });
     await expect(scenario.locator('#outerGroup_nestedChild input')).toBeVisible({ timeout: 5000 });
+    await expect(scenario.locator('#actionButton button')).toBeVisible({ timeout: 5000 });
   });
 });

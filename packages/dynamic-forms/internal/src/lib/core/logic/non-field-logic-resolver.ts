@@ -1,9 +1,11 @@
-import { computed, Signal } from '@angular/core';
+import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormOptions, NextButtonOptions, SubmitButtonOptions } from '../../models/form-config';
 import { LogicConfig, FormStateCondition, isFormStateCondition } from '../../models/logic';
 import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { FunctionRegistryService } from '../registry/function-registry.service';
 import type { EvaluationContext } from '../../models/expressions/evaluation-context';
 import type { Logger } from '../../providers/features/logger/logger.interface';
 
@@ -151,12 +153,19 @@ function evaluateLogicCondition(condition: LogicConfig['condition'], ctx: Button
     return evaluateFormStateCondition(condition, ctx);
   }
 
-  // ConditionalExpression — prefer the full context (with externalData/customFunctions)
-  // when the caller supplies one, so container/button conditions match leaf-field scope.
+  // ConditionalExpression. Prefer the full context (externalData + customFunctions) when the
+  // caller supplies a factory, so container/button conditions match leaf-field scope. The
+  // factory context carries its own formValue (the root form value), so ctx.formValue is
+  // intentionally superseded here; a future scoped caller (array-item or page-scoped value)
+  // must build that scope into the factory rather than rely on ctx.formValue.
   if (ctx.evaluationContext) {
     return evaluateCondition(condition as ConditionalExpression, ctx.evaluationContext());
   }
 
+  // Legacy fallback: no factory supplied, so this context omits externalData/customFunctions.
+  // javascript expressions referencing externalData and custom (functionName) conditions
+  // cannot resolve on this path. Every production caller now passes a factory; this remains
+  // only for boolean/form-state conditions and direct callers that need no expression scope.
   const formValue = (ctx.formValue ?? ctx.form().value()) as Record<string, unknown>;
   const evaluationContext = {
     fieldValue: undefined,
@@ -371,4 +380,17 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
  */
 export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boolean> {
   return computed(() => evaluateNonFieldDisabled(ctx));
+}
+
+/**
+ * Builds a lazy full evaluation-context factory (with `externalData` and `customFunctions`)
+ * for a non-form-bound element. Call from a mapper factory body (injection context); the
+ * returned thunk is invoked lazily inside the mapper/resolver computed so external-data
+ * signal reads stay reactive. Single source for that factory, shared by the container/text
+ * mappers (via `applyHiddenLogic`) and the button mappers.
+ */
+export function injectNonFieldEvaluationContext(fieldDef: { key?: string }): () => EvaluationContext {
+  const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
+  return () => fieldContextRegistry.createDisplayOnlyContext(fieldDef.key ?? '', functionRegistry.getCustomFunctions());
 }

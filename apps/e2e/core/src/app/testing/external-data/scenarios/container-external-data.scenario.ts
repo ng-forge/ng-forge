@@ -1,7 +1,7 @@
 import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
+import { DynamicForm, FormConfig, FormResetEvent } from '@ng-forge/dynamic-forms';
 
 /**
  * Reproduces issue #507: `hidden` logic on layout containers (group/row/container)
@@ -102,6 +102,14 @@ export class ContainerExternalDataScenarioComponent {
             fields: [{ key: 'nestedChild', type: 'input', label: 'Nested Child', value: '' }],
           },
         ],
+      },
+      // Generic button (adapter button mapper) — hidden via a custom function reading externalData.
+      {
+        key: 'actionButton',
+        type: 'button',
+        label: 'Action Button',
+        event: FormResetEvent,
+        logic: [{ type: 'hidden', condition: { type: 'custom', functionName: 'probe' } }],
       },
     ],
   };

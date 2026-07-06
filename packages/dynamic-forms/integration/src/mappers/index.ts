@@ -10,6 +10,7 @@ export { sliderFieldMapper } from './slider/slider-field-mapper';
 // Button field mappers
 export {
   buttonFieldMapper,
+  injectNonFieldLogicResolver,
   // Array button utilities
   resolveArrayButtonContext,
   buildArrayButtonEventContext,

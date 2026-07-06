@@ -9,6 +9,7 @@ import {
   BaseArrayAddButtonField,
   BaseArrayRemoveButtonField,
 } from './array-button.mapper';
+import { injectNonFieldLogicResolver } from './non-field-logic.utils';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import {
   ARRAY_CONTEXT,
@@ -477,6 +478,29 @@ describe('Array Button Mappers with Logic', () => {
       // Should use static values since rootForm is not available
       expect(inputs['hidden']).toBe(true);
       expect(inputs['disabled']).toBe(true);
+    });
+  });
+
+  describe('injectNonFieldLogicResolver', () => {
+    it('evaluates externalData and custom-function conditions for generic (adapter) buttons', () => {
+      setRegistry();
+      externalDataSignal.set({ mode: signal('active') });
+      const injector = createTestInjector({ arrayKey: 'items', index: 0 });
+      injector.get(FunctionRegistryService).registerCustomFunction('probe', (c) => c.externalData?.['mode'] === 'active');
+
+      const fieldDef = {
+        key: 'genericButton',
+        logic: [
+          { type: 'hidden', condition: { type: 'custom', functionName: 'probe' } },
+          { type: 'disabled', condition: { type: 'javascript', expression: "externalData.mode === 'active'" } },
+        ] as NonFieldLogicConfig[],
+      };
+
+      const resolveLogic = runInInjectionContext(injector, () => injectNonFieldLogicResolver(fieldDef));
+      const result = resolveLogic();
+
+      expect(result.hidden).toBe(true);
+      expect(result.disabled).toBe(true);
     });
   });
 });

@@ -57,6 +57,7 @@ export {
   optionsFieldMapper,
   // Button mappers
   buttonFieldMapper,
+  injectNonFieldLogicResolver,
   // Array button utilities
   resolveArrayButtonContext,
   buildArrayButtonEventContext,

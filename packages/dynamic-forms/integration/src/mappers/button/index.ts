@@ -6,7 +6,7 @@ export { resolveArrayButtonContext, buildArrayButtonEventContext, resolveArrayBu
 export type { ArrayButtonContext, ArrayButtonEventContext, EventArg } from './array-button.utils';
 
 // Non-field logic utilities (for hidden/disabled state on non-form-bound elements)
-export { applyNonFieldLogic, resolveHiddenValue } from './non-field-logic.utils';
+export { applyNonFieldLogic, resolveHiddenValue, injectNonFieldLogicResolver } from './non-field-logic.utils';
 export type { FieldDefWithLogic, NonFieldLogicResult } from './non-field-logic.utils';
 
 // Array button mappers
