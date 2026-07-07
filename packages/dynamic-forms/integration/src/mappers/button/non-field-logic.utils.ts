@@ -1,4 +1,7 @@
+import { inject } from '@angular/core';
 import {
+  EvaluationContext,
+  injectNonFieldEvaluationContext,
   LogicConfig,
   NonFieldLogicConfig,
   resolveNonFieldDisabled,
@@ -7,11 +10,16 @@ import {
 } from '@ng-forge/dynamic-forms/internal';
 import { FieldTree } from '@angular/forms/signals';
 
+// Single source lives in @ng-forge/dynamic-forms/internal; re-exported so the button
+// mappers keep importing it from this module.
+export { injectNonFieldEvaluationContext };
+
 /**
  * Field definition with optional hidden/disabled and logic properties.
  * This is the minimal interface needed by applyNonFieldLogic.
  */
 export interface FieldDefWithLogic {
+  key?: string;
   hidden?: boolean;
   disabled?: boolean;
   logic?: NonFieldLogicConfig[] | LogicConfig[];
@@ -30,7 +38,11 @@ export interface NonFieldLogicResult {
  * Applies hidden and disabled logic to a non-form-bound field.
  * Must be called inside a computed() context (reads form signals).
  */
-export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fieldDef: FieldDefWithLogic): NonFieldLogicResult {
+export function applyNonFieldLogic(
+  rootFormRegistry: RootFormRegistryService,
+  fieldDef: FieldDefWithLogic,
+  evaluationContext?: () => EvaluationContext,
+): NonFieldLogicResult {
   const result: NonFieldLogicResult = {};
   const rootForm = rootFormRegistry.rootForm();
 
@@ -40,6 +52,7 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.hidden,
+        evaluationContext,
       });
       result.hidden = hiddenSignal();
     }
@@ -51,6 +64,7 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
         form: rootForm,
         fieldLogic: fieldDef.logic,
         explicitValue: fieldDef.disabled,
+        evaluationContext,
       });
       result.disabled = disabledSignal();
     }
@@ -77,6 +91,7 @@ export function applyNonFieldLogic(rootFormRegistry: RootFormRegistryService, fi
 export function resolveHiddenValue(
   rootForm: FieldTree<unknown, string | number> | undefined,
   fieldDef: FieldDefWithLogic,
+  evaluationContext?: () => EvaluationContext,
 ): boolean | undefined {
   if (!rootForm) {
     return fieldDef.hidden;
@@ -87,9 +102,22 @@ export function resolveHiddenValue(
       form: rootForm,
       fieldLogic: fieldDef.logic,
       explicitValue: fieldDef.hidden,
+      evaluationContext,
       // formValue omitted intentionally - resolver will read form.value() reactively
     })();
   }
 
   return undefined;
+}
+
+/**
+ * Injects everything a non-form-bound button mapper needs to evaluate hidden/disabled logic,
+ * returning a thunk to invoke inside the mapper's computed. Used by adapter button mappers so a
+ * generic `{ type: 'button', logic: [...] }` evaluates its conditions with `externalData` and
+ * custom functions in scope, matching the built-in button field types.
+ */
+export function injectNonFieldLogicResolver(fieldDef: FieldDefWithLogic): () => NonFieldLogicResult {
+  const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
+  return () => applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext);
 }

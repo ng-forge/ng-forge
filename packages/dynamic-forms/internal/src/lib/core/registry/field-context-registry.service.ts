@@ -255,17 +255,25 @@ export class FieldContextRegistryService {
    *
    * @param fieldPath - The key/path of the display-only component
    * @param customFunctions - Optional custom functions for expression evaluation
+   * @param arrayScope - When the element lives inside an array item, scopes `formValue`
+   *        to that item so conditions resolve against sibling fields, matching leaf fields.
    */
   createDisplayOnlyContext(
     fieldPath: string,
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
+    arrayScope?: { arrayKey: string; index: number; localKey: string },
   ): EvaluationContext {
-    const formValue = this.rootFormRegistry.formValue();
+    const rootFormValue = this.rootFormRegistry.formValue();
+
+    if (arrayScope) {
+      return this.buildArrayScopedContext(rootFormValue, arrayScope, undefined, customFunctions, true);
+    }
+
     const rootFormSignal = this.rootFormRegistry.rootForm;
 
     return {
       fieldValue: undefined,
-      formValue,
+      formValue: rootFormValue,
       fieldPath,
       customFunctions: customFunctions || {},
       externalData: this.resolveExternalData(true),

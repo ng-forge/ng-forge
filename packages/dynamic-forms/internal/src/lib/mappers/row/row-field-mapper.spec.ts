@@ -1,13 +1,17 @@
-import { EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
+import { EnvironmentInjector, runInInjectionContext, signal, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { rowFieldMapper } from './row-field-mapper';
 import { RowField } from '../../definitions/default/row-field';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
+import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
 describe('rowFieldMapper', () => {
   let parentInjector: EnvironmentInjector;
   const mockFormValue = signal<Record<string, unknown>>({});
+  const externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
   const mockForm = vi.fn(() => ({
     value: vi.fn().mockReturnValue({}),
     valid: vi.fn().mockReturnValue(true),
@@ -20,6 +24,7 @@ describe('rowFieldMapper', () => {
 
   beforeEach(async () => {
     mockFormValue.set({});
+    externalDataSignal.set(undefined);
 
     mockRootFormRegistry = {
       rootForm: signal(mockForm),
@@ -27,7 +32,12 @@ describe('rowFieldMapper', () => {
     };
 
     await TestBed.configureTestingModule({
-      providers: [{ provide: RootFormRegistryService, useValue: mockRootFormRegistry }],
+      providers: [
+        { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
+        { provide: EXTERNAL_DATA, useValue: externalDataSignal },
+        FunctionRegistryService,
+        FieldContextRegistryService,
+      ],
     }).compileComponents();
 
     parentInjector = TestBed.inject(EnvironmentInjector);
@@ -223,6 +233,47 @@ describe('rowFieldMapper', () => {
 
       const inputs = testMapper(fieldDef);
       expect(inputs['hidden']).toBe(false);
+    });
+  });
+
+  describe('hidden logic with externalData and custom functions', () => {
+    it('should hide when a javascript condition reading externalData is met', () => {
+      externalDataSignal.set({ mode: signal('active') });
+
+      const fieldDef: RowField = {
+        key: 'externalRow',
+        type: 'row',
+        logic: [
+          {
+            type: 'hidden',
+            condition: {
+              type: 'javascript',
+              expression: "['active'].some((s) => externalData.mode.startsWith(s))",
+            },
+          },
+        ],
+        fields: [{ key: 'setting', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(inputs['hidden']).toBe(true);
+    });
+
+    it('should invoke a registered custom function and hide when it returns true', () => {
+      externalDataSignal.set({ mode: signal('active') });
+      const probe = vi.fn((ctx: { externalData?: Record<string, unknown> }) => ctx.externalData?.['mode'] === 'active');
+      TestBed.inject(FunctionRegistryService).registerCustomFunction('probe', probe);
+
+      const fieldDef: RowField = {
+        key: 'customRow',
+        type: 'row',
+        logic: [{ type: 'hidden', condition: { type: 'custom', functionName: 'probe' } }],
+        fields: [{ key: 'setting', type: 'input' }],
+      };
+
+      const inputs = testMapper(fieldDef);
+      expect(probe).toHaveBeenCalled();
+      expect(inputs['hidden']).toBe(true);
     });
   });
 });

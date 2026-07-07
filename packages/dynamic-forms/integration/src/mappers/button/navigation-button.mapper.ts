@@ -11,7 +11,7 @@ import {
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms/internal';
 import { ButtonField } from '../../definitions';
-import { resolveHiddenValue } from './non-field-logic.utils';
+import { injectNonFieldEvaluationContext, resolveHiddenValue } from './non-field-logic.utils';
 
 // =============================================================================
 // Base Interfaces
@@ -36,6 +36,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
   const rootFormRegistry = inject(RootFormRegistryService);
   const defaultProps = inject(DEFAULT_PROPS);
   const formOptions = inject(FORM_OPTIONS);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
 
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
 
@@ -51,6 +52,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
           formOptions: formOptions(),
           fieldLogic: fieldWithLogic.logic,
           explicitlyDisabled: fieldDef.disabled,
+          evaluationContext,
         })()
       : (fieldDef.disabled ?? false);
 
@@ -61,7 +63,7 @@ export function submitButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFi
       disabled,
     };
 
-    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic, evaluationContext);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }
@@ -80,6 +82,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
   const rootFormRegistry = inject(RootFormRegistryService);
   const defaultProps = inject(DEFAULT_PROPS);
   const formOptions = inject(FORM_OPTIONS);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
 
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
 
@@ -92,6 +95,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
       formOptions: formOptions(),
       fieldLogic: fieldWithLogic.logic,
       currentPageValid: fieldSignalContext.currentPageValid,
+      evaluationContext,
     })();
 
     const inputs: Record<string, unknown> = {
@@ -100,7 +104,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
       disabled,
     };
 
-    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic, evaluationContext);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }
@@ -117,6 +121,7 @@ export function nextButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonFiel
 export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
 
   const fieldWithLogic = fieldDef as FieldDef<Record<string, unknown>> & Partial<FieldWithValidation>;
 
@@ -134,7 +139,7 @@ export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButton
       inputs['disabled'] = fieldDef.disabled;
     }
 
-    const hidden = resolveHiddenValue(rootForm, fieldWithLogic);
+    const hidden = resolveHiddenValue(rootForm, fieldWithLogic, evaluationContext);
     if (hidden !== undefined) {
       inputs['hidden'] = hidden;
     }

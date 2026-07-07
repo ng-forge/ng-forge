@@ -326,6 +326,7 @@ export interface BuiltInValidatorConfig extends BaseValidatorConfig {
 // @public
 export interface ButtonLogicContext {
     currentPageValid?: Signal<boolean>;
+    evaluationContext?: () => EvaluationContext;
     explicitlyDisabled?: boolean;
     fieldLogic?: LogicConfig[];
     form: FieldTree<unknown, number | string>;
@@ -770,7 +771,11 @@ export type FieldComponent<T extends FieldDef<unknown, FieldMeta>> = Prettify<Wi
 
 // @public
 export class FieldContextRegistryService {
-    createDisplayOnlyContext(fieldPath: string, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
+    createDisplayOnlyContext(fieldPath: string, customFunctions?: Record<string, (context: EvaluationContext) => unknown>, arrayScope?: {
+        arrayKey: string;
+        index: number;
+        localKey: string;
+    }): EvaluationContext;
     createEvaluationContext<TValue>(fieldContext: FieldContext<TValue>, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
     createReactiveEvaluationContext<TValue>(fieldContext: FieldContext<TValue>, customFunctions?: Record<string, (context: EvaluationContext) => unknown>): EvaluationContext;
     // (undocumented)
@@ -1240,6 +1245,13 @@ export function injectFieldSignalContext<TModel extends Record<string, unknown> 
 export function injectFieldsSupportingAddons(): FieldAddonSupportEntry[];
 
 // @public
+export function injectNonFieldEvaluationContext(fieldDef: {
+    key?: string;
+}, options?: {
+    scopeToArrayItem?: boolean;
+}): () => EvaluationContext;
+
+// @public
 export function interpolateParams(message: string, error: ValidationError): string;
 
 // @public
@@ -1431,6 +1443,7 @@ export type NonFieldLogicConfig = LogicConfig & {
 
 // @public
 export interface NonFieldLogicContext {
+    evaluationContext?: () => EvaluationContext;
     explicitValue?: boolean;
     fieldLogic?: LogicConfig[];
     form: FieldTree<unknown, number | string>;

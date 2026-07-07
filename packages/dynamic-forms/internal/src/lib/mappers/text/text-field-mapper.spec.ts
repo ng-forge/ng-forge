@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { textFieldMapper } from './text-field-mapper';
 import { TextField } from '../../definitions/default/text-field';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
+import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
+import { FunctionRegistryService } from '../../core/registry/function-registry.service';
 import { DEFAULT_PROPS, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
@@ -42,6 +44,8 @@ describe('textFieldMapper', () => {
         { provide: RootFormRegistryService, useValue: mockRootFormRegistry },
         { provide: FIELD_SIGNAL_CONTEXT, useValue: mockFieldSignalContext },
         { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+        FunctionRegistryService,
+        FieldContextRegistryService,
       ],
     }).compileComponents();
 

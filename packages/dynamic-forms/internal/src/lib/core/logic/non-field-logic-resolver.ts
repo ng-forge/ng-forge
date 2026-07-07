@@ -1,9 +1,13 @@
-import { computed, Signal } from '@angular/core';
+import { computed, inject, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { FormOptions, NextButtonOptions, SubmitButtonOptions } from '../../models/form-config';
 import { LogicConfig, FormStateCondition, isFormStateCondition } from '../../models/logic';
 import { ConditionalExpression } from '../../models/expressions';
 import { evaluateCondition } from '../expressions';
+import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { FunctionRegistryService } from '../registry/function-registry.service';
+import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
+import type { EvaluationContext } from '../../models/expressions/evaluation-context';
 import type { Logger } from '../../providers/features/logger/logger.interface';
 
 /**
@@ -41,6 +45,14 @@ export interface ButtonLogicContext {
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
 
+  /**
+   * Optional factory returning the full evaluation context (including `externalData`
+   * and `customFunctions`) used to evaluate `ConditionalExpression` conditions.
+   * Invoked lazily during evaluation so external-data signal reads stay reactive.
+   * When omitted, a minimal context (form value only) is used.
+   */
+  evaluationContext?: () => EvaluationContext;
+
   /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
   logger?: Logger;
 }
@@ -74,6 +86,14 @@ export interface NonFieldLogicContext {
 
   /** Current form value for evaluating conditional expressions */
   formValue?: unknown;
+
+  /**
+   * Optional factory returning the full evaluation context (including `externalData`
+   * and `customFunctions`) used to evaluate `ConditionalExpression` conditions.
+   * Invoked lazily during evaluation so external-data signal reads stay reactive.
+   * When omitted, a minimal context (form value only) is used.
+   */
+  evaluationContext?: () => EvaluationContext;
 
   /** Optional logger for diagnostic output. Falls back to no-op logger if not provided. */
   logger?: Logger;
@@ -134,7 +154,19 @@ function evaluateLogicCondition(condition: LogicConfig['condition'], ctx: Button
     return evaluateFormStateCondition(condition, ctx);
   }
 
-  // ConditionalExpression
+  // ConditionalExpression. Prefer the full context (externalData + customFunctions) when the
+  // caller supplies a factory, so container/button conditions match leaf-field scope. The
+  // factory context carries its own formValue (the root form value), so ctx.formValue is
+  // intentionally superseded here; a future scoped caller (array-item or page-scoped value)
+  // must build that scope into the factory rather than rely on ctx.formValue.
+  if (ctx.evaluationContext) {
+    return evaluateCondition(condition as ConditionalExpression, ctx.evaluationContext());
+  }
+
+  // Legacy fallback: no factory supplied, so this context omits externalData/customFunctions.
+  // javascript expressions referencing externalData and custom (functionName) conditions
+  // cannot resolve on this path. Every production caller now passes a factory; this remains
+  // only for boolean/form-state conditions and direct callers that need no expression scope.
   const formValue = (ctx.formValue ?? ctx.form().value()) as Record<string, unknown>;
   const evaluationContext = {
     fieldValue: undefined,
@@ -187,7 +219,7 @@ function hasCustomLogicOfType(fieldLogic: LogicConfig[] | undefined, logicType: 
 function evaluateLogicOfType(
   fieldLogic: LogicConfig[] | undefined,
   logicType: LogicConfig['type'],
-  ctx: { form: FieldTree<unknown, string | number>; formValue?: unknown; logger?: Logger },
+  ctx: { form: FieldTree<unknown, string | number>; formValue?: unknown; evaluationContext?: () => EvaluationContext; logger?: Logger },
 ): boolean {
   if (!fieldLogic || fieldLogic.length === 0) {
     return false;
@@ -196,6 +228,7 @@ function evaluateLogicOfType(
   const buttonCtx: ButtonLogicContext = {
     form: ctx.form,
     formValue: ctx.formValue,
+    evaluationContext: ctx.evaluationContext,
     logger: ctx.logger,
   };
 
@@ -295,6 +328,7 @@ export function evaluateNonFieldHidden(ctx: NonFieldLogicContext): boolean {
     return evaluateLogicOfType(ctx.fieldLogic, 'hidden', {
       form: ctx.form,
       formValue: ctx.formValue,
+      evaluationContext: ctx.evaluationContext,
       logger: ctx.logger,
     });
   }
@@ -330,6 +364,7 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
     return evaluateLogicOfType(ctx.fieldLogic, 'disabled', {
       form: ctx.form,
       formValue: ctx.formValue,
+      evaluationContext: ctx.evaluationContext,
       logger: ctx.logger,
     });
   }
@@ -346,4 +381,29 @@ export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean {
  */
 export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boolean> {
   return computed(() => evaluateNonFieldDisabled(ctx));
+}
+
+/**
+ * Builds a lazy full evaluation-context factory (with `externalData` and `customFunctions`)
+ * for a non-form-bound element. Call from a mapper factory body (injection context); the
+ * returned thunk is invoked lazily inside the mapper/resolver computed so external-data
+ * signal reads stay reactive. Single source for that factory, shared by the container/text
+ * mappers (via `applyHiddenLogic`) and the button mappers.
+ */
+export function injectNonFieldEvaluationContext(
+  fieldDef: { key?: string },
+  options: { scopeToArrayItem?: boolean } = {},
+): () => EvaluationContext {
+  const fieldContextRegistry = inject(FieldContextRegistryService);
+  const functionRegistry = inject(FunctionRegistryService);
+  // Only layout containers (grouping item fields) scope to the enclosing array item, matching
+  // leaf fields. Buttons — including array-control buttons whose conditions reference the array
+  // itself (e.g. `formValue.items.length`) — must keep root scope, so they opt out.
+  const arrayContext = options.scopeToArrayItem ? inject(ARRAY_CONTEXT, { optional: true }) : null;
+  return () => {
+    const arrayScope = arrayContext
+      ? { arrayKey: arrayContext.arrayKey, index: arrayContext.index(), localKey: fieldDef.key ?? '' }
+      : undefined;
+    return fieldContextRegistry.createDisplayOnlyContext(fieldDef.key ?? '', functionRegistry.getCustomFunctions(), arrayScope);
+  };
 }

@@ -15,7 +15,7 @@ import {
   RootFormRegistryService,
 } from '@ng-forge/dynamic-forms/internal';
 import { buildArrayButtonEventContext, EventArg, resolveArrayButtonContext, resolveArrayButtonEventArgs } from './array-button.utils';
-import { applyNonFieldLogic } from './non-field-logic.utils';
+import { applyNonFieldLogic, injectNonFieldEvaluationContext } from './non-field-logic.utils';
 
 // =============================================================================
 // Base Interfaces
@@ -87,6 +87,7 @@ export interface BaseInsertArrayItemButtonField<TProps = unknown> extends BaseAr
 export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'addArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
@@ -97,7 +98,7 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
       event: AppendArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
@@ -109,6 +110,7 @@ export function addArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonFie
 export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'prependArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
@@ -119,7 +121,7 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
       event: PrependArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
@@ -131,6 +133,7 @@ export function prependArrayItemButtonMapper<TProps>(fieldDef: BaseArrayAddButto
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'insertArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
@@ -141,7 +144,7 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
       event: InsertArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey', fieldDef.index, '$template']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx, fieldDef.template),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
@@ -157,6 +160,7 @@ export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayIte
 export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'removeArrayItem', fieldDef.arrayKey);
 
   // Choose event type based on context:
@@ -173,7 +177,7 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
       event: eventType,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, defaultEventArgs),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
@@ -182,6 +186,7 @@ export function removeArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveBut
 export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'popArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
@@ -192,7 +197,7 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
       event: PopArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
@@ -201,6 +206,7 @@ export function popArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButton
 export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>> {
   const defaultProps = inject(DEFAULT_PROPS);
   const rootFormRegistry = inject(RootFormRegistryService);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
   const ctx = resolveArrayButtonContext(fieldDef.key, 'shiftArrayItem', fieldDef.arrayKey);
 
   return computed(() => {
@@ -211,7 +217,7 @@ export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButt
       event: ShiftArrayItemEvent,
       eventArgs: resolveArrayButtonEventArgs(fieldDef.eventArgs, ['$arrayKey']),
       eventContext: buildArrayButtonEventContext(fieldDef.key, ctx),
-      ...applyNonFieldLogic(rootFormRegistry, fieldDef),
+      ...applyNonFieldLogic(rootFormRegistry, fieldDef, evaluationContext),
     };
   });
 }
