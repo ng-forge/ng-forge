@@ -1247,6 +1247,8 @@ export function injectFieldsSupportingAddons(): FieldAddonSupportEntry[];
 // @public
 export function injectNonFieldEvaluationContext(fieldDef: {
     key?: string;
+}, options?: {
+    scopeToArrayItem?: boolean;
 }): () => EvaluationContext;
 
 // @public

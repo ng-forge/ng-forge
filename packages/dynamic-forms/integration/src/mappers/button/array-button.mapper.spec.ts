@@ -503,21 +503,22 @@ describe('Array Button Mappers with Logic', () => {
       expect(result.disabled).toBe(true);
     });
 
-    it('scopes conditions to the enclosing array item', () => {
-      setRegistry({ items: [{ locked: false }, { locked: true }] });
-      const injector = createTestInjector({ arrayKey: 'items', index: 1 });
+    it('keeps array-control buttons at root scope so array-level conditions work', () => {
+      setRegistry({ items: [{ v: 1 }] });
+      const injector = createTestInjector({ arrayKey: 'items', index: 0 });
 
       const fieldDef = {
         key: 'removeBtn',
         logic: [
-          { type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'locked', operator: 'equals', value: true } },
+          { type: 'disabled', condition: { type: 'javascript', expression: 'formValue.items.length <= 1' } },
         ] as NonFieldLogicConfig[],
       };
 
       const resolveLogic = runInInjectionContext(injector, () => injectNonFieldLogicResolver(fieldDef));
 
-      // items[1].locked === true → hidden; against root scope `locked` is undefined → not hidden.
-      expect(resolveLogic().hidden).toBe(true);
+      // A remove button lives inside an array item, but its condition references the array
+      // itself — it must stay root-scoped, not scope to the item (which would break it).
+      expect(resolveLogic().disabled).toBe(true);
     });
   });
 });

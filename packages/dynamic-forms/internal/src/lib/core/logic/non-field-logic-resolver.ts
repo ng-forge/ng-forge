@@ -390,11 +390,16 @@ export function resolveNonFieldDisabled(ctx: NonFieldLogicContext): Signal<boole
  * signal reads stay reactive. Single source for that factory, shared by the container/text
  * mappers (via `applyHiddenLogic`) and the button mappers.
  */
-export function injectNonFieldEvaluationContext(fieldDef: { key?: string }): () => EvaluationContext {
+export function injectNonFieldEvaluationContext(
+  fieldDef: { key?: string },
+  options: { scopeToArrayItem?: boolean } = {},
+): () => EvaluationContext {
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const functionRegistry = inject(FunctionRegistryService);
-  // Present only inside an array item; scopes the element's conditions to that item.
-  const arrayContext = inject(ARRAY_CONTEXT, { optional: true });
+  // Only layout containers (grouping item fields) scope to the enclosing array item, matching
+  // leaf fields. Buttons — including array-control buttons whose conditions reference the array
+  // itself (e.g. `formValue.items.length`) — must keep root scope, so they opt out.
+  const arrayContext = options.scopeToArrayItem ? inject(ARRAY_CONTEXT, { optional: true }) : null;
   return () => {
     const arrayScope = arrayContext
       ? { arrayKey: arrayContext.arrayKey, index: arrayContext.index(), localKey: fieldDef.key ?? '' }

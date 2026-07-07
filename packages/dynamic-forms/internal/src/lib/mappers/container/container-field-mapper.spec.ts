@@ -1,11 +1,11 @@
-import { EnvironmentInjector, runInInjectionContext, signal, Signal } from '@angular/core';
+import { EnvironmentInjector, Injector, runInInjectionContext, signal, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { containerFieldMapper } from './container-field-mapper';
 import { ContainerField } from '../../definitions/default/container-field';
 import { RootFormRegistryService } from '../../core/registry/root-form-registry.service';
 import { FieldContextRegistryService } from '../../core/registry/field-context-registry.service';
 import { FunctionRegistryService } from '../../core/registry/function-registry.service';
-import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
+import { ARRAY_CONTEXT, EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { vi } from 'vitest';
 
 describe('containerFieldMapper', () => {
@@ -291,6 +291,27 @@ describe('containerFieldMapper', () => {
       expect(inputsSignal()['hidden']).toBe(false);
 
       mode.set('active');
+      expect(inputsSignal()['hidden']).toBe(true);
+    });
+
+    it('scopes conditions to the enclosing array item when inside one', () => {
+      mockFormValue.set({ rows: [{ visible: false }, { visible: true }] });
+      const arrayInjector = Injector.create({
+        providers: [{ provide: ARRAY_CONTEXT, useValue: { arrayKey: 'rows', index: signal(1) } }],
+        parent: parentInjector,
+      });
+
+      const fieldDef = {
+        key: 'box',
+        type: 'container',
+        logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'visible', operator: 'equals', value: true } }],
+        fields: [],
+        wrappers: [],
+      } as unknown as ContainerField;
+
+      const inputsSignal = runInInjectionContext(arrayInjector, () => containerFieldMapper(fieldDef));
+
+      // rows[1].visible === true → hidden (item-scoped); root has no `visible`.
       expect(inputsSignal()['hidden']).toBe(true);
     });
   });

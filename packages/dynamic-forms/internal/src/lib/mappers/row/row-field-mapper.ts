@@ -10,7 +10,7 @@ const ROW_WRAPPERS = [{ type: 'row' }] as const;
 /** Maps a row field definition to container component inputs. */
 export function rowFieldMapper(fieldDef: RowField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef, { scopeToArrayItem: true });
   const className = buildClassName(fieldDef);
 
   return computed(() => {

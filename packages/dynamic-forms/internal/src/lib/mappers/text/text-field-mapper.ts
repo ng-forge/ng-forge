@@ -14,7 +14,7 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
  */
 export function textFieldMapper(fieldDef: TextField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef, { scopeToArrayItem: true });
   const defaultProps = inject(DEFAULT_PROPS);
 
   // Return computed signal for reactive updates

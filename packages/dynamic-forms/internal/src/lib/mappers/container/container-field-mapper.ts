@@ -13,7 +13,7 @@ import { applyHiddenLogic } from '../apply-hidden-logic';
  */
 export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<string, unknown>> {
   const rootFormRegistry = inject(RootFormRegistryService);
-  const evaluationContext = injectNonFieldEvaluationContext(fieldDef);
+  const evaluationContext = injectNonFieldEvaluationContext(fieldDef, { scopeToArrayItem: true });
   const className = buildClassName(fieldDef);
 
   return computed(() => {
