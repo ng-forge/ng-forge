@@ -454,6 +454,9 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
 export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: boolean): FormFieldStateMap;
 
 // @public
+export function createFormStateLogicFunction<TValue>(condition: FormStateCondition): LogicFn<TValue, boolean>;
+
+// @public
 export function createInitializationTracker(eventBus: EventBus, expectedCount: number): Observable<boolean>;
 
 // @public
@@ -664,6 +667,9 @@ export const EMIT_FORM_VALUE_ON_EVENTS: InjectionToken<boolean>;
 
 // @public
 export function evaluateCondition(expression: ConditionalExpression, context: EvaluationContext): boolean;
+
+// @public
+export function evaluateFormStateCondition(condition: FormStateCondition, state: FormStateAccessors): boolean;
 
 // @public
 export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean;
@@ -1009,6 +1015,13 @@ export interface FormOptions {
     nextButton?: NextButtonOptions;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
+}
+
+// @public
+export interface FormStateAccessors {
+    currentPageValid?: () => boolean;
+    formSubmitting(): boolean;
+    formValid(): boolean;
 }
 
 // @public

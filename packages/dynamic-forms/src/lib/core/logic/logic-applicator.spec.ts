@@ -360,4 +360,58 @@ describe('logic-applicator', () => {
       });
     });
   });
+
+  describe('form-state conditions', () => {
+    // `formSubmitting` reads a form-level flag independent of field validity, so it is
+    // cycle-free on leaf fields (unlike formInvalid/pageInvalid, which read form.valid()).
+    it('disables a leaf value field via formSubmitting without cycling (not submitting → not disabled)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        const formInstance = form(
+          formValue,
+          schema<{ info: string }>((path) => {
+            applyLogic({ type: 'disabled', condition: 'formSubmitting' }, path.info);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // Form is not submitting → not disabled, and reading it does not throw a cycle error.
+        expect(formInstance.info().disabled()).toBe(false);
+      });
+    });
+
+    it('rejects formInvalid on a value field at setup (would cycle against form validity)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        expect(() =>
+          form(
+            formValue,
+            schema<{ info: string }>((path) => {
+              applyLogic({ type: 'hidden', condition: 'formInvalid' }, path.info);
+            }),
+          ),
+        ).toThrow(/not supported on value-field logic/);
+      });
+    });
+
+    it('rejects pageInvalid on a value field at setup', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        expect(() =>
+          form(
+            formValue,
+            schema<{ info: string }>((path) => {
+              applyLogic({ type: 'disabled', condition: 'pageInvalid' }, path.info);
+            }),
+          ),
+        ).toThrow(/not supported on value-field logic/);
+      });
+    });
+  });
 });

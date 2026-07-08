@@ -5,11 +5,12 @@ import {
   LogicConfig,
   isStateLogicConfig,
   isDerivationLogicConfig,
+  isFormStateCondition,
   LogicTrigger,
   type StateLogicType,
 } from '@ng-forge/dynamic-forms/internal';
 import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
-import { createLogicFunction, createDebouncedLogicFunction } from '@ng-forge/dynamic-forms/internal';
+import { createLogicFunction, createDebouncedLogicFunction, createFormStateLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 
@@ -56,6 +57,23 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TV
 
   if (typeof config.condition === 'boolean') {
     applyLogicFn(config.type, path, () => config.condition as boolean);
+    return;
+  }
+
+  // Form-state conditions read root form state, not the expression evaluator.
+  if (isFormStateCondition(config.condition)) {
+    // `formInvalid`/`pageInvalid` read `form.valid()`, which on a value field cycles against the
+    // field's own validity: hidden/disabled/readonly feed Angular's `shouldSkipValidation` →
+    // `valid()`. Reject at setup — these only work on buttons/containers (not validation nodes).
+    // `formSubmitting` reads an independent form flag, so it is cycle-free on value fields.
+    if (config.condition === 'formInvalid' || config.condition === 'pageInvalid') {
+      throw new DynamicFormError(
+        `The '${config.condition}' form-state condition is not supported on value-field logic ` +
+          `because it would create a validation cycle against the form's own validity. ` +
+          `Use 'formSubmitting', or apply this condition to a button or container instead.`,
+      );
+    }
+    applyLogicFn(config.type, path, createFormStateLogicFunction(config.condition));
     return;
   }
 

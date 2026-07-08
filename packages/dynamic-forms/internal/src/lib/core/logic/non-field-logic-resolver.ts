@@ -7,6 +7,7 @@ import { evaluateCondition } from '../expressions';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { ARRAY_CONTEXT } from '../../models/field-signal-context.token';
+import { evaluateFormStateCondition as evaluateSharedFormStateCondition } from './form-state-condition';
 import type { EvaluationContext } from '../../models/expressions/evaluation-context';
 import type { Logger } from '../../providers/features/logger/logger.interface';
 
@@ -120,20 +121,11 @@ const DEFAULT_NEXT_BUTTON_OPTIONS: Required<NextButtonOptions> = {
  */
 function evaluateFormStateCondition(condition: FormStateCondition, ctx: ButtonLogicContext): boolean {
   const form = ctx.form();
-
-  switch (condition) {
-    case 'formInvalid':
-      return !form.valid();
-
-    case 'formSubmitting':
-      return form.submitting();
-
-    case 'pageInvalid':
-      return ctx.currentPageValid ? !ctx.currentPageValid() : false;
-
-    default:
-      return false;
-  }
+  return evaluateSharedFormStateCondition(condition, {
+    formValid: () => form.valid(),
+    formSubmitting: () => form.submitting(),
+    currentPageValid: ctx.currentPageValid,
+  });
 }
 
 /**
