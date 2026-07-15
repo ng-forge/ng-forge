@@ -92,8 +92,7 @@ test.describe('Row Fields E2E Tests', () => {
 
   test.describe('Wrapped Column', () => {
     // Regression for issue #518: a field with wrappers must keep its col grid
-    // class on the row's direct flex child. Geometry assertions only; add a
-    // screenshot check after Docker baseline generation (pnpm e2e:material:update).
+    // class on the row's direct flex child.
     test('should keep grid column sizing for a wrapped field in a row', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-wrapped-col');
       await page.goto('/#/test/row-fields/row-wrapped-col');
@@ -113,6 +112,9 @@ test.describe('Row Fields E2E Tests', () => {
 
       expect(Math.abs(plain.width - wrapped.width)).toBeLessThan(24);
       expect(wrapped.width).toBeGreaterThan(row.width * 0.4);
+
+      // Screenshot: wrapped field holds its grid column
+      await helpers.expectScreenshotMatch(scenario, 'material-row-wrapped-col');
     });
   });
 
