@@ -28,7 +28,7 @@ import { AsyncPipe } from '@angular/common';
         [class.form-select-lg]="props()?.size === 'lg'"
         [class.is-invalid]="f().invalid() && f().touched()"
         [multiple]="props()?.multiple || false"
-        [size]="props()?.htmlSize"
+        [attr.size]="props()?.htmlSize ?? null"
       >
         @if (ngf.placeholder(); as placeholder) {
           <option value="" disabled [selected]="!f().value()">{{ placeholder | dynamicText | async }}</option>
