@@ -539,6 +539,68 @@ describe('logic-function-factory', () => {
         expect(fn1).not.toBe(fn2);
       });
 
+      it('should not collide when two custom conditions use different inline fns', () => {
+        const expression1: ConditionalExpression = {
+          type: 'custom',
+          fn: () => true,
+        };
+
+        const expression2: ConditionalExpression = {
+          type: 'custom',
+          fn: () => false,
+        };
+
+        const result1 = runLogicFunctionTest(expression1, 'test');
+        const result2 = runLogicFunctionTest(expression2, 'test');
+
+        expect(result1).toBe(true);
+        expect(result2).toBe(false);
+      });
+
+      it('should not collide when inline fns are nested inside composites', () => {
+        const expression1: ConditionalExpression = {
+          type: 'and',
+          conditions: [{ type: 'custom', fn: () => true }],
+        };
+
+        const expression2: ConditionalExpression = {
+          type: 'and',
+          conditions: [{ type: 'custom', fn: () => false }],
+        };
+
+        const result1 = runLogicFunctionTest(expression1, 'test');
+        const result2 = runLogicFunctionTest(expression2, 'test');
+
+        expect(result1).toBe(true);
+        expect(result2).toBe(false);
+      });
+
+      it('should still share a cache entry for two identical serializable conditions', () => {
+        const expression1: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test',
+        };
+
+        const expression2: ConditionalExpression = {
+          type: 'fieldValue',
+          fieldPath: 'username',
+          operator: 'equals',
+          value: 'test',
+        };
+
+        let fn1: unknown;
+        let fn2: unknown;
+
+        runInInjectionContext(injector, () => {
+          fn1 = createLogicFunction(expression1);
+          fn2 = createLogicFunction(expression2);
+        });
+
+        expect(fn1).toBe(fn2);
+      });
+
       it('should handle nested expressions in cache key', () => {
         const expression: ConditionalExpression = {
           type: 'and',

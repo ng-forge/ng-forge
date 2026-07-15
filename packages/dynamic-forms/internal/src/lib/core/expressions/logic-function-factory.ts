@@ -34,6 +34,24 @@ function validateNoNestedHttpConditions(expression: ConditionalExpression): void
 }
 
 /**
+ * Checks whether the expression tree contains any inline function.
+ * Inline functions serialize to nothing in stableStringify, so caching by
+ * serialized key would collide across distinct functions.
+ */
+function containsInlineFunction(expression: ConditionalExpression): boolean {
+  if (expression.type === 'and' || expression.type === 'or') {
+    return expression.conditions.some(containsInlineFunction);
+  }
+  if (expression.type === 'custom') {
+    return typeof expression.fn === 'function';
+  }
+  if (expression.type === 'async') {
+    return typeof expression.asyncFn === 'function';
+  }
+  return false;
+}
+
+/**
  * Create a logic function from a conditional expression.
  *
  * @param expression The conditional expression to evaluate
@@ -60,13 +78,18 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
   const fieldContextRegistry = inject(FieldContextRegistryService);
   const cacheService = inject(LogicFunctionCacheService);
 
+  // Inline functions serialize to nothing, so their cache keys would collide
+  const cacheable = !expression || !containsInlineFunction(expression);
+
   // Generate cache key from serialized expression
   const cacheKey = stableStringify(expression);
 
   // Check cache first
-  const cached = cacheService.logicFunctionCache.get(cacheKey);
-  if (cached) {
-    return cached as LogicFn<TValue, boolean>;
+  if (cacheable) {
+    const cached = cacheService.logicFunctionCache.get(cacheKey);
+    if (cached) {
+      return cached as LogicFn<TValue, boolean>;
+    }
   }
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
@@ -78,7 +101,9 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
   };
 
   // Cache the function
-  cacheService.logicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  if (cacheable) {
+    cacheService.logicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  }
   return fn;
 }
 
@@ -111,13 +136,18 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   const injector = inject(Injector);
   const cacheService = inject(LogicFunctionCacheService);
 
+  // Inline functions serialize to nothing, so their cache keys would collide
+  const cacheable = !expression || !containsInlineFunction(expression);
+
   // Generate cache key including debounceMs
   const cacheKey = `${stableStringify(expression)}:${debounceMs}`;
 
   // Check cache first
-  const cached = cacheService.debouncedLogicFunctionCache.get(cacheKey);
-  if (cached) {
-    return cached as LogicFn<TValue, boolean>;
+  if (cacheable) {
+    const cached = cacheService.debouncedLogicFunctionCache.get(cacheKey);
+    if (cached) {
+      return cached as LogicFn<TValue, boolean>;
+    }
   }
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
@@ -165,6 +195,8 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   };
 
   // Cache the function
-  cacheService.debouncedLogicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  if (cacheable) {
+    cacheService.debouncedLogicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
+  }
   return fn;
 }
