@@ -888,18 +888,22 @@ export class FormStateManager<
 
   /** Resets the form to default values. */
   reset(): void {
+    const rootField = this.form()();
     this.excludedValueStore.set({});
     const defaults = this.defaultValues();
-    (this.form()().value as WritableSignal<TModel>).set(defaults);
+    (rootField.value as WritableSignal<TModel>).set(defaults);
     this.deps.value.set(defaults as Partial<TModel>);
+    rootField.reset();
   }
 
   /** Clears the form to empty state. */
   clear(): void {
+    const rootField = this.form()();
     this.excludedValueStore.set({});
     const emptyValue = {} as TModel;
-    (this.form()().value as WritableSignal<TModel>).set(emptyValue);
+    (rootField.value as WritableSignal<TModel>).set(emptyValue);
     this.deps.value.set(emptyValue);
+    rootField.reset();
   }
 
   /** Triggers form submission. */

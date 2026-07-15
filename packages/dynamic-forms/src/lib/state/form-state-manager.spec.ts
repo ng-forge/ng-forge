@@ -476,6 +476,23 @@ describe('FormStateManager', () => {
 
       expect(valueSignal()).toEqual(expect.objectContaining({ name: 'Default' }));
     });
+
+    it('should clear touched and dirty state', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
+      } as TestFormConfig);
+
+      const rootField = stateManager.form()();
+      rootField.markAsTouched();
+      rootField.markAsDirty();
+      expect(stateManager.touched()).toBe(true);
+      expect(stateManager.dirty()).toBe(true);
+
+      stateManager.reset();
+
+      expect(stateManager.touched()).toBe(false);
+      expect(stateManager.dirty()).toBe(false);
+    });
   });
 
   describe('clear', () => {
@@ -491,6 +508,23 @@ describe('FormStateManager', () => {
       stateManager.clear();
 
       expect(valueSignal()).toEqual({});
+    });
+
+    it('should clear touched and dirty state', () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
+      } as TestFormConfig);
+
+      const rootField = stateManager.form()();
+      rootField.markAsTouched();
+      rootField.markAsDirty();
+      expect(stateManager.touched()).toBe(true);
+      expect(stateManager.dirty()).toBe(true);
+
+      stateManager.clear();
+
+      expect(stateManager.touched()).toBe(false);
+      expect(stateManager.dirty()).toBe(false);
     });
   });
 
