@@ -74,6 +74,7 @@ function buildResolvedField(
     key?: string;
     component?: Type<unknown>;
     wrappers?: readonly WrapperConfig[] | null;
+    col?: number;
     inputs?: Signal<Record<string, unknown>>;
     renderReady?: Signal<boolean>;
     hidden?: Signal<boolean>;
@@ -85,7 +86,7 @@ function buildResolvedField(
     key,
     // Preserve `null` explicitly — `options.wrappers ?? undefined` would coerce null → undefined
     // and defeat the opt-out semantics we want to test.
-    fieldDef: { key, type: 'input', wrappers: 'wrappers' in options ? options.wrappers : undefined },
+    fieldDef: { key, type: 'input', wrappers: 'wrappers' in options ? options.wrappers : undefined, col: options.col },
     component: options.component ?? TestLeafComponent,
     injector: options.injector,
     inputs: options.inputs ?? signal({ label: key }),
@@ -294,6 +295,42 @@ describe('DfFieldOutlet', () => {
     // TestLeafComponent declares `label` only; `nonExistentInput` was dropped.
     const leaf = fixture.nativeElement.querySelector('.leaf');
     expect(leaf?.getAttribute('data-label')).toBe('A');
+  });
+
+  it('applies the grid column class to the outermost wrapper host when the field has col + wrappers', async () => {
+    const sectionDef: WrapperTypeDefinition = {
+      wrapperName: 'section',
+      loadComponent: () => Promise.resolve({ default: TestSectionWrapper }),
+    };
+    TestBed.overrideProvider(WRAPPER_REGISTRY, { useValue: new Map([['section', sectionDef]]) });
+
+    setupAndResolve((envInjector) =>
+      buildResolvedField({
+        col: 6,
+        wrappers: [{ type: 'section' }] as readonly WrapperConfig[],
+        injector: envInjector,
+      }),
+    );
+    await flush();
+
+    // The wrapper HOST (test-section element) is the row's flex child, so it must carry df-col-6.
+    const wrapperHost = fixture.nativeElement.querySelector('test-section') as HTMLElement | null;
+    expect(wrapperHost).toBeTruthy();
+    expect(wrapperHost?.classList.contains('df-col-6')).toBe(true);
+    // The field component inside must NOT get it imperatively.
+    const leafHost = fixture.nativeElement.querySelector('test-leaf') as HTMLElement | null;
+    expect(leafHost?.classList.contains('df-col-6')).toBe(false);
+  });
+
+  it('does not add grid classes imperatively when the field has col but no wrappers', async () => {
+    setupAndResolve((envInjector) => buildResolvedField({ col: 6, injector: envInjector }));
+    await flush();
+
+    // Without wrappers the field host itself is the flex child; df-col-N comes
+    // from the field component's own className input, not from the outlet.
+    const leafHost = fixture.nativeElement.querySelector('test-leaf') as HTMLElement | null;
+    expect(leafHost).toBeTruthy();
+    expect(leafHost?.classList.contains('df-col-6')).toBe(false);
   });
 
   it('destroys the field + wrappers when the host is destroyed (vcr.clear cascade)', async () => {

@@ -90,6 +90,32 @@ test.describe('Row Fields E2E Tests', () => {
     });
   });
 
+  test.describe('Wrapped Column', () => {
+    // Regression for issue #518: a field with wrappers must keep its col grid
+    // class on the row's direct flex child. Geometry assertions only; add a
+    // screenshot check after Docker baseline generation (pnpm e2e:material:update).
+    test('should keep grid column sizing for a wrapped field in a row', async ({ page, helpers }) => {
+      const scenario = helpers.getScenario('row-wrapped-col');
+      await page.goto('/#/test/row-fields/row-wrapped-col');
+      await page.waitForLoadState('networkidle');
+      await expect(scenario).toBeVisible({ timeout: 10000 });
+
+      await expect(scenario.locator('#plainField input')).toBeVisible({ timeout: 5000 });
+      await expect(scenario.locator('#wrappedField input')).toBeVisible({ timeout: 5000 });
+
+      await setViewport(page, desktopViewport);
+      await expectHorizontalLayout(scenario, 'plainField', 'wrappedField');
+
+      // Both are col:6, so the wrapped field must be sized by the grid, not shrink to auto.
+      const plain = await getRequiredBox(scenario.locator('#plainField'));
+      const wrapped = await getRequiredBox(scenario.locator('#wrappedField'));
+      const row = await getRequiredBox(scenario.locator('df-row-wrapper'));
+
+      expect(Math.abs(plain.width - wrapped.width)).toBeLessThan(24);
+      expect(wrapped.width).toBeGreaterThan(row.width * 0.4);
+    });
+  });
+
   test.describe('Nested Containers', () => {
     test('should render row containing group containers', async ({ page, helpers }) => {
       const scenario = helpers.getScenario('row-containing-group');

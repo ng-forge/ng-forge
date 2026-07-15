@@ -6,6 +6,7 @@ import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { READONLY_FIELD_TREE_CACHE } from '@ng-forge/dynamic-forms/internal';
+import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { buildFieldInputs } from '../../utils/build-field-inputs/build-field-inputs';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { FieldComponentSlot } from './field-component-slot';
@@ -69,6 +70,12 @@ export class DfFieldOutlet {
   private readonly fieldEnvInjector = computed(() => this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector);
   /** Field-level injector (FIELD_SIGNAL_CONTEXT, ARRAY_CONTEXT, …). Threaded to the controller so wrappers can inject it too. */
   private readonly fieldInjector = computed(() => this.dfFieldOutlet().injector);
+  /**
+   * Grid column class for the OUTERMOST wrapper host. When wrappers exist,
+   * the outermost wrapper (not the field component) is the row's direct flex
+   * child, so `df-col-N` must land there for the row grid CSS to match.
+   */
+  private readonly outermostHostClasses = computed(() => getGridClassString(this.dfFieldOutlet().fieldDef) || undefined);
 
   constructor() {
     createWrapperChainController({
@@ -78,6 +85,7 @@ export class DfFieldOutlet {
       rebuildKey: this.componentIdentity,
       fieldInputs: this.fieldInputs,
       fieldInjector: this.fieldInjector,
+      outermostHostClasses: this.outermostHostClasses,
       beforeRebuild: () => this.fieldComponent.detach(),
       renderInnermost: (slot) => {
         const resolved = this.dfFieldOutlet();

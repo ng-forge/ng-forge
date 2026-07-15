@@ -60,6 +60,20 @@ class TestWrapperBNested implements FieldWrapper {
   readonly parent = inject(TestWrapperB);
 }
 
+/** Wrapper with a whole-string `[class]` host binding, mirroring CssWrapperComponent. */
+@Component({
+  selector: 'test-wrapper-class-bound',
+  template: `<ng-container #fieldComponent></ng-container>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class]': 'cssClasses()',
+  },
+})
+class TestWrapperClassBound implements FieldWrapper {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  readonly cssClasses = input<string>('');
+}
+
 /** Wrapper whose #fieldComponent sits inside an @if — viewChild.required throws. */
 @Component({
   selector: 'test-wrapper-broken',
@@ -259,6 +273,101 @@ describe('wrapper-chain', () => {
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining("'broken'"));
       expect(innermost).not.toHaveBeenCalled();
+    });
+
+    it('adds outermostHostClasses to the OUTERMOST wrapper host only', () => {
+      const refs = renderWrapperChain({
+        outerContainer: host.slot(),
+        loadedWrappers: [
+          { config: { type: 'a' } as WrapperConfig, component: TestWrapperA },
+          { config: { type: 'b' } as WrapperConfig, component: TestWrapperB },
+        ],
+        environmentInjector: envInjector,
+        logger: silentLogger(),
+        outermostHostClasses: 'df-col-6',
+        renderInnermost: (slot) => slot.createComponent(TestInputComponent),
+      });
+
+      expect(refs).toHaveLength(2);
+      const outerEl = refs[0].location.nativeElement as HTMLElement;
+      const innerEl = refs[1].location.nativeElement as HTMLElement;
+      expect(outerEl.classList.contains('df-col-6')).toBe(true);
+      expect(innerEl.classList.contains('df-col-6')).toBe(false);
+      // The field component inside the chain must not receive it either.
+      const fieldEl = innerEl.querySelector('test-input-cmp');
+      expect(fieldEl?.classList.contains('df-col-6')).toBe(false);
+    });
+
+    it('splits multiple class tokens and applies each', () => {
+      const refs = renderWrapperChain({
+        outerContainer: host.slot(),
+        loadedWrappers: [{ config: { type: 'a' } as WrapperConfig, component: TestWrapperA }],
+        environmentInjector: envInjector,
+        logger: silentLogger(),
+        outermostHostClasses: 'df-col-4  extra',
+        renderInnermost: () => undefined,
+      });
+
+      const el = refs[0].location.nativeElement as HTMLElement;
+      expect(el.classList.contains('df-col-4')).toBe(true);
+      expect(el.classList.contains('extra')).toBe(true);
+    });
+
+    it('leaves wrapper hosts untouched when outermostHostClasses is omitted', () => {
+      const refs = renderWrapperChain({
+        outerContainer: host.slot(),
+        loadedWrappers: [{ config: { type: 'a' } as WrapperConfig, component: TestWrapperA }],
+        environmentInjector: envInjector,
+        logger: silentLogger(),
+        renderInnermost: () => undefined,
+      });
+
+      const el = refs[0].location.nativeElement as HTMLElement;
+      expect(el.className).not.toContain('df-col');
+    });
+
+    it('no-ops on an empty chain (the field host itself is the flex child)', () => {
+      const innermost = vi.fn();
+      const refs = renderWrapperChain({
+        outerContainer: host.slot(),
+        loadedWrappers: [],
+        environmentInjector: envInjector,
+        logger: silentLogger(),
+        outermostHostClasses: 'df-col-6',
+        renderInnermost: innermost,
+      });
+
+      expect(refs).toHaveLength(0);
+      expect(innermost).toHaveBeenCalledTimes(1);
+    });
+
+    it('classMap pin: a changing [class] host binding does not clobber the imperative class', () => {
+      // The fix depends on Ivy's classMap reconciliation only adding/removing
+      // tokens from its own bound string. If Angular ever starts resetting the
+      // whole className, this test fails and the fix needs a new strategy.
+      const refs = renderWrapperChain({
+        outerContainer: host.slot(),
+        loadedWrappers: [
+          { config: { type: 'cb', cssClasses: 'initial-class' } as unknown as WrapperConfig, component: TestWrapperClassBound },
+        ],
+        environmentInjector: envInjector,
+        logger: silentLogger(),
+        outermostHostClasses: 'df-col-6',
+        renderInnermost: () => undefined,
+      });
+
+      const el = refs[0].location.nativeElement as HTMLElement;
+      expect(el.classList.contains('initial-class')).toBe(true);
+      expect(el.classList.contains('df-col-6')).toBe(true);
+
+      // Change the bound string AFTER the imperative class was added.
+      refs[0].setInput('cssClasses', 'changed-class another');
+      refs[0].changeDetectorRef.detectChanges();
+
+      expect(el.classList.contains('changed-class')).toBe(true);
+      expect(el.classList.contains('another')).toBe(true);
+      expect(el.classList.contains('initial-class')).toBe(false);
+      expect(el.classList.contains('df-col-6')).toBe(true);
     });
 
     it('vcr.clear() on the outer container cascades destroy through every wrapper ref', () => {
