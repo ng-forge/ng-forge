@@ -332,10 +332,18 @@ function evaluateBuiltInCrossFieldValidator<TModel>(
     return null;
   }
 
-  return {
+  const errorObj: Record<string, unknown> = {
     kind: config.type,
     fieldTree: targetField,
-  } as ValidationError.WithOptionalField;
+  };
+
+  // Include the static constraint on the error, matching native built-in errors
+  // (e.g. { maxLength: 5 }) so message templates can interpolate it
+  if ('value' in config && config.value !== undefined) {
+    errorObj[config.type] = config.value;
+  }
+
+  return errorObj as unknown as ValidationError.WithOptionalField;
 }
 
 /**
