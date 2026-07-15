@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, Signal, ViewContainerRef, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Injector, input, Signal, ViewContainerRef, viewChild } from '@angular/core';
 import { pipe, switchMap } from 'rxjs';
 import { derivedFrom } from 'ngxtension/derived-from';
 import { FieldWrapper } from '@ng-forge/dynamic-forms/internal';
@@ -16,14 +16,20 @@ import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
   },
 })
 export default class CssWrapperComponent implements FieldWrapper {
+  private readonly injector = inject(Injector);
+
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
 
   readonly cssClasses = input<DynamicText>();
   readonly fieldInputs = input<WrapperFieldInputs>();
 
-  readonly resolvedClasses: Signal<string> = derivedFrom([this.cssClasses], pipe(switchMap(([value]) => dynamicTextToObservable(value))), {
-    initialValue: '',
-  });
+  readonly resolvedClasses: Signal<string> = derivedFrom(
+    [this.cssClasses],
+    pipe(switchMap(([value]) => dynamicTextToObservable(value, this.injector))),
+    {
+      initialValue: '',
+    },
+  );
 }
 
 export { CssWrapperComponent };
