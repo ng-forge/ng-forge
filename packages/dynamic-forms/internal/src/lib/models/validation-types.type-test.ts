@@ -2,8 +2,10 @@
  * Exhaustive type tests for ValidationMessages type.
  */
 import { expectTypeOf } from 'vitest';
+import { of, type Observable } from 'rxjs';
+import { signal, type Signal } from '@angular/core';
 import type { DynamicText } from './types/dynamic-text';
-import type { ValidationMessages } from './validation-types';
+import type { ValidationError, ValidationMessage, ValidationMessageResolver, ValidationMessages } from './validation-types';
 
 // ============================================================================
 // ValidationMessages - Whitelist Test
@@ -33,8 +35,8 @@ describe('ValidationMessages - Exhaustive Whitelist', () => {
       anotherValidator: 'Another error message',
     };
 
-    expectTypeOf(messages['customValidator']).toMatchTypeOf<DynamicText | undefined>();
-    expectTypeOf(messages['anotherValidator']).toMatchTypeOf<DynamicText | undefined>();
+    expectTypeOf(messages['customValidator']).toMatchTypeOf<ValidationMessage | undefined>();
+    expectTypeOf(messages['anotherValidator']).toMatchTypeOf<ValidationMessage | undefined>();
   });
 
   it('should have all properties as optional', () => {
@@ -48,37 +50,41 @@ describe('ValidationMessages - Exhaustive Whitelist', () => {
 // ============================================================================
 
 describe('ValidationMessages - Property Types', () => {
-  it('required should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['required']>().toEqualTypeOf<DynamicText | undefined>();
+  it('required should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['required']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('email should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['email']>().toEqualTypeOf<DynamicText | undefined>();
+  it('email should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['email']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('min should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['min']>().toEqualTypeOf<DynamicText | undefined>();
+  it('min should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['min']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('max should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['max']>().toEqualTypeOf<DynamicText | undefined>();
+  it('max should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['max']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('minLength should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['minLength']>().toEqualTypeOf<DynamicText | undefined>();
+  it('minLength should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['minLength']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('maxLength should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['maxLength']>().toEqualTypeOf<DynamicText | undefined>();
+  it('maxLength should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['maxLength']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('pattern should be DynamicText', () => {
-    expectTypeOf<ValidationMessages['pattern']>().toEqualTypeOf<DynamicText | undefined>();
+  it('pattern should be ValidationMessage', () => {
+    expectTypeOf<ValidationMessages['pattern']>().toEqualTypeOf<ValidationMessage | undefined>();
   });
 
-  it('index signature should be DynamicText', () => {
+  it('index signature should be ValidationMessage', () => {
     type IndexSignature = ValidationMessages[string];
-    expectTypeOf<IndexSignature>().toEqualTypeOf<DynamicText | undefined>();
+    expectTypeOf<IndexSignature>().toEqualTypeOf<ValidationMessage | undefined>();
+  });
+
+  it('ValidationMessage should be DynamicText or a message resolver', () => {
+    expectTypeOf<ValidationMessage>().toEqualTypeOf<DynamicText | ValidationMessageResolver>();
   });
 });
 
@@ -235,6 +241,47 @@ describe('ValidationMessages - Complex Scenarios', () => {
     } as const satisfies ValidationMessages;
 
     expectTypeOf(messages).toMatchTypeOf<ValidationMessages>();
+  });
+
+  it('should accept function messages for every built-in and custom key', () => {
+    const messages: ValidationMessages = {
+      required: (error: ValidationError) => `Missing: ${error.kind}`,
+      email: (error) => `Invalid: ${error.kind}`,
+      min: (error) => `Too small: ${error.kind}`,
+      max: (error) => `Too large: ${error.kind}`,
+      minLength: (error) => `Too short: ${error.kind}`,
+      maxLength: (error) => `Too long: ${error.kind}`,
+      pattern: (error) => `Bad format: ${error.kind}`,
+      customValidator: (error) => `Custom: ${error.kind}`,
+    };
+
+    expectTypeOf(messages).toMatchTypeOf<ValidationMessages>();
+  });
+
+  it('should accept function messages returning Observable or Signal', () => {
+    const messages: ValidationMessages = {
+      maxLength: (error: ValidationError): Observable<string> => of(error.kind),
+      minLength: (error: ValidationError): Signal<string> => signal(error.kind),
+    };
+
+    expectTypeOf(messages).toMatchTypeOf<ValidationMessages>();
+    expectTypeOf<ValidationMessageResolver>().parameter(0).toEqualTypeOf<ValidationError>();
+    expectTypeOf<ValidationMessageResolver>().returns.toEqualTypeOf<DynamicText>();
+  });
+
+  it('should reject wrong function signatures', () => {
+    const wrongReturn: ValidationMessages = {
+      // @ts-expect-error — message functions must return DynamicText, not number
+      required: (error: ValidationError) => error.kind.length,
+    };
+
+    const wrongParam: ValidationMessages = {
+      // @ts-expect-error — message functions receive a ValidationError, not a string
+      required: (kind: string) => kind,
+    };
+
+    expectTypeOf(wrongReturn).toMatchTypeOf<ValidationMessages>();
+    expectTypeOf(wrongParam).toMatchTypeOf<ValidationMessages>();
   });
 
   it('should support conditional message selection', () => {

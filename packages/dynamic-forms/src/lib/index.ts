@@ -115,7 +115,14 @@ export type { AddonWarning, SanitizedFormConfig, SanitizeFormConfigOptions } fro
 
 // Configuration Types
 export type { CustomFnConfig, FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
-export type { DynamicText, FieldOption, ValidationError, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+export type {
+  DynamicText,
+  FieldOption,
+  ValidationError,
+  ValidationMessage,
+  ValidationMessageResolver,
+  ValidationMessages,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Submission Config
 export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from '@ng-forge/dynamic-forms/internal';

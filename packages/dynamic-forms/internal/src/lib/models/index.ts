@@ -33,7 +33,7 @@ export {
   GROUP_CONTEXT,
   injectFieldSignalContext,
 } from './field-signal-context.token';
-export type { ValidationError, ValidationMessages } from './validation-types';
+export type { ValidationError, ValidationMessage, ValidationMessageResolver, ValidationMessages } from './validation-types';
 export type { Prettify } from './prettify';
 
 // Validation

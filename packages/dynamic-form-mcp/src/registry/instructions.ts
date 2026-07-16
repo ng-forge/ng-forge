@@ -229,6 +229,18 @@ ALWAYS provide validation messages. Use template variables:
 - \`{{min}}\`, \`{{max}}\` - for min/max
 - \`{{requiredPattern}}\` - for pattern
 
+TypeScript-authored configs may also use error-aware message functions: any \`validationMessages\` or \`defaultValidationMessages\` value can be \`(error: ValidationError) => DynamicText\` instead of a string/Observable/Signal. The function receives the validation error (kind plus params like \`maxLength\`), so i18n layers can receive interpolation params natively:
+
+\`\`\`typescript
+validationMessages: {
+  maxLength: (error) => transloco.selectTranslate('validation.maxLength', {
+    requiredLength: 'maxLength' in error ? error.maxLength : undefined,
+  }),
+}
+\`\`\`
+
+Function messages are NOT JSON-serializable. JSON-driven configs MUST keep using string templates with \`{{param}}\` interpolation; MCP-generated configs should always emit string templates.
+
 ## Conditional Logic
 
 Use \`logic\` array for conditional behavior:
