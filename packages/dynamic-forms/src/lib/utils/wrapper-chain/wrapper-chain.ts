@@ -131,6 +131,8 @@ export interface RenderWrapperChainOptions {
    * host (the row's actual flex child), not on the field component inside.
    * Safe alongside `[class]` host bindings: Ivy's classMap reconciliation only
    * touches tokens from its own bound string (pinned by test).
+   * Sampled at chain render time and not updated reactively; a reference-stable
+   * chain keeps its initial classes even if the source signal later changes.
    */
   readonly outermostHostClasses?: string;
   /** Renders whatever belongs at the innermost slot (a field component, a children template, …). */
