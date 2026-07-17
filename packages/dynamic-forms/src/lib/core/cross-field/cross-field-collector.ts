@@ -8,9 +8,7 @@ import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import {
-  isCrossFieldValidator,
-  isCrossFieldBuiltInValidator,
-  hasCrossFieldWhenCondition,
+  requiresTreeValidation,
   isCrossFieldStateLogic,
   isCrossFieldSchema,
   extractExpressionDependencies,
@@ -98,46 +96,30 @@ function collectFromField(field: FieldDef<unknown>, collection: CrossFieldCollec
   }
 }
 
-/** Returns a validator entry if cross-field, null otherwise. */
+/** Returns a validator entry if it requires tree validation, null otherwise. */
 function tryCreateValidatorEntry(fieldKey: string, config: ValidatorConfig): CrossFieldValidatorEntry | null {
-  // Check for custom validators with cross-field expressions
+  if (!requiresTreeValidation(config)) {
+    return null; // `when`-only conditionals are applied natively in applyValidator
+  }
+
   if (config.type === 'custom') {
     const customConfig = config as CustomValidatorConfig;
-    if (isCrossFieldValidator(customConfig)) {
-      return {
-        sourceFieldKey: fieldKey,
-        config,
-        dependsOn: extractStringDependencies(customConfig.expression || ''),
-        category: 'validator',
-      };
-    }
-  }
-
-  // Check for built-in validators with cross-field dynamic expressions
-  if (isCrossFieldBuiltInValidator(config)) {
-    const builtInConfig = config as BuiltInValidatorConfig;
-    return {
-      sourceFieldKey: fieldKey,
-      config: convertBuiltInToCustomValidator(builtInConfig),
-      validatorType: config.type,
-      dependsOn: extractStringDependencies(builtInConfig.expression || ''),
-      category: 'validator',
-    };
-  }
-
-  // Check for validators with cross-field when conditions
-  if (hasCrossFieldWhenCondition(config)) {
-    const whenCondition = config.when as ConditionalExpression;
     return {
       sourceFieldKey: fieldKey,
       config,
-      validatorType: config.type,
-      dependsOn: extractExpressionDependencies(whenCondition),
+      dependsOn: extractStringDependencies(customConfig.expression || ''),
       category: 'validator',
     };
   }
 
-  return null;
+  const builtInConfig = config as BuiltInValidatorConfig;
+  return {
+    sourceFieldKey: fieldKey,
+    config: convertBuiltInToCustomValidator(builtInConfig),
+    validatorType: config.type,
+    dependsOn: extractStringDependencies(builtInConfig.expression || ''),
+    category: 'validator',
+  };
 }
 
 /** Returns a logic entry if cross-field state logic, null otherwise. */

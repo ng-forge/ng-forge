@@ -9,7 +9,7 @@ import { CrossFieldValidatorEntry } from './cross-field/cross-field-types';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
 import { evaluateCondition } from '@ng-forge/dynamic-forms/internal';
-import { CustomValidatorConfig, ValidatorConfig } from '@ng-forge/dynamic-forms/internal';
+import { CustomValidatorConfig } from '@ng-forge/dynamic-forms/internal';
 import { hasChildFields } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import type { Logger } from '@ng-forge/dynamic-forms/internal';
@@ -20,8 +20,6 @@ import { applyFormLevelSchema } from './form-schema-merger';
 import type { FormSchema } from '@ng-forge/dynamic-forms/schema';
 import { VALIDATION_EXECUTION_DEFAULTS } from '../providers/features/validation-execution/validation-execution.token';
 import { FieldTreeMappingContext, resolveDescendantContext, resolveFieldOwnContext } from './field-tree-mapping-context';
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Gets a FieldTree by key, supporting nested paths with dot notation. */
 function getFieldTreeByKey<TModel>(ctx: FieldContext<TModel>, key: string): FieldTree<unknown> | undefined {
@@ -218,13 +216,13 @@ function evaluateCrossFieldValidator<TModel>(
     logger,
   };
 
-  // Check if this is a custom validator (with expression) or a built-in validator (with when condition)
-  if (config.type === 'custom') {
-    return evaluateCustomCrossFieldValidator(config as CustomValidatorConfig, evaluationContext, sourceFieldKey, ctx);
-  } else {
-    // Built-in validator with cross-field when condition
-    return evaluateBuiltInCrossFieldValidator(config, evaluationContext, sourceFieldKey, ctx);
+  // The collector only routes custom validators (raw or converted built-ins) to the tree.
+  // Guard against hand-built entries passed directly to createSchemaFromFields.
+  if (config.type !== 'custom') {
+    logger.warn(`Unexpected non-custom validator in cross-field tree for "${sourceFieldKey}"; ignoring.`);
+    return null;
   }
+  return evaluateCustomCrossFieldValidator(config as CustomValidatorConfig, evaluationContext, sourceFieldKey, ctx);
 }
 
 /** Evaluates a custom cross-field validator with an expression. */
@@ -288,143 +286,6 @@ function evaluateCustomCrossFieldValidator<TModel>(
   }
 
   return errorObj as unknown as ValidationError.WithOptionalField;
-}
-
-/**
- * Evaluates a built-in validator with a cross-field when condition.
- * First checks the when condition, then applies the built-in validation logic.
- */
-function evaluateBuiltInCrossFieldValidator<TModel>(
-  config: ValidatorConfig,
-  evaluationContext: EvaluationContext,
-  sourceFieldKey: string,
-  ctx: FieldContext<TModel>,
-): ValidationError.WithOptionalField | null {
-  const { fieldValue, formValue, logger, customFunctions } = evaluationContext;
-
-  // First, evaluate the when condition
-  // If the condition is false, the validator doesn't apply (validation passes)
-  if (config.when) {
-    const conditionMet = evaluateCondition(config.when, {
-      fieldValue,
-      formValue,
-      fieldPath: sourceFieldKey,
-      customFunctions: customFunctions || {},
-      logger,
-    });
-
-    if (!conditionMet) {
-      return null; // Condition not met, skip validation
-    }
-  }
-
-  // Now apply the built-in validation logic based on the validator type
-  const isValid = applyBuiltInValidationLogic(config, fieldValue);
-
-  if (isValid) {
-    return null; // Validation passed
-  }
-
-  // Validation failed - create error targeting the source field
-  const targetField = getFieldTreeByKey(ctx, sourceFieldKey);
-  if (!targetField) {
-    logger.warn(`Cross-field validator references non-existent field "${sourceFieldKey}"`);
-    return null;
-  }
-
-  const errorObj: Record<string, unknown> = {
-    kind: config.type,
-    fieldTree: targetField,
-  };
-
-  // Include the static constraint on the error, matching native built-in errors
-  // (e.g. { maxLength: 5 }) so message templates can interpolate it
-  if ('value' in config && config.value !== undefined) {
-    errorObj[config.type] = config.value;
-  }
-
-  return errorObj as unknown as ValidationError.WithOptionalField;
-}
-
-/**
- * Applies built-in validation logic based on the validator type.
- * Returns true if validation passes, false if it fails.
- */
-function applyBuiltInValidationLogic(config: ValidatorConfig, fieldValue: unknown): boolean {
-  switch (config.type) {
-    case 'required':
-      // Required: value must be non-null, non-undefined, and non-empty string
-      if (fieldValue === null || fieldValue === undefined) {
-        return false;
-      }
-      if (typeof fieldValue === 'string' && fieldValue.trim() === '') {
-        return false;
-      }
-      return true;
-
-    case 'min':
-      // Min: numeric value must be >= min
-      if (fieldValue === null || fieldValue === undefined) {
-        return true; // Empty values pass min validation (use required for emptiness)
-      }
-      if ('value' in config && typeof config.value === 'number') {
-        return (fieldValue as number) >= config.value;
-      }
-      return true;
-
-    case 'max':
-      // Max: numeric value must be <= max
-      if (fieldValue === null || fieldValue === undefined) {
-        return true;
-      }
-      if ('value' in config && typeof config.value === 'number') {
-        return (fieldValue as number) <= config.value;
-      }
-      return true;
-
-    case 'minLength':
-      // MinLength: string length must be >= minLength
-      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
-        return true;
-      }
-      if ('value' in config && typeof config.value === 'number') {
-        return String(fieldValue).length >= config.value;
-      }
-      return true;
-
-    case 'maxLength':
-      // MaxLength: string length must be <= maxLength
-      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
-        return true;
-      }
-      if ('value' in config && typeof config.value === 'number') {
-        return String(fieldValue).length <= config.value;
-      }
-      return true;
-
-    case 'email':
-      // Email: must match email pattern
-      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
-        return true;
-      }
-
-      return emailPattern.test(String(fieldValue));
-
-    case 'pattern':
-      // Pattern: must match regex pattern
-      if (fieldValue === null || fieldValue === undefined || fieldValue === '') {
-        return true;
-      }
-      if ('value' in config && config.value) {
-        const regex = config.value instanceof RegExp ? config.value : new RegExp(String(config.value));
-        return regex.test(String(fieldValue));
-      }
-      return true;
-
-    default:
-      // Unknown validator type, consider valid
-      return true;
-  }
 }
 
 /** Utility to convert field definitions to default values object */

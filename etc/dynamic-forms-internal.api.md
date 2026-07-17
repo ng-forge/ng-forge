@@ -1111,7 +1111,7 @@ export function hasChildFields<T>(field: FieldDef<T>): field is FieldDef<T> & {
     fields: FieldDef<unknown>[] | Record<string, FieldDef<unknown>>;
 };
 
-// @public
+// @public @deprecated
 export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: CrossFieldDetectionContext): boolean;
 
 // @public
@@ -1566,6 +1566,9 @@ export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 
 // @public
 export type RenderReadyInput = 'field' | (string & {});
+
+// @public
+export function requiresTreeValidation(config: ValidatorConfig): boolean;
 
 // @public
 export type ResolvedValidationExecutionConfig = Required<ValidationExecutionConfig>;
