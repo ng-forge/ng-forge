@@ -281,7 +281,7 @@ export interface CreateNgForgeActionFixtureOptions<TEvent extends FormEvent = Fo
     // (undocumented)
     readonly event?: FormEventConstructor<TEvent>;
     // (undocumented)
-    readonly eventArgs?: EventArgs;
+    readonly eventArgs?: EventArgs_2;
     // (undocumented)
     readonly hidden?: boolean;
     // (undocumented)

@@ -152,16 +152,18 @@ export type {
 } from '@ng-forge/dynamic-forms';
 
 // =============================================================================
-// Testing Harness
+// Testing Harness (moved to the @ng-forge/dynamic-forms/testing entrypoint)
 // =============================================================================
 
-export { createNgForgeFieldFixture, createNgForgeActionFixture, provideTestValidationMessages } from './testing';
+/** @deprecated Import from '@ng-forge/dynamic-forms/testing' instead. This alias will be removed in the next major. */
+export { createNgForgeFieldFixture, createNgForgeActionFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/testing';
+/** @deprecated Import from '@ng-forge/dynamic-forms/testing' instead. This alias will be removed in the next major. */
 export type {
   CreateNgForgeFieldFixtureOptions,
   CreateNgForgeActionFixtureOptions,
   NgForgeFieldFixture,
   NgForgeActionFixture,
-} from './testing';
+} from '@ng-forge/dynamic-forms/testing';
 
 // =============================================================================
 // Adapter-tier primitives (re-exported from /internal — single compiled identity)

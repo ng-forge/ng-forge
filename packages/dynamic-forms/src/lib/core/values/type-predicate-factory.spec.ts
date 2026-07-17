@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createTypePredicateFunction } from './type-predicate-factory';
-import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../../test-utils/src/mock-logger';
 
 describe('createTypePredicateFunction', () => {
   let mockLogger: MockLogger;

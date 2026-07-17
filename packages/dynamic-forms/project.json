@@ -79,17 +79,19 @@
         "{projectRoot}/api-extractor.integration.json",
         "{projectRoot}/api-extractor.schema.json",
         "{projectRoot}/api-extractor.internal.json",
+        "{projectRoot}/api-extractor.testing.json",
         "{workspaceRoot}/config/api-extractor.base.json",
         "{workspaceRoot}/etc/dynamic-forms.api.md",
         "{workspaceRoot}/etc/dynamic-forms-integration.api.md",
         "{workspaceRoot}/etc/dynamic-forms-schema.api.md",
         "{workspaceRoot}/etc/dynamic-forms-internal.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-testing.api.md",
         "{workspaceRoot}/scripts/api-check.mjs",
         "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
         "cwd": "{workspaceRoot}",
-        "command": "node scripts/api-check.mjs packages/dynamic-forms/api-extractor.json packages/dynamic-forms/api-extractor.integration.json packages/dynamic-forms/api-extractor.schema.json packages/dynamic-forms/api-extractor.internal.json"
+        "command": "node scripts/api-check.mjs packages/dynamic-forms/api-extractor.json packages/dynamic-forms/api-extractor.integration.json packages/dynamic-forms/api-extractor.schema.json packages/dynamic-forms/api-extractor.internal.json packages/dynamic-forms/api-extractor.testing.json"
       }
     },
     "api-update": {
@@ -102,7 +104,8 @@
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.integration.json",
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.schema.json",
           "api-extractor run --local --config packages/dynamic-forms/api-extractor.internal.json",
-          "node scripts/normalize-api-unions.mjs etc/dynamic-forms.api.md etc/dynamic-forms-integration.api.md etc/dynamic-forms-schema.api.md etc/dynamic-forms-internal.api.md"
+          "api-extractor run --local --config packages/dynamic-forms/api-extractor.testing.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms.api.md etc/dynamic-forms-integration.api.md etc/dynamic-forms-schema.api.md etc/dynamic-forms-internal.api.md etc/dynamic-forms-testing.api.md"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"

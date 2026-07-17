@@ -15,7 +15,7 @@ import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../test-utils/src/mock-logger';
 
 type TestModel = Record<string, unknown>;
 type TestFields = RegisteredFieldTypes[];

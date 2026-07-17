@@ -6,7 +6,7 @@ import { delay } from '@ng-forge/utils';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { createMockLogger, MockLogger } from '../../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../../test-utils/src/mock-logger';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { DERIVATION_WARNING_TRACKER } from '../derivation/derivation-warning-tracker';

@@ -18,6 +18,8 @@
     "src/**/*.d.ts",
     "integration/src/**/*.spec.ts",
     "integration/src/**/*.test.ts",
-    "integration/src/**/*.type-test.ts"
+    "integration/src/**/*.type-test.ts",
+    "testing/src/**/*.spec.ts",
+    "testing/src/**/*.test.ts"
   ]
 }

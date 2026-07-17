@@ -4,7 +4,9 @@ import { type FieldTree, form, schema, type SchemaPath } from '@angular/forms/si
 import { type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_VALIDATION_MESSAGES, type DynamicText, type ValidationMessages } from '@ng-forge/dynamic-forms/internal';
-import type { EventArgs } from '../definitions/button-field';
+
+/** Structural copy of integration's EventArgs; importing it would cycle the entrypoints. */
+type EventArgs = readonly (string | number | boolean | null | undefined)[];
 
 export interface CreateNgForgeFieldFixtureOptions<TValue = unknown> {
   /** Field key. Becomes the only property on the wrapping form. */

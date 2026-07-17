@@ -1,2 +1,2 @@
-# Exclude testing utilities from npm
-testing/
+# Exclude source-only test utilities from npm
+test-utils/

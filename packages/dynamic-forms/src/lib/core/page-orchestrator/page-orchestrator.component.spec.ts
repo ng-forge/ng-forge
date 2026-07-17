@@ -17,7 +17,7 @@ import { delay } from '@ng-forge/utils';
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: 'input',
-    loadComponent: () => import('../../../../testing/src/harnesses/test-input.harness').then((m) => m.default),
+    loadComponent: () => import('../../../../test-utils/src/harnesses/test-input.harness').then((m) => m.default),
     mapper: valueFieldMapper,
   },
 ];

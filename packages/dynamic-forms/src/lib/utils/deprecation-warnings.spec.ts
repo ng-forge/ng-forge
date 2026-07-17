@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { warnDeprecated } from './deprecation-warnings';
 import { createWarningTracker, type WarningTracker } from '@ng-forge/dynamic-forms/internal';
-import { createMockLogger, MockLogger } from '../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../test-utils/src/mock-logger';
 
 describe('deprecation-warnings', () => {
   let logger: MockLogger;

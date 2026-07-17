@@ -15,7 +15,7 @@ import { form, schema, type SchemaPath } from '@angular/forms/signals';
 import { ContainerFieldComponent } from './container-field.component';
 import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
-import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
+import { createSimpleTestField, TestFieldComponent } from '../../../../test-utils/src/simple-test-utils';
 import { baseFieldMapper, FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import { provideDynamicForm } from '../../providers';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';

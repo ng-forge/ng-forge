@@ -121,11 +121,11 @@ Custom fields work with everything the built-in field types do (validation, deri
 
 The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly (TestBed, Storybook, sandbox harnesses) bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
 
-Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/integration` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
+Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/testing` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
 
 ```typescript
 import { required } from '@angular/forms/signals';
-import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
+import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/testing';
 import RichTextFieldComponent from './rich-text-field.component';
 
 describe('RichTextFieldComponent', () => {
@@ -148,7 +148,7 @@ describe('RichTextFieldComponent', () => {
 For action / button components there's a sibling `createNgForgeActionFixture`:
 
 ```typescript
-import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/integration';
+import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/testing';
 import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
 import SubmitButtonComponent from './my-submit-button.component';
 
