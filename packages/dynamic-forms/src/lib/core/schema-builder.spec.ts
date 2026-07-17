@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Injector, runInInjectionContext } from '@angular/core';
+import { Injector, runInInjectionContext, signal } from '@angular/core';
+import { form } from '@angular/forms/signals';
 import { createSchemaFromFields, fieldsToDefaultValues, CreateSchemaOptions } from './schema-builder';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
+import { interpolateParams } from '@ng-forge/dynamic-forms/internal';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Use vi.hoisted() to declare mocks before vi.mock() hoisting
@@ -573,6 +575,53 @@ describe('schema-builder', () => {
         expect(() =>
           runInInjectionContext(injector, () => createSchemaFromFields<FormWithBothValidations>(fields, registry, options)),
         ).not.toThrow();
+      });
+
+      it('should include the constraint value on conditional built-in cross-field errors', () => {
+        interface NameForm {
+          name: string;
+          other: string;
+        }
+
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'name',
+            config: {
+              type: 'maxLength' as const,
+              value: 5,
+              when: {
+                type: 'fieldValue' as const,
+                fieldPath: 'other',
+                operator: 'equals' as const,
+                value: 'yes',
+              },
+            },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'name' },
+          { type: 'input', key: 'other' },
+        ];
+
+        runInInjectionContext(injector, () => {
+          const model = signal<NameForm>({ name: 'way too long', other: 'yes' });
+          const schema = createSchemaFromFields<NameForm>(fields, registry, { crossFieldValidators });
+          const formInstance = form(model, schema);
+
+          const errors = formInstance.name().errors();
+          const maxLengthError = errors.find((error) => error.kind === 'maxLength');
+
+          expect(maxLengthError).toBeDefined();
+          expect((maxLengthError as unknown as Record<string, unknown>)['maxLength']).toBe(5);
+
+          // extractErrorParams maps maxLength to requiredLength for message templates
+          const message = interpolateParams(
+            'Must be at most {{requiredLength}} characters',
+            maxLengthError as unknown as Parameters<typeof interpolateParams>[1],
+          );
+          expect(message).toBe('Must be at most 5 characters');
+        });
       });
 
       it('should maintain backwards compatibility with array-based crossFieldValidators', () => {
