@@ -4,7 +4,7 @@ import type { FieldTree, SchemaPath, ValidationError } from '@angular/forms/sign
 import { form, schema, validate, requiredError } from '@angular/forms/signals';
 import { of } from 'rxjs';
 import { createResolvedErrorsSignal } from '@ng-forge/dynamic-forms/integration';
-import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import { ValidationMessage, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -254,6 +254,7 @@ describe('createResolvedErrorsSignal', () => {
       const testForm = form(
         initialValue,
         schema<{ username: string }>((path) => {
+          // Cast is safe: the schema generic declares `username: string`, so the field path is SchemaPath<string>
           applyValidator({ type: 'maxLength', value: 5 }, path.username as SchemaPath<string>);
         }),
       );
@@ -370,6 +371,59 @@ describe('createResolvedErrorsSignal', () => {
         TestBed.flushEffects();
 
         expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Function: at most 5 characters' }]);
+      });
+    });
+
+    /** Form whose required validator attaches its own error.message, returning its FieldTree signal */
+    function createRequiredFieldWithMessage() {
+      const initialValue = signal({ email: '' });
+      const testForm = form(
+        initialValue,
+        schema<{ email: string }>((path) => {
+          validate(path.email as SchemaPath<string>, () => requiredError({ message: 'Validator fallback message' }));
+        }),
+      );
+      return signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
+    }
+
+    it('should fall back to error.message and log when a function throws', () => {
+      runInInjectionContext(injector, () => {
+        const emailField = createRequiredFieldWithMessage();
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const fieldMessages = signal<ValidationMessages>({
+          required: () => {
+            throw new Error('resolver boom');
+          },
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        // A throwing resolver must not break the stream; it falls back to error.message
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator fallback message' }]);
+        expect(errorSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('threw'), expect.any(Error));
+
+        errorSpy.mockRestore();
+      });
+    });
+
+    it('should fall back to error.message when a function returns null', () => {
+      runInInjectionContext(injector, () => {
+        const emailField = createRequiredFieldWithMessage();
+
+        const fieldMessages = signal<ValidationMessages>({
+          // Type-forbidden but reachable from JS: a resolver returning null
+          required: (() => null) as unknown as ValidationMessage,
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator fallback message' }]);
       });
     });
   });

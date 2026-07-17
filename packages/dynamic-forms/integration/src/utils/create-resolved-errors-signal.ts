@@ -3,7 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { ValidationMessage, ValidationMessageResolver, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import { DynamicText, ValidationMessage, ValidationMessageResolver, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
 import { interpolateParams } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
@@ -83,6 +83,20 @@ function isMessageResolver(message: ValidationMessage): message is ValidationMes
 }
 
 /**
+ * Invokes a message resolver, falling back to error.message when it throws or returns null/undefined
+ *
+ * @internal
+ */
+function resolveMessageFunction(resolver: ValidationMessageResolver, error: ValidationError, logger: Logger): DynamicText {
+  try {
+    return resolver(error) ?? error.message ?? '';
+  } catch (err) {
+    logger.error(`Validation message resolver for error kind "${error.kind}" threw; falling back to error.message.`, err);
+    return error.message ?? '';
+  }
+}
+
+/**
  * Resolves a single error message from DynamicText or error-aware function sources with fallback logic
  * Priority: field-level message → default message → error.message → no message (logs warning)
  *
@@ -117,7 +131,7 @@ function resolveErrorMessage(
   // error.message is always a plain string, not DynamicText
   const isSchemaMessage = fieldMessage === undefined && defaultMessage === undefined;
   // Message resolvers receive the error so params (e.g. maxLength) reach i18n layers natively
-  const messageText = isMessageResolver(messageToUse) ? messageToUse(error) : messageToUse;
+  const messageText = isMessageResolver(messageToUse) ? resolveMessageFunction(messageToUse, error, logger) : messageToUse;
   const messageObservable = isSchemaMessage
     ? of(messageToUse as string) // error.message is always string
     : dynamicTextToObservable(messageText, injector);
