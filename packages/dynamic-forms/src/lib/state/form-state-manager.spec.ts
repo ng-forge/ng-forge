@@ -493,6 +493,34 @@ describe('FormStateManager', () => {
       expect(stateManager.touched()).toBe(false);
       expect(stateManager.dirty()).toBe(false);
     });
+
+    it('should clear touched and dirty state on a nested field', () => {
+      const { stateManager } = initManager({
+        fields: [
+          {
+            type: 'group',
+            key: 'address',
+            fields: [{ type: 'input', key: 'street', label: 'Street', value: 'Default' }],
+          },
+        ],
+      } as TestFormConfig);
+
+      const nestedForm = stateManager.form() as unknown as FieldTree<{ address: { street: string } }>;
+      const childField = nestedForm.address.street();
+      childField.markAsTouched();
+      childField.markAsDirty();
+      expect(childField.touched()).toBe(true);
+      expect(childField.dirty()).toBe(true);
+      expect(stateManager.touched()).toBe(true);
+      expect(stateManager.dirty()).toBe(true);
+
+      stateManager.reset();
+
+      expect(childField.touched()).toBe(false);
+      expect(childField.dirty()).toBe(false);
+      expect(stateManager.touched()).toBe(false);
+      expect(stateManager.dirty()).toBe(false);
+    });
   });
 
   describe('clear', () => {
@@ -523,6 +551,34 @@ describe('FormStateManager', () => {
 
       stateManager.clear();
 
+      expect(stateManager.touched()).toBe(false);
+      expect(stateManager.dirty()).toBe(false);
+    });
+
+    it('should clear touched and dirty state on a nested field', () => {
+      const { stateManager } = initManager({
+        fields: [
+          {
+            type: 'group',
+            key: 'address',
+            fields: [{ type: 'input', key: 'street', label: 'Street', value: 'Default' }],
+          },
+        ],
+      } as TestFormConfig);
+
+      const nestedForm = stateManager.form() as unknown as FieldTree<{ address: { street: string } }>;
+      const childField = nestedForm.address.street();
+      childField.markAsTouched();
+      childField.markAsDirty();
+      expect(childField.touched()).toBe(true);
+      expect(childField.dirty()).toBe(true);
+      expect(stateManager.touched()).toBe(true);
+      expect(stateManager.dirty()).toBe(true);
+
+      stateManager.clear();
+
+      expect(childField.touched()).toBe(false);
+      expect(childField.dirty()).toBe(false);
       expect(stateManager.touched()).toBe(false);
       expect(stateManager.dirty()).toBe(false);
     });
