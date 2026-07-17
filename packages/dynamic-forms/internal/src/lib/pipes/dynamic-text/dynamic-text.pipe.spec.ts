@@ -1,8 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { DynamicTextPipe } from './dynamic-text.pipe';
-import { signal, WritableSignal } from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import { firstValueFrom, lastValueFrom, of, Subject, take, toArray } from 'rxjs';
+
+@Component({
+  imports: [DynamicTextPipe, AsyncPipe],
+  template: `<span>{{ sig | dynamicText | async }}</span>`,
+})
+class SignalTemplateHostComponent {
+  readonly sig = signal('initial');
+}
 
 describe('DynamicTextPipe', () => {
   let pipe: DynamicTextPipe;
@@ -215,6 +224,20 @@ describe('DynamicTextPipe', () => {
       expect(values).toHaveLength(50);
       expect(values[0]).toBe('Signal 0');
       expect(values[49]).toBe('Signal 49');
+    });
+  });
+
+  describe('template rendering (NG0602 regression)', () => {
+    it('should resolve a signal in a template without throwing and stay reactive', () => {
+      const fixture = TestBed.createComponent(SignalTemplateHostComponent);
+
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(fixture.nativeElement.textContent).toContain('initial');
+
+      fixture.componentInstance.sig.set('updated');
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('updated');
     });
   });
 

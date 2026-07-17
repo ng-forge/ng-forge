@@ -1,7 +1,7 @@
-import { inject, Injector, isSignal, Pipe, PipeTransform } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { isObservable, Observable, of } from 'rxjs';
+import { inject, Injector, Pipe, PipeTransform } from '@angular/core';
+import { Observable } from 'rxjs';
 import { DynamicText } from '../../models/types/dynamic-text';
+import { dynamicTextToObservable } from '../../utils/dynamic-text-to-observable';
 
 /**
  * Pipe that handles dynamic text resolution with support for static strings,
@@ -20,14 +20,7 @@ export class DynamicTextPipe implements PipeTransform {
    * @returns The resolved string value as an Observable
    */
   transform(value: DynamicText | undefined): Observable<string> {
-    if (isObservable(value)) {
-      return value;
-    }
-
-    if (isSignal(value)) {
-      return toObservable(value, { injector: this.injector });
-    }
-
-    return of(value || '');
+    // Normalize null to undefined so it resolves to an empty string
+    return dynamicTextToObservable(value ?? undefined, this.injector);
   }
 }

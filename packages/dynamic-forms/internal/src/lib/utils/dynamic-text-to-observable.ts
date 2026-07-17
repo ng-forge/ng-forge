@@ -1,4 +1,4 @@
-import { isSignal, Injector } from '@angular/core';
+import { isSignal, Injector, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { isObservable, Observable, of } from 'rxjs';
 import { DynamicText } from '../models/types/dynamic-text';
@@ -21,7 +21,8 @@ export function dynamicTextToObservable(value: DynamicText | undefined, injector
   }
 
   if (isSignal(value)) {
-    return toObservable(value, { injector });
+    // Wrap in untracked() to avoid NG0602: toObservable() internally calls effect(), which cannot be created inside a reactive context (template expression)
+    return untracked(() => toObservable(value, { injector }));
   }
 
   return of(String(value));
