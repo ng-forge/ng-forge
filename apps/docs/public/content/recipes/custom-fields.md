@@ -173,6 +173,8 @@ Vitest externalizes packages from `node_modules` by default while inlining your 
 
 ```typescript
 // vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
 export default defineConfig({
   test: {
     server: { deps: { inline: ['@ng-forge/dynamic-forms'] } },

@@ -32,9 +32,10 @@ function assertTestEnvironmentInitialized(): void {
   if (getTestBed().platform) return;
   throw new Error(
     '[Dynamic Forms] The Angular test environment was never initialized for the @angular/core/testing instance this fixture resolved. ' +
-      'This typically happens under Vitest when your specs are inlined but @ng-forge/dynamic-forms is externalized, creating a second testing instance. ' +
+      'Under Vitest this typically means your specs are inlined but @ng-forge/dynamic-forms is externalized, creating a second testing instance. ' +
       "Fix: add the package to Vitest's server.deps.inline:\n" +
-      "test: { server: { deps: { inline: ['@ng-forge/dynamic-forms'] } } }",
+      "test: { server: { deps: { inline: ['@ng-forge/dynamic-forms'] } } }\n" +
+      'On Jest or Karma this instead means initTestEnvironment was never called; add it to your test setup file (e.g. getTestBed().initTestEnvironment(...)).',
   );
 }
 
