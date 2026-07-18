@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { getTestBed, TestBed } from '@angular/core/testing';
+import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
 import { required } from '@angular/forms/signals';
 import { FormEvent } from '@ng-forge/dynamic-forms';
-import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeActionHost, NgForgeFieldHost } from '../directives/host-directive-presets';
 import { injectNgForgeField } from '../directives/ng-forge-field.directive';
 import { injectNgForgeAction } from '../directives/ng-forge-action.directive';
 import { createNgForgeActionFixture, createNgForgeFieldFixture, provideTestValidationMessages } from './create-field-fixture';
+import { ZonelessTestModule } from '../../../src/test-setup';
 
 @Component({
   selector: 'test-harness-field',
@@ -123,5 +124,22 @@ describe('createNgForgeActionFixture', () => {
     });
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).getAttribute('aria-disabled')).toBe('true');
+  });
+});
+
+describe('uninitialized test environment guard', () => {
+  it('throws an actionable error from both fixtures when the test environment is not initialized', () => {
+    getTestBed().resetTestEnvironment();
+    try {
+      expect(() => createNgForgeFieldFixture(TestHarnessFieldComponent, { key: 'username', value: '' })).toThrowError(
+        /server\.deps\.inline/,
+      );
+      expect(() => createNgForgeActionFixture(TestHarnessActionComponent, { key: 'submit', label: 'Save' })).toThrowError(
+        /server\.deps\.inline/,
+      );
+    } finally {
+      // Restore the exact environment from src/test-setup.ts so later tests are unaffected
+      getTestBed().initTestEnvironment([BrowserTestingModule, ZonelessTestModule], platformBrowserTesting());
+    }
   });
 });

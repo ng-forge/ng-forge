@@ -167,6 +167,21 @@ it('dispatches FormSubmitEvent through EventBus on click', () => {
 
 Both harnesses defer `detectChanges()` to the caller so you can set extra component-specific inputs between bind and render. Look at `create-field-fixture.spec.ts` in the integration package for the full surface.
 
+### Running the fixtures under Vitest
+
+Vitest externalizes packages from `node_modules` by default while inlining your specs. That gives the fixtures a second copy of `@angular/core/testing` whose test environment your setup file never initialized, and the first TestBed call crashes with `Cannot read properties of null (reading 'ngModule')`. Inline the package so your specs and the fixtures share one testing instance:
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    server: { deps: { inline: ['@ng-forge/dynamic-forms'] } },
+  },
+});
+```
+
 ## Going further
 
 - [Building an Adapter](/building-an-adapter): full guide for shipping an adapter with many field types, adapter-level configuration cascades, and module augmentation for type-safety.

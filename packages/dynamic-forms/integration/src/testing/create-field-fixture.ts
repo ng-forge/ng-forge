@@ -1,5 +1,5 @@
 import { EnvironmentInjector, Provider, runInInjectionContext, signal, type Type, type WritableSignal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, getTestBed, TestBed } from '@angular/core/testing';
 import { type FieldTree, form, schema, type SchemaPath } from '@angular/forms/signals';
 import { type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
@@ -27,6 +27,18 @@ export interface NgForgeFieldFixture<C, TValue = unknown> {
   readonly rootValue: WritableSignal<Record<string, TValue>>;
 }
 
+/** Guards against a second, uninitialized @angular/core/testing instance (Vitest externalization). */
+function assertTestEnvironmentInitialized(): void {
+  if (getTestBed().platform) return;
+  throw new Error(
+    '[Dynamic Forms] The Angular test environment was never initialized for the @angular/core/testing instance this fixture resolved. ' +
+      'Under Vitest this typically means your specs are inlined but @ng-forge/dynamic-forms is externalized, creating a second testing instance. ' +
+      "Fix: add the package to Vitest's server.deps.inline:\n" +
+      "test: { server: { deps: { inline: ['@ng-forge/dynamic-forms'] } } }\n" +
+      'On Jest or Karma this instead means initTestEnvironment was never called; add it to your test setup file (e.g. getTestBed().initTestEnvironment(...)).',
+  );
+}
+
 /**
  * Builds a `ComponentFixture` for an `NgForgeField`-composing component with
  * `field` + `key` bound BEFORE `detectChanges()` — sidesteps the NG0950 that
@@ -36,6 +48,7 @@ export function createNgForgeFieldFixture<C, TValue = unknown>(
   component: Type<C>,
   options: CreateNgForgeFieldFixtureOptions<TValue>,
 ): NgForgeFieldFixture<C, TValue> {
+  assertTestEnvironmentInitialized();
   TestBed.configureTestingModule({ imports: [component], providers: [...(options.providers ?? [])] });
 
   const key = options.key;
@@ -94,6 +107,7 @@ export function createNgForgeActionFixture<C, TEvent extends FormEvent = FormEve
   component: Type<C>,
   options: CreateNgForgeActionFixtureOptions<TEvent>,
 ): NgForgeActionFixture<C> {
+  assertTestEnvironmentInitialized();
   TestBed.configureTestingModule({ imports: [component], providers: [EventBus, ...(options.providers ?? [])] });
 
   const fixture = TestBed.createComponent(component);
