@@ -6,8 +6,9 @@ import { SchemaRegistryService } from './registry/schema-registry.service';
 import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { createTypePredicateFunction } from './values/type-predicate-factory';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
+import { requiresTreeValidation } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { DynamicFormLogger, type Logger } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Apply schema configuration.
@@ -28,7 +29,7 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
     return;
   }
 
-  const schemaFn = createSchemaFunction(schema);
+  const schemaFn = createSchemaFunction(schema, logger);
 
   // Cast to suppress union type errors - safe because we only use signal forms (see function docs)
   const path = fieldPath as SchemaPath<unknown>;
@@ -59,10 +60,19 @@ export function applySchema(config: SchemaApplicationConfig, fieldPath: SchemaPa
 }
 
 /** Create a schema function from schema definition. */
-export function createSchemaFunction(schema: SchemaDefinition): SchemaOrSchemaFn<unknown> {
+export function createSchemaFunction(schema: SchemaDefinition, logger?: Logger): SchemaOrSchemaFn<unknown> {
   return (path: SchemaPathTree<unknown>) => {
     // Apply validators - path is SchemaPathTree which is accepted by applyValidator
     schema.validators?.forEach((validatorConfig) => {
+      // Cross-field expressions are collected from field definitions only; schema
+      // definition validators never reach the tree collector, so drop them loudly.
+      if (requiresTreeValidation(validatorConfig)) {
+        logger?.warn(
+          `Validator "${validatorConfig.type}" in schema definition "${schema.name}" uses a cross-field expression, ` +
+            `which is not supported on schema definition validators; it was skipped.`,
+        );
+        return;
+      }
       applyValidator(validatorConfig, path);
     });
 

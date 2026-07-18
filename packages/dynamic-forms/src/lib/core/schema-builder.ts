@@ -157,8 +157,19 @@ function applyCrossFieldTreeValidator<TModel>(
   // Get custom functions for expression evaluation
   const customFunctions = functionRegistry.getCustomFunctions();
 
+  // The collector only routes custom validators (raw or converted built-ins) to the tree.
+  // Filter hand-built entries passed directly to createSchemaFromFields once at schema
+  // build so the warning doesn't repeat on every validation run.
+  const customValidators = validators.filter((entry) => {
+    if (entry.config.type !== 'custom') {
+      logger.warn(`Unexpected non-custom validator in cross-field tree for "${entry.sourceFieldKey}"; ignoring.`);
+      return false;
+    }
+    return true;
+  });
+
   validateTree(rootPath as SchemaPath<TModel>, (ctx: FieldContext<TModel>) => {
-    if (validators.length === 0) {
+    if (customValidators.length === 0) {
       return null; // ValidationSuccess - no errors
     }
 
@@ -166,7 +177,7 @@ function applyCrossFieldTreeValidator<TModel>(
     const formValue = ctx.value() as Record<string, unknown>;
     const errors: ValidationError.WithOptionalField[] = [];
 
-    for (const entry of validators) {
+    for (const entry of customValidators) {
       const { sourceFieldKey, config } = entry;
 
       try {
@@ -216,12 +227,7 @@ function evaluateCrossFieldValidator<TModel>(
     logger,
   };
 
-  // The collector only routes custom validators (raw or converted built-ins) to the tree.
-  // Guard against hand-built entries passed directly to createSchemaFromFields.
-  if (config.type !== 'custom') {
-    logger.warn(`Unexpected non-custom validator in cross-field tree for "${sourceFieldKey}"; ignoring.`);
-    return null;
-  }
+  // Entries are pre-filtered to custom validators at schema build in applyCrossFieldTreeValidator.
   return evaluateCustomCrossFieldValidator(config as CustomValidatorConfig, evaluationContext, sourceFieldKey, ctx);
 }
 

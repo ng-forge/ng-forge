@@ -621,6 +621,53 @@ describe('schema-builder', () => {
         warnSpy.mockRestore();
       });
 
+      it('should warn about non-custom tree entries once at schema build, not per validation run', () => {
+        interface NameForm {
+          name: string;
+          other: string;
+        }
+
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'name',
+            config: {
+              type: 'maxLength' as const,
+              value: 5,
+              when: {
+                type: 'fieldValue' as const,
+                fieldPath: 'other',
+                operator: 'equals' as const,
+                value: 'yes',
+              },
+            },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'name' },
+          { type: 'input', key: 'other' },
+        ];
+
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+        runInInjectionContext(injector, () => {
+          const model = signal<NameForm>({ name: 'first', other: 'yes' });
+          const schema = createSchemaFromFields<NameForm>(fields, registry, { crossFieldValidators });
+          const formInstance = form(model, schema);
+
+          formInstance.name().errors();
+          model.set({ name: 'second value', other: 'no' });
+          formInstance.name().errors();
+          model.set({ name: 'third value here', other: 'yes' });
+          formInstance.name().errors();
+
+          const guardWarnings = warnSpy.mock.calls.filter((call) => String(call[1]).includes('Unexpected non-custom validator'));
+          expect(guardWarnings).toHaveLength(1);
+        });
+
+        warnSpy.mockRestore();
+      });
+
       it('should include the constraint value on converted built-in cross-field expression errors', () => {
         interface NameForm {
           name: string;

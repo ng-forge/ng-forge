@@ -938,7 +938,7 @@ describe('validator-factory', () => {
       });
     });
 
-    it('honors a field-local when on maxLength (previously silently dropped)', () => {
+    it('honors a field-local when on maxLength (previously the when was ignored and maxLength applied unconditionally)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ name: 'ignore-me' });
 

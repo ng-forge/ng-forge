@@ -180,6 +180,41 @@ describe('schema-application', () => {
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
+      it('should warn and skip schema definition validators with cross-field expressions', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const testSchema: SchemaDefinition = {
+          name: 'cross-field-schema',
+          validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
+        };
+        schemaRegistry.registerSchema(testSchema);
+
+        const formValue = signal({ name: 'a value beyond any limit', limit: 3 });
+        const config: SchemaApplicationConfig = {
+          type: 'apply',
+          schema: 'cross-field-schema',
+        };
+
+        let formInstance: ReturnType<typeof form>;
+
+        expect(() => {
+          runInInjectionContext(injector, () => {
+            formInstance = form(
+              formValue,
+              schema<typeof formValue>((path) => {
+                applySchema(config, path.name);
+              }),
+            );
+            mockFormSignal.set(formInstance);
+          });
+        }).not.toThrow();
+
+        expect(warnSpy).toHaveBeenCalledWith(
+          '[Dynamic Forms]',
+          expect.stringContaining('schema definition "cross-field-schema" uses a cross-field expression'),
+        );
+        warnSpy.mockRestore();
+      });
+
       it('should apply inline schema definition', () => {
         const formValue = signal({ name: '' });
         const inlineSchema: SchemaDefinition = {
