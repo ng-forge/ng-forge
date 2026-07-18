@@ -125,14 +125,8 @@ export interface RenderWrapperChainOptions {
    */
   readonly fieldInjector?: Injector;
   /**
-   * Optional class tokens added imperatively to the OUTERMOST wrapper host.
-   * The row grid CSS only matches direct children (`::ng-deep > .df-col-N`),
-   * so when wrappers exist the grid class must sit on the chain's outermost
-   * host (the row's actual flex child), not on the field component inside.
-   * Safe alongside `[class]` host bindings: Ivy's classMap reconciliation only
-   * touches tokens from its own bound string (pinned by test).
-   * Sampled at chain render time and not updated reactively; a reference-stable
-   * chain keeps its initial classes even if the source signal later changes.
+   * Classes added imperatively to the outermost wrapper host (the row's direct
+   * flex child, where grid CSS matches). Sampled at render time, not reactive.
    */
   readonly outermostHostClasses?: string;
   /** Renders whatever belongs at the innermost slot (a field component, a children template, …). */
