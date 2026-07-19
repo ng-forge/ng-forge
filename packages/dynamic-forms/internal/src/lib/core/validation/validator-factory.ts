@@ -33,57 +33,71 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
-import {
-  isCrossFieldValidator,
-  isCrossFieldBuiltInValidator,
-  hasCrossFieldWhenCondition,
-  isResourceBasedValidator,
-} from '../cross-field/cross-field-detector';
+import { requiresTreeValidation } from '../cross-field/cross-field-detector';
 
-function applyEmailValidator(path: SchemaPath<string>): void {
-  email(path);
+// Safe cast target: the when LogicFn only reads FieldContext members that exist for every TValue
+type WhenLogic = LogicFn<unknown, boolean> | undefined;
+
+function applyEmailValidator(path: SchemaPath<string>, when?: WhenLogic): void {
+  email(path, when ? { when: when as LogicFn<string, boolean> } : undefined);
 }
 
-function applyMinValidator(path: SchemaPath<number>, value: number, expression?: string): void {
+function applyMinValidator(path: SchemaPath<number>, value: number, expression?: string, when?: WhenLogic): void {
+  const opts = when ? { when: when as LogicFn<number, boolean> } : undefined;
   if (expression) {
-    min(path, createDynamicValueFunction<string | number | null, number | undefined>(expression));
+    // Safe cast: the dynamic value fn only reads generic FieldContext members
+    min(
+      path,
+      createDynamicValueFunction<string | number | null, number | undefined>(expression) as LogicFn<number, number | undefined>,
+      opts,
+    );
   } else {
-    min(path, value);
+    min(path, value, opts);
   }
 }
 
-function applyMaxValidator(path: SchemaPath<number>, value: number, expression?: string): void {
+function applyMaxValidator(path: SchemaPath<number>, value: number, expression?: string, when?: WhenLogic): void {
+  const opts = when ? { when: when as LogicFn<number, boolean> } : undefined;
   if (expression) {
-    max(path, createDynamicValueFunction<string | number | null, number | undefined>(expression));
+    // Safe cast: the dynamic value fn only reads generic FieldContext members
+    max(
+      path,
+      createDynamicValueFunction<string | number | null, number | undefined>(expression) as LogicFn<number, number | undefined>,
+      opts,
+    );
   } else {
-    max(path, value);
+    max(path, value, opts);
   }
 }
 
-function applyMinLengthValidator(path: SchemaPath<string>, value: number, expression?: string): void {
+function applyMinLengthValidator(path: SchemaPath<string>, value: number, expression?: string, when?: WhenLogic): void {
+  const opts = when ? { when: when as LogicFn<string, boolean> } : undefined;
   if (expression) {
-    minLength(path, createDynamicValueFunction<string, number>(expression));
+    minLength(path, createDynamicValueFunction<string, number>(expression), opts);
   } else {
-    minLength(path, value);
+    minLength(path, value, opts);
   }
 }
 
-function applyMaxLengthValidator(path: SchemaPath<string>, value: number, expression?: string): void {
+function applyMaxLengthValidator(path: SchemaPath<string>, value: number, expression?: string, when?: WhenLogic): void {
+  const opts = when ? { when: when as LogicFn<string, boolean> } : undefined;
   if (expression) {
-    maxLength(path, createDynamicValueFunction<string, number>(expression));
+    maxLength(path, createDynamicValueFunction<string, number>(expression), opts);
   } else {
-    maxLength(path, value);
+    maxLength(path, value, opts);
   }
 }
 
-function applyPatternValidator(path: SchemaPath<string>, value: RegExp, expression?: string): void {
+function applyPatternValidator(path: SchemaPath<string>, value: RegExp, expression?: string, when?: WhenLogic): void {
+  const opts = when ? { when: when as LogicFn<string, boolean> } : undefined;
   if (expression) {
     pattern(
       path,
       createDynamicValueFunction<string | undefined, RegExp | undefined>(expression) as LogicFn<string | undefined, RegExp | undefined>,
+      opts,
     );
   } else {
-    pattern(path, value);
+    pattern(path, value, opts);
   }
 }
 
@@ -95,39 +109,35 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = fieldPath as SchemaPath<unknown>;
 
-  if (!isResourceBasedValidator(config) && (isCrossFieldBuiltInValidator(config) || hasCrossFieldWhenCondition(config))) {
+  if (requiresTreeValidation(config)) {
     return;
   }
 
   switch (config.type) {
     case 'required':
-      if (config.when) {
-        required(path, { when: createLogicFunction(config.when) });
-      } else {
-        required(path);
-      }
+      required(path, config.when ? { when: createConditionalLogic(config.when) } : undefined);
       break;
     case 'email':
-      applyEmailValidator(fieldPath as SchemaPath<string>);
+      applyEmailValidator(fieldPath as SchemaPath<string>, createConditionalLogic(config.when));
       break;
     case 'min':
       if (typeof config.value === 'number') {
-        applyMinValidator(fieldPath as SchemaPath<number>, config.value, config.expression);
+        applyMinValidator(fieldPath as SchemaPath<number>, config.value, config.expression, createConditionalLogic(config.when));
       }
       break;
     case 'max':
       if (typeof config.value === 'number') {
-        applyMaxValidator(fieldPath as SchemaPath<number>, config.value, config.expression);
+        applyMaxValidator(fieldPath as SchemaPath<number>, config.value, config.expression, createConditionalLogic(config.when));
       }
       break;
     case 'minLength':
       if (typeof config.value === 'number') {
-        applyMinLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression);
+        applyMinLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression, createConditionalLogic(config.when));
       }
       break;
     case 'maxLength':
       if (typeof config.value === 'number') {
-        applyMaxLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression);
+        applyMaxLengthValidator(fieldPath as SchemaPath<string>, config.value, config.expression, createConditionalLogic(config.when));
       }
       break;
     case 'pattern':
@@ -144,7 +154,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
         } else {
           regexPattern = config.value;
         }
-        applyPatternValidator(fieldPath as SchemaPath<string>, regexPattern, config.expression);
+        applyPatternValidator(fieldPath as SchemaPath<string>, regexPattern, config.expression, createConditionalLogic(config.when));
       }
       break;
     case 'custom':
@@ -160,10 +170,6 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
 }
 
 function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<unknown>): void {
-  if (isCrossFieldValidator(config)) {
-    return;
-  }
-
   let validatorFn: (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null;
 
   if (config.expression) {

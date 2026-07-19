@@ -197,6 +197,110 @@ describe('collectCrossFieldEntries()', () => {
     });
   });
 
+  describe('native when routing (validators not collected into the tree)', () => {
+    const crossFieldWhen = { type: 'javascript' as const, expression: 'formValue.other === true' };
+
+    it('does not collect built-in validators with a static value and cross-field when', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [{ type: 'maxLength', value: 20, when: crossFieldWhen }],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(0);
+    });
+
+    it('does not collect required/email validators with a cross-field when', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [
+            { type: 'required', when: crossFieldWhen },
+            { type: 'email', when: crossFieldWhen },
+          ],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(0);
+    });
+
+    it('does not collect custom fn validators with a cross-field when', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [{ type: 'custom', fn: () => null, when: crossFieldWhen }],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(0);
+    });
+
+    it('does not collect async or http validators with a cross-field when', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [
+            { type: 'async', functionName: 'check', when: crossFieldWhen },
+            {
+              type: 'http',
+              http: { url: '/api/check', method: 'GET' },
+              responseMapping: { validWhen: 'response.ok', errorKind: 'taken' },
+              when: crossFieldWhen,
+            },
+          ],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(0);
+    });
+
+    it('still collects built-in validators with a cross-field expression, preserving when on the converted config', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [{ type: 'maxLength', expression: 'formValue.limit', when: crossFieldWhen }],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(1);
+      expect(validators[0].validatorType).toBe('maxLength');
+      expect(validators[0].config.type).toBe('custom');
+      expect(validators[0].config.when).toEqual(crossFieldWhen);
+      expect(validators[0].dependsOn).toContain('limit');
+    });
+
+    it('still collects custom validators with a cross-field expression', () => {
+      const fields: FieldDef<any>[] = [
+        {
+          type: 'input',
+          key: 'name',
+          validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'mismatch' }],
+        },
+      ];
+
+      const { validators } = collectCrossFieldEntries(fields);
+
+      expect(validators).toHaveLength(1);
+      expect(validators[0].dependsOn).toContain('password');
+    });
+  });
+
   describe('array fields are not traversed', () => {
     it('does not recurse into array items', () => {
       const fields: FieldDef<any>[] = [

@@ -804,6 +804,272 @@ describe('validator-factory', () => {
     });
   });
 
+  describe('conditional built-in validators (native when routing)', () => {
+    const crossFieldWhen = { type: 'javascript' as const, expression: 'formValue.other === true' };
+
+    it('applies maxLength natively with reactive constraint metadata gated by a cross-field when', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ name: 'way too long value', other: false });
+        mockEntity.set({ name: 'way too long value', other: false });
+        const config: ValidatorConfig = { type: 'maxLength', value: 20, when: crossFieldWhen };
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.name);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // Condition false: constraint metadata absent, no error
+        expect(formInstance.name().maxLength?.()).toBeUndefined();
+        expect(formInstance.name().errors()).toEqual([]);
+
+        // Flip the OTHER field only - the validated field is untouched
+        mockEntity.set({ name: 'way too long value', other: true });
+        expect(formInstance.name().maxLength?.()).toBe(20);
+        expect(formInstance.name().errors()).toEqual([]);
+
+        formValue.set({ name: 'x'.repeat(25), other: true });
+        const errors = formInstance.name().errors();
+        expect(errors).toHaveLength(1);
+        expect(errors[0].kind).toBe('maxLength');
+        expect((errors[0] as unknown as Record<string, unknown>)['maxLength']).toBe(20);
+
+        // Flip back off: error clears, metadata gone
+        mockEntity.set({ name: 'x'.repeat(25), other: false });
+        expect(formInstance.name().errors()).toEqual([]);
+        expect(formInstance.name().maxLength?.()).toBeUndefined();
+      });
+    });
+
+    it('applies min, max, and minLength natively with reactive constraints', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ age: 10, count: 100, code: 'ab', other: false });
+        mockEntity.set({ ...formValue() });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'min', value: 18, when: crossFieldWhen }, path.age);
+            applyValidator({ type: 'max', value: 50, when: crossFieldWhen }, path.count);
+            applyValidator({ type: 'minLength', value: 3, when: crossFieldWhen }, path.code);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.age().min?.()).toBeUndefined();
+        expect(formInstance.count().max?.()).toBeUndefined();
+        expect(formInstance.code().minLength?.()).toBeUndefined();
+        expect(formInstance().valid()).toBe(true);
+
+        mockEntity.set({ ...formValue(), other: true });
+        expect(formInstance.age().min?.()).toBe(18);
+        expect(formInstance.count().max?.()).toBe(50);
+        expect(formInstance.code().minLength?.()).toBe(3);
+        expect(formInstance.age().errors()[0]?.kind).toBe('min');
+        expect(formInstance.count().errors()[0]?.kind).toBe('max');
+        expect(formInstance.code().errors()[0]?.kind).toBe('minLength');
+      });
+    });
+
+    it('applies pattern natively with string and RegExp values gated by when', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ codeA: '123', codeB: '456', other: false });
+        mockEntity.set({ ...formValue() });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'pattern', value: '^[a-z]+$', when: crossFieldWhen }, path.codeA);
+            applyValidator({ type: 'pattern', value: /^[a-z]+$/, when: crossFieldWhen }, path.codeB);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.codeA().errors()).toEqual([]);
+        expect(formInstance.codeB().errors()).toEqual([]);
+
+        mockEntity.set({ ...formValue(), other: true });
+        expect(formInstance.codeA().errors()[0]?.kind).toBe('pattern');
+        expect(formInstance.codeB().errors()[0]?.kind).toBe('pattern');
+      });
+    });
+
+    it('toggles field().required() reactively for required with a cross-field when', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ name: '', other: false });
+        mockEntity.set({ name: '', other: false });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'required', when: crossFieldWhen }, path.name);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.name().required()).toBe(false);
+        expect(formInstance.name().errors()).toEqual([]);
+
+        mockEntity.set({ name: '', other: true });
+        expect(formInstance.name().required()).toBe(true);
+        expect(formInstance.name().errors()[0]?.kind).toBe('required');
+      });
+    });
+
+    it('applies email natively gated by a cross-field when', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ contact: 'not-an-email', other: false });
+        mockEntity.set({ ...formValue() });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'email', when: crossFieldWhen }, path.contact);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.contact().errors()).toEqual([]);
+
+        mockEntity.set({ ...formValue(), other: true });
+        expect(formInstance.contact().errors()[0]?.kind).toBe('email');
+      });
+    });
+
+    it('honors a field-local when on maxLength (previously the when was ignored and maxLength applied unconditionally)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ name: 'ignore-me' });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(
+              { type: 'maxLength', value: 5, when: { type: 'javascript', expression: 'fieldValue !== "ignore-me"' } },
+              path.name,
+            );
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // Gate is false for the sentinel value: no error despite length > 5
+        expect(formInstance.name().errors()).toEqual([]);
+
+        formValue.set({ name: 'much too long' });
+        expect(formInstance.name().errors()[0]?.kind).toBe('maxLength');
+      });
+    });
+
+    it('applies both a non-cross-field dynamic value expression and a when gate', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ age: 10, other: false });
+        mockEntity.set({ age: 10, other: false });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'min', value: 1, expression: '18', when: crossFieldWhen }, path.age);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.age().errors()).toEqual([]);
+
+        mockEntity.set({ age: 10, other: true });
+        const errors = formInstance.age().errors();
+        expect(errors[0]?.kind).toBe('min');
+        // Dynamic value expression wins over the static value
+        expect((errors[0] as unknown as Record<string, unknown>)['min']).toBe(18);
+      });
+    });
+
+    it('combines multiple conditional maxLength validators with a static one on the same field', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ name: 'x'.repeat(12), gateA: false, gateB: false });
+        mockEntity.set({ ...formValue() });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'maxLength', value: 10 }, path.name);
+            applyValidator(
+              { type: 'maxLength', value: 5, when: { type: 'javascript', expression: 'formValue.gateA === true' } },
+              path.name,
+            );
+            applyValidator(
+              { type: 'maxLength', value: 3, when: { type: 'javascript', expression: 'formValue.gateB === true' } },
+              path.name,
+            );
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // Only the static rule active
+        expect(formInstance.name().maxLength?.()).toBe(10);
+        expect(formInstance.name().errors()).toHaveLength(1);
+
+        // gateA active: metadata is the min of active contributions, errors independent
+        mockEntity.set({ ...formValue(), gateA: true });
+        expect(formInstance.name().maxLength?.()).toBe(5);
+        expect(formInstance.name().errors()).toHaveLength(2);
+
+        mockEntity.set({ ...formValue(), gateA: true, gateB: true });
+        expect(formInstance.name().maxLength?.()).toBe(3);
+        expect(formInstance.name().errors()).toHaveLength(3);
+        expect(
+          formInstance
+            .name()
+            .errors()
+            .every((e) => e.kind === 'maxLength'),
+        ).toBe(true);
+      });
+    });
+
+    it('applies custom functionName validators natively with a cross-field when gate', () => {
+      runInInjectionContext(injector, () => {
+        const registry = TestBed.inject(FunctionRegistryService);
+        registry.registerValidator('alwaysFails', () => ({ kind: 'customFail' }));
+
+        const formValue = signal({ name: 'value', other: false });
+        mockEntity.set({ name: 'value', other: false });
+        const config: ValidatorConfig = { type: 'custom', functionName: 'alwaysFails', when: crossFieldWhen };
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(config, path.name);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.name().errors()).toEqual([]);
+
+        mockEntity.set({ name: 'value', other: true });
+        expect(formInstance.name().errors()[0]?.kind).toBe('customFail');
+      });
+    });
+
+    it('pins native required semantics: false fails, whitespace-only passes', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ accepted: false, note: '  ', other: true });
+        mockEntity.set({ ...formValue() });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'required', when: crossFieldWhen }, path.accepted);
+            applyValidator({ type: 'required', when: crossFieldWhen }, path.note);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.accepted().errors()[0]?.kind).toBe('required');
+        expect(formInstance.note().errors()).toEqual([]);
+      });
+    });
+  });
+
   describe('declarative HTTP validator callback behavior', () => {
     // These tests mock validateHttp to capture the options object and verify
     // the behavior of request/onSuccess/onError callbacks in isolation.

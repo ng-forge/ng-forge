@@ -577,7 +577,9 @@ describe('schema-builder', () => {
         ).not.toThrow();
       });
 
-      it('should include the constraint value on conditional built-in cross-field errors', () => {
+      it('should ignore non-custom validator entries in the cross-field tree with a warning', () => {
+        // Conditional built-ins are applied natively now; the collector never routes
+        // them to the tree. Hand-built raw entries hit the guard and are ignored.
         interface NameForm {
           name: string;
           other: string;
@@ -604,8 +606,94 @@ describe('schema-builder', () => {
           { type: 'input', key: 'other' },
         ];
 
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
         runInInjectionContext(injector, () => {
           const model = signal<NameForm>({ name: 'way too long', other: 'yes' });
+          const schema = createSchemaFromFields<NameForm>(fields, registry, { crossFieldValidators });
+          const formInstance = form(model, schema);
+
+          const errors = formInstance.name().errors();
+          expect(errors.find((error) => error.kind === 'maxLength')).toBeUndefined();
+          expect(warnSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('Unexpected non-custom validator'));
+        });
+
+        warnSpy.mockRestore();
+      });
+
+      it('should warn about non-custom tree entries once at schema build, not per validation run', () => {
+        interface NameForm {
+          name: string;
+          other: string;
+        }
+
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'name',
+            config: {
+              type: 'maxLength' as const,
+              value: 5,
+              when: {
+                type: 'fieldValue' as const,
+                fieldPath: 'other',
+                operator: 'equals' as const,
+                value: 'yes',
+              },
+            },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'name' },
+          { type: 'input', key: 'other' },
+        ];
+
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+        runInInjectionContext(injector, () => {
+          const model = signal<NameForm>({ name: 'first', other: 'yes' });
+          const schema = createSchemaFromFields<NameForm>(fields, registry, { crossFieldValidators });
+          const formInstance = form(model, schema);
+
+          formInstance.name().errors();
+          model.set({ name: 'second value', other: 'no' });
+          formInstance.name().errors();
+          model.set({ name: 'third value here', other: 'yes' });
+          formInstance.name().errors();
+
+          const guardWarnings = warnSpy.mock.calls.filter((call) => String(call[1]).includes('Unexpected non-custom validator'));
+          expect(guardWarnings).toHaveLength(1);
+        });
+
+        warnSpy.mockRestore();
+      });
+
+      it('should include the constraint value on converted built-in cross-field expression errors', () => {
+        interface NameForm {
+          name: string;
+          limit: number;
+        }
+
+        // Shape produced by the collector for built-in + cross-field expression
+        const crossFieldValidators = [
+          {
+            sourceFieldKey: 'name',
+            config: {
+              type: 'custom' as const,
+              expression: 'fieldValue == null || fieldValue.length <= (formValue.limit)',
+              kind: 'maxLength',
+              errorParams: { maxLength: 'formValue.limit' },
+            },
+          },
+        ];
+
+        const fields: FieldDef<any>[] = [
+          { type: 'input', key: 'name' },
+          { type: 'input', key: 'limit' },
+        ];
+
+        runInInjectionContext(injector, () => {
+          const model = signal<NameForm>({ name: 'way too long', limit: 5 });
           const schema = createSchemaFromFields<NameForm>(fields, registry, { crossFieldValidators });
           const formInstance = form(model, schema);
 

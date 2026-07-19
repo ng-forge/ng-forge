@@ -151,6 +151,8 @@ export function createDebouncedLogicFunction<TValue>(expression: ConditionalExpr
   }
 
   const fn: LogicFn<TValue, boolean> = (ctx: FieldContext<TValue>) => {
+    // debouncedSignalStore keys are per-field-path only; the key must also include the
+    // serialized expression before validator when + debounceMs ever routes through here
     const contextKey = safeReadPathKeys(ctx as FieldContext<unknown>).join('.');
     let signalPair = cacheService.debouncedSignalStore.get(contextKey);
 

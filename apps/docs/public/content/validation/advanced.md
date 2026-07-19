@@ -59,6 +59,8 @@ Activate validators only when conditions are met.
 
 The max validator only applies when `discountType === 'percentage'`.
 
+Conditional built-in validators are applied through Angular Signal Forms' native `when` support. While the condition is active, the field exposes its constraint state (for example the `maxlength` attribute and `field().maxLength()`), and error messages can interpolate the constraint with placeholders like `{{max}}` or `{{requiredLength}}`.
+
 ### Based on Form Value
 
 Validate against the entire form state:
