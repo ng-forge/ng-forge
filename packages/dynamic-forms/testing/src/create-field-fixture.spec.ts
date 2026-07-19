@@ -6,7 +6,7 @@ import { FormEvent } from '@ng-forge/dynamic-forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { injectNgForgeAction, injectNgForgeField, NgForgeActionHost, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeActionFixture, createNgForgeFieldFixture, provideTestValidationMessages } from './create-field-fixture';
-import { ZonelessTestModule } from '../../../src/test-setup';
+import { ZonelessTestModule } from '../../src/test-setup';
 
 @Component({
   selector: 'test-harness-field',
