@@ -169,7 +169,7 @@ Both harnesses defer `detectChanges()` to the caller so you can set extra compon
 
 ### Running the fixtures under Vitest
 
-Vitest externalizes packages from `node_modules` by default while inlining your specs. That gives the fixtures a second copy of `@angular/core/testing` whose test environment your setup file never initialized, and the first TestBed call crashes with `Cannot read properties of null (reading 'ngModule')`. Inline the package so your specs and the fixtures share one testing instance:
+Vitest externalizes packages from `node_modules` by default while inlining your specs. That gives the fixtures a second copy of `@angular/core/testing` whose test environment your setup file never initialized, and the first TestBed call crashes with `Cannot read properties of null (reading 'ngModule')`. Inline the `/testing` entrypoint so your specs and the fixtures share one testing instance:
 
 ```typescript
 // vitest.config.ts
@@ -177,10 +177,12 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    server: { deps: { inline: ['@ng-forge/dynamic-forms'] } },
+    server: { deps: { inline: [/@ng-forge\/dynamic-forms\/testing/] } },
   },
 });
 ```
+
+Inline only the `/testing` entrypoint, not the whole package. The testing bundle contains no compiled components, so it passes through Vitest's transform untouched. Inlining the full package also routes the partial-compilation component bundles through esbuild, which does not run the Angular linker, and components then fail at runtime with input binding errors. If you do need the whole package inlined, use a linker-aware plugin such as `@analogjs/vite-plugin-angular`.
 
 ## Going further
 
