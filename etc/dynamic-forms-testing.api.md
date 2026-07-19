@@ -12,6 +12,7 @@ import { Provider } from '@angular/core';
 import { SchemaPath } from '@angular/forms/signals';
 import { Signal } from '@angular/core';
 import { Type } from '@angular/core';
+import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { WritableSignal } from '@angular/core';
 
 // @public
