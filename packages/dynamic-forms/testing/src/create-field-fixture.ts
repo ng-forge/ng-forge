@@ -2,7 +2,7 @@ import { EnvironmentInjector, Provider, runInInjectionContext, signal, type Type
 import { ComponentFixture, getTestBed, TestBed } from '@angular/core/testing';
 import { type FieldTree, form, schema, type SchemaPath } from '@angular/forms/signals';
 import { type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
-import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { EventBus, DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_VALIDATION_MESSAGES, type DynamicText, type ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 
 /** Structural copy of integration's EventArgs; importing it would cycle the entrypoints. */
@@ -32,8 +32,8 @@ export interface NgForgeFieldFixture<C, TValue = unknown> {
 /** Guards against a second, uninitialized @angular/core/testing instance (Vitest externalization). */
 function assertTestEnvironmentInitialized(): void {
   if (getTestBed().platform) return;
-  throw new Error(
-    '[Dynamic Forms] The Angular test environment was never initialized for the @angular/core/testing instance this fixture resolved. ' +
+  throw new DynamicFormError(
+    'The Angular test environment was never initialized for the @angular/core/testing instance this fixture resolved. ' +
       'Under Vitest this typically means your specs are inlined but the fixtures are externalized, creating a second testing instance. ' +
       "Fix: inline the /testing entrypoint via Vitest's server.deps.inline:\n" +
       'test: { server: { deps: { inline: [/@ng-forge\\/dynamic-forms\\/testing/] } } }\n' +
