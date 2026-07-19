@@ -3,7 +3,7 @@ import { ArrayField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeSimplifiedArrays } from '../../utils/array-field/normalize-simplified-arrays';
 import { RowField } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
-import { createSimpleTestField, TestFieldComponent } from '../../../../testing/src/simple-test-utils';
+import { createSimpleTestField, TestFieldComponent } from '../../../../test-utils/src/simple-test-utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
 import { form } from '@angular/forms/signals';

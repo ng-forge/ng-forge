@@ -32,13 +32,16 @@ Signal Forms are stable as of Angular 22. The `0.x` line targets Angular 21, whe
 | `@ng-forge/dynamic-forms`             | Form consumers     | Public API, governed by semver   |
 | `@ng-forge/dynamic-forms/schema`      | Form consumers     | Public API, governed by semver   |
 | `@ng-forge/dynamic-forms/integration` | UI adapter authors | Public API, governed by semver   |
+| `@ng-forge/dynamic-forms/testing`     | Component authors  | Public API, governed by semver   |
 | `@ng-forge/dynamic-forms/internal`    | None (build-time)  | Unsupported, no semver guarantee |
 
 The `/schema` entrypoint is a supported, semver-governed surface for using [Standard Schema](https://standardschema.dev) validation libraries (Zod, Valibot, ArkType) with dynamic forms via `standardSchema()`.
 
+The `/testing` entrypoint provides test fixtures (`createNgForgeFieldFixture`, `createNgForgeActionFixture`, `provideTestValidationMessages`) for unit testing custom field and action components. The same symbols are still re-exported from `/integration` for backwards compatibility, but those aliases are deprecated and will be removed in the next major.
+
 The `/internal` entrypoint is an unsupported build surface with no semver guarantee. It is published only because shared DI tokens, services, and config types must keep a single compiled identity across the public bundles. Its contents may change or be removed in any release, including patch releases.
 
-Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers) or `@ng-forge/dynamic-forms/integration` (UI adapter authors).
+Import only from `@ng-forge/dynamic-forms` and `@ng-forge/dynamic-forms/schema` (form consumers), `@ng-forge/dynamic-forms/integration` (UI adapter authors), or `@ng-forge/dynamic-forms/testing` (component tests).
 
 ## Installation
 

@@ -4,11 +4,9 @@ import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-
 import { required } from '@angular/forms/signals';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NgForgeActionHost, NgForgeFieldHost } from '../directives/host-directive-presets';
-import { injectNgForgeField } from '../directives/ng-forge-field.directive';
-import { injectNgForgeAction } from '../directives/ng-forge-action.directive';
+import { injectNgForgeAction, injectNgForgeField, NgForgeActionHost, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { createNgForgeActionFixture, createNgForgeFieldFixture, provideTestValidationMessages } from './create-field-fixture';
-import { ZonelessTestModule } from '../../../src/test-setup';
+import { ZonelessTestModule } from '../../src/test-setup';
 
 @Component({
   selector: 'test-harness-field',

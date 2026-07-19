@@ -11,7 +11,7 @@ import { RootFormRegistryService } from '../registry/root-form-registry.service'
 import { FormStateManager } from '../../../../../src/lib/state/form-state-manager';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '../http/http-condition-cache';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
-import { createMockLogger, MockLogger } from '../../../../../testing/src/mock-logger';
+import { createMockLogger, MockLogger } from '../../../../../test-utils/src/mock-logger';
 import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tracker';
 import { createWarningTracker } from '../../utils/warning-tracker';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';

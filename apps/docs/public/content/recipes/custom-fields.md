@@ -121,11 +121,11 @@ Custom fields work with everything the built-in field types do (validation, deri
 
 The form engine's outlet always binds `field` and `key` before triggering the first change-detection pass. Components instantiated directly (TestBed, Storybook, sandbox harnesses) bypass that ordering, so `NgForgeField`'s host bindings hit `input.required<>()` on first read and throw NG0950.
 
-Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/integration` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
+Use `createNgForgeFieldFixture` from `@ng-forge/dynamic-forms/testing` to build the fixture with `field` + `key` already bound. The harness wraps your value in a one-key form via `form()` in an injection context, sets the required inputs, and hands you back the fixture for assertions:
 
 ```typescript
 import { required } from '@angular/forms/signals';
-import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
+import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/testing';
 import RichTextFieldComponent from './rich-text-field.component';
 
 describe('RichTextFieldComponent', () => {
@@ -148,7 +148,7 @@ describe('RichTextFieldComponent', () => {
 For action / button components there's a sibling `createNgForgeActionFixture`:
 
 ```typescript
-import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/integration';
+import { createNgForgeActionFixture } from '@ng-forge/dynamic-forms/testing';
 import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
 import SubmitButtonComponent from './my-submit-button.component';
 
@@ -169,7 +169,9 @@ Both harnesses defer `detectChanges()` to the caller so you can set extra compon
 
 ### Running the fixtures under Vitest
 
-Vitest externalizes packages from `node_modules` by default while inlining your specs. That gives the fixtures a second copy of `@angular/core/testing` whose test environment your setup file never initialized, and the first TestBed call crashes with `Cannot read properties of null (reading 'ngModule')`. Inline the package so your specs and the fixtures share one testing instance:
+In a default Vitest setup (no dependency inlining) the fixtures work as-is: Vitest externalizes both Angular and `@ng-forge/dynamic-forms`, so specs and fixtures share one `@angular/core/testing` instance.
+
+Some setups instead pull Angular through Vite's transform pipeline (a `deps.inline` pattern, an alias, or a plugin). Your specs then use a transformed copy of `@angular/core/testing` while the externalized fixtures load the native one, and the first fixture call throws the library's "test environment was never initialized" error. Inlining only part of the graph trades that error for another dual-instance error, so inline all of it:
 
 ```typescript
 // vitest.config.ts
@@ -177,10 +179,12 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    server: { deps: { inline: ['@ng-forge/dynamic-forms'] } },
+    server: { deps: { inline: [/@angular\//, /@ng-forge/, 'ngxtension'] } },
   },
 });
 ```
+
+Inlined library bundles bypass the Angular linker, so keep `import '@angular/compiler';` as the first import of your test setup file (the JIT compiler links the declarations at runtime), or use a linker-aware plugin such as `@analogjs/vite-plugin-angular`.
 
 ## Going further
 

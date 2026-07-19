@@ -56,6 +56,7 @@ export default defineConfig(({ mode }) => {
         'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
         'integration/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
         'internal/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+        'testing/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       ],
       reporters: ['default'],
       coverage: {

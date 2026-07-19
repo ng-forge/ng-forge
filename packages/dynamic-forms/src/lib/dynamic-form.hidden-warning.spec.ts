@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { delay } from '@ng-forge/utils';
 import { DynamicForm } from './dynamic-form.component';
-import { SimpleTestUtils, TestFormConfig } from '../../testing/src/simple-test-utils';
-import TestInputHarnessComponent from '../../testing/src/harnesses/test-input.harness';
+import { SimpleTestUtils, TestFormConfig } from '../../test-utils/src/simple-test-utils';
+import TestInputHarnessComponent from '../../test-utils/src/harnesses/test-input.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
@@ -13,7 +13,7 @@ import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: 'input',
-    loadComponent: () => import('../../testing/src/harnesses/test-input.harness').then((m) => m.default),
+    loadComponent: () => import('../../test-utils/src/harnesses/test-input.harness').then((m) => m.default),
     mapper: valueFieldMapper,
   },
 ];
