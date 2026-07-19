@@ -1145,24 +1145,30 @@ export interface ValidationExecutionConfig {
     readonly validateWhenHidden?: boolean;
 }
 
+// @public
+export type ValidationMessage = DynamicText | ValidationMessageResolver;
+
+// @public
+export type ValidationMessageResolver = (error: ValidationError) => DynamicText;
+
 // @public (undocumented)
 export interface ValidationMessages {
     // (undocumented)
-    [key: string]: DynamicText | undefined;
+    [key: string]: ValidationMessage | undefined;
     // (undocumented)
-    email?: DynamicText;
+    email?: ValidationMessage;
     // (undocumented)
-    max?: DynamicText;
+    max?: ValidationMessage;
     // (undocumented)
-    maxLength?: DynamicText;
+    maxLength?: ValidationMessage;
     // (undocumented)
-    min?: DynamicText;
+    min?: ValidationMessage;
     // (undocumented)
-    minLength?: DynamicText;
+    minLength?: ValidationMessage;
     // (undocumented)
-    pattern?: DynamicText;
+    pattern?: ValidationMessage;
     // (undocumented)
-    required?: DynamicText;
+    required?: ValidationMessage;
 }
 
 // @public

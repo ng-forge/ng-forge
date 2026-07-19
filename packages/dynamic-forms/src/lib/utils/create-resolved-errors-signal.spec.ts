@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal } from '@angular/core';
-import type { FieldTree, SchemaPath } from '@angular/forms/signals';
+import type { FieldTree, SchemaPath, ValidationError } from '@angular/forms/signals';
 import { form, schema, validate, requiredError } from '@angular/forms/signals';
+import { of } from 'rxjs';
 import { createResolvedErrorsSignal } from '@ng-forge/dynamic-forms/integration';
-import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import { ValidationMessage, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
@@ -242,6 +243,187 @@ describe('createResolvedErrorsSignal', () => {
         TestBed.flushEffects();
 
         expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator: required from validator' }]);
+      });
+    });
+  });
+
+  describe('function messages', () => {
+    /** Form with a single maxLength(5)-violating field, returning its FieldTree signal */
+    function createMaxLengthField() {
+      const initialValue = signal({ username: 'exceeds five' });
+      const testForm = form(
+        initialValue,
+        schema<{ username: string }>((path) => {
+          // Cast is safe: the schema generic declares `username: string`, so the field path is SchemaPath<string>
+          applyValidator({ type: 'maxLength', value: 5 }, path.username as SchemaPath<string>);
+        }),
+      );
+      return signal((testForm as unknown as Record<string, FieldTree<string>>)['username']);
+    }
+
+    it('should pass the validation error to the function and resolve its returned string', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        let receivedError: ValidationError | undefined;
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: (error) => {
+            receivedError = error;
+            const { maxLength } = error as ValidationError & { maxLength: number };
+            return `Must be at most ${maxLength} characters`;
+          },
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(receivedError?.kind).toBe('maxLength');
+        expect((receivedError as (ValidationError & { maxLength?: number }) | undefined)?.maxLength).toBe(5);
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Must be at most 5 characters' }]);
+      });
+    });
+
+    it('should resolve a function returning an Observable<string> (i18n case)', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: (error) => {
+            const { maxLength } = error as ValidationError & { maxLength: number };
+            return of(`Translated: at most ${maxLength} characters`);
+          },
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Translated: at most 5 characters' }]);
+      });
+    });
+
+    it('should resolve a function returning a Signal<string>', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: (error) => {
+            const { maxLength } = error as ValidationError & { maxLength: number };
+            return signal(`Signal: at most ${maxLength} characters`);
+          },
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Signal: at most 5 characters' }]);
+      });
+    });
+
+    it('should let a field-level function win over a default-level function', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: () => 'Field-level function message',
+        });
+        const defaultMessages = signal<ValidationMessages>({
+          maxLength: () => 'Default-level function message',
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, defaultMessages);
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Field-level function message' }]);
+      });
+    });
+
+    it('should keep plain DynamicText messages working unchanged alongside functions', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: 'Plain: too long ({{requiredLength}} max)',
+          required: () => 'Unrelated function message',
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Plain: too long (5 max)' }]);
+      });
+    });
+
+    it('should interpolate {{param}} placeholders left in a function-returned string', () => {
+      runInInjectionContext(injector, () => {
+        const usernameField = createMaxLengthField();
+
+        const fieldMessages = signal<ValidationMessages>({
+          maxLength: () => 'Function: at most {{requiredLength}} characters',
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(usernameField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'maxLength', message: 'Function: at most 5 characters' }]);
+      });
+    });
+
+    /** Form whose required validator attaches its own error.message, returning its FieldTree signal */
+    function createRequiredFieldWithMessage() {
+      const initialValue = signal({ email: '' });
+      const testForm = form(
+        initialValue,
+        schema<{ email: string }>((path) => {
+          validate(path.email as SchemaPath<string>, () => requiredError({ message: 'Validator fallback message' }));
+        }),
+      );
+      return signal((testForm as unknown as Record<string, FieldTree<string>>)['email']);
+    }
+
+    it('should fall back to error.message and log when a function throws', () => {
+      runInInjectionContext(injector, () => {
+        const emailField = createRequiredFieldWithMessage();
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const fieldMessages = signal<ValidationMessages>({
+          required: () => {
+            throw new Error('resolver boom');
+          },
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        // A throwing resolver must not break the stream; it falls back to error.message
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator fallback message' }]);
+        expect(errorSpy).toHaveBeenCalledWith('[Dynamic Forms]', expect.stringContaining('threw'), expect.any(Error));
+
+        errorSpy.mockRestore();
+      });
+    });
+
+    it('should fall back to error.message when a function returns null', () => {
+      runInInjectionContext(injector, () => {
+        const emailField = createRequiredFieldWithMessage();
+
+        const fieldMessages = signal<ValidationMessages>({
+          // Type-forbidden but reachable from JS: a resolver returning null
+          required: (() => null) as unknown as ValidationMessage,
+        });
+
+        const resolvedErrors = createResolvedErrorsSignal(emailField, fieldMessages, signal<ValidationMessages>({}));
+
+        TestBed.flushEffects();
+
+        expect(resolvedErrors()).toEqual([{ kind: 'required', message: 'Validator fallback message' }]);
       });
     });
   });

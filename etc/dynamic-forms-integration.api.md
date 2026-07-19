@@ -26,7 +26,7 @@ import { StandardSchemaV1 } from '@standard-schema/spec';
 import { TemplateRef } from '@angular/core';
 import { TreeValidationResult } from '@angular/forms/signals';
 import { Type } from '@angular/core';
-import { ValidationError } from '@angular/forms/signals';
+import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
@@ -581,7 +581,7 @@ export type InputType = Extract<HtmlInputType, 'email' | 'number' | 'password' |
 export function insertArrayItemButtonMapper<TProps>(fieldDef: BaseInsertArrayItemButtonField<TProps>): Signal<Record<string, unknown>>;
 
 // @public
-export function interpolateParams(message: string, error: ValidationError_2): string;
+export function interpolateParams(message: string, error: ValidationError): string;
 
 // @public (undocumented)
 export function isCheckedField<TProps, TMeta extends FieldMeta = FieldMeta>(field: FieldDef<TProps, TMeta>): field is BaseCheckedField<TProps, TMeta, boolean>;

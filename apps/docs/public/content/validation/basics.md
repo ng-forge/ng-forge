@@ -243,6 +243,27 @@ Use signals or observables for i18n:
 }
 ```
 
+### Function Messages
+
+Every message value can also be a function of the validation error. The function receives the error object, including params like `maxLength` or `min`, and returns a string, `Observable<string>`, or `Signal<string>`. Use this to pass error params to a translation library natively:
+
+```typescript
+{
+  key: 'username',
+  type: 'input',
+  value: '',
+  maxLength: 20,
+  validationMessages: {
+    maxLength: (error) =>
+      this.transloco.selectTranslate('validation.maxLength', {
+        requiredLength: 'maxLength' in error ? error.maxLength : undefined,
+      }),
+  },
+}
+```
+
+Plain string templates with `{{param}}` placeholders keep working and remain the right choice for JSON-serialized configs, since functions cannot be serialized. See [i18n](/dynamic-behavior/i18n) for the full pattern.
+
 ## Quick Examples
 
 ### User Registration
