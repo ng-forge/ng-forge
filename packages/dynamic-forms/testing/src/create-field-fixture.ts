@@ -2,11 +2,19 @@ import { EnvironmentInjector, Provider, runInInjectionContext, signal, type Type
 import { ComponentFixture, getTestBed, TestBed } from '@angular/core/testing';
 import { type FieldTree, form, schema, type SchemaPath } from '@angular/forms/signals';
 import { type FormEvent, type FormEventConstructor } from '@ng-forge/dynamic-forms';
-import { EventBus, DynamicFormError } from '@ng-forge/dynamic-forms/internal';
+import { EventBus, DynamicFormError, DynamicFormLogger, type Logger } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_VALIDATION_MESSAGES, type DynamicText, type ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 
 /** Structural copy of integration's EventArgs; importing it would cycle the entrypoints. */
 type EventArgs = readonly (string | number | boolean | null | undefined)[];
+
+/** Default logger so fixtures work without provideDynamicForm(); override via options.providers. */
+const fixtureLogger: Logger = {
+  debug: (message, ...args) => console.debug('[Dynamic Forms]', message, ...args),
+  info: (message, ...args) => console.info('[Dynamic Forms]', message, ...args),
+  warn: (message, ...args) => console.warn('[Dynamic Forms]', message, ...args),
+  error: (message, ...args) => console.error('[Dynamic Forms]', message, ...args),
+};
 
 export interface CreateNgForgeFieldFixtureOptions<TValue = unknown> {
   /** Field key. Becomes the only property on the wrapping form. */
@@ -34,9 +42,10 @@ function assertTestEnvironmentInitialized(): void {
   if (getTestBed().platform) return;
   throw new DynamicFormError(
     'The Angular test environment was never initialized for the @angular/core/testing instance this fixture resolved. ' +
-      'Under Vitest this typically means your specs are inlined but the fixtures are externalized, creating a second testing instance. ' +
-      "Fix: inline the /testing entrypoint via Vitest's server.deps.inline:\n" +
-      'test: { server: { deps: { inline: [/@ng-forge\\/dynamic-forms\\/testing/] } } }\n' +
+      'Under Vitest this means your specs use a Vite-transformed copy of @angular/core/testing while the fixtures load the native one. ' +
+      'Fix: either remove @angular/* from server.deps.inline so everything resolves natively, or inline the whole Angular graph:\n' +
+      "test: { server: { deps: { inline: [/@angular\\//, /@ng-forge/, 'ngxtension'] } } }\n" +
+      "and keep import '@angular/compiler' in your test setup so the inlined bundles JIT-link.\n" +
       'On Jest or Karma this instead means initTestEnvironment was never called; add it to your test setup file (e.g. getTestBed().initTestEnvironment(...)).',
   );
 }
@@ -51,7 +60,10 @@ export function createNgForgeFieldFixture<C, TValue = unknown>(
   options: CreateNgForgeFieldFixtureOptions<TValue>,
 ): NgForgeFieldFixture<C, TValue> {
   assertTestEnvironmentInitialized();
-  TestBed.configureTestingModule({ imports: [component], providers: [...(options.providers ?? [])] });
+  TestBed.configureTestingModule({
+    imports: [component],
+    providers: [{ provide: DynamicFormLogger, useValue: fixtureLogger }, ...(options.providers ?? [])],
+  });
 
   const key = options.key;
   const rootValue = signal<Record<string, TValue>>({ [key]: options.value as TValue });
@@ -110,7 +122,10 @@ export function createNgForgeActionFixture<C, TEvent extends FormEvent = FormEve
   options: CreateNgForgeActionFixtureOptions<TEvent>,
 ): NgForgeActionFixture<C> {
   assertTestEnvironmentInitialized();
-  TestBed.configureTestingModule({ imports: [component], providers: [EventBus, ...(options.providers ?? [])] });
+  TestBed.configureTestingModule({
+    imports: [component],
+    providers: [EventBus, { provide: DynamicFormLogger, useValue: fixtureLogger }, ...(options.providers ?? [])],
+  });
 
   const fixture = TestBed.createComponent(component);
   fixture.componentRef.setInput('key', options.key);

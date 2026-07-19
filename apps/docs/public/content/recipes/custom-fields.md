@@ -169,7 +169,9 @@ Both harnesses defer `detectChanges()` to the caller so you can set extra compon
 
 ### Running the fixtures under Vitest
 
-Vitest externalizes packages from `node_modules` by default while inlining your specs. That gives the fixtures a second copy of `@angular/core/testing` whose test environment your setup file never initialized, and the first TestBed call crashes with `Cannot read properties of null (reading 'ngModule')`. Inline the `/testing` entrypoint so your specs and the fixtures share one testing instance:
+In a default Vitest setup (no dependency inlining) the fixtures work as-is: Vitest externalizes both Angular and `@ng-forge/dynamic-forms`, so specs and fixtures share one `@angular/core/testing` instance.
+
+Some setups instead pull Angular through Vite's transform pipeline (a `deps.inline` pattern, an alias, or a plugin). Your specs then use a transformed copy of `@angular/core/testing` while the externalized fixtures load the native one, and the first fixture call throws the library's "test environment was never initialized" error. Inlining only part of the graph trades that error for another dual-instance error, so inline all of it:
 
 ```typescript
 // vitest.config.ts
@@ -177,12 +179,12 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    server: { deps: { inline: [/@ng-forge\/dynamic-forms\/testing/] } },
+    server: { deps: { inline: [/@angular\//, /@ng-forge/, 'ngxtension'] } },
   },
 });
 ```
 
-Inline only the `/testing` entrypoint, not the whole package. The testing bundle contains no compiled components, so it passes through Vitest's transform untouched. Inlining the full package also routes the partial-compilation component bundles through esbuild, which does not run the Angular linker, and components then fail at runtime with input binding errors. If you do need the whole package inlined, use a linker-aware plugin such as `@analogjs/vite-plugin-angular`.
+Inlined library bundles bypass the Angular linker, so keep `import '@angular/compiler';` as the first import of your test setup file (the JIT compiler links the declarations at runtime), or use a linker-aware plugin such as `@analogjs/vite-plugin-angular`.
 
 ## Going further
 
