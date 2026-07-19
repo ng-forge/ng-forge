@@ -25,7 +25,6 @@ const EXCLUDE = new Set<string>([
   './lib/core/http/http-response-evaluator',
   './lib/mappers/apply-hidden-logic',
   './lib/models/prettify',
-  './lib/utils/grid-classes/grid-classes',
   './lib/utils/grid-classes/index',
   './lib/utils/safe-read-path-keys',
   './lib/utils/stable-stringify',

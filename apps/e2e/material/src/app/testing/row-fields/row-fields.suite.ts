@@ -1,6 +1,7 @@
 import { TestSuite } from '../shared/types';
 import { rowBasicLayoutScenario } from './scenarios/row-basic-layout.scenario';
 import { rowContainingGroupScenario } from './scenarios/row-containing-group.scenario';
+import { rowWrappedColScenario } from './scenarios/row-wrapped-col.scenario';
 
 /**
  * Row Fields Suite
@@ -15,6 +16,7 @@ export const rowFieldsSuite: TestSuite = {
   scenarios: [
     // Basic Layout
     rowBasicLayoutScenario,
+    rowWrappedColScenario,
 
     // Nested Containers
     rowContainingGroupScenario,

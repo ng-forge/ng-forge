@@ -121,6 +121,7 @@ export * from './lib/utils/deprecation-warning-tracker';
 export * from './lib/utils/derived-from-deferred/derived-from-deferred';
 export * from './lib/utils/dynamic-text-to-observable';
 export * from './lib/utils/dynamic-value/resolve-dynamic-value';
+export * from './lib/utils/grid-classes/grid-classes';
 export * from './lib/utils/initialization-tracker/initialization-tracker';
 export * from './lib/utils/interpolate-params';
 export * from './lib/utils/object-utils';

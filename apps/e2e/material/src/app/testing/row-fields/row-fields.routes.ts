@@ -13,6 +13,11 @@ const routes: Routes = [
     data: { scenario: getRowFieldsScenario('row-basic-layout') },
   },
   {
+    path: 'row-wrapped-col',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getRowFieldsScenario('row-wrapped-col') },
+  },
+  {
     path: 'row-containing-group',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getRowFieldsScenario('row-containing-group') },

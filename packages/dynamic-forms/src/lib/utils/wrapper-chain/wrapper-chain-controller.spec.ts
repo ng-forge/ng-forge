@@ -115,7 +115,11 @@ interface ControllerFixture {
 }
 
 function setupController(
-  options: { registry?: Map<string, WrapperTypeDefinition>; cache?: Map<string, Type<unknown>> } = {},
+  options: {
+    registry?: Map<string, WrapperTypeDefinition>;
+    cache?: Map<string, Type<unknown>>;
+    outermostHostClasses?: WritableSignal<string | undefined>;
+  } = {},
 ): ControllerFixture {
   const registry = options.registry ?? new Map<string, WrapperTypeDefinition>();
   const cache = options.cache ?? new Map<string, Type<unknown>>();
@@ -161,6 +165,7 @@ function setupController(
       gate,
       rebuildKey,
       fieldInputs,
+      outermostHostClasses: options.outermostHostClasses,
       renderInnermost: (s) => {
         ref.innermostCalls++;
         ref.lastInnermostSlot = s;
@@ -420,6 +425,32 @@ describe('createWrapperChainController', () => {
 
     expect(beforeRebuildCount).toBe(1);
     fixture.destroy();
+  });
+
+  it('applies outermostHostClasses to the outermost wrapper on mount and reapplies on structural rebuild', async () => {
+    const registry = new Map<string, WrapperTypeDefinition>([
+      ['x', def('x', () => TestWrapX)],
+      ['y', def('y', () => TestWrapY)],
+    ]);
+    const cache = new Map<string, Type<unknown>>();
+    const outermostHostClasses = signal<string | undefined>('df-col-6');
+    const f = setupController({ registry, cache, outermostHostClasses });
+    f.wrappers.set([{ type: 'x' } as WrapperConfig]);
+    await flush();
+
+    const container = f.slot.element.nativeElement.parentElement as HTMLElement;
+    const outerX = container.querySelector('test-wrap-x') as HTMLElement | null;
+    expect(outerX?.classList.contains('df-col-6')).toBe(true);
+
+    // Structural rebuild with a different chain: the NEW outermost host gets the class.
+    f.wrappers.set([{ type: 'y' } as WrapperConfig, { type: 'x' } as WrapperConfig]);
+    await flush();
+
+    const outerY = container.querySelector('test-wrap-y') as HTMLElement | null;
+    const innerX = container.querySelector('test-wrap-x') as HTMLElement | null;
+    expect(outerY?.classList.contains('df-col-6')).toBe(true);
+    expect(innerX?.classList.contains('df-col-6')).toBe(false);
+    f.destroy();
   });
 
   it('clears the outer VCR on destroy', async () => {

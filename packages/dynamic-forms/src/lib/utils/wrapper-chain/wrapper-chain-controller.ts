@@ -48,6 +48,11 @@ export interface WrapperChainControllerOptions {
    */
   readonly fieldInjector?: Signal<Injector>;
   /**
+   * Grid classes (e.g. `df-col-6`) for the outermost wrapper host, sampled on
+   * each structural rebuild. Containers omit this.
+   */
+  readonly outermostHostClasses?: Signal<string | undefined>;
+  /**
    * Renders whatever belongs at the innermost slot (a field component, a children
    * template, …). Called each time the chain mounts or structurally rebuilds.
    */
@@ -209,6 +214,7 @@ function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyConte
     logger: deps.logger,
     fieldInputs: opts.fieldInputs?.(),
     fieldInjector: opts.fieldInjector?.(),
+    outermostHostClasses: opts.outermostHostClasses?.(),
     renderInnermost: opts.renderInnermost,
   });
   mounted.value = { wrappers: state.wrappers, rebuildKey: state.rebuildKey };

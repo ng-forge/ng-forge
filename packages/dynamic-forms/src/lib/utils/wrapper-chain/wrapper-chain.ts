@@ -124,6 +124,11 @@ export interface RenderWrapperChainOptions {
    * wrappers up the element hierarchy.
    */
   readonly fieldInjector?: Injector;
+  /**
+   * Classes added imperatively to the outermost wrapper host (the row's direct
+   * flex child, where grid CSS matches). Sampled at render time, not reactive.
+   */
+  readonly outermostHostClasses?: string;
   /** Renders whatever belongs at the innermost slot (a field component, a children template, …). */
   readonly renderInnermost: (slot: ViewContainerRef) => void;
 }
@@ -135,6 +140,13 @@ export interface RenderWrapperChainOptions {
 export function renderWrapperChain(options: RenderWrapperChainOptions): ComponentRef<unknown>[] {
   const refs: ComponentRef<unknown>[] = [];
   renderStep(options.outerContainer, options.loadedWrappers, options, refs);
+  // Empty chain = the field host itself is the flex child and already carries the class.
+  if (options.outermostHostClasses && refs.length > 0) {
+    const tokens = options.outermostHostClasses.split(/\s+/).filter(Boolean);
+    if (tokens.length > 0) {
+      (refs[0].location.nativeElement as HTMLElement).classList.add(...tokens);
+    }
+  }
   return refs;
 }
 

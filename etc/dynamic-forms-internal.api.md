@@ -317,6 +317,9 @@ export interface BinaryOpNode {
 export function buildBaseInputs(fieldDef: FieldDef<unknown>, defaultProps?: Record<string, unknown>): Record<string, unknown>;
 
 // @public
+export function buildClassName(fieldDef: FieldDef<unknown>): string | undefined;
+
+// @public
 export interface BuiltInValidatorConfig extends BaseValidatorConfig {
     expression?: string;
     type: 'email' | 'max' | 'maxLength' | 'min' | 'minLength' | 'pattern' | 'required';
@@ -1074,6 +1077,9 @@ export function getChangedKeys(previous: Record<string, unknown> | null | undefi
 
 // @public
 export function getFieldValueHandling(fieldType: string, registry: Map<string, FieldTypeDefinition>): ValueHandlingMode;
+
+// @public
+export function getGridClassString(fieldDef: FieldDef<unknown>): string;
 
 // @public
 export function getNestedValue(obj: unknown, path: string): unknown;
