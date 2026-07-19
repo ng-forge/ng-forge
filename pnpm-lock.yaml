@@ -208,6 +208,9 @@ importers:
       '@ionic/angular':
         specifier: 8.8.10
         version: 8.8.10(dddaf787869a6dd878181ea0c9a9a63f)
+      '@jsverse/transloco':
+        specifier: ^8.4.0
+        version: 8.4.0(@angular/core@22.0.1(@angular/compiler@22.0.1)(rxjs@7.8.2)(zone.js@0.16.1))(rxjs@7.8.2)(typescript@6.0.3)
       '@microsoft/api-extractor':
         specifier: ^7.58.9
         version: 7.58.9(@types/node@25.9.3)
@@ -2407,6 +2410,19 @@ packages:
     engines: {node: '>=10.0'}
     peerDependencies:
       tslib: '2'
+
+  '@jsverse/transloco-utils@8.4.0':
+    resolution: {integrity: sha512-0gJIpjX15a1UmBmwxHI3fXDu0VElU4FaunbYv6O13DOkhdSY8eV6Whdljokv5dJqXSLKdMxI624upkN13enKJg==}
+    engines: {node: '>=18'}
+
+  '@jsverse/transloco@8.4.0':
+    resolution: {integrity: sha512-dGeD2gkYqnSgbG/j6ILXCafgnrGbwcfgpL48m42DoemXutkuN2k/TFskaU27yNM9BeeaNX7zqQtFGdKmz/2wXw==}
+    peerDependencies:
+      '@angular/core': '>=16.0.0'
+      rxjs: '>=6.0.0'
+
+  '@jsverse/utils@1.0.0-beta.5':
+    resolution: {integrity: sha512-z7IdlV6BdSeF3Veii8Yyk64KuyTjNIQnFaW5PAhmDx0wN29lB2BFp8WO6+tJPLPjtlz2yKeNrjkp1XqnMPaeHA==}
 
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
@@ -12473,6 +12489,25 @@ snapshots:
       '@jsonjoy.com/buffers': 17.67.0(tslib@2.8.1)
       '@jsonjoy.com/codegen': 17.67.0(tslib@2.8.1)
       tslib: 2.8.1
+
+  '@jsverse/transloco-utils@8.4.0(typescript@6.0.3)':
+    dependencies:
+      cosmiconfig: 8.3.6(typescript@6.0.3)
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - typescript
+
+  '@jsverse/transloco@8.4.0(@angular/core@22.0.1(@angular/compiler@22.0.1)(rxjs@7.8.2)(zone.js@0.16.1))(rxjs@7.8.2)(typescript@6.0.3)':
+    dependencies:
+      '@angular/core': 22.0.1(@angular/compiler@22.0.1)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@jsverse/transloco-utils': 8.4.0(typescript@6.0.3)
+      '@jsverse/utils': 1.0.0-beta.5
+      rxjs: 7.8.2
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - typescript
+
+  '@jsverse/utils@1.0.0-beta.5': {}
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
