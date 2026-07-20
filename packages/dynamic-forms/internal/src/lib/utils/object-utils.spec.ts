@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { deepMergeDefaults, omit, keyBy, mapValues, memoize } from './object-utils';
+import { deepMergeDefaults, getChangedKeys, isEqual, omit, keyBy, mapValues, memoize } from './object-utils';
 
 describe('object-utils', () => {
   describe('omit', () => {
@@ -471,6 +471,58 @@ describe('object-utils', () => {
       const result = deepMergeDefaults(defaults, value);
 
       expect(result).toEqual({ a: 2 });
+    });
+  });
+
+  describe('isEqual', () => {
+    it('should compare nested structures deeply', () => {
+      expect(isEqual({ a: { b: [1, 2] } }, { a: { b: [1, 2] } })).toBe(true);
+      expect(isEqual({ a: { b: [1, 2] } }, { a: { b: [1, 3] } })).toBe(false);
+    });
+
+    // Angular Signal Forms stamps enumerable symbol-keyed tracking metadata onto
+    // array item value objects (childValue[identitySymbol] ??= Symbol(...)), so
+    // value comparison must ignore symbol keys or write-back loops never converge.
+    it('should ignore symbol-keyed metadata on otherwise equal objects', () => {
+      const stamped: Record<string | symbol, unknown> = { name: 'first', count: 2 };
+      stamped[Symbol('tracking')] = Symbol('id:1');
+
+      expect(isEqual(stamped, { name: 'first', count: 2 })).toBe(true);
+    });
+
+    it('should ignore symbol metadata stamped under different keys on both sides', () => {
+      const a: Record<string | symbol, unknown> = { name: 'item' };
+      a[Symbol('tracking')] = Symbol('id:1');
+      const b: Record<string | symbol, unknown> = { name: 'item' };
+      b[Symbol('tracking')] = Symbol('id:2');
+
+      expect(isEqual(a, b)).toBe(true);
+    });
+
+    it('should ignore symbol metadata on array items', () => {
+      const stampedItem: Record<string | symbol, unknown> = { label: 'a' };
+      stampedItem[Symbol('tracking')] = Symbol('id:1');
+
+      expect(isEqual([stampedItem, { label: 'b' }], [{ label: 'a' }, { label: 'b' }])).toBe(true);
+    });
+
+    it('should still detect string-keyed differences on stamped objects', () => {
+      const stamped: Record<string | symbol, unknown> = { name: 'one' };
+      stamped[Symbol('tracking')] = Symbol('id:1');
+
+      expect(isEqual(stamped, { name: 'two' })).toBe(false);
+      expect(isEqual(stamped, { name: 'one', extra: true })).toBe(false);
+    });
+  });
+
+  describe('getChangedKeys', () => {
+    it('should not flag arrays whose items differ only by symbol metadata', () => {
+      const stampedItem: Record<string | symbol, unknown> = { street: 'main' };
+      stampedItem[Symbol('tracking')] = Symbol('id:1');
+
+      const changed = getChangedKeys({ items: [stampedItem] }, { items: [{ street: 'main' }] });
+
+      expect(changed.size).toBe(0);
     });
   });
 });
