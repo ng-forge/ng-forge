@@ -1,10 +1,11 @@
 import { vi } from 'vitest';
 import { FieldContext, FieldTree } from '@angular/forms/signals';
-import { signal, Injector, runInInjectionContext } from '@angular/core';
+import { computed, signal, Injector, runInInjectionContext, Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { createDynamicValueFunction } from './dynamic-value-factory';
 import { RootFormRegistryService } from '../registry/root-form-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
+import { EXTERNAL_DATA } from '../../models/field-signal-context.token';
 import { FormStateManager } from '../../../../../src/lib/state/form-state-manager';
 import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
 import { ConsoleLogger } from '../../../../../src/lib/providers/features/logger/console-logger';
@@ -14,6 +15,7 @@ describe('dynamic-value-factory', () => {
   let injector: Injector;
   const mockEntity = signal<Record<string, unknown>>({});
   const mockFormSignal = signal<any>(undefined);
+  const externalDataSignal = signal<Record<string, Signal<unknown>> | undefined>(undefined);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -21,6 +23,7 @@ describe('dynamic-value-factory', () => {
         { provide: RootFormRegistryService, useValue: { formValue: mockEntity, rootForm: mockFormSignal } },
         { provide: FormStateManager, useValue: { activeConfig: signal(undefined) } },
         FieldContextRegistryService,
+        { provide: EXTERNAL_DATA, useValue: externalDataSignal },
         // Provide ConsoleLogger to enable logging in tests
         { provide: DynamicFormLogger, useValue: new ConsoleLogger() },
         DynamicValueFunctionCacheService,
@@ -30,6 +33,7 @@ describe('dynamic-value-factory', () => {
     injector = TestBed.inject(Injector);
     mockEntity.set({});
     mockFormSignal.set(undefined);
+    externalDataSignal.set(undefined);
   });
 
   describe('createDynamicValueFunction', () => {
@@ -109,6 +113,27 @@ describe('dynamic-value-factory', () => {
       });
 
       expect(result).toBe(true);
+    });
+
+    // Regression for #508 bug 4: a dynamic value bound to externalData (e.g. a
+    // dynamic validator threshold `externalData.threshold`) must recompute when
+    // the external signal changes, not render once and freeze.
+    it('should recompute when an externalData signal it reads changes', () => {
+      const threshold = signal(10);
+      externalDataSignal.set({ threshold });
+
+      const evaluated = runInInjectionContext(injector, () => {
+        const dynamicFn = createDynamicValueFunction<string, number>('externalData.threshold');
+        const fieldContext = createMockFieldContext('anything');
+        // Angular Signal Forms invokes the LogicFn inside a reactive computed;
+        // mirror that so the reactive externalData read establishes a dependency.
+        return computed(() => dynamicFn(fieldContext));
+      });
+
+      expect(evaluated()).toBe(10);
+
+      threshold.set(42);
+      expect(evaluated()).toBe(42);
     });
 
     it('should access form values in expressions', () => {

@@ -380,6 +380,81 @@ describe('FieldContextRegistryService', () => {
     });
   });
 
+  // Regression for #508 bug 4: dynamic values and sync validators build their
+  // context via createEvaluationContext, which previously read externalData
+  // untracked, so a dynamic label or validator threshold bound to externalData
+  // rendered once and never updated.
+  describe('external data reactivity in createEvaluationContext', () => {
+    it('should re-resolve when an inner external data signal changes', () => {
+      const threshold = signal(10);
+      externalDataSignal.set({ threshold });
+      const fieldContext = createMockFieldContext('test');
+
+      const resolved = computed(() => {
+        const ctx = service.createEvaluationContext(fieldContext);
+        return (ctx.externalData as Record<string, unknown>)?.['threshold'];
+      });
+
+      expect(resolved()).toBe(10);
+
+      threshold.set(25);
+      expect(resolved()).toBe(25);
+    });
+
+    it('should re-resolve when the external data record is replaced', () => {
+      externalDataSignal.set({ siteName: signal('alpha') });
+      const fieldContext = createMockFieldContext('test');
+
+      const resolved = computed(() => {
+        const ctx = service.createEvaluationContext(fieldContext);
+        return (ctx.externalData as Record<string, unknown>)?.['siteName'];
+      });
+
+      expect(resolved()).toBe('alpha');
+
+      externalDataSignal.set({ siteName: signal('beta') });
+      expect(resolved()).toBe('beta');
+    });
+
+    it('should track external data inside an array-scoped context', () => {
+      mockEntity.set({ items: [{ label: 'a' }] });
+      const threshold = signal(1);
+      externalDataSignal.set({ threshold });
+      const fieldContext: any = createMockFieldContext('a', ['items', '0', 'label']);
+      fieldContext.key = signal('label');
+
+      const resolved = computed(() => {
+        const ctx = service.createEvaluationContext(fieldContext);
+        return (ctx.externalData as Record<string, unknown>)?.['threshold'];
+      });
+
+      expect(resolved()).toBe(1);
+
+      threshold.set(2);
+      expect(resolved()).toBe(2);
+    });
+
+    it('should keep the field value untracked (no reactive dependency on it)', () => {
+      const fieldContext = createMockFieldContext('initial');
+      externalDataSignal.set({ note: signal('x') });
+
+      let evaluations = 0;
+      const derived = computed(() => {
+        evaluations++;
+        return service.createEvaluationContext(fieldContext).fieldValue;
+      });
+
+      expect(derived()).toBe('initial');
+      expect(evaluations).toBe(1);
+
+      // Mutating the field's own value signal must NOT re-run a context read:
+      // fieldValue stays untracked to preserve the validator -> valid cycle guard.
+      (fieldContext.value as ReturnType<typeof signal>).set('changed');
+      derived();
+      expect(evaluations).toBe(1);
+    });
+  });
+
   describe('array-scoped context creation via pathKeys', () => {
     const arrayFormValue = {
       addresses: [

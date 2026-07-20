@@ -92,7 +92,7 @@ export class FieldContextRegistryService {
       formValue: rootFormValue,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(false),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
@@ -155,7 +155,7 @@ export class FieldContextRegistryService {
         formValue: rootFormValue,
         fieldPath: localKey,
         customFunctions: customFunctions || {},
-        externalData: this.resolveExternalData(reactive),
+        externalData: this.resolveExternalData(),
         logger: this.logger,
         deprecationTracker: this.deprecationTracker ?? undefined,
         get fieldState() {
@@ -175,7 +175,7 @@ export class FieldContextRegistryService {
       arrayPath: arrayKey,
       fieldPath: `${arrayKey}.${index}.${localKey}`,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(reactive),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
@@ -190,15 +190,20 @@ export class FieldContextRegistryService {
   /**
    * Resolves external data signals to their current values.
    *
-   * @param reactive - If true, reads signals reactively (creates dependencies).
-   *                   If false, reads signals with untracked() (no dependencies).
+   * Always reads reactively. Unlike the field value and form value (which are
+   * read untracked to break the validator -> state -> valid -> validator cycle),
+   * externalData is one-directional external input that validation output can
+   * never feed back into, so tracking it cannot cause a cycle. Reading it
+   * reactively is what lets dynamic values and validators bound to externalData
+   * update when it changes.
+   *
    * @returns Record of resolved external data values, or undefined if no external data.
    */
-  private resolveExternalData(reactive: boolean): Record<string, unknown> | undefined {
+  private resolveExternalData(): Record<string, unknown> | undefined {
     const externalDataSignal = this.externalDataSignal;
     if (!externalDataSignal) return undefined;
 
-    const externalDataRecord = reactive ? externalDataSignal() : untracked(() => externalDataSignal());
+    const externalDataRecord = externalDataSignal();
 
     if (!externalDataRecord) {
       return undefined;
@@ -209,7 +214,7 @@ export class FieldContextRegistryService {
       if (!isSignal(value)) {
         throw new DynamicFormError(`externalData["${key}"] must be a Signal. Got: ${typeof value}. Wrap it with signal(yourValue).`);
       }
-      resolved[key] = reactive ? (value as Signal<unknown>)() : untracked(() => (value as Signal<unknown>)());
+      resolved[key] = (value as Signal<unknown>)();
     }
 
     return resolved;
@@ -237,7 +242,7 @@ export class FieldContextRegistryService {
       formValue: rootFormValue,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(true),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
       get fieldState() {
@@ -276,7 +281,7 @@ export class FieldContextRegistryService {
       formValue: rootFormValue,
       fieldPath,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(true),
+      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
       get formFieldState() {
