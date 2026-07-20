@@ -8,9 +8,13 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
 /**
  * Performs a deep equality comparison between two values.
  *
+ * Symbol-keyed properties are intentionally ignored: form values carry
+ * enumerable symbol metadata stamped by Angular Signal Forms, and comparing it
+ * would make structurally equal values compare unequal. Only string keys count.
+ *
  * @param a - First value
  * @param b - Second value
- * @returns true if values are deeply equal
+ * @returns true if values are deeply equal by their string-keyed properties
  */
 export function isEqual(a: unknown, b: unknown): boolean {
   return isEqualInternal(a, b, new WeakMap(), new WeakMap());
