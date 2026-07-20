@@ -110,12 +110,15 @@ function isEqualInternal(a: unknown, b: unknown, seenA: WeakMap<object, object>,
   }
 
   // Handle plain objects
-  const recordA = a as Record<string | symbol, unknown>;
-  const recordB = b as Record<string | symbol, unknown>;
+  const recordA = a as Record<string, unknown>;
+  const recordB = b as Record<string, unknown>;
 
-  // Get both string and symbol keys
-  const keysA = [...Object.keys(recordA), ...Object.getOwnPropertySymbols(recordA)];
-  const keysB = [...Object.keys(recordB), ...Object.getOwnPropertySymbols(recordB)];
+  // String keys only: Signal Forms stamps enumerable symbol-keyed tracking
+  // metadata onto array item values (fresh Symbol per rebuild), so comparing
+  // symbol keys makes structurally equal form values compare unequal and
+  // write-back loops never converge.
+  const keysA = Object.keys(recordA);
+  const keysB = Object.keys(recordB);
 
   if (keysA.length !== keysB.length) return false;
 
