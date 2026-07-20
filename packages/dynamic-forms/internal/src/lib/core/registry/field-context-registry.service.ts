@@ -82,19 +82,22 @@ export class FieldContextRegistryService {
       return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, false, fieldContext);
     }
 
-    // Use getters for fieldState/formFieldState to defer signal reads until
-    // the expression actually accesses them. Validators that only use fieldValue
-    // will never trigger these getters, avoiding reactive cycles in Angular's
-    // internal signal graph (validator → state → valid → validator).
+    // Use getters for externalData/fieldState/formFieldState to defer signal reads
+    // until the expression actually accesses them. Validators that only use fieldValue
+    // will never trigger these getters, so they subscribe to nothing extra and avoid
+    // reactive cycles in Angular's internal signal graph (validator → state → valid → validator).
     const rootFormSignal = this.rootFormRegistry.rootForm;
+    const resolveExternalData = () => this.resolveExternalData();
     return {
       fieldValue,
       formValue: rootFormValue,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get externalData() {
+        return resolveExternalData();
+      },
       get fieldState() {
         return readFieldStateInfo(extractFieldState(fieldContext), false);
       },
@@ -144,6 +147,7 @@ export class FieldContextRegistryService {
     // Same rationale as createEvaluationContext — avoids reactive cycles
     // when expressions don't actually access these properties.
     const rootFormSignal = this.rootFormRegistry.rootForm;
+    const resolveExternalData = () => this.resolveExternalData();
     const fieldStateGetter = fieldContext ? () => readFieldStateInfo(extractFieldState(fieldContext), reactive) : () => undefined;
     const formFieldStateGetter = () =>
       createFormFieldStateMap((reactive ? rootFormSignal() : untracked(rootFormSignal)) as FieldTree<unknown>, reactive);
@@ -155,9 +159,11 @@ export class FieldContextRegistryService {
         formValue: rootFormValue,
         fieldPath: localKey,
         customFunctions: customFunctions || {},
-        externalData: this.resolveExternalData(),
         logger: this.logger,
         deprecationTracker: this.deprecationTracker ?? undefined,
+        get externalData() {
+          return resolveExternalData();
+        },
         get fieldState() {
           return fieldStateGetter();
         },
@@ -175,9 +181,11 @@ export class FieldContextRegistryService {
       arrayPath: arrayKey,
       fieldPath: `${arrayKey}.${index}.${localKey}`,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get externalData() {
+        return resolveExternalData();
+      },
       get fieldState() {
         return fieldStateGetter();
       },
@@ -236,15 +244,18 @@ export class FieldContextRegistryService {
 
     const localKey = this.extractFieldPath(fieldContext);
     const rootFormSignal = this.rootFormRegistry.rootForm;
+    const resolveExternalData = () => this.resolveExternalData();
 
     return {
       fieldValue,
       formValue: rootFormValue,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get externalData() {
+        return resolveExternalData();
+      },
       get fieldState() {
         return readFieldStateInfo(extractFieldState(fieldContext), true);
       },
@@ -275,15 +286,18 @@ export class FieldContextRegistryService {
     }
 
     const rootFormSignal = this.rootFormRegistry.rootForm;
+    const resolveExternalData = () => this.resolveExternalData();
 
     return {
       fieldValue: undefined,
       formValue: rootFormValue,
       fieldPath,
       customFunctions: customFunctions || {},
-      externalData: this.resolveExternalData(),
       logger: this.logger,
       deprecationTracker: this.deprecationTracker ?? undefined,
+      get externalData() {
+        return resolveExternalData();
+      },
       get formFieldState() {
         return createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
       },

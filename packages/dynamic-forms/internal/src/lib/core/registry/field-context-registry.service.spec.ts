@@ -434,6 +434,28 @@ describe('FieldContextRegistryService', () => {
       expect(resolved()).toBe(2);
     });
 
+    it('should not subscribe to externalData when the expression never reads it', () => {
+      const flag = signal(false);
+      externalDataSignal.set({ flag });
+      const fieldContext = createMockFieldContext('v');
+
+      let evaluations = 0;
+      const derived = computed(() => {
+        evaluations++;
+        // Reads only fieldValue; never touches ctx.externalData.
+        return service.createEvaluationContext(fieldContext).fieldValue;
+      });
+
+      expect(derived()).toBe('v');
+      expect(evaluations).toBe(1);
+
+      // externalData is resolved lazily via a getter, so a context read that
+      // doesn't access it establishes no dependency and must not re-run.
+      flag.set(true);
+      derived();
+      expect(evaluations).toBe(1);
+    });
+
     it('should keep the field value untracked (no reactive dependency on it)', () => {
       const fieldContext = createMockFieldContext('initial');
       externalDataSignal.set({ note: signal('x') });
