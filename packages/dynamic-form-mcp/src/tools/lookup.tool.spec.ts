@@ -161,6 +161,16 @@ describe('Lookup Tool', () => {
       expect(content).toContain('hidden');
     });
 
+    it('documents error-aware message functions and their JSON caveat in validation-messages', async () => {
+      const result = await registeredTool.handler({ topic: 'validation-messages', depth: 'full' });
+      const content = (result as { content: [{ text: string }] }).content[0].text;
+
+      expect(content).toContain('(error: ValidationError) => DynamicText');
+      expect(content).toContain('{{requiredLength}}');
+      // The resolver is TS-only; MCP-generated JSON configs must keep string templates.
+      expect(content).toContain('Not JSON-serializable');
+    });
+
     it('returns derivation documentation', async () => {
       const result = await registeredTool.handler({ topic: 'derivation', depth: 'full' });
       const content = (result as { content: [{ text: string }] }).content[0].text;

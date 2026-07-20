@@ -1623,7 +1623,36 @@ validators: [{
 }]
 \`\`\`
 
-**Built-in Kinds:** required, email, min, max, minlength, maxlength, pattern`,
+**Built-in Kinds:** required, email, min, max, minlength, maxlength, pattern
+
+## Template parameters
+
+String messages interpolate error params with \`{{param}}\`:
+
+\`\`\`typescript
+validationMessages: {
+  minLength: 'Must be at least {{requiredLength}} characters',
+  min: 'Must be at least {{min}}',
+  max: 'Must be at most {{max}}',
+  pattern: 'Does not match {{requiredPattern}}',
+}
+\`\`\`
+
+## Error-aware message functions (TypeScript configs only)
+
+Any \`validationMessages\` or \`defaultValidationMessages\` value can be a function \`(error: ValidationError) => DynamicText\` instead of a string. The function receives the validation error (its \`kind\` plus params such as \`maxLength\`), so an i18n layer gets the interpolation params natively:
+
+\`\`\`typescript
+validationMessages: {
+  maxLength: (error) => transloco.selectTranslate('validation.maxLength', {
+    requiredLength: 'maxLength' in error ? error.maxLength : undefined,
+  }),
+}
+\`\`\`
+
+A resolver may return static text, an \`Observable\`, or a \`Signal\`, and those stay reactive. Returning a plain string after synchronously reading a signal severs reactivity — return the \`Signal\`/\`Observable\` itself instead.
+
+**⚠️ Not JSON-serializable.** Function messages only work in TypeScript-authored configs. JSON-driven configs (and MCP-generated output) MUST use string templates with \`{{param}}\` interpolation.`,
   },
 
   buttons: {
