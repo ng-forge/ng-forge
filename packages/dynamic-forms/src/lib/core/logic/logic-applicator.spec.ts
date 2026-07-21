@@ -362,8 +362,8 @@ describe('logic-applicator', () => {
   });
 
   describe('form-state conditions', () => {
-    // `formSubmitting` reads a form-level flag independent of field validity, so it is
-    // cycle-free on leaf fields (unlike formInvalid/pageInvalid, which read form.valid()).
+    // formSubmitting is cycle-free (independent flag); formInvalid cycles and pageInvalid
+    // has no leaf page context, so both are rejected.
     it('disables a leaf value field via formSubmitting without cycling (not submitting → not disabled)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ info: 'x' });
@@ -398,7 +398,7 @@ describe('logic-applicator', () => {
       });
     });
 
-    it('rejects pageInvalid on a value field at setup', () => {
+    it('rejects pageInvalid on a value field at setup (no page context, not a cycle)', () => {
       runInInjectionContext(injector, () => {
         const formValue = signal({ info: 'x' });
         mockEntity.set(formValue());
@@ -410,7 +410,7 @@ describe('logic-applicator', () => {
               applyLogic({ type: 'disabled', condition: 'pageInvalid' }, path.info);
             }),
           ),
-        ).toThrow(/not supported on value-field logic/);
+        ).toThrow(/no page context/);
       });
     });
   });

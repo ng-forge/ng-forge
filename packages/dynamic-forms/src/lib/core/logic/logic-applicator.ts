@@ -62,14 +62,15 @@ export function applyLogic<TValue>(config: LogicConfig, fieldPath: SchemaPath<TV
 
   // Form-state conditions read root form state, not the expression evaluator.
   if (isFormStateCondition(config.condition)) {
-    // `formInvalid`/`pageInvalid` read `form.valid()`, which on a value field cycles against the
-    // field's own validity: hidden/disabled/readonly feed Angular's `shouldSkipValidation` →
-    // `valid()`. Reject at setup — these only work on buttons/containers (not validation nodes).
-    // `formSubmitting` reads an independent form flag, so it is cycle-free on value fields.
+    // formInvalid cycles against the field's own validity; pageInvalid has no leaf page context.
+    // Only formSubmitting (an independent flag) is cycle-free on value fields.
     if (config.condition === 'formInvalid' || config.condition === 'pageInvalid') {
+      const reason =
+        config.condition === 'formInvalid'
+          ? `it would create a validation cycle against the form's own validity`
+          : `a value field has no page context for it to resolve against`;
       throw new DynamicFormError(
-        `The '${config.condition}' form-state condition is not supported on value-field logic ` +
-          `because it would create a validation cycle against the form's own validity. ` +
+        `The '${config.condition}' form-state condition is not supported on value-field logic because ${reason}. ` +
           `Use 'formSubmitting', or apply this condition to a button or container instead.`,
       );
     }

@@ -96,10 +96,11 @@ export function createFormStateLogicFunction<TValue>(condition: FormStateConditi
     const rootForm = rootFormRegistry.rootForm();
     if (!rootForm) return false;
     const state = rootForm();
+    // applyLogic only routes formSubmitting here; formValid is unreached on leaves by design
+    // (formInvalid is rejected upstream), which is what keeps leaf fields cycle-safe.
     return evaluateFormStateCondition(condition, {
       formValid: () => state.valid(),
       formSubmitting: () => state.submitting(),
-      // `pageInvalid` has no page context on a leaf field, so it resolves to false here.
     });
   };
 }

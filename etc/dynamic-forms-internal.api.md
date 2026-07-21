@@ -669,9 +669,6 @@ export const EMIT_FORM_VALUE_ON_EVENTS: InjectionToken<boolean>;
 export function evaluateCondition(expression: ConditionalExpression, context: EvaluationContext): boolean;
 
 // @public
-export function evaluateFormStateCondition(condition: FormStateCondition, state: FormStateAccessors): boolean;
-
-// @public
 export function evaluateNonFieldDisabled(ctx: NonFieldLogicContext): boolean;
 
 // @public
@@ -1015,13 +1012,6 @@ export interface FormOptions {
     nextButton?: NextButtonOptions;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
-}
-
-// @public
-export interface FormStateAccessors {
-    currentPageValid?: () => boolean;
-    formSubmitting(): boolean;
-    formValid(): boolean;
 }
 
 // @public

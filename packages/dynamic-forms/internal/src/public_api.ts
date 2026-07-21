@@ -33,7 +33,6 @@ export * from './lib/core/expressions/value-utils';
 export * from './lib/core/field-tree-utils';
 export * from './lib/core/http/http-condition-cache';
 export * from './lib/core/http/http-request-resolver';
-export * from './lib/core/logic/form-state-condition';
 export * from './lib/core/logic/non-field-logic-resolver';
 export * from './lib/core/registry/field-context-registry.service';
 export * from './lib/core/registry/function-registry.service';
