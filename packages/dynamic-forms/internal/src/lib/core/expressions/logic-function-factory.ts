@@ -7,6 +7,9 @@ import { DynamicFormError } from '../../errors/dynamic-form-error';
 import { stableStringify } from '../../utils/stable-stringify';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { FunctionRegistryService } from '../registry/function-registry.service';
+import { RootFormRegistryService } from '../registry/root-form-registry.service';
+import { FormStateCondition } from '../../models/logic/logic-config';
+import { evaluateFormStateCondition } from '../logic/form-state-condition';
 import { evaluateCondition } from './condition-evaluator';
 import { createHttpConditionLogicFunction } from './http-condition-logic-function';
 import { createAsyncConditionLogicFunction } from './async-condition-logic-function';
@@ -105,6 +108,26 @@ export function createLogicFunction<TValue>(expression: ConditionalExpression): 
     cacheService.logicFunctionCache.set(cacheKey, fn as LogicFn<unknown, boolean>);
   }
   return fn;
+}
+
+/**
+ * Create a logic function for a form-state condition (`formInvalid` / `formSubmitting` /
+ * `pageInvalid`) on a value field. Reads the root form state reactively so the field
+ * re-evaluates when validity/submitting changes, matching the non-field logic path.
+ */
+export function createFormStateLogicFunction<TValue>(condition: FormStateCondition): LogicFn<TValue, boolean> {
+  const rootFormRegistry = inject(RootFormRegistryService);
+  return () => {
+    const rootForm = rootFormRegistry.rootForm();
+    if (!rootForm) return false;
+    const state = rootForm();
+    // applyLogic only routes formSubmitting here; formValid is unreached on leaves by design
+    // (formInvalid is rejected upstream), which is what keeps leaf fields cycle-safe.
+    return evaluateFormStateCondition(condition, {
+      formValid: () => state.valid(),
+      formSubmitting: () => state.submitting(),
+    });
+  };
 }
 
 /**

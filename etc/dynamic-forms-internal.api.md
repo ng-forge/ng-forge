@@ -457,6 +457,9 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
 export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: boolean): FormFieldStateMap;
 
 // @public
+export function createFormStateLogicFunction<TValue>(condition: FormStateCondition): LogicFn<TValue, boolean>;
+
+// @public
 export function createInitializationTracker(eventBus: EventBus, expectedCount: number): Observable<boolean>;
 
 // @public

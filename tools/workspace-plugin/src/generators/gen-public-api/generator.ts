@@ -23,6 +23,7 @@ const EXCLUDE = new Set<string>([
   './lib/core/expressions/parser/parser',
   './lib/core/expressions/parser/tokenizer',
   './lib/core/http/http-response-evaluator',
+  './lib/core/logic/form-state-condition',
   './lib/mappers/apply-hidden-logic',
   './lib/models/prettify',
   './lib/utils/grid-classes/index',

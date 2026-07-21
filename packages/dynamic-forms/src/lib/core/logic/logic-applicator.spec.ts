@@ -360,4 +360,58 @@ describe('logic-applicator', () => {
       });
     });
   });
+
+  describe('form-state conditions', () => {
+    // formSubmitting is cycle-free (independent flag); formInvalid cycles and pageInvalid
+    // has no leaf page context, so both are rejected.
+    it('disables a leaf value field via formSubmitting without cycling (not submitting → not disabled)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        const formInstance = form(
+          formValue,
+          schema<{ info: string }>((path) => {
+            applyLogic({ type: 'disabled', condition: 'formSubmitting' }, path.info);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // Form is not submitting → not disabled, and reading it does not throw a cycle error.
+        expect(formInstance.info().disabled()).toBe(false);
+      });
+    });
+
+    it('rejects formInvalid on a value field at setup (would cycle against form validity)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        expect(() =>
+          form(
+            formValue,
+            schema<{ info: string }>((path) => {
+              applyLogic({ type: 'hidden', condition: 'formInvalid' }, path.info);
+            }),
+          ),
+        ).toThrow(/not supported on value-field logic/);
+      });
+    });
+
+    it('rejects pageInvalid on a value field at setup (no page context, not a cycle)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ info: 'x' });
+        mockEntity.set(formValue());
+
+        expect(() =>
+          form(
+            formValue,
+            schema<{ info: string }>((path) => {
+              applyLogic({ type: 'disabled', condition: 'pageInvalid' }, path.info);
+            }),
+          ),
+        ).toThrow(/no page context/);
+      });
+    });
+  });
 });
