@@ -1,3 +1,36 @@
+## [1.1.0](https://github.com/ng-forge/ng-forge/compare/v1.0.0...v1.1.0) (2026-07-22)
+
+### 🚀 Features
+
+- **dynamic-forms:** support error-aware validation message functions ([#528](https://github.com/ng-forge/ng-forge/pull/528))
+- **dynamic-forms:** apply conditional built-in validators natively with reactive constraints ([#529](https://github.com/ng-forge/ng-forge/pull/529))
+- **dynamic-forms:** add public testing entrypoint for field fixtures ([#530](https://github.com/ng-forge/ng-forge/pull/530))
+
+### 🐛 Bug Fixes
+
+- **bootstrap:** drop stray size attribute on select when htmlSize is unset ([#522](https://github.com/ng-forge/ng-forge/pull/522))
+- **dynamic-forms:** evaluate container/button logic with externalData and custom functions ([#508](https://github.com/ng-forge/ng-forge/pull/508))
+- **dynamic-forms:** fix conditional validator cache collisions and error params ([#525](https://github.com/ng-forge/ng-forge/pull/525))
+- **dynamic-forms:** resolve signal dynamic text without NG0602 in reactive contexts ([#524](https://github.com/ng-forge/ng-forge/pull/524))
+- **dynamic-forms:** clear interaction state on form reset and clear events ([45ab62237](https://github.com/ng-forge/ng-forge/commit/45ab62237))
+- **dynamic-forms:** add actionable error for uninitialized TestBed in fixtures ([#526](https://github.com/ng-forge/ng-forge/pull/526))
+- **dynamic-forms:** apply grid column class to outermost wrapper host ([#527](https://github.com/ng-forge/ng-forge/pull/527))
+- **dynamic-forms:** ignore symbol-keyed metadata when comparing form values ([#535](https://github.com/ng-forge/ng-forge/pull/535))
+- **dynamic-forms:** make externalData reactive in dynamic values and validators ([#537](https://github.com/ng-forge/ng-forge/pull/537))
+- **dynamic-forms:** support formSubmitting logic on value fields ([#514](https://github.com/ng-forge/ng-forge/pull/514))
+
+### 📚 Documentation
+
+- **mcp:** document error-aware validation message functions in lookup topic ([#536](https://github.com/ng-forge/ng-forge/pull/536))
+
+### ✅ Tests
+
+- **dynamic-forms:** cover nested field interaction state on reset and clear ([c29c5e722](https://github.com/ng-forge/ng-forge/commit/c29c5e722))
+
+### ❤️ Thank You
+
+- Antim Prisacaru @antimprisacaru
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
