@@ -124,6 +124,21 @@ export interface FormOptions {
   nextButton?: NextButtonOptions;
 
   /**
+   * For paged forms: how many pages on each side of the current page are eagerly
+   * mounted (the "preload window"). Pages outside the window render a lightweight
+   * placeholder and mount when navigation brings them into range.
+   *
+   * `0` mounts only the current page; `1` mounts ±1 for flicker-free sequential
+   * navigation; higher values pre-warm more pages for jump navigation at the cost
+   * of more initial DOM + change detection.
+   *
+   * Overrides the global `withPagePreload(n)` default for this form.
+   *
+   * @default undefined (uses global setting, which defaults to `1`)
+   */
+  pagePreloadWindow?: number;
+
+  /**
    * Whether to exclude values of hidden fields from submission output.
    *
    * @default undefined (uses global setting)

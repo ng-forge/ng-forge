@@ -17,6 +17,7 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { isRowField } from '@ng-forge/dynamic-forms/internal';
+import { PAGE_PRELOAD_WINDOW } from '../../providers/features/page-preload/page-preload.token';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -36,8 +37,8 @@ import { isRowField } from '@ng-forge/dynamic-forms/internal';
         \`@if (!field.hidden())\` gate in page-field.component.ts.
       -->
       @if (!pageHiddenStates()[i]) {
-        @if (i === state().currentPageIndex || i === state().currentPageIndex + 1 || i === state().currentPageIndex - 1) {
-          <!-- Current and adjacent pages (±1): render immediately for flicker-free navigation -->
+        @if (isWithinPreloadWindow(i)) {
+          <!-- Current and preloaded neighbour pages: render immediately for flicker-free navigation -->
           @defer (on immediate) {
             <section
               page-field
@@ -50,12 +51,22 @@ import { isRowField } from '@ng-forge/dynamic-forms/internal';
             <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
           }
         } @else {
-          <!-- Distant pages: defer until browser is idle for memory savings -->
-          @defer (on idle) {
-            <section page-field [field]="pageField" [key]="pageField.key" [pageIndex]="i" [isVisible]="false"></section>
-          } @placeholder {
-            <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
-          }
+          <!--
+            Pages outside the preload window render only a lightweight placeholder
+            — they are NOT mounted. Mounting every page eagerly (previously via
+            \`@defer (on idle)\`, which fires almost immediately post-load) put all
+            fields of every page in the DOM at once: O(all-fields) initial render
+            blocking + O(all-fields) change detection on every keystroke, with no
+            visible benefit since only one page is shown at a time.
+
+            Form state (schema/value/validators) derives from config, not from
+            mounted components, so leaving a page unmounted does not affect
+            validity, derivations, or navigation. A page mounts the moment
+            navigation brings it into the preload window (above), which is
+            flicker-free for sequential next/previous navigation. The window size
+            is configurable via \`withPagePreload(n)\` or \`FormOptions.pagePreloadWindow\`.
+          -->
+          <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
         }
       }
     }
@@ -80,6 +91,7 @@ export class PageOrchestratorComponent {
   private readonly fieldContextRegistry = inject(FieldContextRegistryService);
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
+  private readonly globalPreloadWindow = inject(PAGE_PRELOAD_WINDOW);
 
   /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
@@ -191,6 +203,25 @@ export class PageOrchestratorComponent {
     ...this.fieldSignalContext(),
     currentPageValid: this.currentPageValid,
   }));
+
+  /**
+   * Effective preload window (pages mounted on each side of the current page).
+   * Per-form `FormOptions.pagePreloadWindow` wins over the global
+   * `withPagePreload(n)` default; both fall back to `1`. Clamped to `>= 0`.
+   */
+  readonly preloadWindow = computed(() => {
+    const perForm = this.formOptions?.()?.pagePreloadWindow;
+    const resolved = perForm ?? this.globalPreloadWindow;
+    return Math.max(0, Math.floor(resolved));
+  });
+
+  /**
+   * Whether page `i` is inside the preload window around the current page and
+   * should therefore be mounted (vs. rendering a placeholder).
+   */
+  isWithinPreloadWindow(i: number): boolean {
+    return Math.abs(i - this.state().currentPageIndex) <= this.preloadWindow();
+  }
 
   constructor() {
     // Setup event listeners for navigation
