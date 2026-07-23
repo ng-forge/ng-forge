@@ -202,31 +202,14 @@ export function isResourceBasedValidator(config: ValidatorConfig): boolean {
  * @param context Optional context providing function scope lookup
  * @returns true if the when condition references other fields
  * @deprecated No longer used for validator routing; `when` conditions are applied natively
- * via Angular's validator `when` config. Use {@link requiresTreeValidation} for routing.
+ * via Angular's validator `when` config, and validator expressions are applied per-field
+ * with a reactive evaluation context — no validator config ever requires tree validation.
  */
 export function hasCrossFieldWhenCondition(config: ValidatorConfig, context?: CrossFieldDetectionContext): boolean {
   if (!('when' in config) || !config.when) {
     return false;
   }
   return isCrossFieldExpression(config.when as ConditionalExpression, context);
-}
-
-/**
- * True only when the validator must be evaluated by the root validateTree:
- * a cross-field dynamic-value/validation EXPRESSION. A `when` condition alone
- * never requires tree validation; it is applied natively via Angular's
- * validator `when` config (built-ins) or whenLogic gating (custom/async/http).
- */
-export function requiresTreeValidation(config: ValidatorConfig): boolean {
-  if (isResourceBasedValidator(config)) {
-    return false;
-  }
-  if (config.type === 'custom') {
-    // Custom validators (cross-field or not) are applied per-field with a reactive
-    // evaluation context, so they never need whole-form tree validation.
-    return false;
-  }
-  return isCrossFieldBuiltInValidator(config);
 }
 
 // ============================================================================

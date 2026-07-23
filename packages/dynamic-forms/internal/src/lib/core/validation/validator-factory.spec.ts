@@ -1099,6 +1099,85 @@ describe('validator-factory', () => {
         expect(formInstance.grp.a().errors()).toEqual([]);
       });
     });
+
+    // Built-in cross-field constraint (dynamic value expression referencing another field),
+    // applied per-field instead of hoisted to the tree.
+    it('places a root-level cross-field maxLength error on the constrained field and reacts to the referenced field', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ text: '', limit: 3 });
+        formValue.set({ text: '', limit: 3 });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'maxLength', value: 100, expression: 'formValue.limit' }, path.text);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        formValue.set({ text: 'abcd', limit: 3 });
+        const errors = formInstance.text().errors();
+        expect(errors[0]?.kind).toBe('maxLength');
+        // The resolved constraint (from the referenced field) is on the error
+        expect((errors[0] as unknown as Record<string, unknown>)['maxLength']).toBe(3);
+
+        // Raise the referenced field without touching text → error clears reactively
+        formValue.set({ text: 'abcd', limit: 10 });
+        expect(formInstance.text().errors()).toEqual([]);
+      });
+    });
+
+    it('disables a cross-field constraint while the referenced field is null (cleared number input)', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal<{ age: number | null; minAge: number | null }>({ age: 15, minAge: 18 });
+        formValue.set({ age: 15, minAge: 18 });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator({ type: 'min', value: 0, expression: 'formValue.minAge' }, path.age);
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        expect(formInstance.age().errors()[0]?.kind).toBe('min');
+
+        // Clearing the referenced number input yields null; the constraint must
+        // resolve to undefined (no constraint), never null (crashes the native
+        // DOM property write in Signal Forms' control binding).
+        formValue.set({ age: 15, minAge: null });
+        expect(formInstance.age().errors()).toEqual([]);
+        expect(formInstance.age().min?.()).toBeUndefined();
+
+        formValue.set({ age: 15, minAge: 10 });
+        expect(formInstance.age().errors()).toEqual([]);
+      });
+    });
+
+    it('places a group-nested cross-field maxLength error on the nested field and reacts to the sibling', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ grp: { text: '', limit: 3 } });
+        formValue.set({ grp: { text: '', limit: 3 } });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            applyValidator(
+              { type: 'maxLength', value: 100, expression: 'formValue.grp.limit' },
+              (path as unknown as { grp: { text: unknown } }).grp.text as never,
+            );
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        formValue.set({ grp: { text: 'abcd', limit: 3 } });
+        expect(formInstance.grp.text().errors()[0]?.kind).toBe('maxLength');
+
+        // Raise the sibling limit → error clears reactively
+        formValue.set({ grp: { text: 'abcd', limit: 10 } });
+        expect(formInstance.grp.text().errors()).toEqual([]);
+      });
+    });
   });
 
   describe('declarative HTTP validator callback behavior', () => {

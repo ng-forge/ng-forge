@@ -5,6 +5,4 @@ export {
   isCrossFieldBuiltInValidator,
   hasCrossFieldWhenCondition,
   isResourceBasedValidator,
-  requiresTreeValidation,
 } from '@ng-forge/dynamic-forms/internal';
-export type { CrossFieldValidatorEntry } from '../cross-field/cross-field-types';

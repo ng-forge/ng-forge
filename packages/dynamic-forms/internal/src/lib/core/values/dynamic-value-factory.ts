@@ -26,12 +26,14 @@ export function createDynamicValueFunction<TValue, TReturn>(expression: string):
   }
 
   const fn: LogicFn<TValue, TReturn> = (ctx: FieldContext<TValue>) => {
-    // Create evaluation context using the registry-based approach
-    const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx);
+    // Reactive context so a cross-field dynamic value re-runs only when a field it
+    // references changes (fine-grained via createFieldValueProxy).
+    const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx);
 
     try {
-      // Use secure AST-based expression parser (already has LRU cache)
-      return ExpressionParser.evaluate(expression, evaluationContext) as TReturn;
+      // Null means "no constraint" (undefined): a null constraint would be written
+      // to the native DOM property by Signal Forms' control binding and crash.
+      return (ExpressionParser.evaluate(expression, evaluationContext) ?? undefined) as TReturn;
     } catch (error) {
       logger.error('Error evaluating dynamic expression:', expression, error);
       return undefined as TReturn;
