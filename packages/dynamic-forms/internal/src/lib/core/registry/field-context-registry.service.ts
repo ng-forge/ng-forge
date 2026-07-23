@@ -9,6 +9,7 @@ import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tra
 import { getNestedValue } from '../expressions/value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from '../derivation/field-state-extractor';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
+import { createFieldValueProxy } from './field-value-proxy';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
   return 'key' in context && isSignal(context.key);
@@ -234,11 +235,12 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
-    const rootFormValue = this.rootFormRegistry.formValue();
     const pathKeys = safeReadPathKeys(fieldContext);
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
+      // Array-scoped contexts index into the whole-form value; read it eagerly.
+      const rootFormValue = this.rootFormRegistry.formValue();
       return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true, fieldContext);
     }
 
@@ -246,9 +248,17 @@ export class FieldContextRegistryService {
     const rootFormSignal = this.rootFormRegistry.rootForm;
     const resolveExternalData = () => this.resolveExternalData();
 
+    // Fine-grained form value: reading `formValue.<field>` in a condition/validator
+    // subscribes to just that field's signal, not the whole-form value — so
+    // changing one field doesn't re-evaluate every field's logic. See createFieldValueProxy.
+    const formValueProxy = createFieldValueProxy(
+      () => rootFormSignal() as FieldTree<unknown> | undefined,
+      () => this.rootFormRegistry.formValue(),
+    );
+
     return {
       fieldValue,
-      formValue: rootFormValue,
+      formValue: formValueProxy,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
       logger: this.logger,

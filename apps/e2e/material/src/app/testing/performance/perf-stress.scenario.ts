@@ -1,6 +1,8 @@
 import type { TestScenario } from '@ng-forge/examples-shared-testing';
 import {
   enormousIntricateConfig,
+  flatIntricateConfig,
+  flatGroupedConfig,
   fullSurfaceStressConfigFlat,
   fullSurfaceStressConfigPaged,
   fullSurfaceStressConfigPagedMostlyHidden,
@@ -45,6 +47,28 @@ export const perfEnormousPreload3Scenario: TestScenario = {
   title: 'Enterprise Application — preload window 3 (±3 pages preloaded)',
   description: 'Same form, FormOptions.pagePreloadWindow = 3. Current page ±3 preloaded for jump navigation.',
   config: { ...enormousBase, options: { ...((enormousBase['options'] as object) ?? {}), pagePreloadWindow: 3 } } as never,
+};
+
+// Large flat single-page forms — measure per-keystroke CD scaling with field count.
+export const perfFlat100Scenario: TestScenario = {
+  testId: 'perf-flat-100',
+  title: 'Flat single-page form — 100 fields',
+  description: '100 fields on one page (no pagination): conditions, derivations, selects, validators. Measures per-keystroke CD scaling.',
+  config: flatIntricateConfig(100),
+};
+
+export const perfFlat300Scenario: TestScenario = {
+  testId: 'perf-flat-300',
+  title: 'Flat single-page form — 300 fields',
+  description: '300 fields on one page (no pagination). Worst case for per-keystroke change detection since every field is mounted.',
+  config: flatIntricateConfig(300),
+};
+
+export const perfGrouped300Scenario: TestScenario = {
+  testId: 'perf-grouped-300',
+  title: 'Grouped single-page form — 300 fields in groups of 20',
+  description: 'Same 300 fields, chunked into group containers of 20. Tests whether OnPush group boundaries reduce per-keystroke CD.',
+  config: flatGroupedConfig(300, 20),
 };
 
 // Reproduces the pre-fix behaviour (every page mounted) for before/after A/B.

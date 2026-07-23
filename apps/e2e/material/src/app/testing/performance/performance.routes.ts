@@ -7,6 +7,9 @@ import {
   perfEnormousPreload0Scenario,
   perfEnormousPreload3Scenario,
   perfEnormousPreloadAllScenario,
+  perfFlat100Scenario,
+  perfFlat300Scenario,
+  perfGrouped300Scenario,
 } from './perf-stress.scenario';
 
 const routes: Routes = [
@@ -44,6 +47,21 @@ const routes: Routes = [
     path: 'perf-enormous-preload-all',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: perfEnormousPreloadAllScenario },
+  },
+  {
+    path: 'perf-flat-100',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: perfFlat100Scenario },
+  },
+  {
+    path: 'perf-flat-300',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: perfFlat300Scenario },
+  },
+  {
+    path: 'perf-grouped-300',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: perfGrouped300Scenario },
   },
 ];
 

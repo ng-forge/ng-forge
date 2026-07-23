@@ -937,3 +937,81 @@ export function enormousIntricateConfig(opts: EnormousConfigOptions = {}): FormC
 
   return { fields: [triggerPage, ...pages] } as unknown as FormConfig;
 }
+
+/**
+ * Large FLAT (single-page) form — no pagination, so every field is mounted at
+ * once. Used to measure per-keystroke change-detection scaling with field count
+ * (the case the page-preload window cannot help). A handful of trigger fields
+ * drive conditions/derivations sprinkled through the rest.
+ */
+export function flatIntricateConfig(fieldCount = 200): FormConfig {
+  const fields: DF[] = [
+    { key: 'ctrlA', type: 'input', label: 'Control A (type "x" to hide some fields)', value: '', col: 6 },
+    { key: 'ctrlN', type: 'input', label: 'Control N (numeric seed)', value: 1, props: { type: 'number' }, col: 6 },
+  ];
+
+  for (let i = 0; i < fieldCount; i++) {
+    const kind = i % 5;
+    if (kind === 0) {
+      // Conditional field — hidden when ctrlA === 'x'
+      fields.push({
+        key: `f${i}`,
+        type: 'input',
+        label: `Field ${i} (conditional)`,
+        value: '',
+        col: 4,
+        validators: [{ type: 'minLength', value: 2 }],
+        logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'ctrlA', operator: 'equals', value: 'x' } }],
+      });
+    } else if (kind === 1) {
+      // Derived field — depends on ctrlN
+      fields.push({
+        key: `f${i}`,
+        type: 'input',
+        label: `Field ${i} (derived)`,
+        readonly: true,
+        value: 0,
+        props: { type: 'number' },
+        col: 4,
+        derivation: `(+formValue.ctrlN || 0) + ${i}`,
+      });
+    } else if (kind === 2) {
+      fields.push({
+        key: `f${i}`,
+        type: 'select',
+        label: `Field ${i}`,
+        value: 'a',
+        col: 4,
+        options: [
+          { label: 'A', value: 'a' },
+          { label: 'B', value: 'b' },
+          { label: 'C', value: 'c' },
+        ],
+      });
+    } else {
+      fields.push({ key: `f${i}`, type: 'input', label: `Field ${i}`, value: '', col: 4, validators: [{ type: 'maxLength', value: 60 }] });
+    }
+  }
+
+  fields.push({ key: 'flatSubmit', type: 'submit', label: 'Submit', props: { type: 'submit' }, col: 12 });
+  return { fields } as unknown as FormConfig;
+}
+
+/**
+ * Same fields as `flatIntricateConfig` but chunked into `group` containers of
+ * `chunkSize`. Tests whether an OnPush component boundary per chunk lets change
+ * detection skip unaffected chunks — turning O(field count) per-keystroke CD into
+ * roughly O(field count / chunkSize + chunkSize).
+ */
+export function flatGroupedConfig(fieldCount = 300, chunkSize = 20): FormConfig {
+  const flat = flatIntricateConfig(fieldCount) as unknown as { fields: DF[] };
+  const all = flat.fields;
+  const controls = all.slice(0, 2);
+  const body = all.slice(2, all.length - 1);
+  const submit = all[all.length - 1];
+  const groups: DF[] = [];
+  for (let i = 0; i < body.length; i += chunkSize) {
+    groups.push({ key: `grp${i / chunkSize}`, type: 'group', fields: body.slice(i, i + chunkSize) });
+  }
+  return { fields: [...controls, ...groups, submit] } as unknown as FormConfig;
+}
