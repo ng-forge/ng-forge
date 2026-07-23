@@ -288,18 +288,25 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
     arrayScope?: { arrayKey: string; index: number; localKey: string },
   ): EvaluationContext {
-    const rootFormValue = this.rootFormRegistry.formValue();
-
     if (arrayScope) {
+      // Array-scoped contexts index into the whole-form value; read it eagerly.
+      const rootFormValue = this.rootFormRegistry.formValue();
       return this.buildArrayScopedContext(rootFormValue, arrayScope, undefined, customFunctions, true);
     }
 
     const rootFormSignal = this.rootFormRegistry.rootForm;
     const resolveExternalData = () => this.resolveExternalData();
 
+    // Fine-grained form value, same as createReactiveEvaluationContext: a page or
+    // container condition subscribes only to the fields it actually reads.
+    const formValueProxy = createFieldValueProxy(
+      () => rootFormSignal() as FieldTree<unknown> | undefined,
+      () => this.rootFormRegistry.formValue(),
+    );
+
     return {
       fieldValue: undefined,
-      formValue: rootFormValue,
+      formValue: formValueProxy,
       fieldPath,
       customFunctions: customFunctions || {},
       logger: this.logger,

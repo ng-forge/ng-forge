@@ -33,7 +33,6 @@ export function applyHiddenLogic(
       form: rootForm,
       fieldLogic: fieldDef.logic as LogicConfig[] | undefined,
       explicitValue: fieldDef.hidden,
-      formValue: rootFormRegistry.formValue(),
       evaluationContext,
     });
   }

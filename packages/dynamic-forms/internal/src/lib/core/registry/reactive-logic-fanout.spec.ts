@@ -12,7 +12,10 @@ import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tra
 import { createWarningTracker } from '../../utils/warning-tracker';
 import { LogicFunctionCacheService } from '../expressions/logic-function-cache.service';
 import { createLogicFunction } from '../expressions/logic-function-factory';
+import { evaluateCondition } from '../expressions/condition-evaluator';
+import { applyHiddenLogic } from '../../mappers/apply-hidden-logic';
 import type { ConditionalExpression } from '../../models/expressions/conditional-expression';
+import type { LogicConfig } from '../../models/logic';
 
 /**
  * Performance regression benchmark: reactive logic fan-out.
@@ -121,6 +124,73 @@ describe('reactive logic fan-out (perf regression)', () => {
     const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
 
     // Only field 0's condition references f0, so only it should re-run.
+    expect(reevaluated).toBe(1);
+  });
+
+  it(`display-only (page/button) conditions re-evaluate only when a referenced field changes (not all ${N})`, () => {
+    const registry = TestBed.inject(FieldContextRegistryService);
+    const evalCount = new Array<number>(N).fill(0);
+    const consumers: Array<Signal<boolean>> = [];
+
+    // Mirror PageOrchestrator.evaluatePageHidden: each page's hidden condition
+    // references one field, evaluated against a display-only context.
+    for (let i = 0; i < N; i++) {
+      const condition: ConditionalExpression = {
+        type: 'fieldValue',
+        fieldPath: key(i),
+        operator: 'equals',
+        value: 'x',
+      };
+      consumers.push(
+        computed(() => {
+          evalCount[i]++;
+          return evaluateCondition(condition, registry.createDisplayOnlyContext(`page${i}`, {}));
+        }),
+      );
+    }
+
+    consumers.forEach((c) => c());
+    const baseline = [...evalCount];
+
+    fieldSignals[0].set('x');
+    consumers.forEach((c) => c());
+
+    const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
+    expect(reevaluated).toBe(1);
+  });
+
+  it(`container hidden logic (applyHiddenLogic) re-evaluates only when a referenced field changes (not all ${N})`, () => {
+    const registry = TestBed.inject(FieldContextRegistryService);
+    const rootFormRegistry = TestBed.inject(RootFormRegistryService);
+    const evalCount = new Array<number>(N).fill(0);
+    const consumers: Array<Signal<unknown>> = [];
+
+    // Mirror the container/text mapper path: applyHiddenLogic inside the inputs
+    // computed, with the lazy evaluation-context factory the mappers pass.
+    for (let i = 0; i < N; i++) {
+      const logic: LogicConfig[] = [
+        {
+          type: 'hidden',
+          condition: { type: 'fieldValue', fieldPath: key(i), operator: 'equals', value: 'x' },
+        },
+      ];
+      consumers.push(
+        computed(() => {
+          evalCount[i]++;
+          const inputs: Record<string, unknown> = {};
+          applyHiddenLogic(inputs, { logic }, rootFormRegistry, () => registry.createDisplayOnlyContext(`group${i}`, {}));
+          return inputs['hidden'];
+        }),
+      );
+    }
+
+    consumers.forEach((c) => c());
+    const baseline = [...evalCount];
+
+    fieldSignals[0].set('x');
+    consumers.forEach((c) => c());
+
+    const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
     expect(reevaluated).toBe(1);
   });
 });
