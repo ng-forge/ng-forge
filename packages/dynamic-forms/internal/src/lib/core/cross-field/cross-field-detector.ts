@@ -222,7 +222,9 @@ export function requiresTreeValidation(config: ValidatorConfig): boolean {
     return false;
   }
   if (config.type === 'custom') {
-    return isCrossFieldValidator(config);
+    // Custom validators (cross-field or not) are applied per-field with a reactive
+    // evaluation context, so they never need whole-form tree validation.
+    return false;
   }
   return isCrossFieldBuiltInValidator(config);
 }

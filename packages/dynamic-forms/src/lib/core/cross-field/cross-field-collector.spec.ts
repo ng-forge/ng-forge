@@ -9,7 +9,8 @@ describe('collectCrossFieldEntries()', () => {
         {
           type: 'input',
           key: 'confirmPassword',
-          validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
+          // Cross-field built-in (still collected) exercises sourceFieldKey path construction.
+          validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
         },
       ];
 
@@ -51,7 +52,7 @@ describe('collectCrossFieldEntries()', () => {
             {
               type: 'input',
               key: 'confirmPassword',
-              validators: [{ type: 'custom', expression: 'fieldValue === formValue.credentials.password', kind: 'passwordMismatch' }],
+              validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
             },
           ],
         },
@@ -104,13 +105,7 @@ describe('collectCrossFieldEntries()', () => {
                 {
                   type: 'input',
                   key: 'endDate',
-                  validators: [
-                    {
-                      type: 'custom',
-                      expression: 'fieldValue > formValue.outer.inner.startDate',
-                      kind: 'endBeforeStart',
-                    },
-                  ],
+                  validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
                 },
               ],
             },
@@ -135,7 +130,10 @@ describe('collectCrossFieldEntries()', () => {
             {
               type: 'input',
               key: 'confirmPassword',
-              validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
+              // Cross-field BUILT-IN (still routed to the tree) so this exercises
+              // sourceFieldKey path construction. Custom cross-field validators are
+              // now applied per-field and are asserted separately below.
+              validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
             },
           ],
         },
@@ -156,7 +154,10 @@ describe('collectCrossFieldEntries()', () => {
             {
               type: 'input',
               key: 'confirmPassword',
-              validators: [{ type: 'custom', expression: 'fieldValue === formValue.password', kind: 'passwordMismatch' }],
+              // Cross-field BUILT-IN (still routed to the tree) so this exercises
+              // sourceFieldKey path construction. Custom cross-field validators are
+              // now applied per-field and are asserted separately below.
+              validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
             },
           ],
         },
@@ -182,7 +183,7 @@ describe('collectCrossFieldEntries()', () => {
                 {
                   type: 'input',
                   key: 'confirmPassword',
-                  validators: [{ type: 'custom', expression: 'fieldValue === formValue.credentials.password', kind: 'passwordMismatch' }],
+                  validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
                 },
               ],
             },
@@ -285,7 +286,7 @@ describe('collectCrossFieldEntries()', () => {
       expect(validators[0].dependsOn).toContain('limit');
     });
 
-    it('still collects custom validators with a cross-field expression', () => {
+    it('does not collect custom validators with a cross-field expression (applied per-field, reactively)', () => {
       const fields: FieldDef<any>[] = [
         {
           type: 'input',
@@ -296,8 +297,8 @@ describe('collectCrossFieldEntries()', () => {
 
       const { validators } = collectCrossFieldEntries(fields);
 
-      expect(validators).toHaveLength(1);
-      expect(validators[0].dependsOn).toContain('password');
+      // Custom validators are applied per-field now, not hoisted to the tree.
+      expect(validators).toHaveLength(0);
     });
   });
 

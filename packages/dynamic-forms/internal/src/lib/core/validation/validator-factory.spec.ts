@@ -1068,6 +1068,37 @@ describe('validator-factory', () => {
         expect(formInstance.note().errors()).toEqual([]);
       });
     });
+
+    // #260/#262 guarantee under per-field routing: group-nested error placement + sibling reactivity.
+    it('places a group-nested custom cross-field validator error on the nested field and reacts to the sibling', () => {
+      runInInjectionContext(injector, () => {
+        const formValue = signal({ grp: { a: 5, b: 10 } });
+        formValue.set({ grp: { a: 5, b: 10 } });
+
+        const formInstance = form(
+          formValue,
+          schema<typeof formValue>((path) => {
+            // a must be < b (b is a sibling inside the same group)
+            applyValidator(
+              { type: 'custom', kind: 'aLtB', expression: '+fieldValue < +formValue.grp.b' },
+              (path as unknown as { grp: { a: unknown } }).grp.a as never,
+            );
+          }),
+        );
+        mockFormSignal.set(formInstance);
+
+        // 5 < 10 → valid
+        expect(formInstance.grp.a().errors()).toEqual([]);
+
+        // Flip the SIBLING b to 3 → 5 < 3 is false → error on grp.a (not root)
+        formValue.set({ grp: { a: 5, b: 3 } });
+        expect(formInstance.grp.a().errors()[0]?.kind).toBe('aLtB');
+
+        // Restore sibling → error clears (proves reactivity to the referenced field)
+        formValue.set({ grp: { a: 5, b: 10 } });
+        expect(formInstance.grp.a().errors()).toEqual([]);
+      });
+    });
   });
 
   describe('declarative HTTP validator callback behavior', () => {

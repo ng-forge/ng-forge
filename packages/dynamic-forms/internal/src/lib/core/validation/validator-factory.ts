@@ -230,7 +230,9 @@ function createExpressionValidator(
 
   return (ctx: FieldContext<unknown>) => {
     try {
-      const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      // Reactive context so a cross-field expression re-runs only when a field it
+      // references changes (fine-grained via createFieldValueProxy).
+      const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
       const result = ExpressionParser.evaluate(expression, evaluationContext);
 
       if (result) {

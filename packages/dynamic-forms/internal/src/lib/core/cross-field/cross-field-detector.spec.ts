@@ -15,18 +15,20 @@ const localWhen: ConditionalExpression = {
 
 describe('requiresTreeValidation()', () => {
   describe('custom validators', () => {
-    it('returns true for a cross-field expression', () => {
+    // Custom validators (cross-field or not) are applied per-field with a reactive
+    // evaluation context, so they never require whole-form tree validation.
+    it('returns false for a cross-field expression (applied per-field)', () => {
       const config: ValidatorConfig = { type: 'custom', expression: 'fieldValue === formValue.password' };
-      expect(requiresTreeValidation(config)).toBe(true);
+      expect(requiresTreeValidation(config)).toBe(false);
     });
 
-    it('returns true for a cross-field expression with a when condition', () => {
+    it('returns false for a cross-field expression with a when condition', () => {
       const config: ValidatorConfig = {
         type: 'custom',
         expression: 'fieldValue === formValue.password',
         when: crossFieldWhen,
       };
-      expect(requiresTreeValidation(config)).toBe(true);
+      expect(requiresTreeValidation(config)).toBe(false);
     });
 
     it('returns false for a field-local expression', () => {
