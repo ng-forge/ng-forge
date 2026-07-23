@@ -2,37 +2,29 @@ import { untracked } from '@angular/core';
 import type { FieldTree } from '@angular/forms/signals';
 
 /**
- * A lazy, read-only view over the form value that subscribes fine-grainedly.
+ * A lazy, read-only view over the form value that subscribes fine-grainedly:
+ * reading `formValue.foo` resolves `foo` through the Signal Forms `FieldTree` and
+ * subscribes to only that field's `value()` signal, so a condition/validator that
+ * references one field re-runs only when that field changes (instead of every
+ * field, as reading the whole-form value would cause).
  *
- * The naive approach — reading `RootFormRegistryService.formValue()` (the whole
- * form value) — makes every condition/validator/derivation depend on the entire
- * form, so changing ANY field re-evaluates ALL of them (O(N) fan-out per
- * keystroke). Instead this proxy resolves each accessed top-level key through the
- * Signal Forms `FieldTree`, reading only that field's `value()` signal — so a
- * consumer subscribes to just the fields its expression actually touches.
+ * Whole-object operations (spread, `Object.keys`) fall back to the eager whole-form
+ * value and subscribe to everything — correct for code that needs all keys.
  *
- * Property access (`formValue.foo`, `getNestedValue(formValue, 'a.b')`) reads one
- * field's signal. Whole-object operations (spread, `Object.keys`, `JSON.stringify`)
- * fall back to the eager whole-form value and therefore subscribe to everything —
- * the correct, conservative behaviour for code that genuinely needs all keys.
- *
- * @param getRootForm - reads the current root `FieldTree` (structural; changes
- *   only when the form is rebuilt).
- * @param getRootFormValue - reads the eager whole-form value; used as a fallback
- *   for keys absent from the tree and for whole-object enumeration.
+ * @param getRootForm - the current root `FieldTree` (structural; changes on rebuild).
+ * @param getRootFormValue - the eager whole-form value; fallback for keys absent
+ *   from the tree and for whole-object enumeration.
  */
 export function createFieldValueProxy(
   getRootForm: () => FieldTree<unknown> | undefined,
   getRootFormValue: () => Record<string, unknown>,
 ): Record<string, unknown> {
-  // Returns { hit } false when the key is not a navigable field on the tree, so
-  // the caller can fall back to the eager whole-form value.
+  // `hit` is false when the key is not a navigable field, so the caller falls back.
   const readField = (key: string): { hit: boolean; value: unknown } => {
     const root = getRootForm() as Record<string, unknown> | undefined;
     const accessor = root?.[key];
     if (typeof accessor === 'function') {
-      // Get the FieldState structurally (untracked), then read `value()` tracked
-      // so the consumer subscribes to THIS field's value only.
+      // FieldState structurally (untracked); read `value()` tracked to subscribe to this field only.
       const state = untracked(() => (accessor as () => unknown)());
       const valueSig = state && (state as { value?: unknown }).value;
       if (typeof valueSig === 'function') {
@@ -54,8 +46,7 @@ export function createFieldValueProxy(
       if (root && prop in root) return true;
       return prop in getRootFormValue();
     },
-    // Whole-object enumeration needs every key, so it reads the eager value and
-    // subscribes to all fields — intentional for spread / Object.keys / stringify.
+    // Enumeration needs every key, so it reads the eager value (subscribes to all).
     ownKeys() {
       return Reflect.ownKeys(getRootFormValue());
     },

@@ -248,9 +248,8 @@ export class FieldContextRegistryService {
     const rootFormSignal = this.rootFormRegistry.rootForm;
     const resolveExternalData = () => this.resolveExternalData();
 
-    // Fine-grained form value: reading `formValue.<field>` in a condition/validator
-    // subscribes to just that field's signal, not the whole-form value — so
-    // changing one field doesn't re-evaluate every field's logic. See createFieldValueProxy.
+    // Fine-grained form value: reading `formValue.<field>` subscribes to just that
+    // field, so changing one field doesn't re-evaluate every field's logic.
     const formValueProxy = createFieldValueProxy(
       () => rootFormSignal() as FieldTree<unknown> | undefined,
       () => this.rootFormRegistry.formValue(),
