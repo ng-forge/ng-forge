@@ -8,6 +8,35 @@ import {
   fullSurfaceStressConfigPagedMostlyHidden,
 } from '@ng-forge/examples-shared-testing/perf';
 
+// Visual check for the per-field cross-field validator move: a custom validator
+// on a GROUP-nested field must show its error on that field and react to a sibling.
+export const crossFieldGroupDemoScenario: TestScenario = {
+  testId: 'cross-field-group-demo',
+  title: 'Cross-field validator (group-nested)',
+  description: 'confirmPassword must equal credentials.password. Error shows on the nested field and clears when the sibling matches.',
+  config: {
+    fields: [
+      {
+        key: 'credentials',
+        type: 'group',
+        label: 'Credentials',
+        fields: [
+          { key: 'password', type: 'input', label: 'Password', value: '' },
+          {
+            key: 'confirmPassword',
+            type: 'input',
+            label: 'Confirm password',
+            value: '',
+            validators: [{ type: 'custom', kind: 'passwordMismatch', expression: 'fieldValue === formValue.credentials.password' }],
+            validationMessages: { passwordMismatch: 'Passwords must match' },
+          },
+        ],
+      },
+      { key: 'submit', type: 'submit', label: 'Submit' },
+    ],
+  } as never,
+};
+
 export const perfStressFlatScenario: TestScenario = {
   testId: 'perf-stress-flat',
   title: 'Adapter Perf: Full-API Stress (Material, FLAT)',
