@@ -22,6 +22,7 @@ export type DynamicFormFeatureKind =
   | 'value-exclusion'
   | 'validation-execution'
   | 'legacy-status-classes'
+  | 'page-preload'
   | 'addons'
   | 'addon-actions';
 
