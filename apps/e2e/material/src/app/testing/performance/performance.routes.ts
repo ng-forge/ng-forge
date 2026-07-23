@@ -11,6 +11,7 @@ import {
   perfFlat300Scenario,
   perfGrouped300Scenario,
   crossFieldGroupDemoScenario,
+  perfStressStandardScenario,
 } from './perf-stress.scenario';
 
 const routes: Routes = [
@@ -68,6 +69,11 @@ const routes: Routes = [
     path: 'cross-field-group-demo',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: crossFieldGroupDemoScenario },
+  },
+  {
+    path: 'perf-stress-standard',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: perfStressStandardScenario },
   },
 ];
 

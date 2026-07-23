@@ -3,10 +3,19 @@ import {
   enormousIntricateConfig,
   flatIntricateConfig,
   flatGroupedConfig,
+  standardStressConfig,
   fullSurfaceStressConfigFlat,
   fullSurfaceStressConfigPaged,
   fullSurfaceStressConfigPagedMostlyHidden,
 } from '@ng-forge/examples-shared-testing/perf';
+
+export const perfStressStandardScenario: TestScenario = {
+  testId: 'perf-stress-standard',
+  title: 'Standard stress: 50 pages x 10 fields',
+  description:
+    'standardStressConfig — 50 pages, HTTP validators/conditions/derivations, sync derivation chain, cross-field validators, property derivations.',
+  config: standardStressConfig(),
+};
 
 // Visual check for the per-field cross-field validator move: a custom validator
 // on a GROUP-nested field must show its error on that field and react to a sibling.
