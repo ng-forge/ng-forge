@@ -193,4 +193,69 @@ describe('reactive logic fan-out (perf regression)', () => {
     const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
     expect(reevaluated).toBe(1);
   });
+
+  it('array-scoped conditions re-evaluate only for the changed item', () => {
+    const ITEMS = 10;
+    const itemSignals = Array.from({ length: ITEMS }, () => ({ a: signal<unknown>(''), b: signal<unknown>('') }));
+
+    const arrayFormValue = computed(() => ({
+      items: itemSignals.map((item) => ({ a: item.a(), b: item.b() })),
+    }));
+
+    // Navigable array subtree: tree.items is callable (aggregated value) and also
+    // indexable by item; each item is callable and indexable by field, mirroring
+    // Signal Forms' `tree.items[i].a` shape.
+    const itemNodes: Record<number, unknown> = {};
+    for (let i = 0; i < ITEMS; i++) {
+      const { a, b } = itemSignals[i];
+      const itemCall = () => ({ value: computed(() => ({ a: a(), b: b() })) });
+      itemNodes[i] = Object.assign(itemCall, {
+        a: () => ({ value: a }),
+        b: () => ({ value: b }),
+      });
+    }
+    const itemsCall = () => ({ value: computed(() => itemSignals.map((item) => ({ a: item.a(), b: item.b() }))) });
+    const itemsNode = Object.assign(itemsCall, itemNodes);
+    const arrayRootForm = signal({ items: itemsNode });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue: arrayFormValue, rootForm: arrayRootForm } },
+        { provide: EXTERNAL_DATA, useValue: signal(undefined) },
+        { provide: DynamicFormLogger, useValue: createMockLogger() },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
+        LogicFunctionCacheService,
+      ],
+    });
+    const registry = TestBed.inject(FieldContextRegistryService);
+
+    // Each item's condition references its own sibling `b`.
+    const condition: ConditionalExpression = { type: 'fieldValue', fieldPath: 'b', operator: 'equals', value: 'x' };
+    const evalCount = new Array<number>(ITEMS).fill(0);
+    const consumers: Array<Signal<boolean>> = [];
+
+    for (let i = 0; i < ITEMS; i++) {
+      const ctx = mockFieldContext('', ['items', String(i), 'a']);
+      consumers.push(
+        computed(() => {
+          evalCount[i]++;
+          return evaluateCondition(condition, registry.createReactiveEvaluationContext(ctx));
+        }),
+      );
+    }
+
+    consumers.forEach((c) => c());
+    const baseline = [...evalCount];
+
+    itemSignals[0].b.set('x');
+    consumers.forEach((c) => c());
+
+    const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
+
+    expect(reevaluated).toBe(1);
+    expect(consumers[0]()).toBe(true);
+  });
 });
