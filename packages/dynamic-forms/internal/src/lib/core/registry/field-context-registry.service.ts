@@ -290,7 +290,7 @@ export class FieldContextRegistryService {
   }
 
   /**
-   * Resolves external data signals to their current values.
+   * Resolves external data signals as a lazy, read-only view.
    *
    * Always reads reactively. Unlike the field value and form value (which are
    * read untracked to break the validator -> state -> valid -> validator cycle),
@@ -299,7 +299,12 @@ export class FieldContextRegistryService {
    * reactively is what lets dynamic values and validators bound to externalData
    * update when it changes.
    *
-   * @returns Record of resolved external data values, or undefined if no external data.
+   * Fine-grained: reading `externalData.foo` subscribes to only that key's
+   * signal (plus the record signal), so an expression referencing one key does
+   * not re-run when other external signals change. Enumeration (spread,
+   * `Object.keys`) resolves every key.
+   *
+   * @returns Lazy record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(): Record<string, unknown> | undefined {
     const externalDataSignal = this.externalDataSignal;
@@ -311,15 +316,33 @@ export class FieldContextRegistryService {
       return undefined;
     }
 
-    const resolved: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(externalDataRecord)) {
+    const readKey = (key: string): unknown => {
+      const value = externalDataRecord[key];
       if (!isSignal(value)) {
         throw new DynamicFormError(`externalData["${key}"] must be a Signal. Got: ${typeof value}. Wrap it with signal(yourValue).`);
       }
-      resolved[key] = (value as Signal<unknown>)();
-    }
+      return (value as Signal<unknown>)();
+    };
 
-    return resolved;
+    return new Proxy({} as Record<string, unknown>, {
+      get(_target, prop) {
+        if (typeof prop === 'symbol' || !(prop in externalDataRecord)) return undefined;
+        return readKey(prop);
+      },
+      has(_target, prop) {
+        return typeof prop === 'string' && prop in externalDataRecord;
+      },
+      ownKeys() {
+        return Reflect.ownKeys(externalDataRecord);
+      },
+      getOwnPropertyDescriptor(_target, prop) {
+        if (typeof prop !== 'string' || !(prop in externalDataRecord)) return undefined;
+        return { value: readKey(prop), enumerable: true, configurable: true, writable: false };
+      },
+      set() {
+        return false; // read-only view
+      },
+    });
   }
 
   /** Creates a REACTIVE evaluation context for logic functions. */

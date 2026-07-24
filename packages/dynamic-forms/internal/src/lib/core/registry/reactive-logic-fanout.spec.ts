@@ -258,4 +258,50 @@ describe('reactive logic fan-out (perf regression)', () => {
     expect(reevaluated).toBe(1);
     expect(consumers[0]()).toBe(true);
   });
+
+  it(`external data conditions re-evaluate only when a referenced signal changes (not all ${N})`, () => {
+    const extSignals = Array.from({ length: N }, () => signal<unknown>(''));
+    const extRecord: Record<string, WritableSignal<unknown>> = {};
+    for (let i = 0; i < N; i++) extRecord[`ext${i}`] = extSignals[i];
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        FunctionRegistryService,
+        FieldContextRegistryService,
+        { provide: RootFormRegistryService, useValue: { formValue, rootForm } },
+        { provide: EXTERNAL_DATA, useValue: signal(extRecord) },
+        { provide: DynamicFormLogger, useValue: createMockLogger() },
+        { provide: DEPRECATION_WARNING_TRACKER, useFactory: createWarningTracker },
+        LogicFunctionCacheService,
+      ],
+    });
+    const registry = TestBed.inject(FieldContextRegistryService);
+
+    const evalCount = new Array<number>(N).fill(0);
+    const consumers: Array<Signal<boolean>> = [];
+
+    // Each consumer's condition reads ONE external data key.
+    for (let i = 0; i < N; i++) {
+      const condition: ConditionalExpression = { type: 'javascript', expression: `externalData.ext${i} === 'x'` };
+      const ctx = mockFieldContext('', [key(i)]);
+      consumers.push(
+        computed(() => {
+          evalCount[i]++;
+          return evaluateCondition(condition, registry.createReactiveEvaluationContext(ctx));
+        }),
+      );
+    }
+
+    consumers.forEach((c) => c());
+    const baseline = [...evalCount];
+
+    extSignals[0].set('x');
+    consumers.forEach((c) => c());
+
+    const reevaluated = evalCount.filter((v, i) => v > baseline[i]).length;
+
+    expect(reevaluated).toBe(1);
+    expect(consumers[0]()).toBe(true);
+  });
 });
