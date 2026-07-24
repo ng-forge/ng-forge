@@ -65,7 +65,11 @@ export function resolveArrayButtonContext(fieldKey: string, buttonType: string, 
   return {
     targetArrayKey,
     indexSignal,
-    formValue: (arrayContext?.formValue ?? {}) as Record<string, unknown>,
+    // Lazy: read at dispatch time so the value is current and building inputs
+    // inside a computed doesn't subscribe to the form entity.
+    get formValue() {
+      return (arrayContext?.formValue ?? {}) as Record<string, unknown>;
+    },
     isInsideArray: arrayContext !== null,
   };
 }
@@ -87,7 +91,9 @@ export function buildArrayButtonEventContext(
     key: fieldKey,
     index: ctx.indexSignal(), // Evaluated inside computed
     arrayKey: ctx.targetArrayKey ?? '',
-    formValue: ctx.formValue,
+    get formValue() {
+      return ctx.formValue;
+    },
   };
 
   if (template) {
