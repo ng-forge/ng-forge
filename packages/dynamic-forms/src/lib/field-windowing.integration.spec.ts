@@ -170,6 +170,45 @@ describe('Field windowing (progressive field mounting)', () => {
     expect(placeholderCount(fixture)).toBe(10 - mounted);
   });
 
+  it('never windows container fields: a group beyond the eager window mounts instead of deferring', async () => {
+    TestBed.overrideProvider(FIELD_WINDOWING, {
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+    });
+
+    // Group at index 2 (>= eager) and off-viewport. Containers emit
+    // ComponentInitializedEvent, which the init tracker counts, so deferring one
+    // would stall `initialized`; the group must mount directly regardless.
+    const config = {
+      fields: [
+        { key: 'f0', type: 'input', label: 'F0', value: 'v0' },
+        { key: 'f1', type: 'input', label: 'F1', value: 'v1' },
+        {
+          key: 'grp',
+          type: 'group',
+          label: 'Group',
+          fields: [
+            { key: 'g0', type: 'input', label: 'G0', value: 'gv0' },
+            { key: 'g1', type: 'input', label: 'G1', value: 'gv1' },
+          ],
+        },
+        ...Array.from({ length: 10 }, (_, i) => ({ key: `t${i}`, type: 'input', label: `T${i}`, value: `tv${i}` })),
+      ],
+    } as FormConfig;
+
+    const fixture = createHost(config);
+    await settle(fixture, 4);
+    await delay(100);
+    await settle(fixture, 2);
+
+    // The container is never rendered as a placeholder...
+    expect(fixture.nativeElement.querySelector('[data-field-key="grp"].df-field-placeholder')).toBeNull();
+    // ...and its two children mounted (2 eager leaves + 2 group children = >= 4);
+    // had the group been deferred, only the 2 eager leaves would be present.
+    expect(mountedInputCount(fixture)).toBeGreaterThanOrEqual(4);
+    // Trailing leaf fields beyond the window still defer.
+    expect(placeholderCount(fixture)).toBeGreaterThan(0);
+  });
+
   it('keeps unmounted fields participating in the form value at their default', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
       useValue: { enabled: true, eager: 5, placeholderHeight: '80px' } satisfies FieldWindowingConfig,

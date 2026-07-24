@@ -13,6 +13,7 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
+import { isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
 import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
 
@@ -23,7 +24,7 @@ import { resolveFieldWindowing } from '../../providers/features/field-windowing/
   template: `
     @for (field of resolvedFields(); track field.key; let i = $index) {
       @if (!field.hidden()) {
-        @if (fieldWindowing().enabled && i >= fieldWindowing().eager) {
+        @if (windowsField(field, i)) {
           @defer (on viewport) {
             <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
           } @placeholder {
@@ -142,6 +143,17 @@ export default class PageFieldComponent {
 
   constructor() {
     this.setupEffects();
+  }
+
+  /**
+   * Whether a field should be deferred by field windowing. Containers are never
+   * windowed: they emit `ComponentInitializedEvent`, which the form's init
+   * tracker counts, so deferring one would stall `initialized` until it scrolls
+   * into view. Leaf fields carry no such count, so they defer freely.
+   */
+  protected windowsField(field: ResolvedField, index: number): boolean {
+    const w = this.fieldWindowing();
+    return w.enabled && index >= w.eager && !isContainerField(field.fieldDef);
   }
 
   /** Class string for a windowed field's placeholder — matches the real field's grid column. */

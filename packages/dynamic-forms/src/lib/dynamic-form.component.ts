@@ -93,7 +93,7 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
                  the directive's gate stops a same-CD-pass mount before [formField] can warn.
                  Don't dedupe one without the other — see DfFieldOutlet.renderReady. -->
             @if (!field.hidden()) {
-              @if (fieldWindowing().enabled && i >= fieldWindowing().eager) {
+              @if (windowsField(field, i)) {
                 @defer (on viewport) {
                   <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
                 } @placeholder {
@@ -359,6 +359,17 @@ export class DynamicForm<
   protected onNativeSubmit(event: Event): void {
     event.preventDefault();
     this.eventBus.dispatch(FormSubmitEvent);
+  }
+
+  /**
+   * Whether a field should be deferred by field windowing. Containers are never
+   * windowed: they emit `ComponentInitializedEvent`, which the form's init
+   * tracker counts, so deferring one would stall `initialized` until it scrolls
+   * into view. Leaf fields carry no such count, so they defer freely.
+   */
+  protected windowsField(field: ResolvedField, index: number): boolean {
+    const w = this.fieldWindowing();
+    return w.enabled && index >= w.eager && !isContainerField(field.fieldDef);
   }
 
   /** Class string for a windowed field's placeholder — matches the real field's grid column. */
