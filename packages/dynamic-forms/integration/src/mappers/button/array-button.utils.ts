@@ -11,7 +11,13 @@ export interface ArrayButtonContext {
   targetArrayKey: string | undefined;
   /** Computed signal that returns the current array index (-1 if not inside array) */
   indexSignal: Signal<number>;
-  /** The current form value for token resolution */
+  /**
+   * Current form value for token resolution. Implemented as a lazy getter so it
+   * is read at event-dispatch time, not when the mapper builds its context —
+   * reading it eagerly inside the mapper's computed would resnapshot a stale
+   * value and subscribe every array button to the whole form entity per
+   * keystroke. Keep it a getter on any reimplementation.
+   */
   formValue: Record<string, unknown>;
   /** Whether this button is inside an array context */
   isInsideArray: boolean;
@@ -25,7 +31,7 @@ export interface ArrayButtonEventContext {
   index: number;
   /** The target array key */
   arrayKey: string;
-  /** The form value for token resolution */
+  /** Form value for token resolution — a lazy getter, resolved at dispatch time. See {@link ArrayButtonContext.formValue}. */
   formValue: Record<string, unknown>;
   /**
    * Optional template for add operations.
