@@ -139,6 +139,21 @@ export interface FormOptions {
   pagePreloadWindow?: number;
 
   /**
+   * For flat (single-page) forms: progressive field mounting ("field
+   * windowing"). Fields beyond the eager count render as a placeholder and
+   * mount only once scrolled near/into view, instead of all mounting eagerly.
+   *
+   * `true` enables windowing using the global `withFieldWindowing()` defaults;
+   * `false` force-disables it even if the global feature is enabled; an object
+   * enables it with per-form `eager` / `placeholderHeight` overrides.
+   *
+   * Overrides the global `withFieldWindowing(...)` default for this form.
+   *
+   * @default undefined (uses global setting, which defaults to disabled)
+   */
+  fieldWindowing?: boolean | { eager?: number; placeholderHeight?: string };
+
+  /**
    * Whether to exclude values of hidden fields from submission output.
    *
    * @default undefined (uses global setting)

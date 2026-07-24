@@ -11,15 +11,32 @@ import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
+import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
+import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
+import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
 
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({
   selector: 'section[page-field]',
   imports: [DfFieldOutlet],
   template: `
-    @for (field of resolvedFields(); track field.key) {
+    @for (field of resolvedFields(); track field.key; let i = $index) {
       @if (!field.hidden()) {
-        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+        @if (fieldWindowing().enabled && i >= fieldWindowing().eager) {
+          @defer (on viewport) {
+            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          } @placeholder {
+            <div
+              [class]="placeholderGridClass(field)"
+              [style.min-height]="fieldWindowing().placeholderHeight"
+              [attr.data-field-key]="field.key"
+              aria-hidden="true"
+            ></div>
+          }
+        } @else {
+          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+        }
       }
     }
   `,
@@ -47,6 +64,8 @@ export default class PageFieldComponent {
   protected readonly environmentInjector = inject(EnvironmentInjector);
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
+  private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
+  private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -67,6 +86,15 @@ export default class PageFieldComponent {
   readonly disabled = computed(() => this.field().disabled || false);
 
   readonly isValid = computed(() => validatePageNesting(this.field()));
+
+  /**
+   * Effective field-windowing config for this page. Per-form
+   * `FormOptions.fieldWindowing` wins over the global `withFieldWindowing()`
+   * default; both fall back to disabled (fully eager).
+   */
+  protected readonly fieldWindowing = computed(() =>
+    resolveFieldWindowing(this.globalFieldWindowing, this.formOptions?.()?.fieldWindowing),
+  );
 
   private readonly rawFieldRegistry = computed(() => this.fieldRegistry.raw);
 
@@ -114,6 +142,12 @@ export default class PageFieldComponent {
 
   constructor() {
     this.setupEffects();
+  }
+
+  /** Class string for a windowed field's placeholder — matches the real field's grid column. */
+  protected placeholderGridClass(field: ResolvedField): string {
+    const grid = getGridClassString(field.fieldDef);
+    return grid ? `df-field-placeholder ${grid}` : 'df-field-placeholder';
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

@@ -102,6 +102,14 @@ export const perfFlat300Scenario: TestScenario = {
   config: flatIntricateConfig(300),
 };
 
+export const perfFlat300WindowedScenario: TestScenario = {
+  testId: 'perf-flat-300-windowed',
+  title: 'Flat single-page form — 300 fields, field windowing enabled',
+  description:
+    'Same 300-field form as perf-flat-300, with FormOptions.fieldWindowing = true. Only the eager head-count mounts initially; the rest mount on scroll.',
+  config: { ...flatIntricateConfig(300), options: { fieldWindowing: true } } as never,
+};
+
 export const perfGrouped300Scenario: TestScenario = {
   testId: 'perf-grouped-300',
   title: 'Grouped single-page form — 300 fields in groups of 20',

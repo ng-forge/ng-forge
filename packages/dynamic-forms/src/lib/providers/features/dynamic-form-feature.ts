@@ -23,6 +23,7 @@ export type DynamicFormFeatureKind =
   | 'validation-execution'
   | 'legacy-status-classes'
   | 'page-preload'
+  | 'field-windowing'
   | 'addons'
   | 'addon-actions';
 

@@ -9,6 +9,7 @@ import {
   perfEnormousPreloadAllScenario,
   perfFlat100Scenario,
   perfFlat300Scenario,
+  perfFlat300WindowedScenario,
   perfGrouped300Scenario,
   crossFieldGroupDemoScenario,
   perfStressStandardScenario,
@@ -59,6 +60,11 @@ const routes: Routes = [
     path: 'perf-flat-300',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: perfFlat300Scenario },
+  },
+  {
+    path: 'perf-flat-300-windowed',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: perfFlat300WindowedScenario },
   },
   {
     path: 'perf-grouped-300',
