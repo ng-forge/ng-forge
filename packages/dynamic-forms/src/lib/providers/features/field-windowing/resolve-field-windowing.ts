@@ -1,4 +1,5 @@
 import { FieldWindowingConfig } from './field-windowing.token';
+import { clampWindowSize } from '../clamp-window';
 
 /** Per-form override shape for `FormOptions.fieldWindowing`. */
 export type FieldWindowingOption = boolean | { eager?: number; placeholderHeight?: string };
@@ -24,7 +25,7 @@ export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: Fie
 
   return {
     enabled: true,
-    eager: perForm.eager !== undefined ? Math.max(0, Math.floor(perForm.eager)) : global.eager,
+    eager: clampWindowSize(perForm.eager, global.eager),
     placeholderHeight: perForm.placeholderHeight ?? global.placeholderHeight,
   };
 }

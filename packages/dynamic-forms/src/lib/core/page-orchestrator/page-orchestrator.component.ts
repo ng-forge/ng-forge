@@ -18,6 +18,7 @@ import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { isRowField } from '@ng-forge/dynamic-forms/internal';
 import { PAGE_PRELOAD_WINDOW } from '../../providers/features/page-preload/page-preload.token';
+import { clampWindowSize } from '../../providers/features/clamp-window';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -211,8 +212,8 @@ export class PageOrchestratorComponent {
    */
   readonly preloadWindow = computed(() => {
     const perForm = this.formOptions?.()?.pagePreloadWindow;
-    const resolved = perForm ?? this.globalPreloadWindow;
-    return Math.max(0, Math.floor(resolved));
+    // The global is already normalized; a non-finite per-form value falls back to it.
+    return clampWindowSize(perForm, this.globalPreloadWindow);
   });
 
   /**

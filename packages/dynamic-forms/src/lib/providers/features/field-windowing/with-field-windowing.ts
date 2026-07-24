@@ -1,4 +1,5 @@
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
+import { clampWindowSize } from '../clamp-window';
 import { FIELD_WINDOWING, FieldWindowingConfig } from './field-windowing.token';
 
 /**
@@ -31,7 +32,7 @@ import { FIELD_WINDOWING, FieldWindowingConfig } from './field-windowing.token';
 export function withFieldWindowing(config?: { eager?: number; placeholderHeight?: string }): DynamicFormFeature<'field-windowing'> {
   const resolved: FieldWindowingConfig = {
     enabled: true,
-    eager: config?.eager !== undefined ? Math.max(0, Math.floor(config.eager)) : 12,
+    eager: clampWindowSize(config?.eager, 12),
     placeholderHeight: config?.placeholderHeight ?? '4rem',
   };
 

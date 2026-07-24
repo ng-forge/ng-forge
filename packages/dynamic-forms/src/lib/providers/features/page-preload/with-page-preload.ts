@@ -1,4 +1,5 @@
 import { createFeature, DynamicFormFeature } from '../dynamic-form-feature';
+import { clampWindowSize } from '../clamp-window';
 import { PAGE_PRELOAD_WINDOW } from './page-preload.token';
 
 /**
@@ -30,6 +31,6 @@ import { PAGE_PRELOAD_WINDOW } from './page-preload.token';
  * ```
  */
 export function withPagePreload(window: number): DynamicFormFeature<'page-preload'> {
-  const resolved = Math.max(0, Math.floor(window));
+  const resolved = clampWindowSize(window, 1);
   return createFeature('page-preload', [{ provide: PAGE_PRELOAD_WINDOW, useValue: resolved }]);
 }
