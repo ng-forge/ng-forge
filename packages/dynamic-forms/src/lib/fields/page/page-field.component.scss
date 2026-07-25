@@ -58,3 +58,8 @@
     transition: none;
   }
 }
+
+// Field windowing placeholder — reserves layout space until the real field mounts
+.df-field-placeholder {
+  display: block;
+}

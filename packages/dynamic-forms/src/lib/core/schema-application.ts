@@ -6,7 +6,6 @@ import { SchemaRegistryService } from './registry/schema-registry.service';
 import { createLogicFunction } from '@ng-forge/dynamic-forms/internal';
 import { createTypePredicateFunction } from './values/type-predicate-factory';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
-import { requiresTreeValidation } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { DynamicFormLogger, type Logger } from '@ng-forge/dynamic-forms/internal';
 
@@ -64,15 +63,6 @@ export function createSchemaFunction(schema: SchemaDefinition, logger?: Logger):
   return (path: SchemaPathTree<unknown>) => {
     // Apply validators - path is SchemaPathTree which is accepted by applyValidator
     schema.validators?.forEach((validatorConfig) => {
-      // Cross-field expressions are collected from field definitions only; schema
-      // definition validators never reach the tree collector, so drop them loudly.
-      if (requiresTreeValidation(validatorConfig)) {
-        logger?.warn(
-          `Validator "${validatorConfig.type}" in schema definition "${schema.name}" uses a cross-field expression, ` +
-            `which is not supported on schema definition validators; it was skipped.`,
-        );
-        return;
-      }
       applyValidator(validatorConfig, path);
     });
 

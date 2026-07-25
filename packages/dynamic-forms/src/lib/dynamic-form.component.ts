@@ -42,6 +42,10 @@ import { FormIdPrefixService } from './core/registry/form-id-prefix.service';
 import { EventDispatcher } from './events/event-dispatcher';
 import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.directive';
 import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
+import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
+import { ResolvedField } from './utils/resolve-field/resolve-field';
+import { FIELD_WINDOWING } from './providers/features/field-windowing/field-windowing.token';
+import { resolveFieldWindowing } from './providers/features/field-windowing/resolve-field-windowing';
 
 /**
  * Renders a form from a {@link FormConfig}. Attribute component on a native
@@ -83,13 +87,26 @@ import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
           <div page-orchestrator [pageFields]="pageFieldDefinitions()" [form]="form()" [fieldSignalContext]="fieldSignalContext()"></div>
         }
         @case ('non-paged') {
-          @for (field of resolvedFields(); track field.key) {
+          @for (field of resolvedFields(); track field.key; let i = $index) {
             <!-- @if + DfFieldOutlet's own renderReady-&-!hidden gate together silence NG01916:
                  the template @if removes the host from the DOM (Angular's prescribed pattern), and
                  the directive's gate stops a same-CD-pass mount before [formField] can warn.
                  Don't dedupe one without the other — see DfFieldOutlet.renderReady. -->
             @if (!field.hidden()) {
-              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+              @if (windowsField(field, i)) {
+                @defer (on viewport) {
+                  <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+                } @placeholder {
+                  <div
+                    [class]="placeholderGridClass(field)"
+                    [style.min-height]="fieldWindowing().placeholderHeight"
+                    [attr.data-field-key]="field.key"
+                    aria-hidden="true"
+                  ></div>
+                }
+              } @else {
+                <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+              }
             }
           }
         }
@@ -153,6 +170,7 @@ export class DynamicForm<
   private logger = inject(DynamicFormLogger);
   private dispatcher = inject(EventDispatcher, { optional: true });
   private templateRegistry = inject(DfFieldTemplateRegistry);
+  private globalFieldWindowing = inject(FIELD_WINDOWING);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Projected templates — collected for the `template` addon type via DI.
@@ -243,6 +261,15 @@ export class DynamicForm<
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;
 
+  /**
+   * Effective field-windowing config for non-paged forms. Per-form
+   * `FormOptions.fieldWindowing` wins over the global `withFieldWindowing()`
+   * default; both fall back to disabled (fully eager).
+   */
+  protected readonly fieldWindowing = computed(() =>
+    resolveFieldWindowing(this.globalFieldWindowing, this.effectiveFormOptions()?.fieldWindowing),
+  );
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
@@ -332,6 +359,23 @@ export class DynamicForm<
   protected onNativeSubmit(event: Event): void {
     event.preventDefault();
     this.eventBus.dispatch(FormSubmitEvent);
+  }
+
+  /**
+   * Whether a field should be deferred by field windowing. Containers are never
+   * windowed: they emit `ComponentInitializedEvent`, which the form's init
+   * tracker counts, so deferring one would stall `initialized` until it scrolls
+   * into view. Leaf fields carry no such count, so they defer freely.
+   */
+  protected windowsField(field: ResolvedField, index: number): boolean {
+    const w = this.fieldWindowing();
+    return w.enabled && index >= w.eager && !isContainerField(field.fieldDef);
+  }
+
+  /** Class string for a windowed field's placeholder — matches the real field's grid column. */
+  protected placeholderGridClass(field: ResolvedField): string {
+    const grid = getGridClassString(field.fieldDef);
+    return grid ? `df-field-placeholder ${grid}` : 'df-field-placeholder';
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

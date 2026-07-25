@@ -40,7 +40,6 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { createSchemaFromFields } from '../core/schema-builder';
 import { createFormLevelSchema } from '../core/form-schema-merger';
-import { collectCrossFieldEntries } from '../core/cross-field/cross-field-collector';
 import { deepMergeDefaults, isEqual } from '@ng-forge/dynamic-forms/internal';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -466,9 +465,7 @@ export class FormStateManager<
       if (!config) return undefined;
 
       if (setup.schemaFields?.length) {
-        const crossFieldCollection = collectCrossFieldEntries(setup.schemaFields as FieldDef<unknown>[]);
         return createSchemaFromFields(setup.schemaFields, setup.registry, {
-          crossFieldValidators: crossFieldCollection.validators,
           formLevelSchema: config.schema,
           validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
         }) as Schema<TModel>;

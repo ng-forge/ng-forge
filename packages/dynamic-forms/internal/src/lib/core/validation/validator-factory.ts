@@ -33,7 +33,6 @@ import { ConditionalExpression } from '../../models/expressions/conditional-expr
 import { FunctionRegistryService } from '../registry/function-registry.service';
 import { FieldContextRegistryService } from '../registry/field-context-registry.service';
 import { ExpressionParser } from '../expressions/parser/expression-parser';
-import { requiresTreeValidation } from '../cross-field/cross-field-detector';
 
 // Safe cast target: the when LogicFn only reads FieldContext members that exist for every TValue
 type WhenLogic = LogicFn<unknown, boolean> | undefined;
@@ -108,10 +107,6 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
 export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
   const path = fieldPath as SchemaPath<unknown>;
-
-  if (requiresTreeValidation(config)) {
-    return;
-  }
 
   switch (config.type) {
     case 'required':
@@ -230,7 +225,9 @@ function createExpressionValidator(
 
   return (ctx: FieldContext<unknown>) => {
     try {
-      const evaluationContext = fieldContextRegistry.createEvaluationContext(ctx, functionRegistry.getCustomFunctions());
+      // Reactive context so a cross-field expression re-runs only when a field it
+      // references changes (fine-grained via createFieldValueProxy).
+      const evaluationContext = fieldContextRegistry.createReactiveEvaluationContext(ctx, functionRegistry.getCustomFunctions());
       const result = ExpressionParser.evaluate(expression, evaluationContext);
 
       if (result) {

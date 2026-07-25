@@ -1,4 +1,4 @@
-import { Injector, runInInjectionContext, signal, Signal, WritableSignal } from '@angular/core';
+import { computed, Injector, runInInjectionContext, signal, Signal, WritableSignal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import {
   addArrayItemButtonMapper,
@@ -519,6 +519,64 @@ describe('Array Button Mappers with Logic', () => {
       // A remove button lives inside an array item, but its condition references the array
       // itself — it must stay root-scoped, not scope to the item (which would break it).
       expect(resolveLogic().disabled).toBe(true);
+    });
+  });
+
+  describe('eventContext.formValue laziness', () => {
+    // Mirrors the live getter that create-array-item-injector puts on ARRAY_CONTEXT.
+    function createLiveContextInjector(entity: WritableSignal<Record<string, unknown>>): Injector {
+      const ctxValue = {
+        arrayKey: 'items',
+        index: signal(0),
+        get formValue() {
+          return entity();
+        },
+        field: { key: 'items', type: 'array' },
+      };
+      return Injector.create({
+        providers: [
+          { provide: RootFormRegistryService, useValue: { formValue: formValueSignal, rootForm: rootFormSignal } },
+          { provide: DEFAULT_PROPS, useValue: signal(undefined) },
+          { provide: ARRAY_CONTEXT, useValue: ctxValue },
+          { provide: EXTERNAL_DATA, useValue: externalDataSignal },
+          { provide: FunctionRegistryService, useClass: FunctionRegistryService, deps: [] },
+          { provide: FieldContextRegistryService, useClass: FieldContextRegistryService, deps: [] },
+          { provide: DynamicFormLogger, useValue: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } },
+        ],
+      });
+    }
+
+    it('resolves the CURRENT form value at dispatch time, not a mount-time snapshot', () => {
+      const entity = signal<Record<string, unknown>>({ items: [{ n: 1 }] });
+      const injector = createLiveContextInjector(entity);
+
+      const fieldDef: BaseArrayAddButtonField<unknown> = { key: 'addBtn', type: 'addArrayItem', template: { key: 'n', type: 'input' } };
+      const inputs = runInInjectionContext(injector, () => addArrayItemButtonMapper(fieldDef));
+
+      const eventContext = inputs()['eventContext'] as { formValue: Record<string, unknown> };
+
+      entity.set({ items: [{ n: 1 }, { n: 2 }] });
+      expect(eventContext.formValue).toEqual({ items: [{ n: 1 }, { n: 2 }] });
+    });
+
+    it('does not subscribe the inputs computed to the form entity', () => {
+      const entity = signal<Record<string, unknown>>({ items: [{ n: 1 }] });
+      const injector = createLiveContextInjector(entity);
+
+      const fieldDef: BaseArrayAddButtonField<unknown> = { key: 'addBtn', type: 'addArrayItem', template: { key: 'n', type: 'input' } };
+      const inputs = runInInjectionContext(injector, () => addArrayItemButtonMapper(fieldDef));
+
+      let evals = 0;
+      const probe = computed(() => {
+        evals++;
+        return inputs();
+      });
+      probe();
+      const baseline = evals;
+
+      entity.set({ items: [{ n: 1 }, { n: 2 }] });
+      probe();
+      expect(evals).toBe(baseline);
     });
   });
 });

@@ -51,6 +51,12 @@ export { hasFormValue } from '@ng-forge/dynamic-forms/internal';
 export { withValueExclusionDefaults } from './providers/features/value-exclusion';
 export type { ValueExclusionConfig, ResolvedValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
+// Page Preload Feature (paged-form preload window)
+export { withPagePreload } from './providers/features/page-preload/with-page-preload';
+
+// Field Windowing Feature (progressive field mounting for flat forms)
+export { withFieldWindowing } from './providers/features/field-windowing/with-field-windowing';
+
 // Validation Execution Feature
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';
 export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';

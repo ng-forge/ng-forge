@@ -3,7 +3,6 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal, WritableSignal } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { createSchemaFromFields } from './schema-builder';
-import { collectCrossFieldEntries } from './cross-field/cross-field-collector';
 import { SchemaRegistryService } from './registry/schema-registry.service';
 import { FormStateManager } from '../state/form-state-manager';
 import {
@@ -59,16 +58,15 @@ describe('conditional validator routing (native when)', () => {
     mockFormSignal.set(undefined);
   });
 
-  /** Builds the same pipeline as FormStateManager: collector output feeds the schema. */
+  /** Builds the same pipeline as FormStateManager: fields feed createSchemaFromFields. */
   function buildForm<T extends Record<string, unknown>>(fields: FieldDef<unknown>[], initial: T) {
     return runInInjectionContext(injector, () => {
       const model = signal<T>(initial);
       mockEntity.set(initial);
-      const collection = collectCrossFieldEntries(fields);
-      const formSchema = createSchemaFromFields<T>(fields, registry, { crossFieldValidators: collection.validators });
+      const formSchema = createSchemaFromFields<T>(fields, registry);
       const formInstance = form(model, formSchema);
       mockFormSignal.set(formInstance);
-      return { model, formInstance, collection };
+      return { model, formInstance };
     });
   }
 
@@ -83,10 +81,8 @@ describe('conditional validator routing (native when)', () => {
       { type: 'input', key: 'other' } as FieldDef<unknown>,
     ];
 
-    const { model, formInstance, collection } = buildForm(fields, { name: 'way too long', other: 'no' });
+    const { model, formInstance } = buildForm(fields, { name: 'way too long', other: 'no' });
 
-    // Lockstep tripwire: the when-only validator must not be collected into the tree
-    expect(collection.validators).toHaveLength(0);
     expect(formInstance.name().errors()).toEqual([]);
 
     setValue(model, { name: 'way too long', other: 'yes' });
@@ -168,9 +164,8 @@ describe('conditional validator routing (native when)', () => {
     ];
 
     const initial = { contacts: [{ email: 'ok' }, { email: 'way too long' }], other: 'no' };
-    const { model, formInstance, collection } = buildForm(fields, initial);
+    const { model, formInstance } = buildForm(fields, initial);
 
-    expect(collection.validators).toHaveLength(0);
     expect(formInstance.contacts[1].email().errors()).toEqual([]);
 
     setValue(model, { ...initial, other: 'yes' });

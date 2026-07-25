@@ -35,6 +35,7 @@ export * from './lib/core/http/http-condition-cache';
 export * from './lib/core/http/http-request-resolver';
 export * from './lib/core/logic/non-field-logic-resolver';
 export * from './lib/core/registry/field-context-registry.service';
+export * from './lib/core/registry/field-value-proxy';
 export * from './lib/core/registry/function-registry.service';
 export * from './lib/core/registry/root-form-registry.service';
 export * from './lib/core/validation/validator-factory';

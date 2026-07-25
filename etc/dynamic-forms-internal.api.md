@@ -453,6 +453,9 @@ export function createDefaultDerivationLogConfig(): DerivationLogConfig;
 // @public
 export function createDynamicValueFunction<TValue, TReturn>(expression: string): LogicFn<TValue, TReturn>;
 
+// @public
+export function createFieldValueProxy(getRootForm: () => FieldTree<unknown> | undefined, getRootFormValue: () => Record<string, unknown>): Record<string, unknown>;
+
 // @internal
 export function createFormFieldStateMap(rootForm: FieldTree<unknown>, reactive: boolean): FormFieldStateMap;
 
@@ -1010,9 +1013,14 @@ export interface FormOptions {
     excludeValueIfDisabled?: boolean;
     excludeValueIfHidden?: boolean;
     excludeValueIfReadonly?: boolean;
+    fieldWindowing?: boolean | {
+        eager?: number;
+        placeholderHeight?: string;
+    };
     idPrefix?: string;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
+    pagePreloadWindow?: number;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
 }
@@ -1575,9 +1583,6 @@ export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 
 // @public
 export type RenderReadyInput = 'field' | (string & {});
-
-// @public
-export function requiresTreeValidation(config: ValidatorConfig): boolean;
 
 // @public
 export type ResolvedValidationExecutionConfig = Required<ValidationExecutionConfig>;

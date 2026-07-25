@@ -180,11 +180,11 @@ describe('schema-application', () => {
         expect(consoleSpy).not.toHaveBeenCalled();
       });
 
-      it('should warn and skip schema definition validators with cross-field expressions', () => {
+      it('applies schema definition validators with cross-field expressions natively, without warning', () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         const testSchema: SchemaDefinition = {
           name: 'cross-field-schema',
-          validators: [{ type: 'maxLength', expression: 'formValue.limit' }],
+          validators: [{ type: 'maxLength', value: 100, expression: 'formValue.limit' }],
         };
         schemaRegistry.registerSchema(testSchema);
 
@@ -196,22 +196,18 @@ describe('schema-application', () => {
 
         let formInstance: ReturnType<typeof form>;
 
-        expect(() => {
-          runInInjectionContext(injector, () => {
-            formInstance = form(
-              formValue,
-              schema<typeof formValue>((path) => {
-                applySchema(config, path.name);
-              }),
-            );
-            mockFormSignal.set(formInstance);
-          });
-        }).not.toThrow();
+        runInInjectionContext(injector, () => {
+          formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              applySchema(config, path.name);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+        });
 
-        expect(warnSpy).toHaveBeenCalledWith(
-          '[Dynamic Forms]',
-          expect.stringContaining('schema definition "cross-field-schema" uses a cross-field expression'),
-        );
+        expect(formInstance!.name().errors()[0]?.kind).toBe('maxLength');
+        expect(warnSpy).not.toHaveBeenCalled();
         warnSpy.mockRestore();
       });
 

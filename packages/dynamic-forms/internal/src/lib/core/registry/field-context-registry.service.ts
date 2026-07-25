@@ -9,6 +9,7 @@ import { DEPRECATION_WARNING_TRACKER } from '../../utils/deprecation-warning-tra
 import { getNestedValue } from '../expressions/value-utils';
 import { readFieldStateInfo, createFormFieldStateMap } from '../derivation/field-state-extractor';
 import { safeReadPathKeys } from '../../utils/safe-read-path-keys';
+import { createFieldValueProxy } from './field-value-proxy';
 
 function isChildFieldContext<TValue>(context: FieldContext<TValue>): context is ChildFieldContext<TValue> {
   return 'key' in context && isSignal(context.key);
@@ -20,6 +21,18 @@ function extractFieldState(fieldContext: FieldContext<unknown>): ReadonlyFieldSt
     if (!fieldContext || !('state' in fieldContext)) return undefined;
     return fieldContext.state;
   });
+}
+
+/** Navigates a root FieldTree down to a specific array item's subtree, structurally. */
+function navigateArrayItemTree(root: FieldTree<unknown> | undefined, arrayKey: string, index: number): FieldTree<unknown> | undefined {
+  let node: unknown = root;
+  for (const segment of arrayKey.split('.')) {
+    if (node == null) return undefined;
+    node = (node as Record<string, unknown>)[segment];
+  }
+  if (node == null) return undefined;
+  // Array item children are indexed numerically on the same node shape as named children.
+  return (node as Record<number, unknown>)[index] as FieldTree<unknown> | undefined;
 }
 
 /** Detects whether a field lives inside an array by examining its `pathKeys`. */
@@ -196,7 +209,88 @@ export class FieldContextRegistryService {
   }
 
   /**
-   * Resolves external data signals to their current values.
+   * Builds a REACTIVE evaluation context scoped to a specific array item, fine-grained:
+   * `formValue`/`rootFormValue` are proxies over the FieldTree so a condition subscribes
+   * only to the fields it actually reads, instead of the whole-form value.
+   */
+  private buildReactiveArrayScopedContext<TValue>(
+    arrayScope: { arrayKey: string; index: number; localKey: string },
+    fieldValue: TValue,
+    customFunctions: Record<string, (context: EvaluationContext) => unknown> | undefined,
+    fieldContext?: FieldContext<unknown>,
+  ): EvaluationContext {
+    const { arrayKey, index, localKey } = arrayScope;
+    const rootFormSignal = this.rootFormRegistry.rootForm;
+    const resolveExternalData = () => this.resolveExternalData();
+    const fieldStateGetter = fieldContext ? () => readFieldStateInfo(extractFieldState(fieldContext), true) : () => undefined;
+    const formFieldStateGetter = () => createFormFieldStateMap(rootFormSignal() as FieldTree<unknown>, true);
+
+    // Structural check only — untracked so it doesn't subscribe to the whole form.
+    const hasValidItem = untracked(() => {
+      const arrayData = getNestedValue(this.rootFormRegistry.formValue(), arrayKey);
+      if (!Array.isArray(arrayData) || index < 0 || index >= arrayData.length) return false;
+      const item = arrayData[index];
+      return item != null && typeof item === 'object';
+    });
+
+    const rootFormValueProxy = createFieldValueProxy(
+      () => rootFormSignal() as FieldTree<unknown> | undefined,
+      () => this.rootFormRegistry.formValue(),
+    );
+
+    if (!hasValidItem) {
+      return {
+        fieldValue,
+        formValue: rootFormValueProxy,
+        fieldPath: localKey,
+        customFunctions: customFunctions || {},
+        logger: this.logger,
+        deprecationTracker: this.deprecationTracker ?? undefined,
+        get externalData() {
+          return resolveExternalData();
+        },
+        get fieldState() {
+          return fieldStateGetter();
+        },
+        get formFieldState() {
+          return formFieldStateGetter();
+        },
+      };
+    }
+
+    const itemFormValueProxy = createFieldValueProxy(
+      () => navigateArrayItemTree(rootFormSignal() as FieldTree<unknown> | undefined, arrayKey, index),
+      () => {
+        const arrayData = getNestedValue(this.rootFormRegistry.formValue(), arrayKey);
+        const item = Array.isArray(arrayData) ? arrayData[index] : undefined;
+        return item != null && typeof item === 'object' ? (item as Record<string, unknown>) : {};
+      },
+    );
+
+    return {
+      fieldValue,
+      formValue: itemFormValueProxy,
+      rootFormValue: rootFormValueProxy,
+      arrayIndex: index,
+      arrayPath: arrayKey,
+      fieldPath: `${arrayKey}.${index}.${localKey}`,
+      customFunctions: customFunctions || {},
+      logger: this.logger,
+      deprecationTracker: this.deprecationTracker ?? undefined,
+      get externalData() {
+        return resolveExternalData();
+      },
+      get fieldState() {
+        return fieldStateGetter();
+      },
+      get formFieldState() {
+        return formFieldStateGetter();
+      },
+    };
+  }
+
+  /**
+   * Resolves external data signals as a lazy, read-only view.
    *
    * Always reads reactively. Unlike the field value and form value (which are
    * read untracked to break the validator -> state -> valid -> validator cycle),
@@ -205,7 +299,12 @@ export class FieldContextRegistryService {
    * reactively is what lets dynamic values and validators bound to externalData
    * update when it changes.
    *
-   * @returns Record of resolved external data values, or undefined if no external data.
+   * Fine-grained: reading `externalData.foo` subscribes to only that key's
+   * signal (plus the record signal), so an expression referencing one key does
+   * not re-run when other external signals change. Enumeration (spread,
+   * `Object.keys`) resolves every key.
+   *
+   * @returns Lazy record of resolved external data values, or undefined if no external data.
    */
   private resolveExternalData(): Record<string, unknown> | undefined {
     const externalDataSignal = this.externalDataSignal;
@@ -217,15 +316,33 @@ export class FieldContextRegistryService {
       return undefined;
     }
 
-    const resolved: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(externalDataRecord)) {
+    const readKey = (key: string): unknown => {
+      const value = externalDataRecord[key];
       if (!isSignal(value)) {
         throw new DynamicFormError(`externalData["${key}"] must be a Signal. Got: ${typeof value}. Wrap it with signal(yourValue).`);
       }
-      resolved[key] = (value as Signal<unknown>)();
-    }
+      return (value as Signal<unknown>)();
+    };
 
-    return resolved;
+    return new Proxy({} as Record<string, unknown>, {
+      get(_target, prop) {
+        if (typeof prop === 'symbol' || !(prop in externalDataRecord)) return undefined;
+        return readKey(prop);
+      },
+      has(_target, prop) {
+        return typeof prop === 'string' && prop in externalDataRecord;
+      },
+      ownKeys() {
+        return Reflect.ownKeys(externalDataRecord);
+      },
+      getOwnPropertyDescriptor(_target, prop) {
+        if (typeof prop !== 'string' || !(prop in externalDataRecord)) return undefined;
+        return { value: readKey(prop), enumerable: true, configurable: true, writable: false };
+      },
+      set() {
+        return false; // read-only view
+      },
+    });
   }
 
   /** Creates a REACTIVE evaluation context for logic functions. */
@@ -234,21 +351,27 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
   ): EvaluationContext {
     const fieldValue = fieldContext.value();
-    const rootFormValue = this.rootFormRegistry.formValue();
     const pathKeys = safeReadPathKeys(fieldContext);
     const arrayScope = detectArrayScope(pathKeys);
 
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, fieldValue, customFunctions, true, fieldContext);
+      return this.buildReactiveArrayScopedContext(arrayScope, fieldValue, customFunctions, fieldContext);
     }
 
     const localKey = this.extractFieldPath(fieldContext);
     const rootFormSignal = this.rootFormRegistry.rootForm;
     const resolveExternalData = () => this.resolveExternalData();
 
+    // Fine-grained form value: reading `formValue.<field>` subscribes to just that
+    // field, so changing one field doesn't re-evaluate every field's logic.
+    const formValueProxy = createFieldValueProxy(
+      () => rootFormSignal() as FieldTree<unknown> | undefined,
+      () => this.rootFormRegistry.formValue(),
+    );
+
     return {
       fieldValue,
-      formValue: rootFormValue,
+      formValue: formValueProxy,
       fieldPath: localKey,
       customFunctions: customFunctions || {},
       logger: this.logger,
@@ -279,18 +402,23 @@ export class FieldContextRegistryService {
     customFunctions?: Record<string, (context: EvaluationContext) => unknown>,
     arrayScope?: { arrayKey: string; index: number; localKey: string },
   ): EvaluationContext {
-    const rootFormValue = this.rootFormRegistry.formValue();
-
     if (arrayScope) {
-      return this.buildArrayScopedContext(rootFormValue, arrayScope, undefined, customFunctions, true);
+      return this.buildReactiveArrayScopedContext(arrayScope, undefined, customFunctions);
     }
 
     const rootFormSignal = this.rootFormRegistry.rootForm;
     const resolveExternalData = () => this.resolveExternalData();
 
+    // Fine-grained form value, same as createReactiveEvaluationContext: a page or
+    // container condition subscribes only to the fields it actually reads.
+    const formValueProxy = createFieldValueProxy(
+      () => rootFormSignal() as FieldTree<unknown> | undefined,
+      () => this.rootFormRegistry.formValue(),
+    );
+
     return {
       fieldValue: undefined,
-      formValue: rootFormValue,
+      formValue: formValueProxy,
       fieldPath,
       customFunctions: customFunctions || {},
       logger: this.logger,

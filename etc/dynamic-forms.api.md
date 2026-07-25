@@ -378,6 +378,11 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         maxDerivationIterations?: number;
         submitButton?: _ng_forge_dynamic_forms.SubmitButtonOptions;
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
+        pagePreloadWindow?: number;
+        fieldWindowing?: boolean | {
+            eager?: number;
+            placeholderHeight?: string;
+        };
         excludeValueIfHidden?: boolean;
         excludeValueIfDisabled?: boolean;
         excludeValueIfReadonly?: boolean;
@@ -390,6 +395,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     events: _angular_core.OutputRef<_ng_forge_dynamic_forms.FormEvent>;
     fieldLoadingErrors: WritableSignal<FieldLoadingError[]>;
     fieldSignalContext: Signal<_ng_forge_dynamic_forms_internal.FieldSignalContext<TModel>>;
+    protected readonly fieldWindowing: Signal<FieldWindowingConfig>;
     form: Signal<FieldTree<TModel, number | string, "writable">>;
     formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
     formOptions: _angular_core.InputSignal<FormOptions | undefined>;
@@ -403,6 +409,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
     onPageNavigationStateChange: _angular_core.OutputRef<PageNavigationStateChangeEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
+    protected placeholderGridClass(field: ResolvedField): string;
     renderPhase: Signal<"render" | "teardown">;
     reset: _angular_core.OutputRef<FormResetEvent>;
     protected resolvedFields: Signal<ResolvedField[]>;
@@ -415,6 +422,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     valid: Signal<boolean>;
     validityChange: _angular_core.OutputRef<boolean>;
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
+    protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
     // (undocumented)
@@ -672,9 +680,14 @@ export interface FormOptions {
     excludeValueIfDisabled?: boolean;
     excludeValueIfHidden?: boolean;
     excludeValueIfReadonly?: boolean;
+    fieldWindowing?: boolean | {
+        eager?: number;
+        placeholderHeight?: string;
+    };
     idPrefix?: string;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
+    pagePreloadWindow?: number;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
 }
@@ -1196,6 +1209,12 @@ export function withCustomAddon<T extends BaseAddon>(definition: AddonTypeDefini
 // @public
 export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;
 
+// @public
+export function withFieldWindowing(config?: {
+    eager?: number;
+    placeholderHeight?: string;
+}): DynamicFormFeature<'field-windowing'>;
+
 // @public (undocumented)
 export type WithInputSignals<T> = {
     readonly [K in keyof T]-?: Signal<T[K]>;
@@ -1206,6 +1225,9 @@ export function withLegacyStatusClasses(): DynamicFormFeature<'legacy-status-cla
 
 // @public
 export function withLoggerConfig(config?: (() => boolean) | LoggerConfigOptions | boolean): DynamicFormFeature<'logger'>;
+
+// @public
+export function withPagePreload(window: number): DynamicFormFeature<'page-preload'>;
 
 // @public
 export function withValidationExecutionDefaults(config?: Partial<ValidationExecutionConfig>): DynamicFormFeature<'validation-execution'>;

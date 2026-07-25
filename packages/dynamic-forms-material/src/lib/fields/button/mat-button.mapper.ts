@@ -46,7 +46,9 @@ export function buttonFieldMapper(fieldDef: FieldDef<Record<string, unknown>>): 
         key: fieldDef.key,
         index: getIndex(),
         arrayKey: arrayContext?.arrayKey ?? '',
-        formValue: arrayContext?.formValue ?? {},
+        get formValue() {
+          return arrayContext?.formValue ?? {};
+        },
         template,
       };
     }
