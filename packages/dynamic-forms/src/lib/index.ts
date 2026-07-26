@@ -101,6 +101,10 @@ export type { DynamicValue } from '@ng-forge/dynamic-forms/internal';
 
 // Addon Components & Directives (end-user authoring: template projection + built-in renderers)
 export { DfTemplate } from './directives/df-template.directive';
+
+// Field-windowing placeholder projection (customize the placeholder shown before a windowed field mounts)
+export { DfPlaceholder } from './directives/df-placeholder/df-placeholder.directive';
+export type { FieldPlaceholderInfo, FieldPlaceholderContext } from './directives/df-placeholder/df-placeholder.directive';
 export { TextAddonComponent } from './addons/text-addon.component';
 export { TemplateAddonComponent } from './addons/template-addon.component';
 export { ComponentAddonComponent } from './addons/component-addon.component';

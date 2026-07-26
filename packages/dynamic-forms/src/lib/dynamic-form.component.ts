@@ -41,6 +41,14 @@ import { provideDynamicFormDI } from './providers/dynamic-form-di';
 import { FormIdPrefixService } from './core/registry/form-id-prefix.service';
 import { EventDispatcher } from './events/event-dispatcher';
 import { DfTemplate, DfFieldTemplateRegistry } from './directives/df-template.directive';
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  DfPlaceholder,
+  DfPlaceholderRegistry,
+  DF_FIELD_PLACEHOLDERS,
+  type FieldPlaceholderContext,
+} from './directives/df-placeholder/df-placeholder.directive';
+import { resolvePlaceholderTemplate } from './directives/df-placeholder/resolve-placeholder-template';
 import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedField } from './utils/resolve-field/resolve-field';
@@ -79,7 +87,7 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
  */
 @Component({
   selector: 'form[dynamic-form]',
-  imports: [DfFieldOutlet, PageOrchestratorComponent],
+  imports: [DfFieldOutlet, PageOrchestratorComponent, NgTemplateOutlet],
   template: `
     @if (shouldRender()) {
       @switch (formModeDetection().mode) {
@@ -102,7 +110,11 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
                     [style.min-height]="fieldWindowing().placeholderHeight"
                     [attr.data-field-key]="field.key"
                     aria-hidden="true"
-                  ></div>
+                  >
+                    @if (placeholderTemplate(field); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="placeholderContext(field)" />
+                    }
+                  </div>
                 }
               } @else {
                 <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
@@ -121,6 +133,8 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
     provideDynamicFormDI(),
     DfFieldTemplateRegistry,
     { provide: DF_FIELD_TEMPLATES, useFactory: () => inject(DfFieldTemplateRegistry).map },
+    DfPlaceholderRegistry,
+    { provide: DF_FIELD_PLACEHOLDERS, useFactory: () => inject(DfPlaceholderRegistry).placeholders },
   ],
   host: {
     class: 'df-dynamic-form df-form',
@@ -170,6 +184,8 @@ export class DynamicForm<
   private logger = inject(DynamicFormLogger);
   private dispatcher = inject(EventDispatcher, { optional: true });
   private templateRegistry = inject(DfFieldTemplateRegistry);
+  private placeholderRegistry = inject(DfPlaceholderRegistry);
+  private fieldPlaceholders = inject(DF_FIELD_PLACEHOLDERS);
   private globalFieldWindowing = inject(FIELD_WINDOWING);
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -178,6 +194,12 @@ export class DynamicForm<
 
   /** All `<ng-template dfTemplate="...">` instances projected into this form. */
   private readonly _projectedTemplates = contentChildren(DfTemplate);
+
+  /** All `<ng-template dfPlaceholder>` instances projected into this form. */
+  private readonly _projectedPlaceholders = contentChildren(DfPlaceholder);
+
+  /** Per-field placeholder template context, memoised by key to avoid re-allocating each CD. */
+  private readonly _placeholderCtx = new Map<string, FieldPlaceholderContext>();
 
   private readonly stateManager = this.connectDeps();
 
@@ -378,6 +400,23 @@ export class DynamicForm<
     return grid ? `df-field-placeholder ${grid}` : 'df-field-placeholder';
   }
 
+  /** Projected placeholder template for a windowed field, or null for the built-in bare div. */
+  protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null {
+    return resolvePlaceholderTemplate(this.fieldPlaceholders(), { key: field.key, type: field.fieldDef.type });
+  }
+
+  /** Memoised template context for a windowed field's projected placeholder. */
+  protected placeholderContext(field: ResolvedField): FieldPlaceholderContext {
+    let ctx = this._placeholderCtx.get(field.key);
+    if (!ctx) {
+      const label = typeof field.fieldDef.label === 'string' ? field.fieldDef.label : undefined;
+      const info = { key: field.key, type: field.fieldDef.type, label, col: field.fieldDef.col };
+      ctx = { $implicit: info, field: info };
+      this._placeholderCtx.set(field.key, ctx);
+    }
+    return ctx;
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods
   // ─────────────────────────────────────────────────────────────────────────────
@@ -410,6 +449,13 @@ export class DynamicForm<
         map.set(t.dfTemplate(), t.templateRef);
       }
       this.templateRegistry.set(map);
+    });
+
+    // Mirror projected `<ng-template dfPlaceholder>` into the placeholder registry
+    // so windowed pages/fields (including dynamically-rendered ones) can resolve them.
+    explicitEffect([this._projectedPlaceholders], ([placeholders]) => {
+      this.placeholderRegistry.set(placeholders.map((p) => p.descriptor()));
+      this._placeholderCtx.clear();
     });
   }
 
