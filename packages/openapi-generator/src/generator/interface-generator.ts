@@ -220,8 +220,7 @@ function schemaToTsType(
     if (unionSchemas) {
       // Check if this is a discriminator schema — use mapping keys for distinct variant names
       const disc = (schema as Record<string, unknown>)['discriminator'] as
-        | { propertyName: string; mapping?: Record<string, string> }
-        | undefined;
+        { propertyName: string; mapping?: Record<string, string> } | undefined;
       const mappingKeys = disc?.mapping ? Object.keys(disc.mapping) : undefined;
 
       const types = unionSchemas

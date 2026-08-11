@@ -1108,16 +1108,7 @@ type ConditionalExpression =
   | AsyncCondition;
 
 type Operator =
-  | 'equals'
-  | 'notEquals'
-  | 'greater'
-  | 'less'
-  | 'greaterOrEqual'
-  | 'lessOrEqual'
-  | 'contains'
-  | 'startsWith'
-  | 'endsWith'
-  | 'matches';
+  'equals' | 'notEquals' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'contains' | 'startsWith' | 'endsWith' | 'matches';
 
 interface HttpCondition {
   type: 'http';
@@ -1163,9 +1154,7 @@ type AsyncCondition =
 logic: [
   {
     type: 'hidden',
-    condition: {
-      /* when to hide */
-    },
+    condition: {/* when to hide */},
   },
 ];
 ```
@@ -1176,15 +1165,11 @@ logic: [
 logic: [
   {
     type: 'hidden',
-    condition: {
-      /* when to hide */
-    },
+    condition: {/* when to hide */},
   },
   {
     type: 'required',
-    condition: {
-      /* when to require */
-    },
+    condition: {/* when to require */},
   },
 ];
 ```
@@ -1197,14 +1182,7 @@ logic: [
     type: 'hidden',
     condition: {
       type: 'and', // or 'or'
-      conditions: [
-        {
-          /* condition 1 */
-        },
-        {
-          /* condition 2 */
-        },
-      ],
+      conditions: [{/* condition 1 */}, {/* condition 2 */}],
     },
   },
 ];

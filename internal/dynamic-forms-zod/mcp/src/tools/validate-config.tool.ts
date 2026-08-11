@@ -515,8 +515,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       });
 
     const firstPage = fields.find((f) => f && typeof f === 'object' && (f as Record<string, unknown>)['type'] === 'page') as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     const firstPageKey = firstPage?.['key'] as string | undefined;
 
     errors.push({
