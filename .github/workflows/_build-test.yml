@@ -87,32 +87,16 @@ jobs:
           echo "Validating PR title against Angular convention..."
           echo "$PR_TITLE" | pnpm commitlint --verbose
 
-      - name: Check formatting (full)
-        if: ${{ !inputs.affected }}
+      # Always checks the whole repo, on branches and on main alike. Checking only
+      # affected files let a prettier version bump pass on the branch and then fail
+      # on main, since bumping the version does not mark the reformatted files as
+      # affected. The full check takes ~20s, so scoping it down is not worth it.
+      - name: Check formatting
         run: |
           echo "Checking code formatting with Prettier..."
           pnpm exec prettier --check "**/*.{ts,js,json,md,yml,yaml,html,css,scss}" || {
             echo ""
             echo "❌ Formatting issues found!"
-            echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
-            exit 1
-          }
-
-      - name: Check formatting on affected files
-        if: inputs.affected
-        run: |
-          echo "Checking code formatting on affected files..."
-          AFFECTED_FILES=$(git diff --name-only --diff-filter=ACMRT origin/main...HEAD | grep -E '\.(ts|js|json|md|yml|yaml|html|css|scss)$' || true)
-          if [ -z "$AFFECTED_FILES" ]; then
-            echo "No affected files to check"
-            exit 0
-          fi
-          echo "Affected files to check:"
-          echo "$AFFECTED_FILES"
-          echo ""
-          echo "$AFFECTED_FILES" | xargs pnpm exec prettier --check || {
-            echo ""
-            echo "❌ Formatting issues found in affected files!"
             echo "Run 'pnpm exec prettier --write .' to fix formatting issues"
             exit 1
           }

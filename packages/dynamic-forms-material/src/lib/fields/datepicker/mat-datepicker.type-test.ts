@@ -14,15 +14,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 
 describe('MatDatepickerProps - Exhaustive Whitelist', () => {
   type ExpectedKeys =
-    | 'appearance'
-    | 'color'
-    | 'disableRipple'
-    | 'subscriptSizing'
-    | 'floatLabel'
-    | 'hideRequiredMarker'
-    | 'startView'
-    | 'touchUi'
-    | 'hint';
+    'appearance' | 'color' | 'disableRipple' | 'subscriptSizing' | 'floatLabel' | 'hideRequiredMarker' | 'startView' | 'touchUi' | 'hint';
   type ActualKeys = keyof MatDatepickerProps;
 
   it('should have exactly the expected keys', () => {

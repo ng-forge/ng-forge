@@ -544,9 +544,7 @@ export const MY_ADAPTER_CONFIG = new InjectionToken<MyAdapterConfig>('MY_ADAPTER
 In each field component, layer the lookups: per-field `props` win, adapter config falls in next, hard-coded default last.
 
 ```typescript
-@Component({
-  /* ... */
-})
+@Component({/* ... */})
 export default class MyInputComponent {
   private readonly config = inject(MY_ADAPTER_CONFIG, { optional: true });
   protected readonly ngf = injectNgForgeField<string>();

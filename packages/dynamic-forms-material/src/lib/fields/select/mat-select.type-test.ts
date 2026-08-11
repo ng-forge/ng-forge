@@ -22,14 +22,7 @@ import type { RequiredKeys } from '@ng-forge/utils';
 
 describe('MatSelectProps - Exhaustive Whitelist', () => {
   type ExpectedKeys =
-    | 'appearance'
-    | 'multiple'
-    | 'panelMaxHeight'
-    | 'subscriptSizing'
-    | 'floatLabel'
-    | 'hideRequiredMarker'
-    | 'compareWith'
-    | 'hint';
+    'appearance' | 'multiple' | 'panelMaxHeight' | 'subscriptSizing' | 'floatLabel' | 'hideRequiredMarker' | 'compareWith' | 'hint';
   type ActualKeys = keyof MatSelectProps;
 
   it('should have exactly the expected keys', () => {

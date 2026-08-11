@@ -46,9 +46,7 @@ const config = {
       return null;
     });
   },
-  fields: [
-    /* ... */
-  ],
+  fields: [/* ... */],
 };
 ```
 
@@ -73,9 +71,7 @@ const passwordSchema = z
 
 const config = {
   schema: standardSchema(passwordSchema),
-  fields: [
-    /* ... */
-  ],
+  fields: [/* ... */],
 };
 ```
 

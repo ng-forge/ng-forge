@@ -38,9 +38,7 @@ Every adapter uses the same `FormConfig` schema. Import `DynamicForm` and bind a
 })
 export class ContactComponent {
   config = {
-    fields: [
-      /* see Config tab below */
-    ],
+    fields: [/* see Config tab below */],
   } as const satisfies FormConfig;
 }
 ```

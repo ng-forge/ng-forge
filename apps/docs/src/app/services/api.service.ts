@@ -6,16 +6,7 @@ import { Observable, shareReplay, of, catchError } from 'rxjs';
 // ─── API Data Models ─────────────────────────────────────────────────────────
 
 export type DeclarationKind =
-  | 'class'
-  | 'interface'
-  | 'type'
-  | 'function'
-  | 'const'
-  | 'enum'
-  | 'component'
-  | 'directive'
-  | 'injectable'
-  | 'pipe';
+  'class' | 'interface' | 'type' | 'function' | 'const' | 'enum' | 'component' | 'directive' | 'injectable' | 'pipe';
 
 export interface ApiMember {
   name: string;

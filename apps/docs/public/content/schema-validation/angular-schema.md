@@ -200,9 +200,7 @@ const config = {
     required(path.email, { when: ({ valueOf }) => valueOf(path.preferredContact) === 'email' });
     required(path.phone, { when: ({ valueOf }) => valueOf(path.preferredContact) === 'phone' });
   },
-  fields: [
-    /* preferredContact, email, phone */
-  ],
+  fields: [/* preferredContact, email, phone */],
 } as const satisfies FormConfig;
 ```
 
@@ -221,9 +219,7 @@ const config = {
       valueOf(path.discountType) === 'fixed' && value() > valueOf(path.total) ? { kind: 'exceedsTotal' } : null,
     );
   },
-  fields: [
-    /* quantity, discount, discountType, total */
-  ],
+  fields: [/* quantity, discount, discountType, total */],
 } as const satisfies FormConfig;
 ```
 
