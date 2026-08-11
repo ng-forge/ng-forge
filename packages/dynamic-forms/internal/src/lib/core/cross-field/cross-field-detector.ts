@@ -11,8 +11,12 @@ import { CustomFunctionScope } from '../expressions/custom-function-types';
  */
 const FORM_VALUE_ACCESS_PATTERN = /\bformValue\s*(?:\.|\[)/;
 
-/** Combined regex for extracting field paths from formValue expressions. */
-const FORM_VALUE_PATTERN = /\bformValue\s*(?:\.([\w.]+)|\[\s*'([\w.-]+)'\s*\]|\[\s*"([\w.-]+)"\s*\])/g;
+/**
+ * Combined regex for extracting field paths from formValue expressions.
+ * Field keys may contain any ECMA-262 identifier character, not just ASCII.
+ */
+const FORM_VALUE_PATTERN =
+  /\bformValue\s*(?:\.([\p{ID_Continue}$.]+)|\[\s*'([\p{ID_Continue}$.-]+)'\s*\]|\[\s*"([\p{ID_Continue}$.-]+)"\s*\])/gu;
 
 /** Context for cross-field detection, providing access to function scope information. */
 export interface CrossFieldDetectionContext {

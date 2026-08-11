@@ -305,6 +305,31 @@ describe('ExpressionParser', () => {
       const scope4 = { formValue: { user: { profile: { firstName: 'John' } } } };
       expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope4)).toBe('John');
     });
+
+    it('should access properties whose keys contain non-ASCII letters', () => {
+      const scope = {
+        formValue: { bestellgröße: 'L' },
+        externalData: { isAuthenticated: true },
+      };
+
+      expect(ExpressionParser.evaluate('formValue.bestellgröße', scope)).toBe('L');
+      expect(ExpressionParser.evaluate('!!formValue.bestellgröße && externalData.isAuthenticated', scope)).toBe(true);
+    });
+
+    it('should access non-ASCII keys through optional chaining', () => {
+      const scope = { formValue: { lieferung: { bestellgröße: 'L' } } };
+
+      expect(ExpressionParser.evaluate('formValue.lieferung?.bestellgröße', scope)).toBe('L');
+      expect(ExpressionParser.evaluate('formValue.abholung?.bestellgröße', scope)).toBeUndefined();
+    });
+
+    it('should treat dot and bracket notation as equivalent for non-ASCII keys', () => {
+      const scope = { formValue: { bestellgröße: 'L' } };
+
+      expect(ExpressionParser.evaluate('formValue.bestellgröße', scope)).toBe(
+        ExpressionParser.evaluate('formValue["bestellgröße"]', scope),
+      );
+    });
   });
 
   describe('arithmetic operations', () => {
