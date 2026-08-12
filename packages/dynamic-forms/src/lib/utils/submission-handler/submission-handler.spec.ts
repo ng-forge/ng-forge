@@ -255,4 +255,57 @@ describe('createSubmissionHandler', () => {
     expect(payload).toEqual({ middleName: '' });
     sub.unsubscribe();
   });
+  // ─── Server errors returned by the action ───────────────────────────────────
+
+  it('applies server errors returned by the action to the target field', async () => {
+    type Account = { username: string };
+    const { sub, formInstance } = start<Account>(
+      true,
+      (f) => Promise.resolve([{ kind: 'server', message: 'Username taken', fieldTree: f.username }]),
+      { username: 'takenname' },
+    );
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(
+      formInstance
+        .username()
+        .errors()
+        .some((e) => e.kind === 'server'),
+    ).toBe(true);
+    sub.unsubscribe();
+  });
+
+  it('applies server errors returned by an Observable action', async () => {
+    type Account = { username: string };
+    const { sub, formInstance } = start<Account>(true, (f) => of([{ kind: 'server', message: 'Username taken', fieldTree: f.username }]), {
+      username: 'takenname',
+    });
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(
+      formInstance
+        .username()
+        .errors()
+        .some((e) => e.kind === 'server'),
+    ).toBe(true);
+    sub.unsubscribe();
+  });
+
+  it('does not treat a success payload as a validation error', async () => {
+    // An Observable action is usually an HTTP call resolving to a response body;
+    // that body must reach submit() as success, not as a server error.
+    type Account = { username: string };
+    const { sub, formInstance } = start<Account>(true, () => of({ id: 123, status: 'created' }), { username: 'freename' });
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(formInstance.username().errors()).toEqual([]);
+    expect(formInstance().valid()).toBe(true);
+    sub.unsubscribe();
+  });
 });

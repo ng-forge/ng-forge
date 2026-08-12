@@ -1,5 +1,5 @@
 import { Signal } from '@angular/core';
-import { FieldTree, submit } from '@angular/forms/signals';
+import { FieldTree, submit, TreeValidationResult } from '@angular/forms/signals';
 import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from '../../events/constants/submit.event';
@@ -31,23 +31,37 @@ export interface SubmissionHandlerOptions<
 }
 
 /**
+ * Whether a resolved action result is a `TreeValidationResult` carrying server errors.
+ *
+ * `SubmissionConfig.action` also permits arbitrary success payloads (an Observable
+ * action is typically an HTTP call resolving to a response body), so anything that
+ * is not shaped like one-or-many `ValidationError` is reported to `submit()` as
+ * success rather than being misread as a validation failure.
+ */
+function isTreeValidationErrors(result: unknown): result is TreeValidationResult {
+  const isError = (v: unknown): boolean => typeof v === 'object' && v !== null && 'kind' in v;
+  return Array.isArray(result) ? result.every(isError) && result.length > 0 : isError(result);
+}
+
+/**
  * Wraps a submission action to handle both Promise and Observable returns.
  * Converts Observables to Promises for compatibility with Angular Signal Forms' submit().
+ *
+ * The resolved value is handed back to `submit()` so that an action returning
+ * `TreeValidationResult` has its server errors applied to the form.
  *
  * @param action - The submission action function
  * @returns A wrapped function that returns a Promise
  */
 function wrapSubmissionAction<TModel extends Record<string, unknown>>(
   action: (formTree: FieldTree<TModel>) => unknown,
-): (formTree: FieldTree<TModel>) => Promise<void> {
-  return async (formTree: FieldTree<TModel>): Promise<void> => {
+): (formTree: FieldTree<TModel>) => Promise<TreeValidationResult> {
+  return async (formTree: FieldTree<TModel>): Promise<TreeValidationResult> => {
     const result = action(formTree);
-    // If the action returns an Observable, convert it to a Promise
-    if (isObservable(result)) {
-      await firstValueFrom(result);
-      return;
-    }
-    await Promise.resolve(result);
+    // If the action returns an Observable, take its first emission
+    const resolved = isObservable(result) ? await firstValueFrom(result) : await Promise.resolve(result);
+
+    return isTreeValidationErrors(resolved) ? resolved : undefined;
   };
 }
 
