@@ -175,3 +175,70 @@ describe('toInterfaceName', () => {
     expect(toInterfaceName('POST', '/pets')).toBe('PostPetsFormValue');
   });
 });
+
+describe('non-ASCII names', () => {
+  describe('toPascalCase', () => {
+    it('should preserve letters with diacritics', () => {
+      expect(toPascalCase('größe')).toBe('Größe');
+      expect(toPascalCase('țară')).toBe('Țară');
+      expect(toPascalCase('élève')).toBe('Élève');
+      expect(toPascalCase('διεύθυνση')).toBe('Διεύθυνση');
+    });
+
+    it('should keep names that differ only by diacritic distinct', () => {
+      expect(toPascalCase('größe')).not.toBe(toPascalCase('grüße'));
+    });
+
+    it('should split camelCase boundaries at non-ASCII uppercase letters', () => {
+      expect(toPascalCase('straßeÜberweg')).toBe('StraßeÜberweg');
+      expect(toPascalCase('adresseÉlectronique')).toBe('AdresseÉlectronique');
+    });
+
+    it('should still separate words at non-letter characters', () => {
+      expect(toPascalCase('POST:/größen')).toBe('PostGrößen');
+    });
+  });
+
+  describe('toCamelCase', () => {
+    it('should preserve letters with diacritics', () => {
+      expect(toCamelCase('Bestellgröße')).toBe('bestellgröße');
+      expect(toCamelCase('Țară de ședere')).toBe('țarăDeȘedere');
+    });
+  });
+
+  describe('toKebabCase', () => {
+    it('should preserve letters with diacritics', () => {
+      expect(toKebabCase('Größe')).toBe('größe');
+      expect(toKebabCase('BestellGröße')).toBe('bestell-größe');
+    });
+
+    it('should keep names that differ only by diacritic distinct', () => {
+      expect(toKebabCase('Größe')).not.toBe(toKebabCase('Grüße'));
+    });
+  });
+
+  describe('toLabel', () => {
+    it('should capitalize words starting with a non-ASCII letter', () => {
+      expect(toLabel('nom_élève')).toBe('Nom Élève');
+      expect(toLabel('țara_de_ședere')).toBe('Țara De Ședere');
+    });
+  });
+
+  describe('toEnumLabel', () => {
+    it('should humanize SCREAMING_SNAKE_CASE containing non-ASCII letters', () => {
+      expect(toEnumLabel('ÉLÈVE_ACTIF')).toBe('Élève Actif');
+    });
+
+    it('should still uppercase known acronyms alongside accented words', () => {
+      expect(toEnumLabel('élève_sms')).toBe('Élève SMS');
+    });
+  });
+
+  describe('generated names', () => {
+    it('should build config, file and interface names from a non-ASCII operationId', () => {
+      expect(toFormConfigName('POST', '/größen', 'createGröße')).toBe('createGrößeFormConfig');
+      expect(toFormFileName('POST', '/größen', 'createGröße')).toBe('create-größe.form.ts');
+      expect(toInterfaceName('POST', '/größen', 'createGröße')).toBe('CreateGrößeFormValue');
+    });
+  });
+});
