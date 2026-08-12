@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { Injector, runInInjectionContext, signal, type Signal } from '@angular/core';
 import { form, type FieldTree } from '@angular/forms/signals';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Subscription } from 'rxjs';
+import { of, Subject, throwError, timer, type Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from '../../events/constants/submit.event';
 import type { FormConfig } from '@ng-forge/dynamic-forms/internal';
@@ -29,18 +30,23 @@ describe('createSubmissionHandler', () => {
     eventBus = TestBed.inject(EventBus);
   });
 
-  function start(valid: boolean, action?: (form: FieldTree<Model>) => unknown): Subscription {
+  function start<M extends Record<string, unknown> = Model>(
+    valid: boolean,
+    action?: (form: FieldTree<M>) => unknown,
+    initial: M = { email: 'a@b.com' } as unknown as M,
+  ): { sub: Subscription; formInstance: FieldTree<M>; logger: Logger } {
     return runInInjectionContext(injector, () => {
-      const formInstance = form(signal<Model>({ email: 'a@b.com' }));
+      const formInstance = form(signal<M>(initial));
       const config = { fields: [], submission: action ? { action } : undefined } as unknown as FormConfig;
+      const logger = makeLogger();
       const handler$ = createSubmissionHandler({
         eventBus,
         configSignal: signal(config),
         formSignal: signal(formInstance) as unknown as Signal<FieldTree<Record<string, unknown>>>,
         validSignal: signal(valid),
-        logger: makeLogger(),
+        logger,
       });
-      return handler$.subscribe();
+      return { sub: handler$.subscribe(), formInstance, logger };
     });
   }
 
@@ -48,7 +54,7 @@ describe('createSubmissionHandler', () => {
 
   it('skips the submission action when the form is not valid (invalid OR pending async validators)', async () => {
     const action = vi.fn().mockResolvedValue(undefined);
-    const sub = start(false, action);
+    const { sub } = start(false, action);
     dispatchSubmit();
     await tick(15);
     expect(action).not.toHaveBeenCalled();
@@ -57,7 +63,7 @@ describe('createSubmissionHandler', () => {
 
   it('runs the submission action when the form is valid', async () => {
     const action = vi.fn().mockResolvedValue(undefined);
-    const sub = start(true, action);
+    const { sub } = start(true, action);
     dispatchSubmit();
     await tick(25);
     expect(action).toHaveBeenCalledTimes(1);
@@ -65,7 +71,7 @@ describe('createSubmissionHandler', () => {
   });
 
   it('does nothing (no throw) when no submission.action is configured', async () => {
-    const sub = start(true, undefined);
+    const { sub } = start(true, undefined);
     expect(() => dispatchSubmit()).not.toThrow();
     await tick(15);
     sub.unsubscribe();
@@ -75,7 +81,7 @@ describe('createSubmissionHandler', () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
     const action = vi.fn().mockReturnValue(gate);
-    const sub = start(true, action);
+    const { sub } = start(true, action);
     runInInjectionContext(injector, () => {
       eventBus.dispatch(new FormSubmitEvent());
       eventBus.dispatch(new FormSubmitEvent());
@@ -84,6 +90,169 @@ describe('createSubmissionHandler', () => {
     expect(action).toHaveBeenCalledTimes(1);
     release();
     await tick(15);
+    sub.unsubscribe();
+  });
+
+  // ─── Observable actions (wrapSubmissionAction) ──────────────────────────────
+
+  it('awaits an Observable action before completing the submission', async () => {
+    let resolved = false;
+    const action = vi.fn().mockImplementation(() => timer(20).pipe(map(() => (resolved = true))));
+    const { sub, formInstance } = start(true, action);
+
+    dispatchSubmit();
+    await tick(5);
+    expect(resolved).toBe(false);
+
+    await tick(40);
+    expect(resolved).toBe(true);
+    expect(formInstance().submitting()).toBe(false);
+    sub.unsubscribe();
+  });
+
+  it('uses only the first emission of a multi-emit Observable action', async () => {
+    const subject = new Subject<undefined>();
+    const seen: number[] = [];
+    const action = vi.fn().mockImplementation(() =>
+      subject.pipe(
+        map(() => {
+          seen.push(seen.length + 1);
+          return undefined;
+        }),
+      ),
+    );
+    const { sub } = start(true, action);
+
+    dispatchSubmit();
+    await tick(5);
+    subject.next(undefined);
+    subject.next(undefined);
+    subject.next(undefined);
+    await tick(15);
+
+    // firstValueFrom unsubscribes after the first emission.
+    expect(seen).toEqual([1]);
+    sub.unsubscribe();
+  });
+
+  // ─── submitting() lifecycle ─────────────────────────────────────────────────
+
+  it('holds submitting() true for the duration of the action and clears it after', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    let submittingDuringAction: boolean | undefined;
+    const { sub, formInstance } = start(true, (f) => {
+      submittingDuringAction = f().submitting();
+      return gate;
+    });
+
+    expect(formInstance().submitting()).toBe(false);
+    dispatchSubmit();
+    await tick(15);
+
+    expect(submittingDuringAction).toBe(true);
+    expect(formInstance().submitting()).toBe(true);
+
+    release();
+    await tick(15);
+    expect(formInstance().submitting()).toBe(false);
+    sub.unsubscribe();
+  });
+
+  // ─── Failure resilience (the catchError contract) ────────────────────────────
+
+  it('keeps accepting submissions after the action rejects', async () => {
+    const action = vi.fn().mockRejectedValueOnce(new Error('network down')).mockResolvedValue(undefined);
+    const { sub } = start(true, action);
+
+    dispatchSubmit();
+    await tick(25);
+    expect(action).toHaveBeenCalledTimes(1);
+
+    // Without catchError in the handler the stream would be dead here.
+    dispatchSubmit();
+    await tick(25);
+    expect(action).toHaveBeenCalledTimes(2);
+    sub.unsubscribe();
+  });
+
+  it('keeps accepting submissions after an Observable action errors', async () => {
+    const action = vi
+      .fn()
+      .mockImplementationOnce(() => throwError(() => new Error('network down')))
+      .mockImplementation(() => of(undefined));
+    const { sub } = start(true, action);
+
+    dispatchSubmit();
+    await tick(25);
+    dispatchSubmit();
+    await tick(25);
+
+    expect(action).toHaveBeenCalledTimes(2);
+    sub.unsubscribe();
+  });
+
+  it('logs the failure when the action rejects', async () => {
+    const action = vi.fn().mockRejectedValue(new Error('network down'));
+    const { sub, logger } = start(true, action);
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(logger.error).toHaveBeenCalled();
+    sub.unsubscribe();
+  });
+
+  it('treats a non-error return value as a successful submission', async () => {
+    const action = vi.fn().mockResolvedValue({ id: 123, status: 'created' });
+    const { sub, formInstance, logger } = start(true, action);
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(formInstance().submitting()).toBe(false);
+    expect(logger.error).not.toHaveBeenCalled();
+    sub.unsubscribe();
+  });
+
+  // ─── Submitted payload (issue #341 nullable contract) ───────────────────────
+
+  it('passes an untouched nullable field through to the action as null', async () => {
+    type Profile = { firstName: string; middleName: string | null; age: number | null };
+    let payload: Profile | undefined;
+    const { sub } = start<Profile>(
+      true,
+      (f) => {
+        payload = f().value();
+        return Promise.resolve(undefined);
+      },
+      { firstName: 'Jane', middleName: null, age: null },
+    );
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(payload).toEqual({ firstName: 'Jane', middleName: null, age: null });
+    sub.unsubscribe();
+  });
+
+  it('passes "" (not null) for a nullable text field that was typed then cleared', async () => {
+    // Web IDL contract: a cleared text input reads back as "", never null.
+    type Profile = { middleName: string | null };
+    let payload: Profile | undefined;
+    const { sub } = start<Profile>(
+      true,
+      (f) => {
+        payload = f().value();
+        return Promise.resolve(undefined);
+      },
+      { middleName: '' },
+    );
+
+    dispatchSubmit();
+    await tick(25);
+
+    expect(payload).toEqual({ middleName: '' });
     sub.unsubscribe();
   });
 });
