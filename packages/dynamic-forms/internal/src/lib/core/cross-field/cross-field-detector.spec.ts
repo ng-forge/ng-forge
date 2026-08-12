@@ -27,6 +27,33 @@ describe('cross-field-detector', () => {
     it('should extract nested non-ASCII paths as root and full path', () => {
       expect(extractStringDependencies('formValue.lieferung.bestellgröße')).toEqual(['lieferung', 'lieferung.bestellgröße']);
     });
+
+    it.each([
+      ['Romanian', 'țaraDeȘedere'],
+      ['Romanian (cedilla variants)', 'ştiinţă'],
+      ['French', 'adresseÉlectronique'],
+      ['French (ligature)', 'cœurBattant'],
+      ['German', 'überprüfungsgröße'],
+      ['Spanish', 'añoDeNacimiento'],
+      ['Portuguese', 'endereçoIrmão'],
+      ['Polish', 'nazwiskoŻółć'],
+      ['Czech', 'příjmeníŘeka'],
+      ['Hungarian', 'születésiDátum'],
+      ['Turkish', 'kimlikNumarası'],
+      ['Nordic', 'blåbærFødt'],
+      ['Greek', 'διεύθυνση'],
+      ['Cyrillic', 'фамилия'],
+      ['Vietnamese', 'điệnThoại'],
+      ['Hebrew', 'כתובת'],
+      ['Arabic', 'العنوان'],
+      ['CJK', '住所'],
+    ])('should extract a key with %s characters, composed and decomposed', (_language, key) => {
+      expect(extractStringDependencies(`formValue.${key}`)).toEqual([key]);
+      expect(extractStringDependencies(`formValue["${key}"]`)).toEqual([key]);
+
+      const decomposed = key.normalize('NFD');
+      expect(extractStringDependencies(`formValue.${decomposed}`)).toEqual([decomposed]);
+    });
   });
 
   describe('extractExpressionDependencies', () => {
