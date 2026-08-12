@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { PageOrchestratorComponent } from './page-orchestrator.component';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -189,6 +191,188 @@ describe('PageOrchestratorComponent', () => {
       await waitForFormInit(fixture);
 
       expect(pageChangeCount).toBe(0);
+    });
+
+    it('blocks navigation when a required field inside a container is empty', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'detailsBlock',
+                type: 'container',
+                wrappers: [],
+                fields: [{ key: 'nickname', type: 'input', label: 'Nickname', required: true }],
+              },
+            ],
+          },
+          { key: 'page2', type: 'page', fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }] },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, {});
+      await waitForFormInit(fixture);
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+
+      let pageChangeCount = 0;
+      eventBus.on<PageChangeEvent>('page-change').subscribe(() => pageChangeCount++);
+
+      eventBus.dispatch(NextPageEvent);
+      fixture.detectChanges();
+      await waitForFormInit(fixture);
+
+      expect(pageChangeCount).toBe(0);
+    });
+
+    it('blocks navigation when a required field inside a nested container is empty', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'outerBlock',
+                type: 'container',
+                wrappers: [],
+                fields: [
+                  {
+                    key: 'innerRow',
+                    type: 'row',
+                    fields: [
+                      {
+                        key: 'innerBlock',
+                        type: 'container',
+                        wrappers: [],
+                        fields: [{ key: 'nickname', type: 'input', label: 'Nickname', required: true }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          { key: 'page2', type: 'page', fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }] },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, {});
+      await waitForFormInit(fixture);
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+
+      let pageChangeCount = 0;
+      eventBus.on<PageChangeEvent>('page-change').subscribe(() => pageChangeCount++);
+
+      eventBus.dispatch(NextPageEvent);
+      fixture.detectChanges();
+      await waitForFormInit(fixture);
+
+      expect(pageChangeCount).toBe(0);
+    });
+
+    it('blocks navigation when a required field inside a group nested in a container is empty', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'detailsBlock',
+                type: 'container',
+                wrappers: [],
+                fields: [
+                  {
+                    key: 'profile',
+                    type: 'group',
+                    fields: [{ key: 'nickname', type: 'input', label: 'Nickname', required: true }],
+                  },
+                ],
+              },
+            ],
+          },
+          { key: 'page2', type: 'page', fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }] },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, {});
+      await waitForFormInit(fixture);
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+
+      let pageChangeCount = 0;
+      eventBus.on<PageChangeEvent>('page-change').subscribe(() => pageChangeCount++);
+
+      eventBus.dispatch(NextPageEvent);
+      fixture.detectChanges();
+      await waitForFormInit(fixture);
+
+      expect(pageChangeCount).toBe(0);
+    });
+
+    it('reports the page invalid to currentPageValid when a container child is invalid', async () => {
+      // `currentPageValid` is the signal both consumers read: the navigateToNextPage() gate
+      // and resolveNextButtonDisabled (which keeps the next button enabled when it is true).
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'detailsBlock',
+                type: 'container',
+                wrappers: [],
+                fields: [{ key: 'nickname', type: 'input', label: 'Nickname', required: true }],
+              },
+            ],
+          },
+          { key: 'page2', type: 'page', fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }] },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, {});
+      await waitForFormInit(fixture);
+
+      const orchestrator = fixture.debugElement.query(By.directive(PageOrchestratorComponent))
+        .componentInstance as PageOrchestratorComponent;
+
+      expect(orchestrator.currentPageValid()).toBe(false);
+    });
+
+    it('allows navigation when every field inside a container is valid', async () => {
+      const config: FormConfig = {
+        fields: [
+          {
+            key: 'page1',
+            type: 'page',
+            fields: [
+              {
+                key: 'detailsBlock',
+                type: 'container',
+                wrappers: [],
+                fields: [{ key: 'nickname', type: 'input', label: 'Nickname', required: true, value: 'Robin' }],
+              },
+            ],
+          },
+          { key: 'page2', type: 'page', fields: [{ key: 'confirm', type: 'input', label: 'Confirm' }] },
+        ],
+      } as unknown as FormConfig;
+
+      const fixture = createForm(config, { nickname: 'Robin' });
+      await waitForFormInit(fixture);
+      const eventBus = fixture.debugElement.injector.get(EventBus);
+
+      let pageChangeEvent: PageChangeEvent | null = null;
+      eventBus.on<PageChangeEvent>('page-change').subscribe((e) => (pageChangeEvent = e));
+
+      eventBus.dispatch(NextPageEvent);
+      fixture.detectChanges();
+      await waitForFormInit(fixture);
+
+      expect(pageChangeEvent).toBeTruthy();
+      expect(pageChangeEvent!.currentPageIndex).toBe(1);
     });
 
     it('renders a large page > group > many rows shape without standalone injector errors', async () => {
