@@ -1,5 +1,11 @@
 import { Token, TokenType, ExpressionParserError } from './types';
 
+/** Characters that may start an identifier, per ECMA-262 IdentifierStart. */
+const IDENTIFIER_START = /[\p{ID_Start}$_]/u;
+
+/** Characters that may continue an identifier, per ECMA-262 IdentifierPart. */
+const IDENTIFIER_PART = /[\p{ID_Continue}$]/u;
+
 /** Tokenizes an expression string into tokens */
 export class Tokenizer {
   private position = 0;
@@ -48,7 +54,7 @@ export class Tokenizer {
     }
 
     // Identifiers and keywords
-    if (/[a-zA-Z_$]/.test(char)) {
+    if (IDENTIFIER_START.test(this.codePointAt(this.position))) {
       return this.readIdentifierOrKeyword();
     }
 
@@ -122,14 +128,24 @@ export class Tokenizer {
     const start = this.position;
     let value = '';
 
-    while (this.position < this.expression.length && /[a-zA-Z0-9_$]/.test(this.expression[this.position])) {
-      value += this.expression[this.position];
-      this.position++;
+    while (this.position < this.expression.length) {
+      const char = this.codePointAt(this.position);
+      if (!IDENTIFIER_PART.test(char)) {
+        break;
+      }
+      value += char;
+      this.position += char.length;
     }
 
     // Check for keywords
     const type = this.getKeywordType(value);
     return { type, value, position: start };
+  }
+
+  /** Reads the whole code point at `position`, keeping surrogate pairs intact. */
+  private codePointAt(position: number): string {
+    const codePoint = this.expression.codePointAt(position);
+    return codePoint === undefined ? '' : String.fromCodePoint(codePoint);
   }
 
   private getKeywordType(value: string): TokenType {

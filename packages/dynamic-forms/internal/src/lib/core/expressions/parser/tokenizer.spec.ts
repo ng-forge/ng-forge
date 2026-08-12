@@ -184,6 +184,52 @@ describe('Tokenizer', () => {
       expect(tokens[0].type).toBe(TokenType.IDENTIFIER);
       expect(tokens[0].value).toBe('trueValue');
     });
+
+    it('should tokenize identifier with umlauts', () => {
+      const tokenizer = new Tokenizer('bestellgröße');
+      const tokens = tokenizer.tokenize();
+
+      expect(tokens[0]).toEqual({ type: TokenType.IDENTIFIER, value: 'bestellgröße', position: 0 });
+    });
+
+    it('should tokenize identifier starting with a non-ASCII letter', () => {
+      const tokenizer = new Tokenizer('Ärger');
+      const tokens = tokenizer.tokenize();
+
+      expect(tokens[0]).toEqual({ type: TokenType.IDENTIFIER, value: 'Ärger', position: 0 });
+    });
+
+    it('should tokenize identifiers in non-Latin scripts', () => {
+      const tokenizer = new Tokenizer('日本語 имя');
+      const tokens = tokenizer.tokenize();
+
+      expect(tokens[0]).toEqual({ type: TokenType.IDENTIFIER, value: '日本語', position: 0 });
+      expect(tokens[1]).toEqual({ type: TokenType.IDENTIFIER, value: 'имя', position: 4 });
+    });
+
+    it('should tokenize member access on a non-ASCII identifier', () => {
+      const tokenizer = new Tokenizer('formValue.bestellgröße');
+      const tokens = tokenizer.tokenize();
+
+      expect(tokens[0].value).toBe('formValue');
+      expect(tokens[1].type).toBe(TokenType.DOT);
+      expect(tokens[2]).toEqual({ type: TokenType.IDENTIFIER, value: 'bestellgröße', position: 10 });
+      expect(tokens[3].type).toBe(TokenType.EOF);
+    });
+
+    it('should tokenize an identifier containing a zero-width non-joiner', () => {
+      // Persian compounds join words with U+200C, which ECMA-262 allows inside identifiers.
+      const key = 'نام‌خانوادگی';
+      const tokens = new Tokenizer(key).tokenize();
+
+      expect(tokens[0]).toEqual({ type: TokenType.IDENTIFIER, value: key, position: 0 });
+      expect(tokens[1].type).toBe(TokenType.EOF);
+    });
+
+    it('should still reject characters that are not identifier parts', () => {
+      expect(() => new Tokenizer('formValue.€betrag').tokenize()).toThrow(/Unexpected character/);
+      expect(() => new Tokenizer('a # b').tokenize()).toThrow(/Unexpected character/);
+    });
   });
 
   describe('operators', () => {
