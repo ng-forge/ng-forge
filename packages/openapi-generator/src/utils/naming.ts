@@ -4,9 +4,9 @@
  */
 export function toLabel(name: string): string {
   return name
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2')
     .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/(^|\s)(\p{L})/gu, (_, separator, letter: string) => separator + letter.toUpperCase())
     .trim();
 }
 
@@ -64,7 +64,7 @@ const KNOWN_ACRONYMS = new Set([
  */
 export function toEnumLabel(value: string): string {
   // Handle SCREAMING_SNAKE_CASE: lowercase before processing
-  if (/^[A-Z][A-Z0-9_-]*$/.test(value)) {
+  if (/^\p{Lu}[\p{Lu}\p{N}_-]*$/u.test(value)) {
     if (value.length <= 3 && !/[_-]/.test(value)) {
       return value;
     }
@@ -74,7 +74,7 @@ export function toEnumLabel(value: string): string {
   const label = toLabel(value);
 
   // Replace known acronyms with their uppercase form
-  return label.replace(/\b\w+\b/g, (word) => {
+  return label.replace(/[\p{L}\p{N}]+/gu, (word) => {
     if (KNOWN_ACRONYMS.has(word.toLowerCase())) {
       return word.toUpperCase();
     }
@@ -84,12 +84,14 @@ export function toEnumLabel(value: string): string {
 
 /**
  * Convert a string to PascalCase.
- * Examples: "create pet" → "CreatePet", "POST:/pets" → "PostPets"
+ * Letters outside ASCII are kept — they are valid in TypeScript identifiers, and
+ * dropping them would collapse names that differ only by a diacritic.
+ * Examples: "create pet" → "CreatePet", "POST:/pets" → "PostPets", "größe" → "Größe"
  */
 export function toPascalCase(str: string): string {
   return str
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2') // Split camelCase boundaries
-    .replace(/[^a-zA-Z0-9]/g, ' ')
+    .replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2') // Split camelCase boundaries
+    .replace(/[^\p{L}\p{N}]/gu, ' ')
     .split(/\s+/)
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -108,8 +110,8 @@ export function toCamelCase(str: string): string {
  */
 export function toKebabCase(str: string): string {
   return str
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .replace(/[^a-zA-Z0-9]/g, '-')
+    .replace(/(\p{Ll})(\p{Lu})/gu, '$1-$2')
+    .replace(/[^\p{L}\p{N}]/gu, '-')
     .replace(/-+/g, '-')
     .toLowerCase()
     .replace(/^-|-$/g, '');

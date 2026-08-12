@@ -717,4 +717,39 @@ describe('generateInterface', () => {
       expect(result).toContain('export interface');
     });
   });
+
+  describe('non-ASCII property names', () => {
+    it('should name a nested interface after the property, diacritics included', () => {
+      const schema: OpenAPIV3.SchemaObject = {
+        type: 'object',
+        properties: {
+          bestellgröße: { type: 'object', properties: { wert: { type: 'string' } } },
+        },
+      };
+
+      const result = generateInterface(schema, defaultOptions);
+
+      expect(result).toContain('export interface CreatePetFormValueBestellgröße {');
+      expect(result).toContain('  bestellgröße?: CreatePetFormValueBestellgröße;');
+    });
+
+    it('should not collapse sibling properties that differ only by a diacritic', () => {
+      const schema: OpenAPIV3.SchemaObject = {
+        type: 'object',
+        properties: {
+          größe: { type: 'object', properties: { wert: { type: 'string' } } },
+          grüße: { type: 'object', properties: { text: { type: 'string' } } },
+        },
+      };
+
+      const result = generateInterface(schema, defaultOptions);
+
+      expect(result).toContain('export interface CreatePetFormValueGröße {');
+      expect(result).toContain('export interface CreatePetFormValueGrüße {');
+
+      // Two declarations of one name would not compile in the generated file.
+      const declaredNames = [...result.matchAll(/export interface (\S+) \{/gu)].map((m) => m[1]);
+      expect(new Set(declaredNames).size).toBe(declaredNames.length);
+    });
+  });
 });
