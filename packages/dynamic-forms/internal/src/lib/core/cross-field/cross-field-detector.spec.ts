@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { extractExpressionDependencies, extractStringDependencies, isCrossFieldExpression } from './cross-field-detector';
 
+/** Zero-width non-joiner: an identifier part that carries no glyph. */
+const ZWNJ = '\u200C';
+
 describe('cross-field-detector', () => {
   describe('extractStringDependencies', () => {
     it('should extract dot-notation dependencies', () => {
@@ -26,6 +29,31 @@ describe('cross-field-detector', () => {
 
     it('should extract nested non-ASCII paths as root and full path', () => {
       expect(extractStringDependencies('formValue.lieferung.bestellgröße')).toEqual(['lieferung', 'lieferung.bestellgröße']);
+    });
+
+    it('should ignore dot segments that cannot start an identifier', () => {
+      // These are not parseable expressions; extracting a "dependency" from them
+      // only pollutes the dependency set with keys no field can ever have.
+      expect(extractStringDependencies('formValue.123name')).toEqual([]);
+      expect(extractStringDependencies('formValue..name')).toEqual([]);
+    });
+
+    it('should ignore a trailing dot rather than emitting a partial path', () => {
+      expect(extractStringDependencies('formValue.name.')).toEqual(['name']);
+    });
+
+    it('should still accept identifiers starting with underscore or dollar', () => {
+      expect(extractStringDependencies('formValue._private')).toEqual(['_private']);
+      expect(extractStringDependencies('formValue.$special')).toEqual(['$special']);
+      expect(extractStringDependencies('formValue._outer.$inner')).toEqual(['_outer', '_outer.$inner']);
+    });
+
+    it('should extract keys containing a zero-width non-joiner', () => {
+      // Persian compounds join words with U+200C, which is a valid identifier part.
+      const key = `نام${ZWNJ}خانوادگی`;
+
+      expect(extractStringDependencies(`formValue.${key}`)).toEqual([key]);
+      expect(extractStringDependencies(`formValue["${key}"]`)).toEqual([key]);
     });
 
     it.each([

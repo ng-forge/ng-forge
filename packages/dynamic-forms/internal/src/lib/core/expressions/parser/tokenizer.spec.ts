@@ -217,6 +217,15 @@ describe('Tokenizer', () => {
       expect(tokens[3].type).toBe(TokenType.EOF);
     });
 
+    it('should tokenize an identifier containing a zero-width non-joiner', () => {
+      // Persian compounds join words with U+200C, which ECMA-262 allows inside identifiers.
+      const key = 'نام‌خانوادگی';
+      const tokens = new Tokenizer(key).tokenize();
+
+      expect(tokens[0]).toEqual({ type: TokenType.IDENTIFIER, value: key, position: 0 });
+      expect(tokens[1].type).toBe(TokenType.EOF);
+    });
+
     it('should still reject characters that are not identifier parts', () => {
       expect(() => new Tokenizer('formValue.€betrag').tokenize()).toThrow(/Unexpected character/);
       expect(() => new Tokenizer('a # b').tokenize()).toThrow(/Unexpected character/);

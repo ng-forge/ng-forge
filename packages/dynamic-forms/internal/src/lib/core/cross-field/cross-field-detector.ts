@@ -11,12 +11,24 @@ import { CustomFunctionScope } from '../expressions/custom-function-types';
  */
 const FORM_VALUE_ACCESS_PATTERN = /\bformValue\s*(?:\.|\[)/;
 
+/** ECMA-262 identifier characters, not just ASCII. Composed into the path pattern below. */
+const ID_START = String.raw`[\p{ID_Start}$_]`;
+const ID_PART = String.raw`[\p{ID_Continue}$]`;
+
+/** A dotted path of identifiers: every segment must be able to start one. */
+const DOTTED_PATH = String.raw`${ID_START}${ID_PART}*(?:\.${ID_START}${ID_PART}*)*`;
+
+/** Bracket keys are string literals, so they admit characters an identifier cannot (e.g. `-`). */
+const BRACKET_KEY = String.raw`[\p{ID_Continue}$.\-]+`;
+
 /**
  * Combined regex for extracting field paths from formValue expressions.
- * Field keys may contain any ECMA-262 identifier character, not just ASCII.
+ * Matches formValue.a.b, formValue['a-b'] and formValue["a-b"].
  */
-const FORM_VALUE_PATTERN =
-  /\bformValue\s*(?:\.([\p{ID_Continue}$.]+)|\[\s*'([\p{ID_Continue}$.-]+)'\s*\]|\[\s*"([\p{ID_Continue}$.-]+)"\s*\])/gu;
+const FORM_VALUE_PATTERN = new RegExp(
+  String.raw`\bformValue\s*(?:\.(${DOTTED_PATH})|\[\s*'(${BRACKET_KEY})'\s*\]|\[\s*"(${BRACKET_KEY})"\s*\])`,
+  'gu',
+);
 
 /** Context for cross-field detection, providing access to function scope information. */
 export interface CrossFieldDetectionContext {
