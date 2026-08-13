@@ -110,7 +110,8 @@ interface StringInputField<TProps extends { type?: string } = InputProps, TNulla
  * - If props.type is undefined/text/email/etc, only StringInputField matches (value: string)
  */
 type BuildInputFieldUnion<TProps extends { type?: string }, TNullable extends boolean = boolean> =
-  NumberInputField<TProps, TNullable> | StringInputField<TProps, TNullable>;
+  | NumberInputField<TProps, TNullable>
+  | StringInputField<TProps, TNullable>;
 
 /**
  * Input field with automatic type-safe value inference.

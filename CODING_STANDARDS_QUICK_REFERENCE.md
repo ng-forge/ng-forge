@@ -76,7 +76,9 @@ template: `{{ calculateTotal() }}`  // Don't call functions - use computed()
 ### Component Structure (Order Matters!)
 
 ```typescript
-@Component({/* ... */})
+@Component({
+  /* ... */
+})
 export class MyComponent {
   // 1. Inputs (required first, then optional)
   readonly field = input.required<FieldTree<string>>();

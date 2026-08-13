@@ -7,7 +7,9 @@ import { resolveValueFieldContext, buildValueFieldInputs } from '../value/value-
 
 /** Field types that have an options property. */
 export type FieldWithOptions<T = unknown, TProps = unknown> =
-  SelectField<T, TProps> | RadioField<T, TProps> | MultiCheckboxField<T, TProps>;
+  | SelectField<T, TProps>
+  | RadioField<T, TProps>
+  | MultiCheckboxField<T, TProps>;
 
 /**
  * Maps a field with options (select, radio, multi-checkbox) to component inputs.

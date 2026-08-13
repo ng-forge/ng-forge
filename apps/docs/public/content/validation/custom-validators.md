@@ -867,7 +867,9 @@ const checkUsername: AsyncCustomValidator<string, { username: string }, { availa
 
 // HTTP validators with type parameters (advanced)
 const checkDomain: HttpCustomValidator<string, { valid: boolean }> = {
-  request: (ctx) => ({/* ... */}),
+  request: (ctx) => ({
+    /* ... */
+  }),
   onSuccess: (response, ctx) => {
     response.valid; // Type: boolean
     return response.valid ? null : { kind: 'invalidDomain' };

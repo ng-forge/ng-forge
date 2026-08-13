@@ -199,7 +199,11 @@ interface DeclarativeHttpValidatorConfig {
 }
 
 type ValidatorConfig =
-  BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig;
+  | BuiltInValidatorConfig
+  | CustomValidatorConfig
+  | AsyncValidatorConfig
+  | FunctionHttpValidatorConfig
+  | DeclarativeHttpValidatorConfig;
 ```
 
 > **Note:** `FunctionHttpValidatorConfig` and `DeclarativeHttpValidatorConfig` both use `type: 'http'`. They are discriminated by property presence: `functionName` or `fn` indicates function-based, `http` + `responseMapping` indicates declarative.
@@ -286,10 +290,25 @@ interface OrCondition {
 }
 
 type ComparisonOperator =
-  'equals' | 'notEquals' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'contains' | 'startsWith' | 'endsWith' | 'matches';
+  | 'equals'
+  | 'notEquals'
+  | 'greater'
+  | 'less'
+  | 'greaterOrEqual'
+  | 'lessOrEqual'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'matches';
 
 type ConditionalExpression =
-  FieldValueCondition | CustomCondition | JavascriptCondition | HttpCondition | AsyncCondition | AndCondition | OrCondition;
+  | FieldValueCondition
+  | CustomCondition
+  | JavascriptCondition
+  | HttpCondition
+  | AsyncCondition
+  | AndCondition
+  | OrCondition;
 ```
 
 ## Validation Messages

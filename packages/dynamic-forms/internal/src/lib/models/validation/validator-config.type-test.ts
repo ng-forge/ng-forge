@@ -397,7 +397,11 @@ describe('DeclarativeHttpValidatorConfig - Usage Examples', () => {
 describe('ValidatorConfig - Discriminated Union', () => {
   it('should be union of all validator config types', () => {
     type ExpectedUnion =
-      BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig;
+      | BuiltInValidatorConfig
+      | CustomValidatorConfig
+      | AsyncValidatorConfig
+      | FunctionHttpValidatorConfig
+      | DeclarativeHttpValidatorConfig;
     expectTypeOf<ValidatorConfig>().toEqualTypeOf<ExpectedUnion>();
   });
 

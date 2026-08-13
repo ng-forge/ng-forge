@@ -13,7 +13,17 @@ import type { RequiredKeys } from '@ng-forge/utils';
 
 describe('IonicSliderProps - Exhaustive Whitelist', () => {
   type ExpectedKeys =
-    'min' | 'max' | 'step' | 'dualKnobs' | 'pin' | 'pinFormatter' | 'ticks' | 'snaps' | 'color' | 'labelPlacement' | 'hint';
+    | 'min'
+    | 'max'
+    | 'step'
+    | 'dualKnobs'
+    | 'pin'
+    | 'pinFormatter'
+    | 'ticks'
+    | 'snaps'
+    | 'color'
+    | 'labelPlacement'
+    | 'hint';
   type ActualKeys = keyof IonicSliderProps;
 
   it('should have exactly the expected keys', () => {

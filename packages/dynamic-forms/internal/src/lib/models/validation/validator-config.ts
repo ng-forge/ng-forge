@@ -128,7 +128,11 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
  * Discriminated union type for type-safe validator configuration.
  */
 export type ValidatorConfig =
-  BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfig | FunctionHttpValidatorConfig | DeclarativeHttpValidatorConfig;
+  | BuiltInValidatorConfig
+  | CustomValidatorConfig
+  | AsyncValidatorConfig
+  | FunctionHttpValidatorConfig
+  | DeclarativeHttpValidatorConfig;
 
 /** Type guard to distinguish function-based HTTP validators from declarative ones. */
 export function isFunctionHttpValidator(

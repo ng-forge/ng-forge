@@ -380,28 +380,38 @@ fields: [
   {
     key: 'basicInfo',
     type: 'page',
-    fields: [/* lightweight fields */],
+    fields: [
+      /* lightweight fields */
+    ],
   },
   {
     key: 'contact',
     type: 'page',
-    fields: [/* lightweight fields */],
+    fields: [
+      /* lightweight fields */
+    ],
   },
   {
     key: 'address',
     type: 'page',
-    fields: [/* lightweight fields */],
+    fields: [
+      /* lightweight fields */
+    ],
   },
   // These won't load until user reaches page 2-4 (when idle)
   {
     key: 'preferences',
     type: 'page',
-    fields: [/* heavy multi-checkbox with 100 options */],
+    fields: [
+      /* heavy multi-checkbox with 100 options */
+    ],
   },
   {
     key: 'advanced',
     type: 'page',
-    fields: [/* complex conditional logic */],
+    fields: [
+      /* complex conditional logic */
+    ],
   },
 ];
 ```

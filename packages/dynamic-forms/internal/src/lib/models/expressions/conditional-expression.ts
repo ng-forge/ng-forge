@@ -4,7 +4,16 @@ import type { HttpRequestConfig } from '../http/http-request-config';
 
 /** Comparison operators for field value and form value conditions. */
 export type ComparisonOperator =
-  'equals' | 'notEquals' | 'greater' | 'less' | 'greaterOrEqual' | 'lessOrEqual' | 'contains' | 'startsWith' | 'endsWith' | 'matches';
+  | 'equals'
+  | 'notEquals'
+  | 'greater'
+  | 'less'
+  | 'greaterOrEqual'
+  | 'lessOrEqual'
+  | 'contains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'matches';
 
 /** Condition that compares a specific field's value against an expected value. */
 export interface FieldValueCondition {
@@ -120,4 +129,10 @@ export interface OrCondition {
 
 /** Discriminated union of all conditional expression types. */
 export type ConditionalExpression =
-  FieldValueCondition | CustomCondition | JavascriptCondition | HttpCondition | AsyncCondition | AndCondition | OrCondition;
+  | FieldValueCondition
+  | CustomCondition
+  | JavascriptCondition
+  | HttpCondition
+  | AsyncCondition
+  | AndCondition
+  | OrCondition;
