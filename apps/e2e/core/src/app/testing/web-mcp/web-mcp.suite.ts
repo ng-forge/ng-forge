@@ -1,4 +1,5 @@
 import { TestSuite } from '../shared/types';
+import { agentFillOnlyScenario } from './scenarios/agent-fill-only.scenario';
 import { agentFillSubmitScenario } from './scenarios/agent-fill-submit.scenario';
 
 /**
@@ -11,7 +12,7 @@ export const webMcpSuite: TestSuite = {
   title: 'WebMCP Tests',
   description: 'Test scenarios for exposing forms to browser AI agents through WebMCP tools',
   path: '/test/web-mcp',
-  scenarios: [agentFillSubmitScenario],
+  scenarios: [agentFillSubmitScenario, agentFillOnlyScenario],
 };
 
 export function getWebMcpScenario(testId: string) {

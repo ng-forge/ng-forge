@@ -39,8 +39,8 @@ export const NextButtonOptionsSchema = z.object({
  */
 export const WebMcpToolOptionsSchema = z.object({
   /**
-   * Base name for this form's tools, registered as `{name}_inspect` and
-   * `{name}_submit`. Must be unique across every form mounted on the page.
+   * Base name for this form's tools, registered as `fill_{name}` and
+   * `submit_{name}`. Must be unique across every form mounted on the page.
    */
   name: z.string().min(1),
 
@@ -48,6 +48,12 @@ export const WebMcpToolOptionsSchema = z.object({
    * What this form is for, and when an agent should reach for it.
    */
   description: z.string().min(1),
+
+  /**
+   * Whether an agent may submit this form directly. Off by default; without it
+   * the agent can fill the form but a human presses the button.
+   */
+  allowSubmit: z.boolean().optional(),
 });
 
 /**

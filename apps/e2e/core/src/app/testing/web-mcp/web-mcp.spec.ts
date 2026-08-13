@@ -4,20 +4,22 @@ setupTestLogging();
 setupConsoleCheck();
 
 /**
- * Installs a fake `navigator.modelContext` before the app boots and records
- * every tool the app registers.
+ * Installs a fake `document.modelContext` before the app boots and records every
+ * tool the app registers.
  *
  * A recording fake is deliberate: the browser-side contract is a single
  * `registerTool(tool, { signal })` call, so faking it exercises the real
- * registration path while staying deterministic. Driving a real agent would
- * make these tests non-reproducible for no extra coverage.
+ * registration path while staying deterministic. Driving a real agent would make
+ * these tests non-reproducible for no extra coverage.
  */
 async function installModelContext(page: import('@playwright/test').Page): Promise<void> {
   await page.addInitScript(() => {
     const tools: Record<string, unknown> = {};
     (window as unknown as Record<string, unknown>)['__mcpTools'] = tools;
 
-    (navigator as unknown as Record<string, unknown>)['modelContext'] = {
+    // `document.modelContext` is the current surface; `navigator.modelContext`
+    // is deprecated as of Chrome 150.
+    (document as unknown as Record<string, unknown>)['modelContext'] = {
       registerTool: (tool: { name: string }) => {
         tools[tool.name] = tool;
       },
@@ -38,18 +40,27 @@ async function callTool(page: import('@playwright/test').Page, name: string, arg
   );
 }
 
+const toolNames = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => Object.keys((window as unknown as Record<string, object>)['__mcpTools']));
+
 test.describe('WebMCP Tests', () => {
   test.beforeEach(async ({ page }) => {
     await installModelContext(page);
   });
 
-  test('registers inspect and submit tools for an opted-in form', async ({ page, helpers }) => {
+  test('registers a fill tool, and a submit tool only when the form allows it', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
 
-    const names = await page.evaluate(() => Object.keys((window as unknown as Record<string, object>)['__mcpTools']));
+    expect(await toolNames(page)).toEqual(expect.arrayContaining(['fill_signup', 'submit_signup']));
+  });
 
-    expect(names).toContain('signup_inspect');
-    expect(names).toContain('signup_submit');
+  test('registers no submit tool by default', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
+
+    const names = await toolNames(page);
+
+    expect(names).toContain('fill_payment');
+    expect(names).not.toContain('submit_payment');
   });
 
   test('exposes select options as an enum in the tool schema', async ({ page, helpers }) => {
@@ -57,7 +68,7 @@ test.describe('WebMCP Tests', () => {
 
     const schema = await page.evaluate(() => {
       const tools = (window as unknown as Record<string, Record<string, { inputSchema: unknown }>>)['__mcpTools'];
-      return tools['signup_submit'].inputSchema;
+      return tools['fill_signup'].inputSchema;
     });
 
     expect(schema).toMatchObject({
@@ -70,68 +81,80 @@ test.describe('WebMCP Tests', () => {
     });
   });
 
-  test('inspect reports applicability from the live form, not the proposal', async ({ page, helpers }) => {
-    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+  test('flags returned values as untrusted content', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
 
-    // `plan` defaults to 'free', so `referral` is hidden from the outset.
-    const report = await callTool(page, 'signup_inspect', {});
-    expect(report).toContain('Not currently applicable (do not send these): referral');
-
-    // Conditional logic resolves through the form's evaluation context, which is
-    // bound to the live root registry, so a dry run cannot re-derive visibility
-    // for proposed values. The report says so rather than implying otherwise.
-    const dryRun = await callTool(page, 'signup_inspect', { values: { plan: 'pro' } });
-    expect(dryRun).toContain('Which fields apply reflects the form as it stands now');
-
-    // Submitting for real does move it, which is the supported path.
-    await callTool(page, 'signup_submit', { username: 'ada-lovelace', plan: 'pro' });
-    const afterSubmit = await callTool(page, 'signup_inspect', {});
-    expect(afterSubmit).not.toContain('Not currently applicable (do not send these): referral');
-  });
-
-  test('inspect dry run does not modify the rendered form', async ({ page, helpers }) => {
-    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
-
-    const scenario = helpers.getScenario('agent-fill-submit-test');
-    const username = helpers.getInput(scenario, 'username');
-
-    await callTool(page, 'signup_inspect', { values: { username: 'ada-lovelace' } });
-
-    await expect(username).toHaveValue('');
-  });
-
-  test('inspect surfaces validation failures without submitting', async ({ page, helpers }) => {
-    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
-
-    const report = await callTool(page, 'signup_inspect', { values: { username: 'ab' } });
-
-    expect(report).toContain('Validation errors:');
-    expect(report).toContain('username');
-  });
-
-  test('submit fills the real form and its values land in the DOM', async ({ page, helpers }) => {
-    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
-
-    const result = await callTool(page, 'signup_submit', {
-      username: 'ada-lovelace',
-      plan: 'pro',
-      newsletter: true,
+    const annotations = await page.evaluate(() => {
+      const tools = (window as unknown as Record<string, Record<string, { annotations: unknown }>>)['__mcpTools'];
+      return tools['fill_payment'].annotations;
     });
 
-    expect(result).toContain('Form submitted successfully.');
+    expect(annotations).toEqual({ untrustedContentHint: true });
+  });
+
+  test('fill with no arguments reads state without changing it', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    const report = await callTool(page, 'fill_signup', {});
+
+    expect(report).toContain('No changes made.');
+
+    const scenario = helpers.getScenario('agent-fill-submit-test');
+    await expect(helpers.getInput(scenario, 'username')).toHaveValue('');
+  });
+
+  test('fill writes values into the rendered form', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    const report = await callTool(page, 'fill_signup', { username: 'ada-lovelace' });
+
+    expect(report).toContain('Values applied.');
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('ada-lovelace');
   });
 
-  test('submit refuses invalid values and returns the errors', async ({ page, helpers }) => {
+  test('fill re-derives applicability from the values it applied', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
 
-    const result = await callTool(page, 'signup_submit', { username: 'ab' });
+    // `plan` defaults to 'free', which hides the referral field.
+    const before = await callTool(page, 'fill_signup', {});
+    expect(before).toContain('Not currently applicable (do not send these): referral');
 
-    expect(result).toContain('Form was not submitted because validation failed');
+    // Applying to the live form means conditional logic re-evaluates for real.
+    const after = await callTool(page, 'fill_signup', { plan: 'pro' });
+    expect(after).not.toContain('Not currently applicable (do not send these): referral');
+  });
+
+  test('fill reports validation errors using the configured messages', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    const report = await callTool(page, 'fill_signup', { username: 'ab' });
+
+    expect(report).toContain('username: Must be at least 3 characters');
+  });
+
+  test('submit refuses invalid values and says the values were kept', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    const result = await callTool(page, 'submit_signup', { username: 'ab' });
+
+    expect(result).toContain('Not submitted: validation failed.');
+    expect(result).toContain('are still there');
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('ab');
+  });
+
+  test('submit commits values staged by an earlier fill', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    await callTool(page, 'fill_signup', { username: 'ada-lovelace', plan: 'pro' });
+    const result = await callTool(page, 'submit_signup', {});
+
+    expect(result).toContain('Form submitted successfully.');
+
+    const scenario = helpers.getScenario('agent-fill-submit-test');
+    await expect(helpers.getInput(scenario, 'username')).toHaveValue('ada-lovelace');
   });
 });

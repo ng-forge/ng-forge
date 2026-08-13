@@ -1,4 +1,4 @@
-import { FieldDef, FieldOption, isGroupField } from '@ng-forge/dynamic-forms/internal';
+import { FieldDef, FieldOption, isGroupField, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import type { FieldTree } from '@angular/forms/signals';
 import type { FieldReport } from './format-report';
 
@@ -7,10 +7,11 @@ interface ReportableField {
   key?: string;
   label?: unknown;
   options?: readonly FieldOption<unknown>[];
+  validationMessages?: ValidationMessages;
   fields?: unknown;
 }
 
-/** A field walk's output: per-field rows plus a subtree-to-path index. */
+/** A field walk's output: per-field rows plus subtree-keyed indexes. */
 export interface FieldWalk {
   reports: FieldReport[];
   /**
@@ -21,6 +22,14 @@ export interface FieldWalk {
    * config paths through this index rather than by reaching into internals.
    */
   paths: Map<unknown, string>;
+  /**
+   * Maps each field subtree to its declared `validationMessages`.
+   *
+   * ng-forge resolves messages per field at render time, so a raw
+   * `ValidationError` carries no `message`. Collecting them during the same walk
+   * lets an error row use the message the author already wrote for humans.
+   */
+  messages: Map<unknown, ValidationMessages>;
 }
 
 /**
@@ -35,7 +44,7 @@ export interface FieldWalk {
  * @internal
  */
 export function collectFieldReports(fields: readonly FieldDef<unknown>[], tree: FieldTree<unknown>): FieldWalk {
-  const walkResult: FieldWalk = { reports: [], paths: new Map() };
+  const walkResult: FieldWalk = { reports: [], paths: new Map(), messages: new Map() };
   walk(fields, tree, [], walkResult);
   return walkResult;
 }
@@ -61,6 +70,7 @@ function walk(fields: readonly FieldDef<unknown>[], tree: FieldTree<unknown>, pr
     const dotted = path.join('.');
 
     out.paths.set(subtree, dotted);
+    if (candidate.validationMessages) out.messages.set(subtree, candidate.validationMessages);
     out.reports.push({
       path: dotted,
       label: typeof candidate.label === 'string' ? candidate.label : undefined,

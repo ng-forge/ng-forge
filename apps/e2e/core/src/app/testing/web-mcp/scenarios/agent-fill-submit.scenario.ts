@@ -6,6 +6,7 @@ const config = {
     webMcp: {
       name: 'signup',
       description: 'Sign a new user up with a username, plan and newsletter preference.',
+      allowSubmit: true,
     },
   },
   defaultValidationMessages: {

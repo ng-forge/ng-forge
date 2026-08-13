@@ -1,4 +1,5 @@
 import type { ValidationError } from '@angular/forms/signals';
+import { interpolateParams, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 
 /** One field's current state, as reported to an agent. */
 export interface FieldReport {
@@ -20,29 +21,52 @@ export interface ErrorReport {
   message: string;
 }
 
-/** Everything `inspect` reports back. */
-export interface InspectReport {
+/** Everything the `fill` tool reports back. */
+export interface FormReport {
   values: unknown;
   fields: FieldReport[];
   errors: ErrorReport[];
-  /** Present when async validators were skipped, so the agent knows what it did not see. */
-  note?: string;
+  /** Whether this call wrote anything, so the agent knows if form state moved. */
+  changed: boolean;
 }
 
 /**
  * Turns Signal Forms validation errors into agent-readable rows.
  *
- * Prefers the message the form config already provides (`validationMessages` /
- * `defaultValidationMessages` flow into the error's `message`), falling back to
- * the error `kind` so an untitled custom error still says something.
+ * Resolves each error against the messages the author already wrote for humans:
+ * the field's own `validationMessages` first, then the form's
+ * `defaultValidationMessages`, then whatever the error itself carries, and
+ * finally the bare `kind` so an unlabelled custom error still says something.
+ *
+ * Only literal string messages are used. A `DynamicText` message (Observable or
+ * Signal) resolves asynchronously per field at render time, which is not
+ * available here; falling back to the kind matches how the schema builder
+ * handles dynamic labels.
  *
  * @internal
  */
-export function toErrorReports(errors: readonly ValidationError.WithFieldTree[], paths: Map<unknown, string>): ErrorReport[] {
-  return errors.map((error) => ({
-    path: paths.get(error.fieldTree) ?? '',
-    message: error.message ?? String(error.kind),
-  }));
+export function toErrorReports(
+  errors: readonly ValidationError.WithFieldTree[],
+  paths: Map<unknown, string>,
+  messages: Map<unknown, ValidationMessages>,
+  defaults: ValidationMessages | undefined,
+): ErrorReport[] {
+  return errors.map((error) => {
+    const kind = String(error.kind);
+    const fieldMessages = messages.get(error.fieldTree);
+    const template =
+      staticMessage(fieldMessages?.[kind as keyof ValidationMessages]) ?? staticMessage(defaults?.[kind as keyof ValidationMessages]);
+
+    return {
+      path: paths.get(error.fieldTree) ?? '',
+      message: template ? interpolateParams(template, error) : (error.message ?? kind),
+    };
+  });
+}
+
+/** Narrows a `ValidationMessage` to a literal string, ignoring dynamic forms of it. */
+function staticMessage(message: unknown): string | undefined {
+  return typeof message === 'string' && message.length > 0 ? message : undefined;
 }
 
 /**
@@ -54,10 +78,10 @@ export function toErrorReports(errors: readonly ValidationError.WithFieldTree[],
  *
  * @internal
  */
-export function renderInspectReport(report: InspectReport): string {
+export function renderFormReport(report: FormReport): string {
   const lines: string[] = [];
 
-  lines.push('Current values:');
+  lines.push(report.changed ? 'Values applied. Current values:' : 'No changes made. Current values:');
   lines.push(JSON.stringify(report.values, null, 2));
 
   const inapplicable = report.fields.filter((field) => !field.applicable);
@@ -83,23 +107,28 @@ export function renderInspectReport(report: InspectReport): string {
     lines.push('No validation errors.');
   }
 
-  if (report.note) {
-    lines.push('');
-    lines.push(report.note);
-  }
-
   return lines.join('\n');
 }
 
-/** Renders the result of a submit attempt. */
-export function renderSubmitResult(errors: ErrorReport[]): string {
+/**
+ * Renders the result of a submit attempt.
+ *
+ * A failure states whether form state changed, because it did: the values were
+ * applied before validation ran and are still sitting in the form. Leaving the
+ * agent to infer that would invite it to re-send everything from scratch.
+ */
+export function renderSubmitResult(errors: ErrorReport[], changed: boolean): string {
   if (!errors.length) return 'Form submitted successfully.';
 
-  const lines = ['Form was not submitted because validation failed:'];
+  const lines = ['Not submitted: validation failed.'];
   for (const error of errors) {
     lines.push(`- ${error.path ? `${error.path}: ` : ''}${error.message}`);
   }
   lines.push('');
-  lines.push('Correct these values and call the tool again.');
+  lines.push(
+    changed
+      ? 'The values you sent were applied to the form and are still there. Send only the corrected fields and call again.'
+      : 'The form was not modified. Send the corrected fields and call again.',
+  );
   return lines.join('\n');
 }

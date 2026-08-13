@@ -445,7 +445,7 @@ Recommended when consuming Ionic's \`apply-ionic-legacy-error-styles\` mixin, wh
 - \`withEventFormValue()\` — attach the current form value to every dispatched event
 - \`withValueExclusionDefaults(options)\` — set form-wide value exclusion defaults
 - \`withValidationExecutionDefaults(options)\` — set form-wide validation execution defaults (e.g. defer until touched)
-- \`withWebMcp(options?)\` — EXPERIMENTAL. Expose forms to browser AI agents as WebMCP tools. Opt a form in with \`options.webMcp: { name, description }\`; it then registers \`{name}_inspect\` (read state / dry-run values) and \`{name}_submit\` (fill and submit). Pass \`{ allowAsyncValidation: true }\` to let dry runs execute async/HTTP validators (off by default so a probing agent cannot fire speculative requests). Do NOT add \`options.webMcp\` unless the user explicitly asks for agent/WebMCP support.
+- \`withWebMcp()\` — EXPERIMENTAL. Expose forms to browser AI agents as WebMCP tools. Opt a form in with \`options.webMcp: { name, description }\`; it registers \`fill_{name}\`, which applies a partial patch of values to the form and returns its state plus validation errors. Submission is a separate per-form opt-in: add \`allowSubmit: true\` to also register \`submit_{name}\`. Leave \`allowSubmit\` off for anything that spends money, sends a message, or cannot be undone — without it an agent can fill the form but only a human can submit it. Do NOT add \`options.webMcp\` unless the user explicitly asks for agent/WebMCP support.
 
 All features are exported from \`@ng-forge/dynamic-forms\`.
 

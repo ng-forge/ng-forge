@@ -1,12 +1,10 @@
-import { declareExperimentalWebMcpTool, inject, Injector, signal, untracked } from '@angular/core';
-import { FieldTree, form } from '@angular/forms/signals';
+import { declareExperimentalWebMcpTool, inject, Injector, untracked } from '@angular/core';
 import { DynamicFormLogger, EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager } from '../../state/form-state-manager';
-import { WEB_MCP_SETTINGS } from '../../providers/features/web-mcp/web-mcp.token';
 import { FormSubmitEvent } from '../../events/constants/submit.event';
 import { buildToolSchema } from './build-tool-schema';
 import { collectFieldReports } from './collect-field-reports';
-import { renderInspectReport, renderSubmitResult, toErrorReports } from './format-report';
+import { renderFormReport, renderSubmitResult, toErrorReports } from './format-report';
 
 /** Text returned when the agent's arguments could not be applied at all. */
 const NOT_READY = 'The form is not ready yet. Try again shortly.';
@@ -28,13 +26,14 @@ const NOT_READY = 'The form is not ready yet. Try again shortly.';
  */
 export function bootstrapWebMcp(): void {
   const stateManager = inject(FormStateManager);
-  const settings = inject(WEB_MCP_SETTINGS);
   const eventBus = inject(EventBus);
   const logger = inject(DynamicFormLogger);
   const injector = inject(Injector);
 
   const options = untracked(() => stateManager.activeConfig()?.options?.webMcp);
   if (!options) return;
+
+  const defaultMessages = untracked(() => stateManager.activeConfig()?.defaultValidationMessages);
 
   const setup = untracked(() => stateManager.formSetup());
   const fields = setup?.schemaFields ?? [];
@@ -45,124 +44,119 @@ export function bootstrapWebMcp(): void {
   // builder assembles nodes with a widened `type`. The cast is safe because
   // `buildToolSchema` only ever emits members of that subset; it is confined to
   // this boundary so the builder stays ergonomic.
-  const inputSchema = buildToolSchema(fields, registry, (message) => logger.warn(message)) as never;
+  const valuesSchema = buildToolSchema(fields, registry, (message) => logger.warn(message)) as never;
+
+  // Both tools echo form values back to the agent. Those values are user content
+  // and can carry injected instructions, so they are flagged untrusted per
+  // https://developer.chrome.com/docs/agents/security. `annotations` is not in
+  // Angular's `ToolDescriptor` type yet, but `declareExperimentalWebMcpTool`
+  // spreads the descriptor straight into `registerTool`, so it reaches the agent.
+  const annotations = { untrustedContentHint: true };
 
   declareExperimentalWebMcpTool(
     {
-      name: `${options.name}_inspect`,
+      name: `fill_${options.name}`,
       description:
-        `Inspect the "${options.name}" form: ${options.description} ` +
-        `Call with no arguments to read current values, which fields currently apply, and any validation errors. ` +
-        `Call with "values" to check proposed values without submitting or modifying the form.`,
-      inputSchema: {
-        type: 'object',
-        properties: { values: inputSchema },
-        required: [],
-        additionalProperties: false,
-      },
-      execute: (args) => inspect(args?.values),
-    },
+        `Fill the "${options.name}" form: ${options.description} ` +
+        `Accepts any subset of fields and leaves the rest untouched. Does not submit. ` +
+        `Returns the form's current values, which fields currently apply, and any validation errors. ` +
+        `Call with no fields to read the form's current state without changing it.`,
+      inputSchema: valuesSchema,
+      annotations,
+      execute: (args: Record<string, unknown>) => fill(args),
+    } as never,
     injector,
   );
+
+  // Submission is opt-in per form. Guidance is to avoid agent-triggered submits
+  // for consequential actions unless the app has asked for it, and the platform's
+  // own declarative forms API takes the same posture (manual submit by default,
+  // `toolautosubmit` to opt in). Without this flag the agent can stage values and
+  // a human presses the button.
+  if (!options.allowSubmit) return;
 
   declareExperimentalWebMcpTool(
     {
-      name: `${options.name}_submit`,
+      name: `submit_${options.name}`,
       description:
-        `Fill and submit the "${options.name}" form: ${options.description} ` +
-        `Values are validated first; if validation fails nothing is submitted and the errors are returned. ` +
-        `Use the inspect tool first if you are unsure which fields currently apply.`,
-      inputSchema,
-      execute: (args) => submitForm(args as Record<string, unknown>),
-    },
+        `Submit the "${options.name}" form: ${options.description} ` +
+        `Applies any fields given, then submits. If validation fails nothing is submitted and the errors are returned; ` +
+        `the values still remain in the form for correction.`,
+      inputSchema: valuesSchema,
+      annotations,
+      execute: (args: Record<string, unknown>) => submitForm(args),
+    } as never,
     injector,
   );
 
-  /** Reads live state, optionally dry-running proposed values first. */
-  function inspect(values: unknown): string {
+  /**
+   * Applies a partial patch to the live form and reports the result.
+   *
+   * Writing to the live form rather than a copy is deliberate: conditional logic
+   * and cross-field validators resolve through an evaluation context bound to the
+   * root registry, so only the live form can evaluate them correctly. It is also
+   * what the user should see — an agent filling a form on their behalf is visible
+   * work, not a side effect to hide.
+   */
+  async function fill(values: Record<string, unknown>): Promise<string> {
     const tree = untracked(() => stateManager.form());
     if (!tree) return NOT_READY;
 
-    if (values === undefined || values === null) {
-      const walk = untracked(() => collectFieldReports(fields, tree));
-      return renderInspectReport({
-        values: untracked(() => stateManager.formValue()),
-        fields: walk.reports,
-        errors: toErrorReports(
-          untracked(() => tree().errorSummary()),
-          walk.paths,
-        ),
-      });
-    }
+    const changed = applyValues(values);
+    if (changed) await settle();
 
-    return dryRun(tree, values as Record<string, unknown>);
-  }
+    const walk = untracked(() => collectFieldReports(fields, tree));
 
-  /**
-   * Validates proposed values on a throwaway form.
-   *
-   * Applying them to the live form and reverting would fire derivations, mark
-   * fields dirty and flicker the UI, so this builds a separate form over the
-   * same (already memoized) schema and discards it.
-   *
-   * Validation is evaluated on the shadow form, but *applicability* is read from
-   * the live one. Conditional `hidden`/`disabled` logic resolves through the
-   * form's evaluation context, which is bound to the live root registry, so a
-   * shadow form's `hidden()` reflects the live values regardless of what was
-   * proposed. Reporting live applicability is truthful; reporting the shadow's
-   * would look proposal-aware while silently being the same live answer.
-   */
-  function dryRun(live: FieldTree<unknown>, values: Record<string, unknown>): string {
-    const schema = untracked(() => stateManager.formSchema());
-    const current = untracked(() => stateManager.formValue()) as Record<string, unknown>;
-    const merged = { ...structuredClone(current), ...values };
-
-    const model = signal(merged);
-    const shadow = untracked(() => (schema ? form(model, schema, { injector }) : form(model, { injector })));
-
-    const shadowWalk = untracked(() => collectFieldReports(fields, shadow));
-    const errors = toErrorReports(
-      untracked(() => shadow().errorSummary()),
-      shadowWalk.paths,
-    );
-
-    const liveWalk = untracked(() => collectFieldReports(fields, live));
-
-    return renderInspectReport({
-      values: merged,
-      fields: liveWalk.reports,
-      errors,
-      note: [
-        'Which fields apply reflects the form as it stands now; sending values that change visibility may make other fields apply.',
-        settings.allowAsyncValidation
-          ? undefined
-          : 'Only synchronous validation ran. Server-side checks (async and HTTP validators) run on submit.',
-      ]
-        .filter(Boolean)
-        .join(' '),
+    return renderFormReport({
+      values: untracked(() => stateManager.formValue()),
+      fields: walk.reports,
+      errors: toErrorReports(
+        untracked(() => tree().errorSummary()),
+        walk.paths,
+        walk.messages,
+        defaultMessages,
+      ),
+      changed,
     });
   }
 
-  /** Applies values for real and submits through the form's normal path. */
+  /** Applies values, then submits through the form's normal submission path. */
   async function submitForm(values: Record<string, unknown>): Promise<string> {
     const tree = untracked(() => stateManager.form());
     if (!tree) return NOT_READY;
 
-    stateManager.entity.update((current) => ({ ...(current as Record<string, unknown>), ...values }) as never);
-
-    // Let the signal graph settle so validators see the new values before the
-    // validity check below.
-    await Promise.resolve();
+    const changed = applyValues(values);
+    if (changed) await settle();
 
     const walk = untracked(() => collectFieldReports(fields, tree));
     const errors = toErrorReports(
       untracked(() => tree().errorSummary()),
       walk.paths,
+      walk.messages,
+      defaultMessages,
     );
-    if (errors.length) return renderSubmitResult(errors);
+
+    if (errors.length) return renderSubmitResult(errors, changed);
 
     eventBus.dispatch(new FormSubmitEvent());
 
-    return renderSubmitResult([]);
+    return renderSubmitResult([], changed);
   }
+
+  /**
+   * Merges a patch into the form model. Returns whether anything was written, so
+   * a failure can tell the agent whether form state changed (guidance is that an
+   * error should say so rather than leaving the agent to guess).
+   */
+  function applyValues(values: Record<string, unknown>): boolean {
+    if (!values || Object.keys(values).length === 0) return false;
+
+    stateManager.entity.update((current) => ({ ...(current as Record<string, unknown>), ...values }) as never);
+    return true;
+  }
+}
+
+/** Yields once so validators see the new values before state is read back. */
+function settle(): Promise<void> {
+  return Promise.resolve();
 }

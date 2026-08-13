@@ -12,6 +12,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getWebMcpScenario('agent-fill-submit-test') },
   },
+  {
+    path: 'agent-fill-only',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getWebMcpScenario('agent-fill-only-test') },
+  },
 ];
 
 export default routes;
