@@ -632,7 +632,7 @@ If any of these are blockers, decide upfront before starting the migration.
 - **Two-or-more-dot prop paths in derivations.** Formly's `expressions: { 'props.config.foo': '…' }` lets you compute any nested prop. ng-forge supports up to one level (`options`, `label`, `disabled`, `props.minDate`, …) and **throws `DynamicFormError` at runtime, when the derived value is applied to the field,** if the path goes deeper. Restructure your prop shape so the dynamic value sits at the top of `props`, or move the dynamic computation into a custom field component.
 - **Custom `valueProp` / `labelProp` for selects.** ng-forge's `FieldOption` is fixed at `{ value, label, disabled? }`; remap source data with `.map()` or a `targetProperty: 'options'` derivation.
 - **`extensions` API for cross-cutting field-construction hooks.** Formly's extensions can mutate every field's config during construction. ng-forge has no public equivalent; those concerns become wrappers, custom field components, or build-time codegen.
-- **Maturity at scale.** ngx-formly has been in production for years; ng-forge is younger, with fewer Stack Overflow answers and fewer copy-paste solutions on the long tail. The [MCP server](/ai-integration) and [Discord](https://discord.gg/qpzzvFagj3) help, but they don't replace years of community-tested patterns.
+- **Maturity at scale.** ngx-formly has been in production for years; ng-forge is younger, with fewer Stack Overflow answers and fewer copy-paste solutions on the long tail. The [MCP server](/ai-integration/mcp-server) and [Discord](https://discord.gg/qpzzvFagj3) help, but they don't replace years of community-tested patterns.
 
 ## OpenAPI generator
 
@@ -656,7 +656,7 @@ Angular 22. The published packages declare `@angular/*` peer dependencies of `^2
 No. ng-forge is built on Angular **Signal Forms** (`@angular/forms/signals`), a separate system whose primitive, `FieldTree<T>`, holds value, validity, dirty/touched state, and errors as signals. There is no `FormGroup` or `FormControl` involved. If your formly app exposes a `formGroup` to consumers (template parents, services, etc.), those touch-points have no direct equivalent and need to be rewritten against the Signal Forms surface.
 
 **How do I report bugs / get help?**
-Open an issue at [github.com/ng-forge/ng-forge](https://github.com/ng-forge/ng-forge/issues) or join [Discord](https://discord.gg/qpzzvFagj3). For evaluation help, the [MCP server](/ai-integration) lets an LLM in your IDE scaffold configs for you.
+Open an issue at [github.com/ng-forge/ng-forge](https://github.com/ng-forge/ng-forge/issues) or join [Discord](https://discord.gg/qpzzvFagj3). For evaluation help, the [MCP server](/ai-integration/mcp-server) lets an LLM in your IDE scaffold configs for you.
 
 ## Migration checklist
 
@@ -677,4 +677,4 @@ An order that works for porting a non-trivial app:
 - **[Configuration](/configuration)**: `defaultProps`, global validators, schema integration.
 - **[Examples](/examples)**: complete working forms covering most patterns above.
 - **[OpenAPI generator](/openapi-generator)**: for backend-driven forms.
-- **[AI integration (MCP)](/ai-integration)**: scaffold configs from your IDE.
+- **[AI integration (MCP)](/ai-integration/mcp-server)**: scaffold configs from your IDE.

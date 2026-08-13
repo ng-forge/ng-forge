@@ -447,7 +447,7 @@ const PITFALLS: readonly Pitfall[] = [
             </p>
           </div>
           <div class="cta__buttons">
-            <a class="cta__btn cta__btn--primary" [routerLink]="adapterPrefix() + '/ai-integration'">
+            <a class="cta__btn cta__btn--primary" [routerLink]="adapterPrefix() + '/ai-integration/mcp-server'">
               <lucide-icon [img]="Sparkles" size="14" />
               MCP server
             </a>

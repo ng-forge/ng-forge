@@ -121,9 +121,13 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { label: 'Migrating from ngx-formly', path: 'migrating-from-ngx-formly' },
   {
-    label: 'AI Integration (MCP)',
+    label: 'AI Integration',
     path: 'ai-integration',
     cssClass: 'sidebar-link--ai',
+    children: [
+      { label: 'IDE Usage (MCP)', path: 'ai-integration/mcp-server' },
+      { label: 'WebMCP', path: 'ai-integration/webmcp', badge: 'NEW' },
+    ],
   },
   {
     label: 'OpenAPI Generator',

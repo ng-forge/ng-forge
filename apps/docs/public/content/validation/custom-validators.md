@@ -242,7 +242,7 @@ const config = {
 
 `fn` and `functionName` are mutually exclusive (XOR at the type level). The inline form is **not** JSON-serializable; for configs loaded from APIs, OpenAPI, or databases, stick to `functionName`.
 
-**See also:** the same XOR pattern applies to [conditions](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline) and [derivations](/dynamic-behavior/derivation/values#inline-alternative-fn). See [Configuration](/configuration) for `customFnConfig` setup and [AI Integration (MCP)](/ai-integration) for the MCP server, which emits configs using `functionName` exclusively.
+**See also:** the same XOR pattern applies to [conditions](/dynamic-behavior/conditional-logic#function-based-forms-registered-vs-inline) and [derivations](/dynamic-behavior/derivation/values#inline-alternative-fn). See [Configuration](/configuration) for `customFnConfig` setup and [AI Integration (MCP)](/ai-integration/mcp-server) for the MCP server, which emits configs using `functionName` exclusively.
 
 ### FieldContext API
 
