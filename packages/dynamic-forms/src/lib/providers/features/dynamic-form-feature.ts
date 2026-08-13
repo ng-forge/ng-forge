@@ -24,6 +24,7 @@ export type DynamicFormFeatureKind =
   | 'legacy-status-classes'
   | 'page-preload'
   | 'field-windowing'
+  | 'web-mcp'
   | 'addons'
   | 'addon-actions';
 

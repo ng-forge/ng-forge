@@ -30,6 +30,7 @@ import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/intern
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { DERIVATION_RENDER_GATE } from './core/derivation/derivation-render-gate';
+import { WEB_MCP_GATE } from './core/web-mcp/web-mcp-gate';
 import { FORM_INITIALIZER } from './providers/form-initializer.token';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -257,6 +258,11 @@ export class DynamicForm<
   // the lazily-loaded engine to wire, so fields render already-derived (no flash).
   private derivationReady = inject(DERIVATION_RENDER_GATE);
   shouldRender = computed(() => this.stateManager.shouldRender() && this.derivationReady());
+
+  // Injected purely to instantiate the gate (component providers are lazy), which
+  // lazy-loads the WebMCP registrar when a config declares `options.webMcp`.
+  // Intentionally absent from `shouldRender`: agent visibility must never gate render.
+  private readonly webMcpGate = inject(WEB_MCP_GATE);
 
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;
