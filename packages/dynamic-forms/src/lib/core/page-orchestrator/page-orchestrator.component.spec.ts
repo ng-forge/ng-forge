@@ -4,7 +4,7 @@ import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { GoToPageEvent, NextPageEvent, PageChangeEvent } from '../../events/constants';
-import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { PagerStateEvent } from '../../events/constants/pager-state.event';
 import { DynamicForm } from '../../dynamic-form.component';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
@@ -255,8 +255,8 @@ describe('PageOrchestratorComponent', () => {
       const fixture = createForm(config, {});
       const eventBus = fixture.debugElement.injector.get(EventBus);
 
-      const navStates: PageNavigationStateChangeEvent[] = [];
-      eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change').subscribe((e) => navStates.push(e));
+      const navStates: PagerStateEvent[] = [];
+      eventBus.on<PagerStateEvent>('pager-state').subscribe((e) => navStates.push(e));
 
       await waitForFormInit(fixture);
       TestBed.flushEffects();

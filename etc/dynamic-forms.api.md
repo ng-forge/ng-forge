@@ -407,7 +407,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     invalid: Signal<boolean>;
     protected onNativeSubmit(event: Event): void;
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
-    onPageNavigationStateChange: _angular_core.OutputRef<PageNavigationStateChangeEvent>;
+    onPageNavigationStateChange: _angular_core.OutputRef<PagerStateEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
     protected placeholderGridClass(field: ResolvedField): string;
     renderPhase: Signal<"render" | "teardown">;
@@ -947,6 +947,23 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
     readonly meta?: never;
     // (undocumented)
     type: 'page';
+}
+
+// @public
+export interface PagerState {
+    currentPageIndex: number;
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    totalPages: number;
+}
+
+// @public
+export class PagerStateEvent implements FormEvent {
+    constructor(state: PagerState);
+    // (undocumented)
+    state: PagerState;
+    // (undocumented)
+    readonly type: "pager-state";
 }
 
 // @public

@@ -5,7 +5,7 @@ export { compareValues, createLogicFunction, evaluateCondition, getNestedValue }
 export { createDynamicValueFunction, createTypePredicateFunction } from './values';
 export { FieldContextRegistryService, FunctionRegistryService, RootFormRegistryService, SchemaRegistryService } from './registry';
 export { PageOrchestratorComponent } from './page-orchestrator';
-export type { NavigationResult, PageOrchestratorConfig, PageOrchestratorState, PageVisibilityContext } from './page-orchestrator';
+export type { NavigationResult, PagerState } from './page-orchestrator';
 
 // Schema application (keeping original file location for now)
 export { applySchema, createSchemaFunction } from './schema-application';

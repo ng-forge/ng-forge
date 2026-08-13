@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSign
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { GoToPageEvent, NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
+import { NavigationResult, PagerState } from './page-orchestrator.interfaces';
 import { PageField } from '@ng-forge/dynamic-forms/internal';
 import { ContainerLogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { PagerStateEvent } from '../../events/constants/pager-state.event';
 import { FieldTree } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
@@ -144,7 +144,7 @@ export class PageOrchestratorComponent {
   });
 
   /** Computed state for the orchestrator */
-  readonly state = computed<PageOrchestratorState>(() => {
+  readonly state = computed<PagerState>(() => {
     const currentIndex = this.currentPageIndex();
     const totalPages = this.pageFields().length;
     const visibleIndices = this.visiblePageIndices();
@@ -159,7 +159,6 @@ export class PageOrchestratorComponent {
       totalPages,
       isFirstPage: isFirstVisiblePage,
       isLastPage: isLastVisiblePage,
-      navigationDisabled: false,
     };
   });
 
@@ -241,7 +240,7 @@ export class PageOrchestratorComponent {
         // Current page is hidden — navigate to the nearest visible page
         const nearest = this.findNearestVisiblePage(state.currentPageIndex, visibleIndices);
         if (nearest !== -1) {
-          this.navigateToPage(nearest);
+          this.executePageChange(nearest);
         }
       }
     });
@@ -275,14 +274,6 @@ export class PageOrchestratorComponent {
       };
     }
 
-    if (currentState.navigationDisabled) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Navigation is currently disabled',
-      };
-    }
-
     // Find the next visible page after the current index
     const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
     if (currentVisiblePosition === -1 || currentVisiblePosition >= visibleIndices.length - 1) {
@@ -294,7 +285,7 @@ export class PageOrchestratorComponent {
     }
 
     const nextVisiblePageIndex = visibleIndices[currentVisiblePosition + 1];
-    return this.navigateToPage(nextVisiblePageIndex);
+    return this.executePageChange(nextVisiblePageIndex);
   }
 
   /**
@@ -314,14 +305,6 @@ export class PageOrchestratorComponent {
       };
     }
 
-    if (currentState.navigationDisabled) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Navigation is currently disabled',
-      };
-    }
-
     // Find the previous visible page before the current index
     const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
     if (currentVisiblePosition <= 0) {
@@ -333,7 +316,7 @@ export class PageOrchestratorComponent {
     }
 
     const prevVisiblePageIndex = visibleIndices[currentVisiblePosition - 1];
-    return this.navigateToPage(prevVisiblePageIndex);
+    return this.executePageChange(prevVisiblePageIndex);
   }
 
   /**
@@ -352,30 +335,30 @@ export class PageOrchestratorComponent {
    * @param pageIndex The target page index (0-based)
    * @returns Navigation result
    */
-  goToPage(pageIndex: number): NavigationResult {
+  navigateToPage(pageIndex: number): NavigationResult {
     const currentIndex = this.state().currentPageIndex;
     const visibleIndices = this.visiblePageIndices();
 
     // Backward jumps and no-ops need no gate. Out-of-bounds and hidden targets
-    // fall through too — navigateToPage reports those without navigating.
+    // fall through too — executePageChange reports those without navigating.
     if (pageIndex <= currentIndex || !visibleIndices.includes(pageIndex)) {
-      return this.navigateToPage(pageIndex);
+      return this.executePageChange(pageIndex);
     }
 
     const disableWhenPageInvalid = this.formOptions?.()?.nextButton?.disableWhenPageInvalid ?? true;
     if (!disableWhenPageInvalid) {
-      return this.navigateToPage(pageIndex);
+      return this.executePageChange(pageIndex);
     }
 
     const crossedPages = visibleIndices.filter((index) => index >= currentIndex && index < pageIndex);
     const firstInvalidPage = crossedPages.find((index) => !this.isPageValid(index));
 
     if (firstInvalidPage === undefined) {
-      return this.navigateToPage(pageIndex);
+      return this.executePageChange(pageIndex);
     }
 
     // Partial jump: land on the first invalid page and report the failure.
-    this.navigateToPage(firstInvalidPage);
+    this.executePageChange(firstInvalidPage);
 
     return {
       success: false,
@@ -385,12 +368,15 @@ export class PageOrchestratorComponent {
   }
 
   /**
-   * Navigate to a specific page index
+   * Performs the actual page change, with no validity gating.
+   *
+   * Validates bounds and target visibility, updates the active index, and emits
+   * `PageChangeEvent`. All gated entry points funnel through here.
    *
    * @param pageIndex The target page index (0-based)
    * @returns Navigation result
    */
-  navigateToPage(pageIndex: number): NavigationResult {
+  private executePageChange(pageIndex: number): NavigationResult {
     const currentState = this.state();
     const totalPages = currentState.totalPages;
 
@@ -477,10 +463,10 @@ export class PageOrchestratorComponent {
       .on<GoToPageEvent>('go-to-page')
       .pipe(takeUntilDestroyed())
       .subscribe((event) => {
-        this.goToPage(event.pageIndex);
+        this.navigateToPage(event.pageIndex);
       });
 
-    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
+    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
   }
 
   /**

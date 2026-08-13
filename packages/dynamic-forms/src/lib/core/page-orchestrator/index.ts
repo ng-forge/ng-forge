@@ -1,7 +1,2 @@
 export { PageOrchestratorComponent } from './page-orchestrator.component';
-export type {
-  NavigationResult,
-  PageOrchestratorConfig,
-  PageOrchestratorState,
-  PageVisibilityContext,
-} from './page-orchestrator.interfaces';
+export type { NavigationResult, PagerState } from './page-orchestrator.interfaces';

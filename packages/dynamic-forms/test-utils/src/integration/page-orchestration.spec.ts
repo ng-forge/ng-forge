@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventBus } from '../../events/event.bus';
 import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { PagerStateEvent } from '../../events/constants/pager-state.event';
 import { detectFormMode, FormModeDetectionResult } from '../../models/types/form-mode';
 import { FormModeValidator } from '../../utils/form-validation/form-mode-validator';
 import { DynamicFormTestResult, DynamicFormTestUtils } from '../dynamic-form-test-utils';
@@ -464,8 +464,8 @@ describe('Hidden Page Auto-Redirect (B15)', () => {
     testResult = await DynamicFormTestUtils.createTest({ config, initialValue: {} });
     eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-    const navStates: PageNavigationStateChangeEvent[] = [];
-    eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change').subscribe((e) => navStates.push(e));
+    const navStates: PagerStateEvent[] = [];
+    eventBus.on<PagerStateEvent>('pager-state').subscribe((e) => navStates.push(e));
 
     // Flush effects so the auto-redirect explicitEffect fires
     TestBed.flushEffects();
@@ -503,8 +503,8 @@ describe('Hidden Page Auto-Redirect (B15)', () => {
     testResult = await DynamicFormTestUtils.createTest({ config, initialValue: {} });
     eventBus = testResult.fixture.debugElement.injector.get(EventBus);
 
-    const navStates: PageNavigationStateChangeEvent[] = [];
-    eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change').subscribe((e) => navStates.push(e));
+    const navStates: PagerStateEvent[] = [];
+    eventBus.on<PagerStateEvent>('pager-state').subscribe((e) => navStates.push(e));
 
     TestBed.flushEffects();
     testResult.fixture.detectChanges();

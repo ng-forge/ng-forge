@@ -85,17 +85,17 @@ For observing events from a host component, use the output bindings exposed dire
 
 ### Output bindings
 
-| Output                          | Emits                                                                                                          |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `(events)`                      | Every form event (full stream)                                                                                 |
-| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent)                                                      |
-| `(reset)`                       | When the form is reset to default values                                                                       |
-| `(cleared)`                     | When the form is cleared to empty state                                                                        |
-| `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                                 |
-| `(onPageNavigationStateChange)` | Navigation state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`, `navigationDisabled`) |
-| `(validityChange)`              | Boolean, whenever form validity changes                                                                        |
-| `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                     |
-| `(initialized)`                 | Once all field components are rendered and ready                                                               |
+| Output                          | Emits                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `(events)`                      | Every form event (full stream)                                                                               |
+| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent)                                                    |
+| `(reset)`                       | When the form is reset to default values                                                                     |
+| `(cleared)`                     | When the form is cleared to empty state                                                                      |
+| `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                               |
+| `(onPageNavigationStateChange)` | PagerStateEvent whenever pager state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`) |
+| `(validityChange)`              | Boolean, whenever form validity changes                                                                      |
+| `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                   |
+| `(initialized)`                 | Once all field components are rendered and ready                                                             |
 
 ### Examples
 
@@ -213,6 +213,25 @@ eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
 - `currentPageIndex: number` - Current page (0-based)
 - `totalPages: number` - Total number of pages
 - `previousPageIndex?: number` - Previous page index
+
+### PagerStateEvent
+
+Emitted whenever the pager state of a paged form changes. Where `PageChangeEvent` fires only when the active page changed, this also fires when the derived flags move without the page moving, for example when `isFirstPage` / `isLastPage` flip because a page's `hidden` logic toggled and the set of visible pages shifted.
+
+```typescript
+eventBus.on<PagerStateEvent>('pager-state').subscribe((event) => {
+  const { currentPageIndex, totalPages, isFirstPage, isLastPage } = event.state;
+});
+```
+
+**Payload** (`PagerState`):
+
+- `currentPageIndex: number` - Current page (0-based)
+- `totalPages: number` - Total number of pages
+- `isFirstPage: boolean` - On the first visible page
+- `isLastPage: boolean` - On the last visible page
+
+Bind it from a host component through the `(onPageNavigationStateChange)` output. This is the state to drive a custom step list or your own previous/next button enablement, since `onPageChange` alone would leave them stale.
 
 ### NextPageEvent
 

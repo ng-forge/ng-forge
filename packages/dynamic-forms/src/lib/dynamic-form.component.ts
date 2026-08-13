@@ -34,7 +34,7 @@ import { FORM_INITIALIZER } from './providers/form-initializer.token';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
-import { PageNavigationStateChangeEvent } from './events/constants/page-navigation-state-change.event';
+import { PagerStateEvent } from './events/constants/pager-state.event';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
@@ -326,7 +326,7 @@ export class DynamicForm<
   onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
   /** Emits when page navigation state changes (canGoNext, canGoPrevious, etc.). */
-  onPageNavigationStateChange = outputFromObservable(this.eventBus.on<PageNavigationStateChangeEvent>('page-navigation-state-change'));
+  onPageNavigationStateChange = outputFromObservable(this.eventBus.on<PagerStateEvent>('pager-state'));
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor

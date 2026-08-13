@@ -8,6 +8,7 @@ export {
   MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PagerStateEvent,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   PreviousPageEvent,
