@@ -57,27 +57,26 @@ The `submission.action` function receives the form's `FieldTree` instance and ca
 
 While the action is executing, the form is in a submitting state, enabling automatic button disabling and loading states. Errors thrown by the action are caught and logged by the library, and the form exits the submitting state.
 
-**Note:** The action's resolved value is discarded. Returned validation results (such as `TreeValidationResult`) are not currently applied to form fields.
-
 ### Server Error Handling
 
-Returned validation results are not applied to fields, so handle server errors inside your action for now, for example by mapping them to your own notification or error state:
+Return a `TreeValidationResult` from the action to attach server errors to specific fields. Each error names its target through `fieldTree`:
 
 ```typescript
-import { catchError, EMPTY } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 submission: {
   action: (form) => this.http.post('/api/register', form().value()).pipe(
     catchError((error) => {
       if (error.error?.code === 'EMAIL_EXISTS') {
-        this.notifications.error('Email already exists');
-        return EMPTY;
+        return of([{ kind: 'server', message: 'Email already exists', fieldTree: form.email }]);
       }
       throw error; // Unexpected errors are caught and logged by the library
     }),
   ),
 }
 ```
+
+Any other resolved value counts as success, so an action that returns a response body straight from `HttpClient` needs no special handling. Returning `null` or `undefined` also completes the submission successfully.
 
 ## Button Disabled Behavior
 
