@@ -251,6 +251,7 @@ export {
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  GoToPageEvent,
   InsertArrayItemEvent,
   MoveArrayItemEvent,
   NextPageEvent,

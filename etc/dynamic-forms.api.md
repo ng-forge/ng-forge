@@ -710,6 +710,15 @@ export class FormSubmitEvent implements FormEvent {
 }
 
 // @public
+export class GoToPageEvent implements FormEvent {
+    constructor(
+    pageIndex: number);
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly type: "go-to-page";
+}
+
+// @public
 export type GroupAllowedChildren = ArrayField | ContainerField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public

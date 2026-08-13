@@ -1,4 +1,5 @@
 export { FormSubmitEvent } from './submit.event';
+export { GoToPageEvent } from './go-to-page.event';
 export { NextPageEvent } from './next-page.event';
 export { PageChangeEvent } from './page-change.event';
 export { PreviousPageEvent } from './previous-page.event';

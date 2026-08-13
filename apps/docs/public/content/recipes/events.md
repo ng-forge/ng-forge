@@ -230,6 +230,38 @@ Navigate to previous page in wizard.
 eventBus.dispatch(PreviousPageEvent);
 ```
 
+### GoToPageEvent
+
+Jump straight to a page by index. Useful for clickable step lists and for restoring the active page from a route parameter after a reload.
+
+```typescript
+eventBus.dispatch(new GoToPageEvent(3));
+```
+
+**Properties:**
+
+- `pageIndex: number` - Target page (0-based)
+
+**Validation semantics:**
+
+Backward jumps are unconditional, matching `PreviousPageEvent`, which has no validity gate.
+
+Forward jumps validate every visible page the jump crosses: from the current page up to, but excluding, the target. Conditions may have changed since those pages were last visited, and ng-forge derives form state from the config, so every page's validity is computable without having visited it. If one of those pages is invalid, navigation stops on the **first invalid page** rather than staying put, which lands the user where work is required.
+
+The target page itself is not validated, and hidden pages are skipped. An out-of-bounds index or a hidden target is ignored.
+
+Like `NextPageEvent`, this respects the `nextButton.disableWhenPageInvalid` option: set it to `false` and forward jumps skip validation entirely.
+
+```typescript
+// Current page 0, pages 0 and 1 valid, page 2 invalid
+eventBus.dispatch(new GoToPageEvent(4)); // lands on page 2
+
+// Now on page 2 (invalid), going back always works
+eventBus.dispatch(new GoToPageEvent(0)); // lands on page 0
+```
+
+Both outcomes are observable through the existing `onPageChange` and `onPageNavigationStateChange` outputs.
+
 ### FormResetEvent
 
 Reset form to default values.

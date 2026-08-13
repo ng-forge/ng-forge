@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
+import { GoToPageEvent, NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
 import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
 import { PageField } from '@ng-forge/dynamic-forms/internal';
 import { ContainerLogicConfig } from '@ng-forge/dynamic-forms/internal';
@@ -168,23 +168,29 @@ export class PageOrchestratorComponent {
    *
    * @returns `true` if current page is valid, `false` otherwise
    */
-  readonly currentPageValid = computed(() => {
-    const currentIndex = this.currentPageIndex();
+  readonly currentPageValid = computed(() => this.isPageValid(this.currentPageIndex()));
+
+  /**
+   * Whether all fields on the given page are currently valid.
+   *
+   * Form state derives from config, not from mounted components, so any page can
+   * be checked without having been visited.
+   *
+   * @param pageIndex The page index (0-based)
+   * @returns `true` if the page is valid or the index is out of range
+   */
+  private isPageValid(pageIndex: number): boolean {
     const pages = this.pageFields();
     const form = this.form();
 
-    // No pages or invalid index
-    if (pages.length === 0 || currentIndex >= pages.length) {
+    if (pageIndex < 0 || pageIndex >= pages.length) {
       return true;
     }
 
-    const currentPage = pages[currentIndex];
-    const pageFields = currentPage.fields || [];
-
     // Collect all leaf field keys, recursively traversing group/row containers
-    const leafKeys = collectLeafFieldKeys(pageFields);
+    const leafKeys = collectLeafFieldKeys(pages[pageIndex].fields || []);
 
-    // Check validity of each leaf field on the current page
+    // Check validity of each leaf field on the page
     // Fields are stored at root level in the form (pages don't add nesting)
     for (const fieldKey of leafKeys) {
       const field = (form as Record<string, unknown>)[fieldKey];
@@ -197,7 +203,7 @@ export class PageOrchestratorComponent {
     }
 
     return true;
-  });
+  }
 
   /** Extended field signal context that includes currentPageValid. */
   readonly extendedFieldSignalContext = computed(() => ({
@@ -331,6 +337,54 @@ export class PageOrchestratorComponent {
   }
 
   /**
+   * Navigate to an arbitrary page, applying the jump validation semantics.
+   *
+   * Backward jumps are unconditional, matching `previous` having no validity gate.
+   * Forward jumps validate every visible page crossed by the jump — from the
+   * current page up to, but excluding, the target — because conditions may have
+   * changed since those pages were last visited. On failure, navigation lands on
+   * the first invalid page rather than staying put, so the user ends up where
+   * work is required. Hidden pages are never validated.
+   *
+   * Respects `nextButton.disableWhenPageInvalid`, the same option that gates
+   * next-page navigation.
+   *
+   * @param pageIndex The target page index (0-based)
+   * @returns Navigation result
+   */
+  goToPage(pageIndex: number): NavigationResult {
+    const currentIndex = this.state().currentPageIndex;
+    const visibleIndices = this.visiblePageIndices();
+
+    // Backward jumps and no-ops need no gate. Out-of-bounds and hidden targets
+    // fall through too — navigateToPage reports those without navigating.
+    if (pageIndex <= currentIndex || !visibleIndices.includes(pageIndex)) {
+      return this.navigateToPage(pageIndex);
+    }
+
+    const disableWhenPageInvalid = this.formOptions?.()?.nextButton?.disableWhenPageInvalid ?? true;
+    if (!disableWhenPageInvalid) {
+      return this.navigateToPage(pageIndex);
+    }
+
+    const crossedPages = visibleIndices.filter((index) => index >= currentIndex && index < pageIndex);
+    const firstInvalidPage = crossedPages.find((index) => !this.isPageValid(index));
+
+    if (firstInvalidPage === undefined) {
+      return this.navigateToPage(pageIndex);
+    }
+
+    // Partial jump: land on the first invalid page and report the failure.
+    this.navigateToPage(firstInvalidPage);
+
+    return {
+      success: false,
+      newPageIndex: firstInvalidPage,
+      error: `Cannot navigate to page ${pageIndex}: page ${firstInvalidPage} has invalid fields`,
+    };
+  }
+
+  /**
    * Navigate to a specific page index
    *
    * @param pageIndex The target page index (0-based)
@@ -416,6 +470,14 @@ export class PageOrchestratorComponent {
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         this.navigateToPreviousPage();
+      });
+
+    // Listen for programmatic jumps to a specific page
+    this.eventBus
+      .on<GoToPageEvent>('go-to-page')
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        this.goToPage(event.pageIndex);
       });
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
