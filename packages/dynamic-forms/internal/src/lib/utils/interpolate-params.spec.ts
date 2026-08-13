@@ -164,6 +164,48 @@ describe('interpolateParams', () => {
     expect(result).toBe('Expected valid, got invalid');
   });
 
+  describe('keys containing regex metacharacters', () => {
+    it('should not treat a dot in the key as a wildcard', () => {
+      const error = { kind: 'custom', 'user.email': 'taken' } as unknown as ValidationError;
+
+      expect(interpolateParams('Value {{userXemail}} is invalid', error)).toBe('Value {{userXemail}} is invalid');
+      expect(interpolateParams('Value {{user.email}} is invalid', error)).toBe('Value taken is invalid');
+    });
+
+    it('should not treat brackets in the key as a character class', () => {
+      const error = { kind: 'custom', 'items[0]': 'missing' } as unknown as ValidationError;
+
+      expect(interpolateParams('Problem: {{items0}}', error)).toBe('Problem: {{items0}}');
+      expect(interpolateParams('Problem: {{items[0]}}', error)).toBe('Problem: missing');
+    });
+
+    it('should not throw when the key contains an unbalanced group', () => {
+      const error = { kind: 'custom', 'amount(': 3 } as unknown as ValidationError;
+
+      expect(() => interpolateParams('Value {{amount(}}', error)).not.toThrow();
+    });
+  });
+
+  describe('values containing replacement patterns', () => {
+    it('should insert a value containing $& literally', () => {
+      const error = { kind: 'custom', field: '$&' } as unknown as ValidationError;
+
+      expect(interpolateParams('Got {{field}}', error)).toBe('Got $&');
+    });
+
+    it('should not interpolate a placeholder that appears inside another value', () => {
+      const error = { kind: 'custom', outer: '{{inner}}', inner: 'leaked' } as unknown as ValidationError;
+
+      expect(interpolateParams('Value {{outer}}', error)).toBe('Value {{inner}}');
+    });
+  });
+
+  it('should leave inherited object properties uninterpolated', () => {
+    const error = { kind: 'required' } as ValidationError;
+
+    expect(interpolateParams('Oops {{constructor}} {{toString}}', error)).toBe('Oops {{constructor}} {{toString}}');
+  });
+
   // Angular Signal Forms compatibility tests
   describe('Angular Signal Forms format', () => {
     it('should handle minLength property (Signal Forms format) with requiredLength placeholder', () => {

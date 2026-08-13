@@ -1,5 +1,8 @@
 import { ValidationError } from '../models/validation-types';
 
+/** Matches a `{{ param }}` placeholder, capturing the name for trimming. */
+const PLACEHOLDER_PATTERN = /\{\{([^{}]*)\}\}/g;
+
 /**
  * Interpolates {{param}} placeholders in message with error values
  *
@@ -8,15 +11,15 @@ import { ValidationError } from '../models/validation-types';
  * @returns Message with interpolated parameters
  */
 export function interpolateParams(message: string, error: ValidationError): string {
-  let result = message;
   const params = extractErrorParams(error);
 
-  Object.entries(params).forEach(([key, value]) => {
-    const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-    result = result.replace(placeholder, safeToString(value));
+  // Scanning the message once, rather than building a regex per key, keeps param
+  // names literal (they may contain regex metacharacters) and stops an interpolated
+  // value from being re-read as a placeholder.
+  return message.replace(PLACEHOLDER_PATTERN, (placeholder, rawKey: string) => {
+    const key = rawKey.trim();
+    return Object.hasOwn(params, key) ? safeToString(params[key]) : placeholder;
   });
-
-  return result;
 }
 
 /**
