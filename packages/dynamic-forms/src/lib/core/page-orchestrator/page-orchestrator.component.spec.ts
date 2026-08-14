@@ -5,7 +5,9 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { GoToPageEvent, NextPageEvent, PageChangeEvent } from '../../events/constants';
+import { GoToPageEvent } from '../../events/constants/go-to-page.event';
+import { NextPageEvent } from '../../events/constants/next-page.event';
+import { PageChangeEvent } from '../../events/constants/page-change.event';
 import { PagerStateEvent } from '../../events/constants/pager-state.event';
 import { DynamicForm } from '../../dynamic-form.component';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
@@ -13,6 +15,8 @@ import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
+
+// Configs are cast because `input` is registered at runtime below, not in the compile-time registry.
 
 // Minimal field type registration for page orchestrator tests.
 // We only need the form schema to be built correctly; actual rendering is secondary.

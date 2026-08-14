@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { GoToPageEvent, NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
+import { GoToPageEvent } from '../../events/constants/go-to-page.event';
+import { NextPageEvent } from '../../events/constants/next-page.event';
+import { PageChangeEvent } from '../../events/constants/page-change.event';
+import { PreviousPageEvent } from '../../events/constants/previous-page.event';
 import { NavigationResult, PagerState } from './page-orchestrator.interfaces';
 import { PageField } from '@ng-forge/dynamic-forms/internal';
 import { ContainerLogicConfig } from '@ng-forge/dynamic-forms/internal';

@@ -267,7 +267,7 @@ Backward jumps are unconditional, matching `PreviousPageEvent`, which has no val
 
 Forward jumps validate every visible page the jump crosses: from the current page up to, but excluding, the target. Conditions may have changed since those pages were last visited, and ng-forge derives form state from the config, so every page's validity is computable without having visited it. If one of those pages is invalid, navigation stops on the **first invalid page** rather than staying put, which lands the user where work is required.
 
-The target page itself is not validated, and hidden pages are skipped. An out-of-bounds index or a hidden target is ignored.
+The target page itself is not validated, and hidden pages are skipped.
 
 Like `NextPageEvent`, this respects the `nextButton.disableWhenPageInvalid` option: set it to `false` and forward jumps skip validation entirely.
 
@@ -279,7 +279,20 @@ eventBus.dispatch(new GoToPageEvent(4)); // lands on page 2
 eventBus.dispatch(new GoToPageEvent(0)); // lands on page 0
 ```
 
-Both outcomes are observable through the existing `onPageChange` and `onPageNavigationStateChange` outputs.
+**Observing the outcome:**
+
+Dispatching is fire and forget. The event carries no result, so read the outcome from the notifications the navigation produces:
+
+| Outcome                                    | What fires                                             |
+| ------------------------------------------ | ------------------------------------------------------ |
+| Jump succeeds                              | `PageChangeEvent` and `PagerStateEvent` for the target |
+| Jump stops early on an invalid page        | `PageChangeEvent` and `PagerStateEvent` for that page  |
+| Target already active                      | nothing                                                |
+| Target out of bounds, hidden, or no change | nothing                                                |
+
+A partial jump is therefore not distinguishable from a successful one by the events alone. Compare the `currentPageIndex` you receive against the index you asked for: landing somewhere else means the jump was gated.
+
+An out-of-bounds or hidden target is a **silent no-op** — no navigation and no events. Validate the index against `totalPages` from `PagerStateEvent` before dispatching if you need to detect it.
 
 ### FormResetEvent
 
