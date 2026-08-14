@@ -17,6 +17,7 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { isRowField } from '@ng-forge/dynamic-forms/internal';
+import { isGenericContainerField } from '@ng-forge/dynamic-forms/internal';
 import { PAGE_PRELOAD_WINDOW } from '../../providers/features/page-preload/page-preload.token';
 import { clampWindowSize } from '../../providers/features/clamp-window';
 
@@ -513,15 +514,20 @@ export class PageOrchestratorComponent {
   }
 }
 
-/** Recursively collects form-tree keys for all value-bearing nodes on a page. */
+/**
+ * Recursively collects form-tree keys for all value-bearing nodes on a page.
+ *
+ * Layout containers (`row`, `container`) are flattened by `mapFieldToForm`, so no form
+ * node exists under their own key — traverse their children instead. `group` and `array`
+ * own a node whose `valid()` already aggregates descendants, so their key is used as-is.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
 function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
   const keys: string[] = [];
 
   for (const field of fields) {
-    if (isRowField(field)) {
-      // Row children are at the same form-tree level as the row itself
-      keys.push(...collectLeafFieldKeys(field.fields));
+    if (isRowField(field) || isGenericContainerField(field)) {
+      keys.push(...collectLeafFieldKeys(field.fields as readonly FieldDef<unknown>[]));
     } else if (field.key) {
       keys.push(field.key);
     }
