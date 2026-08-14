@@ -1023,6 +1023,7 @@ export interface FormOptions {
     pagePreloadWindow?: number;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
+    webMcp?: WebMcpToolOptions;
 }
 
 // @public
@@ -1909,6 +1910,13 @@ export type ValueType = Date | boolean | number | object | string | unknown[];
 export interface WarningTracker {
     // (undocumented)
     warnedKeys: Set<string>;
+}
+
+// @public
+export interface WebMcpToolOptions {
+    allowSubmit?: boolean;
+    description: string;
+    name: string;
 }
 
 // @public (undocumented)

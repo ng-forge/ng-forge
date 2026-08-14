@@ -388,6 +388,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         excludeValueIfReadonly?: boolean;
         validateWhenHidden?: boolean;
         emitFormValueOnEvents?: boolean;
+        webMcp?: _ng_forge_dynamic_forms.WebMcpToolOptions;
     }>;
     // (undocumented)
     protected environmentInjector: EnvironmentInjector;
@@ -690,6 +691,7 @@ export interface FormOptions {
     pagePreloadWindow?: number;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
+    webMcp?: WebMcpToolOptions;
 }
 
 // @public
@@ -1201,6 +1203,13 @@ export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown>
 export type ValueType = Date | boolean | number | object | string | unknown[];
 
 // @public
+export interface WebMcpToolOptions {
+    allowSubmit?: boolean;
+    description: string;
+    name: string;
+}
+
+// @public
 export function withAddonActions<const H extends Record<string, AddonActionHandler>>(handlers: H): AddonActionsFeature<keyof H & string>;
 
 // @public
@@ -1234,6 +1243,9 @@ export function withValidationExecutionDefaults(config?: Partial<ValidationExecu
 
 // @public
 export function withValueExclusionDefaults(config?: Partial<ValueExclusionConfig>): DynamicFormFeature<'value-exclusion'>;
+
+// @public
+export function withWebMcp(): DynamicFormFeature<'web-mcp'>;
 
 // @public
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers ? FieldRegistryWrappers[TWrappers] : {
