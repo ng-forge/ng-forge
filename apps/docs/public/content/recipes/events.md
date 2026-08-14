@@ -272,8 +272,8 @@ The target page itself is not validated, and hidden pages are skipped.
 Like `NextPageEvent`, this respects the `nextButton.disableWhenPageInvalid` option: set it to `false` and forward jumps skip validation entirely.
 
 ```typescript
-// Current page 0, pages 0 and 1 valid, page 2 invalid
-eventBus.dispatch(new GoToPageEvent(4)); // lands on page 2
+// A 5-page form, currently on page 0. Pages 0 and 1 are valid, page 2 is invalid.
+eventBus.dispatch(new GoToPageEvent(4)); // crosses 0,1,2,3 -> stops on page 2
 
 // Now on page 2 (invalid), going back always works
 eventBus.dispatch(new GoToPageEvent(0)); // lands on page 0
@@ -283,16 +283,19 @@ eventBus.dispatch(new GoToPageEvent(0)); // lands on page 0
 
 Dispatching is fire and forget. The event carries no result, so read the outcome from the notifications the navigation produces:
 
-| Outcome                                    | What fires                                             |
-| ------------------------------------------ | ------------------------------------------------------ |
-| Jump succeeds                              | `PageChangeEvent` and `PagerStateEvent` for the target |
-| Jump stops early on an invalid page        | `PageChangeEvent` and `PagerStateEvent` for that page  |
-| Target already active                      | nothing                                                |
-| Target out of bounds, hidden, or no change | nothing                                                |
+| Outcome                                       | What fires                                             |
+| --------------------------------------------- | ------------------------------------------------------ |
+| Jump succeeds                                 | `PageChangeEvent` and `PagerStateEvent` for the target |
+| Jump stops on a **later** invalid page        | `PageChangeEvent` and `PagerStateEvent` for that page  |
+| The **current** page is the first invalid one | nothing, the form never moves                          |
+| Target already active                         | nothing                                                |
+| Target out of bounds or hidden                | nothing                                                |
 
-A partial jump is therefore not distinguishable from a successful one by the events alone. Compare the `currentPageIndex` you receive against the index you asked for: landing somewhere else means the jump was gated.
+Two cases therefore produce no events at all: the current page being the one that blocks the jump, and an invalid target. Both are silent no-ops, and neither is distinguishable from "nothing happened" by listening alone.
 
-An out-of-bounds or hidden target is a **silent no-op** — no navigation and no events. Validate the index against `totalPages` from `PagerStateEvent` before dispatching if you need to detect it.
+A partial jump that does move is also not distinguishable from a successful one by the events alone. Compare the `currentPageIndex` you receive against the index you asked for: landing somewhere else means the jump was gated.
+
+To detect the silent cases up front, check the target against `totalPages` from `PagerStateEvent`, and check the current page's validity before dispatching a forward jump.
 
 ### FormResetEvent
 

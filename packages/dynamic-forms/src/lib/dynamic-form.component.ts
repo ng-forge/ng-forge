@@ -325,7 +325,7 @@ export class DynamicForm<
   /** Emits when the current page changes in paged forms. */
   onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));
 
-  /** Emits when page navigation state changes (canGoNext, canGoPrevious, etc.). */
+  /** Emits when pager state changes (currentPageIndex, totalPages, isFirstPage, isLastPage). */
   onPageNavigationStateChange = outputFromObservable(this.eventBus.on<PagerStateEvent>('pager-state'));
 
   // ─────────────────────────────────────────────────────────────────────────────
