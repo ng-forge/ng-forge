@@ -108,7 +108,6 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
 /** `field` = `validate()`; `tree` = `validateTree()`, which re-homes errors carrying a `fieldTree`. */
 export type ValidatorAttachment = 'field' | 'tree';
 
- 
 export function applyValidator(
   config: ValidatorConfig,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
