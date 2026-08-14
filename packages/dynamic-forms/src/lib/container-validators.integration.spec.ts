@@ -8,6 +8,7 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/int
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { FormStateManager } from './state/form-state-manager';
 import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
@@ -164,5 +165,81 @@ describe('DynamicForm — container-level validators', () => {
     await waitForRender(fixture);
 
     expect(errorTexts(fixture)).toEqual(['Every period must end after it starts.']);
+  });
+
+  /**
+   * Acceptance test for the exact configuration in issue #568: a SIMPLIFIED
+   * array (`template` + `value`) of `{ from, to }` periods, a validator
+   * registered by name through `customFnConfig.validators`, and `minLength: 1`.
+   * The reporter's wizard gates its Next button on page validity, so the array
+   * node's own `valid()` matters as much as the rendered message.
+   */
+  describe('issue #568 reporter scenario', () => {
+    const periodOrder = (ctx: { value: () => unknown }) => {
+      const rows = (ctx.value() as { from?: string; to?: string }[]) ?? [];
+      return rows.some((r) => r?.from && r?.to && r.to < r.from) ? { kind: 'periodOrder' } : null;
+    };
+
+    const soundPeriodsConfig = (rows: { from: string; to: string }[]) =>
+      ({
+        fields: [
+          {
+            key: 'soundPeriods',
+            type: 'array',
+            template: [
+              { key: 'from', type: 'input', label: 'From', required: true },
+              { key: 'to', type: 'input', label: 'To', required: true },
+            ],
+            value: rows,
+            minLength: 1,
+            validators: [{ type: 'custom', functionName: 'periodOrder' }],
+            validationMessages: { periodOrder: 'The end must not be before the start.' },
+          },
+        ],
+        customFnConfig: { validators: { periodOrder } },
+      }) as unknown as TestFormConfig;
+
+    it('invalidates the form and renders the message when a row ends before it starts', async () => {
+      const { component, fixture } = SimpleTestUtils.createComponent(
+        soundPeriodsConfig([{ from: '2026-01-02T10:00', to: '2026-01-02T09:00' }]),
+      );
+      await waitForRender(fixture);
+
+      touchAll(fixture);
+      await waitForRender(fixture);
+
+      expect(component.valid()).toBe(false);
+      expect(errorTexts(fixture)).toEqual(['The end must not be before the start.']);
+    });
+
+    it('is valid once every row ends after it starts', async () => {
+      const { component, fixture } = SimpleTestUtils.createComponent(
+        soundPeriodsConfig([
+          { from: '2026-01-01T10:00', to: '2026-01-01T12:00' },
+          { from: '2026-01-02T10:00', to: '2026-01-02T12:00' },
+        ]),
+      );
+      await waitForRender(fixture);
+
+      touchAll(fixture);
+      await waitForRender(fixture);
+
+      expect(component.valid()).toBe(true);
+      expect(errorTexts(fixture)).toEqual([]);
+    });
+
+    it('marks the array node itself invalid, which is what page validity reads', async () => {
+      // `collectLeafFieldKeys` uses a group/array key as-is, so a paged form's
+      // `currentPageValid` gate resolves `form.soundPeriods().valid()`.
+      const { fixture } = SimpleTestUtils.createComponent(soundPeriodsConfig([{ from: '2026-01-02T10:00', to: '2026-01-02T09:00' }]));
+      await waitForRender(fixture);
+
+      // FormStateManager is component-scoped, so it comes off the fixture's injector.
+      const stateManager = fixture.debugElement.injector.get(FormStateManager);
+      const arrayNode = (stateManager.form() as unknown as Record<string, () => { valid: () => boolean }>)['soundPeriods'];
+
+      expect(arrayNode).toBeDefined();
+      expect(arrayNode().valid()).toBe(false);
+    });
   });
 });

@@ -1,6 +1,8 @@
 import { TestSuite } from '../shared/types';
 import { arrayCrossValidationScenario } from './scenarios/array-cross-validation.scenario';
 import { conditionalValidatorScenario } from './scenarios/conditional-validator.scenario';
+import { containerArrayValidatorScenario } from './scenarios/container-array-validator.scenario';
+import { containerGroupValidatorScenario } from './scenarios/container-group-validator.scenario';
 import { crossFieldErrorTargetingScenario } from './scenarios/cross-field-error-targeting.scenario';
 import { crossFieldValidatorScenario } from './scenarios/cross-field-validator.scenario';
 import { customValidatorScenario } from './scenarios/custom-validator.scenario';
@@ -31,6 +33,8 @@ export const advancedValidationSuite: TestSuite = {
     whenWithAndOrScenario,
     nestedFieldPathsScenario,
     arrayCrossValidationScenario,
+    containerGroupValidatorScenario,
+    containerArrayValidatorScenario,
   ],
 };
 

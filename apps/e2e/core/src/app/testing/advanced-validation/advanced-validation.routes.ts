@@ -57,6 +57,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAdvancedValidationScenario('array-cross-validation-test') },
   },
+  {
+    path: 'container-group-validator',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('container-group-validator-test') },
+  },
+  {
+    path: 'container-array-validator',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('container-array-validator-test') },
+  },
 ];
 
 export default routes;

@@ -707,4 +707,75 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(errorMessage).toHaveText('Please enter a valid email address');
     });
   });
+
+  test.describe('Container Validators (issue #568)', () => {
+    test('group validator surfaces its message and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-group-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-group-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This app registers withMaterialFields(), so the Material container-errors
+      // wrapper replaces the core default and renders a <mat-error>.
+      const containerError = scenario.locator('mat-error.df-mat-container-error');
+
+      // Nothing to complain about yet.
+      await expect(containerError).toHaveCount(0);
+
+      // End before start — the rule the group owns.
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(submitButton).toBeDisabled();
+
+      // Correcting the order clears it and re-enables submit.
+      await helpers.fillInput(dateTo, '2026-03-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('array validator sees the whole item list and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-array-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-array-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const rowInputs = scenario.locator(':is([id="soundPeriods"], [id$="_soundPeriods"]) input');
+      const from = rowInputs.first();
+      const to = rowInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This app registers withMaterialFields(), so the Material container-errors
+      // wrapper replaces the core default and renders a <mat-error>.
+      const containerError = scenario.locator('mat-error.df-mat-container-error');
+
+      await expect(containerError).toHaveCount(0);
+
+      // A row whose end precedes its start — unreachable from a validator on
+      // either child, which is the whole point of the container-level rule.
+      await helpers.fillInput(from, '2026-01-02T10:00');
+      await helpers.fillInput(to, '2026-01-02T09:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(to, '2026-01-02T11:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
 });
