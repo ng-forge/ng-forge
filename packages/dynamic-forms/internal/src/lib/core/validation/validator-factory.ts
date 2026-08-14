@@ -11,6 +11,7 @@ import {
   required,
   validate,
   validateAsync,
+  validateTree,
   validateHttp,
   ValidationError,
 } from '@angular/forms/signals';
@@ -104,8 +105,16 @@ function createConditionalLogic(when: ConditionalExpression | undefined): LogicF
   return when ? (createLogicFunction(when) as LogicFn<unknown, boolean>) : undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
+/** `field` = `validate()`; `tree` = `validateTree()`, which re-homes errors carrying a `fieldTree`. */
+export type ValidatorAttachment = 'field' | 'tree';
+
+ 
+export function applyValidator(
+  config: ValidatorConfig,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
+  fieldPath: SchemaPath<any> | SchemaPathTree<any>,
+  attachment: ValidatorAttachment = 'field',
+): void {
   const path = fieldPath as SchemaPath<unknown>;
 
   switch (config.type) {
@@ -153,7 +162,7 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
       }
       break;
     case 'custom':
-      applyCustomValidator(config, path);
+      applyCustomValidator(config, path, attachment);
       break;
     case 'async':
       applyAsyncValidator(config, path);
@@ -164,7 +173,11 @@ export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<an
   }
 }
 
-function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPath<unknown>): void {
+function applyCustomValidator(
+  config: CustomValidatorConfig,
+  fieldPath: SchemaPath<unknown>,
+  attachment: ValidatorAttachment = 'field',
+): void {
   let validatorFn: (ctx: FieldContext<unknown>) => ValidationError | ValidationError[] | null;
 
   if (config.expression) {
@@ -176,10 +189,17 @@ function applyCustomValidator(config: CustomValidatorConfig, fieldPath: SchemaPa
   }
 
   const whenLogic = createConditionalLogic(config.when);
-  validate(fieldPath, (ctx: FieldContext<unknown>) => {
+  const run = (ctx: FieldContext<unknown>) => {
     if (whenLogic && !whenLogic(ctx)) return null;
     return validatorFn(ctx);
-  });
+  };
+
+  if (attachment === 'tree') {
+    validateTree(fieldPath as Parameters<typeof validateTree>[0], run as Parameters<typeof validateTree>[1]);
+    return;
+  }
+
+  validate(fieldPath, run);
 }
 
 function createFunctionValidator(
@@ -377,7 +397,11 @@ function applyDeclarativeHttpValidator(config: DeclarativeHttpValidatorConfig, f
   } as Parameters<typeof validateHttp>[1]);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void {
-  configs.forEach((config) => applyValidator(config, fieldPath));
+export function applyValidators(
+  configs: ValidatorConfig[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic forms require any at the Angular API boundary
+  fieldPath: SchemaPath<any> | SchemaPathTree<any>,
+  attachment: ValidatorAttachment = 'field',
+): void {
+  configs.forEach((config) => applyValidator(config, fieldPath, attachment));
 }

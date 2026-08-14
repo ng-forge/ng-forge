@@ -17,47 +17,18 @@ export interface ContainerErrorsOptions {
 }
 
 /**
- * Resolves the display-ready errors for a container-level validator, for use by
- * a `container-errors` wrapper.
+ * Resolves the display-ready errors for a `container-errors` wrapper.
  *
- * A container (`group` / `array`) has no adapter field component to render its
- * message, so the wrapper resolves the container's own `FieldTree` itself. The
- * wrapper chain is created with the field-level injector, so
- * `FIELD_SIGNAL_CONTEXT` here is the container's PARENT tree and
- * `form[key]` is the container's own node — the same lookup
- * `GroupFieldComponent` performs.
- *
- * Adapter authors overriding the built-in `container-errors` wrapper should use
- * this rather than reimplementing the lookup:
- *
- * ```typescript
- * @Component({
- *   template: `
- *     <ng-container #fieldComponent></ng-container>
- *     @for (error of errors(); track error.kind) {
- *       <mat-error>{{ error.message }}</mat-error>
- *     }
- *   `,
- * })
- * export default class MatContainerErrorsWrapper implements FieldWrapper {
- *   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
- *   readonly fieldInputs = input<WrapperFieldInputs>();
- *   readonly validationMessages = input<ValidationMessages>();
- *   protected readonly errors = injectContainerErrors({
- *     fieldInputs: this.fieldInputs,
- *     validationMessages: this.validationMessages,
- *   });
- * }
- * ```
- *
- * Must be called in an injection context (field initializer or constructor).
+ * The wrapper chain is created with the field-level injector, so `FIELD_SIGNAL_CONTEXT`
+ * here is the container's PARENT tree and `form[key]` is the container's own node.
+ * Must be called in an injection context.
  */
 export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]> {
   const injector = options.injector ?? inject(Injector);
   const fieldSignalContext = injectFieldSignalContext();
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true });
 
-  // `undefined` before the form settles, which simply renders nothing.
+  // `undefined` before the form settles — renders nothing.
   const containerField = computed<FieldTree<unknown> | undefined>(() => {
     const key = options.fieldInputs()?.key;
     if (!key) return undefined;

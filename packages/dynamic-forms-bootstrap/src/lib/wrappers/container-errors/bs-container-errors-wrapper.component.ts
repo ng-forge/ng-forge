@@ -4,11 +4,8 @@ import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-for
 
 /**
  * Bootstrap rendering of a container-level validation message.
- *
- * Uses the same `.invalid-feedback.d-block` markup the Bootstrap field
- * components emit. `d-block` is required because Bootstrap only reveals
- * `.invalid-feedback` for a sibling `.is-invalid` control, which a container
- * does not have.
+ * `d-block` is required — Bootstrap only reveals `.invalid-feedback` next to a
+ * sibling `.is-invalid` control, which a container has none of.
  */
 @Component({
   selector: 'df-bs-container-errors',

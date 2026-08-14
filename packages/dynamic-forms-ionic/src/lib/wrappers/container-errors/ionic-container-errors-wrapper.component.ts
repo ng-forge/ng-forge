@@ -3,12 +3,7 @@ import { IonNote } from '@ionic/angular/standalone';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
-/**
- * Ionic rendering of a container-level validation message.
- *
- * Uses the same `<ion-note color="danger" class="df-ion-error">` markup the
- * Ionic field components emit for field-level errors.
- */
+/** Ionic rendering of a container-level validation message. Replaces the core default. */
 @Component({
   selector: 'df-ion-container-errors',
   imports: [IonNote],

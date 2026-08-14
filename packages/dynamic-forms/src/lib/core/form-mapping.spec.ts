@@ -1144,6 +1144,90 @@ describe('form-mapping', () => {
         });
       });
 
+      it('should re-home an error carrying a fieldTree onto that descendant', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({
+            periods: [
+              { from: '2026-01-01T10:00', to: '2026-01-01T12:00' },
+              { from: '2026-01-02T10:00', to: '2026-01-02T09:00' },
+            ],
+          });
+          const arrayField: FieldDef = {
+            key: 'periods',
+            type: 'array',
+            fields: [
+              [
+                { key: 'from', type: 'input' },
+                { key: 'to', type: 'input' },
+              ],
+            ],
+            validators: [
+              {
+                type: 'custom',
+                fn: (ctx) => {
+                  const rows = (ctx.value() as { from?: string; to?: string }[]) ?? [];
+                  const trees = ctx.fieldTree as unknown as Record<number, { to: unknown }>;
+                  return rows.flatMap((r, i) =>
+                    r.from && r.to && r.to < r.from ? [{ kind: 'periodOrder', fieldTree: trees[i].to }] : [],
+                  ) as never;
+                },
+              },
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.periods as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          const kindsOf = (node: unknown) =>
+            (node as () => { errors: () => { kind: string }[] })()
+              .errors()
+              .map((e) => e.kind);
+          const rows = (formInstance as any).periods;
+
+          // Only the offending row carries it; the array node stays clean.
+          expect(kindsOf(rows[1].to)).toContain('periodOrder');
+          expect(kindsOf(rows[0].to)).not.toContain('periodOrder');
+          expect(kindsOf(rows)).not.toContain('periodOrder');
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
+      it('should keep an untargeted error on the container itself', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ periods: [{ from: '', to: '' }] });
+          const arrayField: FieldDef = {
+            key: 'periods',
+            type: 'array',
+            fields: [
+              [
+                { key: 'from', type: 'input' },
+                { key: 'to', type: 'input' },
+              ],
+            ],
+            validators: [{ type: 'custom', fn: () => ({ kind: 'listLevel' }) }],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.periods as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          const kinds = (formInstance as any)
+            .periods()
+            .errors()
+            .map((e: { kind: string }) => e.kind);
+          expect(kinds).toContain('listLevel');
+        });
+      });
+
       it('should leave containers without validators untouched', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ period: { dateFrom: '', dateTo: '' } });

@@ -277,16 +277,7 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
   applyHiddenGatedValidation(path, context, applyValidation);
 }
 
-/**
- * Applies a validation block through the `validateWhenHidden` gate.
- *
- * Shared by leaf fields and containers so both honour the same rule: validators
- * do not run while the field (or an ancestor) is hidden, unless
- * `validateWhenHidden` opts back in.
- *
- * @param apply Receives the path the validators should be declared against —
- *   either `path` itself, or the sub-schema path created by `applyWhen`.
- */
+/** Applies a validation block through the `validateWhenHidden` gate. Shared by leaves and containers. */
 function applyHiddenGatedValidation(
   path: SchemaPath<unknown>,
   context: FieldTreeMappingContext,
@@ -322,16 +313,8 @@ function applyHiddenGatedValidation(
 }
 
 /**
- * Applies a container's own `validators` to its schema path (issue #568).
- *
- * `group` and `array` own a path, so `validate()` there sees the whole subtree:
- * `ctx.value()` is the group's object or the array's item list. That gives
- * cross-field rules a home on the container they belong to.
- *
- * `context` must be the container's DESCENDANT context — unlike a leaf, a group
- * never calls `hidden()` on its own schema path, so `ctx.state.hidden()` alone
- * would not see the container's own `hidden` flag or hidden logic. The
- * descendant context folds those in.
+ * Applies a container's own `validators` to its schema path (#568).
+ * `context` must be the DESCENDANT context — a group never calls `hidden()` on its own path.
  */
 function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
   const validators = (fieldDef as FieldDef<unknown> & ContainerValidation).validators;
@@ -339,7 +322,7 @@ function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySch
 
   applyHiddenGatedValidation(fieldPath as SchemaPath<unknown>, context, (validationPath) => {
     for (const config of validators) {
-      applyValidator(config, validationPath);
+      applyValidator(config, validationPath, 'tree');
     }
   });
 }
@@ -347,13 +330,9 @@ function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySch
 /**
  * Applies simple validation rules from field properties.
  * Casts are isolated to the boundary between untyped field definitions and typed validator functions.
- *
- * @param context Supplies `ancestorRequired` — the `required` cascaded down from
- *   an ancestor container, used only when this field declares none of its own.
  */
 function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>, context: FieldTreeMappingContext): void {
-  // The field's own `required` wins over one inherited from a container, so an
-  // explicit `required: false` opts out of an ancestor's cascade.
+  // Own `required` wins over an inherited one, so `required: false` opts out.
   if (fieldDef.required ?? context.ancestorRequired) {
     required(path);
   }
@@ -400,8 +379,6 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
     maxLength(fieldPath as SchemaPath<unknown[]>, arrayField.maxLength);
   }
 
-  // Container validators run against the item list (`ctx.value()` is the array).
-  // `context` is already the descendant context resolved by the caller.
   applyContainerValidators(arrayField, fieldPath, context);
 
   // Fields can be either FieldDef (primitive) or FieldDef[] (object)

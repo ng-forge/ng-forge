@@ -3,13 +3,7 @@ import { MatError } from '@angular/material/form-field';
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
-/**
- * Material rendering of a container-level validation message.
- *
- * Registered under the built-in `container-errors` name, so it replaces the
- * neutral core default for apps using Material fields. Attached automatically
- * to a `group` / `array` that declares `validators`.
- */
+/** Material rendering of a container-level validation message. Replaces the core default. */
 @Component({
   selector: 'df-mat-container-errors',
   imports: [MatError],

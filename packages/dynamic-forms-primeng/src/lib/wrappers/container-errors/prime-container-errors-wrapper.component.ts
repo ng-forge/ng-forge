@@ -2,12 +2,7 @@ import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild 
 import { ValidationMessages } from '@ng-forge/dynamic-forms';
 import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 
-/**
- * PrimeNG rendering of a container-level validation message.
- *
- * Uses the same `<small class="p-error">` markup the PrimeNG field components
- * emit for field-level errors.
- */
+/** PrimeNG rendering of a container-level validation message. Replaces the core default. */
 @Component({
   selector: 'df-prime-container-errors',
   template: `

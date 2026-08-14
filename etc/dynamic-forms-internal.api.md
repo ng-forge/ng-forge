@@ -147,10 +147,10 @@ export type AnyAddon = DynamicFormAddonRegistry[keyof DynamicFormAddonRegistry];
 export function applyMetaToElement(element: Element, meta: FieldMeta | undefined, previouslyApplied: Set<string>): Set<string>;
 
 // @public (undocumented)
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public (undocumented)
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public
 export const ARRAY_CONTEXT: InjectionToken<ArrayContext>;
@@ -1925,6 +1925,9 @@ export interface ValidationMessages {
     // (undocumented)
     required?: ValidationMessage;
 }
+
+// @public
+export type ValidatorAttachment = 'field' | 'tree';
 
 // @public
 export type ValidatorConfig = AsyncValidatorConfig | BuiltInValidatorConfig | CustomValidatorConfig | DeclarativeHttpValidatorConfig | FunctionHttpValidatorConfig;

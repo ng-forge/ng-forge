@@ -1,20 +1,28 @@
 import { CustomValidator, FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
-/** Fails when any row's `to` precedes its `from`. `ctx.value()` is the item list. */
+/**
+ * Fails when any row's `to` precedes its `from`. `ctx.value()` is the item list.
+ *
+ * Each error carries a `fieldTree` so it renders on the offending row's own input rather
+ * than as one message for the whole list. A re-homed error must carry its own `message` —
+ * the container's `validationMessages` are not in scope on the child.
+ */
 const periodOrder: CustomValidator = (ctx) => {
   const rows = (ctx.value() ?? []) as { from?: string; to?: string }[];
-  return rows.some((r) => r?.from && r?.to && r.to < r.from) ? { kind: 'periodOrder' } : null;
+  const rowTrees = ctx.fieldTree as unknown as Record<number, { to: unknown }>;
+
+  return rows.flatMap((row, index) =>
+    row?.from && row?.to && row.to < row.from
+      ? [{ kind: 'periodOrder', message: 'The end must not be before the start.', fieldTree: rowTrees[index].to }]
+      : [],
+  ) as ReturnType<CustomValidator>;
 };
 
 /**
- * Tests a validator declared on an `array` container (issue #568), using the
- * reporter's own shape: a list of `{ from, to }` periods where every row must
- * end after it starts.
- *
- * This rule has no other home — the array itself is the only scope that can see
- * both fields of a row, because a validator on the `to` template child cannot
- * reach its sibling `from`. `ctx.value()` here is the whole item list.
+ * Validator on an `array` container (#568): a list of `{ from, to }` periods where
+ * every row must end after it starts. The array is the only scope that sees both
+ * fields of a row.
  */
 const config = {
   customFnConfig: { validators: { periodOrder } },

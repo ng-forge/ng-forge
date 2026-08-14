@@ -5,28 +5,18 @@ import { ContainerValidation, isArrayField, isContainerField, isGroupField, Wrap
 const CONTAINER_ERRORS_WRAPPER = 'container-errors';
 
 /**
- * Appends the `container-errors` wrapper to every `group` / `array` that
- * declares its own `validators` (issue #568).
+ * Appends the `container-errors` wrapper to every `group` / `array` declaring `validators` (#568).
  *
- * A container has no native form element, so nothing would otherwise render the
- * message for a tree-level error. Attaching here rather than auto-associating
- * the wrapper by field type means containers WITHOUT container validators keep
- * their exact current DOM — no wrapper host element, no layout change.
- *
- * The wrapper goes last so it ends up innermost: the message renders directly
- * under the container's own content, inside any wrapper the author declared
- * (e.g. a card), rather than outside it.
- *
- * Runs after `normalizeSimplifiedArrays`, so simplified arrays have already
- * been expanded into full `ArrayField`s.
+ * Attaching here rather than auto-associating by field type leaves containers without
+ * container validators with their exact current DOM. The wrapper goes last so it renders
+ * innermost, inside any author-declared wrapper. Runs after `normalizeSimplifiedArrays`.
  */
 export function attachContainerErrorWrappers(fields: FieldDef<unknown>[]): FieldDef<unknown>[] {
   return fields.map((field) => attachToField(field));
 }
 
 function attachToField(field: FieldDef<unknown>): FieldDef<unknown> {
-  // Arrays recurse into item definitions, which are either a single FieldDef
-  // (primitive item) or an array of FieldDefs (object item).
+  // Array items are either a single FieldDef (primitive) or an array of them (object).
   if (isArrayField(field)) {
     const items = field.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];
     const nextItems = items.map((item) =>
@@ -39,9 +29,7 @@ function attachToField(field: FieldDef<unknown>): FieldDef<unknown> {
     return withErrorWrapper(base);
   }
 
-  // Groups and layout containers (page / row / container) recurse into `fields`.
-  // Only groups can carry container validators — layout containers flatten into
-  // their parent and have no schema path of their own.
+  // Only groups can carry container validators; layout containers just recurse.
   if (isContainerField(field) && Array.isArray((field as { fields?: unknown }).fields)) {
     const children = (field as unknown as { fields: FieldDef<unknown>[] }).fields;
     const nextChildren = attachContainerErrorWrappers(children);

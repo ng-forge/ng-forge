@@ -8,12 +8,8 @@ const dateOrder: CustomValidator = (ctx) => {
 };
 
 /**
- * Tests a validator declared on a `group` container (issue #568).
- *
- * The rule spans two children, so it lives on the group rather than on one of
- * them: `ctx.value()` resolves to the group's own object. The message has no
- * native form element to attach to, so it renders through the auto-attached
- * `container-errors` wrapper below the group's fields.
+ * Validator on a `group` container (#568): the rule spans two children, so it lives on
+ * the group. The message renders through the auto-attached `container-errors` wrapper.
  */
 const config = {
   customFnConfig: { validators: { dateOrder } },

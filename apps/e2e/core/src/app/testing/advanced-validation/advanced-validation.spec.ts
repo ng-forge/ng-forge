@@ -744,7 +744,7 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(submitButton).toBeEnabled();
     });
 
-    test('array validator sees the whole item list and gates submit', async ({ page, helpers }) => {
+    test('array validator targets the offending row and gates submit', async ({ page, helpers }) => {
       await page.goto('/#/test/advanced-validation/container-array-validator');
       await page.waitForLoadState('networkidle');
 
@@ -755,11 +755,12 @@ test.describe('Advanced Validation E2E Tests', () => {
       const from = rowInputs.first();
       const to = rowInputs.nth(1);
       const submitButton = helpers.getSubmitButton(scenario);
-      // This app registers withMaterialFields(), so the Material container-errors
-      // wrapper replaces the core default and renders a <mat-error>.
+      // This validator returns errors carrying a `fieldTree`, so they re-home onto the
+      // row's own input and render as an ordinary field error, not a container message.
+      const rowError = scenario.locator('mat-error');
       const containerError = scenario.locator('mat-error.df-mat-container-error');
 
-      await expect(containerError).toHaveCount(0);
+      await expect(rowError).toHaveCount(0);
 
       // A row whose end precedes its start — unreachable from a validator on
       // either child, which is the whole point of the container-level rule.
@@ -767,14 +768,15 @@ test.describe('Advanced Validation E2E Tests', () => {
       await helpers.fillInput(to, '2026-01-02T09:00');
       await helpers.blurInput(to);
 
-      await expect(containerError).toBeVisible();
-      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(rowError).toBeVisible();
+      await expect(rowError).toHaveText('The end must not be before the start.');
+      await expect(containerError).toHaveCount(0);
       await expect(submitButton).toBeDisabled();
 
       await helpers.fillInput(to, '2026-01-02T11:00');
       await helpers.blurInput(to);
 
-      await expect(containerError).toHaveCount(0);
+      await expect(rowError).toHaveCount(0);
       await expect(submitButton).toBeEnabled();
     });
   });
