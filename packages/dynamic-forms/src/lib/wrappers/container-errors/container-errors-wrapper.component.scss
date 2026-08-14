@@ -1,0 +1,8 @@
+// Mirrors the `.df-{lib}-error` convention documented in styles/_form-field-base.scss
+// so a container-level message reads the same as a field-level one. Adapters that
+// register their own `container-errors` wrapper replace this entirely.
+.df-container-error {
+  color: var(--df-error-color, #dc3545);
+  font-size: var(--df-error-font-size, 0.875rem);
+  margin-top: var(--df-field-gap, 0.5rem);
+}

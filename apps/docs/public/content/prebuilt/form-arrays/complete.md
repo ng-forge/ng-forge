@@ -78,6 +78,49 @@ Use `minLength` and `maxLength` on the array field to constrain the number of it
 
 Both properties are optional and can be used independently or together.
 
+## Array-Level Validation
+
+Size bounds only count items. For a rule about the item _contents_ — most commonly a per-row rule whose two fields have to be compared against each other — declare `validators` on the array. `ctx.value()` resolves to the item list:
+
+```typescript
+{
+  key: 'periods',
+  type: 'array',
+  minLength: 1,
+  fields: [
+    [
+      { key: 'from', type: 'input', label: 'From', props: { type: 'datetime-local' }, value: '' },
+      { key: 'to', type: 'input', label: 'To', props: { type: 'datetime-local' }, value: '' },
+    ],
+  ],
+  validators: [{ type: 'custom', functionName: 'periodOrder' }],
+  validationMessages: { periodOrder: 'Every period must end after it starts.' },
+}
+```
+
+The registered function sees every row at once, so it can compare fields within a row:
+
+```typescript
+const periodOrder: CustomValidator = (ctx) => {
+  const rows = (ctx.value() as { from?: string; to?: string }[]) ?? [];
+  return rows.some((r) => r.from && r.to && r.to < r.from) ? { kind: 'periodOrder' } : null;
+};
+```
+
+This is the only way to express a rule that spans two fields of the same row. A validator placed on the `to` template field cannot see its sibling `from`, because sibling access needs schema paths that only exist while the schema is being built.
+
+The error lands on the array itself, so it gates form and page validity. Array validators are skipped while the array is hidden, unless you set `validateWhenHidden: true`. The same properties work on the [simplified array API](/prebuilt/form-arrays/simplified).
+
+### Rendering the message
+
+Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `container-errors` wrapper, which renders each resolved message below the array's items:
+
+```html
+<div class="df-container-error" role="alert">Every period must end after it starts.</div>
+```
+
+It reads `--df-error-color` and `--df-error-font-size` so it matches field-level errors. To restyle it, register your own wrapper under the same `container-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
+
 ## Initial Values
 
 Initial values are defined directly on each field via the `value` property - no separate `initialValue` is needed:

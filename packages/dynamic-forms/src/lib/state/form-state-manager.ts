@@ -20,6 +20,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simplified-arrays';
+import { attachContainerErrorWrappers } from '../utils/container-errors/attach-container-error-wrappers';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';
@@ -1043,7 +1044,9 @@ export class FormStateManager<
   }
 
   private createFormSetupFromConfig(fields: FieldDef<unknown>[], mode: FormMode, registry: Map<string, FieldTypeDefinition>): FormSetup {
-    const normalizedFields = normalizeSimplifiedArrays(fields);
+    // Simplified arrays expand first, so the attach pass below sees full
+    // ArrayFields (and their carried-over container validators).
+    const normalizedFields = attachContainerErrorWrappers(normalizeSimplifiedArrays(fields));
     // Two validation passes run after normalization so simplified array templates
     // are already expanded into full ArrayField.fields and reachable during traversal:
     // 1. Structural — duplicate keys, unknown field types, invalid regex patterns.

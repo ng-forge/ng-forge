@@ -308,7 +308,7 @@ export interface CreateNgForgeFieldFixtureOptions<TValue = unknown> {
 }
 
 // @public
-export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T>>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
+export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T> | undefined>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
 
 // @public
 export function createWrappers<const T extends readonly WrapperRegistration[]>(...registrations: T): WrappersBundle<T>;
@@ -967,7 +967,7 @@ export function setupMetaTracking(elementRef: ElementRef<HTMLElement>, meta: Sig
 export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>>;
 
 // @public
-export function shouldShowErrors<T>(field: Signal<FieldTree<T>>): Signal<boolean>;
+export function shouldShowErrors<T>(field: Signal<FieldTree<T> | undefined>): Signal<boolean>;
 
 // @public (undocumented)
 export interface SliderField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, number, FieldMeta, TNullable> {

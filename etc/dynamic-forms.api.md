@@ -132,7 +132,7 @@ export function arrayEvent(arrayKey: string): {
 };
 
 // @public
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never>, ContainerValidation {
     readonly fields: TFields;
     readonly label?: never;
     readonly logic?: ContainerLogicConfig[];
@@ -597,6 +597,8 @@ export interface FieldRegistryLeaves {
 // @public
 export interface FieldRegistryWrappers {
     // (undocumented)
+    'container-errors': ContainerErrorsWrapper;
+    // (undocumented)
     css: CssWrapper;
     // (undocumented)
     row: RowWrapper;
@@ -713,7 +715,7 @@ export class FormSubmitEvent implements FormEvent {
 export type GroupAllowedChildren = ArrayField | ContainerField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never>, ContainerValidation {
     // (undocumented)
     readonly fields: TFields;
     readonly label?: never;
@@ -1050,7 +1052,7 @@ export class ShiftArrayItemEvent implements FormEvent {
 }
 
 // @public
-export interface SimplifiedArrayField extends FieldDef<never> {
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
     readonly addButton?: ArrayButtonConfig | false;
     readonly fields?: never;
     readonly label?: never;

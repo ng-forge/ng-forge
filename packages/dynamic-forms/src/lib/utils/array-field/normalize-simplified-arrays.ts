@@ -96,6 +96,8 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     wrappers,
     skipAutoWrappers,
     skipDefaultWrappers,
+    validators,
+    validationMessages,
   } = field;
   const isObjectTemplate = Array.isArray(template);
   const values = value as unknown[];
@@ -146,6 +148,14 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   }
   if (skipDefaultWrappers !== undefined) {
     arrayFieldObj['skipDefaultWrappers'] = skipDefaultWrappers;
+  }
+  // Container validators belong to the array itself, not to its items — carry
+  // them onto the expanded ArrayField so the schema mapping still sees them.
+  if (validators !== undefined) {
+    arrayFieldObj['validators'] = validators;
+  }
+  if (validationMessages !== undefined) {
+    arrayFieldObj['validationMessages'] = validationMessages;
   }
 
   // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields

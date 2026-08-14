@@ -176,7 +176,7 @@ export interface ArrayContext {
 }
 
 // @public
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never>, ContainerValidation {
     readonly fields: TFields;
     readonly label?: never;
     readonly logic?: ContainerLogicConfig[];
@@ -419,6 +419,13 @@ export type ContainerAllowedChildren = ArrayField | ContainerField | GroupField 
 export type ContainerComponent = FieldComponent<ContainerField<ContainerAllowedChildren[]>>;
 
 // @public
+export interface ContainerErrorsWrapper {
+    // (undocumented)
+    readonly type: 'container-errors';
+    readonly validationMessages?: ValidationMessages;
+}
+
+// @public
 export interface ContainerField<TFields extends readonly ContainerAllowedChildren[] = readonly ContainerAllowedChildren[], TWrapperConfigs extends readonly WrapperConfig[] = readonly WrapperConfig[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;
@@ -439,6 +446,12 @@ export type ContainerFieldTypes = DynamicFormFieldRegistry['containers'][keyof D
 export interface ContainerLogicConfig {
     condition: ConditionalExpression | boolean;
     type: 'hidden';
+}
+
+// @public
+export interface ContainerValidation {
+    readonly validationMessages?: ValidationMessages;
+    readonly validators?: ValidatorConfig[];
 }
 
 // @public (undocumented)
@@ -467,6 +480,9 @@ export function createInitializationTracker(eventBus: EventBus, expectedCount: n
 
 // @public
 export function createLogicFunction<TValue>(expression: ConditionalExpression): LogicFn<TValue, boolean>;
+
+// @public
+export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T> | undefined>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
 
 // @internal
 export function createWarningTracker(): WarningTracker;
@@ -865,6 +881,8 @@ export interface FieldRegistryLeaves {
 // @public
 export interface FieldRegistryWrappers {
     // (undocumented)
+    'container-errors': ContainerErrorsWrapper;
+    // (undocumented)
     css: CssWrapper;
     // (undocumented)
     row: RowWrapper;
@@ -1110,7 +1128,7 @@ export interface GroupContext {
 }
 
 // @public
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never>, ContainerValidation {
     // (undocumented)
     readonly fields: TFields;
     readonly label?: never;
@@ -1585,6 +1603,14 @@ export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 export type RenderReadyInput = 'field' | (string & {});
 
 // @public
+export interface ResolvedError {
+    // (undocumented)
+    kind: string;
+    // (undocumented)
+    message: string;
+}
+
+// @public
 export type ResolvedValidationExecutionConfig = Required<ValidationExecutionConfig>;
 
 // @public
@@ -1673,7 +1699,10 @@ export function setupInitializationTracking(options: InitializationTrackingOptio
 export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean;
 
 // @public
-export interface SimplifiedArrayField extends FieldDef<never> {
+export function shouldShowErrors<T>(field: Signal<FieldTree<T> | undefined>): Signal<boolean>;
+
+// @public
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
     readonly addButton?: ArrayButtonConfig | false;
     readonly fields?: never;
     readonly label?: never;
@@ -1926,7 +1955,7 @@ export const WRAPPER_AUTO_ASSOCIATIONS: InjectionToken<WrapperAutoAssociations>;
 export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
+export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.ContainerErrorsWrapper | _ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
 
 // @public
 export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;

@@ -387,7 +387,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     type: 'group',
     category: 'container',
     description:
-      "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility.",
+      "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility. Supports container-level `validators` + `validationMessages` for cross-field rules over the group's children — `ctx.value()` resolves to the group's object.",
     valueType: 'object',
     baseInterface: 'FieldDef',
     props: {
@@ -396,6 +396,20 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         type: 'GroupAllowedChildren[]',
         description: 'Child fields in the group. Allowed: rows, arrays, leaf fields (NOT pages or other groups)',
         required: true,
+      },
+      validators: {
+        name: 'validators',
+        type: 'ValidatorConfig[]',
+        description:
+          "Container-level validators run against the group's own subtree — `ctx.value()` is the group's object, so a cross-field rule (e.g. dateTo >= dateFrom) lives on the group rather than on one child. Skipped while the group is hidden unless validateWhenHidden is set.",
+        required: false,
+      },
+      validationMessages: {
+        name: 'validationMessages',
+        type: 'Record<string, string>',
+        description:
+          "Messages keyed by error kind for the group's own validators. Rendered below the group's content by the auto-attached 'container-errors' wrapper.",
+        required: false,
       },
     },
     validationSupported: true,
@@ -431,6 +445,18 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     { key: 'city', type: 'input', label: 'City' },
     { key: 'zip', type: 'input', label: 'ZIP Code' }
   ]
+}
+
+// Cross-field rule owned by the group
+{
+  key: 'period',
+  type: 'group',
+  fields: [
+    { key: 'dateFrom', type: 'input', label: 'From', props: { type: 'date' } },
+    { key: 'dateTo', type: 'input', label: 'To', props: { type: 'date' } }
+  ],
+  validators: [{ type: 'custom', functionName: 'dateOrder' }],
+  validationMessages: { dateOrder: 'The end must not be before the start.' }
 }`,
     minimalExample: `{ key: 'address', type: 'group', fields: [...] }`,
   },
@@ -438,7 +464,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     type: 'array',
     category: 'container',
     description:
-      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Supports minLength/maxLength for array size validation. Full-API arrays are positional — each item must have its own entry in `fields`. For homogeneous arrays driven by a value (e.g., tags, contacts), use the simplified array API (`template` + `value`) instead. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Supports minLength/maxLength for array size validation, and container-level `validators` + `validationMessages` for rules over the item list — `ctx.value()` resolves to the array of items. Full-API arrays are positional — each item must have its own entry in `fields`. For homogeneous arrays driven by a value (e.g., tags, contacts), use the simplified array API (`template` + `value`) instead. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {
@@ -458,6 +484,20 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'maxLength',
         type: 'number',
         description: 'Maximum number of items allowed in the array. Validation fails if more items.',
+        required: false,
+      },
+      validators: {
+        name: 'validators',
+        type: 'ValidatorConfig[]',
+        description:
+          "Container-level validators run against the item list — `ctx.value()` is the array, so a per-row rule (e.g. every row's `to` >= its `from`) can be expressed without a custom field type. Skipped while the array is hidden unless validateWhenHidden is set.",
+        required: false,
+      },
+      validationMessages: {
+        name: 'validationMessages',
+        type: 'Record<string, string>',
+        description:
+          "Messages keyed by error kind for the array's own validators. Rendered below the array's items by the auto-attached 'container-errors' wrapper.",
         required: false,
       },
     },
@@ -510,7 +550,23 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     ]
   }]
 }
-// Result: { contacts: [{name: '', email: ''}, ...] }`,
+// Result: { contacts: [{name: '', email: ''}, ...] }
+
+// Per-row rule owned by the array
+{
+  key: 'periods',
+  type: 'array',
+  minLength: 1,
+  fields: [[
+    { key: 'from', type: 'input', label: 'From', props: { type: 'datetime-local' } },
+    { key: 'to', type: 'input', label: 'To', props: { type: 'datetime-local' } }
+  ]],
+  validators: [{ type: 'custom', functionName: 'periodOrder' }],
+  validationMessages: { periodOrder: 'Every period must end after it starts.' }
+}
+// periodOrder receives the whole item list:
+//   (ctx) => (ctx.value() ?? []).some(r => r.from && r.to && r.to < r.from)
+//     ? { kind: 'periodOrder' } : null`,
     minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
   },
   {

@@ -160,6 +160,45 @@ See **[Custom Validators](/validation/custom-validators)** for complete document
 - FieldContext API for accessing other field values
 - Async validators and HTTP validators
 
+## Container-Level Validation
+
+When a rule belongs to a whole subtree rather than to one field, declare `validators` on the `group` or `array` itself. `ctx.value()` then resolves to the container's own value instead of a single field's:
+
+```typescript
+// Group: ctx.value() is { dateFrom, dateTo }
+{
+  key: 'period',
+  type: 'group',
+  fields: [
+    { key: 'dateFrom', type: 'input', label: 'From', props: { type: 'date' } },
+    { key: 'dateTo', type: 'input', label: 'To', props: { type: 'date' } },
+  ],
+  validators: [{ type: 'custom', functionName: 'dateOrder' }],
+  validationMessages: { dateOrder: 'The end must not be before the start.' },
+}
+
+// Array: ctx.value() is the item list
+{
+  key: 'periods',
+  type: 'array',
+  fields: [[
+    { key: 'from', type: 'input', label: 'From' },
+    { key: 'to', type: 'input', label: 'To' },
+  ]],
+  validators: [{ type: 'custom', functionName: 'periodOrder' }],
+  validationMessages: { periodOrder: 'Every period must end after it starts.' },
+}
+```
+
+Reach for this over a cross-field expression when:
+
+- The rule spans two fields of the same array row. A validator on a template child cannot see its row sibling, so the array is the only place the rule can live.
+- The rule is about the group as a whole. Writing it as an expression on one child forces the group's absolute path into the expression, which then breaks if the group moves.
+
+Containers accept `validators` and `validationMessages` only. The leaf shorthands (`required`, `email`, `pattern`, and so on) are value-shaped and have no meaning on a subtree; arrays keep their own `minLength`/`maxLength` for size. Layout containers (`page`, `row`, `container`) flatten into their parent and have no schema path, so they cannot carry validators.
+
+The message renders below the container's content through the built-in `container-errors` wrapper. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for how to restyle it.
+
 ## Complex Conditional Logic
 
 Combine multiple conditions with AND/OR logic:

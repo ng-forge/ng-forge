@@ -1,13 +1,15 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { GroupAllowedChildren } from '../../models/types/nesting-constraints';
 import { ContainerLogicConfig } from '../base/container-logic-config';
+import { ContainerValidation } from '../base/container-validation';
 
 /**
  * Group field interface for creating logical field groupings that map to object values
  * Groups create nested form structures where child field values are collected into an object
  * This is a programmatic grouping only - users cannot customize this field type
  */
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]>
+  extends FieldDef<never>, ContainerValidation {
   type: 'group';
 
   readonly fields: TFields;

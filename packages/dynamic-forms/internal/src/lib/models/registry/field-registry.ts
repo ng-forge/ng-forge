@@ -6,6 +6,7 @@ import { RowField } from '../../definitions/default/row-field';
 import { TextField } from '../../definitions/default/text-field';
 import { CssWrapper } from '../../wrappers/css/css-wrapper.type';
 import { RowWrapper } from '../../wrappers/row/row-wrapper.type';
+import { ContainerErrorsWrapper } from '../../wrappers/container-errors/container-errors-wrapper.type';
 import { ContainerField } from '../../definitions/default/container-field';
 
 /** Container fields registry - augment this interface to add custom container fields */
@@ -27,6 +28,7 @@ export interface FieldRegistryLeaves {
 export interface FieldRegistryWrappers {
   css: CssWrapper;
   row: RowWrapper;
+  'container-errors': ContainerErrorsWrapper;
 }
 
 /**

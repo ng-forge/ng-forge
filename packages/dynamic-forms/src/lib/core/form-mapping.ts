@@ -16,6 +16,7 @@ import {
 import type { FieldContext, SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { ContainerValidation } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { applySchema } from './schema-application';
@@ -168,6 +169,7 @@ export function mapFieldToForm(
   // through the cascade as a belt-and-suspenders fallback.
   if (isGroupField(fieldDef)) {
     const descendantContext = resolveDescendantContext(fieldDef, ownContext);
+    applyContainerValidators(fieldDef, fieldPath, descendantContext);
     mapContainerChildren(fieldDef.fields, fieldPath, descendantContext);
     return;
   }
@@ -272,8 +274,26 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
     }
   };
 
+  applyHiddenGatedValidation(path, context, applyValidation);
+}
+
+/**
+ * Applies a validation block through the `validateWhenHidden` gate.
+ *
+ * Shared by leaf fields and containers so both honour the same rule: validators
+ * do not run while the field (or an ancestor) is hidden, unless
+ * `validateWhenHidden` opts back in.
+ *
+ * @param apply Receives the path the validators should be declared against —
+ *   either `path` itself, or the sub-schema path created by `applyWhen`.
+ */
+function applyHiddenGatedValidation(
+  path: SchemaPath<unknown>,
+  context: FieldTreeMappingContext,
+  apply: (validationPath: SchemaPath<unknown>) => void,
+): void {
   if (context.validateWhenHidden) {
-    applyValidation(path);
+    apply(path);
     return;
   }
 
@@ -297,8 +317,31 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
       if (ancestorHiddenLogic && ancestorHiddenLogic(ctx)) return false;
       return true;
     },
-    schema<unknown>((subPath) => applyValidation(subPath as SchemaPath<unknown>)),
+    schema<unknown>((subPath) => apply(subPath as SchemaPath<unknown>)),
   );
+}
+
+/**
+ * Applies a container's own `validators` to its schema path (issue #568).
+ *
+ * `group` and `array` own a path, so `validate()` there sees the whole subtree:
+ * `ctx.value()` is the group's object or the array's item list. That gives
+ * cross-field rules a home on the container they belong to.
+ *
+ * `context` must be the container's DESCENDANT context — unlike a leaf, a group
+ * never calls `hidden()` on its own schema path, so `ctx.state.hidden()` alone
+ * would not see the container's own `hidden` flag or hidden logic. The
+ * descendant context folds those in.
+ */
+function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
+  const validators = (fieldDef as FieldDef<unknown> & ContainerValidation).validators;
+  if (!validators || validators.length === 0) return;
+
+  applyHiddenGatedValidation(fieldPath as SchemaPath<unknown>, context, (validationPath) => {
+    for (const config of validators) {
+      applyValidator(config, validationPath);
+    }
+  });
 }
 
 /**
@@ -351,6 +394,10 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
   if (arrayField.maxLength !== undefined) {
     maxLength(fieldPath as SchemaPath<unknown[]>, arrayField.maxLength);
   }
+
+  // Container validators run against the item list (`ctx.value()` is the array).
+  // `context` is already the descendant context resolved by the caller.
+  applyContainerValidators(arrayField, fieldPath, context);
 
   // Fields can be either FieldDef (primitive) or FieldDef[] (object)
   let itemDefinitions = arrayField.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];

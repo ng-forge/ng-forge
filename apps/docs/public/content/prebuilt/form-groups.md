@@ -167,6 +167,80 @@ When the group is hidden, all its nested fields are hidden with it. Only `'hidde
 
 For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/conditional-logic).
 
+## Group-Level Validation
+
+A rule that spans several children belongs on the group, not on one of them. Declare `validators` on the group and `ctx.value()` resolves to the group's own object:
+
+```typescript
+{
+  key: 'period',
+  type: 'group',
+  fields: [
+    { key: 'dateFrom', type: 'input', label: 'From', props: { type: 'date' }, value: '' },
+    { key: 'dateTo', type: 'input', label: 'To', props: { type: 'date' }, value: '' },
+  ],
+  validators: [{ type: 'custom', functionName: 'dateOrder' }],
+  validationMessages: { dateOrder: 'The end must not be before the start.' },
+}
+```
+
+The registered function receives the group's value, so both children are readable without spelling out any paths:
+
+```typescript
+const dateOrder: CustomValidator = (ctx) => {
+  const { dateFrom, dateTo } = ctx.value() as { dateFrom?: string; dateTo?: string };
+  return dateFrom && dateTo && dateTo < dateFrom ? { kind: 'dateOrder' } : null;
+};
+```
+
+Register it with `customFnConfig.validators` the same way as any other custom validator. See [Custom Validators](/validation/custom-validators).
+
+The error lands on the group itself, so it gates form and page validity like any other error. Group validators are skipped while the group is hidden, unless you set `validateWhenHidden: true`.
+
+### Rendering the message
+
+A group has no form element of its own, so there is nothing to hang a message on the way an input does. When a container declares `validators`, ng-forge appends the built-in `container-errors` wrapper, which renders each resolved message below the group's content:
+
+```html
+<div class="df-container-error" role="alert">The end must not be before the start.</div>
+```
+
+It picks up `--df-error-color` and `--df-error-font-size`, so it matches field-level errors in whichever adapter you use.
+
+To render it your own way, register a wrapper under the same name. The later registration wins, so the built-in is replaced everywhere without touching any config:
+
+```typescript name="app-wrappers.ts"
+import { createWrappers } from '@ng-forge/dynamic-forms';
+
+export const appWrappers = createWrappers({
+  wrapperName: 'container-errors',
+  loadComponent: () => import('./my-container-errors.wrapper'),
+});
+```
+
+Your component receives the container's `validationMessages` as an input and follows the normal wrapper contract, exposing a `#fieldComponent` slot for the container's content:
+
+```typescript name="my-container-errors.wrapper.ts"
+@Component({
+  selector: 'my-container-errors',
+  template: `
+    <ng-container #fieldComponent></ng-container>
+    @for (error of errors(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
+    }
+  `,
+})
+export default class MyContainerErrorsWrapper implements FieldWrapper {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  readonly validationMessages = input<ValidationMessages>();
+  // ...resolve errors from the container's FieldTree
+}
+```
+
+Because you are replacing a built-in name rather than adding one, there is no `FieldRegistryWrappers` augmentation to write. See [Registering and Applying](/wrappers/registering-and-applying) for the full wrapper pipeline.
+
+Setting `wrappers: null` on the container opts out of the message entirely while keeping the validator.
+
 ## Next Steps
 
 - **[Form Rows](/prebuilt/form-rows)**: Arrange fields side-by-side in horizontal layouts
