@@ -68,7 +68,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   const features = items.filter(isDynamicFormFeature);
 
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
-  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const customWrappers = [...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const wrappers = [...BUILT_IN_WRAPPERS, ...customWrappers];
 
   // Extract providers from features (includes config features like material-config, bootstrap-config, etc.)
   const featureProviders: Provider[] = [];
@@ -118,12 +119,20 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
       useFactory: () => {
         const logger = inject(DynamicFormLogger);
         const registry = new Map();
-        // Add custom wrapper types
-        wrappers.forEach((wrapperType) => {
-          if (registry.has(wrapperType.wrapperName)) {
-            logger.warn(`Wrapper type "${wrapperType.wrapperName}" is already registered. Overwriting.`);
+        // Seed the built-ins, then let later registrations replace them.
+        // Replacing a built-in is a SUPPORTED override — it's how an adapter
+        // restyles `container-errors` — so it must not warn. Only a collision
+        // between two custom registrations is a mistake worth reporting.
+        BUILT_IN_WRAPPERS.forEach((wrapperType) => registry.set(wrapperType.wrapperName, wrapperType));
+
+        const seenCustom = new Set<string>();
+        customWrappers.forEach((wrapperType) => {
+          const name = wrapperType.wrapperName;
+          if (seenCustom.has(name)) {
+            logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
           }
-          registry.set(wrapperType.wrapperName, wrapperType);
+          seenCustom.add(name);
+          registry.set(name, wrapperType);
         });
         return registry;
       },

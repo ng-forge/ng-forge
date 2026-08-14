@@ -167,6 +167,27 @@ When the group is hidden, all its nested fields are hidden with it. Only `'hidde
 
 For all available condition types and operators, see [Conditional Logic](/dynamic-behavior/conditional-logic).
 
+## Required Groups
+
+Setting `required` on a group marks every field inside it as required, so you write the rule once instead of on each child:
+
+```typescript
+{
+  key: 'address',
+  type: 'group',
+  required: true,
+  fields: [
+    { key: 'street', type: 'input', label: 'Street', value: '' },
+    { key: 'city', type: 'input', label: 'City', value: '' },
+    { key: 'apartment', type: 'input', label: 'Apartment', value: '', required: false },
+  ],
+}
+```
+
+It is an inherited default, not a rule on the group itself. A field that declares its own `required` wins, which is how `apartment` above stays optional. The same applies to a nested group: `required: false` on it opts its whole subtree back out.
+
+The cascade reaches through nested groups, rows, and array item templates, and respects `validateWhenHidden` like any other validation, so a hidden group does not make its children required.
+
 ## Group-Level Validation
 
 A rule that spans several children belongs on the group, not on one of them. Declare `validators` on the group and `ctx.value()` resolves to the group's own object:
@@ -205,9 +226,9 @@ A group has no form element of its own, so there is nothing to hang a message on
 <div class="df-container-error" role="alert">The end must not be before the start.</div>
 ```
 
-It picks up `--df-error-color` and `--df-error-font-size`, so it matches field-level errors in whichever adapter you use.
+Each UI adapter ships its own version of this wrapper, so the message already renders in the adapter's native error style: `<mat-error>` on Material, `.invalid-feedback` on Bootstrap, `<small class="p-error">` on PrimeNG, and `<ion-note color="danger">` on Ionic. The core default shown above applies when you use ng-forge without an adapter; it follows the `--df-error-color` and `--df-error-font-size` conventions so it still matches surrounding field errors.
 
-To render it your own way, register a wrapper under the same name. The later registration wins, so the built-in is replaced everywhere without touching any config:
+To render it your own way, register a wrapper under the same name. The later registration wins, so the built-in (or the adapter's) is replaced everywhere without touching any config:
 
 ```typescript name="app-wrappers.ts"
 import { createWrappers } from '@ng-forge/dynamic-forms';
@@ -218,7 +239,7 @@ export const appWrappers = createWrappers({
 });
 ```
 
-Your component receives the container's `validationMessages` as an input and follows the normal wrapper contract, exposing a `#fieldComponent` slot for the container's content:
+Your component receives the container's `validationMessages` as an input and follows the normal wrapper contract, exposing a `#fieldComponent` slot for the container's content. `injectContainerErrors` resolves the container's own errors so you do not have to reach into the field tree yourself:
 
 ```typescript name="my-container-errors.wrapper.ts"
 @Component({
@@ -233,7 +254,12 @@ Your component receives the container's `validationMessages` as an input and fol
 export default class MyContainerErrorsWrapper implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly validationMessages = input<ValidationMessages>();
-  // ...resolve errors from the container's FieldTree
+  readonly fieldInputs = input<WrapperFieldInputs>();
+
+  protected readonly errors = injectContainerErrors({
+    fieldInputs: this.fieldInputs,
+    validationMessages: this.validationMessages,
+  });
 }
 ```
 

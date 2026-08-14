@@ -10,14 +10,32 @@ import { ValidationMessages } from '../../models/validation-types';
  * belong to — `dateTo >= dateFrom` over a group's children, or "every row's
  * `to` is not before its `from`" over an array's items.
  *
- * Deliberately narrower than {@link FieldWithValidation}: the leaf shorthands
- * (`required`, `email`, `pattern`, …) are value-shaped and have no meaning on a
- * subtree. Arrays declare size bounds through their own `minLength`/`maxLength`.
+ * Deliberately narrower than {@link FieldWithValidation}: the value-shaped leaf
+ * shorthands (`email`, `pattern`, `min`, …) have no meaning on a subtree, and
+ * arrays declare size bounds through their own `minLength`/`maxLength`. The one
+ * shorthand that does carry over is `required`, which cascades to descendants
+ * rather than validating the container itself.
  *
  * Layout containers (`page`, `row`, `container`) flatten into their parent and
  * have no schema path of their own, so they cannot carry these.
  */
 export interface ContainerValidation {
+  /**
+   * Marks every descendant field as required.
+   *
+   * This is an inherited default, not a rule on the container itself: it flows
+   * down to descendant leaves (through nested groups, rows, and array item
+   * templates), and any descendant that declares its own `required` wins —
+   * including `required: false`, which opts that field (and, on a nested
+   * container, its whole subtree) back out.
+   *
+   * Gated by `validateWhenHidden` like any other validation, so a hidden
+   * container does not make its children required.
+   *
+   * For "the array must have at least one item", use `minLength` instead.
+   */
+  readonly required?: boolean;
+
   /**
    * Validators applied to the container's own schema path.
    *

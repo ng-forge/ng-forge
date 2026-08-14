@@ -1,6 +1,6 @@
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
 import { PrimeNGConfig } from '../models/primeng-config';
 import { PRIMENG_CONFIG } from '../models/primeng-config.token';
@@ -18,9 +18,19 @@ type PrimeNGConfigFeature = {
  * Default `withPrimeNGFields()` shape — field defs + the auto-included
  * addons feature so `prime-icon` / `prime-button` work out of the box.
  */
-type PrimeNGFieldsWithAddons = [...PrimeNGFieldTypes, PrimeNGAddonsFeature];
+type PrimeNGFieldsWithAddons = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, WrapperTypeDefinition];
 
-type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, PrimeNGConfigFeature];
+type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, WrapperTypeDefinition, PrimeNGConfigFeature];
+
+/**
+ * Replaces the neutral core `container-errors` wrapper with the PrimeNG one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const PRIMENG_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'container-errors',
+  loadComponent: () => import('../wrappers/container-errors/prime-container-errors-wrapper.component'),
+};
 
 /**
  * Provides PrimeNG field type definitions for the dynamic form system,
@@ -37,7 +47,7 @@ export function withPrimeNGFields(config: PrimeNGConfig | undefined): PrimeNGFie
 export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldsWithAddons | PrimeNGFieldsWithConfig {
   // Always include the addons feature — prime-icon / prime-button are part of
   // the canonical PrimeNG surface.
-  const base: unknown[] = [...PRIMENG_FIELD_TYPES, withPrimeNGAddons()];
+  const base: unknown[] = [...PRIMENG_FIELD_TYPES, withPrimeNGAddons(), PRIMENG_CONTAINER_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

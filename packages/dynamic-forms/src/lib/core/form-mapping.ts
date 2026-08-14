@@ -257,7 +257,7 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
 
   // Validation block — gated by `validateWhenHidden` when hidden.
   const applyValidation = (validationPath: SchemaPath<unknown>): void => {
-    applySimpleValidationRules(validationField, validationPath);
+    applySimpleValidationRules(validationField, validationPath, context);
 
     if (validationField.validators) {
       for (const config of validationField.validators) {
@@ -347,9 +347,14 @@ function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySch
 /**
  * Applies simple validation rules from field properties.
  * Casts are isolated to the boundary between untyped field definitions and typed validator functions.
+ *
+ * @param context Supplies `ancestorRequired` — the `required` cascaded down from
+ *   an ancestor container, used only when this field declares none of its own.
  */
-function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>): void {
-  if (fieldDef.required) {
+function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>, context: FieldTreeMappingContext): void {
+  // The field's own `required` wins over one inherited from a container, so an
+  // explicit `required: false` opts out of an ancestor's cascade.
+  if (fieldDef.required ?? context.ancestorRequired) {
     required(path);
   }
 

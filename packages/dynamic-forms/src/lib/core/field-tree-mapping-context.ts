@@ -32,6 +32,15 @@ export interface FieldTreeMappingContext {
    * against the current form value through the field context.
    */
   readonly ancestorHiddenLogics: readonly LogicFn<unknown, boolean>[];
+
+  /**
+   * `required` inherited from the nearest ancestor container that declared it
+   * (see `ContainerValidation.required`). `undefined` when no ancestor did.
+   *
+   * A field's own `required` always wins — `fieldDef.required ?? ancestorRequired`
+   * — so an explicit `required: false` opts back out of an inherited `true`.
+   */
+  readonly ancestorRequired?: boolean;
 }
 
 /**
@@ -77,12 +86,21 @@ export function resolveFieldOwnContext(
  * @internal
  */
 export function resolveDescendantContext(
-  fieldDef: FieldDef<unknown> & Partial<Pick<FieldWithValidation, 'logic'>>,
+  fieldDef: FieldDef<unknown> & Partial<Pick<FieldWithValidation, 'logic' | 'required'>>,
   ownContext: FieldTreeMappingContext,
 ): FieldTreeMappingContext {
   let ancestorAlwaysHidden = ownContext.ancestorAlwaysHidden;
   let ancestorHiddenLogics = ownContext.ancestorHiddenLogics;
   let mutated = false;
+
+  // A container that declares `required` becomes the new inherited default for
+  // its subtree. Only `group` / `array` can express this (see ContainerValidation);
+  // layout containers have no such property in their types.
+  let ancestorRequired = ownContext.ancestorRequired;
+  if (fieldDef.required !== undefined && fieldDef.required !== ancestorRequired) {
+    ancestorRequired = fieldDef.required;
+    mutated = true;
+  }
 
   if (fieldDef.hidden === true && !ancestorAlwaysHidden) {
     ancestorAlwaysHidden = true;
@@ -123,5 +141,6 @@ export function resolveDescendantContext(
     validateWhenHidden: ownContext.validateWhenHidden,
     ancestorAlwaysHidden,
     ancestorHiddenLogics,
+    ancestorRequired,
   };
 }

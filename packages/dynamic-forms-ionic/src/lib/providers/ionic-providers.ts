@@ -1,6 +1,6 @@
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
 import { IonicConfig } from '../models/ionic-config';
 import { IONIC_CONFIG } from '../models/ionic-config.token';
@@ -18,9 +18,19 @@ type IonicConfigFeature = {
  * Default `withIonicFields()` shape — field defs + the auto-included
  * addons feature so `ion-icon` / `ion-button` work out of the box.
  */
-type IonicFieldsWithAddons = [...IonicFieldTypes, IonicAddonsFeature];
+type IonicFieldsWithAddons = [...IonicFieldTypes, IonicAddonsFeature, WrapperTypeDefinition];
 
-type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, IonicConfigFeature];
+type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, WrapperTypeDefinition, IonicConfigFeature];
+
+/**
+ * Replaces the neutral core `container-errors` wrapper with the Ionic one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const IONIC_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'container-errors',
+  loadComponent: () => import('../wrappers/container-errors/ionic-container-errors-wrapper.component'),
+};
 
 /**
  * Provides Ionic field type definitions for the dynamic form system,
@@ -37,7 +47,7 @@ export function withIonicFields(config: IonicConfig | undefined): IonicFieldsWit
 export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | IonicFieldsWithConfig {
   // Always include the addons feature — ion-icon / ion-button are part of
   // the canonical Ionic surface.
-  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons()];
+  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons(), IONIC_CONTAINER_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

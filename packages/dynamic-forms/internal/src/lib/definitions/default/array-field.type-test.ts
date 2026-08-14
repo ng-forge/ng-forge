@@ -42,7 +42,8 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'minLength'
     | 'maxLength'
     | 'validators'
-    | 'validationMessages';
+    | 'validationMessages'
+    | 'required';
 
   type ActualKeys = keyof ArrayField;
 
@@ -112,6 +113,10 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
     it('maxLength', () => {
       expectTypeOf<ArrayField['maxLength']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('required (cascades to descendants)', () => {
+      expectTypeOf<ArrayField['required']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('validators', () => {

@@ -1170,6 +1170,201 @@ describe('form-mapping', () => {
       });
     });
 
+    describe('cascading required on containers', () => {
+      // `required: true` on a group/array is inherited by every descendant leaf.
+      // A descendant that declares its own `required` wins — including `false`.
+
+      const requiredKinds = (node: unknown): string[] =>
+        (node as () => { errors: () => { kind: string }[] })()
+          .errors()
+          .map((e) => e.kind);
+
+      it('should make a group child required when the group declares required', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '', city: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            required: true,
+            fields: [
+              { key: 'street', type: 'input' },
+              { key: 'city', type: 'input' },
+            ],
+          } as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+          expect(requiredKinds((formInstance as any).address.street)).toContain('required');
+          expect(requiredKinds((formInstance as any).address.city)).toContain('required');
+        });
+      });
+
+      it('should let a child opt out with an explicit required: false', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '', apartment: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            required: true,
+            fields: [
+              { key: 'street', type: 'input' },
+              { key: 'apartment', type: 'input', required: false },
+            ],
+          } as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(requiredKinds((formInstance as any).address.street)).toContain('required');
+          expect(requiredKinds((formInstance as any).address.apartment)).not.toContain('required');
+        });
+      });
+
+      it('should cascade through a nested group', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ outer: { inner: { deep: '' } } });
+          const groupField: FieldDef = {
+            key: 'outer',
+            type: 'group',
+            required: true,
+            fields: [
+              {
+                key: 'inner',
+                type: 'group',
+                fields: [{ key: 'deep', type: 'input' }],
+              },
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.outer as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(requiredKinds((formInstance as any).outer.inner.deep)).toContain('required');
+        });
+      });
+
+      it('should stop the cascade at a nested group that declares required: false', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ outer: { inner: { deep: '' } } });
+          const groupField: FieldDef = {
+            key: 'outer',
+            type: 'group',
+            required: true,
+            fields: [
+              {
+                key: 'inner',
+                type: 'group',
+                required: false,
+                fields: [{ key: 'deep', type: 'input' }],
+              },
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.outer as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(requiredKinds((formInstance as any).outer.inner.deep)).not.toContain('required');
+        });
+      });
+
+      it('should cascade into array item template fields', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ contacts: [{ name: '', email: '' }] });
+          const arrayField: FieldDef = {
+            key: 'contacts',
+            type: 'array',
+            required: true,
+            fields: [
+              [
+                { key: 'name', type: 'input' },
+                { key: 'email', type: 'input', required: false },
+              ],
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.contacts as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(false);
+          const firstItem = (formInstance as any).contacts[0];
+          expect(requiredKinds(firstItem.name)).toContain('required');
+          expect(requiredKinds(firstItem.email)).not.toContain('required');
+        });
+      });
+
+      it('should leave children untouched when the container declares no required', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            fields: [{ key: 'street', type: 'input' }],
+          };
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+          expect(requiredKinds((formInstance as any).address.street)).not.toContain('required');
+        });
+      });
+
+      it('should not apply the cascade while the container is hidden', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            required: true,
+            hidden: true,
+            fields: [{ key: 'street', type: 'input' }],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          expect(formInstance().valid()).toBe(true);
+        });
+      });
+    });
+
     describe('array item layout containers', () => {
       // Locks in the downstream dbxForgeAddressListField fix: a value-bearing
       // input nested under one or more layout containers (page/row/container)

@@ -1,0 +1,9 @@
+// `mat-error` normally takes its color and type scale from the enclosing
+// `mat-form-field` subscript wrapper. A container has no form field, so the
+// values are restated here, still preferring Material's own system tokens.
+.df-mat-container-error {
+  display: block;
+  color: var(--mat-sys-error, var(--df-error-color, #b3261e));
+  font-size: var(--df-error-font-size, 0.75rem);
+  margin-top: var(--df-field-gap, 0.5rem);
+}

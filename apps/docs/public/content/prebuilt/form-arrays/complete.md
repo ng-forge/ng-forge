@@ -78,6 +78,25 @@ Use `minLength` and `maxLength` on the array field to constrain the number of it
 
 Both properties are optional and can be used independently or together.
 
+## Required Items
+
+Setting `required` on the array marks every field inside each item as required, without repeating it on each template field:
+
+```typescript
+{
+  key: 'contacts',
+  type: 'array',
+  required: true,
+  fields: [[
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+    { key: 'note', type: 'input', label: 'Note', required: false },
+  ]],
+}
+```
+
+A template field that declares its own `required` wins, so `note` above stays optional. This is about item _contents_; for "the array must have at least one item", use `minLength: 1`.
+
 ## Array-Level Validation
 
 Size bounds only count items. For a rule about the item _contents_ — most commonly a per-row rule whose two fields have to be compared against each other — declare `validators` on the array. `ctx.value()` resolves to the item list:
@@ -119,7 +138,7 @@ Like a group, an array has no form element to hang a message on. Declaring `vali
 <div class="df-container-error" role="alert">Every period must end after it starts.</div>
 ```
 
-It reads `--df-error-color` and `--df-error-font-size` so it matches field-level errors. To restyle it, register your own wrapper under the same `container-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
+Each UI adapter ships its own version of this wrapper, so the message renders in the adapter's native error style out of the box. To restyle it, register your own wrapper under the same `container-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
 
 ## Initial Values
 

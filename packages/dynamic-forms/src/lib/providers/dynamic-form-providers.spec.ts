@@ -457,16 +457,36 @@ describe('provideDynamicForm', () => {
       expect(registry.has('section')).toBe(true);
     });
 
-    it('should warn when overwriting a built-in wrapper', () => {
+    it('should replace a built-in wrapper without warning', () => {
       const customCss: WrapperTypeDefinition = {
         wrapperName: 'css',
         loadComponent: () => import('../fields/text/text-field.component'),
       };
 
       const envProviders = provideDynamicForm(customCss, withLoggerConfig());
-      createWrapperRegistryWithInjection(envProviders);
+      const registry = createWrapperRegistryWithInjection(envProviders);
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "css" is already registered. Overwriting.');
+      // Replacing a built-in is a supported override — it is how an adapter
+      // restyles `container-errors` — so it must not warn.
+      expect(registry.get('css')).toBe(customCss);
+      expect(consoleWarnSpy).not.toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "css" is already registered. Overwriting.');
+    });
+
+    it('should warn when two custom registrations collide on the same name', () => {
+      const first: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+      const second: WrapperTypeDefinition = {
+        wrapperName: 'section',
+        loadComponent: () => import('../fields/text/text-field.component'),
+      };
+
+      const envProviders = provideDynamicForm(first, second, withLoggerConfig());
+      const registry = createWrapperRegistryWithInjection(envProviders);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "section" is already registered. Overwriting.');
+      expect(registry.get('section')).toBe(second);
     });
   });
 

@@ -38,6 +38,7 @@ export * from './lib/core/registry/field-context-registry.service';
 export * from './lib/core/registry/field-value-proxy';
 export * from './lib/core/registry/function-registry.service';
 export * from './lib/core/registry/root-form-registry.service';
+export * from './lib/core/validation/container-errors';
 export * from './lib/core/validation/create-resolved-errors-signal';
 export * from './lib/core/validation/should-show-errors';
 export * from './lib/core/validation/validator-factory';

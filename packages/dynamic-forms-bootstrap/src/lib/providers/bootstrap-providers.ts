@@ -1,6 +1,6 @@
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
 import { BootstrapConfig } from '../models/bootstrap-config';
 import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
@@ -18,9 +18,19 @@ type BootstrapConfigFeature = {
  * Default `withBootstrapFields()` shape — field defs + the auto-included
  * addons feature so `bs-icon` / `bs-button` work out of the box.
  */
-type BootstrapFieldsWithAddons = [...BootstrapFieldTypes, BootstrapAddonsFeature];
+type BootstrapFieldsWithAddons = [...BootstrapFieldTypes, BootstrapAddonsFeature, WrapperTypeDefinition];
 
-type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature, BootstrapConfigFeature];
+type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature, WrapperTypeDefinition, BootstrapConfigFeature];
+
+/**
+ * Replaces the neutral core `container-errors` wrapper with the Bootstrap one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const BOOTSTRAP_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'container-errors',
+  loadComponent: () => import('../wrappers/container-errors/bs-container-errors-wrapper.component'),
+};
 
 /**
  * Provides Bootstrap field type definitions for the dynamic form system,
@@ -37,7 +47,7 @@ export function withBootstrapFields(config: BootstrapConfig | undefined): Bootst
 export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldsWithAddons | BootstrapFieldsWithConfig {
   // Always include the addons feature — bs-icon / bs-button are part of
   // the canonical Bootstrap surface.
-  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons()];
+  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons(), BOOTSTRAP_CONTAINER_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

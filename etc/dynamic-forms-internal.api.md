@@ -419,6 +419,13 @@ export type ContainerAllowedChildren = ArrayField | ContainerField | GroupField 
 export type ContainerComponent = FieldComponent<ContainerField<ContainerAllowedChildren[]>>;
 
 // @public
+export interface ContainerErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages: Signal<ValidationMessages | undefined>;
+}
+
+// @public
 export interface ContainerErrorsWrapper {
     // (undocumented)
     readonly type: 'container-errors';
@@ -450,6 +457,7 @@ export interface ContainerLogicConfig {
 
 // @public
 export interface ContainerValidation {
+    readonly required?: boolean;
     readonly validationMessages?: ValidationMessages;
     readonly validators?: ValidatorConfig[];
 }
@@ -1272,6 +1280,9 @@ export interface InitializationTrackingOptions {
 
 // @public
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
+
+// @public
+export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]>;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;

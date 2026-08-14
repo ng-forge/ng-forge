@@ -143,6 +143,9 @@ export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } fro
 
 export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
 export type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+// Resolves a container's own errors for a `container-errors` wrapper override.
+export { injectContainerErrors } from '@ng-forge/dynamic-forms/internal';
+export type { ContainerErrorsOptions } from '@ng-forge/dynamic-forms/internal';
 export type {
   FieldWrapper,
   WrapperRegistration,

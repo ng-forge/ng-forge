@@ -49,4 +49,22 @@ describe('withMaterialFields', () => {
 
     expect(TestBed.inject(MATERIAL_CONFIG)).toEqual(config);
   });
+
+  it('registers a container-errors wrapper that overrides the core default', () => {
+    const fields = withMaterialFields();
+
+    const wrapper = fields.find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+
+    // Same name as the built-in, so the Material component replaces the neutral
+    // core default wherever a container declares validators.
+    expect(wrapper).toBeDefined();
+  });
+
+  it('loads the Material container-errors component', async () => {
+    const wrapper = withMaterialFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+
+    const loaded = await wrapper.loadComponent();
+
+    expect(loaded.default ?? loaded).toBeDefined();
+  });
 });

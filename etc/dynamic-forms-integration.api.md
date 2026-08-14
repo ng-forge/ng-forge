@@ -266,6 +266,13 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown, FieldMet
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys$1>>>;
 
 // @public
+export interface ContainerErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages: Signal<ValidationMessages | undefined>;
+}
+
+// @public
 export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<string, unknown>>;
 
 // @public
@@ -526,6 +533,9 @@ export const INITIALIZATION_TIMEOUT_MS: InjectionToken<number>;
 
 // @public
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
+
+// @public
+export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]>;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;

@@ -387,7 +387,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     type: 'group',
     category: 'container',
     description:
-      "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility. Supports container-level `validators` + `validationMessages` for cross-field rules over the group's children — `ctx.value()` resolves to the group's object.",
+      "Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility. Supports `required` (cascades to every descendant; a descendant's own `required` wins) and container-level `validators` + `validationMessages` for cross-field rules over the group's children — `ctx.value()` resolves to the group's object.",
     valueType: 'object',
     baseInterface: 'FieldDef',
     props: {
@@ -396,6 +396,13 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         type: 'GroupAllowedChildren[]',
         description: 'Child fields in the group. Allowed: rows, arrays, leaf fields (NOT pages or other groups)',
         required: true,
+      },
+      required: {
+        name: 'required',
+        type: 'boolean',
+        description:
+          "Marks every descendant field required. An inherited default, not a rule on the group itself - a descendant that declares its own `required` wins, including `required: false` which opts that field (or a nested container's subtree) back out. Respects validateWhenHidden.",
+        required: false,
       },
       validators: {
         name: 'validators',
@@ -464,7 +471,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     type: 'array',
     category: 'container',
     description:
-      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Supports minLength/maxLength for array size validation, and container-level `validators` + `validationMessages` for rules over the item list — `ctx.value()` resolves to the array of items. Full-API arrays are positional — each item must have its own entry in `fields`. For homogeneous arrays driven by a value (e.g., tags, contacts), use the simplified array API (`template` + `value`) instead. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
+      'Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only \'hidden\' logic type for conditional visibility. Supports minLength/maxLength for array size validation, `required` (cascades to every field in each item), and container-level `validators` + `validationMessages` for rules over the item list — `ctx.value()` resolves to the array of items. Full-API arrays are positional — each item must have its own entry in `fields`. For homogeneous arrays driven by a value (e.g., tags, contacts), use the simplified array API (`template` + `value`) instead. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.',
     valueType: 'T[]',
     baseInterface: 'FieldDef',
     props: {
@@ -484,6 +491,13 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'maxLength',
         type: 'number',
         description: 'Maximum number of items allowed in the array. Validation fails if more items.',
+        required: false,
+      },
+      required: {
+        name: 'required',
+        type: 'boolean',
+        description:
+          "Marks every field inside each array item required. A template field that declares its own `required` wins. This is about item CONTENTS - for 'at least one item', use minLength instead.",
         required: false,
       },
       validators: {

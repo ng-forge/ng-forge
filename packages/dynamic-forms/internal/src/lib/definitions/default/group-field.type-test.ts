@@ -41,7 +41,8 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'fields'
     | 'logic'
     | 'validators'
-    | 'validationMessages';
+    | 'validationMessages'
+    | 'required';
 
   type ActualKeys = keyof GroupField;
 
@@ -103,6 +104,10 @@ describe('GroupField - Exhaustive Whitelist', () => {
 
     it('logic', () => {
       expectTypeOf<GroupField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
+    });
+
+    it('required (cascades to descendants)', () => {
+      expectTypeOf<GroupField['required']>().toEqualTypeOf<boolean | undefined>();
     });
 
     it('validators', () => {
