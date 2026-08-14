@@ -68,6 +68,51 @@ When your form contains page fields:
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
 - **Programmatic Jumps**: Dispatch [`GoToPageEvent`](/recipes/events) to move to a page by index, for step lists or deep links
+- **Deep Links & Resume**: Set `options.initialPage` to open the form on a specific page (see below)
+
+## Deep Links and Session Resume
+
+To open a paged form somewhere other than page 0, set `options.initialPage`. The orchestrator applies it as it initializes, so it works even when the config arrives asynchronously from a backend.
+
+```typescript
+const config: FormConfig = {
+  options: { initialPage: 2 },
+  fields: [/* pages */],
+};
+```
+
+The shorthand lands on the page unconditionally, which is what restoring a saved session usually wants: a user who stopped on page 4 comes back to page 4, even if page 2 is still incomplete. The next and submit buttons stay gated as normal, so nothing invalid can be submitted.
+
+Pass an object to opt into validation instead:
+
+```typescript
+const config: FormConfig = {
+  options: { initialPage: { index: 2, validate: true } },
+  fields: [/* pages */],
+};
+```
+
+That applies the same gate a forward `GoToPageEvent` uses, stopping on the first invalid page.
+
+**Edge cases** are handled for you: an out-of-range index clamps to the last page, negative and non-numeric values fall back to page 0, and a hidden target resolves to the nearest visible page.
+
+### Restoring from a query parameter
+
+A typical resume flow fetches the saved session, then feeds the page into the config:
+
+```typescript
+export class ResumeComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly params = toSignal(this.route.queryParamMap, { requireSync: true });
+
+  readonly config = computed(() => ({
+    ...this.savedConfig(),
+    options: { initialPage: Number(this.params().get('page')) },
+  }));
+}
+```
+
+For navigation _after_ load, such as a step list or reacting to a URL change, dispatch `GoToPageEvent` instead. Add `{ validate: false }` when you want it to land exactly rather than stop at the first incomplete page.
 
 ## Performance & Lazy Loading
 

@@ -2,7 +2,8 @@ import { Page } from '@playwright/test';
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
 
 setupTestLogging();
-setupConsoleCheck();
+// The backend-failure scenario deliberately returns a 500, which Angular logs.
+setupConsoleCheck({ ignorePatterns: [/saved-session/i, /500/] });
 
 /** Four pages; `a`, `b`, `c` required, `d` optional. Page 2 hides when `a === 'skip'`. */
 const SESSION_CONFIG = {
@@ -26,7 +27,7 @@ const SESSION_CONFIG = {
     {
       key: 'p3',
       type: 'page',
-      logic: [{ type: 'hidden', condition: { field: 'a', operator: 'eq', value: 'skip' } }],
+      logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'a', operator: 'equals', value: 'skip' } }],
       fields: [
         { key: 'c', type: 'input', label: 'C', required: true },
         { key: 'next3', type: 'next', label: 'Next' },
@@ -203,7 +204,7 @@ test.describe('Deep Linking / Session Resume', () => {
   test.describe('URL synchronisation', () => {
     test('writes the active page back to the URL as the user advances', async ({ page }) => {
       await mockSession(page, { value: COMPLETE });
-      await open(page, '?page=0');
+      await open(page, '?page=0&sync=on');
 
       await page.locator('#next1 button').click();
       await expect(currentPage(page)).toHaveText('1');
@@ -212,7 +213,7 @@ test.describe('Deep Linking / Session Resume', () => {
 
     test('a refresh resumes on the mirrored page', async ({ page }) => {
       await mockSession(page, { value: COMPLETE });
-      await open(page, '?page=0');
+      await open(page, '?page=0&sync=on');
 
       await page.locator('#next1 button').click();
       await expect(page).toHaveURL(/page=1/);

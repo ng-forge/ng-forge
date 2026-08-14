@@ -88,6 +88,7 @@ export class DeepLinkScenarioComponent {
 
   readonly mode = computed(() => this.params().get('mode') ?? 'declarative');
   private readonly gated = computed(() => this.params().get('gate') === 'on');
+  private readonly syncUrl = computed(() => this.params().get('sync') === 'on');
   private readonly formId = computed(() => this.params().get('formId') ?? 'default');
 
   /** Session fetched from the mocked backend, keyed by `formId`. */
@@ -171,7 +172,9 @@ export class DeepLinkScenarioComponent {
     this.totalPages.set(event.state.totalPages);
 
     // Mirror the active page into the URL so a refresh resumes where the user left off.
-    // Guarded so the write does not feed back into the params and re-trigger navigation.
+    // Opt-in: the write changes `page`, which would otherwise feed straight back into
+    // effect mode and drag the form back to whatever landed first.
+    if (!this.syncUrl()) return;
     if (this.params().get('page') === String(event.state.currentPageIndex)) return;
 
     this.router.navigate([], {

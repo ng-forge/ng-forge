@@ -167,6 +167,31 @@ Use for wizard-style forms:
 }
 \`\`\`
 
+##### Starting on a specific page (deep links, session resume)
+
+Set \`options.initialPage\` to open a paged form somewhere other than page 0:
+
+\`\`\`typescript
+{
+  options: { initialPage: 2 },   // lands on page 2 regardless of earlier pages
+  fields: [ /* pages */ ]
+}
+\`\`\`
+
+The shorthand lands unconditionally, which is what restoring a saved session wants.
+Use \`{ index: 2, validate: true }\` to apply the same validity gate a forward
+\`GoToPageEvent\` uses, which stops on the first invalid page instead.
+
+Out-of-range indices clamp to the last page; negative or non-numeric values fall back
+to \`0\`; a hidden target resolves to the nearest visible page.
+
+To move pages at runtime, dispatch \`GoToPageEvent\`:
+
+\`\`\`typescript
+dispatcher.dispatch(new GoToPageEvent(3));                     // gated, stops on first invalid page
+dispatcher.dispatch(new GoToPageEvent(3, { validate: false })); // lands exactly, for resume
+\`\`\`
+
 ## Validation
 
 ### Shorthand Validators (Preferred)

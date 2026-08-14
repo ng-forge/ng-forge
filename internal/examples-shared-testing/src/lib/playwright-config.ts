@@ -75,7 +75,10 @@ const getProjects = () => {
  * ```
  */
 export function createPlaywrightConfig(configFileUrl: string, appName: ExampleApp): PlaywrightTestConfig {
-  const port = APP_PORTS[appName];
+  // `E2E_PORT` lets a second checkout (git worktree, parallel agent) run the same suite
+  // without colliding with a dev server already listening on the app's default port.
+  // Without it, `reuseExistingServer` silently attaches to the other checkout's build.
+  const port = Number(process.env['E2E_PORT']) || APP_PORTS[appName];
   const baseURL = process.env['BASE_URL'] || `http://localhost:${port}`;
 
   return defineConfig({
