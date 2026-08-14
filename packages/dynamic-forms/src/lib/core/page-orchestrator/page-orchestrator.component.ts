@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { GoToPageEvent } from '../../events/constants/go-to-page.event';
+import { GoToPageEvent, PageNavigationOptions } from '../../events/constants/go-to-page.event';
 import { NextPageEvent } from '../../events/constants/next-page.event';
 import { PageChangeEvent } from '../../events/constants/page-change.event';
 import { PreviousPageEvent } from '../../events/constants/previous-page.event';
@@ -143,8 +143,29 @@ export class PageOrchestratorComponent {
 
     if (totalPages === 0) return 0;
 
-    // Start on page 0 (will be adjusted if page 0 is hidden by initial navigation)
-    return 0;
+    // A gated landing starts at 0 and is applied by the init effect below, so the jump
+    // runs through the same validation as any forward jump. An ungated one lands here
+    // directly (adjusted afterwards if the target turns out to be hidden).
+    return this.initialPage().validate ? 0 : this.initialPage().index;
+  });
+
+  /**
+   * Resolved `FormOptions.initialPage`, clamped to the available pages.
+   *
+   * Out-of-range indices clamp to the last page; negative or non-finite values fall
+   * back to `0`. Validity is not considered here — that is the init effect's job.
+   */
+  private readonly initialPage = computed<{ index: number; validate: boolean }>(() => {
+    const raw = this.formOptions?.()?.initialPage;
+    const totalPages = this.pageFields().length;
+    const requested = typeof raw === 'number' ? raw : raw?.index;
+    const validate = typeof raw === 'number' ? false : (raw?.validate ?? false);
+
+    if (typeof requested !== 'number' || !Number.isFinite(requested) || requested < 0 || totalPages === 0) {
+      return { index: 0, validate: false };
+    }
+
+    return { index: Math.min(Math.trunc(requested), totalPages - 1), validate };
   });
 
   /** Computed state for the orchestrator */
@@ -236,6 +257,15 @@ export class PageOrchestratorComponent {
   constructor() {
     // Setup event listeners for navigation
     this.setupEventListeners();
+
+    // Apply a gated `initialPage` once the form is available, reusing the normal
+    // forward-jump path so it stops on the first invalid page.
+    let initialPageApplied = false;
+    explicitEffect([this.pageFields, this.initialPage], ([pages, initialPage]) => {
+      if (initialPageApplied || pages.length === 0 || !initialPage.validate || initialPage.index === 0) return;
+      initialPageApplied = true;
+      untracked(() => this.navigateToPage(initialPage.index));
+    });
 
     // B15: Auto-navigate away when current page becomes hidden
     explicitEffect([this.state, this.visiblePageIndices], ([state, visibleIndices]) => {
@@ -339,13 +369,18 @@ export class PageOrchestratorComponent {
    * @param pageIndex The target page index (0-based)
    * @returns Navigation result
    */
-  navigateToPage(pageIndex: number): NavigationResult {
+  navigateToPage(pageIndex: number, options?: PageNavigationOptions): NavigationResult {
     const currentIndex = this.state().currentPageIndex;
     const visibleIndices = this.visiblePageIndices();
 
     // Backward jumps and no-ops need no gate. Out-of-bounds and hidden targets
     // fall through too — executePageChange reports those without navigating.
     if (pageIndex <= currentIndex || !visibleIndices.includes(pageIndex)) {
+      return this.executePageChange(pageIndex);
+    }
+
+    // Per-dispatch opt-out, for restoring a saved session onto its exact page.
+    if (options?.validate === false) {
       return this.executePageChange(pageIndex);
     }
 
@@ -467,7 +502,7 @@ export class PageOrchestratorComponent {
       .on<GoToPageEvent>('go-to-page')
       .pipe(takeUntilDestroyed())
       .subscribe((event) => {
-        this.navigateToPage(event.pageIndex);
+        this.navigateToPage(event.pageIndex, event.options);
       });
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));

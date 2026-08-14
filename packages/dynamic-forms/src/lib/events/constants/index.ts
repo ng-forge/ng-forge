@@ -1,5 +1,6 @@
 export { FormSubmitEvent } from './submit.event';
 export { GoToPageEvent } from './go-to-page.event';
+export type { PageNavigationOptions } from './go-to-page.event';
 export { NextPageEvent } from './next-page.event';
 export { PageChangeEvent } from './page-change.event';
 export { PagerStateEvent } from './pager-state.event';
