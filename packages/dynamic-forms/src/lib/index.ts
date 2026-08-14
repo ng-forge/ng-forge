@@ -167,6 +167,9 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 export { isRowField, isSimplifiedArrayField } from '@ng-forge/dynamic-forms/internal';
 
+// Paged-form navigation state — payload of PagerStateEvent / the onPageNavigationStateChange output
+export type { PagerState } from './core';
+
 // Hidden Field (display-only, value pass-through)
 export type { HiddenField, HiddenValue, HiddenScalar } from '@ng-forge/dynamic-forms/internal';
 
@@ -251,10 +254,12 @@ export {
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  GoToPageEvent,
   InsertArrayItemEvent,
   MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PagerStateEvent,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   PreviousPageEvent,

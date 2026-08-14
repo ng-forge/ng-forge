@@ -67,6 +67,7 @@ When your form contains page fields:
 - **Navigation Controls**: Add `next` and `previous` button fields inside each page to move between pages
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
+- **Programmatic Jumps**: Dispatch [`GoToPageEvent`](/recipes/events) to move to a page by index, for step lists or deep links
 
 ## Performance & Lazy Loading
 

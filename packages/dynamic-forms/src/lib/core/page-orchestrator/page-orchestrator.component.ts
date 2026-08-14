@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { NextPageEvent, PageChangeEvent, PreviousPageEvent } from '../../events/constants';
-import { NavigationResult, PageOrchestratorState } from './page-orchestrator.interfaces';
+import { GoToPageEvent } from '../../events/constants/go-to-page.event';
+import { NextPageEvent } from '../../events/constants/next-page.event';
+import { PageChangeEvent } from '../../events/constants/page-change.event';
+import { PreviousPageEvent } from '../../events/constants/previous-page.event';
+import { NavigationResult, PagerState } from './page-orchestrator.interfaces';
 import { PageField } from '@ng-forge/dynamic-forms/internal';
 import { ContainerLogicConfig } from '@ng-forge/dynamic-forms/internal';
 import { FieldSignalContext } from '@ng-forge/dynamic-forms/internal';
 import PageFieldComponent from '../../fields/page/page-field.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { PageNavigationStateChangeEvent } from '../../events/constants/page-navigation-state-change.event';
+import { PagerStateEvent } from '../../events/constants/pager-state.event';
 import { FieldTree } from '@angular/forms/signals';
 import { FIELD_SIGNAL_CONTEXT, FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
@@ -145,7 +148,7 @@ export class PageOrchestratorComponent {
   });
 
   /** Computed state for the orchestrator */
-  readonly state = computed<PageOrchestratorState>(() => {
+  readonly state = computed<PagerState>(() => {
     const currentIndex = this.currentPageIndex();
     const totalPages = this.pageFields().length;
     const visibleIndices = this.visiblePageIndices();
@@ -160,7 +163,6 @@ export class PageOrchestratorComponent {
       totalPages,
       isFirstPage: isFirstVisiblePage,
       isLastPage: isLastVisiblePage,
-      navigationDisabled: false,
     };
   });
 
@@ -169,23 +171,29 @@ export class PageOrchestratorComponent {
    *
    * @returns `true` if current page is valid, `false` otherwise
    */
-  readonly currentPageValid = computed(() => {
-    const currentIndex = this.currentPageIndex();
+  readonly currentPageValid = computed(() => this.isPageValid(this.currentPageIndex()));
+
+  /**
+   * Whether all fields on the given page are currently valid.
+   *
+   * Form state derives from config, not from mounted components, so any page can
+   * be checked without having been visited.
+   *
+   * @param pageIndex The page index (0-based)
+   * @returns `true` if the page is valid or the index is out of range
+   */
+  private isPageValid(pageIndex: number): boolean {
     const pages = this.pageFields();
     const form = this.form();
 
-    // No pages or invalid index
-    if (pages.length === 0 || currentIndex >= pages.length) {
+    if (pageIndex < 0 || pageIndex >= pages.length) {
       return true;
     }
 
-    const currentPage = pages[currentIndex];
-    const pageFields = currentPage.fields || [];
-
     // Collect all leaf field keys, recursively traversing group/row containers
-    const leafKeys = collectLeafFieldKeys(pageFields);
+    const leafKeys = collectLeafFieldKeys(pages[pageIndex].fields || []);
 
-    // Check validity of each leaf field on the current page
+    // Check validity of each leaf field on the page
     // Fields are stored at root level in the form (pages don't add nesting)
     for (const fieldKey of leafKeys) {
       const field = (form as Record<string, unknown>)[fieldKey];
@@ -198,7 +206,7 @@ export class PageOrchestratorComponent {
     }
 
     return true;
-  });
+  }
 
   /** Extended field signal context that includes currentPageValid. */
   readonly extendedFieldSignalContext = computed(() => ({
@@ -236,7 +244,7 @@ export class PageOrchestratorComponent {
         // Current page is hidden — navigate to the nearest visible page
         const nearest = this.findNearestVisiblePage(state.currentPageIndex, visibleIndices);
         if (nearest !== -1) {
-          this.navigateToPage(nearest);
+          this.executePageChange(nearest);
         }
       }
     });
@@ -270,14 +278,6 @@ export class PageOrchestratorComponent {
       };
     }
 
-    if (currentState.navigationDisabled) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Navigation is currently disabled',
-      };
-    }
-
     // Find the next visible page after the current index
     const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
     if (currentVisiblePosition === -1 || currentVisiblePosition >= visibleIndices.length - 1) {
@@ -289,7 +289,7 @@ export class PageOrchestratorComponent {
     }
 
     const nextVisiblePageIndex = visibleIndices[currentVisiblePosition + 1];
-    return this.navigateToPage(nextVisiblePageIndex);
+    return this.executePageChange(nextVisiblePageIndex);
   }
 
   /**
@@ -309,14 +309,6 @@ export class PageOrchestratorComponent {
       };
     }
 
-    if (currentState.navigationDisabled) {
-      return {
-        success: false,
-        newPageIndex: currentState.currentPageIndex,
-        error: 'Navigation is currently disabled',
-      };
-    }
-
     // Find the previous visible page before the current index
     const currentVisiblePosition = visibleIndices.indexOf(currentState.currentPageIndex);
     if (currentVisiblePosition <= 0) {
@@ -328,16 +320,67 @@ export class PageOrchestratorComponent {
     }
 
     const prevVisiblePageIndex = visibleIndices[currentVisiblePosition - 1];
-    return this.navigateToPage(prevVisiblePageIndex);
+    return this.executePageChange(prevVisiblePageIndex);
   }
 
   /**
-   * Navigate to a specific page index
+   * Navigate to an arbitrary page, applying the jump validation semantics.
+   *
+   * Backward jumps are unconditional, matching `previous` having no validity gate.
+   * Forward jumps validate every visible page crossed by the jump — from the
+   * current page up to, but excluding, the target — because conditions may have
+   * changed since those pages were last visited. On failure, navigation lands on
+   * the first invalid page rather than staying put, so the user ends up where
+   * work is required. Hidden pages are never validated.
+   *
+   * Respects `nextButton.disableWhenPageInvalid`, the same option that gates
+   * next-page navigation.
    *
    * @param pageIndex The target page index (0-based)
    * @returns Navigation result
    */
   navigateToPage(pageIndex: number): NavigationResult {
+    const currentIndex = this.state().currentPageIndex;
+    const visibleIndices = this.visiblePageIndices();
+
+    // Backward jumps and no-ops need no gate. Out-of-bounds and hidden targets
+    // fall through too — executePageChange reports those without navigating.
+    if (pageIndex <= currentIndex || !visibleIndices.includes(pageIndex)) {
+      return this.executePageChange(pageIndex);
+    }
+
+    const disableWhenPageInvalid = this.formOptions?.()?.nextButton?.disableWhenPageInvalid ?? true;
+    if (!disableWhenPageInvalid) {
+      return this.executePageChange(pageIndex);
+    }
+
+    const crossedPages = visibleIndices.filter((index) => index >= currentIndex && index < pageIndex);
+    const firstInvalidPage = crossedPages.find((index) => !this.isPageValid(index));
+
+    if (firstInvalidPage === undefined) {
+      return this.executePageChange(pageIndex);
+    }
+
+    // Partial jump: land on the first invalid page and report the failure.
+    this.executePageChange(firstInvalidPage);
+
+    return {
+      success: false,
+      newPageIndex: firstInvalidPage,
+      error: `Cannot navigate to page ${pageIndex}: page ${firstInvalidPage} has invalid fields`,
+    };
+  }
+
+  /**
+   * Performs the actual page change, with no validity gating.
+   *
+   * Validates bounds and target visibility, updates the active index, and emits
+   * `PageChangeEvent`. All gated entry points funnel through here.
+   *
+   * @param pageIndex The target page index (0-based)
+   * @returns Navigation result
+   */
+  private executePageChange(pageIndex: number): NavigationResult {
     const currentState = this.state();
     const totalPages = currentState.totalPages;
 
@@ -419,7 +462,15 @@ export class PageOrchestratorComponent {
         this.navigateToPreviousPage();
       });
 
-    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PageNavigationStateChangeEvent, state));
+    // Listen for programmatic jumps to a specific page
+    this.eventBus
+      .on<GoToPageEvent>('go-to-page')
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        this.navigateToPage(event.pageIndex);
+      });
+
+    explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
   }
 
   /**
