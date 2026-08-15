@@ -68,6 +68,56 @@ When your form contains page fields:
 - **Validation**: Users must complete required fields before advancing to the next page
 - **Single Page View**: Only one page is visible at a time
 - **Programmatic Jumps**: Dispatch [`GoToPageEvent`](/recipes/events) to move to a page by index, for step lists or deep links
+- **Deep Links & Resume**: Set `options.initialPage` to open the form on a specific page (see below)
+
+## Deep Links and Session Resume
+
+To open a paged form somewhere other than page 0, set `options.initialPage`. The orchestrator applies it as it initializes, so it works even when the config arrives asynchronously from a backend.
+
+```typescript
+const config: FormConfig = {
+  options: { initialPage: 2 },
+  fields: [/* pages */],
+};
+```
+
+The shorthand lands on the page unconditionally, which is what restoring a saved session usually wants: a user who stopped on page 4 comes back to page 4, even if page 2 is still incomplete. The next and submit buttons stay gated as normal, so nothing invalid can be submitted.
+
+Pass an object to opt into validation instead:
+
+```typescript
+const config: FormConfig = {
+  options: { initialPage: { index: 2, validate: true } },
+  fields: [/* pages */],
+};
+```
+
+That applies the same gate a forward `GoToPageEvent` uses, stopping on the first invalid page.
+
+A gated landing is resolved once, against the form as it exists when the pages mount, so supply restored values together with the config. Values applied in a later step do not re-run it, and a gated landing against a form that is still empty stops on page 0. The unconditional form has no such constraint, which is another reason it suits resume.
+
+**Edge cases** are handled for you: an out-of-range index clamps to the last page, negative and non-numeric values fall back to page 0, and a hidden target resolves to the nearest visible page.
+
+### Restoring from a query parameter
+
+A typical resume flow fetches the saved session, then feeds the page into the config:
+
+```typescript
+export class ResumeComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly params = toSignal(this.route.queryParamMap, { requireSync: true });
+
+  readonly config = computed(() => {
+    const saved = this.savedConfig();
+    return {
+      ...saved,
+      options: { ...saved.options, initialPage: Number(this.params().get('page')) },
+    };
+  });
+}
+```
+
+For navigation _after_ load, such as a step list or reacting to a URL change, dispatch `GoToPageEvent` instead. Add `{ validate: false }` to skip the validity gate so the jump does not stop at the first incomplete page. That only bypasses validation: the target must still be in range and visible, and an out-of-range or hidden target remains a no-op.
 
 ## Performance & Lazy Loading
 

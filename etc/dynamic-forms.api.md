@@ -378,6 +378,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         maxDerivationIterations?: number;
         submitButton?: _ng_forge_dynamic_forms.SubmitButtonOptions;
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
+        initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
         pagePreloadWindow?: number;
         fieldWindowing?: boolean | {
             eager?: number;
@@ -685,6 +686,7 @@ export interface FormOptions {
         placeholderHeight?: string;
     };
     idPrefix?: string;
+    initialPage?: InitialPageConfig | number;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
@@ -712,7 +714,9 @@ export class FormSubmitEvent implements FormEvent {
 // @public
 export class GoToPageEvent implements FormEvent {
     constructor(
-    pageIndex: number);
+    pageIndex: number,
+    options?: PageNavigationOptions | undefined);
+    readonly options?: PageNavigationOptions | undefined;
     readonly pageIndex: number;
     // (undocumented)
     readonly type: "go-to-page";
@@ -796,6 +800,12 @@ export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
         readonly type: Reg['wrapperName'];
     };
 } : never;
+
+// @public
+export interface InitialPageConfig {
+    index: number;
+    validate?: boolean;
+}
 
 // @public
 export class InsertArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {
@@ -947,6 +957,11 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
     readonly meta?: never;
     // (undocumented)
     type: 'page';
+}
+
+// @public
+export interface PageNavigationOptions {
+    validate?: boolean;
 }
 
 // @public

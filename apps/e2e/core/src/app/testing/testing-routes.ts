@@ -37,6 +37,12 @@ export default [
     loadChildren: () => import('./cascading-validation/cascading-validation.routes'),
   },
 
+  // Deep Linking / Session Resume Tests
+  {
+    path: 'deep-linking',
+    loadChildren: () => import('./deep-linking/deep-linking.routes'),
+  },
+
   // Config Change Tests
   {
     path: 'config-change',

@@ -131,7 +131,13 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 
 // Submission Config
-export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from '@ng-forge/dynamic-forms/internal';
+export type {
+  SubmissionConfig,
+  SubmissionActionResult,
+  SubmitButtonOptions,
+  NextButtonOptions,
+  InitialPageConfig,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Form State Condition
 export type { FormStateCondition } from '@ng-forge/dynamic-forms/internal';
@@ -270,7 +276,7 @@ export {
 
 // Array event builder (recommended public API)
 export { arrayEvent } from './events';
-export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate, PageNavigationOptions } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 

@@ -260,6 +260,13 @@ eventBus.dispatch(new GoToPageEvent(3));
 **Properties:**
 
 - `pageIndex: number` - Target page (0-based)
+- `options?: { validate?: boolean }` - Set `validate: false` to land on the target regardless of earlier pages, for restoring a saved session. Bounds and hidden-page checks still apply. Defaults to `true`
+
+```typescript
+eventBus.dispatch(new GoToPageEvent(3, { validate: false }));
+```
+
+To open a form on a specific page in the first place, use [`options.initialPage`](/prebuilt/form-pages) rather than dispatching on load. It is applied as the form initializes, so it cannot race the orchestrator.
 
 **Validation semantics:**
 
