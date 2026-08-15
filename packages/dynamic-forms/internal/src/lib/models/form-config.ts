@@ -135,6 +135,8 @@ export interface FormOptions {
    * restore usually wants. Pass `{ index, validate: true }` to run the same validity
    * gate a forward `GoToPageEvent` uses, which stops on the first invalid page.
    *
+   * A gated landing resolves once at mount, so supply restored values with the config.
+   *
    * @default undefined (starts on page 0)
    */
   initialPage?: number | InitialPageConfig;

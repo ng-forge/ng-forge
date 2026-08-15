@@ -94,6 +94,8 @@ const config: FormConfig = {
 
 That applies the same gate a forward `GoToPageEvent` uses, stopping on the first invalid page.
 
+A gated landing is resolved once, against the form as it exists when the pages mount, so supply restored values together with the config. Values applied in a later step do not re-run it, and a gated landing against a form that is still empty stops on page 0. The unconditional form has no such constraint, which is another reason it suits resume.
+
 **Edge cases** are handled for you: an out-of-range index clamps to the last page, negative and non-numeric values fall back to page 0, and a hidden target resolves to the nearest visible page.
 
 ### Restoring from a query parameter
