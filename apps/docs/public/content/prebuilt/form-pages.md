@@ -105,14 +105,17 @@ export class ResumeComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly params = toSignal(this.route.queryParamMap, { requireSync: true });
 
-  readonly config = computed(() => ({
-    ...this.savedConfig(),
-    options: { initialPage: Number(this.params().get('page')) },
-  }));
+  readonly config = computed(() => {
+    const saved = this.savedConfig();
+    return {
+      ...saved,
+      options: { ...saved.options, initialPage: Number(this.params().get('page')) },
+    };
+  });
 }
 ```
 
-For navigation _after_ load, such as a step list or reacting to a URL change, dispatch `GoToPageEvent` instead. Add `{ validate: false }` when you want it to land exactly rather than stop at the first incomplete page.
+For navigation _after_ load, such as a step list or reacting to a URL change, dispatch `GoToPageEvent` instead. Add `{ validate: false }` to skip the validity gate so the jump does not stop at the first incomplete page. That only bypasses validation: the target must still be in range and visible, and an out-of-range or hidden target remains a no-op.
 
 ## Performance & Lazy Loading
 

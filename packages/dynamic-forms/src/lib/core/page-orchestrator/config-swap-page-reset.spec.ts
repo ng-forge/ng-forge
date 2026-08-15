@@ -35,7 +35,7 @@ async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs
   fixture.detectChanges();
 }
 
-function pagedConfig(label: string, initialPage?: number): FormConfig {
+function pagedConfig(label: string, initialPage?: number | { index: number; validate?: boolean }): FormConfig {
   return {
     ...(initialPage !== undefined ? { options: { initialPage } } : {}),
     fields: [
@@ -109,6 +109,26 @@ describe('config swap resets the active page', () => {
     await waitForFormInit(fixture, 600);
 
     // Reset target follows the config, so the deep-linked page survives a swap.
+    expect(activePage(fixture)).toBe(1);
+  });
+
+  it('re-applies a gated initialPage after a swap', async () => {
+    const gated = { index: 1, validate: true };
+    const fixture = TestBed.createComponent(DynamicForm);
+    fixture.componentRef.setInput('dynamic-form', pagedConfig('v1', gated));
+    fixture.componentRef.setInput('value', {});
+    await waitForFormInit(fixture);
+    expect(activePage(fixture)).toBe(1);
+
+    const bus = fixture.debugElement.injector.get(EventBus);
+    bus.dispatch(new GoToPageEvent(2, { validate: false }));
+    await waitForFormInit(fixture);
+    expect(activePage(fixture)).toBe(2);
+
+    fixture.componentRef.setInput('dynamic-form', pagedConfig('v2', gated));
+    await waitForFormInit(fixture, 600);
+
+    // The gated landing must re-apply, matching the ungated case above.
     expect(activePage(fixture)).toBe(1);
   });
 });

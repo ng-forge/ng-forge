@@ -143,18 +143,25 @@ export class PageOrchestratorComponent {
 
     if (totalPages === 0) return 0;
 
-    // A gated landing starts at 0 and is applied by the init effect below, so the jump
-    // runs through the same validation as any forward jump. An ungated one lands here
-    // directly (adjusted afterwards if the target turns out to be hidden).
-    return this.initialPage().validate ? 0 : this.initialPage().index;
+    // Untracked: re-land on a config swap, but never on a later validity or visibility change.
+    return untracked(() => this.resolveInitialLanding());
   });
 
-  /**
-   * Resolved `FormOptions.initialPage`, clamped to the available pages.
-   *
-   * Out-of-range indices clamp to the last page; negative or non-finite values fall
-   * back to `0`. Validity is not considered here — that is the init effect's job.
-   */
+  /** Where `initialPage` actually lands: hidden targets resolve forward, gated ones stop on the first invalid page. */
+  private resolveInitialLanding(): number {
+    const { index, validate } = this.initialPage();
+    const visible = this.visiblePageIndices();
+    if (index === 0 || visible.length === 0) return 0;
+
+    const target = visible.includes(index) ? index : this.findNearestVisiblePage(index, visible);
+    if (target <= 0) return Math.max(target, 0);
+    if (!validate) return target;
+
+    const firstInvalid = visible.filter((i) => i < target).find((i) => !this.isPageValid(i));
+    return firstInvalid ?? target;
+  }
+
+  /** Resolved `FormOptions.initialPage`: out-of-range clamps to the last page, invalid values fall back to 0. */
   private readonly initialPage = computed<{ index: number; validate: boolean }>(() => {
     const raw = this.formOptions?.()?.initialPage;
     const totalPages = this.pageFields().length;
@@ -260,13 +267,6 @@ export class PageOrchestratorComponent {
 
     // Apply a gated `initialPage` once the form is available, reusing the normal
     // forward-jump path so it stops on the first invalid page.
-    let initialPageApplied = false;
-    explicitEffect([this.pageFields, this.initialPage], ([pages, initialPage]) => {
-      if (initialPageApplied || pages.length === 0 || !initialPage.validate || initialPage.index === 0) return;
-      initialPageApplied = true;
-      untracked(() => this.navigateToPage(initialPage.index));
-    });
-
     // B15: Auto-navigate away when current page becomes hidden
     explicitEffect([this.state, this.visiblePageIndices], ([state, visibleIndices]) => {
       const currentVisiblePosition = visibleIndices.indexOf(state.currentPageIndex);

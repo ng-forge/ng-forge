@@ -112,6 +112,15 @@ test.describe('Deep Linking / Session Resume', () => {
       // page 2 (`b`) is empty, so the gated landing stops there
       await expect(currentPage(page)).toHaveText('1');
     });
+
+    test('a gated landing reaches the target when the restored data is complete', async ({ page }) => {
+      // Guards the ordering risk: values arrive from the backend after the config, so a
+      // gated landing must not evaluate validity against a still-empty form and stop short.
+      await mockSession(page, { value: COMPLETE });
+      await open(page, '?page=3&gate=on');
+
+      await expect(currentPage(page)).toHaveText('3');
+    });
   });
 
   test.describe('malformed parameters', () => {
@@ -231,6 +240,7 @@ test.describe('Deep Linking / Session Resume', () => {
       await open(page, '?page=2');
 
       await expect(page.getByTestId('load-error')).toBeVisible();
+      await expect(page.locator('form')).toHaveCount(0);
     });
   });
 });

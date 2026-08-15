@@ -145,6 +145,16 @@ describe('initialPage / deep linking', () => {
       // page 1 is hidden, so the landing resolves to the next visible page
       expect(activePage(fixture)).toBe(2);
     });
+
+    it('resolves a hidden target to the nearest visible page when gated too', async () => {
+      const fixture = createForm(pagedConfig({ initialPage: { index: 1, validate: true } }, [{ type: 'hidden', condition: true }]), {
+        a: 'x',
+      });
+      await waitForFormInit(fixture);
+
+      // Gated and ungated landings must agree on how a hidden target resolves.
+      expect(activePage(fixture)).toBe(2);
+    });
   });
 
   describe('GoToPageEvent validate option', () => {
