@@ -401,7 +401,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'required',
         type: 'boolean',
         description:
-          "Marks every descendant field required. An inherited default, not a rule on the group itself - a descendant that declares its own `required` wins, including `required: false` which opts that field (or a nested container's subtree) back out. Respects validateWhenHidden.",
+          "Marks every descendant field required. An inherited default, not a rule on the group itself - a descendant that declares its own `required` wins, including `required: false` which opts that field (or a nested container's subtree) back out, and including one whose requiredness is conditional via logic. Respects validateWhenHidden.",
         required: false,
       },
       validators: {
@@ -497,7 +497,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'required',
         type: 'boolean',
         description:
-          "Marks every field inside each array item required. A template field that declares its own `required` wins. This is about item CONTENTS - for 'at least one item', use minLength instead.",
+          "Marks every field inside each array item required. A template field that declares its own `required` wins, as does one whose requiredness is conditional via logic. Object items only - primitive-item arrays hold plain values with no field to mark. This is about item CONTENTS; for 'at least one item', use minLength instead.",
         required: false,
       },
       validators: {

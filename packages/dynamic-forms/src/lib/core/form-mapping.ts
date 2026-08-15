@@ -332,8 +332,11 @@ function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySch
  * Casts are isolated to the boundary between untyped field definitions and typed validator functions.
  */
 function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>, context: FieldTreeMappingContext): void {
-  // Own `required` wins over an inherited one, so `required: false` opts out.
-  if (fieldDef.required ?? context.ancestorRequired) {
+  // Own `required` wins over an inherited one, so `required: false` opts out. A child
+  // whose requiredness is conditional (`logic: [{ type: 'required', when }]`) also opts
+  // out — an unconditional cascade on top would make that condition unreachable.
+  const declaresRequiredLogic = fieldDef.logic?.some(isValidationStateLogic) ?? false;
+  if (fieldDef.required ?? (declaresRequiredLogic ? false : context.ancestorRequired)) {
     required(path);
   }
 
@@ -452,18 +455,17 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
         const layoutDescendant = resolveDescendantContext(templateField, layoutOwn);
         mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath, layoutDescendant);
       } else if (isGroupField(templateField)) {
-        // Group template - access group's path first
         const groupKey = templateField.key;
-        const groupOwn = resolveFieldOwnContext(templateField, context);
-        const groupDescendant = resolveDescendantContext(templateField, groupOwn);
         if (groupKey) {
+          // Via mapFieldToForm so the group's own validators apply, not just its children.
           const groupPath = pathRecord[groupKey];
           if (groupPath) {
-            mapContainerChildren(templateField.fields, groupPath, groupDescendant);
+            mapFieldToForm(templateField, groupPath, context);
           }
         } else {
           // No group key - apply children directly (edge case)
-          mapContainerChildren(templateField.fields, itemPath, groupDescendant);
+          const groupOwn = resolveFieldOwnContext(templateField, context);
+          mapContainerChildren(templateField.fields, itemPath, resolveDescendantContext(templateField, groupOwn));
         }
       } else {
         // Simple field template - get the specific field's path

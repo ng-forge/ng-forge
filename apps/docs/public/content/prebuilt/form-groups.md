@@ -184,7 +184,7 @@ Setting `required` on a group marks every field inside it as required, so you wr
 }
 ```
 
-It is an inherited default, not a rule on the group itself. A field that declares its own `required` wins, which is how `apartment` above stays optional. The same applies to a nested group: `required: false` on it opts its whole subtree back out.
+The group supplies a default, and a field that declares its own `required` wins — which is how `apartment` above stays optional. The same applies to a nested group: `required: false` on it opts its whole subtree back out. A field whose requiredness is conditional (`logic: [{ type: 'required', when }]`) keeps its own condition too, rather than being forced true by the cascade.
 
 The cascade reaches through nested groups, rows, and array item templates, and respects `validateWhenHidden` like any other validation, so a hidden group does not make its children required.
 

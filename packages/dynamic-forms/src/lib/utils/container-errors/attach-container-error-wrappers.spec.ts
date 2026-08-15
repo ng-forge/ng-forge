@@ -81,6 +81,21 @@ describe('attachContainerErrorWrappers', () => {
     expect(result[0]).toBe(group);
   });
 
+  it('should honour wrappers: null as an opt-out', () => {
+    const field = {
+      key: 'period',
+      type: 'group',
+      fields: [],
+      wrappers: null,
+      validators: [{ type: 'custom', functionName: 'dateOrder' }],
+    } as unknown as FieldDef<unknown>;
+
+    const result = attachContainerErrorWrappers([field]);
+
+    // `wrappers: null` is a three-state contract meaning "no wrappers at all".
+    expect((result[0] as { wrappers?: unknown }).wrappers).toBeNull();
+  });
+
   it('should leave a leaf field with validators untouched', () => {
     const leaf = {
       key: 'email',
@@ -152,6 +167,16 @@ describe('attachContainerErrorWrappers', () => {
     const result = attachContainerErrorWrappers(attachContainerErrorWrappers(fields));
 
     expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['container-errors']);
+  });
+
+  it('should reuse array item rows that did not change', () => {
+    const row = [{ key: 'from', type: 'input' } as FieldDef<unknown>];
+    const fields: FieldDef<unknown>[] = [{ key: 'rows', type: 'array', fields: [row] } as unknown as FieldDef<unknown>];
+
+    const result = attachContainerErrorWrappers(fields);
+
+    expect(result[0]).toBe(fields[0]);
+    expect((result[0] as unknown as { fields: unknown[] }).fields[0]).toBe(row);
   });
 
   it('should leave the input array untouched', () => {

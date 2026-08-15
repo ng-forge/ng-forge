@@ -195,7 +195,9 @@ Reach for this over a cross-field expression when:
 - The rule spans two fields of the same array row. A validator on a template child cannot see its row sibling, so the array is the only place the rule can live.
 - The rule is about the group as a whole. Writing it as an expression on one child forces the group's absolute path into the expression, which then breaks if the group moves.
 
-Containers accept `validators` and `validationMessages` only. The leaf shorthands (`required`, `email`, `pattern`, and so on) are value-shaped and have no meaning on a subtree; arrays keep their own `minLength`/`maxLength` for size. Layout containers (`page`, `row`, `container`) flatten into their parent and have no schema path, so they cannot carry validators.
+Containers accept `validators`, `validationMessages`, and `required`. The other leaf shorthands (`email`, `pattern`, `min`, and so on) are value-shaped and have no meaning on a subtree; arrays keep their own `minLength`/`maxLength` for size. `required` behaves differently from the rest: it cascades to descendants rather than validating the container itself, and a descendant's own `required` wins. See [Required Groups](/prebuilt/form-groups#required-groups).
+
+Container validators honour `validateWhenHidden` exactly like leaf validators, so a hidden container does not gate submission. Layout containers (`page`, `row`, `container`) flatten into their parent and have no schema path, so they cannot carry validators at all.
 
 The message renders below the container's content through the built-in `container-errors` wrapper. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for how to restyle it.
 

@@ -119,16 +119,17 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
       useFactory: () => {
         const logger = inject(DynamicFormLogger);
         const registry = new Map();
-        // Seed the built-ins, then let later registrations replace them.
-        // Replacing a built-in is a SUPPORTED override — it's how an adapter
-        // restyles `container-errors` — so it must not warn. Only a collision
-        // between two custom registrations is a mistake worth reporting.
+        // Seed the built-ins, then let later registrations replace them. Overriding a
+        // built-in name is supported — an adapter restyles `container-errors` that way,
+        // and an app may then override the adapter's — so those never warn. Only two
+        // custom registrations colliding on a name of their own is a mistake.
+        const builtInNames = new Set(BUILT_IN_WRAPPERS.map((w) => w.wrapperName));
         BUILT_IN_WRAPPERS.forEach((wrapperType) => registry.set(wrapperType.wrapperName, wrapperType));
 
         const seenCustom = new Set<string>();
         customWrappers.forEach((wrapperType) => {
           const name = wrapperType.wrapperName;
-          if (seenCustom.has(name)) {
+          if (seenCustom.has(name) && !builtInNames.has(name)) {
             logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
           }
           seenCustom.add(name);

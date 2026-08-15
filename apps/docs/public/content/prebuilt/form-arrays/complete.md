@@ -95,7 +95,9 @@ Setting `required` on the array marks every field inside each item as required, 
 }
 ```
 
-A template field that declares its own `required` wins, so `note` above stays optional. This is about item _contents_; for "the array must have at least one item", use `minLength: 1`.
+A template field that declares its own `required` wins, so `note` above stays optional. A field whose requiredness is conditional (`logic: [{ type: 'required', when }]`) also keeps its own condition rather than being forced by the cascade.
+
+This is about item _contents_; for "the array must have at least one item", use `minLength: 1`. It applies to object items only. Primitive-item arrays (a single field per item, producing `['a', 'b']`) hold plain values with no field to mark, so `required` on the array has no effect there.
 
 ## Array-Level Validation
 

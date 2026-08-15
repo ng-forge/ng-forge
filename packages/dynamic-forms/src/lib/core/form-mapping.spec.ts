@@ -1228,6 +1228,53 @@ describe('form-mapping', () => {
         });
       });
 
+      it('should apply a validator declared on a group inside an array item template', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ rows: [{ period: { from: '2026-02-01', to: '2026-01-01' } }] });
+          const arrayField: FieldDef = {
+            key: 'rows',
+            type: 'array',
+            fields: [
+              [
+                {
+                  key: 'period',
+                  type: 'group',
+                  fields: [
+                    { key: 'from', type: 'input' },
+                    { key: 'to', type: 'input' },
+                  ],
+                  validators: [
+                    {
+                      type: 'custom',
+                      fn: (ctx) => {
+                        const v = ctx.value() as { from?: string; to?: string };
+                        return v.from && v.to && v.to < v.from ? { kind: 'dateOrder' } : null;
+                      },
+                    },
+                  ],
+                },
+              ],
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(arrayField, path.rows as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          const groupNode = (formInstance as any).rows[0].period;
+          expect(
+            groupNode()
+              .errors()
+              .map((e: { kind: string }) => e.kind),
+          ).toContain('dateOrder');
+          expect(formInstance().valid()).toBe(false);
+        });
+      });
+
       it('should leave containers without validators untouched', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ period: { dateFrom: '', dateTo: '' } });
@@ -1403,6 +1450,44 @@ describe('form-mapping', () => {
         });
       });
 
+      it('should not override a child that expresses required through conditional logic', () => {
+        runInInjectionContext(injector, () => {
+          // `country` is empty so its inherited `required` actually reports an error;
+          // it is not 'CA', so `state`'s own condition leaves it optional.
+          const formValue = signal({ address: { country: '', state: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            required: true,
+            fields: [
+              { key: 'country', type: 'input' },
+              {
+                key: 'state',
+                type: 'input',
+                logic: [
+                  {
+                    type: 'required',
+                    condition: { type: 'fieldValue', fieldPath: 'address.country', operator: 'equals', value: 'CA' },
+                  },
+                ],
+              },
+            ],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // The child's own condition governs; country is US, so `state` stays optional.
+          expect(requiredKinds((formInstance as any).address.state)).not.toContain('required');
+          expect(requiredKinds((formInstance as any).address.country)).toContain('required');
+        });
+      });
+
       it('should leave children untouched when the container declares no required', () => {
         runInInjectionContext(injector, () => {
           const formValue = signal({ address: { street: '' } });
@@ -1444,7 +1529,34 @@ describe('form-mapping', () => {
           );
           mockFormSignal.set(formInstance);
 
+          expect(requiredKinds((formInstance as any).address.street)).not.toContain('required');
           expect(formInstance().valid()).toBe(true);
+        });
+      });
+
+      it('should apply the cascade on a hidden container when validateWhenHidden is true', () => {
+        runInInjectionContext(injector, () => {
+          const formValue = signal({ address: { street: '' } });
+          const groupField: FieldDef = {
+            key: 'address',
+            type: 'group',
+            required: true,
+            hidden: true,
+            validateWhenHidden: true,
+            fields: [{ key: 'street', type: 'input' }],
+          } as unknown as FieldDef;
+
+          const formInstance = form(
+            formValue,
+            schema<typeof formValue>((path) => {
+              mapFieldToForm(groupField, path.address as any);
+            }),
+          );
+          mockFormSignal.set(formInstance);
+
+          // The mirror of the test above — together they pin the gate rather than
+          // passing simply because the cascade never ran.
+          expect(requiredKinds((formInstance as any).address.street)).toContain('required');
         });
       });
     });

@@ -19,12 +19,16 @@ function attachToField(field: FieldDef<unknown>): FieldDef<unknown> {
   // Array items are either a single FieldDef (primitive) or an array of them (object).
   if (isArrayField(field)) {
     const items = field.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];
-    const nextItems = items.map((item) =>
-      Array.isArray(item)
-        ? attachContainerErrorWrappers([...(item as readonly FieldDef<unknown>[])])
-        : attachToField(item as FieldDef<unknown>),
-    );
+    const nextItems = items.map((item) => {
+      if (!Array.isArray(item)) return attachToField(item as FieldDef<unknown>);
+      // Reuse the row when nothing beneath it changed — mapping always allocates,
+      // so compare element-wise rather than trusting array identity.
+      const row = item as readonly FieldDef<unknown>[];
+      const nextRow = attachContainerErrorWrappers([...row]);
+      return nextRow.some((child, i) => child !== row[i]) ? nextRow : item;
+    });
     const changed = nextItems.some((item, i) => item !== items[i]);
+    // Safe: only `fields` is replaced, with the same item shape the array already had.
     const base = changed ? ({ ...field, fields: nextItems } as unknown as FieldDef<unknown>) : field;
     return withErrorWrapper(base);
   }
@@ -45,6 +49,8 @@ function attachToField(field: FieldDef<unknown>): FieldDef<unknown> {
 function withErrorWrapper(field: FieldDef<unknown>): FieldDef<unknown> {
   const { validators, validationMessages } = field as FieldDef<unknown> & ContainerValidation;
   if (!validators || validators.length === 0) return field;
+  // `null` means "no wrappers at all" — an explicit opt-out, not an empty chain.
+  if (field.wrappers === null) return field;
 
   const existing = field.wrappers ?? [];
   if (existing.some((w) => w.type === CONTAINER_ERRORS_WRAPPER)) return field;

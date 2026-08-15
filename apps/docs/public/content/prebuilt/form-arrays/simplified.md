@@ -24,6 +24,7 @@ The simplified API is built around `template` and `value`, plus optional `minLen
 | `maxLength`          | Maximum number of array items (form invalid if more)                       |
 | `validators`         | Rules over the item list -- `ctx.value()` is the array of items            |
 | `validationMessages` | Messages keyed by error kind for the array's own validators                |
+| `validateWhenHidden` | Run the array's validators while it is hidden (default `false`)            |
 
 The `template` shape determines the array variant:
 
