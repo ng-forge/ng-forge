@@ -456,8 +456,14 @@ export class FormStateManager<
    * Schema derived from the current form config and field setup.
    * Separated from `form` so schema construction is memoized independently.
    * Requires `runInInjectionContext` because `createSchemaFromFields` calls `inject()` internally.
+   *
+   * Readable so the WebMCP registrar can build a throwaway shadow form over the
+   * same schema to dry-run an agent's proposed values without touching the live
+   * form (which would fire derivations and mark fields dirty).
+   *
+   * @internal
    */
-  private readonly formSchema = computed((): Schema<TModel> | undefined =>
+  readonly formSchema = computed((): Schema<TModel> | undefined =>
     runInInjectionContext(this.injector, () => {
       const setup = this.formSetup();
       const config = this.activeConfig();

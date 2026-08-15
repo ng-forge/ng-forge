@@ -77,7 +77,7 @@ export const FEATURE_OVERVIEW_FAQ: readonly FaqEntry[] = [
   },
   {
     q: 'Is there a codemod or automated migration tool from formly?',
-    a: 'No automated migration tool today; port manually. The concept-mapping table in the [migration guide](/migrating-from-ngx-formly) is the closest thing to a porting cheatsheet; the [MCP server](/ai-integration) lets an LLM in your IDE generate large chunks of the new config from a description of the old one. A codemod is on the wishlist but not committed work.',
+    a: 'No automated migration tool today; port manually. The concept-mapping table in the [migration guide](/migrating-from-ngx-formly) is the closest thing to a porting cheatsheet; the [MCP server](/ai-integration/mcp-server) lets an LLM in your IDE generate large chunks of the new config from a description of the old one. A codemod is on the wishlist but not committed work.',
   },
   {
     q: 'How big is the bundle?',

@@ -19,6 +19,7 @@ import { DERIVATION_WARNING_TRACKER } from '../core/derivation/derivation-warnin
 import { DEPRECATION_WARNING_TRACKER } from '@ng-forge/dynamic-forms/internal';
 import { createWarningTracker } from '@ng-forge/dynamic-forms/internal';
 import { createDerivationRenderGate, DERIVATION_RENDER_GATE } from '../core/derivation/derivation-render-gate';
+import { createWebMcpGate, WEB_MCP_GATE } from '../core/web-mcp/web-mcp-gate';
 import { CONTAINER_FIELD_PROCESSORS, createContainerFieldProcessors } from '../utils/container-utils/container-field-processors';
 import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../core/property-derivation/property-override-store';
 import { HTTP_CONDITION_CACHE, HttpConditionCache } from '@ng-forge/dynamic-forms/internal';
@@ -190,5 +191,6 @@ export function provideDynamicFormDI(): Provider[] {
     ...asyncExpressionProviders(),
     ...propertyDerivationProviders(),
     ...derivationProviders(),
+    { provide: WEB_MCP_GATE, useFactory: createWebMcpGate },
   ];
 }

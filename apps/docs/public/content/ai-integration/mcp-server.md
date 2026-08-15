@@ -1,12 +1,14 @@
 ---
-title: AI Integration (MCP)
-slug: ai-integration
+title: IDE Usage (MCP)
+slug: ai-integration/mcp-server
 description: 'Use the ng-forge MCP server to let AI assistants generate, validate, and scaffold dynamic form configurations in Cursor, VS Code, or any MCP client.'
 ---
 
-# AI Integration
+# IDE Usage (MCP)
 
 The `@ng-forge/dynamic-form-mcp` package provides a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that enables AI assistants to generate, validate, and work with ng-forge dynamic form configurations.
+
+This page covers authoring time: an assistant in your editor writing form configs for you. For runtime, where an agent in the browser fills and submits a form your users are looking at, see [WebMCP](/ai-integration/webmcp).
 
 ## Available Tools
 

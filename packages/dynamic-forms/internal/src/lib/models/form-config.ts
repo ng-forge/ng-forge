@@ -187,6 +187,52 @@ export interface FormOptions {
    * @default undefined (uses global setting)
    */
   emitFormValueOnEvents?: boolean;
+
+  /**
+   * Exposes this form to browser AI agents as WebMCP tools.
+   *
+   * Requires the `withWebMcp()` feature on `provideDynamicForm(...)`. Registers
+   * `fill_{name}`, which applies a partial patch of values and reports the
+   * form's state back. Submission stays off unless `allowSubmit` is set.
+   *
+   * Experimental: WebMCP is an emerging standard and Angular's underlying APIs
+   * are marked experimental, so this may change outside a major version.
+   *
+   * @example
+   * ```typescript
+   * options: { webMcp: { name: 'invoice', description: 'Create an invoice for a customer.' } }
+   * ```
+   *
+   * @default undefined (form is not exposed to agents)
+   */
+  webMcp?: WebMcpToolOptions;
+}
+
+/** Identifies a form's WebMCP tools to connected AI agents. */
+export interface WebMcpToolOptions {
+  /**
+   * Base name for this form's tools, used as `fill_{name}` and (when submission
+   * is allowed) `submit_{name}`. Must be unique across every form on the page.
+   */
+  name: string;
+
+  /** What this form is for, and when an agent should reach for it. */
+  description: string;
+
+  /**
+   * Whether an agent may submit this form directly.
+   *
+   * Off by default. Every registered tool is callable by any agent that reaches
+   * the page, including one acting on injected instructions from elsewhere, so
+   * submission is treated as the consequential step and kept opt-in. With it
+   * off, an agent can still fill the form and a human presses the button.
+   *
+   * Leave it off for anything that spends money, sends a message, or cannot be
+   * undone.
+   *
+   * @default false
+   */
+  allowSubmit?: boolean;
 }
 
 /** Options for controlling submit button disabled behavior. */
