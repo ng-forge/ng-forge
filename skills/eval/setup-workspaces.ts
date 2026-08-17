@@ -59,7 +59,13 @@ async function installCli(workspace: string): Promise<void> {
 /** Written by the CLI wrapper on every invocation. */
 export const INVOCATION_LOG = '.validator-invocations.log';
 
-export async function setupWorkspaces(outputDir: string, trials: number): Promise<string[]> {
+/**
+ * @param withSkill install the skill into each workspace. Pass false to build
+ * the baseline arm: the same tasks, the same validator, no skill. Without that
+ * comparison a high pass rate says nothing, because it cannot distinguish a
+ * skill that works from a task an agent would have got right anyway.
+ */
+export async function setupWorkspaces(outputDir: string, trials: number, withSkill = true): Promise<string[]> {
   await rm(outputDir, { recursive: true, force: true });
   const created: string[] = [];
 
@@ -68,9 +74,11 @@ export async function setupWorkspaces(outputDir: string, trials: number): Promis
       const workspace = join(outputDir, `${task.id}__t${trial}`);
       await mkdir(join(workspace, 'src'), { recursive: true });
 
-      // The skill lands where a real install would put it.
-      await mkdir(join(workspace, '.claude', 'skills'), { recursive: true });
-      await cp(SKILL_SOURCE, join(workspace, '.claude', 'skills', 'dynamic-forms'), { recursive: true });
+      if (withSkill) {
+        // The skill lands where a real install would put it.
+        await mkdir(join(workspace, '.claude', 'skills'), { recursive: true });
+        await cp(SKILL_SOURCE, join(workspace, '.claude', 'skills', 'dynamic-forms'), { recursive: true });
+      }
 
       for (const [relativePath, contents] of Object.entries(FIXTURES[task.id] ?? {})) {
         await mkdir(dirname(join(workspace, relativePath)), { recursive: true });
@@ -104,12 +112,13 @@ export async function setupWorkspaces(outputDir: string, trials: number): Promis
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const outputDir = process.argv[2];
   const trials = Number(process.argv[3] ?? 2);
+  const withSkill = !process.argv.includes('--no-skill');
 
   if (!outputDir) {
-    console.error('usage: node skills/eval/setup-workspaces.ts <output-dir> [trials]');
+    console.error('usage: node skills/eval/setup-workspaces.ts <output-dir> [trials] [--no-skill]');
     process.exitCode = 2;
   } else {
-    const created = await setupWorkspaces(outputDir, trials);
+    const created = await setupWorkspaces(outputDir, trials, withSkill);
     console.log(`created ${created.length} workspace(s) under ${outputDir}`);
     for (const path of created) {
       console.log(`  ${path}`);

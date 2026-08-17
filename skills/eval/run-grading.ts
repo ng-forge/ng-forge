@@ -17,11 +17,51 @@
  * Usage: node skills/eval/run-grading.ts <trials-dir> [reports-dir]
  */
 
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { EVAL_TASKS } from './tasks.ts';
-import { gradeTrial, summariseTask, formatSummary, type TrialResult } from './grade.ts';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { EVAL_TASKS, FIXTURES } from './tasks.ts';
+import { gradeTrial, summariseTask, formatSummary, type ConfigValidator, type TrialResult } from './grade.ts';
 import { INVOCATION_LOG } from './setup-workspaces.ts';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const CLI_BIN = join(ROOT, 'dist', 'packages', 'dynamic-forms-cli', 'bin', 'ng-forge-validate.js');
+
+/**
+ * Validate by running the built CLI, not by importing the library.
+ *
+ * Grading against the same artifact a user installs means a packaging bug
+ * cannot pass the eval while failing in the wild. It also keeps this runner
+ * free of the library's ESM specifiers, which Node's type stripping cannot
+ * resolve from source.
+ */
+function cliValidator(workspace: string): ConfigValidator {
+  return (_source, filePath, ui) => {
+    const target = join(workspace, filePath);
+    let stdout: string;
+
+    try {
+      stdout = execFileSync(process.execPath, [CLI_BIN, target, '--ui', ui, '--json'], { encoding: 'utf-8' });
+    } catch (error) {
+      // Exit code 1 means invalid, which still prints the JSON payload.
+      const withOutput = error as { stdout?: string };
+      stdout = withOutput.stdout ?? '';
+    }
+
+    try {
+      const payload = JSON.parse(stdout);
+      const file = payload.files?.[0];
+      return {
+        found: (file?.configsFound ?? 0) > 0,
+        valid: Boolean(payload.valid),
+        errorCount: payload.errorCount ?? 0,
+      };
+    } catch {
+      return { found: false, valid: false, errorCount: 0 };
+    }
+  };
+}
 
 async function readIfPresent(path: string): Promise<string | undefined> {
   try {
@@ -37,6 +77,15 @@ export async function gradeAll(trialsDir: string, reportsDir?: string) {
 
   const byTask = new Map<string, TrialResult[]>();
   const missing: string[] = [];
+  /**
+   * Workspaces that look untouched.
+   *
+   * A trial whose agent never ran scores like a bad trial, which quietly
+   * poisons the aggregate. Grading a run before its agents finish produced
+   * exactly that during development, so it is worth detecting rather than
+   * trusting the caller to sequence things correctly.
+   */
+  const notRun: string[] = [];
 
   for (const task of EVAL_TASKS) {
     const taskWorkspaces = workspaces.filter((name) => name.startsWith(`${task.id}__`)).sort();
@@ -53,17 +102,30 @@ export async function gradeAll(trialsDir: string, reportsDir?: string) {
         missing.push(name);
       }
 
+      // Only checkable for tasks that expect a file. A negative control has no
+      // fixture and is supposed to leave no trace, so it always looks untouched.
+      if (task.expectedFile) {
+        const fixture = FIXTURES[task.id]?.[task.expectedFile];
+        if (invocations === '' && producedFile === fixture) {
+          notRun.push(name);
+        }
+      }
+
       // The invocation log is the objective half of the transcript; the
       // agent's summary supplies only the trigger signal.
       const transcript = [invocations ? `ng-forge-validate ${invocations}` : '', report].join('\n');
 
-      results.push(gradeTrial(task, { taskId: task.id, transcript, producedFile }));
+      results.push(
+        gradeTrial(task, { taskId: task.id, transcript, producedFile }, cliValidator(workspace), {
+          canObserveTriggering: Boolean(reportsDir),
+        }),
+      );
     }
 
     byTask.set(task.id, results);
   }
 
-  return { byTask, missing };
+  return { byTask, missing, notRun };
 }
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop() ?? '')) {
@@ -74,7 +136,7 @@ if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()
     console.error('usage: node skills/eval/run-grading.ts <trials-dir> [reports-dir]');
     process.exitCode = 2;
   } else {
-    const { byTask, missing } = await gradeAll(trialsDir, reportsDir);
+    const { byTask, missing, notRun } = await gradeAll(trialsDir, reportsDir);
 
     console.log('# Skill eval results\n');
 
@@ -98,6 +160,14 @@ if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop()
 
     console.log('## Summary\n');
     console.log(formatSummary(summaries));
+
+    if (notRun.length > 0) {
+      console.log(`\n> WARNING: ${notRun.length} workspace(s) look untouched, so their rows are not real results:`);
+      for (const name of notRun) {
+        console.log(`>   ${name}`);
+      }
+      console.log('> Either the agent never ran, or grading ran before it finished.');
+    }
 
     if (missing.length > 0) {
       console.log(`\nNo agent report found for ${missing.length} workspace(s); their trigger grader reads as a miss.`);

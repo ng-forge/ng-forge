@@ -6,8 +6,23 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ranValidator, loadedSkill, gradeTrial, summariseTask, formatSummary, PASS_THRESHOLD } from '../eval/grade.ts';
+import {
+  ranValidator,
+  loadedSkill,
+  gradeTrial,
+  summariseTask,
+  formatSummary,
+  PASS_THRESHOLD,
+  type ConfigValidator,
+} from '../eval/grade.ts';
+import { validateSource } from '@ng-forge/dynamic-forms-validation';
 import { EVAL_TASKS, type EvalTask } from '../eval/tasks.ts';
+
+/** In-process validator for the unit tests: the graders take it as a parameter. */
+const validate: ConfigValidator = (source, filePath, ui) => {
+  const result = validateSource(source, filePath, ui);
+  return { found: !result.noConfigsFound, valid: result.valid, errorCount: result.errorCount };
+};
 
 const VALID_CONFIG = `import { FormConfig } from '@ng-forge/dynamic-forms';
 
@@ -62,34 +77,59 @@ describe('loadedSkill', () => {
 });
 
 describe('gradeTrial, positive tasks', () => {
+  it('omits the trigger grader when triggering cannot be observed', () => {
+    const result = gradeTrial(
+      task('implicit-select'),
+      { taskId: 'implicit-select', transcript: 'ng-forge-validate src/signup.form.ts', producedFile: VALID_CONFIG },
+      validate,
+      { canObserveTriggering: false },
+    );
+
+    expect(result.graders.map((g) => g.name)).not.toContain('triggered');
+    // An unmeasurable grader must not be scored as a failure.
+    expect(result.score).toBe(1);
+  });
+
   it('gives a perfect score to a trial that triggered, validated, and produced a valid config', () => {
-    const result = gradeTrial(task('implicit-select'), {
-      taskId: 'implicit-select',
-      transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts --ui material',
-      producedFile: VALID_CONFIG,
-    });
+    const result = gradeTrial(
+      task('implicit-select'),
+      {
+        taskId: 'implicit-select',
+        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts --ui material',
+        producedFile: VALID_CONFIG,
+      },
+      validate,
+    );
 
     expect(result.score).toBe(1);
     expect(result.passed).toBe(true);
   });
 
   it('fails a trial whose config does not validate', () => {
-    const result = gradeTrial(task('hidden-field-value'), {
-      taskId: 'hidden-field-value',
-      transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
-      producedFile: INVALID_CONFIG,
-    });
+    const result = gradeTrial(
+      task('hidden-field-value'),
+      {
+        taskId: 'hidden-field-value',
+        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
+        producedFile: INVALID_CONFIG,
+      },
+      validate,
+    );
 
     expect(result.graders.find((g) => g.name === 'config-valid')?.score).toBe(0);
     expect(result.passed).toBe(false);
   });
 
   it('penalises skipping the validator even when the output happens to be right', () => {
-    const result = gradeTrial(task('implicit-select'), {
-      taskId: 'implicit-select',
-      transcript: 'Read SKILL.md and wrote the config.',
-      producedFile: VALID_CONFIG,
-    });
+    const result = gradeTrial(
+      task('implicit-select'),
+      {
+        taskId: 'implicit-select',
+        transcript: 'Read SKILL.md and wrote the config.',
+        producedFile: VALID_CONFIG,
+      },
+      validate,
+    );
 
     expect(result.graders.find((g) => g.name === 'ran-validator')?.score).toBe(0);
     expect(result.score).toBeLessThan(1);
@@ -101,20 +141,28 @@ describe('gradeTrial, positive tasks', () => {
       "props: { options: [{ value: 'us', label: 'United States' }] }",
     );
 
-    const result = gradeTrial(task('implicit-select'), {
-      taskId: 'implicit-select',
-      transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
-      producedFile: withPropsOptions,
-    });
+    const result = gradeTrial(
+      task('implicit-select'),
+      {
+        taskId: 'implicit-select',
+        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
+        producedFile: withPropsOptions,
+      },
+      validate,
+    );
 
     expect(result.graders.find((g) => g.name === 'forbidden-content')?.score).toBe(0);
   });
 
   it('scores a missing file as a failed outcome rather than throwing', () => {
-    const result = gradeTrial(task('implicit-select'), {
-      taskId: 'implicit-select',
-      transcript: 'Read SKILL.md.',
-    });
+    const result = gradeTrial(
+      task('implicit-select'),
+      {
+        taskId: 'implicit-select',
+        transcript: 'Read SKILL.md.',
+      },
+      validate,
+    );
 
     expect(result.graders.find((g) => g.name === 'config-valid')?.detail).toContain('was not produced');
     expect(result.passed).toBe(false);
@@ -123,20 +171,28 @@ describe('gradeTrial, positive tasks', () => {
 
 describe('gradeTrial, negative controls', () => {
   it('passes when the skill stayed dormant', () => {
-    const result = gradeTrial(task('negative-unrelated-angular'), {
-      taskId: 'negative-unrelated-angular',
-      transcript: 'Wrote src/truncate.pipe.ts using Angular Pipe.',
-    });
+    const result = gradeTrial(
+      task('negative-unrelated-angular'),
+      {
+        taskId: 'negative-unrelated-angular',
+        transcript: 'Wrote src/truncate.pipe.ts using Angular Pipe.',
+      },
+      validate,
+    );
 
     expect(result.score).toBe(1);
     expect(result.passed).toBe(true);
   });
 
   it('fails when the skill activated on an unrelated task', () => {
-    const result = gradeTrial(task('negative-plain-reactive-form'), {
-      taskId: 'negative-plain-reactive-form',
-      transcript: 'Read skills/dynamic-forms/SKILL.md before writing the reactive form.',
-    });
+    const result = gradeTrial(
+      task('negative-plain-reactive-form'),
+      {
+        taskId: 'negative-plain-reactive-form',
+        transcript: 'Read skills/dynamic-forms/SKILL.md before writing the reactive form.',
+      },
+      validate,
+    );
 
     expect(result.score).toBe(0);
     expect(result.passed).toBe(false);

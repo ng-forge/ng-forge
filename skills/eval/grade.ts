@@ -7,8 +7,20 @@
  * cheap enough to run repeatedly, which is what pass^k needs.
  */
 
-import { validateSource } from '@ng-forge/dynamic-forms-validation';
-import type { EvalTask } from './tasks.ts';
+import type { EvalTask, UiIntegration } from './tasks.ts';
+
+/**
+ * How a caller validates a produced config.
+ *
+ * Injected rather than imported so this module has no runtime dependency on
+ * the validation library. Tests pass the in-process `validateSource`; the
+ * grading runner shells out to the built CLI, which is what a user would run.
+ */
+export type ConfigValidator = (
+  source: string,
+  filePath: string,
+  ui: UiIntegration,
+) => { found: boolean; valid: boolean; errorCount: number };
 
 /** What a single trial produced. */
 export interface TrialRecord {
@@ -54,8 +66,20 @@ export function loadedSkill(transcript: string): boolean {
   return /SKILL\.md|ng-forge-dynamic-forms|references\/(rules|field-types|patterns|pitfalls)\.md/.test(transcript);
 }
 
+export interface GradeOptions {
+  /**
+   * Whether the trigger grader can be evaluated at all.
+   *
+   * It needs the agent's transcript. When the harness cannot supply one, the
+   * grader is omitted rather than scored zero: a missing measurement is not a
+   * failed one, and silently counting it as failure understates the skill.
+   */
+  canObserveTriggering?: boolean;
+}
+
 /** Grade one trial against its task definition. */
-export function gradeTrial(task: EvalTask, record: TrialRecord): TrialResult {
+export function gradeTrial(task: EvalTask, record: TrialRecord, validate: ConfigValidator, options: GradeOptions = {}): TrialResult {
+  const { canObserveTriggering = true } = options;
   const graders: GraderResult[] = [];
 
   if (!task.shouldTrigger) {
@@ -74,13 +98,15 @@ export function gradeTrial(task: EvalTask, record: TrialRecord): TrialResult {
     return { taskId: task.id, graders, score: total, passed: total >= PASS_THRESHOLD };
   }
 
-  const triggered = loadedSkill(record.transcript);
-  graders.push({
-    name: 'triggered',
-    score: triggered ? 1 : 0,
-    weight: 1,
-    detail: triggered ? 'skill activated' : 'skill never activated',
-  });
+  if (canObserveTriggering) {
+    const triggered = loadedSkill(record.transcript);
+    graders.push({
+      name: 'triggered',
+      score: triggered ? 1 : 0,
+      weight: 1,
+      detail: triggered ? 'skill activated' : 'skill never activated',
+    });
+  }
 
   const validated = ranValidator(record.transcript);
   graders.push({
@@ -96,13 +122,13 @@ export function gradeTrial(task: EvalTask, record: TrialRecord): TrialResult {
     if (source === undefined) {
       graders.push({ name: 'config-valid', score: 0, weight: 3, detail: `${task.expectedFile} was not produced` });
     } else {
-      const result = validateSource(source, task.expectedFile, task.ui);
-      const ok = !result.noConfigsFound && result.valid;
+      const result = validate(source, task.expectedFile, task.ui);
+      const ok = result.found && result.valid;
       graders.push({
         name: 'config-valid',
         score: ok ? 1 : 0,
         weight: 3,
-        detail: result.noConfigsFound
+        detail: !result.found
           ? 'no FormConfig found in the produced file'
           : ok
             ? 'config validates'
