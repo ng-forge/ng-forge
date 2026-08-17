@@ -1,0 +1,34 @@
+{
+  "name": "skills",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "tags": ["scope:skills", "type:docs"],
+  "implicitDependencies": ["dynamic-form-mcp", "dynamic-forms-cli"],
+  "targets": {
+    "update": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/generate-skills.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/scripts/generate-skills.ts",
+        "{workspaceRoot}/skills/dynamic-forms/**/*.md",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/instructions.ts",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/field-types.ts",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/tools/examples.tool.ts",
+        "{workspaceRoot}/packages/dynamic-forms-cli/src/fix-suggestions.ts",
+        "{workspaceRoot}/packages/dynamic-forms/package.json"
+      ],
+      "options": {
+        "command": "node scripts/generate-skills.ts --check",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}
