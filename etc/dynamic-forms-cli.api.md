@@ -4,30 +4,42 @@
 
 ```ts
 
-import type { FormattedValidationError } from '@ng-forge/dynamic-forms-zod/validate';
-import { Node as Node_2 } from 'ts-morph';
-import { ObjectLiteralExpression } from 'ts-morph';
-import { SourceFile } from 'ts-morph';
-import { UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
-import { ValidationResult } from '@ng-forge/dynamic-forms-zod/validate';
+import { ConfigValidationResult } from '@ng-forge/dynamic-forms-validation';
+import { createSourceFile } from '@ng-forge/dynamic-forms-validation';
+import { DATE_PLACEHOLDER } from '@ng-forge/dynamic-forms-validation';
+import { ExtractionError } from '@ng-forge/dynamic-forms-validation';
+import { ExtractionResult } from '@ng-forge/dynamic-forms-validation';
+import { ExtractionWarning } from '@ng-forge/dynamic-forms-validation';
+import { extractToJson } from '@ng-forge/dynamic-forms-validation';
+import { FileValidationResult } from '@ng-forge/dynamic-forms-validation';
+import { findFormConfigCandidates } from '@ng-forge/dynamic-forms-validation';
+import { FIX_SUGGESTIONS } from '@ng-forge/dynamic-forms-validation';
+import { formatConfigReport } from '@ng-forge/dynamic-forms-validation';
+import { formatFileReport } from '@ng-forge/dynamic-forms-validation';
+import { FormattedValidationError } from '@ng-forge/dynamic-forms-validation';
+import { FormConfigCandidate } from '@ng-forge/dynamic-forms-validation';
+import { getFixSuggestion } from '@ng-forge/dynamic-forms-validation';
+import { isValidFormConfig } from '@ng-forge/dynamic-forms-validation';
+import { MAX_SOURCE_TEXT_LENGTH } from '@ng-forge/dynamic-forms-validation';
+import { parseConfigInput } from '@ng-forge/dynamic-forms-validation';
+import { ParsedConfigInput } from '@ng-forge/dynamic-forms-validation';
+import { ReportOptions } from '@ng-forge/dynamic-forms-validation';
+import { UI_INTEGRATIONS } from '@ng-forge/dynamic-forms-validation';
+import { UiIntegration } from '@ng-forge/dynamic-forms-validation';
+import { validateConfigObject } from '@ng-forge/dynamic-forms-validation';
+import { validateFile } from '@ng-forge/dynamic-forms-validation';
+import { validateFormConfig } from '@ng-forge/dynamic-forms-validation';
+import { validateSource } from '@ng-forge/dynamic-forms-validation';
+import { ValidationResult } from '@ng-forge/dynamic-forms-validation';
 
 // @public
 export function collectRelatedDocs(errors: FormattedValidationError[]): string[];
 
-// @public
-export interface ConfigValidationResult {
-    extraction: ExtractionResult;
-    line: number;
-    matchReason: FormConfigCandidate['matchReason'];
-    name: string;
-    validation: ValidationResult;
-}
+export { ConfigValidationResult }
 
-// @public
-export function createSourceFile(source: string, fileName?: string): SourceFile;
+export { createSourceFile }
 
-// @public
-export const DATE_PLACEHOLDER = "2024-01-01T00:00:00.000Z";
+export { DATE_PLACEHOLDER }
 
 // @public
 export const EXIT_INVALID_CONFIG = 1;
@@ -38,99 +50,52 @@ export const EXIT_OK = 0;
 // @public
 export const EXIT_USAGE = 2;
 
-// @public
-export interface ExtractionError {
-    message: string;
-    path: string;
-}
+export { ExtractionError }
 
-// @public
-export interface ExtractionResult {
-    errors: ExtractionError[];
-    value: unknown;
-    warnings: ExtractionWarning[];
-}
+export { ExtractionResult }
 
-// @public
-export interface ExtractionWarning {
-    issue: string;
-    originalText: string;
-    path: string;
-    placeholder: boolean | null | number | string;
-}
+export { ExtractionWarning }
 
-// @public
-export function extractToJson(node: Node_2, path?: string): ExtractionResult;
+export { extractToJson }
 
-// @public
-export interface FileValidationResult {
-    errorCount: number;
-    // (undocumented)
-    filePath: string;
-    noConfigsFound: boolean;
-    results: ConfigValidationResult[];
-    // (undocumented)
-    uiIntegration: UiIntegration;
-    valid: boolean;
-}
+export { FileValidationResult }
 
-// @public
-export function findFormConfigCandidates(sourceFile: SourceFile): FormConfigCandidate[];
+export { findFormConfigCandidates }
 
-// @public
-export const FIX_SUGGESTIONS: Record<string, string>;
+export { FIX_SUGGESTIONS }
 
-// @public
-export function formatConfigReport(uiIntegration: UiIntegration, validation: ValidationResult, options?: ReportOptions): string;
+export { formatConfigReport }
 
-// @public
-export function formatFileReport(result: FileValidationResult, options?: ReportOptions): string;
+export { formatFileReport }
 
-// @public
-export interface FormConfigCandidate {
-    matchReason: 'as-cast' | 'satisfies' | 'structural' | 'type-annotation';
-    name: string;
-    objectLiteral: ObjectLiteralExpression;
-    startLine: number;
-}
+export { FormattedValidationError }
 
-// @public
-export function getFixSuggestion(error: FormattedValidationError): string | undefined;
+export { FormConfigCandidate }
 
-// @public
-export const MAX_SOURCE_TEXT_LENGTH = 50;
+export { getFixSuggestion }
 
-// @public
-export function parseConfigInput(config: Record<string, unknown> | string): ParsedConfigInput;
+export { isValidFormConfig }
 
-// @public
-export type ParsedConfigInput = {
-    type: 'file';
-    path: string;
-} | {
-    type: 'json';
-    data: Record<string, unknown>;
-} | {
-    type: 'object';
-    data: Record<string, unknown>;
-};
+export { MAX_SOURCE_TEXT_LENGTH }
 
-// @public (undocumented)
-export interface ReportOptions {
-    relatedDocs?: (errors: FormattedValidationError[]) => string[];
-}
+export { parseConfigInput }
+
+export { ParsedConfigInput }
+
+export { ReportOptions }
 
 // @public
 export function runValidate(patterns: string[], options: ValidateOptions): Promise<number>;
 
-// @public
-export const UI_INTEGRATIONS: readonly ["material", "bootstrap", "primeng", "ionic"];
+export { UI_INTEGRATIONS }
 
-// @public
-export function validateConfigObject(config: unknown, uiIntegration: UiIntegration): ValidationResult;
+export { UiIntegration }
 
-// @public
-export function validateFile(filePath: string, uiIntegration: UiIntegration): Promise<FileValidationResult>;
+export { validateConfigObject }
+
+export { validateFile }
+
+export { validateFormConfig }
 
 // @public (undocumented)
 export interface ValidateOptions {
@@ -139,8 +104,9 @@ export interface ValidateOptions {
     ui: string;
 }
 
-// @public
-export function validateSource(source: string, filePath: string, uiIntegration: UiIntegration): FileValidationResult;
+export { validateSource }
+
+export { ValidationResult }
 
 // (No @packageDocumentation comment for this package)
 

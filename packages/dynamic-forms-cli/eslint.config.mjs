@@ -9,10 +9,20 @@ export default [
         'error',
         {
           ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}'],
-          // `zod` is never imported here directly; it is a peerDependency of
-          // @ng-forge/dynamic-forms-zod, and this CLI is the consumer that has
-          // to satisfy it so `npx @ng-forge/dynamic-forms-cli` resolves standalone.
-          ignoredDependencies: ['vite', '@nx/vite', 'vitest', 'zod'],
+          // The three runtime packages below are not imported from this
+          // package's own sources. They are reached through the bundled
+          // @ng-forge/dynamic-forms-validation code, so they must be declared
+          // for `npx @ng-forge/dynamic-forms-cli` to resolve standalone even
+          // though the dependency check cannot see the import.
+          ignoredDependencies: [
+            'vite',
+            '@nx/vite',
+            'vitest',
+            'zod',
+            'ts-morph',
+            'zod-to-json-schema',
+            '@ng-forge/dynamic-forms-validation', // Internal library, bundled by esbuild
+          ],
         },
       ],
     },

@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { INSTRUCTIONS } from '../packages/dynamic-form-mcp/src/registry/instructions.ts';
 import { FIELD_TYPES } from '../packages/dynamic-form-mcp/src/registry/field-types.ts';
 import { PATTERNS } from '../packages/dynamic-form-mcp/src/tools/examples.tool.ts';
-import { FIX_SUGGESTIONS } from '../packages/dynamic-forms-cli/src/fix-suggestions.ts';
+import { FIX_SUGGESTIONS } from '../internal/dynamic-forms-validation/reporting/fix-suggestions.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SKILL_DIR = join(ROOT, 'skills', 'dynamic-forms');

@@ -35,9 +35,9 @@ export {
 } from './registry/index.js';
 
 // Re-export validation from Zod package for direct use (e.g., Amplify AI tools)
-export type { ValidationResult, FormattedValidationError, UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
+export type { ValidationResult, FormattedValidationError, UiIntegration } from '@ng-forge/dynamic-forms-validation';
 
-export { validateFormConfig, isValidFormConfig } from '@ng-forge/dynamic-forms-zod/validate';
+export { validateFormConfig, isValidFormConfig } from '@ng-forge/dynamic-forms-validation';
 
 // Re-export JSON schema utilities
-export { getFormConfigJsonSchema, getLeafFieldJsonSchema } from '@ng-forge/dynamic-forms-zod/validate';
+export { getFormConfigJsonSchema, getLeafFieldJsonSchema } from '@ng-forge/dynamic-forms-validation';

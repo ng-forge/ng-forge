@@ -2,10 +2,14 @@
 
 import { glob } from 'node:fs/promises';
 import { relative } from 'node:path';
-import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
-import { formatFileReport } from './report.js';
+import {
+  formatFileReport,
+  UI_INTEGRATIONS,
+  validateFile,
+  type FileValidationResult,
+  type UiIntegration,
+} from '@ng-forge/dynamic-forms-validation';
 import { collectRelatedDocs } from './related-docs.js';
-import { UI_INTEGRATIONS, validateFile, type FileValidationResult } from './validate-file.js';
 
 /** All valid, nothing to fix. */
 export const EXIT_OK = 0;

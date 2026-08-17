@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": [
+    "index.ts",
+    "src/**/*.ts",
+    "material/src/**/*.ts",
+    "bootstrap/src/**/*.ts",
+    "primeng/src/**/*.ts",
+    "ionic/src/**/*.ts",
+    "validate/src/**/*.ts",
+    "discovery/**/*.ts",
+    "reporting/**/*.ts"
+  ],
+  // Test globs are NOT scoped to `src/`: several sibling directories carry
+  // their own specs, and scoping the excludes to src/ let those specs through.
+  "exclude": [
+    "vite.config.ts",
+    "vite.config.mts",
+    "vitest.config.ts",
+    "vitest.config.mts",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+    "**/__tests__/**"
+  ]
+}

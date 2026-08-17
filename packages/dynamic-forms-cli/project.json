@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/dynamic-forms-cli/src",
   "projectType": "library",
+  "implicitDependencies": ["dynamic-forms-validation"],
   "release": {
     "version": {
       "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
@@ -24,9 +25,12 @@
         "platform": "node",
         "bundle": true,
         "esbuildOptions": {
-          "external": ["commander", "ts-morph", "zod", "@ng-forge/dynamic-forms-zod"]
+          "external": ["commander", "ts-morph", "zod", "zod-to-json-schema"]
         },
-        "additionalEntryPoints": ["packages/dynamic-forms-cli/bin/ng-forge-validate.ts"],
+        "additionalEntryPoints": [
+          "packages/dynamic-forms-cli/bin/ng-forge-validate.ts",
+          "packages/dynamic-forms-cli/validate/src/index.ts"
+        ],
         "assets": ["packages/dynamic-forms-cli/README.md", "packages/dynamic-forms-cli/package.json", "packages/dynamic-forms-cli/LICENSE"]
       }
     },

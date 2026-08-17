@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validateSource } from '@ng-forge/dynamic-forms-cli';
+import { validateSource } from '@ng-forge/dynamic-forms-validation';
 import { PATTERNS } from './examples.tool.js';
 
 const DEPTHS = ['minimal', 'brief', 'full'] as const;

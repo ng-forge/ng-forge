@@ -98,10 +98,26 @@ if (!result.valid) {
 
 `validateSource` takes the source text directly if you already hold it, for example in an editor integration.
 
+## Validating configs at runtime
+
+If your forms arrive as JSON from an API or a CMS, the compiler cannot see them and the CLI runs too early. Import the `/validate` entry point instead, which carries the schemas without the ts-morph source parser and is safe in an application bundle:
+
+```typescript
+import { validateFormConfig, getFormConfigJsonSchema } from '@ng-forge/dynamic-forms-cli/validate';
+
+const result = validateFormConfig('material', configFromApi);
+
+if (!result.valid) {
+  console.error(result.errorSummary);
+}
+
+// JSON Schema, for constraining an LLM's structured output
+const schema = getFormConfigJsonSchema('material');
+```
+
 ## Related
 
 - [`@ng-forge/dynamic-forms`](https://www.npmjs.com/package/@ng-forge/dynamic-forms) - the form library
-- [`@ng-forge/dynamic-forms-zod`](https://www.npmjs.com/package/@ng-forge/dynamic-forms-zod) - the schemas this CLI validates against
 - [`@ng-forge/dynamic-form-mcp`](https://www.npmjs.com/package/@ng-forge/dynamic-form-mcp) - MCP server exposing the same validation to AI assistants
 
 ## License

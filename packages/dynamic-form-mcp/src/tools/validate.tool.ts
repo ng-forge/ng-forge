@@ -2,8 +2,15 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { validateFormConfig, type UiIntegration, type FormattedValidationError } from '@ng-forge/dynamic-forms-zod/validate';
-import { formatConfigReport, formatFileReport, parseConfigInput, validateFile } from '@ng-forge/dynamic-forms-cli';
+import {
+  formatConfigReport,
+  formatFileReport,
+  parseConfigInput,
+  validateFile,
+  validateFormConfig,
+  type FormattedValidationError,
+  type UiIntegration,
+} from '@ng-forge/dynamic-forms-validation';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 

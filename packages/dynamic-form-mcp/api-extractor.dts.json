@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
   "projectFolder": ".",
   "mainEntryPointFilePath": "<projectFolder>/../../dist/packages/dynamic-form-mcp/src/index.d.ts",
-  "bundledPackages": ["@ng-forge/dynamic-forms-zod"],
+  "bundledPackages": ["@ng-forge/dynamic-forms-validation"],
   "compiler": {
     "overrideTsconfig": {
       "compilerOptions": {
@@ -15,8 +15,8 @@
         "types": [],
         "baseUrl": "../..",
         "paths": {
-          "@ng-forge/dynamic-forms-zod": ["./dist/packages/dynamic-forms-zod/src/index.d.ts"],
-          "@ng-forge/dynamic-forms-zod/*": ["./dist/packages/dynamic-forms-zod/*/src/index.d.ts"]
+          "@ng-forge/dynamic-forms-validation": ["./dist/internal/dynamic-forms-validation/index.d.ts"],
+          "@ng-forge/dynamic-forms-validation/schema-only": ["./dist/internal/dynamic-forms-validation/validate/src/index.d.ts"]
         }
       }
     }

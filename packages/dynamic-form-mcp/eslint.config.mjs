@@ -17,8 +17,8 @@ export default [
             'vitest',
             'tsx',
             'ts-morph',
-            '@ng-forge/dynamic-forms-zod', // Internal package, bundled by esbuild
-            'zod-to-json-schema', // Required by the bundled dynamic-forms-zod/validate code (not a direct src import)
+            '@ng-forge/dynamic-forms-validation', // Internal library, bundled by esbuild
+            'zod-to-json-schema', // Required by the bundled validation code (not a direct src import)
           ],
         },
       ],

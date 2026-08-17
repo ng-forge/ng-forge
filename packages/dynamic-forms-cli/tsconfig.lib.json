@@ -8,5 +8,5 @@
     "types": ["node"]
   },
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "src/**/__tests__/**", "vite.config.ts"],
-  "include": ["src/**/*.ts", "bin/**/*.ts"]
+  "include": ["src/**/*.ts", "bin/**/*.ts", "validate/src/**/*.ts"]
 }

@@ -1,6 +1,6 @@
 /** Maps validation errors to documentation pages. */
 
-import type { FormattedValidationError } from '@ng-forge/dynamic-forms-zod/validate';
+import type { FormattedValidationError } from '@ng-forge/dynamic-forms-validation';
 
 const DOCS_BASE_URL = 'https://ng-forge.com/dynamic-forms';
 

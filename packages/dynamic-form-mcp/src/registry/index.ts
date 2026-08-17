@@ -1,6 +1,6 @@
 /** Registry module for field type, validator, and UI adapter metadata */
 
-import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
+import type { UiIntegration } from '@ng-forge/dynamic-forms-validation';
 
 export interface PropertyInfo {
   name: string;

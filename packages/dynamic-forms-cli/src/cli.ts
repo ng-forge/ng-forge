@@ -1,8 +1,8 @@
 /** `ng-forge-validate` command wiring. */
 
 import { Command } from 'commander';
+import { UI_INTEGRATIONS } from '@ng-forge/dynamic-forms-validation';
 import { runValidate, type ValidateOptions } from './run-validate.js';
-import { UI_INTEGRATIONS } from './validate-file.js';
 
 /** Build the commander program. Exposed for tests. */
 export function createProgram(): Command {

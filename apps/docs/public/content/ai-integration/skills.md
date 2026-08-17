@@ -96,7 +96,7 @@ The CLI exists for what the compiler cannot see: structural rules such as contai
 If your forms come from an API or a CMS, neither the compiler nor the CLI can reach them. Validate them where they land:
 
 ```typescript
-import { validateFormConfig } from '@ng-forge/dynamic-forms-zod/validate';
+import { validateFormConfig } from '@ng-forge/dynamic-forms-cli/validate';
 
 const result = validateFormConfig('material', configFromApi);
 
@@ -108,7 +108,7 @@ if (!result.valid) {
 The same package generates JSON Schema, which is useful for constraining an LLM's structured output to configs that will actually render:
 
 ```typescript
-import { getFormConfigJsonSchema } from '@ng-forge/dynamic-forms-zod/validate';
+import { getFormConfigJsonSchema } from '@ng-forge/dynamic-forms-cli/validate';
 
 const schema = getFormConfigJsonSchema('material');
 ```
@@ -124,13 +124,13 @@ The whole documentation site is published in a form assistants can read without 
 
 ## Compared to the MCP server
 
-| MCP tool           | Equivalent with the skill                                                   |
-| ------------------ | --------------------------------------------------------------------------- |
-| `ngforge_validate` | `npx @ng-forge/dynamic-forms-cli`, or the `@ng-forge/dynamic-forms-zod` API |
-| `ngforge_lookup`   | `references/rules.md` and `references/field-types.md`, or `llms-full.txt`   |
-| `ngforge_examples` | `references/patterns.md`                                                    |
-| `ngforge_scaffold` | The patterns, adapted by the assistant                                      |
-| `ngforge_search`   | No direct equivalent. Use the docs site search                              |
+| MCP tool           | Equivalent with the skill                                                 |
+| ------------------ | ------------------------------------------------------------------------- |
+| `ngforge_validate` | `npx @ng-forge/dynamic-forms-cli`, or its `/validate` entry point         |
+| `ngforge_lookup`   | `references/rules.md` and `references/field-types.md`, or `llms-full.txt` |
+| `ngforge_examples` | `references/patterns.md`                                                  |
+| `ngforge_scaffold` | The patterns, adapted by the assistant                                    |
+| `ngforge_search`   | No direct equivalent. Use the docs site search                            |
 
 The skill loses interactive lookup: the assistant reads whole reference files rather than querying for one topic. In exchange it needs no server, works across assistants, and its validation runs in CI.
 

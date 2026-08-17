@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateFormConfig } from '@ng-forge/dynamic-forms-zod/validate';
+import { validateFormConfig } from '@ng-forge/dynamic-forms-validation';
 
 /**
  * Parity guard between the dynamic-forms library and the MCP/zod validation
