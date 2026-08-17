@@ -22,6 +22,11 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getGroupFieldsScenario('group-nested') },
   },
+  {
+    path: 'container-validator',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getGroupFieldsScenario('group-container-validator-test') },
+  },
 ];
 
 export default routes;

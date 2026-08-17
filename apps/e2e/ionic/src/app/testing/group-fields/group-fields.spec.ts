@@ -176,4 +176,39 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(companyInput).toHaveValue('TechCorp', { timeout: 5000 });
     });
   });
+
+  test.describe('Container Validator (issue #568)', () => {
+    test('renders the group-level message in this adapter and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/container-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('group-container-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This adapter registers its own `container-errors` wrapper over the core default.
+      const containerError = scenario.locator('ion-note.df-ion-error');
+
+      await expect(containerError).toHaveCount(0);
+
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      // `ion-button` is a custom element, so Playwright's toBeDisabled() does not
+      // read it — the rest of this suite asserts on aria-disabled instead.
+      await expect(submitButton).toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
+
+      await helpers.fillInput(dateTo, '2026-03-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
+    });
+  });
 });

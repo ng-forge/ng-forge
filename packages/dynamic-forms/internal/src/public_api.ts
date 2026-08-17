@@ -43,6 +43,7 @@ export * from './lib/core/validation/create-resolved-errors-signal';
 export * from './lib/core/validation/should-show-errors';
 export * from './lib/core/validation/validator-factory';
 export * from './lib/core/validation/validator-types';
+export * from './lib/core/validation/wrapper-field-errors';
 export * from './lib/core/values/dynamic-value-factory';
 export * from './lib/core/values/dynamic-value-function-cache.service';
 export * from './lib/definitions/base/base-checked-field';

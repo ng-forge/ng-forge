@@ -1285,6 +1285,9 @@ export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
 export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]>;
 
 // @public
+export function injectFieldErrors(options: WrapperFieldErrorsOptions): WrapperFieldErrors;
+
+// @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;
 
 // @public
@@ -1978,6 +1981,21 @@ export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers ? FieldRegistryWrappers[TWrappers] : {
     readonly type: TWrappers;
 };
+
+// @public
+export interface WrapperFieldErrors {
+    readonly errorId: Signal<string>;
+    readonly errors: Signal<ResolvedError[]>;
+    readonly errorsToDisplay: Signal<ResolvedError[]>;
+    readonly showErrors: Signal<boolean>;
+}
+
+// @public (undocumented)
+export interface WrapperFieldErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages?: Signal<ValidationMessages | undefined>;
+}
 
 // @public
 export interface WrapperFieldInputs {
