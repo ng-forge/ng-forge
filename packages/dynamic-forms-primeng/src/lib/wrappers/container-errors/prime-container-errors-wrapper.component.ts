@@ -11,6 +11,7 @@ import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-for
       <small class="p-error" role="alert">{{ error.message }}</small>
     }
   `,
+  styleUrl: './prime-container-errors-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PrimeContainerErrorsWrapperComponent implements FieldWrapper {

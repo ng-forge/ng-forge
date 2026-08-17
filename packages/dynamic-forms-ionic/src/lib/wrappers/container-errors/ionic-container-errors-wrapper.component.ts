@@ -13,6 +13,7 @@ import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-for
       <ion-note color="danger" class="df-ion-error" role="alert">{{ error.message }}</ion-note>
     }
   `,
+  styleUrl: './ionic-container-errors-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicContainerErrorsWrapperComponent implements FieldWrapper {

@@ -15,6 +15,7 @@ import { FieldWrapper, injectContainerErrors, WrapperFieldInputs } from '@ng-for
       <div class="invalid-feedback d-block" role="alert">{{ error.message }}</div>
     }
   `,
+  styleUrl: './bs-container-errors-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class BsContainerErrorsWrapperComponent implements FieldWrapper {
