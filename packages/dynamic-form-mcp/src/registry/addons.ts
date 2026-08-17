@@ -1,6 +1,6 @@
 /** Addon Registry Data */
 
-import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
+import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
 import type { PropertyInfo } from './index.js';
 
 export interface AddonTypeInfo {

@@ -226,7 +226,7 @@ jobs:
           # Path filter `-- packages/` further restricts to commits that actually touched
           # the published library sources. A `feat(docs): …` or `fix(examples): …` no
           # longer triggers a nightly because it doesn't change anything that ships to
-          # npm. Only changes under `packages/**` (the seven workspaces in
+          # npm. Only changes under `packages/**` (the workspaces in
           # LIBRARY_PACKAGES) qualify.
           #
           # Disable errexit + pipefail for this pipeline so we can distinguish grep's

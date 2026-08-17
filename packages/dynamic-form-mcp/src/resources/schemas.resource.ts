@@ -1,7 +1,7 @@
 /** Schemas Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { getSupportedFieldTypes } from '@ng-forge/dynamic-forms-zod/mcp';
+import { getSupportedFieldTypes } from '@ng-forge/dynamic-forms-zod/validate';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 

@@ -1,7 +1,7 @@
 /** UI Adapters Resource */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/mcp';
+import type { UiIntegration } from '@ng-forge/dynamic-forms-zod/validate';
 import { getUIAdapters, getUIAdapter } from '../registry/index.js';
 
 export function registerUIAdaptersResource(server: McpServer): void {

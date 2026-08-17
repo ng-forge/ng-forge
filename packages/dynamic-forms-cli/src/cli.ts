@@ -1,0 +1,28 @@
+/** `ng-forge-validate` command wiring. */
+
+import { Command } from 'commander';
+import { runValidate, type ValidateOptions } from './run-validate.js';
+import { UI_INTEGRATIONS } from './validate-file.js';
+
+/** Build the commander program. Exposed for tests. */
+export function createProgram(): Command {
+  const program = new Command();
+
+  program
+    .name('ng-forge-validate')
+    .description('Validate @ng-forge/dynamic-forms FormConfig objects in TypeScript or JavaScript files.')
+    .argument('<patterns...>', 'glob pattern(s) of files to check, e.g. "src/**/*.form.ts"')
+    .option('-u, --ui <integration>', `UI integration to validate against (${UI_INTEGRATIONS.join(', ')})`, 'material')
+    .option('--json', 'emit machine-readable JSON instead of a report', false)
+    .option('-q, --quiet', 'only report failures', false)
+    .action(async (patterns: string[], options: ValidateOptions) => {
+      process.exitCode = await runValidate(patterns, options);
+    });
+
+  return program;
+}
+
+/** Entry point used by the bin script. */
+export async function run(argv: string[] = process.argv): Promise<void> {
+  await createProgram().parseAsync(argv);
+}

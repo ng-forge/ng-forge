@@ -2,69 +2,16 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { readFile } from 'fs/promises';
-import {
-  validateFormConfig,
-  type UiIntegration,
-  type ValidationResult,
-  type FormattedValidationError,
-} from '@ng-forge/dynamic-forms-zod/mcp';
-import {
-  createSourceFile,
-  findFormConfigCandidates,
-  extractToJson,
-  type FormConfigCandidate,
-  type ExtractionResult,
-} from '../utils/ast-extractor.js';
+import { validateFormConfig, type UiIntegration, type FormattedValidationError } from '@ng-forge/dynamic-forms-zod/validate';
+import { formatConfigReport, formatFileReport, parseConfigInput, validateFile } from '@ng-forge/dynamic-forms-cli';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
 
-/** Common fixes for validation errors. */
-const FIX_SUGGESTIONS: Record<string, string> = {
-  options: 'Move `options` from `props: { options: [...] }` to field level: `{ key, type, options: [...] }`',
-  label: 'Remove `label` from this container field (page/group/row/array). Use a `text` field inside for headings.',
-  logic:
-    "Containers (group, row, array) only support 'hidden' logic type (same as pages). For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.",
-  minValue: 'Use `minValue` at field level for sliders, not `min` in props.',
-  maxValue: 'Use `maxValue` at field level for sliders, not `max` in props.',
-  step: 'Use `step` at field level for sliders, not in props.',
-  template:
-    'Arrays support two APIs: (1) Full API with `fields` for explicit item definitions, or (2) Simplified API with `template` + `value` for common cases. If using `template`, provide a single field for primitive arrays or an array of fields for object arrays.',
-  content: 'Use `label` for text content and `props: { elementType }` for HTML element.',
-  element: 'Use `props: { elementType }` not `element` for text field HTML element.',
-  hideWhen: "Use `logic: [{ type: 'hidden', condition: {...} }]` - no `hideWhen` shorthand exists.",
-  showWhen: "Use `logic: [{ type: 'hidden', condition: {...} }]` with inverted condition - no `showWhen` shorthand exists.",
-  expressions: "Use `logic: [{ type: 'derivation', expression }]` or shorthand `derivation: '...'` - no `expressions` property exists.",
-  derivation:
-    "Use shorthand `derivation: '...'` or `logic: [{ type: 'derivation', expression: '...' }]`. Derivations are defined on the target field itself.",
-  targetField:
-    "The `targetField` property has been removed. Define derivations directly on the target field using `derivation: '...'` or `logic: [{ type: 'derivation', expression: '...' }]`.",
-  value: 'Hidden fields REQUIRE a `value` property. Add: `value: "your-value-here"`',
-  validators: 'Hidden fields do NOT support validators. Remove the `validators` property.',
-  required: 'Hidden fields do NOT support `required`. Remove it.',
-  disabled: 'Hidden fields do NOT support `disabled`. Remove it.',
-  readonly: 'Hidden fields do NOT support `readonly`. Remove it.',
-  hidden: 'Hidden fields do NOT support `hidden`. Remove it (the field is already hidden).',
-  col: 'Hidden fields do NOT support `col`. Remove it (no layout needed).',
-  props: 'Hidden fields do NOT support `props`. Remove it.',
-  arrayKey: 'arrayKey should be at FIELD level, not inside props.',
-  responseMapping:
-    'Declarative HTTP validators require `responseMapping: { validWhen: "response.isValid", errorKind: "serverError" }`. `validWhen` is an expression evaluated with `{ response }` scope — truthy means valid. `errorKind` maps to `validationMessages`.',
-  validWhen:
-    '`validWhen` is a property of `responseMapping`, not a top-level validator property. Use: `responseMapping: { validWhen: "response.ok", errorKind: "..." }`.',
-  errorKind:
-    '`errorKind` is a property of `responseMapping`, not a top-level validator property. Use: `responseMapping: { validWhen: "...", errorKind: "myError" }`.',
-  stopOnUserOverride:
-    '`stopOnUserOverride` is a derivation option. When true, the derivation stops running after the user manually edits the field. Pair with `reEngageOnDependencyChange: true` to re-derive when dependencies change.',
-  reEngageOnDependencyChange:
-    '`reEngageOnDependencyChange` requires `stopOnUserOverride: true`. Clears the user-override flag when dependencies change, allowing the derivation to run again.',
-  httpCondition:
-    'HTTP conditions use `type: "http"` with `http: { url, method?, queryParams? }` and optional `responseExpression` to extract boolean from response. Set `pendingValue` for in-flight behavior.',
-};
-
 /**
  * Error-to-topic hints for contextual documentation references.
- * Maps error text patterns to relevant lookup tool calls.
+ * Maps error text patterns to relevant lookup tool calls. This is the MCP
+ * flavour of the CLI's `collectRelatedDocs`: same intent, but it points the
+ * model at `ngforge_lookup` rather than at a URL it would have to fetch.
  */
 const ERROR_TOPIC_HINTS: Array<{ pattern: RegExp; hint: string }> = [
   { pattern: /options/i, hint: '`ngforge_lookup topic="options-format"` — correct options syntax' },
@@ -96,227 +43,16 @@ function collectErrorTopicHints(errors: FormattedValidationError[]): string[] {
   return hints;
 }
 
-/** Get fix suggestion for an error. */
-function getFixSuggestion(error: FormattedValidationError): string | undefined {
-  const pathParts = error.path.split('.');
-  const lastPart = pathParts[pathParts.length - 1];
-
-  // Check for direct property match
-  if (FIX_SUGGESTIONS[lastPart]) {
-    return FIX_SUGGESTIONS[lastPart];
+/**
+ * Hints for the JSON/object path. Same topic mapping as the file path, plus a
+ * standing pointer to the pitfalls topic: when the model handed us a config
+ * inline it has no file to re-read, so the catch-all is worth repeating.
+ */
+function collectObjectReportHints(errors: FormattedValidationError[]): string[] {
+  if (errors.length === 0) {
+    return [];
   }
-
-  // Check message for known patterns
-  for (const [key, suggestion] of Object.entries(FIX_SUGGESTIONS)) {
-    if (error.message.toLowerCase().includes(key.toLowerCase())) {
-      return suggestion;
-    }
-  }
-
-  return undefined;
-}
-
-/** Result of extracting and validating a single FormConfig from file. */
-interface ConfigValidationResult {
-  name: string;
-  line: number;
-  matchReason: FormConfigCandidate['matchReason'];
-  extraction: ExtractionResult;
-  validation: ValidationResult;
-}
-
-/** Format validation report for file validation. */
-function formatFileReport(
-  filePath: string,
-  uiIntegration: string,
-  candidates: FormConfigCandidate[],
-  results: ConfigValidationResult[],
-): string {
-  const lines: string[] = [];
-
-  lines.push('# Validation Report');
-  lines.push('');
-  lines.push(`**File:** ${filePath}`);
-  lines.push(`**UI Integration:** ${uiIntegration}`);
-  lines.push('');
-
-  // Discovery Phase
-  if (candidates.length === 0) {
-    lines.push('## No FormConfig Found');
-    lines.push('');
-    lines.push('Could not find any FormConfig objects in the file.');
-    lines.push('');
-    lines.push('**Detection methods used:**');
-    lines.push('1. `satisfies FormConfig` (recommended)');
-    lines.push('2. `const x: FormConfig = {...}`');
-    lines.push('3. `as FormConfig`');
-    lines.push('4. Structural match (object with `fields` array)');
-    lines.push('');
-    lines.push('**Tip:** Ensure your config has a `fields` array with objects containing `key` or `type`.');
-    return lines.join('\n');
-  }
-
-  lines.push(`## Found ${candidates.length} FormConfig(s)`);
-  lines.push('');
-
-  // Extraction Warnings
-  const hasWarnings = results.some((r) => r.extraction.warnings.length > 0);
-  if (hasWarnings) {
-    lines.push('### Extraction Notes');
-    lines.push('');
-    lines.push('Some runtime values were replaced with placeholders:');
-    lines.push('');
-    for (const result of results) {
-      for (const warning of result.extraction.warnings) {
-        lines.push(`- **${warning.path}**: ${warning.issue}`);
-      }
-    }
-    lines.push('');
-  }
-
-  // Validation Results
-  const allValid = results.every((r) => r.validation.valid);
-  const totalErrors = results.reduce((sum, r) => sum + (r.validation.errors?.length || 0), 0);
-
-  if (allValid) {
-    lines.push('### ✅ All Configs Valid');
-    lines.push('');
-    for (const result of results) {
-      lines.push(`- **${result.name}** (line ${result.line}): Valid`);
-    }
-  } else {
-    lines.push(`### ❌ ${totalErrors} Error(s) Found`);
-    lines.push('');
-
-    const allErrors: FormattedValidationError[] = [];
-
-    for (const result of results) {
-      if (result.validation.valid) {
-        lines.push(`#### ${result.name} (line ${result.line}): ✅ Valid`);
-      } else {
-        lines.push(`#### ${result.name} (line ${result.line}): ❌ Invalid`);
-        lines.push('');
-
-        if (result.validation.errors) {
-          for (const error of result.validation.errors) {
-            lines.push(`- **${error.path}:** ${error.message}`);
-            const fix = getFixSuggestion(error);
-            if (fix) {
-              lines.push(`  - **Fix:** ${fix}`);
-            }
-          }
-          allErrors.push(...result.validation.errors);
-        }
-      }
-      lines.push('');
-    }
-
-    // Append contextual documentation hints based on errors
-    const hints = collectErrorTopicHints(allErrors);
-    if (hints.length > 0) {
-      lines.push('### 📚 Related Documentation');
-      for (const hint of hints) {
-        lines.push(`- ${hint}`);
-      }
-      lines.push('');
-    }
-  }
-
-  return lines.join('\n');
-}
-
-/** Format validation report for JSON config validation. */
-function formatJsonReport(uiIntegration: string, result: ValidationResult): string {
-  const lines: string[] = [];
-
-  lines.push('# Validation Report');
-  lines.push('');
-  lines.push(`**UI Integration:** ${uiIntegration}`);
-  lines.push('');
-
-  if (result.valid) {
-    lines.push('### ✅ Config Valid');
-    lines.push('');
-    lines.push('The configuration passes all validation checks.');
-  } else {
-    const errorCount = result.errors?.length || 0;
-    lines.push(`### ❌ ${errorCount} Error(s) Found`);
-    lines.push('');
-
-    if (result.errors) {
-      for (const error of result.errors) {
-        lines.push(`- **${error.path}:** ${error.message}`);
-        const fix = getFixSuggestion(error);
-        if (fix) {
-          lines.push(`  - **Fix:** ${fix}`);
-        }
-      }
-
-      // Append contextual documentation hints based on errors
-      lines.push('');
-      const hints = collectErrorTopicHints(result.errors);
-      if (hints.length > 0) {
-        lines.push('### 📚 Related Documentation');
-        for (const hint of hints) {
-          lines.push(`- ${hint}`);
-        }
-      }
-      lines.push('');
-      lines.push('**Tip:** Use `ngforge_lookup topic="pitfalls"` for common mistakes and solutions.');
-    }
-  }
-
-  return lines.join('\n');
-}
-
-/** Detect if a string is a file path. */
-function isFilePath(value: string): boolean {
-  // Check for common file path patterns
-  return (
-    value.startsWith('/') || // Absolute path (Unix)
-    value.startsWith('./') || // Relative path
-    value.startsWith('../') || // Parent directory
-    value.startsWith('~') || // Home directory
-    /^[a-zA-Z]:\\/.test(value) || // Windows absolute path
-    value.endsWith('.ts') ||
-    value.endsWith('.js') ||
-    value.endsWith('.tsx') ||
-    value.endsWith('.jsx')
-  );
-}
-
-/** Parse config input - handles string (file path or JSON) or object. */
-async function parseConfigInput(
-  config: string | Record<string, unknown>,
-): Promise<
-  { type: 'file'; path: string } | { type: 'json'; data: Record<string, unknown> } | { type: 'object'; data: Record<string, unknown> }
-> {
-  // Already an object
-  if (typeof config === 'object') {
-    return { type: 'object', data: config };
-  }
-
-  // String - could be file path or JSON
-  const trimmed = config.trim();
-
-  // Check if it's a file path
-  if (isFilePath(trimmed)) {
-    return { type: 'file', path: trimmed };
-  }
-
-  // Try to parse as JSON
-  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      return { type: 'json', data: parsed };
-    } catch {
-      // Not valid JSON - might be a file path after all
-      return { type: 'file', path: trimmed };
-    }
-  }
-
-  // Default to treating as file path
-  return { type: 'file', path: trimmed };
+  return [...collectErrorTopicHints(errors), 'Use `ngforge_lookup topic="pitfalls"` for common mistakes and solutions.'];
 }
 
 export function registerValidateTool(server: McpServer): void {
@@ -351,46 +87,20 @@ Example errors you'll see:
     },
     async ({ config, uiIntegration }) => {
       try {
-        const parsed = await parseConfigInput(config);
+        const parsed = parseConfigInput(config);
 
         // File validation
         if (parsed.type === 'file') {
-          const filePath = parsed.path;
+          const result = await validateFile(parsed.path, uiIntegration as UiIntegration);
+          const report = formatFileReport(result, { relatedDocs: collectErrorTopicHints });
 
-          // Read the file
-          const source = await readFile(filePath, 'utf-8');
-
-          // Parse with ts-morph
-          const sourceFile = createSourceFile(source, filePath);
-
-          // Find candidates
-          const candidates = findFormConfigCandidates(sourceFile);
-
-          // Extract and validate each candidate
-          const results: ConfigValidationResult[] = candidates.map((candidate) => {
-            const extraction = extractToJson(candidate.objectLiteral);
-            const validation = validateFormConfig(uiIntegration as UiIntegration, extraction.value);
-
-            return {
-              name: candidate.name,
-              line: candidate.startLine,
-              matchReason: candidate.matchReason,
-              extraction,
-              validation,
-            };
-          });
-
-          // Format report
-          const report = formatFileReport(filePath, uiIntegration, candidates, results);
-
-          // Structured output
           const structured = {
             type: 'file',
-            filePath,
+            filePath: result.filePath,
             uiIntegration,
-            configsFound: results.length,
-            allValid: results.every((r) => r.validation.valid),
-            results: results.map((r) => ({
+            configsFound: result.results.length,
+            allValid: result.valid,
+            results: result.results.map((r) => ({
               name: r.name,
               line: r.line,
               valid: r.validation.valid,
@@ -410,7 +120,7 @@ Example errors you'll see:
         const configData = parsed.data;
         const result = validateFormConfig(uiIntegration as UiIntegration, configData);
 
-        const report = formatJsonReport(uiIntegration, result);
+        const report = formatConfigReport(uiIntegration as UiIntegration, result, { relatedDocs: collectObjectReportHints });
 
         const structured = {
           type: parsed.type,

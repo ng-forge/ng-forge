@@ -37,6 +37,9 @@ export default {
         'mcp',
         // OpenAPI generator
         'openapi-generator',
+        // Zod schemas + validation CLI
+        'zod',
+        'cli',
         // Apps
         'docs',
         'examples',

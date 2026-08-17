@@ -15,8 +15,8 @@
         "types": [],
         "baseUrl": "../..",
         "paths": {
-          "@ng-forge/dynamic-forms-zod": ["./dist/internal/dynamic-forms-zod/src/index.d.ts"],
-          "@ng-forge/dynamic-forms-zod/*": ["./dist/internal/dynamic-forms-zod/*/src/index.d.ts"]
+          "@ng-forge/dynamic-forms-zod": ["./dist/packages/dynamic-forms-zod/src/index.d.ts"],
+          "@ng-forge/dynamic-forms-zod/*": ["./dist/packages/dynamic-forms-zod/*/src/index.d.ts"]
         }
       }
     }

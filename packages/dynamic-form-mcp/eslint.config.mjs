@@ -18,7 +18,7 @@ export default [
             'tsx',
             'ts-morph',
             '@ng-forge/dynamic-forms-zod', // Internal package, bundled by esbuild
-            'zod-to-json-schema', // Required by the bundled dynamic-forms-zod/mcp code (not a direct src import)
+            'zod-to-json-schema', // Required by the bundled dynamic-forms-zod/validate code (not a direct src import)
           ],
         },
       ],

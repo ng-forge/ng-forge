@@ -1,0 +1,55 @@
+import { z } from 'zod';
+import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves/index.js';
+import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement.js';
+import {
+  IonicInputFieldSchemaObject,
+  IonicCheckboxFieldSchema,
+  IonicRadioFieldSchemaObject,
+  IonicToggleFieldSchema,
+  IonicSliderFieldSchemaObject,
+  IonicDatepickerFieldSchemaObject,
+  IonicSelectFieldSchemaObject,
+  IonicTextareaFieldSchemaObject,
+  IonicMultiCheckboxFieldSchemaObject,
+  IonicButtonFieldSchema,
+  IonicSubmitButtonFieldSchema,
+  IonicNextButtonFieldSchema,
+  IonicPreviousButtonFieldSchema,
+  IonicAddArrayItemButtonFieldSchema,
+  IonicRemoveArrayItemButtonFieldSchema,
+  IonicPrependArrayItemButtonFieldSchema,
+  IonicInsertArrayItemButtonFieldSchema,
+  IonicPopArrayItemButtonFieldSchema,
+  IonicShiftArrayItemButtonFieldSchema,
+} from './fields/index.js';
+
+/**
+ * Discriminated union of all Ionic leaf field types.
+ */
+export const IonicLeafFieldSchema = z
+  .discriminatedUnion('type', [
+    TextFieldSchema,
+    HiddenFieldSchema,
+    IonicInputFieldSchemaObject,
+    IonicCheckboxFieldSchema,
+    IonicRadioFieldSchemaObject,
+    IonicToggleFieldSchema,
+    IonicSliderFieldSchemaObject,
+    IonicDatepickerFieldSchemaObject,
+    IonicSelectFieldSchemaObject,
+    IonicTextareaFieldSchemaObject,
+    IonicMultiCheckboxFieldSchemaObject,
+    IonicButtonFieldSchema,
+    IonicSubmitButtonFieldSchema,
+    IonicNextButtonFieldSchema,
+    IonicPreviousButtonFieldSchema,
+    IonicAddArrayItemButtonFieldSchema,
+    IonicRemoveArrayItemButtonFieldSchema,
+    IonicPrependArrayItemButtonFieldSchema,
+    IonicInsertArrayItemButtonFieldSchema,
+    IonicPopArrayItemButtonFieldSchema,
+    IonicShiftArrayItemButtonFieldSchema,
+  ])
+  .superRefine(nullableValueRefine);
+
+export type IonicLeafFieldSchemaType = z.infer<typeof IonicLeafFieldSchema>;
