@@ -1,17 +1,38 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatHint, MatInput } from '@angular/material/input';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
+import {
+  DfAddonSlot,
+  injectNgForgeAddons,
+  injectNgForgeField,
+  NgForgeAddons,
+  NgForgeControl,
+  NgForgeFieldHost,
+  WrapperFieldInputs,
+} from '@ng-forge/dynamic-forms/integration';
 import { MatTextareaProps } from './mat-textarea.type';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '../../models/material-config.token';
 
 @Component({
   selector: 'df-mat-textarea',
-  imports: [MatFormField, MatLabel, MatInput, MatHint, FormField, MatError, DynamicTextPipe, AsyncPipe, NgForgeControl],
-  hostDirectives: [NgForgeFieldHost],
+  imports: [
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatHint,
+    FormField,
+    MatError,
+    MatPrefix,
+    MatSuffix,
+    DynamicTextPipe,
+    AsyncPipe,
+    NgForgeControl,
+    DfAddonSlot,
+  ],
+  hostDirectives: [NgForgeFieldHost, NgForgeAddons],
   template: `
     @let textareaId = ngf.key() + '-textarea';
 
@@ -25,6 +46,15 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         <mat-label>{{ ngf.label() | dynamicText | async }}</mat-label>
       }
 
+      @for (a of ngfa.prefixAddons(); track $index) {
+        <df-addon-slot
+          matPrefix
+          [class.df-mat-addon-text]="a.type === 'text'"
+          [addon]="a"
+          [fieldInputs]="fieldInputs()"
+          [hidden]="ngfa.hiddenSignalCache().get(a)"
+        />
+      }
       <textarea
         ngForgeControl
         matInput
@@ -34,6 +64,15 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
         [attr.tabindex]="ngf.tabIndex()"
         [style.resize]="props()?.resize || 'vertical'"
       ></textarea>
+      @for (a of ngfa.suffixAddons(); track $index) {
+        <df-addon-slot
+          matSuffix
+          [class.df-mat-addon-text]="a.type === 'text'"
+          [addon]="a"
+          [fieldInputs]="fieldInputs()"
+          [hidden]="ngfa.hiddenSignalCache().get(a)"
+        />
+      }
 
       @if (ngf.errorsToDisplay()[0]; as error) {
         <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
@@ -56,8 +95,15 @@ export default class MatTextareaFieldComponent {
   private materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
   protected readonly ngf = injectNgForgeField<string>();
+  protected readonly ngfa = injectNgForgeAddons();
 
   readonly props = input<MatTextareaProps>();
+  /**
+   * Wrapper-style host bag pushed by `DfFieldOutlet`. Declared at the
+   * component level so `setInputIfDeclared` (which uses
+   * `reflectComponentType`) can write it.
+   */
+  readonly fieldInputs = input<WrapperFieldInputs | undefined>();
 
   readonly appearance = computed(() => this.props()?.appearance ?? this.materialConfig?.appearance ?? 'outline');
   readonly subscriptSizing = computed(() => this.props()?.subscriptSizing ?? this.materialConfig?.subscriptSizing ?? 'dynamic');

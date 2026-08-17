@@ -486,6 +486,21 @@ export const FIELD_ADDON_SUPPORT: FieldAddonSupportInfo[] = [
     slots: ['prefix', 'suffix'],
   },
   {
+    fieldType: 'select',
+    adapter: 'material',
+    slots: ['prefix', 'suffix'],
+  },
+  {
+    fieldType: 'textarea',
+    adapter: 'material',
+    slots: ['prefix', 'suffix'],
+  },
+  {
+    fieldType: 'datepicker',
+    adapter: 'material',
+    slots: ['prefix', 'suffix'],
+  },
+  {
     fieldType: 'input',
     adapter: 'bootstrap',
     slots: ['prefix', 'suffix'],

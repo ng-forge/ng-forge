@@ -54,6 +54,9 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/select/mat-select.component'),
     mapper: optionsFieldMapper,
     scope: 'single-select',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
@@ -129,6 +132,9 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     mapper: valueFieldMapper,
     propsToMeta: ['rows', 'cols'],
     scope: 'text-input',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
@@ -150,6 +156,9 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
     loadComponent: () => import('../fields/datepicker/mat-datepicker.component'),
     mapper: datepickerFieldMapper,
     scope: 'date',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
