@@ -13,6 +13,12 @@
         "cwd": "{workspaceRoot}"
       }
     },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "skills/vitest.config.mts"
+      }
+    },
     "check": {
       "executor": "nx:run-commands",
       "cache": true,

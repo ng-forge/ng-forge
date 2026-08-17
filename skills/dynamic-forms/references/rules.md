@@ -2,6 +2,20 @@
 
 # ng-forge Dynamic Forms - Best Practices
 
+## Contents
+
+- [Core Principles](#core-principles)
+- [FormConfig Structure](#formconfig-structure)
+- [Field Definition Rules](#field-definition-rules)
+- [Validation](#validation)
+- [Conditional Logic](#conditional-logic)
+- [UI Library Integration](#ui-library-integration)
+- [Provider Features](#provider-features)
+- [Common Patterns](#common-patterns)
+- [Anti-patterns to Avoid](#anti-patterns-to-avoid)
+- [CRITICAL: UI Library Differences](#critical-ui-library-differences)
+- [Validation Before Use](#validation-before-use)
+
 You MUST follow these practices when generating FormConfig objects for ng-forge.
 
 ## Core Principles

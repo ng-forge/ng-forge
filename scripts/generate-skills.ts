@@ -115,12 +115,57 @@ adapter. Check which adapter the project provides before writing \`props\`.
 }
 
 function rulesMd(): string {
-  return `${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n`;
+  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n`);
 }
 
 /** Escape a value for use inside a markdown table cell. Union types are full of pipes. */
 function cell(value: string): string {
   return value.replace(/\|/g, '\\|');
+}
+
+/** Files longer than this get a table of contents. */
+export const TOC_LINE_THRESHOLD = 100;
+
+/** GitHub-style anchor slug for a heading. */
+function anchorFor(heading: string): string {
+  return heading
+    .toLowerCase()
+    .replace(/`/g, '')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+/**
+ * Insert a table of contents into long reference files.
+ *
+ * Agents preview long files with partial reads (`head -100`), so without a
+ * contents list near the top they cannot see what else the file covers.
+ * Only `##` headings are listed: deeper levels would bury the shape.
+ */
+export function withTableOfContents(content: string): string {
+  const lines = content.split('\n');
+  if (lines.length <= TOC_LINE_THRESHOLD) {
+    return content;
+  }
+
+  const headings = lines.filter((line) => /^## /.test(line)).map((line) => line.slice(3).trim());
+
+  // A file with one section has nothing worth indexing.
+  if (headings.length < 2) {
+    return content;
+  }
+
+  const toc = ['## Contents', '', ...headings.map((h) => `- [${h}](#${anchorFor(h)})`), ''];
+
+  const titleIndex = lines.findIndex((line) => /^# /.test(line));
+  if (titleIndex === -1) {
+    return [...toc, ...lines].join('\n');
+  }
+
+  // Skip the blank line that follows the title, if there is one.
+  const insertAt = lines[titleIndex + 1]?.trim() === '' ? titleIndex + 2 : titleIndex + 1;
+  return [...lines.slice(0, insertAt), ...toc, ...lines.slice(insertAt)].join('\n');
 }
 
 function fieldTypesMd(): string {
@@ -168,7 +213,7 @@ function fieldTypesMd(): string {
     }
   }
 
-  return lines.join('\n');
+  return withTableOfContents(lines.join('\n'));
 }
 
 /** Pull fenced TypeScript blocks out of markdown-shaped pattern content. */
@@ -235,23 +280,25 @@ function pitfallsMd(): string {
   return lines.join('\n');
 }
 
-const version = await libraryVersion();
-const checkOnly = process.argv.includes('--check');
-
-const outputs: Array<[string, string]> = [
-  [join(SKILL_DIR, 'SKILL.md'), skillMd(version)],
-  [join(REFERENCES_DIR, 'rules.md'), rulesMd()],
-  [join(REFERENCES_DIR, 'field-types.md'), fieldTypesMd()],
-  [join(REFERENCES_DIR, 'patterns.md'), patternsMd()],
-  [join(REFERENCES_DIR, 'pitfalls.md'), pitfallsMd()],
-];
+/** Every file the skill is made of, as [absolute path, contents] pairs. */
+export async function buildOutputs(): Promise<Array<[string, string]>> {
+  const version = await libraryVersion();
+  return [
+    [join(SKILL_DIR, 'SKILL.md'), skillMd(version)],
+    [join(REFERENCES_DIR, 'rules.md'), rulesMd()],
+    [join(REFERENCES_DIR, 'field-types.md'), fieldTypesMd()],
+    [join(REFERENCES_DIR, 'patterns.md'), patternsMd()],
+    [join(REFERENCES_DIR, 'pitfalls.md'), pitfallsMd()],
+  ];
+}
 
 const rel = (path: string) => path.replace(`${ROOT}/`, '');
 
-if (checkOnly) {
+/** Names of generated files whose on-disk contents differ from a fresh render. */
+export async function findStaleOutputs(): Promise<string[]> {
   const stale: string[] = [];
 
-  for (const [path, contents] of outputs) {
+  for (const [path, contents] of await buildOutputs()) {
     let onDisk: string | null = null;
     try {
       onDisk = await readFile(path, 'utf-8');
@@ -263,22 +310,38 @@ if (checkOnly) {
     }
   }
 
-  if (stale.length > 0) {
-    console.error('[skills-check] FAIL: generated skill files are stale:');
-    for (const path of stale) {
-      console.error(`  - ${path}`);
+  return stale;
+}
+
+async function main(): Promise<void> {
+  if (process.argv.includes('--check')) {
+    const stale = await findStaleOutputs();
+
+    if (stale.length > 0) {
+      console.error('[skills-check] FAIL: generated skill files are stale:');
+      for (const path of stale) {
+        console.error(`  - ${path}`);
+      }
+      console.error('\nRegenerate with: nx run skills:update');
+      process.exitCode = 1;
+      return;
     }
-    console.error('\nRegenerate with: nx run skills:update');
-    process.exit(1);
+
+    console.log('[skills-check] OK: 5 generated file(s) match their sources.');
+    return;
   }
 
-  console.log(`[skills-check] OK: ${outputs.length} generated file(s) match their sources.`);
-} else {
   await rm(SKILL_DIR, { recursive: true, force: true });
   await mkdir(REFERENCES_DIR, { recursive: true });
 
-  for (const [path, contents] of outputs) {
+  for (const [path, contents] of await buildOutputs()) {
     await writeFile(path, contents, 'utf-8');
     console.log(`generated ${rel(path)} (${contents.length} bytes)`);
   }
+}
+
+// Only run when invoked directly, so the pure helpers above stay importable
+// from tests without generating files as a side effect.
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  await main();
 }
