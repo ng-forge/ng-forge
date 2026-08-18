@@ -4,6 +4,23 @@ Measures whether the generated skill actually changes how an agent behaves.
 The deterministic tests in `../tests/` check that the skill is well formed;
 this checks that it works.
 
+## This is a local step, not a CI job
+
+Deliberately. It has no nx target and no CI wiring, because step 3 below
+cannot be automated here: it needs an agent runner driving eight or more
+workspaces, which means an API key and a per-run cost. Running it is a
+manual exercise a maintainer does when changing the skill, not something
+that gates a pull request.
+
+What that costs you: nothing verifies these files still work as the code
+around them moves. `grade.ts` and `run-grading.ts` are covered by unit
+tests in `../tests/grade.spec.ts`, so the scoring cannot silently rot, but
+the end-to-end path is only exercised when someone runs it.
+
+Worth running when you change `SKILL.md`, change what the validator
+reports, or change the rules in the MCP registries the skill is generated
+from. Not worth running for a docs tweak.
+
 ## Running it
 
 ```bash
@@ -23,6 +40,12 @@ node skills/eval/run-grading.ts /tmp/skill-trials
 Add `--no-skill` at step 2 to build the baseline arm. A pass rate on its own
 means nothing without it: it cannot distinguish a skill that works from a task
 the model would have got right anyway.
+
+Last run, 2026-08-18: with the skill, 8 of 8 tasks passed every trial across
+two trials each. Against a no-skill baseline on four of those tasks, the
+agents still produced valid configs every time; what separated the arms was
+that two of four baseline runs never invoked the validator. So the measured
+effect was on verification behaviour, not on config correctness.
 
 ## What is measured, and how much to trust it
 

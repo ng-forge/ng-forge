@@ -93,6 +93,8 @@ For configs written in TypeScript, `as const satisfies FormConfig` plus a typech
 
 The CLI exists for what the compiler cannot see: structural rules such as containers accepting only `hidden` logic, hidden fields requiring a `value`, and configs that are not TypeScript at all.
 
+What it does not currently catch is a property nobody declared. The schemas pass unknown keys through, so an invented field option, or a validator whose value is the wrong type, is reported as valid. That matters most for AI-generated configs, where inventing a plausible-looking property is a common failure. Treat a clean run as "the structure is right", not as "every key here exists".
+
 ## Configs that arrive at runtime
 
 If your forms come from an API or a CMS, neither the compiler nor the CLI can reach them. Validate them where they land:
