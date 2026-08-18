@@ -6,8 +6,10 @@ Working configurations to adapt. Every config here is checked against the schema
 
 | Pattern | Description |
 | ------- | ----------- |
+| [`complete`](#complete) | Complete multi-page form with all major features |
 | [`conditional`](#conditional) | Show/hide fields based on conditions |
 | [`derivation`](#derivation) | Computed field values from other fields |
+| [`mega`](#mega) | Kitchen sink demonstrating EVERY feature |
 | [`minimal-array`](#minimal-array) | Dynamic array with simplified API (~15 lines) |
 | [`minimal-conditional`](#minimal-conditional) | Show/hide field based on condition (~25 lines) |
 | [`minimal-hidden`](#minimal-hidden) | Hidden fields in multi-page form (~15 lines) |
@@ -17,6 +19,123 @@ Working configurations to adapt. Every config here is checked against the schema
 | [`multi-page`](#multi-page) | Multi-step wizard forms |
 | [`property-derivation`](#property-derivation) | Derive field properties (minDate, options, label) from form values |
 | [`validation`](#validation) | Form validation patterns |
+
+## complete
+
+Complete multi-page form with all major features
+
+```typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const formConfig = {
+  fields: [
+    // ========== PAGE 1: Personal Info ==========
+    {
+      key: 'personalInfo',
+      type: 'page',
+      fields: [
+        { key: 'header1', type: 'text', label: 'Personal Information', props: { elementType: 'h2' } },
+        {
+          key: 'nameRow',
+          type: 'row',
+          fields: [
+            { key: 'firstName', type: 'input', label: 'First Name', required: true, minLength: 2, col: 6 },
+            { key: 'lastName', type: 'input', label: 'Last Name', required: true, minLength: 2, col: 6 }
+          ]
+        },
+        {
+          key: 'fullName',
+          type: 'input',
+          label: 'Full Name',
+          readonly: true,
+          // Shorthand derivation - no targetField needed, derivation is on the target field itself
+          derivation: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
+        },
+        { key: 'email', type: 'input', label: 'Email', required: true, email: true, props: { type: 'email' } },
+        { key: 'next1', type: 'next', label: 'Continue' }
+      ]
+    },
+    // ========== PAGE 2: Address ==========
+    {
+      key: 'addressPage',
+      type: 'page',
+      fields: [
+        { key: 'header2', type: 'text', label: 'Address', props: { elementType: 'h2' } },
+        {
+          key: 'address',
+          type: 'group',
+          fields: [
+            { key: 'street', type: 'input', label: 'Street', required: true },
+            {
+              key: 'cityRow',
+              type: 'row',
+              fields: [
+                { key: 'city', type: 'input', label: 'City', required: true, col: 6 },
+                {
+                  key: 'state',
+                  type: 'select',
+                  label: 'State',
+                  required: true,
+                  col: 6,
+                  options: [
+                    { label: 'California', value: 'CA' },
+                    { label: 'New York', value: 'NY' },
+                    { label: 'Texas', value: 'TX' }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          key: 'navRow2',
+          type: 'row',
+          fields: [
+            { key: 'back2', type: 'previous', label: 'Back', col: 6 },
+            { key: 'next2', type: 'next', label: 'Continue', col: 6 }
+          ]
+        }
+      ]
+    },
+    // ========== PAGE 3: Preferences ==========
+    {
+      key: 'prefsPage',
+      type: 'page',
+      fields: [
+        { key: 'header3', type: 'text', label: 'Preferences', props: { elementType: 'h2' } },
+        {
+          key: 'accountType',
+          type: 'radio',
+          label: 'Account Type',
+          required: true,
+          options: [
+            { label: 'Personal', value: 'personal' },
+            { label: 'Business', value: 'business' }
+          ]
+        },
+        {
+          key: 'companyName',
+          type: 'input',
+          label: 'Company Name',
+          logic: [
+            { type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'notEquals', value: 'business' } },
+            { type: 'required', condition: { type: 'fieldValue', fieldPath: 'accountType', operator: 'equals', value: 'business' } }
+          ]
+        },
+        { key: 'acceptTerms', type: 'checkbox', label: 'I accept the terms', required: true },
+        {
+          key: 'navRow3',
+          type: 'row',
+          fields: [
+            { key: 'back3', type: 'previous', label: 'Back', col: 6 },
+            { key: 'submitBtn', type: 'submit', label: 'Submit', col: 6 }
+          ]
+        }
+      ]
+    }
+  ]
+} as const satisfies FormConfig;
+```
 
 ## conditional
 
@@ -83,6 +202,208 @@ Computed field values from other fields
 }
 
 // Available: formValue.path, formValue.nested?.path, optional chaining supported
+```
+
+## mega
+
+Kitchen sink demonstrating EVERY feature
+
+```typescript
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const megaFormConfig = {
+  fields: [
+    // ========== PAGE 1: All Field Types ==========
+    {
+      key: 'fieldTypesPage',
+      type: 'page',
+      fields: [
+        { key: 'pageHeader', type: 'text', label: 'All Field Types Demo', props: { elementType: 'h1' } },
+
+        // TEXT INPUTS
+        { key: 'textInput', type: 'input', label: 'Text Input', placeholder: 'Type here' },
+        { key: 'emailInput', type: 'input', label: 'Email', email: true, props: { type: 'email' } },
+        { key: 'passwordInput', type: 'input', label: 'Password', minLength: 8, props: { type: 'password' } },
+        { key: 'numberInput', type: 'input', label: 'Number', min: 0, max: 100, props: { type: 'number' } },
+
+        // SELECT & OPTIONS
+        {
+          key: 'selectField',
+          type: 'select',
+          label: 'Select (single)',
+          options: [
+            { label: 'Option A', value: 'a' },
+            { label: 'Option B', value: 'b' }
+          ]
+        },
+        {
+          key: 'radioField',
+          type: 'radio',
+          label: 'Radio Group',
+          options: [
+            { label: 'Yes', value: true },
+            { label: 'No', value: false }
+          ]
+        },
+        {
+          key: 'multiCheckbox',
+          type: 'multi-checkbox',
+          label: 'Multi-Checkbox',
+          options: [
+            { label: 'Red', value: 'red' },
+            { label: 'Green', value: 'green' },
+            { label: 'Blue', value: 'blue' }
+          ]
+        },
+
+        // BOOLEAN FIELDS
+        { key: 'checkboxField', type: 'checkbox', label: 'Single Checkbox' },
+        { key: 'toggleField', type: 'toggle', label: 'Toggle Switch' },
+
+        // NUMERIC FIELDS
+        { key: 'sliderField', type: 'slider', label: 'Slider', minValue: 0, maxValue: 100, step: 5, value: 50 },
+
+        // DATE FIELDS
+        { key: 'datepickerField', type: 'datepicker', label: 'Date Picker' },
+
+        // TEXT AREA
+        { key: 'textareaField', type: 'textarea', label: 'Textarea', props: { rows: 4 } },
+
+        // HIDDEN
+        { key: 'hiddenField', type: 'hidden', value: 'secret-value' },
+
+        { key: 'toLogicPage', type: 'next', label: 'Next: Logic Demo' }
+      ]
+    },
+
+    // ========== PAGE 2: Logic Types ==========
+    {
+      key: 'logicPage',
+      type: 'page',
+      fields: [
+        { key: 'logicHeader', type: 'text', label: 'Logic Types Demo', props: { elementType: 'h1' } },
+
+        // DERIVATION
+        {
+          key: 'sourceA',
+          type: 'input',
+          label: 'Source A',
+          value: '10'
+        },
+        {
+          key: 'sourceB',
+          type: 'input',
+          label: 'Source B',
+          value: '20'
+        },
+        {
+          key: 'derived',
+          type: 'input',
+          label: 'Derived (A + B)',
+          readonly: true,
+          // Self-targeting derivation - no targetField needed
+          derivation: 'parseInt(formValue.sourceA || 0) + parseInt(formValue.sourceB || 0)'
+        },
+
+        // CONDITIONAL VISIBILITY
+        {
+          key: 'showExtra',
+          type: 'checkbox',
+          label: 'Show extra field'
+        },
+        {
+          key: 'extraField',
+          type: 'input',
+          label: 'Extra Field',
+          logic: [{
+            type: 'hidden',
+            condition: { type: 'fieldValue', fieldPath: 'showExtra', operator: 'notEquals', value: true }
+          }]
+        },
+
+        // CONDITIONAL REQUIRED
+        {
+          key: 'makeRequired',
+          type: 'checkbox',
+          label: 'Make field required'
+        },
+        {
+          key: 'conditionalRequired',
+          type: 'input',
+          label: 'Conditionally Required',
+          logic: [{
+            type: 'required',
+            condition: { type: 'fieldValue', fieldPath: 'makeRequired', operator: 'equals', value: true }
+          }]
+        },
+
+        {
+          key: 'logicNav',
+          type: 'row',
+          fields: [
+            { key: 'backToFields', type: 'previous', label: 'Back', col: 6 },
+            { key: 'toContainers', type: 'next', label: 'Next: Containers', col: 6 }
+          ]
+        }
+      ]
+    },
+
+    // ========== PAGE 3: Containers ==========
+    {
+      key: 'containersPage',
+      type: 'page',
+      fields: [
+        { key: 'containersHeader', type: 'text', label: 'Containers Demo', props: { elementType: 'h1' } },
+
+        // ROW
+        {
+          key: 'demoRow',
+          type: 'row',
+          fields: [
+            { key: 'col4', type: 'input', label: 'Col 4', col: 4 },
+            { key: 'col4b', type: 'input', label: 'Col 4', col: 4 },
+            { key: 'col4c', type: 'input', label: 'Col 4', col: 4 }
+          ]
+        },
+
+        // GROUP
+        {
+          key: 'demoGroup',
+          type: 'group',
+          fields: [
+            { key: 'groupText', type: 'text', label: 'Nested Group:', props: { elementType: 'h3' } },
+            { key: 'nestedField1', type: 'input', label: 'Nested Field 1' },
+            { key: 'nestedField2', type: 'input', label: 'Nested Field 2' }
+          ]
+        },
+
+        // ARRAY (Simplified API - recommended)
+        {
+          key: 'itemsHeader', type: 'text', label: 'Dynamic Array:', props: { elementType: 'h3' }
+        },
+        {
+          key: 'demoArray',
+          type: 'array',
+          template: [
+            { key: 'itemName', type: 'input', label: 'Item Name' },
+            { key: 'itemQty', type: 'input', label: 'Qty', props: { type: 'number' } }
+          ],
+          value: [{ itemName: 'Widget', itemQty: '5' }],
+          addButton: { label: 'Add Item' }
+        },
+
+        {
+          key: 'containersNav',
+          type: 'row',
+          fields: [
+            { key: 'backToLogic', type: 'previous', label: 'Back', col: 6 },
+            { key: 'submitFinal', type: 'submit', label: 'Submit', col: 6 }
+          ]
+        }
+      ]
+    }
+  ]
+} as const satisfies FormConfig;
 ```
 
 ## minimal-array
