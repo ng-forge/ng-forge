@@ -25,7 +25,8 @@
         "platform": "node",
         "bundle": true,
         "esbuildOptions": {
-          "external": ["commander", "ts-morph", "zod", "zod-to-json-schema"]
+          "external": ["commander", "ts-morph", "zod", "zod-to-json-schema"],
+          "splitting": true
         },
         "additionalEntryPoints": [
           "packages/dynamic-forms-cli/bin/ng-forge-validate.ts",

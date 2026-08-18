@@ -2,10 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     // The package declares `"type": "module"` and is consumed through its
-    // `exports` map, so emit must be real ESM. Relative specifiers carry
-    // explicit `.js` extensions for this reason.
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    // `exports` map, so emit must be real ESM. `nodenext` rather than
+    // `bundler` because it is the mode that actually enforces the explicit
+    // `.js` extensions this relies on; under `bundler` an extensionless
+    // import compiles fine and only breaks for direct dist consumers, which
+    // neither esbuild bundler would catch.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "ES2022",
     "forceConsistentCasingInFileNames": true,
     "strict": true,

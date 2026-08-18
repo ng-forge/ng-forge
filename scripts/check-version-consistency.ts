@@ -36,8 +36,14 @@ export interface Violation {
   detail: string;
 }
 
-async function readJson(path: string): Promise<Record<string, unknown>> {
-  return JSON.parse(await readFile(join(ROOT, path), 'utf-8'));
+async function readJson(path: string): Promise<Record<string, unknown> | undefined> {
+  try {
+    return JSON.parse(await readFile(join(ROOT, path), 'utf-8'));
+  } catch {
+    // A directory under packages/ without a manifest is worth reporting
+    // cleanly rather than crashing the check with ENOENT.
+    return undefined;
+  }
 }
 
 /** Every workspace manifest that must state the canonical version. */
@@ -47,11 +53,20 @@ async function versionedManifests(): Promise<string[]> {
 }
 
 export async function findViolations(): Promise<{ canonical: string; violations: Violation[] }> {
-  const canonical = String((await readJson(CANONICAL_MANIFEST)).version);
+  const canonicalPkg = await readJson(CANONICAL_MANIFEST);
+  if (!canonicalPkg) {
+    throw new Error(`${CANONICAL_MANIFEST} is missing; there is no version to compare against.`);
+  }
+  const canonical = String(canonicalPkg.version);
   const violations: Violation[] = [];
 
   for (const manifest of await versionedManifests()) {
     const pkg = await readJson(manifest);
+
+    if (!pkg) {
+      violations.push({ file: manifest, detail: 'no package.json found' });
+      continue;
+    }
 
     if (pkg.version !== canonical) {
       violations.push({ file: manifest, detail: `version is ${pkg.version}, expected ${canonical}` });
@@ -66,8 +81,13 @@ export async function findViolations(): Promise<{ canonical: string; violations:
       for (const [name, range] of Object.entries(deps)) {
         if (!name.startsWith('@ng-forge/')) continue;
 
-        const pinned = range.replace(/^[\^~]/, '');
-        if (pinned !== canonical) {
+        // Only simple pins track the release. A compound range (`>=`, `||`) or a
+        // workspace protocol is a deliberate choice, not a stale bump, so
+        // reporting it as "expected 1.1.0" would be wrong.
+        const simple = /^[\^~]?(\d+\.\d+\.\d+)$/.exec(range);
+        if (!simple) continue;
+
+        if (simple[1] !== canonical) {
           violations.push({ file: manifest, detail: `${block}.${name} is ${range}, expected ${canonical}` });
         }
       }
@@ -75,17 +95,20 @@ export async function findViolations(): Promise<{ canonical: string; violations:
   }
 
   // The generated skill states the release it documents, in prose an agent reads.
+  //
+  // Anchored on that one sentence rather than every semver in the file. Scanning
+  // for any `x.y.z` meant a skill mentioning an Angular version or a peer range
+  // failed the build with "states 22.0.0, expected 1.1.0". The generator injects
+  // this version everywhere it appears, so the other mentions cannot drift from
+  // this one independently.
   const skillPath = join('skills', 'dynamic-forms', 'SKILL.md');
   const skill = await readFile(join(ROOT, skillPath), 'utf-8');
-  const stated = [...skill.matchAll(/\b(\d+\.\d+\.\d+)\b/g)].map((m) => m[1]);
+  const stated = /documents version \*\*(\d+\.\d+\.\d+)\*\*/.exec(skill);
 
-  if (stated.length === 0) {
-    violations.push({ file: skillPath, detail: 'states no version at all' });
-  }
-  for (const version of new Set(stated)) {
-    if (version !== canonical) {
-      violations.push({ file: skillPath, detail: `states ${version}, expected ${canonical}` });
-    }
+  if (!stated) {
+    violations.push({ file: skillPath, detail: 'does not state which release it documents' });
+  } else if (stated[1] !== canonical) {
+    violations.push({ file: skillPath, detail: `states ${stated[1]}, expected ${canonical}` });
   }
 
   return { canonical, violations };

@@ -16,8 +16,10 @@
  * Usage: node scripts/package-smoke-test.mjs <dist-dir>
  * e.g.   node scripts/package-smoke-test.mjs dist/packages/dynamic-form-mcp
  */
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { builtinModules } from 'node:module';
 import { parse } from 'acorn';
 
@@ -123,4 +125,60 @@ if (offenders.size > 0) {
   process.exit(1);
 }
 
-console.log(`[smoke:${LABEL}] OK: all external imports across ${files.length} emitted file(s) are declared in the published manifest.`);
+// Static analysis cannot tell whether the package actually loads. A wrong path
+// in `exports`, or an entry point that throws on import, passes every check
+// above and fails for the first consumer.
+const targets = new Set();
+for (const entry of Object.values(pkg.exports ?? {})) {
+  const specifier = typeof entry === 'string' ? entry : (entry?.import ?? entry?.default);
+  if (typeof specifier === 'string' && specifier.endsWith('.js')) {
+    targets.add(specifier);
+  }
+}
+if (typeof pkg.main === 'string' && pkg.main.endsWith('.js')) targets.add(pkg.main);
+
+const unloadable = [];
+for (const target of targets) {
+  const resolved = join(process.cwd(), DIST, target);
+  if (!existsSync(resolved)) {
+    unloadable.push(`${target}: not present in the built output`);
+    continue;
+  }
+  try {
+    await import(pathToFileURL(resolved).href);
+  } catch (err) {
+    unloadable.push(`${target}: ${err.message.split('\n')[0]}`);
+  }
+}
+
+if (unloadable.length > 0) {
+  console.error(`[smoke:${LABEL}] FAIL: entry point(s) do not load:`);
+  for (const detail of unloadable) {
+    console.error(`  - ${detail}`);
+  }
+  process.exit(1);
+}
+
+// Loading from dist proves the code runs; it says nothing about what npm will
+// actually ship. `files` is what decides that, and an emitted-but-unpacked file
+// fails only for the consumer. Enabling esbuild code splitting produced exactly
+// that: correct chunks, correct specifiers, and a `files` list that omitted them.
+const packed = new Set(
+  JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json'], { cwd: DIST, encoding: 'utf8' }))[0].files.map((f) => f.path),
+);
+
+const unpacked = files
+  .map((file) => file.slice(DIST.length + 1))
+  .filter((relative) => !packed.has(relative));
+
+if (unpacked.length > 0) {
+  console.error(`[smoke:${LABEL}] FAIL: emitted file(s) would not be published, check the "files" field:`);
+  for (const relative of unpacked) {
+    console.error(`  - ${relative}`);
+  }
+  process.exit(1);
+}
+
+console.log(
+  `[smoke:${LABEL}] OK: ${files.length} emitted file(s) declared and packed, ${targets.size} entry point(s) load.`,
+);
