@@ -167,9 +167,7 @@ const packed = new Set(
   JSON.parse(execFileSync('npm', ['pack', '--dry-run', '--json'], { cwd: DIST, encoding: 'utf8' }))[0].files.map((f) => f.path),
 );
 
-const unpacked = files
-  .map((file) => file.slice(DIST.length + 1))
-  .filter((relative) => !packed.has(relative));
+const unpacked = files.map((file) => file.slice(DIST.length + 1)).filter((relative) => !packed.has(relative));
 
 if (unpacked.length > 0) {
   console.error(`[smoke:${LABEL}] FAIL: emitted file(s) would not be published, check the "files" field:`);
@@ -179,6 +177,4 @@ if (unpacked.length > 0) {
   process.exit(1);
 }
 
-console.log(
-  `[smoke:${LABEL}] OK: ${files.length} emitted file(s) declared and packed, ${targets.size} entry point(s) load.`,
-);
+console.log(`[smoke:${LABEL}] OK: ${files.length} emitted file(s) declared and packed, ${targets.size} entry point(s) load.`);

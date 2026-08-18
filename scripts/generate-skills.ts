@@ -118,9 +118,17 @@ function rulesMd(): string {
   return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n`);
 }
 
-/** Escape a value for use inside a markdown table cell. Union types are full of pipes. */
+/**
+ * Escape a value for use inside a markdown table cell. Union types are full of
+ * pipes.
+ *
+ * Backslashes go first. Escaping only the pipe turns a literal `\|` into
+ * `\\|`, which renders as an escaped backslash followed by a live pipe and
+ * splits the cell. No registry value contains one today, but the registries are
+ * hand-edited data.
+ */
 function cell(value: string): string {
-  return value.replace(/\|/g, '\\|');
+  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 }
 
 /** Files longer than this get a table of contents. */
