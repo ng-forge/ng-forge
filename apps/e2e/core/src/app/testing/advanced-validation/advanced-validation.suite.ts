@@ -4,6 +4,8 @@ import { conditionalValidatorScenario } from './scenarios/conditional-validator.
 import { containerArrayValidatorScenario } from './scenarios/container-array-validator.scenario';
 import { containerGroupValidatorScenario } from './scenarios/container-group-validator.scenario';
 import { delegatedFieldErrorsScenario } from './scenarios/delegated-field-errors.scenario';
+import { requiredCascadeScenario } from './scenarios/required-cascade.scenario';
+import { containerErrorsOptOutScenario } from './scenarios/container-errors-opt-out.scenario';
 import { crossFieldErrorTargetingScenario } from './scenarios/cross-field-error-targeting.scenario';
 import { crossFieldValidatorScenario } from './scenarios/cross-field-validator.scenario';
 import { customValidatorScenario } from './scenarios/custom-validator.scenario';
@@ -37,6 +39,8 @@ export const advancedValidationSuite: TestSuite = {
     containerGroupValidatorScenario,
     containerArrayValidatorScenario,
     delegatedFieldErrorsScenario,
+    requiredCascadeScenario,
+    containerErrorsOptOutScenario,
   ],
 };
 

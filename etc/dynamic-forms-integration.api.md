@@ -425,6 +425,11 @@ export interface FieldAddonSupportEntry {
 }
 
 // @public
+export interface FieldErrorDisplayClaim {
+    readonly claimedKey: Signal<string | undefined>;
+}
+
+// @public
 export interface FieldErrors {
     readonly errorId: Signal<string>;
     readonly errors: Signal<ResolvedError[]>;
@@ -437,6 +442,21 @@ export interface FieldErrorsOptions {
     readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
     readonly injector?: Injector;
     readonly validationMessages?: Signal<ValidationMessages | undefined>;
+}
+
+// @public
+export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
+    readonly claimedKey: i0.Signal<string | undefined>;
+    // (undocumented)
+    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    // (undocumented)
+    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
+    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
 }
 
 // @public
@@ -889,6 +909,9 @@ export interface PresetCollaborators {
 
 // @public
 export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>>;
+
+// @public
+export function provideFieldErrorDisplay(wrapper: () => Type<FieldErrorDisplayClaim>): Provider;
 
 // @public
 export function provideTestValidationMessages(messages: ValidationMessages): Provider;

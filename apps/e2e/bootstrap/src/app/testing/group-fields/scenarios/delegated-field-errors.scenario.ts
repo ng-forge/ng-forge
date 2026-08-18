@@ -1,0 +1,37 @@
+import { FormConfig } from '@ng-forge/dynamic-forms';
+import { TestScenario } from '../../shared/types';
+
+/**
+ * A leaf wrapped by `field-errors` (#568 follow-up). The wrapper claims error display, so
+ * the field component renders none of its own. `email` is the control: same error, no
+ * wrapper, rendered by the field component as usual.
+ */
+const config = {
+  fields: [
+    {
+      key: 'username',
+      type: 'input',
+      label: 'Username',
+      value: '',
+      required: true,
+      wrappers: [{ type: 'field-errors' }],
+      validationMessages: { required: 'Username is required.' },
+    },
+    {
+      key: 'email',
+      type: 'input',
+      label: 'Email',
+      value: '',
+      required: true,
+      validationMessages: { required: 'Email is required.' },
+    },
+    { key: 'submit', type: 'submit', label: 'Submit', col: 12 },
+  ],
+} as unknown as FormConfig;
+
+export const delegatedFieldErrorsScenario: TestScenario = {
+  testId: 'delegated-field-errors-test',
+  title: 'Delegated Field Errors',
+  description: 'A leaf whose errors are rendered by the field-errors wrapper instead of the field component',
+  config,
+};

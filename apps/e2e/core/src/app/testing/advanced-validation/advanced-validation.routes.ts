@@ -72,6 +72,16 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getAdvancedValidationScenario('delegated-field-errors-test') },
   },
+  {
+    path: 'required-cascade',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('required-cascade-test') },
+  },
+  {
+    path: 'container-errors-opt-out',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getAdvancedValidationScenario('container-errors-opt-out-test') },
+  },
 ];
 
 export default routes;

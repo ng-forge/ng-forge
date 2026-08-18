@@ -211,4 +211,55 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(submitButton).not.toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
     });
   });
+
+  test.describe('Delegated field errors (FIELD_ERROR_DISPLAY)', () => {
+    test('renders the message once, from the wrapper rather than the field', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/delegated-field-errors');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('delegated-field-errors-test');
+      await expect(scenario).toBeVisible();
+
+      const username = scenario.locator(':is([id="username"], [id$="_username"]) input');
+      const email = scenario.locator(':is([id="email"], [id$="_email"]) input');
+
+      await helpers.fillInput(username, 'x');
+      await helpers.clearAndFill(username, '');
+      await helpers.blurInput(username);
+      await helpers.fillInput(email, 'x');
+      await helpers.clearAndFill(email, '');
+      await helpers.blurInput(email);
+
+      // One delegated (rendered by the wrapper) + one ordinary. Three would mean the
+      // delegated field rendered its own on top of the wrapper's.
+      await expect(scenario.locator('ion-note.df-ion-error')).toHaveCount(2);
+      await expect(scenario.locator('df-ion-field-errors ion-note.df-ion-error')).toHaveCount(1);
+      await expect(scenario.locator('df-ion-field-errors ion-note.df-ion-error')).toHaveText('Username is required.');
+
+      // Styling parity: the wrapper's message must look like the field component's own.
+      // Text-only assertions let a wrapper render in body grey and still pass — that
+      // regression happened once already on PrimeNG.
+      const parity = await page.evaluate(
+        ({ errorSel, wrapperSel }) => {
+          const all = Array.from(document.querySelectorAll(errorSel));
+          const wrapped = document.querySelector(`${wrapperSel} ${errorSel}`);
+          const own = all.find((el) => el !== wrapped);
+          if (!wrapped || !own) return null;
+          const a = getComputedStyle(wrapped);
+          const b = getComputedStyle(own);
+          return {
+            color: [a.color, b.color],
+            fontSize: [a.fontSize, b.fontSize],
+            inheritsBody: a.color === getComputedStyle(document.body).color,
+          };
+        },
+        { errorSel: 'ion-note.df-ion-error', wrapperSel: 'df-ion-field-errors' },
+      );
+
+      expect(parity).not.toBeNull();
+      expect(parity!.color[0]).toBe(parity!.color[1]);
+      expect(parity!.fontSize[0]).toBe(parity!.fontSize[1]);
+      expect(parity!.inheritsBody).toBe(false);
+    });
+  });
 });

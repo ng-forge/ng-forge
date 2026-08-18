@@ -13,6 +13,7 @@ import { LogicFn } from '@angular/forms/signals';
 import { Observable } from 'rxjs';
 import { OperatorFunction } from 'rxjs';
 import { PipeTransform } from '@angular/core';
+import { Provider } from '@angular/core';
 import { ReadonlyFieldState } from '@angular/forms/signals';
 import { Resource } from '@angular/core';
 import { ResourceRef } from '@angular/core';
@@ -857,6 +858,21 @@ export interface FieldErrorsWrapper {
 }
 
 // @public
+export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
+    readonly claimedKey: i0.Signal<string | undefined>;
+    // (undocumented)
+    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    // (undocumented)
+    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
+    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
+}
+
+// @public
 export interface FieldMeta {
     [key: `data-${string}`]: string | undefined;
     [key: `aria-${string}`]: boolean | string | undefined;
@@ -1588,6 +1604,9 @@ export interface PresetCollaborators {
 export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
+
+// @public
+export function provideFieldErrorDisplay(wrapper: () => Type<FieldErrorDisplayClaim>): Provider;
 
 // @internal
 export function readFieldStateInfo(fieldSource: FieldTree<unknown> | ReadonlyFieldState<unknown> | undefined, reactive: boolean): FieldStateInfo | undefined;

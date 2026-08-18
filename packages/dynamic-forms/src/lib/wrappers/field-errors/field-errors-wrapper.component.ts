@@ -1,6 +1,5 @@
-import { computed, forwardRef, input, viewChild, ChangeDetectionStrategy, Component, ViewContainerRef } from '@angular/core';
-import { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
-import { FIELD_ERROR_DISPLAY, injectFieldErrors, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Neutral default rendering of a validation message for the wrapped field.
@@ -16,22 +15,8 @@ import { FIELD_ERROR_DISPLAY, injectFieldErrors, ValidationMessages } from '@ng-
   `,
   styleUrl: './field-errors-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  // Claims error display for the field it wraps, so that field renders none of its own.
-  providers: [{ provide: FIELD_ERROR_DISPLAY, useExisting: forwardRef(() => FieldErrorsWrapperComponent) }],
+  providers: [provideFieldErrorDisplay(() => FieldErrorsWrapperComponent)],
 })
-export default class FieldErrorsWrapperComponent implements FieldWrapper {
-  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-
-  readonly validationMessages = input<ValidationMessages>();
-  readonly fieldInputs = input<WrapperFieldInputs>();
-
-  /** The field this wrapper renders errors for — see `FieldErrorDisplayClaim`. */
-  readonly claimedKey = computed(() => this.fieldInputs()?.key);
-
-  protected readonly ngf = injectFieldErrors({
-    fieldInputs: this.fieldInputs,
-    validationMessages: this.validationMessages,
-  });
-}
+export default class FieldErrorsWrapperComponent extends FieldErrorsWrapperBase {}
 
 export { FieldErrorsWrapperComponent };

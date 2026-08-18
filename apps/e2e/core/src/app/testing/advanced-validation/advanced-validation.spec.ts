@@ -809,6 +809,74 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(allErrors).toHaveCount(2);
       await expect(wrapperErrors).toHaveCount(1);
       await expect(wrapperErrors).toHaveText('Username is required.');
+
+      // Styling parity: the wrapper's message must look like the field component's own.
+      // Text-only assertions let a wrapper render in body grey and still pass — that
+      // regression happened once already on PrimeNG.
+      const parity = await page.evaluate(
+        ({ errorSel, wrapperSel }) => {
+          const all = Array.from(document.querySelectorAll(errorSel));
+          const wrapped = document.querySelector(`${wrapperSel} ${errorSel}`);
+          const own = all.find((el) => el !== wrapped);
+          if (!wrapped || !own) return null;
+          const a = getComputedStyle(wrapped);
+          const b = getComputedStyle(own);
+          return {
+            color: [a.color, b.color],
+            fontSize: [a.fontSize, b.fontSize],
+            inheritsBody: a.color === getComputedStyle(document.body).color,
+          };
+        },
+        { errorSel: 'mat-error', wrapperSel: 'df-mat-field-errors' },
+      );
+
+      expect(parity).not.toBeNull();
+      expect(parity!.color[0]).toBe(parity!.color[1]);
+      expect(parity!.fontSize[0]).toBe(parity!.fontSize[1]);
+      expect(parity!.inheritsBody).toBe(false);
+    });
+  });
+
+  test.describe('Required cascade from a container', () => {
+    test('marks cascaded children required and honours a child opting out', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/required-cascade');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('required-cascade-test');
+      await expect(scenario).toBeVisible();
+
+      const street = scenario.locator(':is([id="street"], [id$="_street"]) input');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // `street` inherits required from the group and is empty, so submit is gated.
+      await expect(submitButton).toBeDisabled();
+
+      // Filling only `street` satisfies the form: `apartment` opted out with
+      // `required: false`, so the cascade must not have forced it.
+      await helpers.fillInput(street, '1 Main St');
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Container errors opt-out (wrappers: null)', () => {
+    test('suppresses the message while the validator still gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-errors-opt-out');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-errors-opt-out-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      await helpers.fillInput(groupInputs.first(), '2026-02-01');
+      await helpers.fillInput(groupInputs.nth(1), '2026-01-01');
+      await helpers.blurInput(groupInputs.nth(1));
+
+      // No wrapper, so no message anywhere — but the rule still holds the form invalid.
+      await expect(scenario.locator('df-mat-field-errors')).toHaveCount(0);
+      await expect(scenario.locator('mat-error')).toHaveCount(0);
+      await expect(submitButton).toBeDisabled();
     });
   });
 });

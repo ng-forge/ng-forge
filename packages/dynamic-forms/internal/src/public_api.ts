@@ -133,6 +133,7 @@ export * from './lib/utils/object-utils';
 export * from './lib/utils/resource-composition/with-previous-value';
 export * from './lib/utils/warning-tracker';
 export * from './lib/wrappers/css/css-wrapper.type';
+export * from './lib/wrappers/field-errors/field-errors-wrapper-base';
 export * from './lib/wrappers/field-errors/field-errors-wrapper.type';
 export * from './lib/wrappers/row/row-wrapper.type';
 export * from './lib/wrappers/wrapper-field-inputs';
