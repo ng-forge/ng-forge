@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 
 /**
  * Material form field appearance options.

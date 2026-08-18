@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
  * Schema for asynchronous validator configurations.

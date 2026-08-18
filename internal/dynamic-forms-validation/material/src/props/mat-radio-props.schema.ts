@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { ThemePaletteSchema, LabelPositionSchema } from './mat-common-props.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { ThemePaletteSchema, LabelPositionSchema } from './mat-common-props.schema';
 
 /**
  * Props schema for Material radio field.

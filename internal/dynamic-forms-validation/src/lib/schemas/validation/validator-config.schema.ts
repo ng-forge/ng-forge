@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
  * Base schema for validator configurations with optional conditional application.
@@ -130,7 +130,7 @@ export type ValidatorConfigSchemaType = z.infer<typeof ValidatorConfigSchema>;
 export type ValidatorsArraySchemaType = z.infer<typeof ValidatorsArraySchema>;
 
 // Re-export individual schemas for direct usage
-export { BuiltInValidatorConfigSchema } from './built-in-validator.schema.js';
-export { CustomValidatorConfigSchema } from './custom-validator.schema.js';
-export { AsyncValidatorConfigSchema } from './async-validator.schema.js';
-export { HttpValidatorConfigSchema } from './http-validator.schema.js';
+export { BuiltInValidatorConfigSchema } from './built-in-validator.schema';
+export { CustomValidatorConfigSchema } from './custom-validator.schema';
+export { AsyncValidatorConfigSchema } from './async-validator.schema';
+export { HttpValidatorConfigSchema } from './http-validator.schema';

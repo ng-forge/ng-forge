@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { MatLeafFieldSchema } from './mat-leaf-field.schema.js';
-import { createContainerSchemas } from '../../src/lib/schemas/containers/factories.js';
+import { MatLeafFieldSchema } from './mat-leaf-field.schema';
+import { createContainerSchemas } from '../../src/lib/schemas/containers/factories';
 
 /**
  * Create container schemas with Material leaf fields.

@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { BsLeafFieldSchema } from './bs-leaf-field.schema.js';
-import { createContainerSchemas } from '../../src/lib/schemas/containers/factories.js';
-import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema.js';
-import { BsSizeSchema } from './props/bs-common-props.schema.js';
+import { BsLeafFieldSchema } from './bs-leaf-field.schema';
+import { createContainerSchemas } from '../../src/lib/schemas/containers/factories';
+import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema';
+import { BsSizeSchema } from './props/bs-common-props.schema';
 
 const containerSchemas = createContainerSchemas({
   leafFieldSchema: BsLeafFieldSchema,

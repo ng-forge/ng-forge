@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { StateLogicConfigSchema } from './state-logic.schema.js';
-import { DerivationLogicConfigSchema } from './derivation-logic.schema.js';
+import { StateLogicConfigSchema } from './state-logic.schema';
+import { DerivationLogicConfigSchema } from './derivation-logic.schema';
 
 /**
  * Union schema for all logic configurations.

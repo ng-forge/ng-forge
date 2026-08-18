@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { MatFieldSchema } from './mat-field.schema.js';
-import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema.js';
-import { MatFormFieldAppearanceSchema, SubscriptSizingSchema, ThemePaletteSchema } from './props/mat-common-props.schema.js';
+import { MatFieldSchema } from './mat-field.schema';
+import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema';
+import { MatFormFieldAppearanceSchema, SubscriptSizingSchema, ThemePaletteSchema } from './props/mat-common-props.schema';
 
 /**
  * Schema for Material form default props.

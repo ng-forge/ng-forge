@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from 'zod';
-import { FormOptionsSchema } from './form-options.schema.js';
-import { SchemaDefinitionsArraySchema } from './schema-definition.schema.js';
-import { ValidationMessagesSchema } from '../validation/validation-messages.schema.js';
+import { FormOptionsSchema } from './form-options.schema';
+import { SchemaDefinitionsArraySchema } from './schema-definition.schema';
+import { ValidationMessagesSchema } from '../validation/validation-messages.schema';
 
 /**
  * Creates a FormConfig schema with the specified field schema and props schema.

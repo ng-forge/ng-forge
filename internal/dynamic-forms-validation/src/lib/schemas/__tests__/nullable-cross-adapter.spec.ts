@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { z } from 'zod';
-import { MatLeafFieldSchema } from '../../../../material/src/mat-leaf-field.schema.js';
-import { BsLeafFieldSchema } from '../../../../bootstrap/src/bs-leaf-field.schema.js';
-import { PrimeLeafFieldSchema } from '../../../../primeng/src/prime-leaf-field.schema.js';
-import { IonicLeafFieldSchema } from '../../../../ionic/src/ionic-leaf-field.schema.js';
+import { MatLeafFieldSchema } from '../../../../material/src/mat-leaf-field.schema';
+import { BsLeafFieldSchema } from '../../../../bootstrap/src/bs-leaf-field.schema';
+import { PrimeLeafFieldSchema } from '../../../../primeng/src/prime-leaf-field.schema';
+import { IonicLeafFieldSchema } from '../../../../ionic/src/ionic-leaf-field.schema';
 
 /**
  * Smoke coverage for the nullable contract across every adapter's leaf-field

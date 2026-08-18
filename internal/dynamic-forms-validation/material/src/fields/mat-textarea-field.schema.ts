@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema.js';
-import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema.js';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { MatTextareaPropsSchema } from '../props/mat-textarea-props.schema.js';
-import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement.js';
+import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema';
+import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { MatTextareaPropsSchema } from '../props/mat-textarea-props.schema';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 /**
  * Schema for Material textarea field.

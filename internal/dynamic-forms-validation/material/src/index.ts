@@ -18,12 +18,12 @@
 export const MATERIAL_SCHEMA_VERSION = '0.4.0';
 
 // Props schemas
-export * from './props/index.js';
+export * from './props/index';
 
 // Field schemas
-export * from './fields/index.js';
+export * from './fields/index';
 
 // Composite schemas
-export * from './mat-leaf-field.schema.js';
-export * from './mat-field.schema.js';
-export * from './mat-form-config.schema.js';
+export * from './mat-leaf-field.schema';
+export * from './mat-field.schema';
+export * from './mat-form-config.schema';

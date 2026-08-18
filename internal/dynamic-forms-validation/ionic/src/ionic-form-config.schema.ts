@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { IonicLeafFieldSchema } from './ionic-leaf-field.schema.js';
-import { createContainerSchemas } from '../../src/lib/schemas/containers/factories.js';
-import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema.js';
-import { IonicColorSchema, IonicLabelPlacementSchema } from './props/index.js';
+import { IonicLeafFieldSchema } from './ionic-leaf-field.schema';
+import { createContainerSchemas } from '../../src/lib/schemas/containers/factories';
+import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema';
+import { IonicColorSchema, IonicLabelPlacementSchema } from './props/index';
 
 const containerSchemas = createContainerSchemas({
   leafFieldSchema: IonicLeafFieldSchema,

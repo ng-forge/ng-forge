@@ -1,24 +1,24 @@
 import { z } from 'zod';
 
 // Import default leaf fields
-import { TextFieldSchema } from '../../src/lib/schemas/leaves/text-field.schema.js';
-import { HiddenFieldSchema } from '../../src/lib/schemas/leaves/hidden-field.schema.js';
-import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement.js';
+import { TextFieldSchema } from '../../src/lib/schemas/leaves/text-field.schema';
+import { HiddenFieldSchema } from '../../src/lib/schemas/leaves/hidden-field.schema';
+import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
 
 // Import Material-specific fields.
 // For value-bearing fields, we import the raw `<X>FieldSchemaObject` variants —
 // discriminatedUnion requires ZodObject members (ZodEffects from .superRefine is rejected).
 // The refinement still runs at the union level via `.superRefine(nullableValueRefine)` below,
 // and individual-schema direct-parse gets the refinement via the public `<X>FieldSchema` export.
-import { MatInputFieldSchemaObject } from './fields/mat-input-field.schema.js';
-import { MatTextareaFieldSchemaObject } from './fields/mat-textarea-field.schema.js';
-import { MatSelectFieldSchemaObject } from './fields/mat-select-field.schema.js';
-import { MatCheckboxFieldSchema } from './fields/mat-checkbox-field.schema.js';
-import { MatRadioFieldSchemaObject } from './fields/mat-radio-field.schema.js';
-import { MatMultiCheckboxFieldSchemaObject } from './fields/mat-multi-checkbox-field.schema.js';
-import { MatToggleFieldSchema } from './fields/mat-toggle-field.schema.js';
-import { MatSliderFieldSchemaObject } from './fields/mat-slider-field.schema.js';
-import { MatDatepickerFieldSchemaObject } from './fields/mat-datepicker-field.schema.js';
+import { MatInputFieldSchemaObject } from './fields/mat-input-field.schema';
+import { MatTextareaFieldSchemaObject } from './fields/mat-textarea-field.schema';
+import { MatSelectFieldSchemaObject } from './fields/mat-select-field.schema';
+import { MatCheckboxFieldSchema } from './fields/mat-checkbox-field.schema';
+import { MatRadioFieldSchemaObject } from './fields/mat-radio-field.schema';
+import { MatMultiCheckboxFieldSchemaObject } from './fields/mat-multi-checkbox-field.schema';
+import { MatToggleFieldSchema } from './fields/mat-toggle-field.schema';
+import { MatSliderFieldSchemaObject } from './fields/mat-slider-field.schema';
+import { MatDatepickerFieldSchemaObject } from './fields/mat-datepicker-field.schema';
 import {
   MatButtonFieldSchema,
   MatSubmitButtonFieldSchema,
@@ -30,7 +30,7 @@ import {
   MatInsertArrayItemButtonFieldSchema,
   MatPopArrayItemButtonFieldSchema,
   MatShiftArrayItemButtonFieldSchema,
-} from './fields/mat-button-field.schema.js';
+} from './fields/mat-button-field.schema';
 
 /**
  * Discriminated union of all Material leaf field types.

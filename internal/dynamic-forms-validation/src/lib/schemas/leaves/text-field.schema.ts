@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../field/field-def.schema.js';
-import { LogicArraySchema } from '../logic/logic-config.schema.js';
+import { BaseFieldDefSchema } from '../field/field-def.schema';
+import { LogicArraySchema } from '../logic/logic-config.schema';
 
 /**
  * Element types for text display fields.

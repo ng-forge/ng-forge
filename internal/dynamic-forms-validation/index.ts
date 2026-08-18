@@ -11,15 +11,15 @@
  */
 
 // Adapter-agnostic base schemas.
-export * from './src/index.js';
+export * from './src/index';
 
 // Validation and JSON Schema generation.
-export * from './validate/src/index.js';
+export * from './validate/src/index';
 
 // FormConfig discovery inside TypeScript/JavaScript sources.
-export * from './discovery/ast-extractor.js';
-export * from './discovery/validate-file.js';
+export * from './discovery/ast-extractor';
+export * from './discovery/validate-file';
 
 // Report formatting and the error-to-fix table.
-export * from './reporting/fix-suggestions.js';
-export * from './reporting/report.js';
+export * from './reporting/fix-suggestions';
+export * from './reporting/report';

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConditionalExpressionSchema } from './conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from './conditional-expression.schema';
 
 /**
  * State logic types that control field visibility and interactivity.

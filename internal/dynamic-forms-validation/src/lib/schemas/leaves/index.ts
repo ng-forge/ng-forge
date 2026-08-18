@@ -1,2 +1,2 @@
-export * from './text-field.schema.js';
-export * from './hidden-field.schema.js';
+export * from './text-field.schema';
+export * from './hidden-field.schema';

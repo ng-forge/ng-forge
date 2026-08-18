@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 describe('ConditionalExpressionSchema', () => {
   describe('fieldValue conditions', () => {

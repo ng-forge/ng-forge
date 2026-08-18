@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { ValidatorsArraySchema } from '../validation/validator-config.schema.js';
-import { ValidationMessagesSchema } from '../validation/validation-messages.schema.js';
-import { LogicArraySchema } from '../logic/logic-config.schema.js';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { ValidatorsArraySchema } from '../validation/validator-config.schema';
+import { ValidationMessagesSchema } from '../validation/validation-messages.schema';
+import { LogicArraySchema } from '../logic/logic-config.schema';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
  * Schema application types.

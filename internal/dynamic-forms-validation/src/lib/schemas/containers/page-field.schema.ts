@@ -1,6 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
-import { BaseFieldDefSchema } from '../field/field-def.schema.js';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { BaseFieldDefSchema } from '../field/field-def.schema';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
  * Schema for container logic configuration (only 'hidden' type allowed).

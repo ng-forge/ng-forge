@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves/index.js';
-import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement.js';
+import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves/index';
+import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
 import {
   PrimeInputFieldSchemaObject,
   PrimeCheckboxFieldSchema,
@@ -21,7 +21,7 @@ import {
   PrimeInsertArrayItemButtonFieldSchema,
   PrimePopArrayItemButtonFieldSchema,
   PrimeShiftArrayItemButtonFieldSchema,
-} from './fields/index.js';
+} from './fields/index';
 
 /**
  * Discriminated union of all PrimeNG leaf field types.

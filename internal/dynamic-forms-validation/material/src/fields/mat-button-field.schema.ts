@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema.js';
-import { LogicArraySchema } from '../../../src/lib/schemas/logic/logic-config.schema.js';
-import { MatButtonPropsSchema } from '../props/mat-button-props.schema.js';
+import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema';
+import { LogicArraySchema } from '../../../src/lib/schemas/logic/logic-config.schema';
+import { MatButtonPropsSchema } from '../props/mat-button-props.schema';
 
 /**
  * Event argument types for button events.

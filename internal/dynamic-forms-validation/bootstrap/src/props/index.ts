@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { BsSizeSchema, BsFormFieldPropsSchema, BsButtonVariantSchema } from './bs-common-props.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { BsSizeSchema, BsFormFieldPropsSchema, BsButtonVariantSchema } from './bs-common-props.schema';
 
-export * from './bs-common-props.schema.js';
+export * from './bs-common-props.schema';
 
 // Input props
 export const BsInputPropsSchema = BsFormFieldPropsSchema.extend({

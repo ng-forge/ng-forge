@@ -1,6 +1,6 @@
 /** Fix suggestions for common FormConfig validation errors. */
 
-import type { FormattedValidationError } from '../validate/src/index.js';
+import type { FormattedValidationError } from '../validate/src/index';
 
 /**
  * Maps a config property (or a substring of an error message) to a

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ValidatorConfigSchema } from '../validation/validator-config.schema.js';
+import { ValidatorConfigSchema } from '../validation/validator-config.schema';
 
 describe('ValidatorConfigSchema', () => {
   describe('built-in validators', () => {

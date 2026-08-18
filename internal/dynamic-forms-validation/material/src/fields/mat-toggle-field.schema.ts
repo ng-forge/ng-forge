@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema.js';
-import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema.js';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { MatTogglePropsSchema } from '../props/mat-toggle-props.schema.js';
+import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema';
+import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { MatTogglePropsSchema } from '../props/mat-toggle-props.schema';
 
 /**
  * Schema for Material toggle (slide toggle) field.

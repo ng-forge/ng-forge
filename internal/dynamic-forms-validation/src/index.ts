@@ -1,1 +1,1 @@
-export * from './lib/base-schemas.js';
+export * from './lib/base-schemas';

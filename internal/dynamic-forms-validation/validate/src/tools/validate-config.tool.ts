@@ -1,12 +1,12 @@
 import { z, ZodError } from 'zod';
 
 // Import form config schemas
-import { MatFormConfigSchema } from '../../../material/src/index.js';
-import { BsFormConfigSchema } from '../../../bootstrap/src/index.js';
-import { PrimeFormConfigSchema } from '../../../primeng/src/index.js';
-import { IonicFormConfigSchema } from '../../../ionic/src/index.js';
+import { MatFormConfigSchema } from '../../../material/src/index';
+import { BsFormConfigSchema } from '../../../bootstrap/src/index';
+import { PrimeFormConfigSchema } from '../../../primeng/src/index';
+import { IonicFormConfigSchema } from '../../../ionic/src/index';
 
-import type { UiIntegration } from '../json-schema/form-config-json-schema.js';
+import type { UiIntegration } from '../json-schema/form-config-json-schema';
 
 /**
  * Map of UI integration to form config schema.

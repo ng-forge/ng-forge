@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseConfigInput, validateSource } from './validate-file.js';
-import { getFixSuggestion, FIX_SUGGESTIONS } from '../reporting/fix-suggestions.js';
-import { formatConfigReport, formatFileReport } from '../reporting/report.js';
+import { parseConfigInput, validateSource } from './validate-file';
+import { getFixSuggestion, FIX_SUGGESTIONS } from '../reporting/fix-suggestions';
+import { formatConfigReport, formatFileReport } from '../reporting/report';
 
 const VALID_SOURCE = `
 import { FormConfig } from '@ng-forge/dynamic-forms';

@@ -1,2 +1,2 @@
-export * from './dynamic-text.schema.js';
-export * from './field-option.schema.js';
+export * from './dynamic-text.schema';
+export * from './field-option.schema';

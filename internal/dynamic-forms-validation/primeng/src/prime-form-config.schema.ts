@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { PrimeLeafFieldSchema } from './prime-leaf-field.schema.js';
-import { createContainerSchemas } from '../../src/lib/schemas/containers/factories.js';
-import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema.js';
+import { PrimeLeafFieldSchema } from './prime-leaf-field.schema';
+import { createContainerSchemas } from '../../src/lib/schemas/containers/factories';
+import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema';
 
 const containerSchemas = createContainerSchemas({
   leafFieldSchema: PrimeLeafFieldSchema,

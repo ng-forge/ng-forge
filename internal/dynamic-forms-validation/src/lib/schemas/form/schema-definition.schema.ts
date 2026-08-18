@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { ValidatorsArraySchema } from '../validation/validator-config.schema.js';
-import { LogicArraySchema } from '../logic/logic-config.schema.js';
-import { SchemaApplicationConfigSchema } from '../field/field-with-validation.schema.js';
+import { ValidatorsArraySchema } from '../validation/validator-config.schema';
+import { LogicArraySchema } from '../logic/logic-config.schema';
+import { SchemaApplicationConfigSchema } from '../field/field-with-validation.schema';
 
 /**
  * Schema for reusable schema definitions.

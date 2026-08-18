@@ -1,6 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
-import { DynamicTextSchema } from '../common/dynamic-text.schema.js';
-import { FieldMetaSchema } from './field-meta.schema.js';
+import { DynamicTextSchema } from '../common/dynamic-text.schema';
+import { FieldMetaSchema } from './field-meta.schema';
 
 /**
  * Schema for base FieldDef properties shared by all field types.

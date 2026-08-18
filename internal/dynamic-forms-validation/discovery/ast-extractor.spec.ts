@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createSourceFile, findFormConfigCandidates, extractToJson, DATE_PLACEHOLDER, MAX_SOURCE_TEXT_LENGTH } from './ast-extractor.js';
+import { createSourceFile, findFormConfigCandidates, extractToJson, DATE_PLACEHOLDER, MAX_SOURCE_TEXT_LENGTH } from './ast-extractor';
 
 describe('AST Extractor', () => {
   describe('createSourceFile', () => {

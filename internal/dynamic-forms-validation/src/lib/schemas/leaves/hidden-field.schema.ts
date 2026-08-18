@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../field/field-def.schema.js';
+import { BaseFieldDefSchema } from '../field/field-def.schema';
 
 /**
  * Schema for hidden field scalar values.

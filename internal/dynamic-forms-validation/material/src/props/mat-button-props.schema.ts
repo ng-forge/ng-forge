@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ThemePaletteSchema } from './mat-common-props.schema.js';
+import { ThemePaletteSchema } from './mat-common-props.schema';
 
 /**
  * Button type options.

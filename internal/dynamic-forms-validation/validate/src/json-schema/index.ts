@@ -1,2 +1,2 @@
-export * from './form-config-json-schema.js';
-export * from './field-type-json-schemas.js';
+export * from './form-config-json-schema';
+export * from './field-type-json-schemas';

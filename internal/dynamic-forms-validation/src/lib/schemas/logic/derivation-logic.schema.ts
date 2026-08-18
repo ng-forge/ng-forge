@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConditionalExpressionSchema } from './conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from './conditional-expression.schema';
 
 /**
  * Schema for immediate derivation logic (evaluates on change).

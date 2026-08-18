@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema.js';
-import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema.js';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { FieldOptionsSchema } from '../../../src/lib/schemas/common/field-option.schema.js';
-import { LogicArraySchema } from '../../../src/lib/schemas/logic/logic-config.schema.js';
+import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema';
+import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-with-validation.schema';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { FieldOptionsSchema } from '../../../src/lib/schemas/common/field-option.schema';
+import { LogicArraySchema } from '../../../src/lib/schemas/logic/logic-config.schema';
 import {
   BsInputPropsSchema,
   BsTextareaPropsSchema,
@@ -15,8 +15,8 @@ import {
   BsDatepickerPropsSchema,
   BsSliderPropsSchema,
   BsButtonPropsSchema,
-} from '../props/index.js';
-import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement.js';
+} from '../props/index';
+import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 // Value field base (extends BaseFieldDef with validation)
 const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);

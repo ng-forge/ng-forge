@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { ThemePaletteSchema, MatFormFieldAppearanceSchema, SubscriptSizingSchema } from './mat-common-props.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { ThemePaletteSchema, MatFormFieldAppearanceSchema, SubscriptSizingSchema } from './mat-common-props.schema';
 
 /**
  * Datepicker start view options.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LogicConfigSchema } from '../logic/logic-config.schema.js';
+import { LogicConfigSchema } from '../logic/logic-config.schema';
 
 describe('LogicConfigSchema', () => {
   describe('state logic', () => {

@@ -1,6 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
-import { BaseFieldDefSchema } from '../field/field-def.schema.js';
-import { ContainerLogicConfigSchema } from './page-field.schema.js';
+import { BaseFieldDefSchema } from '../field/field-def.schema';
+import { ContainerLogicConfigSchema } from './page-field.schema';
 
 /**
  * Creates a GroupField schema with the specified child field schema.

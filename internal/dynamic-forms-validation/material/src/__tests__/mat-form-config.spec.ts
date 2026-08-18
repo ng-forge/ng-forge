@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { MatFormConfigSchema } from '../mat-form-config.schema.js';
-import { MatInputFieldSchema } from '../fields/mat-input-field.schema.js';
-import { MatLeafFieldSchema } from '../mat-leaf-field.schema.js';
+import { MatFormConfigSchema } from '../mat-form-config.schema';
+import { MatInputFieldSchema } from '../fields/mat-input-field.schema';
+import { MatLeafFieldSchema } from '../mat-leaf-field.schema';
 
 describe('MatFormConfigSchema', () => {
   describe('basic form configs', () => {

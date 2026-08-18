@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { ThemePaletteSchema, LabelPositionSchema, MatFormFieldAppearanceSchema } from './mat-common-props.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { ThemePaletteSchema, LabelPositionSchema, MatFormFieldAppearanceSchema } from './mat-common-props.schema';
 
 /**
  * Props schema for Material toggle (slide toggle) field.

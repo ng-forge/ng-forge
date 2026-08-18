@@ -3,6 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
+    // Declarations only. The emitted JS had no consumer, and producing it
+    // forced this internal library to look like a publishable ESM package.
+    "emitDeclarationOnly": true,
     "types": ["node"]
   },
   "include": [

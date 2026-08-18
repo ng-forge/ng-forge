@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema.js';
+import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
 
 /**
  * Built-in validator types that map to Angular's built-in validators.

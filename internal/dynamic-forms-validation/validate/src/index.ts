@@ -21,5 +21,5 @@
  * ```
  */
 
-export * from './json-schema/index.js';
-export * from './tools/index.js';
+export * from './json-schema/index';
+export * from './tools/index';

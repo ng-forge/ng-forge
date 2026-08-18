@@ -1,14 +1,14 @@
 /** FormConfig discovery and validation over source files. */
 
 import { readFile } from 'node:fs/promises';
-import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src/index.js';
+import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src/index';
 import {
   createSourceFile,
   findFormConfigCandidates,
   extractToJson,
   type FormConfigCandidate,
   type ExtractionResult,
-} from './ast-extractor.js';
+} from './ast-extractor';
 
 /** The four UI integrations a config can be validated against. */
 export const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema.js';
-import { MatFormFieldAppearanceSchema, SubscriptSizingSchema } from './mat-common-props.schema.js';
+import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
+import { MatFormFieldAppearanceSchema, SubscriptSizingSchema } from './mat-common-props.schema';
 
 /**
  * Input type options for Material input field.

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from '../common/dynamic-text.schema.js';
+import { DynamicTextSchema } from '../common/dynamic-text.schema';
 
 /**
  * Schema for validation messages configuration.

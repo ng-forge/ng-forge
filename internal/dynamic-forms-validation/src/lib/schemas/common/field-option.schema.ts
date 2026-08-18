@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DynamicTextSchema } from './dynamic-text.schema.js';
+import { DynamicTextSchema } from './dynamic-text.schema';
 
 /**
  * Schema for FieldOption<T> used in select, radio, and multi-checkbox fields.
