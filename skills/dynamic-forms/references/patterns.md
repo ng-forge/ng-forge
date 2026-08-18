@@ -135,6 +135,21 @@ const formConfig = {
     }
   ]
 } as const satisfies FormConfig;
+
+{
+  firstName: string;
+  lastName: string;
+  fullName: string;      // Computed via derivation
+  email: string;
+  address: {             // Nested from group
+    street: string;
+    city: string;
+    state: string;
+  };
+  accountType: 'personal' | 'business';
+  companyName?: string;  // Only present when accountType is 'business'
+  acceptTerms: boolean;
+}
 ```
 
 ## conditional

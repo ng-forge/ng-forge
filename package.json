@@ -38,6 +38,8 @@
     "mcp:build": "nx build dynamic-form-mcp",
     "mcp:dev": "nx build dynamic-form-mcp && node dist/packages/dynamic-form-mcp/bin/ng-forge-mcp.js",
     "mcp:smoke": "nx run dynamic-form-mcp:smoke",
+    "version:check": "node scripts/check-version-consistency.ts",
+    "skills:update": "nx run skills:update",
     "release:branch:patch": "bash scripts/create-release-branch.sh patch",
     "release:branch:minor": "bash scripts/create-release-branch.sh minor",
     "release:branch:major": "bash scripts/create-release-branch.sh major"

@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 import { INSTRUCTIONS } from '../packages/dynamic-form-mcp/src/registry/instructions.ts';
 import { FIELD_TYPES } from '../packages/dynamic-form-mcp/src/registry/field-types.ts';
-import { PATTERNS, COMPLETE_EXAMPLE, MEGA_EXAMPLE } from '../packages/dynamic-form-mcp/src/tools/examples.tool.ts';
+import { PATTERNS } from '../packages/dynamic-form-mcp/src/tools/examples.tool.ts';
 import { FIX_SUGGESTIONS } from '../internal/dynamic-forms-validation/reporting/fix-suggestions.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -228,20 +228,9 @@ function extractTypeScriptBlocks(content: string): string[] {
 }
 
 /**
- * `complete` and `mega` carry no content in PATTERNS. The examples tool
- * special-cases them ahead of the table and serves these constants instead,
- * so reading PATTERNS alone silently drops the two examples its own
- * description calls the recommended starting points.
- */
-const SPECIAL_CASED_EXAMPLES: Record<string, string> = {
-  complete: COMPLETE_EXAMPLE,
-  mega: MEGA_EXAMPLE,
-};
-
-/**
  * Best available code for a pattern: `brief` and `minimal` are raw TypeScript,
- * `full` is markdown wrapping the same config. Patterns with no content in the
- * table fall back to the special-cased constants above.
+ * `full` is markdown wrapping the same config. No pattern ships empty, so the
+ * undefined branch is a guard against a future one, not a routine case.
  */
 function patternCode(name: string): string | undefined {
   const pattern = PATTERNS[name];
@@ -251,14 +240,7 @@ function patternCode(name: string): string | undefined {
       return value;
     }
   }
-
-  const fromTable = extractTypeScriptBlocks(pattern.full)[0];
-  if (fromTable) {
-    return fromTable;
-  }
-
-  const special = SPECIAL_CASED_EXAMPLES[name];
-  return special ? extractTypeScriptBlocks(special)[0] : undefined;
+  return extractTypeScriptBlocks(pattern.full)[0];
 }
 
 function patternsMd(): string {

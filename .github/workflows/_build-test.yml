@@ -220,6 +220,11 @@ jobs:
       - name: Check generated skill is current
         run: pnpm nx run skills:check
 
+      # Every package releases at one version, and the generated skill states
+      # which release it documents. Fails when a bump missed any of them.
+      - name: Check version anchors agree
+        run: node scripts/check-version-consistency.ts
+
       - name: Cache build artifacts
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
         with:
