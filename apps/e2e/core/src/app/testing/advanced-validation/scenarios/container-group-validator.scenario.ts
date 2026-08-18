@@ -9,7 +9,7 @@ const dateOrder: CustomValidator = (ctx) => {
 
 /**
  * Validator on a `group` container (#568): the rule spans two children, so it lives on
- * the group. The message renders through the auto-attached `container-errors` wrapper.
+ * the group. The message renders through the auto-attached `field-errors` wrapper.
  */
 const config = {
   customFnConfig: { validators: { dateOrder } },
@@ -36,6 +36,6 @@ const config = {
 export const containerGroupValidatorScenario: TestScenario = {
   testId: 'container-group-validator-test',
   title: 'Container Validator (Group)',
-  description: 'Group-level validator comparing two children, rendered via the container-errors wrapper',
+  description: 'Group-level validator comparing two children, rendered via the field-errors wrapper',
   config,
 };

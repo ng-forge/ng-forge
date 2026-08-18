@@ -14,7 +14,7 @@ describe('withPrimeNGFields', () => {
   it('returns field types with the addons feature appended when no config provided', () => {
     const fields = withPrimeNGFields();
 
-    // The addons feature and the container-errors wrapper follow the field defs.
+    // The addons feature and the field-errors wrapper follow the field defs.
     expect(fields.length).toBe(PRIMENG_FIELD_TYPES.length + 2);
     for (let i = 0; i < PRIMENG_FIELD_TYPES.length; i++) {
       expect(fields[i]).toBe(PRIMENG_FIELD_TYPES[i]);
@@ -53,14 +53,14 @@ describe('withPrimeNGFields', () => {
     expect(TestBed.inject(PRIMENG_CONFIG)).toEqual(config);
   });
 
-  it('registers a container-errors wrapper that overrides the core default', () => {
-    const wrapper = withPrimeNGFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('registers a field-errors wrapper that overrides the core default', () => {
+    const wrapper = withPrimeNGFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     expect(wrapper).toBeDefined();
   });
 
-  it('loads the PrimeNG container-errors component', async () => {
-    const wrapper = withPrimeNGFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('loads the PrimeNG field-errors component', async () => {
+    const wrapper = withPrimeNGFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     const loaded = await wrapper.loadComponent();
 

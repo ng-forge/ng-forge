@@ -199,7 +199,7 @@ Containers accept `validators`, `validationMessages`, and `required`. The other 
 
 Container validators honour `validateWhenHidden` exactly like leaf validators, so a hidden container does not gate submission. Layout containers (`page`, `row`, `container`) flatten into their parent and have no schema path, so they cannot carry validators at all.
 
-The message renders below the container's content through the built-in `container-errors` wrapper. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for how to restyle it.
+The message renders below the container's content through the built-in `field-errors` wrapper. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for how to restyle it.
 
 ## Complex Conditional Logic
 

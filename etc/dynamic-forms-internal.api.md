@@ -419,20 +419,6 @@ export type ContainerAllowedChildren = ArrayField | ContainerField | GroupField 
 export type ContainerComponent = FieldComponent<ContainerField<ContainerAllowedChildren[]>>;
 
 // @public
-export interface ContainerErrorsOptions {
-    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
-    readonly injector?: Injector;
-    readonly validationMessages: Signal<ValidationMessages | undefined>;
-}
-
-// @public
-export interface ContainerErrorsWrapper {
-    // (undocumented)
-    readonly type: 'container-errors';
-    readonly validationMessages?: ValidationMessages;
-}
-
-// @public
 export interface ContainerField<TFields extends readonly ContainerAllowedChildren[] = readonly ContainerAllowedChildren[], TWrapperConfigs extends readonly WrapperConfig[] = readonly WrapperConfig[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;
@@ -772,6 +758,9 @@ export type ExtractField<T extends AvailableFieldTypes> = T extends keyof FieldT
 export function extractStringDependencies(expression: string): string[];
 
 // @public
+export const FIELD_ERROR_DISPLAY: InjectionToken<FieldErrorDisplayClaim>;
+
+// @public
 export const FIELD_REGISTRY: InjectionToken<Map<string, FieldTypeDefinition<any>>>;
 
 // @public
@@ -841,6 +830,33 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
 }
 
 // @public
+export interface FieldErrorDisplayClaim {
+    readonly claimedKey: Signal<string | undefined>;
+}
+
+// @public
+export interface FieldErrors {
+    readonly errorId: Signal<string>;
+    readonly errors: Signal<ResolvedError[]>;
+    readonly errorsToDisplay: Signal<ResolvedError[]>;
+    readonly showErrors: Signal<boolean>;
+}
+
+// @public (undocumented)
+export interface FieldErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages?: Signal<ValidationMessages | undefined>;
+}
+
+// @public
+export interface FieldErrorsWrapper {
+    // (undocumented)
+    readonly type: 'field-errors';
+    readonly validationMessages?: ValidationMessages;
+}
+
+// @public
 export interface FieldMeta {
     [key: `data-${string}`]: string | undefined;
     [key: `aria-${string}`]: boolean | string | undefined;
@@ -889,7 +905,7 @@ export interface FieldRegistryLeaves {
 // @public
 export interface FieldRegistryWrappers {
     // (undocumented)
-    'container-errors': ContainerErrorsWrapper;
+    'field-errors': FieldErrorsWrapper;
     // (undocumented)
     css: CssWrapper;
     // (undocumented)
@@ -1282,10 +1298,7 @@ export interface InitializationTrackingOptions {
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
 
 // @public
-export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]>;
-
-// @public
-export function injectFieldErrors(options: WrapperFieldErrorsOptions): WrapperFieldErrors;
+export function injectFieldErrors(options: FieldErrorsOptions): FieldErrors;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;
@@ -1972,7 +1985,7 @@ export const WRAPPER_AUTO_ASSOCIATIONS: InjectionToken<WrapperAutoAssociations>;
 export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.ContainerErrorsWrapper | _ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
+export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.FieldErrorsWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
 
 // @public
 export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;
@@ -1981,21 +1994,6 @@ export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers ? FieldRegistryWrappers[TWrappers] : {
     readonly type: TWrappers;
 };
-
-// @public
-export interface WrapperFieldErrors {
-    readonly errorId: Signal<string>;
-    readonly errors: Signal<ResolvedError[]>;
-    readonly errorsToDisplay: Signal<ResolvedError[]>;
-    readonly showErrors: Signal<boolean>;
-}
-
-// @public (undocumented)
-export interface WrapperFieldErrorsOptions {
-    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
-    readonly injector?: Injector;
-    readonly validationMessages?: Signal<ValidationMessages | undefined>;
-}
 
 // @public
 export interface WrapperFieldInputs {

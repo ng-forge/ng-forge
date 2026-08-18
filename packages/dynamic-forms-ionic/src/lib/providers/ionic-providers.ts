@@ -23,13 +23,13 @@ type IonicFieldsWithAddons = [...IonicFieldTypes, IonicAddonsFeature, WrapperTyp
 type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, WrapperTypeDefinition, IonicConfigFeature];
 
 /**
- * Replaces the neutral core `container-errors` wrapper with the Ionic one, so
+ * Replaces the neutral core `field-errors` wrapper with the Ionic one, so
  * a container-level validation message renders like a field-level one.
  * Registered under the same name, so the later registration wins.
  */
-const IONIC_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
-  wrapperName: 'container-errors',
-  loadComponent: () => import('../wrappers/container-errors/ionic-container-errors-wrapper.component'),
+const IONIC_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/ionic-field-errors-wrapper.component'),
 };
 
 /**
@@ -47,7 +47,7 @@ export function withIonicFields(config: IonicConfig | undefined): IonicFieldsWit
 export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | IonicFieldsWithConfig {
   // Always include the addons feature — ion-icon / ion-button are part of
   // the canonical Ionic surface.
-  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons(), IONIC_CONTAINER_ERRORS_WRAPPER];
+  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons(), IONIC_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

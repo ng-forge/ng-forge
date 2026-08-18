@@ -597,7 +597,7 @@ export interface FieldRegistryLeaves {
 // @public
 export interface FieldRegistryWrappers {
     // (undocumented)
-    'container-errors': ContainerErrorsWrapper;
+    'field-errors': FieldErrorsWrapper;
     // (undocumented)
     css: CssWrapper;
     // (undocumented)

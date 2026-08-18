@@ -23,13 +23,13 @@ type BootstrapFieldsWithAddons = [...BootstrapFieldTypes, BootstrapAddonsFeature
 type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature, WrapperTypeDefinition, BootstrapConfigFeature];
 
 /**
- * Replaces the neutral core `container-errors` wrapper with the Bootstrap one, so
+ * Replaces the neutral core `field-errors` wrapper with the Bootstrap one, so
  * a container-level validation message renders like a field-level one.
  * Registered under the same name, so the later registration wins.
  */
-const BOOTSTRAP_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
-  wrapperName: 'container-errors',
-  loadComponent: () => import('../wrappers/container-errors/bs-container-errors-wrapper.component'),
+const BOOTSTRAP_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/bs-field-errors-wrapper.component'),
 };
 
 /**
@@ -47,7 +47,7 @@ export function withBootstrapFields(config: BootstrapConfig | undefined): Bootst
 export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldsWithAddons | BootstrapFieldsWithConfig {
   // Always include the addons feature — bs-icon / bs-button are part of
   // the canonical Bootstrap surface.
-  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons(), BOOTSTRAP_CONTAINER_ERRORS_WRAPPER];
+  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons(), BOOTSTRAP_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

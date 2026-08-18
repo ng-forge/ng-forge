@@ -220,10 +220,10 @@ The error lands on the group itself, so it gates form and page validity like any
 
 ### Rendering the message
 
-A group has no form element of its own, so there is nothing to hang a message on the way an input does. When a container declares `validators`, ng-forge appends the built-in `container-errors` wrapper, which renders each resolved message below the group's content:
+A group has no form element of its own, so there is nothing to hang a message on the way an input does. When a container declares `validators`, ng-forge appends the built-in `field-errors` wrapper, which renders each resolved message below the group's content:
 
 ```html
-<div class="df-container-error" role="alert">The end must not be before the start.</div>
+<div class="df-field-error" role="alert">The end must not be before the start.</div>
 ```
 
 Each UI adapter ships its own version of this wrapper, so the message already renders in the adapter's native error style: `<mat-error>` on Material, `.invalid-feedback` on Bootstrap, `<small class="p-error">` on PrimeNG, and `<ion-note color="danger">` on Ionic. The core default shown above applies when you use ng-forge without an adapter; it follows the `--df-error-color` and `--df-error-font-size` conventions so it still matches surrounding field errors.
@@ -234,16 +234,16 @@ To render it your own way, register a wrapper under the same name. The later reg
 import { createWrappers } from '@ng-forge/dynamic-forms';
 
 export const appWrappers = createWrappers({
-  wrapperName: 'container-errors',
-  loadComponent: () => import('./my-container-errors.wrapper'),
+  wrapperName: 'field-errors',
+  loadComponent: () => import('./my-field-errors.wrapper'),
 });
 ```
 
 Your component receives the container's `validationMessages` as an input and follows the normal wrapper contract, exposing a `#fieldComponent` slot for the container's content. `injectContainerErrors` resolves the container's own errors so you do not have to reach into the field tree yourself:
 
-```typescript name="my-container-errors.wrapper.ts"
+```typescript name="my-field-errors.wrapper.ts"
 @Component({
-  selector: 'my-container-errors',
+  selector: 'my-field-errors',
   template: `
     <ng-container #fieldComponent></ng-container>
     @for (error of errors(); track error.kind) {
@@ -251,7 +251,7 @@ Your component receives the container's `validationMessages` as an input and fol
     }
   `,
 })
-export default class MyContainerErrorsWrapper implements FieldWrapper {
+export default class MyFieldErrorsWrapper implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly validationMessages = input<ValidationMessages>();
   readonly fieldInputs = input<WrapperFieldInputs>();

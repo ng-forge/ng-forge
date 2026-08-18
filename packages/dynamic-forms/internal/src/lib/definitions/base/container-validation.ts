@@ -19,7 +19,7 @@ export interface ContainerValidation {
   readonly validators?: ValidatorConfig[];
 
   /**
-   * Messages keyed by error `kind`. Rendered by the `container-errors` wrapper, attached
+   * Messages keyed by error `kind`. Rendered by the `field-errors` wrapper, attached
    * automatically when the container declares `validators`.
    */
   readonly validationMessages?: ValidationMessages;

@@ -5,6 +5,7 @@ import {
   createResolvedErrorsSignal,
   DEFAULT_VALIDATION_MESSAGES,
   DynamicText,
+  FIELD_ERROR_DISPLAY,
   FieldMeta,
   ResolvedError,
   shouldShowErrors,
@@ -79,7 +80,16 @@ export class NgForgeField {
     this.defaultValidationMessages,
   );
   readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
-  readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
+
+  /** An ancestor wrapper's claim to render errors — see `FIELD_ERROR_DISPLAY`. */
+  private readonly errorDisplayClaim = inject(FIELD_ERROR_DISPLAY, { optional: true });
+
+  readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => {
+    // Only yield to a claim on THIS field. A wrapper around a container reaches every
+    // descendant, and must not silence the inputs inside it.
+    if (this.errorDisplayClaim?.claimedKey() === this.key()) return [];
+    return this.showErrors() ? this.errors() : [];
+  });
 
   // ───────────────────────────────────────────────────────────────────────────
   // Accessibility helpers

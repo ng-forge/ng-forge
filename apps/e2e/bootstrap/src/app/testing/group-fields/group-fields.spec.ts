@@ -164,7 +164,7 @@ test.describe('Group Fields E2E Tests', () => {
       const dateFrom = groupInputs.first();
       const dateTo = groupInputs.nth(1);
       const submitButton = helpers.getSubmitButton(scenario);
-      // This adapter registers its own `container-errors` wrapper over the core default.
+      // This adapter registers its own `field-errors` wrapper over the core default.
       const containerError = scenario.locator('.invalid-feedback');
 
       await expect(containerError).toHaveCount(0);

@@ -11,7 +11,7 @@ function wrappersOf(field: FieldDef<unknown> | undefined): { type: string; valid
 }
 
 describe('attachContainerErrorWrappers', () => {
-  it('should append the container-errors wrapper to a group that declares validators', () => {
+  it('should append the field-errors wrapper to a group that declares validators', () => {
     const fields: FieldDef<unknown>[] = [
       {
         key: 'period',
@@ -23,10 +23,10 @@ describe('attachContainerErrorWrappers', () => {
 
     const result = attachContainerErrorWrappers(fields);
 
-    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['container-errors']);
+    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['field-errors']);
   });
 
-  it('should append the container-errors wrapper to an array that declares validators', () => {
+  it('should append the field-errors wrapper to an array that declares validators', () => {
     const fields: FieldDef<unknown>[] = [
       {
         key: 'periods',
@@ -38,7 +38,7 @@ describe('attachContainerErrorWrappers', () => {
 
     const result = attachContainerErrorWrappers(fields);
 
-    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['container-errors']);
+    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['field-errors']);
   });
 
   it('should forward validationMessages onto the wrapper config', () => {
@@ -57,7 +57,7 @@ describe('attachContainerErrorWrappers', () => {
     expect(wrappersOf(result[0])[0].validationMessages).toEqual({ dateOrder: 'The end must not be before the start.' });
   });
 
-  it('should keep the container-errors wrapper innermost so it renders inside existing wrappers', () => {
+  it('should keep the field-errors wrapper innermost so it renders inside existing wrappers', () => {
     const fields: FieldDef<unknown>[] = [
       {
         key: 'period',
@@ -70,7 +70,7 @@ describe('attachContainerErrorWrappers', () => {
 
     const result = attachContainerErrorWrappers(fields);
 
-    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['css', 'container-errors']);
+    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['css', 'field-errors']);
   });
 
   it('should leave a container without validators untouched', () => {
@@ -127,7 +127,7 @@ describe('attachContainerErrorWrappers', () => {
     const result = attachContainerErrorWrappers(fields);
     const nested = (result[0] as unknown as { fields: FieldDef<unknown>[] }).fields[0];
 
-    expect(wrappersOf(nested).map((w) => w.type)).toEqual(['container-errors']);
+    expect(wrappersOf(nested).map((w) => w.type)).toEqual(['field-errors']);
   });
 
   it('should reach a group nested inside an array item template', () => {
@@ -151,7 +151,7 @@ describe('attachContainerErrorWrappers', () => {
     const result = attachContainerErrorWrappers(fields);
     const item = (result[0] as unknown as { fields: FieldDef<unknown>[][] }).fields[0];
 
-    expect(wrappersOf(item[0]).map((w) => w.type)).toEqual(['container-errors']);
+    expect(wrappersOf(item[0]).map((w) => w.type)).toEqual(['field-errors']);
   });
 
   it('should not attach twice when run over an already-normalized config', () => {
@@ -166,7 +166,7 @@ describe('attachContainerErrorWrappers', () => {
 
     const result = attachContainerErrorWrappers(attachContainerErrorWrappers(fields));
 
-    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['container-errors']);
+    expect(wrappersOf(result[0]).map((w) => w.type)).toEqual(['field-errors']);
   });
 
   it('should reuse array item rows that did not change', () => {

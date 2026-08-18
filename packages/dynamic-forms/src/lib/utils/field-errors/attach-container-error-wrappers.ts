@@ -2,10 +2,10 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { ContainerValidation, isArrayField, isContainerField, isGroupField, WrapperConfig } from '@ng-forge/dynamic-forms/internal';
 
 /** Wrapper type name — must match the `BUILT_IN_WRAPPERS` registration. */
-const CONTAINER_ERRORS_WRAPPER = 'container-errors';
+const CONTAINER_ERRORS_WRAPPER = 'field-errors';
 
 /**
- * Appends the `container-errors` wrapper to every `group` / `array` declaring `validators` (#568).
+ * Appends the `field-errors` wrapper to every `group` / `array` declaring `validators` (#568).
  *
  * Attaching here rather than auto-associating by field type leaves containers without
  * container validators with their exact current DOM. The wrapper goes last so it renders

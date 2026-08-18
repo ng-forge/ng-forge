@@ -144,7 +144,7 @@ describe('DynamicFormFieldRegistry wrappers', () => {
   });
 
   it('RegisteredWrapperTypes should include registered wrapper type names', () => {
-    // FieldRegistryWrappers: 'css' (CssWrapper) + 'row' (RowWrapper) + 'container-errors' (ContainerErrorsWrapper)
-    expectTypeOf<RegisteredWrapperTypes>().toEqualTypeOf<'css' | 'row' | 'container-errors'>();
+    // FieldRegistryWrappers: 'css' (CssWrapper) + 'row' (RowWrapper) + 'field-errors' (FieldErrorsWrapper)
+    expectTypeOf<RegisteredWrapperTypes>().toEqualTypeOf<'css' | 'row' | 'field-errors'>();
   });
 });

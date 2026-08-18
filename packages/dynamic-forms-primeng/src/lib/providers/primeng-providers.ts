@@ -23,13 +23,13 @@ type PrimeNGFieldsWithAddons = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, Wrap
 type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, WrapperTypeDefinition, PrimeNGConfigFeature];
 
 /**
- * Replaces the neutral core `container-errors` wrapper with the PrimeNG one, so
+ * Replaces the neutral core `field-errors` wrapper with the PrimeNG one, so
  * a container-level validation message renders like a field-level one.
  * Registered under the same name, so the later registration wins.
  */
-const PRIMENG_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
-  wrapperName: 'container-errors',
-  loadComponent: () => import('../wrappers/container-errors/prime-container-errors-wrapper.component'),
+const PRIMENG_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/prime-field-errors-wrapper.component'),
 };
 
 /**
@@ -47,7 +47,7 @@ export function withPrimeNGFields(config: PrimeNGConfig | undefined): PrimeNGFie
 export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldsWithAddons | PrimeNGFieldsWithConfig {
   // Always include the addons feature — prime-icon / prime-button are part of
   // the canonical PrimeNG surface.
-  const base: unknown[] = [...PRIMENG_FIELD_TYPES, withPrimeNGAddons(), PRIMENG_CONTAINER_ERRORS_WRAPPER];
+  const base: unknown[] = [...PRIMENG_FIELD_TYPES, withPrimeNGAddons(), PRIMENG_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

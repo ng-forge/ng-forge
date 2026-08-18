@@ -467,7 +467,7 @@ describe('provideDynamicForm', () => {
       const registry = createWrapperRegistryWithInjection(envProviders);
 
       // Replacing a built-in is a supported override — it is how an adapter
-      // restyles `container-errors` — so it must not warn.
+      // restyles `field-errors` — so it must not warn.
       expect(registry.get('css')).toBe(customCss);
       expect(consoleWarnSpy).not.toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "css" is already registered. Overwriting.');
     });
@@ -490,25 +490,22 @@ describe('provideDynamicForm', () => {
     });
 
     it('should not warn when an app overrides an adapter registration of a built-in name', () => {
-      // Adapters register `container-errors` as a custom wrapper, and the docs tell apps
+      // Adapters register `field-errors` as a custom wrapper, and the docs tell apps
       // to override it the same way. Both shadow a built-in, so neither is a mistake.
       const fromAdapter: WrapperTypeDefinition = {
-        wrapperName: 'container-errors',
+        wrapperName: 'field-errors',
         loadComponent: () => import('../fields/text/text-field.component'),
       };
       const fromApp: WrapperTypeDefinition = {
-        wrapperName: 'container-errors',
+        wrapperName: 'field-errors',
         loadComponent: () => import('../fields/text/text-field.component'),
       };
 
       const envProviders = provideDynamicForm(fromAdapter, fromApp, withLoggerConfig());
       const registry = createWrapperRegistryWithInjection(envProviders);
 
-      expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-        '[Dynamic Forms]',
-        'Wrapper type "container-errors" is already registered. Overwriting.',
-      );
-      expect(registry.get('container-errors')).toBe(fromApp);
+      expect(consoleWarnSpy).not.toHaveBeenCalledWith('[Dynamic Forms]', 'Wrapper type "field-errors" is already registered. Overwriting.');
+      expect(registry.get('field-errors')).toBe(fromApp);
     });
   });
 

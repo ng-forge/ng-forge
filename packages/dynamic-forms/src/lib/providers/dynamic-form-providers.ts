@@ -120,7 +120,7 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         const logger = inject(DynamicFormLogger);
         const registry = new Map();
         // Seed the built-ins, then let later registrations replace them. Overriding a
-        // built-in name is supported — an adapter restyles `container-errors` that way,
+        // built-in name is supported — an adapter restyles `field-errors` that way,
         // and an app may then override the adapter's — so those never warn. Only two
         // custom registrations colliding on a name of their own is a mistake.
         const builtInNames = new Set(BUILT_IN_WRAPPERS.map((w) => w.wrapperName));

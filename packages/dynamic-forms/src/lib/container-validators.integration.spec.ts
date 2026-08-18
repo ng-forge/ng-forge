@@ -22,7 +22,7 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
 /**
  * End-to-end coverage for issue #568: a `validators` entry on a `group` /
  * `array` must gate form validity AND surface its message, which for a
- * container means through the auto-attached `container-errors` wrapper.
+ * container means through the auto-attached `field-errors` wrapper.
  */
 describe('DynamicForm — container-level validators', () => {
   beforeEach(async () => {
@@ -63,7 +63,7 @@ describe('DynamicForm — container-level validators', () => {
   };
 
   const errorTexts = (fixture: ComponentFixture<unknown>): string[] =>
-    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.df-container-error')).map((el) => el.textContent?.trim() ?? '');
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.df-field-error')).map((el) => el.textContent?.trim() ?? '');
 
   /** Marks every rendered control touched, which propagates touched up to the container. */
   const touchAll = (fixture: ComponentFixture<unknown>): void => {
@@ -129,7 +129,7 @@ describe('DynamicForm — container-level validators', () => {
     const { fixture } = SimpleTestUtils.createComponent(config);
     await waitForRender(fixture);
 
-    expect((fixture.nativeElement as HTMLElement).querySelector('df-container-errors-wrapper')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('df-field-errors-wrapper')).toBeNull();
   });
 
   it('renders the container message for an array-level rule', async () => {

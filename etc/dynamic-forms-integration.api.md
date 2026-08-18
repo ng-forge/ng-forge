@@ -266,13 +266,6 @@ export function checkboxFieldMapper(fieldDef: BaseCheckedField<unknown, FieldMet
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown, FieldMeta, boolean>> = Prettify<WithInputSignals<Omit<T, ExcludedKeys$1>>>;
 
 // @public
-export interface ContainerErrorsOptions {
-    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
-    readonly injector?: Injector;
-    readonly validationMessages: Signal<ValidationMessages | undefined>;
-}
-
-// @public
 export function containerFieldMapper(fieldDef: ContainerField): Signal<Record<string, unknown>>;
 
 // @public
@@ -407,6 +400,9 @@ export class EventBus {
 }
 
 // @public
+export const FIELD_ERROR_DISPLAY: InjectionToken<FieldErrorDisplayClaim>;
+
+// @public
 export const FIELD_REGISTRY: InjectionToken<Map<string, FieldTypeDefinition<any>>>;
 
 // @public
@@ -426,6 +422,21 @@ export interface FieldAddonSupportEntry {
     readonly name: string;
     // (undocumented)
     readonly slots: FieldAddonSupport['slots'];
+}
+
+// @public
+export interface FieldErrors {
+    readonly errorId: Signal<string>;
+    readonly errors: Signal<ResolvedError[]>;
+    readonly errorsToDisplay: Signal<ResolvedError[]>;
+    readonly showErrors: Signal<boolean>;
+}
+
+// @public (undocumented)
+export interface FieldErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages?: Signal<ValidationMessages | undefined>;
 }
 
 // @public
@@ -535,10 +546,7 @@ export const INITIALIZATION_TIMEOUT_MS: InjectionToken<number>;
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
 
 // @public
-export function injectContainerErrors(options: ContainerErrorsOptions): Signal<ResolvedError[]>;
-
-// @public
-export function injectFieldErrors(options: WrapperFieldErrorsOptions): WrapperFieldErrors;
+export function injectFieldErrors(options: FieldErrorsOptions): FieldErrors;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;
@@ -1076,21 +1084,6 @@ export type ValueHandlingMode = 'exclude' | 'flatten' | 'include';
 
 // @public
 export function withPreviousValue<T>(input: Resource<T>): Resource<T>;
-
-// @public
-export interface WrapperFieldErrors {
-    readonly errorId: Signal<string>;
-    readonly errors: Signal<ResolvedError[]>;
-    readonly errorsToDisplay: Signal<ResolvedError[]>;
-    readonly showErrors: Signal<boolean>;
-}
-
-// @public (undocumented)
-export interface WrapperFieldErrorsOptions {
-    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
-    readonly injector?: Injector;
-    readonly validationMessages?: Signal<ValidationMessages | undefined>;
-}
 
 // @public
 export interface WrapperFieldInputs {

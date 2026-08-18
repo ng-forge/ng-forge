@@ -23,13 +23,13 @@ type MaterialFieldsWithAddons = [...MaterialFieldTypes, MaterialAddonsFeature, W
 type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialAddonsFeature, WrapperTypeDefinition, MaterialConfigFeature];
 
 /**
- * Replaces the neutral core `container-errors` wrapper with the Material one, so
+ * Replaces the neutral core `field-errors` wrapper with the Material one, so
  * a container-level validation message renders like a field-level one.
  * Registered under the same name, so the later registration wins.
  */
-const MATERIAL_CONTAINER_ERRORS_WRAPPER: WrapperTypeDefinition = {
-  wrapperName: 'container-errors',
-  loadComponent: () => import('../wrappers/container-errors/mat-container-errors-wrapper.component'),
+const MATERIAL_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/mat-field-errors-wrapper.component'),
 };
 
 /**
@@ -47,7 +47,7 @@ export function withMaterialFields(config: MaterialConfig | undefined): Material
 export function withMaterialFields(config?: MaterialConfig): MaterialFieldsWithAddons | MaterialFieldsWithConfig {
   // Always include the addons feature — mat-icon / mat-button are part of
   // the canonical Material surface.
-  const base: unknown[] = [...MATERIAL_FIELD_TYPES, withMaterialAddons(), MATERIAL_CONTAINER_ERRORS_WRAPPER];
+  const base: unknown[] = [...MATERIAL_FIELD_TYPES, withMaterialAddons(), MATERIAL_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({

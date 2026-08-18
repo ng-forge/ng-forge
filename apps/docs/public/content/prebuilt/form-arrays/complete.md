@@ -153,13 +153,13 @@ The error lands on the array itself, so it gates form and page validity. Array v
 
 ### Rendering the message
 
-Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `container-errors` wrapper, which renders each resolved message below the array's items:
+Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `field-errors` wrapper, which renders each resolved message below the array's items:
 
 ```html
-<div class="df-container-error" role="alert">Every period must end after it starts.</div>
+<div class="df-field-error" role="alert">Every period must end after it starts.</div>
 ```
 
-Each UI adapter ships its own version of this wrapper, so the message renders in the adapter's native error style out of the box. To restyle it, register your own wrapper under the same `container-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
+Each UI adapter ships its own version of this wrapper, so the message renders in the adapter's native error style out of the box. To restyle it, register your own wrapper under the same `field-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
 
 ## Initial Values
 

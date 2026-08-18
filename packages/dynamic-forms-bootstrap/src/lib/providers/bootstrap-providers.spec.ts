@@ -14,7 +14,7 @@ describe('withBootstrapFields', () => {
   it('returns field types + the auto-included addons feature when no config provided', () => {
     const fields = withBootstrapFields();
 
-    // Field types come first; the addons feature and the container-errors
+    // Field types come first; the addons feature and the field-errors
     // wrapper are appended after them.
     expect(fields.slice(0, BOOTSTRAP_FIELD_TYPES.length)).toEqual(BOOTSTRAP_FIELD_TYPES);
     const addonsFeature = fields.find((f) => 'ɵkind' in f && f.ɵkind === 'addons');
@@ -52,14 +52,14 @@ describe('withBootstrapFields', () => {
     expect(TestBed.inject(BOOTSTRAP_CONFIG)).toEqual(config);
   });
 
-  it('registers a container-errors wrapper that overrides the core default', () => {
-    const wrapper = withBootstrapFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('registers a field-errors wrapper that overrides the core default', () => {
+    const wrapper = withBootstrapFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     expect(wrapper).toBeDefined();
   });
 
-  it('loads the Bootstrap container-errors component', async () => {
-    const wrapper = withBootstrapFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('loads the Bootstrap field-errors component', async () => {
+    const wrapper = withBootstrapFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     const loaded = await wrapper.loadComponent();
 

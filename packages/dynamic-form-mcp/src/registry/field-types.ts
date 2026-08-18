@@ -415,7 +415,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'validationMessages',
         type: 'Record<string, string>',
         description:
-          "Messages keyed by error kind for the group's own validators. Rendered below the group's content by the auto-attached 'container-errors' wrapper.",
+          "Messages keyed by error kind for the group's own validators. Rendered below the group's content by the auto-attached 'field-errors' wrapper.",
         required: false,
       },
     },
@@ -511,7 +511,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         name: 'validationMessages',
         type: 'Record<string, string>',
         description:
-          "Messages keyed by error kind for the array's own validators. Rendered below the array's items by the auto-attached 'container-errors' wrapper.",
+          "Messages keyed by error kind for the array's own validators. Rendered below the array's items by the auto-attached 'field-errors' wrapper.",
         required: false,
       },
     },

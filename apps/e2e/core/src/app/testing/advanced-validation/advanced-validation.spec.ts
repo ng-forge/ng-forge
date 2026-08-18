@@ -720,9 +720,9 @@ test.describe('Advanced Validation E2E Tests', () => {
       const dateFrom = groupInputs.first();
       const dateTo = groupInputs.nth(1);
       const submitButton = helpers.getSubmitButton(scenario);
-      // This app registers withMaterialFields(), so the Material container-errors
+      // This app registers withMaterialFields(), so the Material field-errors
       // wrapper replaces the core default and renders a <mat-error>.
-      const containerError = scenario.locator('mat-error.df-mat-container-error');
+      const containerError = scenario.locator('mat-error.df-mat-field-error');
 
       // Nothing to complain about yet.
       await expect(containerError).toHaveCount(0);
@@ -758,7 +758,7 @@ test.describe('Advanced Validation E2E Tests', () => {
       // This validator returns errors carrying a `fieldTree`, so they re-home onto the
       // row's own input and render as an ordinary field error, not a container message.
       const rowError = scenario.locator('mat-error');
-      const containerError = scenario.locator('mat-error.df-mat-container-error');
+      const containerError = scenario.locator('mat-error.df-mat-field-error');
 
       await expect(rowError).toHaveCount(0);
 

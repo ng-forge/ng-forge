@@ -4,7 +4,7 @@ import { form, schema, validate } from '@angular/forms/signals';
 import { DynamicFormLogger, NoopLogger } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import { afterEach, describe, expect, it } from 'vitest';
-import MatContainerErrorsWrapperComponent from './mat-container-errors-wrapper.component';
+import MatFieldErrorsWrapperComponent from './mat-field-errors-wrapper.component';
 
 /**
  * The wrapper resolves the container's own node from the PARENT tree exposed by
@@ -13,15 +13,15 @@ import MatContainerErrorsWrapperComponent from './mat-container-errors-wrapper.c
  * `mapFieldToForm` produces for a container that declares `validators`.
  */
 @Component({
-  imports: [MatContainerErrorsWrapperComponent],
-  template: `<df-mat-container-errors [fieldInputs]="inputs" [validationMessages]="messages" />`,
+  imports: [MatFieldErrorsWrapperComponent],
+  template: `<df-mat-field-errors [fieldInputs]="inputs" [validationMessages]="messages" />`,
 })
 class Host {
   readonly inputs = { key: 'period' } as never;
   readonly messages = { dateOrder: 'The end must not be before the start.' };
 }
 
-describe('MatContainerErrorsWrapperComponent', () => {
+describe('MatFieldErrorsWrapperComponent', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   function setup(dateFrom: string, dateTo: string) {

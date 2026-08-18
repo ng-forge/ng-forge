@@ -8,7 +8,7 @@ const dateOrder: CustomValidator = (ctx) => {
 };
 
 /**
- * Validator on a `group` container (#568). Verifies this adapter's `container-errors`
+ * Validator on a `group` container (#568). Verifies this adapter's `field-errors`
  * wrapper replaces the neutral core default and renders the message natively.
  */
 const config = {
@@ -31,6 +31,6 @@ const config = {
 export const groupContainerValidatorScenario: TestScenario = {
   testId: 'group-container-validator-test',
   title: 'Group Container Validator',
-  description: 'Group-level validator rendered through the container-errors wrapper',
+  description: 'Group-level validator rendered through the field-errors wrapper',
   config,
 };

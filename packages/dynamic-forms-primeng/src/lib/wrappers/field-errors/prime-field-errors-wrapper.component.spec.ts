@@ -4,7 +4,7 @@ import { form, schema, validate } from '@angular/forms/signals';
 import { DynamicFormLogger, NoopLogger } from '@ng-forge/dynamic-forms';
 import { FIELD_SIGNAL_CONTEXT } from '@ng-forge/dynamic-forms/integration';
 import { afterEach, describe, expect, it } from 'vitest';
-import BsContainerErrorsWrapperComponent from './bs-container-errors-wrapper.component';
+import PrimeFieldErrorsWrapperComponent from './prime-field-errors-wrapper.component';
 
 /**
  * The wrapper resolves the container's own node from the PARENT tree exposed by
@@ -13,15 +13,15 @@ import BsContainerErrorsWrapperComponent from './bs-container-errors-wrapper.com
  * `mapFieldToForm` produces for a container that declares `validators`.
  */
 @Component({
-  imports: [BsContainerErrorsWrapperComponent],
-  template: `<df-bs-container-errors [fieldInputs]="inputs" [validationMessages]="messages" />`,
+  imports: [PrimeFieldErrorsWrapperComponent],
+  template: `<df-prime-field-errors [fieldInputs]="inputs" [validationMessages]="messages" />`,
 })
 class Host {
   readonly inputs = { key: 'period' } as never;
   readonly messages = { dateOrder: 'The end must not be before the start.' };
 }
 
-describe('BsContainerErrorsWrapperComponent', () => {
+describe('PrimeFieldErrorsWrapperComponent', () => {
   afterEach(() => TestBed.resetTestingModule());
 
   function setup(dateFrom: string, dateTo: string) {
@@ -68,7 +68,7 @@ describe('BsContainerErrorsWrapperComponent', () => {
   }
 
   const errorTexts = (fixture: ComponentFixture<Host>): string[] =>
-    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.invalid-feedback')).map((el) => el.textContent?.trim() ?? '');
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('small.p-error')).map((el) => el.textContent?.trim() ?? '');
 
   const settle = async (fixture: ComponentFixture<Host>): Promise<void> => {
     for (let i = 0; i < 3; i++) {
@@ -85,7 +85,7 @@ describe('BsContainerErrorsWrapperComponent', () => {
     expect(errorTexts(fixture)).toEqual([]);
   });
 
-  it('renders an .invalid-feedback message once touched and invalid', async () => {
+  it('renders a small.p-error message once touched and invalid', async () => {
     const { fixture, parentForm } = setup('2026-02-01', '2026-01-01');
 
     (parentForm as unknown as { period: () => { markAsTouched(): void } }).period().markAsTouched();

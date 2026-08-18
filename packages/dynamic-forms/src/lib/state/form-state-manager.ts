@@ -20,7 +20,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { normalizeSimplifiedArrays } from '../utils/array-field/normalize-simplified-arrays';
-import { attachContainerErrorWrappers } from '../utils/container-errors/attach-container-error-wrappers';
+import { attachContainerErrorWrappers } from '../utils/field-errors/attach-container-error-wrappers';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';

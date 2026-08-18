@@ -320,7 +320,7 @@ const periodOrder: CustomValidator = (ctx) => {
 };
 ```
 
-The message renders below the array's items via the built-in `container-errors` wrapper, which is appended automatically when a container declares `validators`. See [Array-Level Validation](/prebuilt/form-arrays/complete#array-level-validation) in the complete API guide for the full details and how to restyle the wrapper.
+The message renders below the array's items via the built-in `field-errors` wrapper, which is appended automatically when a container declares `validators`. See [Array-Level Validation](/prebuilt/form-arrays/complete#array-level-validation) in the complete API guide for the full details and how to restyle the wrapper.
 
 ## Conditional Visibility
 

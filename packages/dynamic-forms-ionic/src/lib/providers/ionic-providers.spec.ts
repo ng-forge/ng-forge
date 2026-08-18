@@ -15,7 +15,7 @@ describe('withIonicFields', () => {
     const fields = withIonicFields();
 
     // First N entries are the IONIC_FIELD_TYPES; the trailing entries are the
-    // auto-included `withIonicAddons()` feature and the container-errors wrapper.
+    // auto-included `withIonicAddons()` feature and the field-errors wrapper.
     expect(fields.slice(0, IONIC_FIELD_TYPES.length)).toEqual([...IONIC_FIELD_TYPES]);
     const addonsFeature = fields.find((f) => 'ɵkind' in f && f.ɵkind === 'addons');
     expect(addonsFeature).toBeDefined();
@@ -52,14 +52,14 @@ describe('withIonicFields', () => {
     expect(TestBed.inject(IONIC_CONFIG)).toEqual(config);
   });
 
-  it('registers a container-errors wrapper that overrides the core default', () => {
-    const wrapper = withIonicFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('registers a field-errors wrapper that overrides the core default', () => {
+    const wrapper = withIonicFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     expect(wrapper).toBeDefined();
   });
 
-  it('loads the Ionic container-errors component', async () => {
-    const wrapper = withIonicFields().find((f) => 'wrapperName' in f && f.wrapperName === 'container-errors');
+  it('loads the Ionic field-errors component', async () => {
+    const wrapper = withIonicFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
 
     const loaded = await wrapper.loadComponent();
 
