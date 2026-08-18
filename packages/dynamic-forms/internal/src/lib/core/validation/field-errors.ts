@@ -1,6 +1,7 @@
 import { computed, inject, Injector, InjectionToken, Signal } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { WrapperFieldInputs } from '../../wrappers/wrapper-field-inputs';
+import { ReadonlyFieldTree } from '../field-tree-utils';
 import { ValidationMessages } from '../../models/validation-types';
 import { DEFAULT_VALIDATION_MESSAGES, FIELD_SIGNAL_CONTEXT } from '../../models/field-signal-context.token';
 import { createResolvedErrorsSignal, ResolvedError } from './create-resolved-errors-signal';
@@ -61,15 +62,24 @@ export function injectFieldErrors(options: FieldErrorsOptions): FieldErrors {
   const defaultValidationMessages = inject(DEFAULT_VALIDATION_MESSAGES, { optional: true });
   const fieldSignalContext = inject(FIELD_SIGNAL_CONTEXT, { optional: true });
 
-  const fieldTree = computed<FieldTree<unknown> | undefined>(() => {
+  // The two shapes differ: a leaf's `fieldInputs.field` is a `ReadonlyFieldTree`, a plain
+  // object of signals, while a container's node comes from the parent tree and is a
+  // callable `FieldTree`. Normalise to the state object both expose.
+  const fieldState = computed<ReadonlyFieldTree | undefined>(() => {
     const inputs = options.fieldInputs();
     if (!inputs) return undefined;
-    // Leaf: the mapper already put the tree in the bag. `ReadonlyFieldTree` is the same
-    // callable narrowed to read-only signals, which is all the error signals touch.
-    if (inputs.field) return inputs.field as unknown as FieldTree<unknown>;
-    // Container: no `field`, so look its own node up in the parent tree.
+    if (inputs.field) return inputs.field as ReadonlyFieldTree;
+
     const parentTree = fieldSignalContext?.form as Record<string, FieldTree<unknown> | undefined> | undefined;
-    return inputs.key ? parentTree?.[inputs.key] : undefined;
+    const node = inputs.key ? parentTree?.[inputs.key] : undefined;
+    return node ? (node() as unknown as ReadonlyFieldTree) : undefined;
+  });
+
+  // The error signals take a callable tree and immediately call it for the state, so
+  // hand them a thunk over the state we already resolved.
+  const fieldTree = computed<FieldTree<unknown> | undefined>(() => {
+    const state = fieldState();
+    return state ? ((() => state) as unknown as FieldTree<unknown>) : undefined;
   });
 
   const messages = computed<ValidationMessages | undefined>(

@@ -780,4 +780,35 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(submitButton).toBeEnabled();
     });
   });
+
+  test.describe('Delegated field errors (FIELD_ERROR_DISPLAY)', () => {
+    test('renders the message once, from the wrapper rather than the field', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/delegated-field-errors');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('delegated-field-errors-test');
+      await expect(scenario).toBeVisible();
+
+      const username = scenario.locator(':is([id="username"], [id$="_username"])');
+      const email = scenario.locator(':is([id="email"], [id$="_email"])');
+
+      await helpers.fillInput(username.locator('input'), 'x');
+      await helpers.clearAndFill(username.locator('input'), '');
+      await helpers.blurInput(username.locator('input'));
+      await helpers.fillInput(email.locator('input'), 'x');
+      await helpers.clearAndFill(email.locator('input'), '');
+      await helpers.blurInput(email.locator('input'));
+
+      // The wrapper is the field's PARENT, so its message is a sibling of the field
+      // host — count at scenario level rather than scoping inside either field.
+      const wrapperErrors = scenario.locator('mat-error.df-mat-field-error');
+      const allErrors = scenario.locator('mat-error');
+
+      // One delegated (wrapper) + one ordinary (email). Three would mean the delegated
+      // field rendered its own on top of the wrapper's.
+      await expect(allErrors).toHaveCount(2);
+      await expect(wrapperErrors).toHaveCount(1);
+      await expect(wrapperErrors).toHaveText('Username is required.');
+    });
+  });
 });
