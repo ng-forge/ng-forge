@@ -2,10 +2,10 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 // Import form config schemas from each UI integration
-import { MatFormConfigSchema } from '../../../material/src/index';
-import { BsFormConfigSchema } from '../../../bootstrap/src/index';
-import { PrimeFormConfigSchema } from '../../../primeng/src/index';
-import { IonicFormConfigSchema } from '../../../ionic/src/index';
+import { MatFormConfigSchema } from '../../../material/src';
+import { BsFormConfigSchema } from '../../../bootstrap/src';
+import { PrimeFormConfigSchema } from '../../../primeng/src';
+import { IonicFormConfigSchema } from '../../../ionic/src';
 
 /**
  * Supported UI integrations for form config schemas.

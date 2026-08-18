@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { IonicLeafFieldSchema } from './ionic-leaf-field.schema';
 import { createContainerSchemas } from '../../src/lib/schemas/containers/factories';
 import { createFormConfigSchema } from '../../src/lib/schemas/form/form-config.schema';
-import { IonicColorSchema, IonicLabelPlacementSchema } from './props/index';
+import { IonicColorSchema, IonicLabelPlacementSchema } from './props';
 
 const containerSchemas = createContainerSchemas({
   leafFieldSchema: IonicLeafFieldSchema,

@@ -15,7 +15,7 @@ import {
   PrimeSliderPropsSchema,
   PrimeTogglePropsSchema,
   PrimeButtonPropsSchema,
-} from '../props/index';
+} from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);

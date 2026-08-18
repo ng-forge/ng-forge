@@ -7,7 +7,7 @@
 
 export const BOOTSTRAP_SCHEMA_VERSION = '0.4.0';
 
-export * from './props/index';
-export * from './fields/index';
+export * from './props';
+export * from './fields';
 export * from './bs-leaf-field.schema';
 export * from './bs-form-config.schema';

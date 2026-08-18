@@ -17,4 +17,4 @@
  */
 
 // Export all base schemas
-export * from './schemas/index';
+export * from './schemas';

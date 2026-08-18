@@ -11,10 +11,10 @@
  */
 
 // Adapter-agnostic base schemas.
-export * from './src/index';
+export * from './src';
 
 // Validation and JSON Schema generation.
-export * from './validate/src/index';
+export * from './validate/src';
 
 // FormConfig discovery inside TypeScript/JavaScript sources.
 export * from './discovery/ast-extractor';

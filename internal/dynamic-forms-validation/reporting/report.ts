@@ -1,6 +1,6 @@
 /** Markdown reports for FormConfig validation results. */
 
-import type { FormattedValidationError, UiIntegration, ValidationResult } from '../validate/src/index';
+import type { FormattedValidationError, UiIntegration, ValidationResult } from '../validate/src';
 import { getFixSuggestion } from './fix-suggestions';
 import type { FileValidationResult } from '../discovery/validate-file';
 

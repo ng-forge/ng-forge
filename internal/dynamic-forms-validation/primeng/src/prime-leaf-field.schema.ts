@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves/index';
+import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves';
 import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
 import {
   PrimeInputFieldSchemaObject,
@@ -21,7 +21,7 @@ import {
   PrimeInsertArrayItemButtonFieldSchema,
   PrimePopArrayItemButtonFieldSchema,
   PrimeShiftArrayItemButtonFieldSchema,
-} from './fields/index';
+} from './fields';
 
 /**
  * Discriminated union of all PrimeNG leaf field types.

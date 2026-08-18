@@ -15,7 +15,7 @@ import {
   IonicTextareaPropsSchema,
   IonicMultiCheckboxPropsSchema,
   IonicButtonPropsSchema,
-} from '../props/index';
+} from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 const IonicValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);

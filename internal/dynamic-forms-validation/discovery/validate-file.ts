@@ -1,7 +1,7 @@
 /** FormConfig discovery and validation over source files. */
 
 import { readFile } from 'node:fs/promises';
-import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src/index';
+import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src';
 import {
   createSourceFile,
   findFormConfigCandidates,

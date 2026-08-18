@@ -15,7 +15,7 @@ import {
   BsDatepickerPropsSchema,
   BsSliderPropsSchema,
   BsButtonPropsSchema,
-} from '../props/index';
+} from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
 
 // Value field base (extends BaseFieldDef with validation)

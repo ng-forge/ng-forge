@@ -2,10 +2,10 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 // Import leaf field schemas from each UI integration
-import { MatLeafFieldSchema } from '../../../material/src/index';
-import { BsLeafFieldSchema } from '../../../bootstrap/src/index';
-import { PrimeLeafFieldSchema } from '../../../primeng/src/index';
-import { IonicLeafFieldSchema } from '../../../ionic/src/index';
+import { MatLeafFieldSchema } from '../../../material/src';
+import { BsLeafFieldSchema } from '../../../bootstrap/src';
+import { PrimeLeafFieldSchema } from '../../../primeng/src';
+import { IonicLeafFieldSchema } from '../../../ionic/src';
 
 // Import individual field schemas for Material
 import {
@@ -22,7 +22,7 @@ import {
   MatSubmitButtonFieldSchema,
   MatNextButtonFieldSchema,
   MatPreviousButtonFieldSchema,
-} from '../../../material/src/fields/index';
+} from '../../../material/src/fields';
 
 // Import individual field schemas for Bootstrap
 import {
@@ -39,7 +39,7 @@ import {
   BsSubmitButtonFieldSchema,
   BsNextButtonFieldSchema,
   BsPreviousButtonFieldSchema,
-} from '../../../bootstrap/src/fields/index';
+} from '../../../bootstrap/src/fields';
 
 // Import individual field schemas for PrimeNG
 import {
@@ -56,7 +56,7 @@ import {
   PrimeSubmitButtonFieldSchema,
   PrimeNextButtonFieldSchema,
   PrimePreviousButtonFieldSchema,
-} from '../../../primeng/src/fields/index';
+} from '../../../primeng/src/fields';
 
 // Import individual field schemas for Ionic
 import {
@@ -73,7 +73,7 @@ import {
   IonicSubmitButtonFieldSchema,
   IonicNextButtonFieldSchema,
   IonicPreviousButtonFieldSchema,
-} from '../../../ionic/src/fields/index';
+} from '../../../ionic/src/fields';
 
 import type { UiIntegration, JsonSchemaType } from './form-config-json-schema';
 

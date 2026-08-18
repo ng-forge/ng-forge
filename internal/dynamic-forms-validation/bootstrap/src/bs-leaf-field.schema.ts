@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves/index';
+import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves';
 import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
 import {
   BsInputFieldSchemaObject,
@@ -21,7 +21,7 @@ import {
   BsInsertArrayItemButtonFieldSchema,
   BsPopArrayItemButtonFieldSchema,
   BsShiftArrayItemButtonFieldSchema,
-} from './fields/index';
+} from './fields';
 
 /**
  * Discriminated union of all Bootstrap leaf field types.
