@@ -1,10 +1,10 @@
 /**
  * Deterministic graders for the skill eval.
  *
- * Nothing here calls a model. Whether the agent ran the validator is a fact
- * about its transcript; whether the config it produced is valid is a fact the
- * validator itself decides. Keeping both objective is what makes this eval
- * cheap enough to run repeatedly, which is what pass^k needs.
+ * Nothing here calls a model. Whether the agent ran the validator is read from
+ * a log it never sees, not from its own account of itself; whether the config
+ * it produced is valid is decided by re-validating it. Keeping both out of the
+ * agent's reach is what makes the numbers mean anything.
  */
 
 import type { EvalTask, UiIntegration } from './tasks.ts';
@@ -25,7 +25,14 @@ export type ConfigValidator = (
 /** What a single trial produced. */
 export interface TrialRecord {
   taskId: string;
-  /** Everything the agent did, as text: commands, tool calls, narration. */
+  /**
+   * Contents of the workspace's validator invocation log, written by a wrapper
+   * the agent never sees. Kept separate from `transcript` on purpose: grading
+   * "did it run the validator" against anything the agent authored lets a
+   * trial pass by merely claiming to have run it.
+   */
+  invocations: string;
+  /** The agent's own account of what it did. Self-reported, so trigger signal only. */
   transcript: string;
   /** Final contents of the file the task expected, if it exists. */
   producedFile?: string;
@@ -54,11 +61,14 @@ export const PASS_THRESHOLD = 0.8;
 /**
  * Did the agent invoke the validator?
  *
- * Matches the command in any of the forms the skill documents, allowing for a
- * package-manager prefix and arbitrary arguments.
+ * The workspace wrapper appends one line per invocation and nothing else ever
+ * writes to that file, so a non-empty log is the run. This deliberately does
+ * not pattern-match a command line: an earlier version did, which meant the
+ * check passed on any text merely naming the command, and the agent's own
+ * summary was being fed in alongside the log.
  */
-export function ranValidator(transcript: string): boolean {
-  return /(?:npx|pnpm dlx|yarn dlx|bunx)?\s*(?:@ng-forge\/dynamic-forms-cli|ng-forge-validate)\b/.test(transcript);
+export function ranValidator(invocations: string): boolean {
+  return invocations.trim().length > 0;
 }
 
 /** Did the agent read the skill at all? */
@@ -108,7 +118,8 @@ export function gradeTrial(task: EvalTask, record: TrialRecord, validate: Config
     });
   }
 
-  const validated = ranValidator(record.transcript);
+  // Invocation log only. See TrialRecord.invocations.
+  const validated = ranValidator(record.invocations);
   graders.push({
     name: 'ran-validator',
     score: validated ? 1 : 0,

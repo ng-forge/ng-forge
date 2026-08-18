@@ -111,12 +111,8 @@ export async function gradeAll(trialsDir: string, reportsDir?: string) {
         }
       }
 
-      // The invocation log is the objective half of the transcript; the
-      // agent's summary supplies only the trigger signal.
-      const transcript = [invocations ? `ng-forge-validate ${invocations}` : '', report].join('\n');
-
       results.push(
-        gradeTrial(task, { taskId: task.id, transcript, producedFile }, cliValidator(workspace), {
+        gradeTrial(task, { taskId: task.id, invocations, transcript: report, producedFile }, cliValidator(workspace), {
           canObserveTriggering: Boolean(reportsDir),
         }),
       );

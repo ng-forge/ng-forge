@@ -6,8 +6,8 @@
  * rules, and common mistakes is derived from the same registries the MCP
  * server and the validation CLI use, so the three cannot drift apart.
  *
- * Run `nx run workspace:skills-update` to regenerate; CI runs
- * `skills-check`, which fails if the committed output is stale.
+ * Run `nx run skills:update` to regenerate; CI runs `nx run skills:check`,
+ * which fails if the committed output is stale.
  *
  * Executed by Node's native type stripping, so it must stay free of
  * TypeScript syntax that requires real transformation (enums, namespaces,
@@ -327,7 +327,7 @@ async function main(): Promise<void> {
       return;
     }
 
-    console.log('[skills-check] OK: 5 generated file(s) match their sources.');
+    console.log(`[skills-check] OK: ${(await buildOutputs()).length} generated file(s) match their sources.`);
     return;
   }
 

@@ -5,9 +5,9 @@ import type { FormattedValidationError } from '@ng-forge/dynamic-forms-validatio
 const DOCS_BASE_URL = 'https://ng-forge.com/dynamic-forms';
 
 /**
- * Error text patterns paired with the doc page that explains the rule.
- * Order matters: the first match for a given error wins, and each hint is
- * emitted at most once per report.
+ * Error path patterns paired with the doc page that explains the rule.
+ * The first match for a given error wins, and each hint is emitted at most
+ * once per report.
  */
 const ERROR_DOC_HINTS: ReadonlyArray<{ pattern: RegExp; label: string; path: string }> = [
   { pattern: /options/i, label: 'Options syntax', path: 'schema-fields/field-types' },
@@ -34,12 +34,20 @@ export function collectRelatedDocs(errors: FormattedValidationError[]): string[]
   const hints: string[] = [];
 
   for (const error of errors) {
-    const haystack = `${error.path} ${error.message}`;
+    // Path only. Matching the message drew unrelated pages, because messages
+    // quote property names they are not about: one unknown-field-type error
+    // enumerated the valid types and pulled in the hidden, container and array
+    // pages at once.
     for (const { pattern, label, path } of ERROR_DOC_HINTS) {
-      if (pattern.test(haystack) && !seen.has(path)) {
+      if (!pattern.test(error.path)) {
+        continue;
+      }
+      if (!seen.has(path)) {
         seen.add(path);
         hints.push(`${label}: ${DOCS_BASE_URL}/${path}`);
       }
+      // First match wins, as documented above.
+      break;
     }
   }
 

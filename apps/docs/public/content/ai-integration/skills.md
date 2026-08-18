@@ -78,7 +78,9 @@ It finds every FormConfig in the matched files, validates it against the schema 
 | `1`  | At least one config failed validation                        |
 | `2`  | Unknown UI integration, or no files matched                  |
 
-Code `2` is separate from `1` so a typo in a glob does not read as a passing run. That makes the command safe as a CI gate:
+Code `2` is separate from `1` so a typo in a glob does not read as a passing run.
+
+One case to know about before relying on this as a gate: if files match but none of them contains a FormConfig the extractor recognises, the command reports that on stderr and still exits `0`. A refactor that moves configs somewhere the extractor cannot see them turns the gate quiet rather than red.
 
 ```yaml
 - name: Validate form configs

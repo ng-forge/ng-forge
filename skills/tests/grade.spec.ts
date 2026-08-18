@@ -44,20 +44,26 @@ export const signupForm = {
 const task = (id: string): EvalTask => EVAL_TASKS.find((t) => t.id === id)!;
 
 describe('ranValidator', () => {
-  it.each([
-    'npx @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material',
-    'pnpm dlx @ng-forge/dynamic-forms-cli src/signup.form.ts',
-    'bunx @ng-forge/dynamic-forms-cli src/a.ts',
-    'ng-forge-validate src/signup.form.ts --ui bootstrap',
-  ])('detects %s', (command) => {
-    expect(ranValidator(`Running the validator:\n${command}\nDone.`)).toBe(true);
+  it('counts a non-empty invocation log as a run', () => {
+    expect(ranValidator('src/signup.form.ts --ui material\n')).toBe(true);
   });
 
-  it('is not fooled by a transcript that merely mentions validating', () => {
-    expect(ranValidator('I validated the config by reading it carefully.')).toBe(false);
+  it('counts several logged invocations as a run', () => {
+    expect(ranValidator('src/a.form.ts\nsrc/b.form.ts --ui bootstrap\n')).toBe(true);
   });
 
-  it('returns false for an empty transcript', () => {
+  it('returns false for an empty log', () => {
+    expect(ranValidator('')).toBe(false);
+  });
+
+  it('returns false for a whitespace-only log', () => {
+    expect(ranValidator('  \n  ')).toBe(false);
+  });
+
+  it('cannot be satisfied by prose, because prose never reaches the log', () => {
+    // Guards the earlier design, which regexed a string that included the
+    // agent's own summary and so credited a claim as a run.
+    expect(ranValidator('I ran npx @ng-forge/dynamic-forms-cli and it passed.')).toBe(true);
     expect(ranValidator('')).toBe(false);
   });
 });
@@ -77,10 +83,28 @@ describe('loadedSkill', () => {
 });
 
 describe('gradeTrial, positive tasks', () => {
+  it('does not credit a run the agent only claimed to make', () => {
+    // The agent's summary names the command; the invocation log is empty.
+    // Grading anything agent-authored here would score this a full pass.
+    const result = gradeTrial(
+      task('implicit-select'),
+      {
+        taskId: 'implicit-select',
+        invocations: '',
+        transcript: 'I ran `npx @ng-forge/dynamic-forms-cli src/signup.form.ts --ui material` and it passed.',
+        producedFile: VALID_CONFIG,
+      },
+      validate,
+    );
+
+    expect(result.graders.find((g) => g.name === 'ran-validator')?.score).toBe(0);
+    expect(result.passed).toBe(false);
+  });
+
   it('omits the trigger grader when triggering cannot be observed', () => {
     const result = gradeTrial(
       task('implicit-select'),
-      { taskId: 'implicit-select', transcript: 'ng-forge-validate src/signup.form.ts', producedFile: VALID_CONFIG },
+      { taskId: 'implicit-select', invocations: 'src/signup.form.ts', transcript: '', producedFile: VALID_CONFIG },
       validate,
       { canObserveTriggering: false },
     );
@@ -95,7 +119,8 @@ describe('gradeTrial, positive tasks', () => {
       task('implicit-select'),
       {
         taskId: 'implicit-select',
-        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts --ui material',
+        invocations: 'src/signup.form.ts --ui material\n',
+        transcript: 'Read SKILL.md.',
         producedFile: VALID_CONFIG,
       },
       validate,
@@ -110,7 +135,8 @@ describe('gradeTrial, positive tasks', () => {
       task('hidden-field-value'),
       {
         taskId: 'hidden-field-value',
-        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
+        invocations: 'src/signup.form.ts\n',
+        transcript: 'Read SKILL.md.',
         producedFile: INVALID_CONFIG,
       },
       validate,
@@ -125,6 +151,7 @@ describe('gradeTrial, positive tasks', () => {
       task('implicit-select'),
       {
         taskId: 'implicit-select',
+        invocations: '',
         transcript: 'Read SKILL.md and wrote the config.',
         producedFile: VALID_CONFIG,
       },
@@ -145,7 +172,8 @@ describe('gradeTrial, positive tasks', () => {
       task('implicit-select'),
       {
         taskId: 'implicit-select',
-        transcript: 'Read SKILL.md. Ran npx @ng-forge/dynamic-forms-cli src/signup.form.ts',
+        invocations: 'src/signup.form.ts\n',
+        transcript: 'Read SKILL.md.',
         producedFile: withPropsOptions,
       },
       validate,
@@ -159,6 +187,7 @@ describe('gradeTrial, positive tasks', () => {
       task('implicit-select'),
       {
         taskId: 'implicit-select',
+        invocations: '',
         transcript: 'Read SKILL.md.',
       },
       validate,
@@ -175,6 +204,7 @@ describe('gradeTrial, negative controls', () => {
       task('negative-unrelated-angular'),
       {
         taskId: 'negative-unrelated-angular',
+        invocations: '',
         transcript: 'Wrote src/truncate.pipe.ts using Angular Pipe.',
       },
       validate,
@@ -189,6 +219,7 @@ describe('gradeTrial, negative controls', () => {
       task('negative-plain-reactive-form'),
       {
         taskId: 'negative-plain-reactive-form',
+        invocations: '',
         transcript: 'Read skills/dynamic-forms/SKILL.md before writing the reactive form.',
       },
       validate,

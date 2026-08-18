@@ -21,18 +21,36 @@ describe('collectRelatedDocs', () => {
     expect(collectRelatedDocs([{ path: 'zzz', message: 'zzz' }])).toEqual([]);
   });
 
-  it('emits a link for every documented topic pattern', () => {
+  it('matches on the path, not the message', () => {
+    // An unknown-field-type message enumerates the valid types, which used to
+    // drag in the hidden, container and array pages at once.
     const hints = collectRelatedDocs([
-      { path: 'fields[0].props.options', message: 'options' },
-      { path: 'fields[1]', message: 'hidden field requires value' },
-      { path: 'fields[2].logic', message: 'conditional logic' },
-      { path: 'fields[3].validators', message: 'required validator' },
-      { path: 'fields[4].derivation', message: 'derivation expression' },
+      { path: 'fields.0', message: 'Unknown field type "x". Valid types: input, hidden, text, row, group, array' },
     ]);
 
-    expect(hints.length).toBeGreaterThanOrEqual(5);
-    for (const hint of hints) {
-      expect(hint).toMatch(/^.+: https:\/\/ng-forge\.com\/dynamic-forms\/\S+$/);
-    }
+    expect(hints).toEqual([]);
+  });
+
+  it('emits at most one link per error', () => {
+    const hints = collectRelatedDocs([{ path: 'fields[0].props.options', message: 'options must be at field level' }]);
+    expect(hints).toHaveLength(1);
+  });
+
+  it('maps distinct paths to distinct pages', () => {
+    const hints = collectRelatedDocs([
+      { path: 'fields[0].props.options', message: 'x' },
+      { path: 'fields[1].logic', message: 'x' },
+    ]);
+
+    expect(hints).toHaveLength(2);
+    expect(hints[0]).toContain('schema-fields/field-types');
+    expect(hints[1]).toContain('conditional-logic');
+  });
+
+  it('gives no link when the path names nothing mapped, even if the message does', () => {
+    // Cost of matching the path only: a hidden-field error reads as
+    // `fields[N].value`, so its doc page is not reachable from the path. The
+    // fix suggestion still fires, so the guidance survives without the URL.
+    expect(collectRelatedDocs([{ path: 'fields[2].value', message: 'Hidden field "token" is missing value' }])).toEqual([]);
   });
 });

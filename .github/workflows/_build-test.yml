@@ -206,7 +206,8 @@ jobs:
         run: pnpm nx affected -t api-check --base=origin/main
 
       # Fails when emitted code imports an npm specifier not declared in the
-      # published dependencies. Defined by the three publishable node packages.
+      # published dependencies. Defined by dynamic-forms-cli and dynamic-form-mcp;
+      # openapi-generator is publishable but has no smoke target yet.
       - name: Publish smoke test
         if: ${{ !inputs.affected }}
         run: pnpm nx run-many -t smoke
@@ -216,7 +217,7 @@ jobs:
         run: pnpm nx affected -t smoke --base=origin/main
 
       # The agent skill under skills/ is generated from the MCP registries and the
-      # CLI fix table. Fails when the committed output no longer matches its sources.
+      # validation library's fix table. Fails when the committed output is stale.
       - name: Check generated skill is current
         run: pnpm nx run skills:check
 

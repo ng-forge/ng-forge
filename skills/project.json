@@ -25,10 +25,9 @@
       "inputs": [
         "{workspaceRoot}/scripts/generate-skills.ts",
         "{workspaceRoot}/skills/dynamic-forms/**/*.md",
-        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/instructions.ts",
-        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/field-types.ts",
-        "{workspaceRoot}/packages/dynamic-form-mcp/src/tools/examples.tool.ts",
-        "{workspaceRoot}/packages/dynamic-forms-cli/src/fix-suggestions.ts",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/**",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/tools/**",
+        "{workspaceRoot}/internal/dynamic-forms-validation/reporting/**",
         "{workspaceRoot}/packages/dynamic-forms/package.json"
       ],
       "options": {

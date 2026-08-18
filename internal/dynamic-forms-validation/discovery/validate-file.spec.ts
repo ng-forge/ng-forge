@@ -99,9 +99,28 @@ describe('getFixSuggestion', () => {
     expect(suggestion).toBe(FIX_SUGGESTIONS['options']);
   });
 
-  it('falls back to scanning the message', () => {
-    const suggestion = getFixSuggestion({ path: 'fields[0]', message: 'Hidden fields require a value property' });
-    expect(suggestion).toBeDefined();
+  it('finds the property anywhere in a bracket path, not just the last segment', () => {
+    const suggestion = getFixSuggestion({ path: 'fields[0].props.options', message: 'anything' });
+    expect(suggestion).toBe(FIX_SUGGESTIONS['options']);
+  });
+
+  it('ignores array indices when reading the path', () => {
+    const suggestion = getFixSuggestion({ path: 'fields[3].value', message: 'anything' });
+    expect(suggestion).toBe(FIX_SUGGESTIONS['value']);
+  });
+
+  it('gives no suggestion when the path names no property', () => {
+    // Dotted zod paths bottom out at an index. Guessing from the message text
+    // produced actively wrong fixes, so nothing is the correct answer here.
+    expect(getFixSuggestion({ path: 'fields.0', message: 'Unknown field type "x". Valid types: hidden, text' })).toBeUndefined();
+  });
+
+  it('never suggests deleting validators because the message mentions them', () => {
+    const suggestion = getFixSuggestion({
+      path: 'fields.0',
+      message: 'Field "name" (type: input): Validators can be shorthand (`required: true`) or use the `validators: [...]` array.',
+    });
+    expect(suggestion).toBeUndefined();
   });
 
   it('returns undefined when nothing matches', () => {

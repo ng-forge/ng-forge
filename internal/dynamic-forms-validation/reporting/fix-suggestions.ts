@@ -50,22 +50,36 @@ export const FIX_SUGGESTIONS: Record<string, string> = {
 };
 
 /**
+ * Split an error path into its property segments.
+ *
+ * Two producers emit different shapes: the zod adapter joins with dots and
+ * includes array indices (`fields.0`), while the semantic checks use bracket
+ * notation (`fields[0].props.options`). Both reduce to the same segment list,
+ * with indices dropped because a number never names a property.
+ */
+function pathSegments(path: string): string[] {
+  return path.split(/[.[\]]+/).filter((segment) => segment.length > 0 && !/^\d+$/.test(segment));
+}
+
+/**
  * Resolve a fix suggestion for a validation error.
  *
- * Matches on the last segment of the error path first (the offending
- * property), then falls back to scanning the message for a known key.
+ * Matches only on the error's path. Scanning the message text was tried and
+ * removed: messages routinely quote property names they are not about, so an
+ * unknown field type whose message lists `hidden` among the valid types drew
+ * "Hidden fields do NOT support `hidden`. Remove it", and a validators hint on
+ * an `input` field drew "Remove the `validators` property". A wrong fix is
+ * worse than none here, because the skill instructs agents to apply what this
+ * reports before replying.
+ *
+ * An error that does not name a property in its path therefore gets no
+ * suggestion, which is the honest answer.
  */
 export function getFixSuggestion(error: FormattedValidationError): string | undefined {
-  const pathParts = error.path.split('.');
-  const lastPart = pathParts[pathParts.length - 1];
-
-  if (FIX_SUGGESTIONS[lastPart]) {
-    return FIX_SUGGESTIONS[lastPart];
-  }
-
-  for (const [key, suggestion] of Object.entries(FIX_SUGGESTIONS)) {
-    if (error.message.toLowerCase().includes(key.toLowerCase())) {
-      return suggestion;
+  // Last segment first: it is the most specific property in the path.
+  for (const segment of pathSegments(error.path).reverse()) {
+    if (FIX_SUGGESTIONS[segment]) {
+      return FIX_SUGGESTIONS[segment];
     }
   }
 
