@@ -3,8 +3,11 @@ name: mcp-builder
 description: Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services using Node/TypeScript (MCP SDK).
 license: Complete terms in LICENSE.txt
 metadata:
-  # Maintainer tooling, not a consumer-facing skill. Without this, `npx skills
-  # add ng-forge/ng-forge` offers it alongside the published dynamic-forms skill.
+  # Kept OUTSIDE .claude/skills on purpose. That directory is scanned by
+  # `npx skills add`, so a copy there is offered to anyone installing the
+  # published dynamic-forms skill from this repo. Here it is reference
+  # material rather than an invocable skill. `internal: true` is belt and
+  # braces in case it is ever moved back.
   internal: true
 ---
 
