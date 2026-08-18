@@ -200,6 +200,7 @@ test.describe('Group Fields E2E Tests', () => {
 
       await expect(containerError).toBeVisible();
       await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-group.png');
       // `ion-button` is a custom element, so Playwright's toBeDisabled() does not
       // read it — the rest of this suite asserts on aria-disabled instead.
       await expect(submitButton).toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
@@ -285,6 +286,7 @@ test.describe('Group Fields E2E Tests', () => {
 
       await expect(containerError).toBeVisible();
       await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-array.png');
       await expect(submitButton).toHaveAttribute('aria-disabled', 'true', { timeout: 10000 });
 
       await helpers.fillInput(to, '2026-01-02T11:00');

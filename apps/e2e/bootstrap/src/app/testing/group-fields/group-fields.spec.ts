@@ -175,6 +175,7 @@ test.describe('Group Fields E2E Tests', () => {
 
       await expect(containerError).toBeVisible();
       await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-group.png');
       await expect(submitButton).toBeDisabled();
 
       await helpers.fillInput(dateTo, '2026-03-01');
@@ -258,6 +259,7 @@ test.describe('Group Fields E2E Tests', () => {
 
       await expect(containerError).toBeVisible();
       await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-array.png');
       await expect(submitButton).toBeDisabled();
 
       await helpers.fillInput(to, '2026-01-02T11:00');

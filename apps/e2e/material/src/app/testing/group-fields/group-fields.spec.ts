@@ -203,4 +203,79 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(firstNameInput).toHaveValue('Jane', { timeout: 5000 });
     });
   });
+
+  test.describe('Container Validator (issue #568)', () => {
+    test('renders the group-level message in this adapter and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/container-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('group-container-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      const containerError = scenario.locator('df-mat-field-errors mat-error');
+
+      await expect(containerError).toHaveCount(0);
+
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-group.png');
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(dateTo, '2026-03-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Delegated field errors (FIELD_ERROR_DISPLAY)', () => {
+    test('renders the message once, from the wrapper rather than the field', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/delegated-field-errors');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('delegated-field-errors-test');
+      await expect(scenario).toBeVisible();
+
+      const username = scenario.locator(':is([id="username"], [id$="_username"]) input');
+      const email = scenario.locator(':is([id="email"], [id$="_email"]) input');
+
+      await helpers.fillInput(username, 'x');
+      await helpers.clearAndFill(username, '');
+      await helpers.blurInput(username);
+      await helpers.fillInput(email, 'x');
+      await helpers.clearAndFill(email, '');
+      await helpers.blurInput(email);
+
+      await expect(scenario.locator('mat-error')).toHaveCount(2);
+      await expect(scenario.locator('df-mat-field-errors mat-error')).toHaveCount(1);
+      await expect(scenario.locator('df-mat-field-errors mat-error')).toHaveText('Username is required.');
+
+      // Material insets its subscript, so a message rendered outside the form field
+      // would sit 16px further left than every field-level error above it. Compare the
+      // TEXT origin: padding lives inside the element box, so element.left cannot see it.
+      const alignment = await page.evaluate(() => {
+        const textLeft = (el: Element) => {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          return Math.round(range.getBoundingClientRect().left);
+        };
+        const all = Array.from(document.querySelectorAll('mat-error'));
+        const wrapped = document.querySelector('df-mat-field-errors mat-error');
+        const own = all.find((el) => el !== wrapped);
+        return wrapped && own ? textLeft(wrapped) - textLeft(own) : null;
+      });
+
+      expect(alignment).toBe(0);
+      await expect(scenario).toHaveScreenshot('delegated-field-error.png');
+    });
+  });
 });

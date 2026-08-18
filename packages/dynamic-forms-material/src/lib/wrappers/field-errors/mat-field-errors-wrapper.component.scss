@@ -12,4 +12,8 @@
   line-height: var(--mat-form-field-subscript-text-line-height, 20px);
   letter-spacing: var(--mat-form-field-subscript-text-tracking, 0.0333333333em);
   margin-top: var(--df-field-gap, 0.5rem);
+  // Material insets its subscript by the text field's horizontal padding — 16px, not
+  // exposed as a token — so a message rendered outside the form field would sit flush
+  // left and misalign with every field-level error above it.
+  padding-inline-start: var(--df-mat-error-inset, 16px);
 }
