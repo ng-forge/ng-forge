@@ -353,6 +353,20 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
 export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, TemplateRef<unknown>>>>;
 
 // @public
+export class DfPlaceholder {
+    readonly descriptor: Signal<PlaceholderDescriptor>;
+    readonly dfPlaceholder: _angular_core.InputSignal<string>;
+    readonly dfPlaceholderKey: _angular_core.InputSignal<string>;
+    static ngTemplateContextGuard(_dir: DfPlaceholder, ctx: unknown): ctx is FieldPlaceholderContext;
+    // (undocumented)
+    readonly templateRef: TemplateRef<FieldPlaceholderContext>;
+    // (undocumented)
+    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DfPlaceholder, "ng-template[dfPlaceholder], ng-template[dfPlaceholderKey]", ["dfPlaceholder"], { "dfPlaceholder": { "alias": "dfPlaceholder"; "required": false; "isSignal": true; }; "dfPlaceholderKey": { "alias": "dfPlaceholderKey"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<DfPlaceholder, never>;
+}
+
+// @public
 export class DfTemplate {
     readonly dfTemplate: _angular_core.InputSignal<string>;
     readonly templateRef: TemplateRef<unknown>;
@@ -410,7 +424,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
     onPageNavigationStateChange: _angular_core.OutputRef<PagerStateEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
+    protected placeholderContext(field: ResolvedField): FieldPlaceholderContext;
     protected placeholderGridClass(field: ResolvedField): string;
+    protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null;
     renderPhase: Signal<"render" | "teardown">;
     reset: _angular_core.OutputRef<FormResetEvent>;
     protected resolvedFields: Signal<ResolvedField[]>;
@@ -425,7 +441,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates", "_projectedPlaceholders"], never, true, never>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }
@@ -572,6 +588,22 @@ export interface FieldOption<T = unknown> {
 export type FieldPathAccess<TValue> = {
     [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };
+
+// @public
+export interface FieldPlaceholderContext {
+    // (undocumented)
+    readonly $implicit: FieldPlaceholderInfo;
+    // (undocumented)
+    readonly field: FieldPlaceholderInfo;
+}
+
+// @public
+export interface FieldPlaceholderInfo {
+    readonly col?: number;
+    readonly key: string;
+    readonly label?: string;
+    readonly type: string;
+}
 
 // @public
 export interface FieldRegistryContainers {
