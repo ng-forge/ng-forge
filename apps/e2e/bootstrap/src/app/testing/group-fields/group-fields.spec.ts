@@ -235,4 +235,36 @@ test.describe('Group Fields E2E Tests', () => {
       expect(parity!.inheritsBody).toBe(false);
     });
   });
+
+  test.describe('Container Validator on an array (issue #568)', () => {
+    test('renders the array-level message in this adapter and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/array-container-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('array-container-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const rowInputs = scenario.locator(':is([id="periods"], [id$="_periods"]) input');
+      const from = rowInputs.first();
+      const to = rowInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      const containerError = scenario.locator('df-bs-field-errors .invalid-feedback');
+
+      await expect(containerError).toHaveCount(0);
+
+      await helpers.fillInput(from, '2026-01-02T10:00');
+      await helpers.fillInput(to, '2026-01-02T09:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(to, '2026-01-02T11:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
 });
