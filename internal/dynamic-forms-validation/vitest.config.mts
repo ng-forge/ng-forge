@@ -11,7 +11,7 @@ export default defineConfig(() => ({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['{src,tests,material,bootstrap,primeng,ionic,validate,discovery,reporting}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['{src,tests,material,bootstrap,primeng,ionic,validate,discovery,reporting,descriptor}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
       enabled: true,
