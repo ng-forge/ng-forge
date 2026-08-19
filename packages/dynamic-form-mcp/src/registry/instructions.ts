@@ -6,7 +6,7 @@ You MUST follow these practices when generating FormConfig objects for ng-forge.
 
 ## Core Principles
 
-1. **Configuration-driven**: ng-forge wraps Angular Reactive Forms. Define structure declaratively via \`FormConfig\`, not imperatively.
+1. **Configuration-driven**: ng-forge is built on Angular Signal Forms. Define structure declaratively via \`FormConfig\`, not imperatively.
 2. **Type-safe**: Use TypeScript interfaces for form values. The library provides full type inference.
 3. **Validation-first**: Always include validation and user-friendly error messages.
 
