@@ -1,0 +1,97 @@
+{
+  "name": "dynamic-forms-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynamic-forms-cli/src",
+  "projectType": "library",
+  "implicitDependencies": ["dynamic-forms-validation"],
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": ["scope:cli", "type:cli"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/dynamic-forms-cli",
+        "main": "packages/dynamic-forms-cli/src/index.ts",
+        "tsConfig": "packages/dynamic-forms-cli/tsconfig.lib.json",
+        "format": ["esm"],
+        "platform": "node",
+        "bundle": true,
+        "esbuildOptions": {
+          "external": ["commander", "ts-morph", "zod", "zod-to-json-schema"],
+          "splitting": true
+        },
+        "additionalEntryPoints": [
+          "packages/dynamic-forms-cli/bin/ng-forge-validate.ts",
+          "packages/dynamic-forms-cli/validate/src/index.ts"
+        ],
+        "assets": ["packages/dynamic-forms-cli/README.md", "packages/dynamic-forms-cli/package.json", "packages/dynamic-forms-cli/LICENSE"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "packages/dynamic-forms-cli/vite.config.ts"
+      }
+    },
+    "smoke": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/{projectRoot}/**/*.js",
+        "{workspaceRoot}/dist/{projectRoot}/package.json",
+        "{workspaceRoot}/scripts/package-smoke-test.mjs"
+      ],
+      "options": {
+        "command": "node scripts/package-smoke-test.mjs dist/packages/dynamic-forms-cli",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "api-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/{projectRoot}/src/**/*.d.ts",
+        "{projectRoot}/api-extractor.json",
+        "{workspaceRoot}/config/api-extractor.base.json",
+        "{workspaceRoot}/etc/dynamic-forms-cli.api.md",
+        "{workspaceRoot}/scripts/api-check.mjs",
+        "{workspaceRoot}/scripts/normalize-api-unions.mjs"
+      ],
+      "options": {
+        "command": "node scripts/api-check.mjs packages/dynamic-forms-cli/api-extractor.json",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "api-update": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "commands": [
+          "nx run dynamic-forms-cli:build --skip-nx-cache",
+          "api-extractor run --local --config packages/dynamic-forms-cli/api-extractor.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-cli.api.md"
+        ],
+        "parallel": false,
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

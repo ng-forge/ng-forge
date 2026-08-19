@@ -45,12 +45,9 @@
       "@ng-forge/styling": ["./internal/styling/src/index.ts"],
       "@ng-forge/dynamic-forms/testing": ["./packages/dynamic-forms/testing/src/public_api.ts"],
       "@ng-forge/utils": ["./internal/utils/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod": ["./internal/dynamic-forms-zod/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/material": ["./internal/dynamic-forms-zod/material/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/bootstrap": ["./internal/dynamic-forms-zod/bootstrap/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/primeng": ["./internal/dynamic-forms-zod/primeng/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/ionic": ["./internal/dynamic-forms-zod/ionic/src/index.ts"],
-      "@ng-forge/dynamic-forms-zod/mcp": ["./internal/dynamic-forms-zod/mcp/src/index.ts"]
+      "@ng-forge/dynamic-forms-validation": ["./internal/dynamic-forms-validation/index.ts"],
+      "@ng-forge/dynamic-forms-validation/schema-only": ["./internal/dynamic-forms-validation/validate/src/index.ts"],
+      "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

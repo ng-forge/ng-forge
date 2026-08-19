@@ -1742,7 +1742,7 @@ Derivations are always defined ON the field that receives the computed value.
 
   complete: {
     description: 'Complete multi-page form with all major features',
-    minimal: '', // Handled specially
+    minimal: '',
     brief: '',
     full: '',
     explained: '',
@@ -2269,6 +2269,19 @@ const megaFormConfig = {
 - **Condition types:** fieldValue with operators
 - **Layout:** col property for grid widths`;
 
+// Fill in the two document-shaped examples. They are declared empty above
+// because the table comes before these constants, and filling them here means
+// no pattern ships empty: anything reading PATTERNS gets real content.
+PATTERNS.complete.full = COMPLETE_EXAMPLE;
+PATTERNS.complete.explained = COMPLETE_EXAMPLE;
+PATTERNS.complete.minimal = extractCode(COMPLETE_EXAMPLE);
+PATTERNS.complete.brief = extractCode(COMPLETE_EXAMPLE);
+
+PATTERNS.mega.full = MEGA_EXAMPLE;
+PATTERNS.mega.explained = MEGA_EXAMPLE;
+PATTERNS.mega.minimal = extractCode(MEGA_EXAMPLE);
+PATTERNS.mega.brief = extractCode(MEGA_EXAMPLE);
+
 const PATTERN_NAMES = Object.keys(PATTERNS);
 
 function getPatternList(): string {
@@ -2352,22 +2365,6 @@ Use depth="minimal" for code-only output (no markdown).`,
       if (normalizedPattern === 'list') {
         return {
           content: [{ type: 'text' as const, text: getPatternList() }],
-        };
-      }
-
-      // Special case: complete example
-      if (normalizedPattern === 'complete') {
-        const content = depth === 'minimal' ? extractCode(COMPLETE_EXAMPLE) : COMPLETE_EXAMPLE;
-        return {
-          content: [{ type: 'text' as const, text: content }],
-        };
-      }
-
-      // Special case: mega example
-      if (normalizedPattern === 'mega') {
-        const content = depth === 'minimal' ? extractCode(MEGA_EXAMPLE) : MEGA_EXAMPLE;
-        return {
-          content: [{ type: 'text' as const, text: content }],
         };
       }
 

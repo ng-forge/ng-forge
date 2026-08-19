@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Nothing loads this library's compiled JavaScript. The CLI and the MCP
+    // server resolve it through tsconfig paths and bundle it from source with
+    // esbuild; only its `.d.ts` is consumed, by the MCP's api-extractor
+    // rollup. So the build emits declarations only, and specifiers stay
+    // extensionless: `bundler` resolution matches how it is actually read.
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "importHelpers": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true
+  },
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}

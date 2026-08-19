@@ -124,6 +124,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'AI Integration (MCP)',
     path: 'ai-integration',
     cssClass: 'sidebar-link--ai',
+    children: [{ label: 'Agent Skill', path: 'ai-integration/skills', badge: 'NEW' }],
   },
   {
     label: 'OpenAPI Generator',

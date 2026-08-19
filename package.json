@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "postinstall": "bash scripts/postinstall.sh",
-    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-form-mcp,openapi-generator",
+    "build:libs": "nx run-many -t build -p dynamic-forms,dynamic-forms-material,dynamic-forms-bootstrap,dynamic-forms-primeng,dynamic-forms-ionic,dynamic-forms-cli,dynamic-form-mcp,openapi-generator",
     "build:docs": "nx build docs",
     "build:examples": "nx build sandbox-examples",
     "build:all:prod": "pnpm run build:libs && pnpm run build:docs",
@@ -38,6 +38,8 @@
     "mcp:build": "nx build dynamic-form-mcp",
     "mcp:dev": "nx build dynamic-form-mcp && node dist/packages/dynamic-form-mcp/bin/ng-forge-mcp.js",
     "mcp:smoke": "nx run dynamic-form-mcp:smoke",
+    "version:check": "node scripts/check-version-consistency.ts",
+    "skills:update": "nx run skills:update",
     "release:branch:patch": "bash scripts/create-release-branch.sh patch",
     "release:branch:minor": "bash scripts/create-release-branch.sh minor",
     "release:branch:major": "bash scripts/create-release-branch.sh major"
