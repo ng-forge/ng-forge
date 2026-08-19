@@ -7,7 +7,7 @@
  */
 
 import { resolveRegistry, type RegistryFailure, type ResolveRegistryOptions } from './extract-registry';
-import { describeFieldLevel, describeProps, describeStructural, type ShapeContext } from './extract-shape';
+import { describeFieldLevel, describeProps, describeStructural, type RawUnresolved, type ShapeContext } from './extract-shape';
 import { unmappedNarrowingCandidates } from './narrowing';
 import {
   DESCRIPTOR_FORMAT_VERSION,
@@ -17,6 +17,27 @@ import {
   type DescriptorProperty,
   type UnresolvedEntry,
 } from './descriptor.types';
+
+/**
+ * Collapse per-path degradations into one entry per distinct reason.
+ *
+ * The same few config shapes are unresolved across most field types, so listing
+ * them per path restated the same long union text dozens of times. Sorted so the
+ * committed artifact does not depend on traversal order.
+ */
+function groupUnresolved(raw: readonly RawUnresolved[]): UnresolvedEntry[] {
+  const byReason = new Map<string, string[]>();
+
+  for (const entry of raw) {
+    const paths = byReason.get(entry.reason) ?? [];
+    paths.push(entry.path);
+    byReason.set(entry.reason, paths);
+  }
+
+  return [...byReason.entries()]
+    .map(([reason, paths]) => ({ reason, fallback: 'passthrough' as const, paths: [...paths].sort() }))
+    .sort((a, b) => (a.reason < b.reason ? -1 : a.reason > b.reason ? 1 : 0));
+}
 
 /** Name of the hoisted shared field-level shape. */
 const BASE_OBJECT = 'BaseFieldProperties';
@@ -78,7 +99,7 @@ export function buildDescriptor(options: BuildDescriptorOptions): BuildResult {
   const registry = resolveRegistry(options);
   if (!registry.ok) return { ok: false, failure: registry.failure };
 
-  const unresolved: UnresolvedEntry[] = [];
+  const unresolved: RawUnresolved[] = [];
   const encountered = new Set<string>();
   const fieldTypes: Record<string, DescriptorFieldType> = {};
 
@@ -113,18 +134,18 @@ export function buildDescriptor(options: BuildDescriptorOptions): BuildResult {
   }
 
   const hoisted = hoistCommonFieldLevel(fieldTypes);
+  const grouped = groupUnresolved(unresolved);
 
   return {
     ok: true,
-    unresolved,
+    unresolved: grouped,
     descriptor: {
       formatVersion: DESCRIPTOR_FORMAT_VERSION,
       generator: options.generator,
       adapter: { id: options.adapterId, package: options.adapterPackage, version: options.adapterVersion },
       fieldTypes: hoisted.fieldTypes,
       objects: hoisted.base ? { [BASE_OBJECT]: hoisted.base } : {},
-      // Sorted so the committed artifact does not depend on traversal order.
-      unresolved: [...unresolved].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0)),
+      unresolved: grouped,
     },
   };
 }

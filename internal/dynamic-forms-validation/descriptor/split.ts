@@ -28,13 +28,31 @@ import type {
  * committed artifact would depend on extraction order and on which half an entry
  * came from. Same reasoning as sorting keys: the diff has to reflect content.
  */
-function byPath(entries: readonly UnresolvedEntry[]): UnresolvedEntry[] {
-  return [...entries].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+function byReason(entries: readonly UnresolvedEntry[]): UnresolvedEntry[] {
+  return [...entries].sort((a, b) => (a.reason < b.reason ? -1 : a.reason > b.reason ? 1 : 0));
 }
 
-/** True when an unresolved entry describes something inside a `props` object. */
-function isPropsEntry(entry: UnresolvedEntry): boolean {
-  return entry.path.includes('.props.');
+/**
+ * Divide one grouped entry between the halves.
+ *
+ * An entry's paths can straddle both: the same union is often unresolved on a
+ * field-level key and inside `props`. Assigning the whole entry to one side
+ * would either hide a degradation or attribute one adapter's to every adapter,
+ * so the paths are split and the reason kept on whichever halves need it.
+ */
+function partitionByProps(entries: readonly UnresolvedEntry[]): { core: UnresolvedEntry[]; adapter: UnresolvedEntry[] } {
+  const core: UnresolvedEntry[] = [];
+  const adapter: UnresolvedEntry[] = [];
+
+  for (const entry of entries) {
+    const propsPaths = entry.paths.filter((path) => path.includes('.props.'));
+    const corePaths = entry.paths.filter((path) => !path.includes('.props.'));
+
+    if (corePaths.length > 0) core.push({ ...entry, paths: corePaths });
+    if (propsPaths.length > 0) adapter.push({ ...entry, paths: propsPaths });
+  }
+
+  return { core, adapter };
 }
 
 export interface SplitDescriptor {
@@ -52,6 +70,7 @@ export interface SplitDescriptor {
 export function splitDescriptor(descriptor: Descriptor): SplitDescriptor {
   const fieldTypes: Record<string, Omit<DescriptorFieldType, 'props'>> = {};
   const props: Record<string, DescriptorObject> = {};
+  const unresolved = partitionByProps(descriptor.unresolved);
 
   for (const [name, fieldType] of Object.entries(descriptor.fieldTypes)) {
     const { props: fieldProps, ...rest } = fieldType;
@@ -70,16 +89,33 @@ export function splitDescriptor(descriptor: Descriptor): SplitDescriptor {
       generator: descriptor.generator,
       fieldTypes,
       objects: descriptor.objects,
-      unresolved: byPath(descriptor.unresolved.filter((entry) => !isPropsEntry(entry))),
+      unresolved: byReason(unresolved.core),
     },
     adapter: {
       formatVersion: descriptor.formatVersion,
       generator: descriptor.generator,
       adapter: descriptor.adapter,
       props,
-      unresolved: byPath(descriptor.unresolved.filter(isPropsEntry)),
+      unresolved: byReason(unresolved.adapter),
     },
   };
+}
+
+/** Rejoin entries the split may have divided, so the whole matches the original. */
+function mergeUnresolved(...halves: ReadonlyArray<readonly UnresolvedEntry[]>): UnresolvedEntry[] {
+  const byReasonText = new Map<string, string[]>();
+
+  for (const half of halves) {
+    for (const entry of half) {
+      const paths = byReasonText.get(entry.reason) ?? [];
+      paths.push(...entry.paths);
+      byReasonText.set(entry.reason, paths);
+    }
+  }
+
+  return [...byReasonText.entries()]
+    .map(([reason, paths]) => ({ reason, fallback: 'passthrough' as const, paths: [...paths].sort() }))
+    .sort((a, b) => (a.reason < b.reason ? -1 : a.reason > b.reason ? 1 : 0));
 }
 
 /** Thrown when the two halves cannot be read together. */
@@ -126,6 +162,6 @@ export function joinDescriptor(core: CoreDescriptor, adapter: AdapterDescriptor)
     adapter: adapter.adapter,
     fieldTypes,
     objects: core.objects,
-    unresolved: byPath([...core.unresolved, ...adapter.unresolved]),
+    unresolved: mergeUnresolved(core.unresolved, adapter.unresolved),
   };
 }

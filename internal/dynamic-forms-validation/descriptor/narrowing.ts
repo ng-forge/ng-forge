@@ -29,8 +29,15 @@ export const NARROWING_TABLE: Readonly<Record<string, DescriptorType>> = {
   DynamicText: { kind: 'string' },
 };
 
-/** Type constructors that can never be expressed in a static JSON config. */
-const NON_SERIALIZABLE = [/^Observable</, /^Signal</, /^WritableSignal</, /=>/, /^Promise</];
+/**
+ * Types that cannot be written in a JSON-serializable static config.
+ *
+ * `RegExp` and `Date` sit here for the same reason as `Observable`: a config can
+ * hold `"^[a-z]+$"` or `"2026-01-01"` but not `/^[a-z]+$/` or `new Date()`. The
+ * hand-written schemas already take this position — `pattern` is `z.string()` —
+ * so recording it makes the derivation agree rather than diverge.
+ */
+const NON_SERIALIZABLE = [/^Observable</, /^Signal</, /^WritableSignal</, /=>/, /^Promise</, /^RegExp$/, /^Date$/];
 
 /** True when an arm of a union cannot appear literally in a config file. */
 export function isNonSerializableArm(text: string): boolean {
@@ -77,21 +84,44 @@ export function narrow(type: Type, at: import('ts-morph').Node): NarrowingOutcom
     };
   }
 
-  // An anonymous union that mixes serializable and non-serializable arms, e.g. a
-  // prop typed inline rather than through an alias. Keep the serializable half
-  // rather than giving up on the whole property.
+  // A union mixing serializable and non-serializable arms, e.g. `string | RegExp`
+  // written inline. Keep the serializable half rather than giving up: `unknown`
+  // constrains nothing where `string` constrains a great deal.
   if (!type.isUnion()) return undefined;
 
   const arms = armTexts(type, at);
   const dropped = arms.filter(isNonSerializableArm);
   if (dropped.length === 0 || dropped.length === arms.length) return undefined;
 
+  const kept = type
+    .getNonNullableType()
+    .getUnionTypes()
+    .filter((arm) => !isNonSerializableArm(bareTypeName(arm.getText(at))));
+
   return {
-    type: { kind: 'unknown' },
+    type: survivingType(kept),
     narrowedFrom: aliasName ?? bareTypeName(type.getText(at)),
     droppedArms: dropped,
     viaTable: false,
   };
+}
+
+/**
+ * The descriptor type for the arms that survived narrowing.
+ *
+ * Only unambiguous shapes: one primitive, or a set of string literals. Anything
+ * else stays `unknown`, because inventing a narrower type from a union we do not
+ * fully understand is how a validator starts rejecting valid configs.
+ */
+function survivingType(kept: Type[]): DescriptorType {
+  if (kept.length === 0) return { kind: 'unknown' };
+  if (kept.every((a) => a.isString())) return { kind: 'string' };
+  if (kept.every((a) => a.isNumber())) return { kind: 'number' };
+  if (kept.every((a) => a.isBoolean() || a.isBooleanLiteral())) return { kind: 'boolean' };
+  if (kept.every((a) => a.isStringLiteral())) {
+    return { kind: 'enum', values: kept.map((a) => String(a.getLiteralValue())).sort() };
+  }
+  return { kind: 'unknown' };
 }
 
 function armTexts(type: Type, at: import('ts-morph').Node): string[] {

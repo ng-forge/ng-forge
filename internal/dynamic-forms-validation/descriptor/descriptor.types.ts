@@ -93,13 +93,21 @@ export interface DescriptorFieldType {
   readonly props?: DescriptorObject;
 }
 
-/** A type the extractor could not express, recorded rather than silently dropped. */
+/**
+ * A type the extractor could not express, recorded rather than silently dropped.
+ *
+ * Grouped by reason rather than listed per path. The same handful of config
+ * shapes are unresolved on most field types — one union accounted for 26 of 80
+ * entries — so repeating the reason text spent about a fifth of the whole
+ * artifact restating it. Grouping also reads better: "this shape is unresolved
+ * in 26 places" is the useful fact, not 26 near-identical lines.
+ */
 export interface UnresolvedEntry {
-  /** Dotted path, e.g. `input.props.hint`. */
-  readonly path: string;
   readonly reason: string;
   /** Always permissive. Present so the guarantee is visible in the artifact. */
   readonly fallback: 'passthrough';
+  /** Dotted paths sharing this reason, e.g. `input.props.hint`. Sorted. */
+  readonly paths: readonly string[];
 }
 
 export interface Descriptor {

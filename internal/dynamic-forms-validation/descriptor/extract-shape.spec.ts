@@ -179,7 +179,6 @@ describe('props', () => {
 
     expect(props?.keys['onBlur'].type.kind).toBe('opaque');
     expect(ctx.unresolved.some((u) => u.path === 'input.props.onBlur')).toBe(true);
-    expect(ctx.unresolved.every((u) => u.fallback === 'passthrough')).toBe(true);
   });
 });
 

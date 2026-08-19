@@ -14,7 +14,13 @@
  */
 
 import type { Node, Type } from 'ts-morph';
-import type { DescriptorObject, DescriptorProperty, DescriptorType, ObjectPolicy, UnresolvedEntry } from './descriptor.types';
+import type { DescriptorObject, DescriptorProperty, DescriptorType, ObjectPolicy } from './descriptor.types';
+
+/** One degradation as it is recorded, before entries are grouped by reason. */
+export interface RawUnresolved {
+  path: string;
+  reason: string;
+}
 import { bareTypeName, isNarrowingCandidate, isNonSerializableArm, narrow, propertyFromNarrowing } from './narrowing';
 
 /**
@@ -39,7 +45,7 @@ export interface ShapeContext {
   /** Dotted path prefix for `unresolved` entries, e.g. `input`. */
   path: string;
   /** Collected as a side effect, so a caller sees everything that degraded. */
-  unresolved: UnresolvedEntry[];
+  unresolved: RawUnresolved[];
   /**
    * Named types that mix serializable and non-serializable arms but have no
    * narrowing entry. Only these are exhaustiveness failures; a type with no
@@ -49,7 +55,7 @@ export interface ShapeContext {
 }
 
 function record(context: ShapeContext, path: string, reason: string): DescriptorType {
-  context.unresolved.push({ path, reason, fallback: 'passthrough' });
+  context.unresolved.push({ path, reason });
   return { kind: 'opaque' };
 }
 
@@ -116,13 +122,17 @@ function describeProperty(symbol: import('ts-morph').Symbol, at: Node, context: 
 
   const narrowed = narrow(type, at);
   if (narrowed) {
-    if (!narrowed.viaTable) {
+    // Only a *named* type could have had a table entry. An inline union such as
+    // `string | RegExp` has no name to record, so keeping its serializable arm is
+    // the complete answer rather than a degradation worth reporting.
+    const named = Boolean((type.getAliasSymbol() ?? type.getNonNullableType().getAliasSymbol())?.getName());
+
+    if (!narrowed.viaTable && named) {
       // Kept the serializable half by inference rather than by decision. Record
       // it, so a property we only partly understand is visible in the diff.
       context.unresolved.push({
         path,
         reason: `no narrowing entry for ${narrowed.narrowedFrom}; kept the serializable arm by inference`,
-        fallback: 'passthrough',
       });
       const alias = (type.getAliasSymbol() ?? type.getNonNullableType().getAliasSymbol())?.getName();
       if (alias) context.encountered.add(alias);

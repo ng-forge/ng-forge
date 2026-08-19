@@ -189,7 +189,7 @@ describe('narrowing exhaustiveness depends on who owns the adapter', () => {
 
     const chrome = result.descriptor.fieldTypes['input'].props?.keys['chrome'];
     expect(chrome?.narrowedFrom).toBe('AcmeText');
-    expect(result.descriptor.unresolved.some((u) => u.path === 'input.props.chrome')).toBe(true);
+    expect(result.descriptor.unresolved.flatMap((u) => u.paths)).toContain('input.props.chrome');
     expect(result.descriptor.unresolved.every((u) => u.fallback === 'passthrough')).toBe(true);
   });
 

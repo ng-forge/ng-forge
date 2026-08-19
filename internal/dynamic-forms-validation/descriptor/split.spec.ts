@@ -26,8 +26,8 @@ function descriptor(overrides: Partial<Descriptor> = {}): Descriptor {
     },
     objects: { FieldOption: { policy: 'passthrough', keys: {} } },
     unresolved: [
-      { path: 'input.props.hint', reason: 'callable', fallback: 'passthrough' },
-      { path: 'input.logic[]', reason: 'union', fallback: 'passthrough' },
+      { reason: 'callable', fallback: 'passthrough', paths: ['input.props.hint'] },
+      { reason: 'union of configs', fallback: 'passthrough', paths: ['input.logic[]', 'text.props.tone'] },
     ],
     ...overrides,
   };
@@ -55,8 +55,17 @@ describe('splitDescriptor', () => {
     // every adapter, including ones where the property does not exist.
     const { core, adapter } = splitDescriptor(descriptor());
 
-    expect(adapter.unresolved.map((u) => u.path)).toEqual(['input.props.hint']);
-    expect(core.unresolved.map((u) => u.path)).toEqual(['input.logic[]']);
+    expect(adapter.unresolved.flatMap((u) => u.paths).sort()).toEqual(['input.props.hint', 'text.props.tone']);
+    expect(core.unresolved.flatMap((u) => u.paths)).toEqual(['input.logic[]']);
+  });
+
+  it('divides one reason whose paths straddle both halves', () => {
+    // The same union is often unresolved on a field-level key and inside props.
+    // Assigning the whole entry to one side would hide half of it.
+    const { core, adapter } = splitDescriptor(descriptor());
+
+    expect(core.unresolved.find((u) => u.reason === 'union of configs')?.paths).toEqual(['input.logic[]']);
+    expect(adapter.unresolved.find((u) => u.reason === 'union of configs')?.paths).toEqual(['text.props.tone']);
   });
 
   it('carries provenance on the adapter half', () => {
@@ -81,11 +90,13 @@ describe('joinDescriptor', () => {
     const original = descriptor();
     const { core, adapter } = splitDescriptor(original);
 
-    // `unresolved` comes back in a stable sorted order, which is what the
-    // committed artifact needs, so compare against the sorted original.
+    // Rejoined entries are regrouped and sorted, which is what the committed
+    // artifact needs, so compare against the same normalisation.
     expect(joinDescriptor(core, adapter)).toEqual({
       ...original,
-      unresolved: [...original.unresolved].sort((a, b) => (a.path < b.path ? -1 : 1)),
+      unresolved: [...original.unresolved]
+        .map((u) => ({ ...u, paths: [...u.paths].sort() }))
+        .sort((a, b) => (a.reason < b.reason ? -1 : 1)),
     });
   });
 
