@@ -68,6 +68,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
       RowFieldSchema as z.ZodType<GenericField>,
       GroupFieldSchema as z.ZodType<GenericField>,
       ArrayFieldSchema as z.ZodType<GenericField>,
+      ContainerFieldSchema as z.ZodType<GenericField>,
     ]),
   );
 
@@ -80,6 +81,33 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     // This makes Zod reject any value for these properties
     label: z.never().optional(),
     meta: z.never().optional(),
+  });
+
+  /**
+   * Wrapper reference. Wrapper types are extensible through registry
+   * augmentation, so the set cannot be enumerated here; accept any `type` with
+   * its own configuration rather than rejecting wrappers we have not heard of.
+   */
+  const WrapperConfigSchema = z.object({ type: z.string() }).passthrough();
+
+  /**
+   * Container: wraps children in UI chrome.
+   *
+   * `wrappers` is REQUIRED, and that is the whole point of the type. A container
+   * with no wrappers array is not a container, it is a group spelled
+   * differently, and treating the property as optional would erase the
+   * distinction that justifies the type existing.
+   *
+   * Child placement and cardinality are deliberately not constrained here: the
+   * schemas do not enforce nesting for any container (see the limitation noted
+   * on this factory), and adding it for `container` alone would be inconsistent
+   * as well as out of scope.
+   */
+  const ContainerFieldSchema = ContainerBaseSchema.extend({
+    type: z.literal('container'),
+    fields: z.array(AnyFieldSchema),
+    wrappers: z.array(WrapperConfigSchema),
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Page can contain: rows, groups, arrays, leaves (no pages)
@@ -168,6 +196,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     RowFieldSchema,
     GroupFieldSchema,
     ArrayFieldSchema,
+    ContainerFieldSchema,
     AllFieldsSchema,
   };
 }
