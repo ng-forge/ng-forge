@@ -598,6 +598,71 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
   },
   {
+    type: 'container',
+    category: 'container',
+    description:
+      "Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values \u2014 child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.",
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {
+      fields: {
+        name: 'fields',
+        type: 'ContainerAllowedChildren[]',
+        description:
+          'Child fields to render inside the wrapper chain. Allowed: rows, groups, arrays, nested containers, hidden fields, and value fields (input, select, etc). NOT ALLOWED: pages',
+        required: true,
+      },
+      wrappers: {
+        name: 'wrappers',
+        type: 'WrapperConfig[]',
+        description:
+          "REQUIRED. Wrapper components chained around the children, outermost first. Use [] for no chrome. Each entry needs a 'type'; the built-in wrapper is 'css', which takes 'cssClasses'. Custom wrapper types can be registered.",
+        required: true,
+      },
+    },
+    validationSupported: false,
+    source: 'core',
+    allowedIn: ['top-level', 'page', 'group', 'array', 'row', 'container'],
+    notAllowedIn: [],
+    canContain: [
+      'row',
+      'group',
+      'array',
+      'container',
+      'hidden',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page'],
+    example: `{
+  key: 'billingChrome',
+  type: 'container',
+  // NOTE: Containers do NOT have a label property
+  // wrappers is REQUIRED \u2014 use [] when no chrome is needed
+  wrappers: [{ type: 'css', cssClasses: 'card p-3' }],
+  fields: [
+    { key: 'street', type: 'input', label: 'Street' },
+    { key: 'city', type: 'input', label: 'City' }
+  ]
+}
+// Values flatten: { street: '', city: '' } \u2014 no 'billingChrome' key
+// NOT ALLOWED in containers:
+// - type: 'page' (pages are top-level only)`,
+    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [...] }`,
+  },
+  {
     type: 'page',
     category: 'container',
     description:
