@@ -220,7 +220,7 @@ The error lands on the group itself, so it gates form and page validity like any
 
 ### Rendering the message
 
-A group has no form element of its own, so there is nothing to hang a message on the way an input does. When a container declares `validators`, ng-forge appends the built-in `field-errors` wrapper, which renders each resolved message below the group's content:
+A group has no form element of its own, so there is nothing to hang a message on the way an input does. When a container declares `validators`, ng-forge appends the built-in `field-errors` wrapper, which renders the first resolved message below the group's content:
 
 ```html
 <div class="df-field-error" role="alert">The end must not be before the start.</div>

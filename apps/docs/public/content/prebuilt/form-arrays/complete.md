@@ -156,7 +156,7 @@ The error lands on the array itself, so it gates form and page validity. Array v
 
 ### Rendering the message
 
-Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `field-errors` wrapper, which renders each resolved message below the array's items:
+Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `field-errors` wrapper, which renders the first resolved message below the array's items:
 
 ```html
 <div class="df-field-error" role="alert">Every period must end after it starts.</div>
