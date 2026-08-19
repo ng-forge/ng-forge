@@ -124,6 +124,24 @@ export interface FormOptions {
   nextButton?: NextButtonOptions;
 
   /**
+   * For paged forms: which page to start on. Use for deep links and session restore.
+   *
+   * Applied by the orchestrator as it initializes, so it is race-free even when the
+   * config arrives asynchronously. Out-of-range indices clamp to the last page;
+   * negative or non-finite values fall back to `0`. A hidden target resolves to the
+   * nearest visible page.
+   *
+   * The shorthand `initialPage: 4` lands on the page unconditionally, which is what
+   * restore usually wants. Pass `{ index, validate: true }` to run the same validity
+   * gate a forward `GoToPageEvent` uses, which stops on the first invalid page.
+   *
+   * A gated landing resolves once at mount, so supply restored values with the config.
+   *
+   * @default undefined (starts on page 0)
+   */
+  initialPage?: number | InitialPageConfig;
+
+  /**
    * For paged forms: how many pages on each side of the current page are eagerly
    * mounted (the "preload window"). Pages outside the window render a lightweight
    * placeholder and mount when navigation brings them into range.
@@ -204,6 +222,20 @@ export interface SubmitButtonOptions {
    * @default true
    */
   disableWhileSubmitting?: boolean;
+}
+
+/** Which page a paged form starts on, for deep links and session restore. */
+export interface InitialPageConfig {
+  /** Target page index (0-based). */
+  index: number;
+
+  /**
+   * Whether to apply the forward-jump validity gate, stopping on the first
+   * invalid page instead of landing on the target.
+   *
+   * @default false
+   */
+  validate?: boolean;
 }
 
 /** Options for controlling next page button disabled behavior. */

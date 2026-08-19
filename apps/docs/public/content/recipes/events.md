@@ -85,17 +85,17 @@ For observing events from a host component, use the output bindings exposed dire
 
 ### Output bindings
 
-| Output                          | Emits                                                                                                          |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `(events)`                      | Every form event (full stream)                                                                                 |
-| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent)                                                      |
-| `(reset)`                       | When the form is reset to default values                                                                       |
-| `(cleared)`                     | When the form is cleared to empty state                                                                        |
-| `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                                 |
-| `(onPageNavigationStateChange)` | Navigation state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`, `navigationDisabled`) |
-| `(validityChange)`              | Boolean, whenever form validity changes                                                                        |
-| `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                     |
-| `(initialized)`                 | Once all field components are rendered and ready                                                               |
+| Output                          | Emits                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `(events)`                      | Every form event (full stream)                                                                               |
+| `(submitted)`                   | Form value when submitted **and valid** (FormSubmitEvent)                                                    |
+| `(reset)`                       | When the form is reset to default values                                                                     |
+| `(cleared)`                     | When the form is cleared to empty state                                                                      |
+| `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                               |
+| `(onPageNavigationStateChange)` | PagerStateEvent whenever pager state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`) |
+| `(validityChange)`              | Boolean, whenever form validity changes                                                                      |
+| `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                   |
+| `(initialized)`                 | Once all field components are rendered and ready                                                             |
 
 ### Examples
 
@@ -214,6 +214,25 @@ eventBus.on<PageChangeEvent>('page-change').subscribe((event) => {
 - `totalPages: number` - Total number of pages
 - `previousPageIndex?: number` - Previous page index
 
+### PagerStateEvent
+
+Emitted whenever the pager state of a paged form changes. Where `PageChangeEvent` fires only when the active page changed, this also fires when the derived flags move without the page moving, for example when `isFirstPage` / `isLastPage` flip because a page's `hidden` logic toggled and the set of visible pages shifted.
+
+```typescript
+eventBus.on<PagerStateEvent>('pager-state').subscribe((event) => {
+  const { currentPageIndex, totalPages, isFirstPage, isLastPage } = event.state;
+});
+```
+
+**Payload** (`PagerState`):
+
+- `currentPageIndex: number` - Current page (0-based)
+- `totalPages: number` - Total number of pages
+- `isFirstPage: boolean` - On the first visible page
+- `isLastPage: boolean` - On the last visible page
+
+Bind it from a host component through the `(onPageNavigationStateChange)` output. This is the state to drive a custom step list or your own previous/next button enablement, since `onPageChange` alone would leave them stale.
+
 ### NextPageEvent
 
 Navigate to next page in wizard.
@@ -229,6 +248,61 @@ Navigate to previous page in wizard.
 ```typescript
 eventBus.dispatch(PreviousPageEvent);
 ```
+
+### GoToPageEvent
+
+Jump straight to a page by index. Useful for clickable step lists and for restoring the active page from a route parameter after a reload.
+
+```typescript
+eventBus.dispatch(new GoToPageEvent(3));
+```
+
+**Properties:**
+
+- `pageIndex: number` - Target page (0-based)
+- `options?: { validate?: boolean }` - Set `validate: false` to land on the target regardless of earlier pages, for restoring a saved session. Bounds and hidden-page checks still apply. Defaults to `true`
+
+```typescript
+eventBus.dispatch(new GoToPageEvent(3, { validate: false }));
+```
+
+To open a form on a specific page in the first place, use [`options.initialPage`](/prebuilt/form-pages) rather than dispatching on load. It is applied as the form initializes, so it cannot race the orchestrator.
+
+**Validation semantics:**
+
+Backward jumps are unconditional, matching `PreviousPageEvent`, which has no validity gate.
+
+Forward jumps validate every visible page the jump crosses: from the current page up to, but excluding, the target. Conditions may have changed since those pages were last visited, and ng-forge derives form state from the config, so every page's validity is computable without having visited it. If one of those pages is invalid, navigation stops on the **first invalid page** rather than staying put, which lands the user where work is required.
+
+The target page itself is not validated, and hidden pages are skipped.
+
+Like `NextPageEvent`, this respects the `nextButton.disableWhenPageInvalid` option: set it to `false` and forward jumps skip validation entirely.
+
+```typescript
+// A 5-page form, currently on page 0. Pages 0 and 1 are valid, page 2 is invalid.
+eventBus.dispatch(new GoToPageEvent(4)); // crosses 0,1,2,3 -> stops on page 2
+
+// Now on page 2 (invalid), going back always works
+eventBus.dispatch(new GoToPageEvent(0)); // lands on page 0
+```
+
+**Observing the outcome:**
+
+Dispatching is fire and forget. The event carries no result, so read the outcome from the notifications the navigation produces:
+
+| Outcome                                       | What fires                                             |
+| --------------------------------------------- | ------------------------------------------------------ |
+| Jump succeeds                                 | `PageChangeEvent` and `PagerStateEvent` for the target |
+| Jump stops on a **later** invalid page        | `PageChangeEvent` and `PagerStateEvent` for that page  |
+| The **current** page is the first invalid one | nothing, the form never moves                          |
+| Target already active                         | nothing                                                |
+| Target out of bounds or hidden                | nothing                                                |
+
+Two cases therefore produce no events at all: the current page being the one that blocks the jump, and an invalid target. Both are silent no-ops, and neither is distinguishable from "nothing happened" by listening alone.
+
+A partial jump that does move is also not distinguishable from a successful one by the events alone. Compare the `currentPageIndex` you receive against the index you asked for: landing somewhere else means the jump was gated.
+
+To detect the silent cases up front, check the target against `totalPages` from `PagerStateEvent`, and check the current page's validity before dispatching a forward jump.
 
 ### FormResetEvent
 

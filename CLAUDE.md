@@ -91,6 +91,12 @@ The `@ng-forge/dynamic-form-mcp` package provides an MCP server for AI-assisted 
 
 Update `packages/dynamic-form-mcp/` when adding/modifying field types, validators, field configuration options, UI adapter features, form configuration schema, or API surface/behavior. Registry data lives directly in TypeScript source files under `packages/dynamic-form-mcp/src/registry/`.
 
+The agent skill under `skills/dynamic-forms/` is generated from those same registries, so it follows automatically. Regenerate with `nx run skills:update`; `nx run skills:check` runs in CI and fails when the committed output is stale.
+
+### Skill eval (local only)
+
+`skills/eval/` measures whether an agent actually follows the skill. It has no CI target on purpose: it needs an agent runner driving several workspaces, which costs money per run. Run it manually when changing `SKILL.md`, the rules in the MCP registries, or what the validator reports. See `skills/eval/README.md` for the four steps and for what each grader is worth. Its scoring logic is unit-tested in `skills/tests/`, so only the end-to-end path depends on someone running it.
+
 ## Code Style
 
 ### Angular API Usage

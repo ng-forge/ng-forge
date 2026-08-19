@@ -1,0 +1,28 @@
+{
+  "name": "dynamic-forms-validation",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "internal/dynamic-forms-validation",
+  "projectType": "library",
+  "tags": ["scope:internal"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/internal/dynamic-forms-validation",
+        "main": "internal/dynamic-forms-validation/index.ts",
+        "tsConfig": "internal/dynamic-forms-validation/tsconfig.lib.json",
+        "assets": []
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "internal/dynamic-forms-validation/vitest.config.mts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

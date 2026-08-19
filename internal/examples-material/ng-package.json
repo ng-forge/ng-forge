@@ -9,8 +9,6 @@
     "@ng-forge/dynamic-forms",
     "@ng-forge/dynamic-forms-material",
     "@ng-forge/dynamic-forms/schema",
-    "@ng-forge/dynamic-forms-zod",
-    "@ng-forge/dynamic-forms-zod/material",
     "@ng-forge/examples-shared-ui",
     "@ng-forge/examples-shared-testing"
   ]

@@ -3,10 +3,12 @@ export {
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  GoToPageEvent,
   InsertArrayItemEvent,
   MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PagerStateEvent,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   PreviousPageEvent,
@@ -14,7 +16,7 @@ export {
   ShiftArrayItemEvent,
   FormSubmitEvent,
 } from './constants';
-export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './constants';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate, PageNavigationOptions } from './constants';
 
 // Array event builder (public API)
 export { arrayEvent } from './array-event';

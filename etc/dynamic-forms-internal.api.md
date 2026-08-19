@@ -1076,6 +1076,7 @@ export interface FormOptions {
         placeholderHeight?: string;
     };
     idPrefix?: string;
+    initialPage?: InitialPageConfig | number;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
@@ -1308,6 +1309,12 @@ export interface InitializationTrackingOptions {
     injector: Injector;
     // (undocumented)
     totalComponentsCount: Signal<number>;
+}
+
+// @public
+export interface InitialPageConfig {
+    index: number;
+    validate?: boolean;
 }
 
 // @public

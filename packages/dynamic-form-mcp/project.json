@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/dynamic-form-mcp/src",
   "projectType": "library",
-  "implicitDependencies": ["dynamic-forms-zod"],
+  "implicitDependencies": ["dynamic-forms-validation"],
   "release": {
     "version": {
       "manifestRootsToUpdate": ["{projectRoot}", "dist/{projectRoot}"],
@@ -41,7 +41,7 @@
       "inputs": [
         "{workspaceRoot}/dist/{projectRoot}/src/**/*.d.ts",
         "{projectRoot}/api-extractor.dts.json",
-        "{workspaceRoot}/dist/internal/dynamic-forms-zod/**/*.d.ts"
+        "{workspaceRoot}/dist/internal/dynamic-forms-validation/**/*.d.ts"
       ],
       "options": {
         "command": "api-extractor run --local --config packages/dynamic-form-mcp/api-extractor.dts.json",
@@ -99,10 +99,10 @@
       "inputs": [
         "{workspaceRoot}/dist/{projectRoot}/**/*.js",
         "{workspaceRoot}/dist/{projectRoot}/package.json",
-        "{workspaceRoot}/scripts/mcp-smoke-test.mjs"
+        "{workspaceRoot}/scripts/package-smoke-test.mjs"
       ],
       "options": {
-        "command": "node scripts/mcp-smoke-test.mjs",
+        "command": "node scripts/package-smoke-test.mjs dist/packages/dynamic-form-mcp",
         "cwd": "{workspaceRoot}"
       }
     }

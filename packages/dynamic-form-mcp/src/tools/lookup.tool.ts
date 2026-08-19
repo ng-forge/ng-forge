@@ -15,7 +15,7 @@ import {
   type UIAdapterFieldType,
   type WrapperInfo,
 } from '../registry/index.js';
-import { getFieldTypeJsonSchema, type UiIntegration, type FieldType } from '@ng-forge/dynamic-forms-zod/mcp';
+import { getFieldTypeJsonSchema, type UiIntegration, type FieldType } from '@ng-forge/dynamic-forms-validation';
 import { TOPICS, TOPIC_ALIASES, TOPIC_DESCRIPTIONS } from './data/lookup-topics.js';
 import { fetchDocSection } from '../services/doc-fetcher.js';
 import { getTopicSections } from '../services/topic-mapper.js';

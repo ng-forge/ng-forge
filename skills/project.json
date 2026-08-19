@@ -1,0 +1,39 @@
+{
+  "name": "skills",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "tags": ["scope:skills", "type:docs"],
+  "implicitDependencies": ["dynamic-form-mcp", "dynamic-forms-cli"],
+  "targets": {
+    "update": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/generate-skills.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "options": {
+        "configFile": "skills/vitest.config.mts"
+      }
+    },
+    "check": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/scripts/generate-skills.ts",
+        "{workspaceRoot}/skills/dynamic-forms/**/*.md",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/**",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/tools/**",
+        "{workspaceRoot}/internal/dynamic-forms-validation/reporting/**",
+        "{workspaceRoot}/packages/dynamic-forms/package.json"
+      ],
+      "options": {
+        "command": "node scripts/generate-skills.ts --check",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

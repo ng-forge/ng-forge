@@ -131,7 +131,13 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 
 // Submission Config
-export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from '@ng-forge/dynamic-forms/internal';
+export type {
+  SubmissionConfig,
+  SubmissionActionResult,
+  SubmitButtonOptions,
+  NextButtonOptions,
+  InitialPageConfig,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Form State Condition
 export type { FormStateCondition } from '@ng-forge/dynamic-forms/internal';
@@ -166,6 +172,9 @@ export type {
   CssWrapper,
 } from '@ng-forge/dynamic-forms/internal';
 export { isRowField, isSimplifiedArrayField } from '@ng-forge/dynamic-forms/internal';
+
+// Paged-form navigation state — payload of PagerStateEvent / the onPageNavigationStateChange output
+export type { PagerState } from './core';
 
 // Hidden Field (display-only, value pass-through)
 export type { HiddenField, HiddenValue, HiddenScalar } from '@ng-forge/dynamic-forms/internal';
@@ -254,10 +263,12 @@ export {
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  GoToPageEvent,
   InsertArrayItemEvent,
   MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PagerStateEvent,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   PreviousPageEvent,
@@ -268,7 +279,7 @@ export {
 
 // Array event builder (recommended public API)
 export { arrayEvent } from './events';
-export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate, PageNavigationOptions } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 

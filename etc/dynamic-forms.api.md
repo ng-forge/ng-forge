@@ -378,6 +378,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         maxDerivationIterations?: number;
         submitButton?: _ng_forge_dynamic_forms.SubmitButtonOptions;
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
+        initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
         pagePreloadWindow?: number;
         fieldWindowing?: boolean | {
             eager?: number;
@@ -407,7 +408,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     invalid: Signal<boolean>;
     protected onNativeSubmit(event: Event): void;
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
-    onPageNavigationStateChange: _angular_core.OutputRef<PageNavigationStateChangeEvent>;
+    onPageNavigationStateChange: _angular_core.OutputRef<PagerStateEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
     protected placeholderGridClass(field: ResolvedField): string;
     renderPhase: Signal<"render" | "teardown">;
@@ -687,6 +688,7 @@ export interface FormOptions {
         placeholderHeight?: string;
     };
     idPrefix?: string;
+    initialPage?: InitialPageConfig | number;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
@@ -709,6 +711,17 @@ export type FormStateCondition =
 export class FormSubmitEvent implements FormEvent {
     // (undocumented)
     readonly type: "submit";
+}
+
+// @public
+export class GoToPageEvent implements FormEvent {
+    constructor(
+    pageIndex: number,
+    options?: PageNavigationOptions | undefined);
+    readonly options?: PageNavigationOptions | undefined;
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly type: "go-to-page";
 }
 
 // @public
@@ -789,6 +802,12 @@ export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
         readonly type: Reg['wrapperName'];
     };
 } : never;
+
+// @public
+export interface InitialPageConfig {
+    index: number;
+    validate?: boolean;
+}
 
 // @public
 export class InsertArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {
@@ -940,6 +959,28 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
     readonly meta?: never;
     // (undocumented)
     type: 'page';
+}
+
+// @public
+export interface PageNavigationOptions {
+    validate?: boolean;
+}
+
+// @public
+export interface PagerState {
+    currentPageIndex: number;
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    totalPages: number;
+}
+
+// @public
+export class PagerStateEvent implements FormEvent {
+    constructor(state: PagerState);
+    // (undocumented)
+    state: PagerState;
+    // (undocumented)
+    readonly type: "pager-state";
 }
 
 // @public
