@@ -10,6 +10,9 @@ const EMPTY_WRAPPERS: readonly WrapperConfig[] = Object.freeze([]);
 /** Wrapper type name — must match the `BUILT_IN_WRAPPERS` registration. */
 const FIELD_ERRORS_WRAPPER = 'field-errors';
 
+/** Frozen so the appended entry keeps its identity and `isSameWrapperChain` still memoises. */
+const FIELD_ERRORS_CONFIG = Object.freeze({ type: FIELD_ERRORS_WRAPPER }) as WrapperConfig;
+
 /** The subset of a field this resolver reads. */
 type ResolvableField = Pick<FieldDef<unknown>, 'type' | 'wrappers' | 'skipAutoWrappers' | 'skipDefaultWrappers'> &
   Partial<ContainerValidation>;
@@ -51,7 +54,7 @@ export function resolveWrappers(
   // A container validator (#568) has no field component to render its message. Appended
   // after all layers compose, so a custom error wrapper counts from any of them.
   if (needsErrorWrapper(field, composed, wrapperRegistry)) {
-    composed.push({ type: FIELD_ERRORS_WRAPPER } as WrapperConfig);
+    composed.push(FIELD_ERRORS_CONFIG);
   }
 
   return composed.length === 0 ? EMPTY_WRAPPERS : composed;

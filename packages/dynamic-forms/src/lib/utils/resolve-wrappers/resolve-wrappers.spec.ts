@@ -258,5 +258,14 @@ describe('isSameWrapperChain', () => {
 
       expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['field-errors']);
     });
+
+    it('keeps the appended entry identical across calls so the chain memoises', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS };
+
+      const first = resolveWrappers(field, undefined, autoAssoc({}), REGISTRY);
+      const second = resolveWrappers(field, undefined, autoAssoc({}), REGISTRY);
+
+      expect(isSameWrapperChain(first, second)).toBe(true);
+    });
   });
 });
