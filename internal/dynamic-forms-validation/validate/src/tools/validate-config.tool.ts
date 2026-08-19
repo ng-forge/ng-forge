@@ -1,10 +1,11 @@
 import { z, ZodError } from 'zod';
 
 // Import form config schemas
-import { MatFormConfigSchema } from '../../../material/src';
-import { BsFormConfigSchema } from '../../../bootstrap/src';
-import { PrimeFormConfigSchema } from '../../../primeng/src';
-import { IonicFormConfigSchema } from '../../../ionic/src';
+import { MatFormConfigSchema, MatFieldSchema } from '../../../material/src';
+import { BsFormConfigSchema, BsFieldSchema } from '../../../bootstrap/src';
+import { PrimeFormConfigSchema, PrimeFieldSchema } from '../../../primeng/src';
+import { IonicFormConfigSchema, IonicFieldSchema } from '../../../ionic/src';
+import { collectFieldTypeNames } from '../../../src/lib/schemas/field-type-names';
 
 import type { UiIntegration } from '../json-schema/form-config-json-schema';
 
@@ -16,6 +17,19 @@ const formConfigSchemas: Record<UiIntegration, z.ZodType> = {
   bootstrap: BsFormConfigSchema,
   primeng: PrimeFormConfigSchema,
   ionic: IonicFormConfigSchema,
+};
+
+/**
+ * Map of UI integration to its all-fields schema.
+ *
+ * Kept alongside the form config schemas so the accepted field type names can be
+ * read off the schema that decides validity, rather than retyped.
+ */
+const fieldSchemas: Record<UiIntegration, z.ZodTypeAny> = {
+  material: MatFieldSchema,
+  bootstrap: BsFieldSchema,
+  primeng: PrimeFieldSchema,
+  ionic: IonicFieldSchema,
 };
 
 /**
@@ -69,29 +83,22 @@ export interface FormattedValidationError {
 }
 
 /**
- * Known field types for helpful error messages.
+ * Field type names accepted by each adapter, derived from its schema on first
+ * use. Deriving rather than declaring is deliberate: the hand-written list this
+ * replaced had drifted, so a known type with bad properties was reported as an
+ * unknown type. See `collectFieldTypeNames`.
  */
-const KNOWN_FIELD_TYPES = [
-  'input',
-  'textarea',
-  'select',
-  'checkbox',
-  'multi-checkbox',
-  'radio',
-  'datepicker',
-  'toggle',
-  'slider',
-  'hidden',
-  'text',
-  'row',
-  'group',
-  'array',
-  'page',
-  'button',
-  'submit',
-  'next',
-  'previous',
-];
+const fieldTypeNameCache = new Map<UiIntegration, string[]>();
+
+function knownFieldTypes(uiIntegration: UiIntegration): string[] {
+  const cached = fieldTypeNameCache.get(uiIntegration);
+  if (cached) return cached;
+
+  const schema = fieldSchemas[uiIntegration];
+  const names = schema ? collectFieldTypeNames(schema).sort() : [];
+  fieldTypeNameCache.set(uiIntegration, names);
+  return names;
+}
 
 /**
  * Properties that commonly cause errors and their correct placement.
@@ -150,7 +157,7 @@ const DID_YOU_MEAN: Record<string, string> = {
 /**
  * Format a Zod error into user-friendly validation errors.
  */
-function formatZodError(error: ZodError, config?: unknown): FormattedValidationError[] {
+function formatZodError(error: ZodError, uiIntegration: UiIntegration, config?: unknown): FormattedValidationError[] {
   const errors = error.errors.map((err) => {
     const path = err.path.join('.') || 'root';
     let message = err.message;
@@ -174,8 +181,9 @@ function formatZodError(error: ZodError, config?: unknown): FormattedValidationE
           const fieldType = field['type'] as string;
           const fieldKey = field['key'] as string;
 
-          if (fieldType && !KNOWN_FIELD_TYPES.includes(fieldType)) {
-            message = `Unknown field type "${fieldType}". Valid types: ${KNOWN_FIELD_TYPES.join(', ')}`;
+          const validTypes = knownFieldTypes(uiIntegration);
+          if (fieldType && !validTypes.includes(fieldType)) {
+            message = `Unknown field type "${fieldType}". Valid types: ${validTypes.join(', ')}`;
           } else if (fieldType) {
             // Check for common mistakes
             const mistakes: string[] = [];
@@ -868,7 +876,7 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
   }
 
   // Combine pre-validation errors with Zod errors
-  const zodErrors = result.success ? [] : formatZodError(result.error, normalizedConfig);
+  const zodErrors = result.success ? [] : formatZodError(result.error, uiIntegration, normalizedConfig);
   const allErrors = [...preErrors, ...zodErrors];
 
   return {
