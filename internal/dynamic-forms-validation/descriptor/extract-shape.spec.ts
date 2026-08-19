@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Project, type Node, type Type } from 'ts-morph';
 import { describeFieldLevel, describeProps, describeStructural, type ShapeContext } from './extract-shape';
-import { NARROWING_TABLE, unmappedNonSerializable } from './narrowing';
+import { NARROWING_TABLE, isNarrowingCandidate, unmappedNarrowingCandidates } from './narrowing';
 
 const CORE = '@shape-test/core';
 
@@ -202,11 +202,21 @@ describe('narrowing', () => {
     expect(ctx.unresolved.map((u) => u.path)).not.toContain('input.props.hint');
   });
 
-  it('flags a non-serializable type that has no narrowing entry', () => {
-    // Exhaustiveness in the direction that matters: a new runtime type appearing
+  it('flags a narrowable type that has no table entry', () => {
+    // Exhaustiveness in the direction that matters: a new mixed type appearing
     // in a built-in adapter's props must fail rather than degrade quietly.
-    expect(unmappedNonSerializable(['Observable<number>'])).toEqual(['Observable<number>']);
-    expect(unmappedNonSerializable(['string', 'DynamicText'])).toEqual([]);
+    expect(unmappedNarrowingCandidates(['AcmeText'])).toEqual(['AcmeText']);
+    expect(unmappedNarrowingCandidates(['DynamicText'])).toEqual([]);
+  });
+
+  it('treats only mixed types as narrowable', () => {
+    // A bare callback has no serializable arm to keep, so demanding a table
+    // entry would be asking for an answer that does not exist, and the gate
+    // would fire on correct code.
+    expect(isNarrowingCandidate(['string', 'Observable<string>'])).toBe(true);
+    expect(isNarrowingCandidate(['(a: string) => void'])).toBe(false);
+    expect(isNarrowingCandidate(['Observable<string>'])).toBe(false);
+    expect(isNarrowingCandidate(['string', 'number'])).toBe(false);
   });
 
   it('keeps the narrowing table small and deliberate', () => {

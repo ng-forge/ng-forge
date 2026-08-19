@@ -79,6 +79,16 @@ export interface DescriptorFieldType {
    * the contract rather than an accident to paper over.
    */
   readonly aliases: readonly string[];
+  /**
+   * Name of a shared entry in {@link Descriptor.objects} holding the field-level
+   * properties every field type has in common.
+   *
+   * Hoisting them matters for more than size. Repeating three dozen inherited
+   * keys on each of two dozen field types means changing one base property
+   * churns every block, and a diff nobody can read is not a review artifact.
+   */
+  readonly extends?: string;
+  /** Field-level properties specific to this type, beyond {@link extends}. */
   readonly fieldLevel: Readonly<Record<string, DescriptorProperty>>;
   readonly props?: DescriptorObject;
 }

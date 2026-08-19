@@ -46,6 +46,12 @@ export interface NarrowingOutcome {
   type: DescriptorType;
   narrowedFrom?: string;
   droppedArms?: string[];
+  /**
+   * False when the table had no entry and the serializable half was kept by
+   * inference instead. That is still a degradation and must be recorded, or a
+   * property we only partly understand would look fully understood.
+   */
+  viaTable: boolean;
 }
 
 /**
@@ -67,6 +73,7 @@ export function narrow(type: Type, at: import('ts-morph').Node): NarrowingOutcom
       type: NARROWING_TABLE[named],
       narrowedFrom: named,
       droppedArms: arms.filter(isNonSerializableArm),
+      viaTable: true,
     };
   }
 
@@ -81,8 +88,9 @@ export function narrow(type: Type, at: import('ts-morph').Node): NarrowingOutcom
 
   return {
     type: { kind: 'unknown' },
-    narrowedFrom: bareTypeName(type.getText(at)),
+    narrowedFrom: aliasName ?? bareTypeName(type.getText(at)),
     droppedArms: dropped,
+    viaTable: false,
   };
 }
 
@@ -93,21 +101,35 @@ function armTexts(type: Type, at: import('ts-morph').Node): string[] {
 }
 
 /**
- * Every narrowing-table entry that a set of encountered type names failed to use.
+ * Named types that could be narrowed but have no table entry.
  *
- * Exhaustiveness runs the other way too: {@link unmappedNonSerializable} reports
- * a type we should have narrowed and did not, which for a built-in adapter is a
- * build failure rather than a silent degradation.
+ * Only a *mixed* type is a narrowing candidate: one with both a serializable arm
+ * to keep and a non-serializable arm to drop, like `DynamicText`. Those are the
+ * cases where omitting an entry silently stops constraining a property that
+ * could have been constrained.
+ *
+ * A type with no serializable arm at all — a bare callback, a bare `Observable`
+ * — is permanently opaque. There is nothing to keep, so demanding a table entry
+ * would be asking for an impossible answer, and failing the build over it would
+ * make the gate fire on correct code.
  */
-export function unmappedNonSerializable(encountered: Iterable<string>): string[] {
+export function unmappedNarrowingCandidates(candidates: Iterable<string>): string[] {
   const unmapped = new Set<string>();
 
-  for (const name of encountered) {
-    if (NARROWING_TABLE[name]) continue;
-    if (isNonSerializableArm(name)) unmapped.add(name);
+  for (const name of candidates) {
+    if (!NARROWING_TABLE[name]) unmapped.add(name);
   }
 
   return [...unmapped].sort();
+}
+
+/**
+ * True when a type mixes arms we can express with arms we cannot, which is what
+ * makes it narrowable rather than simply opaque.
+ */
+export function isNarrowingCandidate(arms: string[]): boolean {
+  const dropped = arms.filter(isNonSerializableArm);
+  return dropped.length > 0 && dropped.length < arms.length;
 }
 
 /** Convenience for building a descriptor property from a narrowing outcome. */

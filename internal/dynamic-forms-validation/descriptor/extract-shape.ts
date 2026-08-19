@@ -15,7 +15,7 @@
 
 import type { Node, Type } from 'ts-morph';
 import type { DescriptorObject, DescriptorProperty, DescriptorType, ObjectPolicy, UnresolvedEntry } from './descriptor.types';
-import { bareTypeName, narrow, propertyFromNarrowing } from './narrowing';
+import { bareTypeName, isNarrowingCandidate, isNonSerializableArm, narrow, propertyFromNarrowing } from './narrowing';
 
 /**
  * Deterministic order for enum members.
@@ -40,7 +40,11 @@ export interface ShapeContext {
   path: string;
   /** Collected as a side effect, so a caller sees everything that degraded. */
   unresolved: UnresolvedEntry[];
-  /** Every non-serializable type name seen, for exhaustiveness checking. */
+  /**
+   * Named types that mix serializable and non-serializable arms but have no
+   * narrowing entry. Only these are exhaustiveness failures; a type with no
+   * serializable arm is permanently opaque and needs no entry.
+   */
   encountered: Set<string>;
 }
 
@@ -95,6 +99,11 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
   // callback prop would be recorded as a referenceable object shape.
   if (nonNullable.getCallSignatures().length > 0) return record(context, path, `callable ${text}`);
 
+  // A runtime type such as Observable<T> is object-shaped but can never appear in
+  // a JSON config. Recording it as a describable ref would claim we can validate
+  // a value that cannot be written down.
+  if (isNonSerializableArm(text)) return record(context, path, `not expressible in a static config: ${text}`);
+
   if (nonNullable.isObject()) return { kind: 'ref', name: text };
 
   return record(context, path, `unhandled type ${text}`);
@@ -105,10 +114,27 @@ function describeProperty(symbol: import('ts-morph').Symbol, at: Node, context: 
   const type = symbol.getTypeAtLocation(at);
   const required = !symbol.isOptional();
 
-  for (const arm of splitArms(type, at)) context.encountered.add(arm);
-
   const narrowed = narrow(type, at);
-  if (narrowed) return propertyFromNarrowing(required, narrowed);
+  if (narrowed) {
+    if (!narrowed.viaTable) {
+      // Kept the serializable half by inference rather than by decision. Record
+      // it, so a property we only partly understand is visible in the diff.
+      context.unresolved.push({
+        path,
+        reason: `no narrowing entry for ${narrowed.narrowedFrom}; kept the serializable arm by inference`,
+        fallback: 'passthrough',
+      });
+      const alias = (type.getAliasSymbol() ?? type.getNonNullableType().getAliasSymbol())?.getName();
+      if (alias) context.encountered.add(alias);
+    }
+    return propertyFromNarrowing(required, narrowed);
+  }
+
+  // A narrowed property is already handled, so only unnarrowed ones are checked,
+  // and only when they are genuinely narrowable: a named alias mixing arms we can
+  // express with arms we cannot.
+  const alias = (type.getAliasSymbol() ?? type.getNonNullableType().getAliasSymbol())?.getName();
+  if (alias && isNarrowingCandidate(splitArms(type, at))) context.encountered.add(alias);
 
   return { required, type: describeType(type, at, context, path) };
 }

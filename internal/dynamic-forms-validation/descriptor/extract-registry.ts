@@ -18,7 +18,7 @@
  * types with no error anywhere.
  */
 
-import { Project, type Type, type Symbol as TsSymbol } from 'ts-morph';
+import { Project, type Node, type Type, type Symbol as TsSymbol } from 'ts-morph';
 import { join } from 'node:path';
 
 /** A field type as declared in the registry, before its shape is read. */
@@ -30,6 +30,15 @@ export interface RegistryEntry {
   kind: 'leaf' | 'container';
   /** Resolved type, carried so a later pass can read its shape. */
   type: Type;
+  /**
+   * Node the type was resolved at.
+   *
+   * Carried rather than rederived: an intersection such as
+   * `InputField<Props> & { addons }` has no single declaring symbol, so asking
+   * the type for one yields nothing and the shape pass silently reads an empty
+   * field. The probe declaration is a valid location for every entry.
+   */
+  at: Node;
 }
 
 export type RegistryFailure =
@@ -178,6 +187,7 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
       aliases: [...aliases].sort(),
       kind: existing?.kind ?? kind,
       type: existing?.type ?? type,
+      at: existing?.at ?? at,
     });
   }
 
