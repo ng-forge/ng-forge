@@ -9,7 +9,7 @@ import { FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dyna
   selector: 'df-field-errors-wrapper',
   template: `
     <ng-container #fieldComponent></ng-container>
-    @for (error of ngf.errorsToDisplay(); track error.kind) {
+    @if (ngf.errorsToDisplay()[0]; as error) {
       <div class="df-field-error" role="alert" [id]="ngf.errorId()">{{ error.message }}</div>
     }
   `,

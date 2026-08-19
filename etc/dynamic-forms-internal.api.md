@@ -1699,6 +1699,17 @@ export type RowAllowedChildren = ContainerAllowedChildren;
 export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;
 
 // @public
+export function rowError(ctx: FieldContext<unknown>, index: number, key: string, error: RowErrorSpec): ValidationError_2;
+
+// @public
+export interface RowErrorSpec {
+    // (undocumented)
+    readonly [param: string]: unknown;
+    readonly kind: string;
+    readonly message?: string;
+}
+
+// @public
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;

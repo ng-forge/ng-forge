@@ -40,6 +40,7 @@ export * from './lib/core/registry/function-registry.service';
 export * from './lib/core/registry/root-form-registry.service';
 export * from './lib/core/validation/create-resolved-errors-signal';
 export * from './lib/core/validation/field-errors';
+export * from './lib/core/validation/row-error';
 export * from './lib/core/validation/should-show-errors';
 export * from './lib/core/validation/validator-factory';
 export * from './lib/core/validation/validator-types';

@@ -28,7 +28,7 @@ const config = {
     },
     { key: 'submit', type: 'submit', label: 'Submit', col: 12 },
   ],
-} as unknown as FormConfig;
+} as const satisfies FormConfig;
 
 export const containerErrorsOptOutScenario: TestScenario = {
   testId: 'container-errors-opt-out-test',

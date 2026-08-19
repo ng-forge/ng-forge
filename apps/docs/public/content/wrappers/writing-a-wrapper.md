@@ -183,7 +183,7 @@ It returns four signals, matching what `injectNgForgeField()` exposes to a field
 | `errorsToDisplay` | `errors()` gated by `showErrors()` — render this            |
 | `errorId`         | `{key}-error`, for wiring `aria-describedby` on the control |
 
-Container fields push no `fieldInputs.field`, so this returns empty for them. Use `injectContainerErrors` for a container's own validators instead — see [Group-Level Validation](/prebuilt/form-groups#group-level-validation).
+Container fields push no `fieldInputs.field`, so the helper falls back to resolving the container's own node by key from `FIELD_SIGNAL_CONTEXT` — the same call works for a `group` or `array` wrapper. For a wrapper that renders errors and nothing else, extend `FieldErrorsWrapperBase` instead and write only the template; see [Group-Level Validation](/prebuilt/form-groups#group-level-validation).
 
 ### Wrappers on container fields
 

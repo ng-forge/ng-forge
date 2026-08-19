@@ -545,6 +545,23 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  it('should preserve validateWhenHidden on the expanded array field', () => {
+    const input = fields({
+      key: 'periods',
+      type: 'array',
+      template: objectTemplate,
+      validators: [{ type: 'custom', functionName: 'periodOrder' }],
+      validateWhenHidden: true,
+    } as never);
+
+    const result = normalizeSimplifiedArrays(input);
+
+    // Documented on the simplified-array surface, so dropping it here would make the
+    // option silently behave as `false`.
+    const arrayField = result[0] as Record<string, unknown>;
+    expect(arrayField.validateWhenHidden).toBe(true);
+  });
+
   describe('minLength/maxLength preservation', () => {
     it('should preserve minLength on the expanded array field', () => {
       const input = fields({

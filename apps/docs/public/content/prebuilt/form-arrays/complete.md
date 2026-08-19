@@ -132,22 +132,25 @@ This is the only way to express a rule that spans two fields of the same row. A 
 
 ### Pointing at the offending row
 
-One message for the whole list cannot say _which_ row is wrong. Return an error carrying a `fieldTree` and it lands on that row's own input instead, rendered by the adapter like any other field error:
+One message for the whole list cannot say _which_ row is wrong. `rowError` targets the error at one row's field, where the adapter renders it like any other field error:
 
 ```typescript
+import { rowError, type CustomValidator } from '@ng-forge/dynamic-forms';
+
 const periodOrder: CustomValidator = (ctx) => {
   const rows = (ctx.value() ?? []) as { from?: string; to?: string }[];
-  const trees = ctx.fieldTree as unknown as Record<number, { to: unknown }>;
 
-  return rows.flatMap((row, i) =>
+  return rows.flatMap((row, index) =>
     row.from && row.to && row.to < row.from
-      ? [{ kind: 'periodOrder', message: 'The end must not be before the start.', fieldTree: trees[i].to }]
+      ? [rowError(ctx, index, 'to', { kind: 'periodOrder', message: 'The end must not be before the start.' })]
       : [],
   );
 };
 ```
 
-A re-homed error must carry its own `message` — the container's `validationMessages` are keyed to the container, not to the child it moved to. Errors returned without a `fieldTree` stay on the container and use `validationMessages` as usual.
+A targeted error needs its own `message`: the container's `validationMessages` are keyed to the container, not to the child the error moves to. If the row or field cannot be resolved, the error stays on the container rather than disappearing.
+
+Errors returned without `rowError` stay on the container and use `validationMessages` as usual.
 
 The error lands on the array itself, so it gates form and page validity. Array validators are skipped while the array is hidden, unless you set `validateWhenHidden: true`. The same properties work on the [simplified array API](/prebuilt/form-arrays/simplified).
 

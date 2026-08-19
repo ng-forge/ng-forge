@@ -31,7 +31,7 @@ const config = {
       col: 12,
     },
   ],
-} as unknown as FormConfig;
+} as const satisfies FormConfig;
 
 export const containerGroupValidatorScenario: TestScenario = {
   testId: 'container-group-validator-test',

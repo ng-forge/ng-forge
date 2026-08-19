@@ -1001,6 +1001,17 @@ export function resolveDynamicValue<T>(value: DynamicValue<T> | undefined, fallb
 export type RowAllowedChildren = ContainerAllowedChildren;
 
 // @public
+export function rowError(ctx: FieldContext<unknown>, index: number, key: string, error: RowErrorSpec): ValidationError_2;
+
+// @public
+export interface RowErrorSpec {
+    // (undocumented)
+    readonly [param: string]: unknown;
+    readonly kind: string;
+    readonly message?: string;
+}
+
+// @public
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;

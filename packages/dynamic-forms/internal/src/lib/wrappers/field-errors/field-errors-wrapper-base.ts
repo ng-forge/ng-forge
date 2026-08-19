@@ -16,7 +16,7 @@ import { FIELD_ERROR_DISPLAY, FieldErrorDisplayClaim, injectFieldErrors } from '
  *   imports: [MatError],
  *   template: `
  *     <ng-container #fieldComponent></ng-container>
- *     @for (error of ngf.errorsToDisplay(); track error.kind) {
+ *     @if (ngf.errorsToDisplay()[0]; as error) {
  *       <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
  *     }
  *   `,

@@ -239,29 +239,31 @@ export const appWrappers = createWrappers({
 });
 ```
 
-Your component receives the container's `validationMessages` as an input and follows the normal wrapper contract, exposing a `#fieldComponent` slot for the container's content. `injectContainerErrors` resolves the container's own errors so you do not have to reach into the field tree yourself:
+Extend `FieldErrorsWrapperBase` and supply a template. The base carries the `#fieldComponent` slot, the `fieldInputs` / `validationMessages` inputs, and `ngf` — the resolved error surface — so the only thing you write is markup:
 
 ```typescript name="my-field-errors.wrapper.ts"
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MatError } from '@angular/material/form-field';
+import { FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dynamic-forms/integration';
+
 @Component({
   selector: 'my-field-errors',
+  imports: [MatError],
   template: `
     <ng-container #fieldComponent></ng-container>
-    @for (error of errors(); track error.kind) {
-      <mat-error>{{ error.message }}</mat-error>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <mat-error [id]="ngf.errorId()">{{ error.message }}</mat-error>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [provideFieldErrorDisplay(() => MyFieldErrorsWrapper)],
 })
-export default class MyFieldErrorsWrapper implements FieldWrapper {
-  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
-  readonly validationMessages = input<ValidationMessages>();
-  readonly fieldInputs = input<WrapperFieldInputs>();
-
-  protected readonly errors = injectContainerErrors({
-    fieldInputs: this.fieldInputs,
-    validationMessages: this.validationMessages,
-  });
-}
+export default class MyFieldErrorsWrapper extends FieldErrorsWrapperBase {}
 ```
+
+`ngf.errorsToDisplay()` is the gated list — it stays empty until the field is both invalid and touched, matching how field-level errors behave. `ngf.errors()` is the ungated list if you need it, and `ngf.errorId()` gives `{key}-error` for wiring `aria-describedby`.
+
+`provideFieldErrorDisplay(...)` is what tells a wrapped leaf field to stop rendering its own errors, so the message appears once. It is harmless on a container, which has no field component of its own.
 
 Because you are replacing a built-in name rather than adding one, there is no `FieldRegistryWrappers` augmentation to write. See [Registering and Applying](/wrappers/registering-and-applying) for the full wrapper pipeline.
 

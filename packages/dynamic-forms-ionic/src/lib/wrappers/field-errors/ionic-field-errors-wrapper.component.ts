@@ -8,7 +8,7 @@ import { FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dyna
   imports: [IonNote],
   template: `
     <ng-container #fieldComponent></ng-container>
-    @for (error of ngf.errorsToDisplay(); track error.kind) {
+    @if (ngf.errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" role="alert" [id]="ngf.errorId()">{{ error.message }}</ion-note>
     }
   `,

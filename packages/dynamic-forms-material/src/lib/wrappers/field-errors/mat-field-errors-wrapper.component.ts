@@ -8,7 +8,7 @@ import { FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dyna
   imports: [MatError],
   template: `
     <ng-container #fieldComponent></ng-container>
-    @for (error of ngf.errorsToDisplay(); track error.kind) {
+    @if (ngf.errorsToDisplay()[0]; as error) {
       <mat-error class="df-mat-field-error" role="alert" [id]="ngf.errorId()">{{ error.message }}</mat-error>
     }
   `,

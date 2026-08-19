@@ -192,6 +192,10 @@ describe('DynamicForm — container-level validators', () => {
             ],
             value: rows,
             minLength: 1,
+            // This registry has no array-action field types; the buttons are not what
+            // is under test, and leaving them on logs component-resolution errors.
+            addButton: false,
+            removeButton: false,
             validators: [{ type: 'custom', functionName: 'periodOrder' }],
             validationMessages: { periodOrder: 'The end must not be before the start.' },
           },

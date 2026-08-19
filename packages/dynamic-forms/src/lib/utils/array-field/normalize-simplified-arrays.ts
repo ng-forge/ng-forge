@@ -99,6 +99,7 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     validators,
     validationMessages,
     required,
+    validateWhenHidden,
   } = field;
   const isObjectTemplate = Array.isArray(template);
   const values = value as unknown[];
@@ -160,6 +161,9 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   }
   if (required !== undefined) {
     arrayFieldObj['required'] = required;
+  }
+  if (validateWhenHidden !== undefined) {
+    arrayFieldObj['validateWhenHidden'] = validateWhenHidden;
   }
 
   // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields

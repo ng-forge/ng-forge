@@ -404,6 +404,13 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
           "Marks every descendant field required. An inherited default, not a rule on the group itself - a descendant that declares its own `required` wins, including `required: false` which opts that field (or a nested container's subtree) back out, and including one whose requiredness is conditional via logic. Respects validateWhenHidden.",
         required: false,
       },
+      validateWhenHidden: {
+        name: 'validateWhenHidden',
+        type: 'boolean',
+        description:
+          "Run this container's own `validators` (and the cascaded `required`) even while the container or an ancestor is hidden. Defaults to false, so a hidden container does not gate submission. Array minLength/maxLength are size constraints and are not governed by this flag.",
+        required: false,
+      },
       validators: {
         name: 'validators',
         type: 'ValidatorConfig[]',
@@ -498,6 +505,13 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
         type: 'boolean',
         description:
           "Marks every field inside each array item required. A template field that declares its own `required` wins, as does one whose requiredness is conditional via logic. Object items only - primitive-item arrays hold plain values with no field to mark. This is about item CONTENTS; for 'at least one item', use minLength instead.",
+        required: false,
+      },
+      validateWhenHidden: {
+        name: 'validateWhenHidden',
+        type: 'boolean',
+        description:
+          "Run this container's own `validators` (and the cascaded `required`) even while the container or an ancestor is hidden. Defaults to false, so a hidden container does not gate submission. Array minLength/maxLength are size constraints and are not governed by this flag.",
         required: false,
       },
       validators: {

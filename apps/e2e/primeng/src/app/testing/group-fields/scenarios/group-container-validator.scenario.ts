@@ -26,7 +26,7 @@ const config = {
     },
     { key: 'submit', type: 'submit', label: 'Submit', col: 12 },
   ],
-} as unknown as FormConfig;
+} as const satisfies FormConfig;
 
 export const groupContainerValidatorScenario: TestScenario = {
   testId: 'group-container-validator-test',

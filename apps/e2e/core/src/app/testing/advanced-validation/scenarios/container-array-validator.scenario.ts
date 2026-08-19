@@ -1,4 +1,4 @@
-import { CustomValidator, FormConfig } from '@ng-forge/dynamic-forms';
+import { rowError, type CustomValidator, type FormConfig } from '@ng-forge/dynamic-forms';
 import { TestScenario } from '../../shared/types';
 
 /**
@@ -10,13 +10,12 @@ import { TestScenario } from '../../shared/types';
  */
 const periodOrder: CustomValidator = (ctx) => {
   const rows = (ctx.value() ?? []) as { from?: string; to?: string }[];
-  const rowTrees = ctx.fieldTree as unknown as Record<number, { to: unknown }>;
 
   return rows.flatMap((row, index) =>
     row?.from && row?.to && row.to < row.from
-      ? [{ kind: 'periodOrder', message: 'The end must not be before the start.', fieldTree: rowTrees[index].to }]
+      ? [rowError(ctx, index, 'to', { kind: 'periodOrder', message: 'The end must not be before the start.' })]
       : [],
-  ) as ReturnType<CustomValidator>;
+  );
 };
 
 /**
@@ -46,7 +45,7 @@ const config = {
       col: 12,
     },
   ],
-} as unknown as FormConfig;
+} as const satisfies FormConfig;
 
 export const containerArrayValidatorScenario: TestScenario = {
   testId: 'container-array-validator-test',

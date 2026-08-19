@@ -27,7 +27,7 @@ const config = {
     },
     { key: 'submit', type: 'submit', label: 'Submit', col: 12 },
   ],
-} as unknown as FormConfig;
+} as const satisfies FormConfig;
 
 export const delegatedFieldErrorsScenario: TestScenario = {
   testId: 'delegated-field-errors-test',
