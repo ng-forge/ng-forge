@@ -2,6 +2,7 @@
 
 import { glob } from 'node:fs/promises';
 import { relative } from 'node:path';
+import { markFail, markOk, bad, bold, cyan, dim, plural, rule, startSpinner, warn } from './terminal.js';
 import {
   formatFileReport,
   UI_INTEGRATIONS,
@@ -97,20 +98,30 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
   const uiIntegration = options.ui as UiIntegration;
 
   if (!UI_INTEGRATIONS.includes(uiIntegration)) {
-    console.error(`Unknown UI integration "${options.ui}". Expected one of: ${UI_INTEGRATIONS.join(', ')}`);
+    console.error(`${markFail()} Unknown UI integration ${cyan(options.ui)}. Expected one of: ${UI_INTEGRATIONS.join(', ')}`);
     return EXIT_USAGE;
   }
 
   const files = await resolveFiles(patterns);
 
   if (files.length === 0) {
-    console.error(`No files matched: ${patterns.join(', ')}`);
+    console.error(`${markFail()} No files matched: ${cyan(patterns.join(', '))}`);
     return EXIT_USAGE;
   }
 
+  // Progress on stderr only, and only for a person: a large glob takes long
+  // enough that silence reads as a hang, but stdout must stay exactly what an
+  // agent is told to parse.
+  const spinner = options.json || options.quiet ? undefined : startSpinner(`validating ${plural(files.length, 'file')}`);
+
   const results: FileValidationResult[] = [];
-  for (const file of files) {
-    results.push(await validateFile(file, uiIntegration));
+  try {
+    for (const [index, file] of files.entries()) {
+      spinner?.update(`validating ${displayPath(file)} ${dim(`(${index + 1}/${files.length})`)}`);
+      results.push(await validateFile(file, uiIntegration));
+    }
+  } finally {
+    spinner?.stop();
   }
 
   if (options.json) {
@@ -125,7 +136,9 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
 
   const failing = results.filter((r) => !r.valid);
 
-  for (const result of failing) {
+  for (const [index, result] of failing.entries()) {
+    if (index > 0) console.log(rule());
+    console.log(`${markFail()} ${bold(displayPath(result.filePath))}`);
     console.log(formatFileReport(result, { relatedDocs: collectRelatedDocs }));
     console.log('');
   }
@@ -133,7 +146,7 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
   if (!options.quiet) {
     for (const result of results.filter((r) => r.valid && !r.noConfigsFound)) {
       const label = displayPath(result.filePath);
-      console.log(`ok  ${label} (${result.results.length} config${result.results.length === 1 ? '' : 's'})`);
+      console.log(`${markOk()} ${label} ${dim(`(${plural(result.results.length, 'config')})`)}`);
     }
   }
 
@@ -141,19 +154,22 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
 
   if (configsFound === 0) {
     console.error(
-      `No FormConfig objects found in ${files.length} file(s). Check the pattern, or annotate configs with \`satisfies FormConfig\`.`,
+      warn(`No FormConfig objects found in ${plural(files.length, 'file')}.`) +
+        ` Check the pattern, or annotate configs with ${cyan('satisfies FormConfig')}.`,
     );
     return options.requireConfig ? EXIT_INVALID_CONFIG : EXIT_OK;
   }
 
   if (failing.length > 0) {
     const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
-    console.error(`${errorCount} error(s) across ${failing.length} of ${files.length} file(s).`);
+    console.error(bad(`${plural(errorCount, 'error')} across ${failing.length} of ${plural(files.length, 'file')}.`));
     return EXIT_INVALID_CONFIG;
   }
 
   if (!options.quiet) {
-    console.log(`${configsFound} config(s) valid across ${files.length} file(s).`);
+    console.log(
+      `${markOk()} ${bold(plural(configsFound, 'config'))} valid across ${plural(files.length, 'file')} ${dim(`· ${uiIntegration}`)}`,
+    );
   }
 
   return EXIT_OK;
