@@ -379,7 +379,7 @@ Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label prop
 
 ### `container`
 
-Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values — child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility.
+Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values — child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.
 
 - Allowed in: `top-level`, `page`, `group`, `array`, `row`, `container`
 - Validators supported: no
