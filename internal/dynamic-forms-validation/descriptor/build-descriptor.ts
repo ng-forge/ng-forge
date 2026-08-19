@@ -123,7 +123,8 @@ export function buildDescriptor(options: BuildDescriptorOptions): BuildResult {
       adapter: { id: options.adapterId, package: options.adapterPackage, version: options.adapterVersion },
       fieldTypes: hoisted.fieldTypes,
       objects: hoisted.base ? { [BASE_OBJECT]: hoisted.base } : {},
-      unresolved,
+      // Sorted so the committed artifact does not depend on traversal order.
+      unresolved: [...unresolved].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0)),
     },
   };
 }

@@ -121,3 +121,44 @@ export interface Descriptor {
    */
   readonly unresolved: readonly UnresolvedEntry[];
 }
+
+/**
+ * The adapter-independent half of a descriptor.
+ *
+ * Field types, their aliases, and their field-level shape are identical whichever
+ * adapter is installed — measured byte-identical across all 26 types for Material
+ * and Bootstrap. Carrying them once rather than in every adapter's file is what
+ * keeps the committed artifact readable as well as smaller.
+ *
+ * This is the same seam the skills use: core holds field types and rules, each
+ * adapter holds only its own `props`.
+ */
+export interface CoreDescriptor {
+  readonly formatVersion: string;
+  readonly generator: { readonly name: string; readonly version: string };
+  /** Field types without their `props`, which belong to an adapter. */
+  readonly fieldTypes: Readonly<Record<string, Omit<DescriptorFieldType, 'props'>>>;
+  readonly objects: Readonly<Record<string, DescriptorObject>>;
+  readonly unresolved: readonly UnresolvedEntry[];
+}
+
+/**
+ * One adapter's contribution: the `props` it adds, and nothing else.
+ *
+ * Read together with a {@link CoreDescriptor} of the same `formatVersion`. Held
+ * apart because a project installs core plus exactly one adapter, so shipping
+ * four adapters' props in one artifact describes three sets of properties the
+ * project does not have.
+ */
+export interface AdapterDescriptor {
+  readonly formatVersion: string;
+  readonly generator: { readonly name: string; readonly version: string };
+  readonly adapter: {
+    readonly id: string;
+    readonly package: string;
+    readonly version: string;
+  };
+  /** Keyed by canonical field type name. Absent means the adapter adds no props. */
+  readonly props: Readonly<Record<string, DescriptorObject>>;
+  readonly unresolved: readonly UnresolvedEntry[];
+}
