@@ -120,6 +120,19 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
     // the accepted set is this descriptor's own `fieldTypes`.
     if (arms.length > 1 && arms.every((a) => isFieldType(a, at))) return { kind: 'field' };
 
+    // Mostly field types, plus something else — an array item is a field
+    // definition or the simplified `ArrayItemTemplate`. Collapsing the field arms
+    // keeps this adapter-independent, where spelling the union out named the
+    // adapter's own prop types and made an otherwise shared core differ.
+    if (arms.length > 1 && arms.some((a) => isFieldType(a, at))) {
+      const others = arms.filter((a) => !isFieldType(a, at)).map((a) => bareTypeName(a.getText(at)));
+
+      return {
+        kind: 'union',
+        of: [{ kind: 'field' }, ...others.sort().map((name) => ({ kind: 'opaque' as const, as: name }))],
+      };
+    }
+
     return record(context, path, `union of ${arms.map((a) => bareTypeName(a.getText(at))).join(' | ')}`);
   }
 

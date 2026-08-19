@@ -35,6 +35,15 @@ export type DescriptorType =
    * prop types, which would make an otherwise shared core adapter-specific.
    */
   | { readonly kind: 'field' }
+  /**
+   * A union of alternatives, e.g. an array item that may be a field definition
+   * or the simplified `ArrayItemTemplate` shape.
+   *
+   * Kept flat and shallow on purpose: each arm is either `field` or `opaque`.
+   * Describing arms recursively pulls in the framework types they eventually
+   * reference and is a separate piece of work.
+   */
+  | { readonly kind: 'union'; readonly of: readonly DescriptorType[] }
   /** Deliberately unconstrained, e.g. a `value` that may be any JSON. */
   | { readonly kind: 'unknown' }
   /**

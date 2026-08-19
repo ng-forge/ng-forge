@@ -1,0 +1,2531 @@
+{
+  "fieldTypes": {
+    "add-array-item": {
+      "aliases": ["addArrayItem"],
+      "canonical": "add-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "as": "readonly ArrayAllowedChildren[]",
+                "kind": "opaque"
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["add-array-item", "addArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "array": {
+      "aliases": [],
+      "canonical": "array",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "field"
+                },
+                {
+                  "as": "ArrayItemTemplate",
+                  "kind": "opaque"
+                }
+              ]
+            }
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "ContainerLogicConfig"
+            }
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["array"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "button": {
+      "aliases": [],
+      "canonical": "button",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "event": {
+          "required": true,
+          "type": {
+            "kind": "ref",
+            "name": "FormEventConstructor<FormEvent>"
+          }
+        },
+        "eventArgs": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["button"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "checkbox": {
+      "aliases": [],
+      "canonical": "checkbox",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["checkbox"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "container": {
+      "aliases": [],
+      "canonical": "container",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "ContainerLogicConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["container"]
+          }
+        },
+        "wrappers": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "datepicker": {
+      "aliases": [],
+      "canonical": "datepicker",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxDate": {
+          "droppedArms": ["Date"],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minDate": {
+          "droppedArms": ["Date"],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "startAt": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["datepicker"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "droppedArms": ["Date"],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "group": {
+      "aliases": [],
+      "canonical": "group",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "ContainerLogicConfig"
+            }
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["group"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "hidden": {
+      "aliases": [],
+      "canonical": "hidden",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["hidden"]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "input": {
+      "aliases": [],
+      "canonical": "input",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "InputMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["input"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "insert-array-item": {
+      "aliases": ["insertArrayItem"],
+      "canonical": "insert-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "index": {
+          "required": true,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "as": "readonly ArrayAllowedChildren[]",
+                "kind": "opaque"
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["insert-array-item", "insertArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "multi-checkbox": {
+      "aliases": [],
+      "canonical": "multi-checkbox",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "FieldOption<unknown>"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["multi-checkbox"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "{}"
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "next": {
+      "aliases": [],
+      "canonical": "next",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["next"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "page": {
+      "aliases": [],
+      "canonical": "page",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "ContainerLogicConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["page"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "pop-array-item": {
+      "aliases": ["popArrayItem"],
+      "canonical": "pop-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["pop-array-item", "popArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "prepend-array-item": {
+      "aliases": ["prependArrayItem"],
+      "canonical": "prepend-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "as": "readonly ArrayAllowedChildren[]",
+                "kind": "opaque"
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["prepend-array-item", "prependArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "previous": {
+      "aliases": [],
+      "canonical": "previous",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["previous"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "radio": {
+      "aliases": [],
+      "canonical": "radio",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "FieldOption<unknown>"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["radio"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "{}"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "remove-array-item": {
+      "aliases": ["removeArrayItem"],
+      "canonical": "remove-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["remove-array-item", "removeArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "row": {
+      "aliases": [],
+      "canonical": "row",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "ContainerLogicConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["row"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "select": {
+      "aliases": [],
+      "canonical": "select",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "FieldOption<unknown>"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["select"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "{}"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "shift-array-item": {
+      "aliases": ["shiftArrayItem"],
+      "canonical": "shift-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["shift-array-item", "shiftArrayItem"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "slider": {
+      "aliases": [],
+      "canonical": "slider",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxValue": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minValue": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "step": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["slider"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "submit": {
+      "aliases": [],
+      "canonical": "submit",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["submit"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "text": {
+      "aliases": [],
+      "canonical": "text",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["text"]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "textarea": {
+      "aliases": [],
+      "canonical": "textarea",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "TextareaMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["textarea"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "toggle": {
+      "aliases": [],
+      "canonical": "toggle",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "FieldMeta"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "ref",
+              "name": "SchemaApplicationConfig"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["toggle"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "kind": "ref",
+            "name": "ValidationMessages"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    }
+  },
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "@ng-forge/dynamic-forms-validation",
+    "version": "1.1.0"
+  },
+  "objects": {
+    "BaseFieldProperties": {
+      "keys": {
+        "className": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "col": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "disabled": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfDisabled": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfHidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfReadonly": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "hidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "key": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "readonly": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "skipAutoWrappers": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "skipDefaultWrappers": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "tabIndex": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "validateWhenHidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        }
+      },
+      "policy": "strip"
+    }
+  },
+  "unresolved": [
+    {
+      "fallback": "passthrough",
+      "paths": ["datepicker.startAt"],
+      "reason": "not expressible in a static config: Date"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "array.validators[]",
+        "checkbox.validators[]",
+        "datepicker.validators[]",
+        "group.validators[]",
+        "input.validators[]",
+        "multi-checkbox.validators[]",
+        "radio.validators[]",
+        "select.validators[]",
+        "slider.validators[]",
+        "textarea.validators[]",
+        "toggle.validators[]"
+      ],
+      "reason": "union of BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfigShared & { functionName: string; fn?: never; } | AsyncValidatorConfigShared & { fn: AsyncCustomValidator; functionName?: never; } | FunctionHttpValidatorConfigShared & { functionName: string; fn?: never; } | FunctionHttpValidatorConfigShared & { fn: HttpCustomValidator; functionName?: never; } | DeclarativeHttpValidatorConfig"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "add-array-item.wrappers[]",
+        "array.wrappers[]",
+        "button.wrappers[]",
+        "checkbox.wrappers[]",
+        "container.wrappers[]",
+        "datepicker.wrappers[]",
+        "group.wrappers[]",
+        "hidden.wrappers[]",
+        "input.wrappers[]",
+        "insert-array-item.wrappers[]",
+        "multi-checkbox.wrappers[]",
+        "next.wrappers[]",
+        "page.wrappers[]",
+        "pop-array-item.wrappers[]",
+        "prepend-array-item.wrappers[]",
+        "previous.wrappers[]",
+        "radio.wrappers[]",
+        "remove-array-item.wrappers[]",
+        "row.wrappers[]",
+        "select.wrappers[]",
+        "shift-array-item.wrappers[]",
+        "slider.wrappers[]",
+        "submit.wrappers[]",
+        "text.wrappers[]",
+        "textarea.wrappers[]",
+        "toggle.wrappers[]"
+      ],
+      "reason": "union of CssWrapper | RowWrapper | FieldErrorsWrapper"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["text.logic[]"],
+      "reason": "union of ImmediateStateLogicConfig & { type: NonFieldLogicType; } | DebouncedStateLogicConfig & { type: NonFieldLogicType; } | never | never | never | never | never | never | never | never | never | never | never | never | never | never"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "add-array-item.logic[]",
+        "button.logic[]",
+        "insert-array-item.logic[]",
+        "next.logic[]",
+        "pop-array-item.logic[]",
+        "prepend-array-item.logic[]",
+        "previous.logic[]",
+        "remove-array-item.logic[]",
+        "shift-array-item.logic[]",
+        "submit.logic[]"
+      ],
+      "reason": "union of ImmediateStateLogicConfig | DebouncedStateLogicConfig"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "checkbox.logic[]",
+        "datepicker.logic[]",
+        "input.logic[]",
+        "multi-checkbox.logic[]",
+        "radio.logic[]",
+        "select.logic[]",
+        "slider.logic[]",
+        "textarea.logic[]",
+        "toggle.logic[]"
+      ],
+      "reason": "union of ImmediateStateLogicConfig | DebouncedStateLogicConfig | HttpDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | HttpDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | AsyncFunctionDerivationShared & { asyncFunctionName: string; asyncFn?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | AsyncFunctionDerivationShared & { asyncFn: AsyncDerivationFunction; asyncFunctionName?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | AsyncFunctionDerivationShared & { asyncFunctionName: string; asyncFn?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | AsyncFunctionDerivationShared & { asyncFn: AsyncDerivationFunction; asyncFunctionName?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | ExpressionDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | ExpressionDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | ValueDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | ValueDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | FunctionDerivationShared & { functionName: string; fn?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | FunctionDerivationShared & { fn: CustomFunction; functionName?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | FunctionDerivationShared & { functionName: string; fn?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | FunctionDerivationShared & { fn: CustomFunction; functionName?: never; } & { trigger: \"debounced\"; debounceMs?: number; }"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["input.value"],
+      "reason": "union of string | number"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["button.eventArgs[]"],
+      "reason": "union of string | number | false | true"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["hidden.value"],
+      "reason": "union of string | number | false | true | HiddenScalar[]"
+    }
+  ]
+}

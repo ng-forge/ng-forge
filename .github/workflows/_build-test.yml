@@ -216,6 +216,12 @@ jobs:
         if: inputs.affected
         run: pnpm nx affected -t smoke --base=origin/main
 
+      # The type descriptors are derived from the FieldRegistryLeaves augmentation.
+      # Fails when a field type or prop changed without regenerating, which would
+      # leave the artifact describing an API the library no longer has.
+      - name: Check generated descriptors are current
+        run: pnpm nx run dynamic-forms-validation:descriptors-check
+
       # The agent skill under skills/ is generated from the MCP registries and the
       # validation library's fix table. Fails when the committed output is stale.
       - name: Check generated skill is current
