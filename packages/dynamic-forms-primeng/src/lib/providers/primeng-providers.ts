@@ -30,6 +30,7 @@ type PrimeNGFieldsWithConfig = [...PrimeNGFieldTypes, PrimeNGAddonsFeature, Wrap
 const PRIMENG_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
   wrapperName: 'field-errors',
   loadComponent: () => import('../wrappers/field-errors/prime-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
 };
 
 /**

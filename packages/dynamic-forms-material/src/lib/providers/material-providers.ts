@@ -30,6 +30,7 @@ type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialAddonsFeature, W
 const MATERIAL_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
   wrapperName: 'field-errors',
   loadComponent: () => import('../wrappers/field-errors/mat-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
 };
 
 /**

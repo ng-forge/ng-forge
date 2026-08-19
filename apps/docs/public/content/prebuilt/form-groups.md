@@ -267,7 +267,37 @@ export default class MyFieldErrorsWrapper extends FieldErrorsWrapperBase {}
 
 Because you are replacing a built-in name rather than adding one, there is no `FieldRegistryWrappers` augmentation to write. See [Registering and Applying](/wrappers/registering-and-applying) for the full wrapper pipeline.
 
-Setting `wrappers: null` on the container opts out of the message entirely while keeping the validator.
+### Using your own wrapper on specific containers
+
+Replacing `field-errors` changes every container in the app. To use a different presentation on just some of them, register under your own name and set `rendersFieldErrors: true`:
+
+```typescript name="app-wrappers.ts"
+export const appWrappers = createWrappers({
+  wrapperName: 'summary-errors',
+  loadComponent: () => import('./summary-errors.wrapper'),
+  rendersFieldErrors: true,
+});
+```
+
+Then name it on the containers that should use it:
+
+```typescript
+{
+  key: 'period',
+  type: 'group',
+  fields: [/* ... */],
+  validators: [{ type: 'custom', functionName: 'dateOrder' }],
+  wrappers: [{ type: 'summary-errors' }],
+}
+```
+
+`rendersFieldErrors` tells ng-forge the wrapper already displays the message, so the default is not appended next to it and the error is not rendered twice. Declare it on the registration as well as calling `provideFieldErrorDisplay(...)` in the component: the chain is composed before any component exists to be asked.
+
+The check runs after every wrapper layer is composed, so it holds however your wrapper reaches the container: named in `wrappers`, applied through `defaultWrappers`, or auto-associated to the `group` / `array` field type. Without the flag, a container carrying `summary-errors` would also get the built-in appended.
+
+### Opting out of the message
+
+`wrappers: null` on the container keeps the validator and renders no message at all. It is the absolute escape hatch: no wrappers of any kind, from any layer. Reach for it when the error is surfaced somewhere else entirely, such as a form-level summary. When you do have your own display, use `rendersFieldErrors` instead so the rest of the chain survives.
 
 ## Next Steps
 

@@ -278,4 +278,33 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(scenario).toHaveScreenshot('delegated-field-error.png');
     });
   });
+
+  test.describe('Custom error wrapper (rendersFieldErrors)', () => {
+    test('renders only the custom wrapper, without appending the built-in default', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/custom-error-wrapper');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('custom-error-wrapper-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const customError = scenario.locator('.demo-custom-error');
+      const builtInError = scenario.locator('df-mat-field-errors');
+
+      await expect(customError).toHaveCount(0);
+
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      // The message appears exactly once: without `rendersFieldErrors` on the registration
+      // the built-in wrapper would be appended too and render the same text again.
+      await expect(customError).toHaveCount(1);
+      await expect(customError).toHaveText('The end must not be before the start.');
+      await expect(builtInError).toHaveCount(0);
+      await expect(scenario.getByText('The end must not be before the start.')).toHaveCount(1);
+    });
+  });
 });

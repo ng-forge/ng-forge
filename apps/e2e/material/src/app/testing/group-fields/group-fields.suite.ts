@@ -4,6 +4,7 @@ import { groupInitialValuesScenario } from './scenarios/group-initial-values.sce
 import { groupNestedScenario } from './scenarios/group-nested.scenario';
 import { groupContainerValidatorScenario } from './scenarios/group-container-validator.scenario';
 import { delegatedFieldErrorsScenario } from './scenarios/delegated-field-errors.scenario';
+import { customErrorWrapperScenario } from './scenarios/custom-error-wrapper.scenario';
 import { groupCrossFieldValidationScenario } from './scenarios/group-cross-field-validation.scenario';
 
 /**
@@ -26,6 +27,7 @@ export const groupFieldsSuite: TestSuite = {
     // Container validators (#568)
     groupContainerValidatorScenario,
     delegatedFieldErrorsScenario,
+    customErrorWrapperScenario,
   ],
 };
 

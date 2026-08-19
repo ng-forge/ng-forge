@@ -100,5 +100,6 @@ export const BUILT_IN_WRAPPERS: WrapperTypeDefinition[] = [
   {
     wrapperName: 'field-errors',
     loadComponent: () => import('../wrappers/field-errors/field-errors-wrapper.component'),
+    rendersFieldErrors: true,
   } satisfies WrapperTypeDefinition<FieldErrorsWrapper>,
 ];

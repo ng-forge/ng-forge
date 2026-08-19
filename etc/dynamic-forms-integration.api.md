@@ -1156,6 +1156,7 @@ export interface WrappersBundle<T extends readonly WrapperRegistration[] = reado
 // @public
 export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
     loadComponent: LazyComponentLoader;
+    rendersFieldErrors?: boolean;
     types?: readonly string[];
     _wrapper?: T;
     wrapperName: string;

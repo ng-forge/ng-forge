@@ -30,6 +30,7 @@ type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature
 const BOOTSTRAP_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
   wrapperName: 'field-errors',
   loadComponent: () => import('../wrappers/field-errors/bs-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
 };
 
 /**

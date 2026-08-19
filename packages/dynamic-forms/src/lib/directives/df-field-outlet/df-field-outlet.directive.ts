@@ -1,7 +1,7 @@
 import { computed, DestroyRef, Directive, EnvironmentInjector, inject, input, Signal, signal, Type, ViewContainerRef } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
+import { WRAPPER_REGISTRY, WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
@@ -28,6 +28,7 @@ export class DfFieldOutlet {
   private readonly vcr: Signal<ViewContainerRef> = signal(this.vcrRef).asReadonly();
   private readonly destroyRef = inject(DestroyRef);
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
+  private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
   private readonly readonlyFieldCache = inject(READONLY_FIELD_TREE_CACHE);
 
@@ -50,7 +51,8 @@ export class DfFieldOutlet {
    * the chain — avoids rebuilds on reconciled fields.
    */
   private readonly wrappers = computed(
-    () => resolveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations),
+    () =>
+      resolveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations, this.wrapperRegistry),
     { equal: isSameWrapperChain },
   );
 
@@ -62,7 +64,12 @@ export class DfFieldOutlet {
    * re-evaluations.
    */
   private readonly fieldInputs = computed<WrapperFieldInputs>(() =>
-    buildFieldInputs(this.rawInputs(), this.readonlyFieldCache, this.dfFieldOutlet().fieldDef.type),
+    buildFieldInputs(
+      this.rawInputs(),
+      this.readonlyFieldCache,
+      this.dfFieldOutlet().fieldDef.type,
+      (this.dfFieldOutlet().fieldDef as { validationMessages?: Record<string, unknown> }).validationMessages,
+    ),
   );
 
   private readonly defaultEnvInjector = inject(EnvironmentInjector);

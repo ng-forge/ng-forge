@@ -3,7 +3,24 @@ import { isSameWrapperChain, resolveWrappers } from './resolve-wrappers';
 import { WrapperConfig } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 
-type TestField = Pick<FieldDef<unknown>, 'type' | 'wrappers' | 'skipAutoWrappers' | 'skipDefaultWrappers'>;
+import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+
+type TestField = Pick<FieldDef<unknown>, 'type' | 'wrappers' | 'skipAutoWrappers' | 'skipDefaultWrappers'> & {
+  validators?: readonly unknown[];
+};
+
+const EMPTY_REGISTRY = new Map<string, WrapperTypeDefinition>();
+
+/** A registry where `custom-errors` declares it renders the field's errors, `plain` does not. */
+const REGISTRY = new Map<string, WrapperTypeDefinition>([
+  ['custom-errors', { wrapperName: 'custom-errors', loadComponent: async () => ({}) as never, rendersFieldErrors: true }],
+  ['plain', { wrapperName: 'plain', loadComponent: async () => ({}) as never }],
+]);
+
+/** A container declaring validators, which is what triggers the error wrapper. */
+const VALIDATORS = [{ type: 'custom', functionName: 'dateOrder' }] as const;
+
+const typesOf = (chain: readonly WrapperConfig[]) => chain.map((w) => w.type);
 
 /**
  * Shorthand: build an auto-association map from `{ fieldType: [wrapperNames] }`.
@@ -24,14 +41,14 @@ describe('resolveWrappers', () => {
   it('returns an empty chain for a bare field with no defaults and no auto-associations', () => {
     const field: TestField = { type: 'input' };
 
-    expect(resolveWrappers(field, undefined, autoAssoc({}))).toEqual([]);
+    expect(resolveWrappers(field, undefined, autoAssoc({}, EMPTY_REGISTRY))).toEqual([]);
   });
 
   it('returns the field-level wrappers unchanged when no defaults and no auto', () => {
     const fieldWrappers: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'a' } as WrapperConfig];
     const field: TestField = { type: 'input', wrappers: fieldWrappers };
 
-    const result = resolveWrappers(field, undefined, autoAssoc({}));
+    const result = resolveWrappers(field, undefined, autoAssoc({}, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual(fieldWrappers);
   });
@@ -40,7 +57,7 @@ describe('resolveWrappers', () => {
     const field: TestField = { type: 'input', wrappers: null };
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'should-not-apply' } as WrapperConfig];
 
-    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['row'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['row'] }, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual([]);
   });
@@ -49,7 +66,7 @@ describe('resolveWrappers', () => {
     const field: TestField = { type: 'input', wrappers: [] };
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'default' } as WrapperConfig];
 
-    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['auto-input'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['auto-input'] }, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual([{ type: 'auto-input' }, { type: 'css', cssClasses: 'default' }]);
   });
@@ -58,7 +75,7 @@ describe('resolveWrappers', () => {
     const defaults: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'default' } as WrapperConfig];
     const field: TestField = { type: 'input' };
 
-    const result = resolveWrappers(field, defaults, autoAssoc({}));
+    const result = resolveWrappers(field, defaults, autoAssoc({}, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual(defaults);
   });
@@ -68,7 +85,12 @@ describe('resolveWrappers', () => {
     const fieldWrappers: readonly WrapperConfig[] = [{ type: 'css', cssClasses: 'field-specific' } as WrapperConfig];
     const field: TestField = { type: 'input', wrappers: fieldWrappers };
 
-    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['auto-input'], select: ['auto-select'] }));
+    const result = resolveWrappers(
+      field,
+      defaults,
+      autoAssoc({ input: ['auto-input'], select: ['auto-select'] }, EMPTY_REGISTRY),
+      EMPTY_REGISTRY,
+    );
 
     expect(result).toEqual([{ type: 'auto-input' }, { type: 'css', cssClasses: 'default' }, { type: 'css', cssClasses: 'field-specific' }]);
   });
@@ -76,14 +98,19 @@ describe('resolveWrappers', () => {
   it('skips auto-associations that do not target the field type', () => {
     const field: TestField = { type: 'input' };
 
-    const result = resolveWrappers(field, undefined, autoAssoc({ input: ['matches'], checkbox: ['does-not-match'] }));
+    const result = resolveWrappers(
+      field,
+      undefined,
+      autoAssoc({ input: ['matches'], checkbox: ['does-not-match'] }, EMPTY_REGISTRY),
+      EMPTY_REGISTRY,
+    );
 
     expect(result).toEqual([{ type: 'matches' }]);
   });
 
   it('returns the same reference for every empty-chain call (for ref-stable memoization)', () => {
-    const first = resolveWrappers({ type: 'input' }, undefined, autoAssoc({}));
-    const second = resolveWrappers({ type: 'input', wrappers: null }, undefined, autoAssoc({ input: ['ignored'] }));
+    const first = resolveWrappers({ type: 'input' }, undefined, autoAssoc({}, EMPTY_REGISTRY));
+    const second = resolveWrappers({ type: 'input', wrappers: null }, undefined, autoAssoc({ input: ['ignored'] }, EMPTY_REGISTRY));
 
     expect(first).toBe(second);
     expect(first).toEqual([]);
@@ -97,7 +124,7 @@ describe('resolveWrappers', () => {
       wrappers: [{ type: 'field-specific' } as WrapperConfig],
     };
 
-    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual([{ type: 'card' }, { type: 'field-specific' }]);
   });
@@ -110,7 +137,7 @@ describe('resolveWrappers', () => {
       wrappers: [{ type: 'field-specific' } as WrapperConfig],
     };
 
-    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }));
+    const result = resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }, EMPTY_REGISTRY), EMPTY_REGISTRY);
 
     expect(result).toEqual([{ type: 'validation' }, { type: 'field-specific' }]);
   });
@@ -123,7 +150,7 @@ describe('resolveWrappers', () => {
       skipDefaultWrappers: true,
     };
 
-    expect(resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }))).toEqual([]);
+    expect(resolveWrappers(field, defaults, autoAssoc({ input: ['validation'] }, EMPTY_REGISTRY))).toEqual([]);
   });
 
   it('wrappers: null beats the skip flags — bare is bare', () => {
@@ -134,7 +161,7 @@ describe('resolveWrappers', () => {
       skipDefaultWrappers: false,
     };
 
-    expect(resolveWrappers(field, [{ type: 'card' } as WrapperConfig], autoAssoc({ input: ['validation'] }))).toEqual([]);
+    expect(resolveWrappers(field, [{ type: 'card' } as WrapperConfig], autoAssoc({ input: ['validation'] }, EMPTY_REGISTRY))).toEqual([]);
   });
 });
 
@@ -157,5 +184,79 @@ describe('isSameWrapperChain', () => {
     const a: WrapperConfig = { type: 'css', cssClasses: 'x' } as WrapperConfig;
     const b: WrapperConfig = { type: 'css', cssClasses: 'x' } as WrapperConfig;
     expect(isSameWrapperChain([a], [b])).toBe(false);
+  });
+
+  describe('container error wrapper (#568)', () => {
+    it('appends field-errors when a container declares validators', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['field-errors']);
+    });
+
+    it('leaves a container without validators untouched', () => {
+      const field: TestField = { type: 'group' };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual([]);
+    });
+
+    it('appends field-errors innermost, after every other layer', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS, wrappers: [{ type: 'plain' } as WrapperConfig] };
+
+      const result = resolveWrappers(field, [{ type: 'css' } as WrapperConfig], autoAssoc({ group: ['row'] }), REGISTRY);
+
+      expect(typesOf(result)).toEqual(['row', 'css', 'plain', 'field-errors']);
+    });
+
+    it('skips the default when a field-level wrapper declares rendersFieldErrors', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS, wrappers: [{ type: 'custom-errors' } as WrapperConfig] };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['custom-errors']);
+    });
+
+    it('skips the default when the declaring wrapper arrives via defaultWrappers', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS };
+
+      const result = resolveWrappers(field, [{ type: 'custom-errors' } as WrapperConfig], autoAssoc({}), REGISTRY);
+
+      expect(typesOf(result)).toEqual(['custom-errors']);
+    });
+
+    it('skips the default when the declaring wrapper arrives via auto-association', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS };
+
+      const result = resolveWrappers(field, undefined, autoAssoc({ group: ['custom-errors'] }), REGISTRY);
+
+      expect(typesOf(result)).toEqual(['custom-errors']);
+    });
+
+    it('still appends the default alongside a wrapper that does not declare the capability', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS, wrappers: [{ type: 'plain' } as WrapperConfig] };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['plain', 'field-errors']);
+    });
+
+    it('does not append twice when field-errors is already declared explicitly', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS, wrappers: [{ type: 'field-errors' } as WrapperConfig] };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['field-errors']);
+    });
+
+    it('renders no chain at all under wrappers: null, even with validators', () => {
+      const field: TestField = { type: 'group', validators: VALIDATORS, wrappers: null };
+
+      expect(typesOf(resolveWrappers(field, [{ type: 'css' } as WrapperConfig], autoAssoc({ group: ['row'] }), REGISTRY))).toEqual([]);
+    });
+
+    it('leaves a leaf field with validators alone, since it renders its own errors', () => {
+      const field: TestField = { type: 'input', validators: VALIDATORS };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual([]);
+    });
+
+    it('appends to an array container the same way as a group', () => {
+      const field: TestField = { type: 'array', validators: VALIDATORS };
+
+      expect(typesOf(resolveWrappers(field, undefined, autoAssoc({}), REGISTRY))).toEqual(['field-errors']);
+    });
   });
 });

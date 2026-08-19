@@ -35,6 +35,12 @@ export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> 
   loadComponent: LazyComponentLoader;
   /** Field types this wrapper should auto-apply to. */
   types?: readonly string[];
+  /**
+   * Declares that this wrapper renders the wrapped field's errors, so the default
+   * `field-errors` wrapper is not appended next to it. Needed here as well as via
+   * `provideFieldErrorDisplay`: the chain resolves before any component exists to ask.
+   */
+  rendersFieldErrors?: boolean;
 }
 
 /** Type guard for WrapperTypeDefinition. */

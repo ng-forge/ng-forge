@@ -67,4 +67,10 @@ describe('withMaterialFields', () => {
 
     expect(loaded.default ?? loaded).toBeDefined();
   });
+
+  it('declares rendersFieldErrors so the built-in default is not appended alongside it', () => {
+    const wrapper = withMaterialFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
+
+    expect(wrapper.rendersFieldErrors).toBe(true);
+  });
 });

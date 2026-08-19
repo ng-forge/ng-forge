@@ -30,6 +30,7 @@ type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, WrapperTyp
 const IONIC_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
   wrapperName: 'field-errors',
   loadComponent: () => import('../wrappers/field-errors/ionic-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
 };
 
 /**
