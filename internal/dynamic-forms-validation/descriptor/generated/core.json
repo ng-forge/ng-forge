@@ -24,15 +24,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "template": {
@@ -64,7 +74,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -101,8 +125,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "ContainerLogicConfig"
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -134,8 +158,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -143,7 +167,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -152,7 +206,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -167,8 +235,8 @@
         "event": {
           "required": true,
           "type": {
-            "kind": "ref",
-            "name": "FormEventConstructor<FormEvent>"
+            "as": "FormEventConstructor<FormEvent>",
+            "kind": "opaque"
           }
         },
         "eventArgs": {
@@ -176,7 +244,23 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "string"
+                },
+                {
+                  "kind": "number"
+                },
+                {
+                  "kind": "enum",
+                  "values": [null]
+                },
+                {
+                  "kind": "enum",
+                  "values": [null]
+                }
+              ]
             }
           }
         },
@@ -193,15 +277,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -216,7 +310,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -253,7 +361,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -272,8 +446,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -321,8 +495,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -336,8 +510,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -345,7 +519,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -360,7 +564,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -386,8 +604,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "ContainerLogicConfig"
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -403,7 +621,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -440,7 +672,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -467,8 +765,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -524,8 +822,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -545,8 +843,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -554,7 +852,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -571,7 +899,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -597,8 +939,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "ContainerLogicConfig"
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -618,8 +960,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -627,7 +969,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -636,7 +1008,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -659,8 +1045,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -673,7 +1059,45 @@
         "value": {
           "required": true,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "string"
+              },
+              {
+                "kind": "number"
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "union",
+                  "of": [
+                    {
+                      "kind": "string"
+                    },
+                    {
+                      "kind": "number"
+                    },
+                    {
+                      "kind": "enum",
+                      "values": [null]
+                    },
+                    {
+                      "kind": "enum",
+                      "values": [null]
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         "wrappers": {
@@ -681,7 +1105,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -718,7 +1156,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -737,8 +1241,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "InputMeta"
+            "as": "InputMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -786,8 +1290,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -801,8 +1305,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -810,14 +1314,52 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
         "value": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "string"
+              },
+              {
+                "kind": "number"
+              }
+            ]
           }
         },
         "wrappers": {
@@ -825,7 +1367,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -862,15 +1418,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "template": {
@@ -902,7 +1468,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -939,7 +1519,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -958,8 +1604,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -985,8 +1631,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "FieldOption<unknown>"
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
             }
           }
         },
@@ -1017,8 +1663,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1032,8 +1678,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -1041,7 +1687,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -1050,8 +1726,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "{}"
+              "as": "{}",
+              "kind": "opaque"
             }
           }
         },
@@ -1060,7 +1736,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1085,15 +1775,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1108,7 +1808,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1134,8 +1848,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "ContainerLogicConfig"
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1151,7 +1865,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1182,15 +1910,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1205,7 +1943,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1236,15 +1988,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "template": {
@@ -1276,7 +2038,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1301,15 +2077,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1324,7 +2110,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1361,7 +2161,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -1380,8 +2246,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -1407,8 +2273,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "FieldOption<unknown>"
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
             }
           }
         },
@@ -1439,8 +2305,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1454,8 +2320,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -1463,15 +2329,45 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
         "value": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "{}"
+            "as": "{}",
+            "kind": "opaque"
           }
         },
         "wrappers": {
@@ -1479,7 +2375,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1510,15 +2420,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1533,7 +2453,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1559,8 +2493,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "ContainerLogicConfig"
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1576,7 +2510,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1613,7 +2561,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -1632,8 +2646,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -1659,8 +2673,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "FieldOption<unknown>"
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
             }
           }
         },
@@ -1691,8 +2705,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1706,8 +2720,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -1715,15 +2729,45 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
         "value": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "{}"
+            "as": "{}",
+            "kind": "opaque"
           }
         },
         "wrappers": {
@@ -1731,7 +2775,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1762,15 +2820,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1785,7 +2853,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1822,7 +2904,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -1847,8 +2995,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -1902,8 +3050,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -1923,8 +3071,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -1932,7 +3080,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -1947,7 +3125,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -1972,15 +3164,25 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
             }
           }
         },
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -1995,7 +3197,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -2027,8 +3243,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "type": {
@@ -2043,7 +3259,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -2080,7 +3310,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -2099,8 +3395,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "TextareaMeta"
+            "as": "TextareaMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -2148,8 +3444,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -2163,8 +3459,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -2172,7 +3468,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -2187,7 +3513,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -2224,7 +3564,73 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
             }
           }
         },
@@ -2243,8 +3649,8 @@
         "meta": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "FieldMeta"
+            "as": "FieldMeta",
+            "kind": "opaque"
           }
         },
         "min": {
@@ -2292,8 +3698,8 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "ref",
-              "name": "SchemaApplicationConfig"
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
             }
           }
         },
@@ -2307,8 +3713,8 @@
         "validationMessages": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "ValidationMessages"
+            "as": "ValidationMessages",
+            "kind": "opaque"
           }
         },
         "validators": {
@@ -2316,7 +3722,37 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
             }
           }
         },
@@ -2331,7 +3767,21 @@
           "type": {
             "kind": "array",
             "of": {
-              "kind": "opaque"
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
             }
           }
         }
@@ -2345,6 +3795,365 @@
     "version": "1.1.0"
   },
   "objects": {
+    "AsyncFunctionDerivationShared~2786f9": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["asyncFunction"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~6ab423": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["asyncFunction"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~806a82": {
+      "keys": {
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["asyncFunction"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~8b3ac2": {
+      "keys": {
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["asyncFunction"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncValidatorConfigShared~3e5579": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "as": "AsyncCustomValidator<unknown, unknown, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["async"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncValidatorConfigShared~ebb855": {
+      "keys": {
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["async"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "BaseFieldProperties": {
       "keys": {
         "className": {
@@ -2427,9 +4236,1014 @@
         }
       },
       "policy": "strip"
+    },
+    "BuiltInValidatorConfig": {
+      "keys": {
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["email", "max", "maxLength", "min", "minLength", "pattern", "required"]
+          }
+        },
+        "value": {
+          "droppedArms": ["RegExp"],
+          "narrowedFrom": "string | number | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "unknown"
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "CssWrapper": {
+      "keys": {
+        "cssClasses": {
+          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["css"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "CustomValidatorConfig": {
+      "keys": {
+        "errorParams": {
+          "required": false,
+          "type": {
+            "as": "Record<string, string>",
+            "kind": "opaque"
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "kind": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["custom"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedExpressionDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedHttpDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedStateLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["disabled", "hidden", "readonly", "required"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedValueDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DeclarativeHttpValidatorConfig": {
+      "keys": {
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "responseMapping": {
+          "required": true,
+          "type": {
+            "as": "HttpValidationResponseMapping",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FieldErrorsWrapper": {
+      "keys": {
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["field-errors"]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~0e36ce": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~5204ab": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~8b26a1": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["debounced"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~dee103": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionHttpValidatorConfigShared~4faf65": {
+      "keys": {
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionHttpValidatorConfigShared~6064b3": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "as": "HttpCustomValidator<unknown, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "ImmediateStateLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["disabled", "hidden", "readonly", "required"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeExpressionDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeHttpDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeValueDerivationLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": ["onChange"]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["derivation"]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "RowWrapper": {
+      "keys": {
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["row"]
+          }
+        }
+      },
+      "policy": "strip"
     }
   },
   "unresolved": [
+    {
+      "fallback": "passthrough",
+      "paths": ["AsyncFunctionDerivationShared~2786f9.asyncFn", "AsyncFunctionDerivationShared~6ab423.asyncFn"],
+      "reason": "callable AsyncDerivationFunction"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["FunctionDerivationShared~5204ab.fn", "FunctionDerivationShared~8b26a1.fn"],
+      "reason": "callable CustomFunction"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": ["CustomValidatorConfig.fn"],
+      "reason": "callable CustomValidator"
+    },
     {
       "fallback": "passthrough",
       "paths": ["datepicker.startAt"],
@@ -2438,51 +5252,15 @@
     {
       "fallback": "passthrough",
       "paths": [
-        "array.validators[]",
-        "checkbox.validators[]",
-        "datepicker.validators[]",
-        "group.validators[]",
-        "input.validators[]",
-        "multi-checkbox.validators[]",
-        "radio.validators[]",
-        "select.validators[]",
-        "slider.validators[]",
-        "textarea.validators[]",
-        "toggle.validators[]"
+        "AsyncValidatorConfigShared~3e5579.when",
+        "AsyncValidatorConfigShared~ebb855.when",
+        "BuiltInValidatorConfig.when",
+        "CustomValidatorConfig.when",
+        "DeclarativeHttpValidatorConfig.when",
+        "FunctionHttpValidatorConfigShared~4faf65.when",
+        "FunctionHttpValidatorConfigShared~6064b3.when"
       ],
-      "reason": "union of BuiltInValidatorConfig | CustomValidatorConfig | AsyncValidatorConfigShared & { functionName: string; fn?: never; } | AsyncValidatorConfigShared & { fn: AsyncCustomValidator; functionName?: never; } | FunctionHttpValidatorConfigShared & { functionName: string; fn?: never; } | FunctionHttpValidatorConfigShared & { fn: HttpCustomValidator; functionName?: never; } | DeclarativeHttpValidatorConfig"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": [
-        "add-array-item.wrappers[]",
-        "array.wrappers[]",
-        "button.wrappers[]",
-        "checkbox.wrappers[]",
-        "container.wrappers[]",
-        "datepicker.wrappers[]",
-        "group.wrappers[]",
-        "hidden.wrappers[]",
-        "input.wrappers[]",
-        "insert-array-item.wrappers[]",
-        "multi-checkbox.wrappers[]",
-        "next.wrappers[]",
-        "page.wrappers[]",
-        "pop-array-item.wrappers[]",
-        "prepend-array-item.wrappers[]",
-        "previous.wrappers[]",
-        "radio.wrappers[]",
-        "remove-array-item.wrappers[]",
-        "row.wrappers[]",
-        "select.wrappers[]",
-        "shift-array-item.wrappers[]",
-        "slider.wrappers[]",
-        "submit.wrappers[]",
-        "text.wrappers[]",
-        "textarea.wrappers[]",
-        "toggle.wrappers[]"
-      ],
-      "reason": "union of CssWrapper | RowWrapper | FieldErrorsWrapper"
+      "reason": "union of FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
     },
     {
       "fallback": "passthrough",
@@ -2492,48 +5270,27 @@
     {
       "fallback": "passthrough",
       "paths": [
-        "add-array-item.logic[]",
-        "button.logic[]",
-        "insert-array-item.logic[]",
-        "next.logic[]",
-        "pop-array-item.logic[]",
-        "prepend-array-item.logic[]",
-        "previous.logic[]",
-        "remove-array-item.logic[]",
-        "shift-array-item.logic[]",
-        "submit.logic[]"
+        "AsyncFunctionDerivationShared~2786f9.condition",
+        "AsyncFunctionDerivationShared~6ab423.condition",
+        "AsyncFunctionDerivationShared~806a82.condition",
+        "AsyncFunctionDerivationShared~8b3ac2.condition",
+        "DebouncedExpressionDerivationLogicConfig.condition",
+        "DebouncedHttpDerivationLogicConfig.condition",
+        "DebouncedValueDerivationLogicConfig.condition",
+        "FunctionDerivationShared~0e36ce.condition",
+        "FunctionDerivationShared~5204ab.condition",
+        "FunctionDerivationShared~8b26a1.condition",
+        "FunctionDerivationShared~dee103.condition",
+        "OnChangeExpressionDerivationLogicConfig.condition",
+        "OnChangeHttpDerivationLogicConfig.condition",
+        "OnChangeValueDerivationLogicConfig.condition"
       ],
-      "reason": "union of ImmediateStateLogicConfig | DebouncedStateLogicConfig"
+      "reason": "union of false | true | FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
     },
     {
       "fallback": "passthrough",
-      "paths": [
-        "checkbox.logic[]",
-        "datepicker.logic[]",
-        "input.logic[]",
-        "multi-checkbox.logic[]",
-        "radio.logic[]",
-        "select.logic[]",
-        "slider.logic[]",
-        "textarea.logic[]",
-        "toggle.logic[]"
-      ],
-      "reason": "union of ImmediateStateLogicConfig | DebouncedStateLogicConfig | HttpDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | HttpDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | AsyncFunctionDerivationShared & { asyncFunctionName: string; asyncFn?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | AsyncFunctionDerivationShared & { asyncFn: AsyncDerivationFunction; asyncFunctionName?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | AsyncFunctionDerivationShared & { asyncFunctionName: string; asyncFn?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | AsyncFunctionDerivationShared & { asyncFn: AsyncDerivationFunction; asyncFunctionName?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | ExpressionDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | ExpressionDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | ValueDerivationBase & { trigger?: \"onChange\"; debounceMs?: never; } | ValueDerivationBase & { trigger: \"debounced\"; debounceMs?: number; } | FunctionDerivationShared & { functionName: string; fn?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | FunctionDerivationShared & { fn: CustomFunction; functionName?: never; } & { trigger?: \"onChange\"; debounceMs?: never; } | FunctionDerivationShared & { functionName: string; fn?: never; } & { trigger: \"debounced\"; debounceMs?: number; } | FunctionDerivationShared & { fn: CustomFunction; functionName?: never; } & { trigger: \"debounced\"; debounceMs?: number; }"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": ["input.value"],
-      "reason": "union of string | number"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": ["button.eventArgs[]"],
-      "reason": "union of string | number | false | true"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": ["hidden.value"],
-      "reason": "union of string | number | false | true | HiddenScalar[]"
+      "paths": ["DebouncedStateLogicConfig.condition", "ImmediateStateLogicConfig.condition"],
+      "reason": "union of false | true | FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition | \"formInvalid\" | \"formSubmitting\" | \"pageInvalid\""
     }
   ]
 }

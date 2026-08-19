@@ -102,10 +102,13 @@ export function buildDescriptor(options: BuildDescriptorOptions): BuildResult {
   const unresolved: RawUnresolved[] = [];
   const encountered = new Set<string>();
   const fieldTypes: Record<string, DescriptorFieldType> = {};
+  // Shared across every field type, so a config shape such as `logic` is
+  // described once and referenced rather than repeated on each of twenty types.
+  const objects: Record<string, DescriptorObject> = {};
 
   for (const entry of registry.entries) {
     const at = entry.at;
-    const context: ShapeContext = { path: entry.canonical, unresolved, encountered };
+    const context: ShapeContext = { path: entry.canonical, unresolved, encountered, objects };
     const props = describeProps(entry.type, at, context);
 
     fieldTypes[entry.canonical] = {
@@ -144,7 +147,7 @@ export function buildDescriptor(options: BuildDescriptorOptions): BuildResult {
       generator: options.generator,
       adapter: { id: options.adapterId, package: options.adapterPackage, version: options.adapterVersion },
       fieldTypes: hoisted.fieldTypes,
-      objects: hoisted.base ? { [BASE_OBJECT]: hoisted.base } : {},
+      objects: hoisted.base ? { ...objects, [BASE_OBJECT]: hoisted.base } : objects,
       unresolved: grouped,
     },
   };

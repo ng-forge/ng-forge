@@ -532,7 +532,16 @@
         "tickInterval": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "number"
+              },
+              {
+                "kind": "enum",
+                "values": ["auto"]
+              }
+            ]
           }
         }
       },
@@ -680,11 +689,6 @@
       "fallback": "passthrough",
       "paths": ["select.props.compareWith"],
       "reason": "callable (o1: ValueType, o2: ValueType) => boolean"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": ["slider.props.tickInterval"],
-      "reason": "union of number | \"auto\""
     }
   ]
 }

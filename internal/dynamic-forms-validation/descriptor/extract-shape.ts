@@ -77,6 +77,28 @@ function isFieldType(type: Type, at: Node): boolean {
   return arms.length > 0 && arms.every((arm) => arm.isStringLiteral());
 }
 
+/**
+ * True when a type is directly expressible: a primitive, a literal, or an array
+ * of those.
+ *
+ * Used to decide whether a union can be spelled out. Object arms are excluded on
+ * purpose — describing them means naming shapes in `objects`, and emitting a
+ * reference to something nothing defines is worse than recording it as
+ * unresolved.
+ */
+function isDirectlyExpressible(type: Type): boolean {
+  const t = type.getNonNullableType();
+
+  if (t.isString() || t.isNumber() || t.isBoolean() || t.isStringLiteral() || t.isNumberLiteral() || t.isBooleanLiteral()) {
+    return true;
+  }
+
+  if (t.isUnion()) return t.getUnionTypes().every(isDirectlyExpressible);
+
+  const element = t.getArrayElementType();
+  return element ? isDirectlyExpressible(element) : false;
+}
+
 /** True when every arm of a type is a field definition. */
 function isFieldUnion(type: Type, at: Node): boolean {
   const nonNullable = type.getNonNullableType();
@@ -123,6 +145,13 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
     }
     if (arms.every((a) => a.isBooleanLiteral())) return { kind: 'boolean' };
 
+    // A union of primitives and literals, e.g. `string | number` or
+    // `number | 'auto'`. Recording it as unresolved leaves a property
+    // unconstrained that the types describe completely.
+    if (arms.every(isDirectlyExpressible)) {
+      return { kind: 'union', of: arms.map((arm) => describeType(arm, at, context, path)) };
+    }
+
     // `fields` and `template` accept the whole field union. It is not unresolved:
     // the accepted set is this descriptor's own `fieldTypes`.
     if (arms.length > 1 && arms.every((a) => isFieldType(a, at))) return { kind: 'field' };
@@ -148,6 +177,14 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
       return { kind: 'union', of: [{ kind: 'field' }, ...others] };
     }
 
+    // A union of config objects: logic, validators, wrappers. These are the
+    // richest part of a config, so leaving them unconstrained is the most
+    // expensive gap in a derived schema. Each arm is described one level deep;
+    // anything nested inside is named rather than followed.
+    if (!context.shallow && context.objects && arms.every((a) => a.getProperties().length > 0 && a.getCallSignatures().length === 0)) {
+      return { kind: 'union', of: arms.map((arm) => describeConfigShape(arm, at, context)) };
+    }
+
     return record(context, path, `union of ${arms.map((a) => bareTypeName(a.getText(at))).join(' | ')}`);
   }
 
@@ -162,9 +199,81 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
 
   if (isFieldType(nonNullable, at)) return { kind: 'field' };
 
-  if (nonNullable.isObject()) return { kind: 'ref', name: text };
+  // An object we did not describe is named, not referenced. Only config union
+  // arms are described, so a `ref` anywhere else pointed at a shape nothing
+  // defines — a reader following it finds nothing, and a schema built from it
+  // would have no rule to apply. `opaque` says what is true: we stopped here.
+  if (nonNullable.isObject()) return { kind: 'opaque', as: text };
 
   return record(context, path, `unhandled type ${text}`);
+}
+
+/**
+ * A short, stable, unique name for a described shape.
+ *
+ * Most arms are named types and keep their name. The rest are anonymous
+ * intersections whose structural text runs to 145 characters, repeated once as a
+ * key and again at every reference, which cost about a quarter of the artifact
+ * and made it unreadable.
+ *
+ * Those get their base type plus a digest of the full text. The digest is
+ * content-derived rather than positional, so it does not move when TypeScript
+ * reorders union arms, and a changed variant shows up as a removal and an
+ * addition rather than as an edit to a name that no longer describes it. The
+ * full shape is right there under the name, so nothing is lost.
+ */
+function shapeName(type: Type, at: Node): string {
+  const alias = type.getAliasSymbol()?.getName();
+  if (alias) return alias;
+
+  const text = bareTypeName(type.getText(at));
+  if (text.length <= MAX_INLINE_SHAPE_NAME) return text;
+
+  const base = text.split(' & ')[0].trim();
+  return `${base}~${digest(text)}`;
+}
+
+/** Longest structural text kept as a name before falling back to a digest. */
+const MAX_INLINE_SHAPE_NAME = 48;
+
+/** FNV-1a, for a short stable suffix. Not security relevant. */
+function digest(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0').slice(0, 6);
+}
+
+/**
+ * Describe one arm of a config union, one level deep, and reference it by name.
+ *
+ * Arms of the same union often share a name across field types, so naming them
+ * in `objects` keeps twenty copies of the same logic shape out of the artifact.
+ */
+function describeConfigShape(type: Type, at: Node, context: ShapeContext): DescriptorType {
+  const name = shapeName(type, at);
+
+  if (context.objects && !context.objects[name]) {
+    // Reserve the name first: an arm can reference its own union.
+    context.objects[name] = { policy: 'strip', keys: {} };
+
+    const keys: Record<string, DescriptorProperty> = {};
+    const nested: ShapeContext = { ...context, shallow: true, path: name };
+    for (const prop of type.getProperties()) {
+      // `never` marks a key as forbidden on this arm, e.g. `debounceMs?: never`
+      // on the non-debounced variant. It is the absence of a property, not a
+      // property whose type we failed to work out.
+      if (prop.getTypeAtLocation(at).getNonNullableType().isNever()) continue;
+
+      keys[prop.getName()] = describeProperty(prop, at, nested, `${name}.${prop.getName()}`);
+    }
+
+    context.objects[name] = { policy: 'strip', keys };
+  }
+
+  return { kind: 'ref', name };
 }
 
 /** Turn one property symbol into a descriptor property. */

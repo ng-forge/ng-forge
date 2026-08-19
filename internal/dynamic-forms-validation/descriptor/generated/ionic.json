@@ -768,8 +768,8 @@
         "interfaceOptions": {
           "required": false,
           "type": {
-            "kind": "ref",
-            "name": "{}"
+            "as": "{}",
+            "kind": "opaque"
           }
         },
         "labelPlacement": {

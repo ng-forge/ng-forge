@@ -39,8 +39,15 @@ const ADAPTER_DTS = (extra: string) => `
 import type { BaseField, DynamicText, Observable } from '${CORE}';
 
 export type AcmeText = string | Observable<string>;
+
+export interface LogicBase { type: string; }
+/** Two anonymous intersection variants, as the real logic configs are. */
+export type AcmeLogic =
+  | (LogicBase & { trigger?: 'onChange'; debounceMs?: never })
+  | (LogicBase & { trigger: 'debounced'; debounceMs?: number });
 export interface AcmeInputProps { appearance?: 'outline' | 'fill'; hint?: DynamicText; ${extra} }
-export interface AcmeInputField extends BaseField { type: 'input'; props?: AcmeInputProps; }
+export interface AcmeInputExtras { logic?: AcmeLogic[]; }
+export interface AcmeInputField extends BaseField, AcmeInputExtras { type: 'input'; props?: AcmeInputProps; }
 export interface AcmeAddItemField extends BaseField { type: 'add-array-item' | 'addArrayItem'; }
 
 declare module '${CORE}' {
@@ -163,6 +170,49 @@ describe('buildDescriptor', () => {
     if (!result.ok) throw new Error('expected success');
 
     expect(serializeDescriptor(result.descriptor)).toBe(serializeDescriptor(result.descriptor));
+  });
+});
+
+describe('config union shapes', () => {
+  let built: ReturnType<typeof build>;
+
+  beforeAll(async () => {
+    built = build(await workspace('shapes'));
+  });
+
+  it('describes each arm rather than recording the union as unresolved', () => {
+    if (!built.ok) throw new Error(built.failure.detail);
+
+    expect(built.descriptor.fieldTypes['input'].fieldLevel['logic']?.type.kind).toBe('array');
+  });
+
+  it('names anonymous intersections short and stably', () => {
+    // Structural text ran to 145 characters, repeated at every reference. A name
+    // that long is both most of the artifact and unreadable in a diff.
+    if (!built.ok) throw new Error(built.failure.detail);
+
+    for (const name of Object.keys(built.descriptor.objects)) {
+      expect(name.length, `${name} is too long to read in a diff`).toBeLessThanOrEqual(64);
+    }
+  });
+
+  it('gives every described shape a unique name', () => {
+    // A collision would silently merge two different config shapes into one.
+    if (!built.ok) throw new Error(built.failure.detail);
+
+    const names = Object.keys(built.descriptor.objects);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('leaves no reference pointing at a shape nothing defines', () => {
+    if (!built.ok) throw new Error(built.failure.detail);
+
+    const defined = new Set(Object.keys(built.descriptor.objects));
+    const refs = [...JSON.stringify(built.descriptor).matchAll(/"kind":"ref","name":"([^"]+)"/g)].map((m) => m[1]);
+
+    for (const ref of refs) {
+      expect(defined.has(ref), `ref to undefined shape ${ref}`).toBe(true);
+    }
   });
 });
 
