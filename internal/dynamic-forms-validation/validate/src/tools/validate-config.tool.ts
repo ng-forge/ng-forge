@@ -351,7 +351,24 @@ const FORBIDDEN_HIDDEN_PROPS = [
  * Properties that are FORBIDDEN on container fields (row, group, array).
  * Note: page supports logic (hidden only).
  */
-const CONTAINER_FORBIDDEN_PROPS = ['validators', 'required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'value'];
+const CONTAINER_FORBIDDEN_PROPS = ['email', 'min', 'max', 'pattern', 'value'];
+
+/**
+ * Containers that own a schema path and therefore support container-level
+ * validation, mirroring which interfaces extend `ContainerValidation`.
+ *
+ * The type system states the rule: a validator on a container runs against its
+ * own subtree, so `ctx.value()` needs something to resolve to. `group` gives an
+ * object and `array` gives the item list; `page`, `row` and `container` flatten
+ * into their parent and have no path of their own.
+ */
+const VALIDATING_CONTAINERS = ['group', 'array'];
+
+/** Container-level validation keys, accepted only by {@link VALIDATING_CONTAINERS}. */
+const CONTAINER_VALIDATION_PROPS = ['validators', 'required', 'validationMessages'];
+
+/** Array size constraints. Valid on `array`, meaningless elsewhere. */
+const ARRAY_SIZE_PROPS = ['minLength', 'maxLength'];
 
 /**
  * Field types that require the 'options' property.
@@ -561,8 +578,8 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       });
     }
 
-    // Check for invalid properties on containers (row, group, array - NOT page)
-    if (['row', 'group', 'array'].includes(fieldType || '')) {
+    // Check for invalid properties on containers (row, group, array, container - NOT page)
+    if (['row', 'group', 'array', 'container'].includes(fieldType || '')) {
       for (const prop of INVALID_CONTAINER_PROPS) {
         if (prop in f) {
           errors.push({
@@ -572,7 +589,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         }
       }
 
-      // Check for forbidden validation-related properties
+      // Value-level properties, which no container holds.
       // Note: 'value' is allowed on array fields using the simplified API (template + value)
       for (const prop of CONTAINER_FORBIDDEN_PROPS) {
         if (prop in f) {
@@ -583,8 +600,32 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const expected = EXPECTED_STRUCTURE[fieldType || ''] || '';
           errors.push({
             path: `${path}.${prop}`,
-            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values or validate - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
+            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
           });
+        }
+      }
+
+      // Container-level validation, which only containers with a schema path own.
+      if (!VALIDATING_CONTAINERS.includes(fieldType || '')) {
+        for (const prop of CONTAINER_VALIDATION_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". They flatten into their parent and have no schema path, so a container-level validator would have no value to run against. Use "group" or "array" for cross-field rules, or move the rule onto a child field.`,
+            });
+          }
+        }
+      }
+
+      // Array size constraints are meaningless on anything that is not an array.
+      if (fieldType !== 'array') {
+        for (const prop of ARRAY_SIZE_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". Array size constraints apply to "array" fields only.`,
+            });
+          }
         }
       }
 
