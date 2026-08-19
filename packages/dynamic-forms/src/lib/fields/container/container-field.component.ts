@@ -20,7 +20,7 @@ import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-fi
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
-import { WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
+import { WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
@@ -58,6 +58,7 @@ export default class ContainerFieldComponent {
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
+  private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
 
   private readonly childrenTpl = viewChild.required('childrenTpl', { read: TemplateRef });
@@ -95,9 +96,12 @@ export default class ContainerFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
-  private readonly wrappers = computed(() => resolveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperAutoAssociations), {
-    equal: isSameWrapperChain,
-  });
+  private readonly wrappers = computed(
+    () => resolveWrappers(this.field(), this.defaultWrappersSignal?.(), this.wrapperAutoAssociations, this.wrapperRegistry),
+    {
+      equal: isSameWrapperChain,
+    },
+  );
 
   constructor() {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'container', () => this.field().key, this.injector);

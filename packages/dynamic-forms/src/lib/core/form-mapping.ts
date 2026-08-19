@@ -16,6 +16,7 @@ import {
 import type { FieldContext, SchemaPath, SchemaPathTree } from '@angular/forms/signals';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
+import { ContainerValidation } from '@ng-forge/dynamic-forms/internal';
 import { applyValidator } from '@ng-forge/dynamic-forms/internal';
 import { applyLogic } from './logic/logic-applicator';
 import { applySchema } from './schema-application';
@@ -168,6 +169,7 @@ export function mapFieldToForm(
   // through the cascade as a belt-and-suspenders fallback.
   if (isGroupField(fieldDef)) {
     const descendantContext = resolveDescendantContext(fieldDef, ownContext);
+    applyContainerValidators(fieldDef, fieldPath, descendantContext);
     mapContainerChildren(fieldDef.fields, fieldPath, descendantContext);
     return;
   }
@@ -255,7 +257,7 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
 
   // Validation block — gated by `validateWhenHidden` when hidden.
   const applyValidation = (validationPath: SchemaPath<unknown>): void => {
-    applySimpleValidationRules(validationField, validationPath);
+    applySimpleValidationRules(validationField, validationPath, context);
 
     if (validationField.validators) {
       for (const config of validationField.validators) {
@@ -272,8 +274,17 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
     }
   };
 
+  applyHiddenGatedValidation(path, context, applyValidation);
+}
+
+/** Applies a validation block through the `validateWhenHidden` gate. Shared by leaves and containers. */
+function applyHiddenGatedValidation(
+  path: SchemaPath<unknown>,
+  context: FieldTreeMappingContext,
+  apply: (validationPath: SchemaPath<unknown>) => void,
+): void {
   if (context.validateWhenHidden) {
-    applyValidation(path);
+    apply(path);
     return;
   }
 
@@ -297,16 +308,35 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
       if (ancestorHiddenLogic && ancestorHiddenLogic(ctx)) return false;
       return true;
     },
-    schema<unknown>((subPath) => applyValidation(subPath as SchemaPath<unknown>)),
+    schema<unknown>((subPath) => apply(subPath as SchemaPath<unknown>)),
   );
+}
+
+/**
+ * Applies a container's own `validators` to its schema path (#568).
+ * `context` must be the DESCENDANT context — a group never calls `hidden()` on its own path.
+ */
+function applyContainerValidators(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, context: FieldTreeMappingContext): void {
+  const validators = (fieldDef as FieldDef<unknown> & ContainerValidation).validators;
+  if (!validators || validators.length === 0) return;
+
+  applyHiddenGatedValidation(fieldPath as SchemaPath<unknown>, context, (validationPath) => {
+    for (const config of validators) {
+      applyValidator(config, validationPath, 'tree');
+    }
+  });
 }
 
 /**
  * Applies simple validation rules from field properties.
  * Casts are isolated to the boundary between untyped field definitions and typed validator functions.
  */
-function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>): void {
-  if (fieldDef.required) {
+function applySimpleValidationRules(fieldDef: FieldWithValidation, path: SchemaPath<unknown>, context: FieldTreeMappingContext): void {
+  // Own `required` wins over an inherited one, so `required: false` opts out. A child
+  // whose requiredness is conditional (`logic: [{ type: 'required', when }]`) also opts
+  // out — an unconditional cascade on top would make that condition unreachable.
+  const declaresRequiredLogic = fieldDef.logic?.some(isValidationStateLogic) ?? false;
+  if (fieldDef.required ?? (declaresRequiredLogic ? false : context.ancestorRequired)) {
     required(path);
   }
 
@@ -351,6 +381,8 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
   if (arrayField.maxLength !== undefined) {
     maxLength(fieldPath as SchemaPath<unknown[]>, arrayField.maxLength);
   }
+
+  applyContainerValidators(arrayField, fieldPath, context);
 
   // Fields can be either FieldDef (primitive) or FieldDef[] (object)
   let itemDefinitions = arrayField.fields as readonly (FieldDef<unknown> | readonly FieldDef<unknown>[])[];
@@ -423,18 +455,17 @@ function mapArrayFieldToForm(arrayField: FieldDef<unknown>, fieldPath: AnySchema
         const layoutDescendant = resolveDescendantContext(templateField, layoutOwn);
         mapContainerChildren(templateField.fields as FieldDef<unknown>[] | undefined, itemPath, layoutDescendant);
       } else if (isGroupField(templateField)) {
-        // Group template - access group's path first
         const groupKey = templateField.key;
-        const groupOwn = resolveFieldOwnContext(templateField, context);
-        const groupDescendant = resolveDescendantContext(templateField, groupOwn);
         if (groupKey) {
+          // Via mapFieldToForm so the group's own validators apply, not just its children.
           const groupPath = pathRecord[groupKey];
           if (groupPath) {
-            mapContainerChildren(templateField.fields, groupPath, groupDescendant);
+            mapFieldToForm(templateField, groupPath, context);
           }
         } else {
           // No group key - apply children directly (edge case)
-          mapContainerChildren(templateField.fields, itemPath, groupDescendant);
+          const groupOwn = resolveFieldOwnContext(templateField, context);
+          mapContainerChildren(templateField.fields, itemPath, resolveDescendantContext(templateField, groupOwn));
         }
       } else {
         // Simple field template - get the specific field's path

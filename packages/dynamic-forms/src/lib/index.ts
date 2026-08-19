@@ -194,6 +194,9 @@ export type { HttpRequestConfig, HttpValidationResponseMapping } from '@ng-forge
 
 // Validator Function Types (for customFnConfig)
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
+// Targets a container validator's error at one row's field — see `rowError`.
+export { rowError } from '@ng-forge/dynamic-forms/internal';
+export type { RowErrorSpec } from '@ng-forge/dynamic-forms/internal';
 
 // Logic & Expression Types
 export type {

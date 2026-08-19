@@ -3,11 +3,12 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FieldTree, ValidationError } from '@angular/forms/signals';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { DynamicText, ValidationMessage, ValidationMessageResolver, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
-import { dynamicTextToObservable } from '@ng-forge/dynamic-forms/internal';
-import { interpolateParams } from '@ng-forge/dynamic-forms/internal';
-import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import type { Logger } from '@ng-forge/dynamic-forms';
+import { DynamicText } from '../../models/types/dynamic-text';
+import { ValidationMessage, ValidationMessageResolver, ValidationMessages } from '../../models/validation-types';
+import { dynamicTextToObservable } from '../../utils/dynamic-text-to-observable';
+import { interpolateParams } from '../../utils/interpolate-params';
+import { DynamicFormLogger } from '../../providers/features/logger/logger.token';
+import type { Logger } from '../../providers/features/logger/logger.interface';
 
 /** Resolved validation error with interpolated message */
 export interface ResolvedError {
@@ -19,14 +20,15 @@ export interface ResolvedError {
  * Factory function that creates a signal of resolved validation errors
  * Handles async resolution of DynamicText validation messages
  *
- * @param field - Signal containing FieldTree
+ * @param field - Signal containing the FieldTree, or `undefined` before it
+ *   exists (containers resolve their node lazily from the parent tree)
  * @param validationMessages - Signal containing custom field-level validation messages
  * @param defaultValidationMessages - Signal containing default validation messages (fallback)
  * @param injector - Optional injector for DynamicText resolution
  * @returns Signal<ResolvedError[]> - Reactively resolved error messages
  */
 export function createResolvedErrorsSignal<T>(
-  field: Signal<FieldTree<T>>,
+  field: Signal<FieldTree<T> | undefined>,
   validationMessages: Signal<ValidationMessages | undefined>,
   defaultValidationMessages: Signal<ValidationMessages | undefined> = signal(undefined),
   injector = inject(Injector),
@@ -40,10 +42,7 @@ export function createResolvedErrorsSignal<T>(
 
   // Create a computed signal that reads the actual errors from the field
   // This ensures the signal tracks changes to field().errors(), not just the field reference
-  const errors = computed(() => {
-    const control = field()();
-    return control.errors();
-  });
+  const errors = computed(() => field()?.().errors() ?? []);
 
   // Convert signals to observables using toObservable with injector
   const errors$ = toObservable(errors, { injector });

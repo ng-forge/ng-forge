@@ -175,4 +175,122 @@ test.describe('Group Fields E2E Tests', () => {
       await expect(companyInput).toHaveValue('TechCorp', { timeout: 5000 });
     });
   });
+
+  test.describe('Container Validator (issue #568)', () => {
+    test('renders the group-level message in this adapter and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/container-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('group-container-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This adapter registers its own `field-errors` wrapper over the core default.
+      const containerError = scenario.locator('small.p-error');
+
+      await expect(containerError).toHaveCount(0);
+
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-group.png');
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(dateTo, '2026-03-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Delegated field errors (FIELD_ERROR_DISPLAY)', () => {
+    test('renders the message once, from the wrapper rather than the field', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/delegated-field-errors');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('delegated-field-errors-test');
+      await expect(scenario).toBeVisible();
+
+      const username = scenario.locator(':is([id="username"], [id$="_username"]) input');
+      const email = scenario.locator(':is([id="email"], [id$="_email"]) input');
+
+      await helpers.fillInput(username, 'x');
+      await helpers.clearAndFill(username, '');
+      await helpers.blurInput(username);
+      await helpers.fillInput(email, 'x');
+      await helpers.clearAndFill(email, '');
+      await helpers.blurInput(email);
+
+      // One delegated (rendered by the wrapper) + one ordinary. Three would mean the
+      // delegated field rendered its own on top of the wrapper's.
+      await expect(scenario.locator('small.p-error')).toHaveCount(2);
+      await expect(scenario.locator('df-prime-field-errors small.p-error')).toHaveCount(1);
+      await expect(scenario.locator('df-prime-field-errors small.p-error')).toHaveText('Username is required.');
+
+      // Styling parity: the wrapper's message must look like the field component's own.
+      // Text-only assertions let a wrapper render in body grey and still pass — that
+      // regression happened once already on PrimeNG.
+      const parity = await page.evaluate(
+        ({ errorSel, wrapperSel }) => {
+          const all = Array.from(document.querySelectorAll(errorSel));
+          const wrapped = document.querySelector(`${wrapperSel} ${errorSel}`);
+          const own = all.find((el) => el !== wrapped);
+          if (!wrapped || !own) return null;
+          const a = getComputedStyle(wrapped);
+          const b = getComputedStyle(own);
+          return {
+            color: [a.color, b.color],
+            fontSize: [a.fontSize, b.fontSize],
+            inheritsBody: a.color === getComputedStyle(document.body).color,
+          };
+        },
+        { errorSel: 'small.p-error', wrapperSel: 'df-prime-field-errors' },
+      );
+
+      expect(parity).not.toBeNull();
+      expect(parity!.color[0]).toBe(parity!.color[1]);
+      expect(parity!.fontSize[0]).toBe(parity!.fontSize[1]);
+      expect(parity!.inheritsBody).toBe(false);
+    });
+  });
+
+  test.describe('Container Validator on an array (issue #568)', () => {
+    test('renders the array-level message in this adapter and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/group-fields/array-container-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('array-container-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const rowInputs = scenario.locator(':is([id="periods"], [id$="_periods"]) input');
+      const from = rowInputs.first();
+      const to = rowInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      const containerError = scenario.locator('df-prime-field-errors small.p-error');
+
+      await expect(containerError).toHaveCount(0);
+
+      await helpers.fillInput(from, '2026-01-02T10:00');
+      await helpers.fillInput(to, '2026-01-02T09:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(scenario).toHaveScreenshot('container-error-array.png');
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(to, '2026-01-02T11:00');
+      await helpers.blurInput(to);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
 });

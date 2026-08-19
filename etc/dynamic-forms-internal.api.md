@@ -13,6 +13,7 @@ import { LogicFn } from '@angular/forms/signals';
 import { Observable } from 'rxjs';
 import { OperatorFunction } from 'rxjs';
 import { PipeTransform } from '@angular/core';
+import { Provider } from '@angular/core';
 import { ReadonlyFieldState } from '@angular/forms/signals';
 import { Resource } from '@angular/core';
 import { ResourceRef } from '@angular/core';
@@ -147,10 +148,10 @@ export type AnyAddon = DynamicFormAddonRegistry[keyof DynamicFormAddonRegistry];
 export function applyMetaToElement(element: Element, meta: FieldMeta | undefined, previouslyApplied: Set<string>): Set<string>;
 
 // @public (undocumented)
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public (undocumented)
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public
 export const ARRAY_CONTEXT: InjectionToken<ArrayContext>;
@@ -176,7 +177,7 @@ export interface ArrayContext {
 }
 
 // @public
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never>, ContainerValidation {
     readonly fields: TFields;
     readonly label?: never;
     readonly logic?: ContainerLogicConfig[];
@@ -441,6 +442,13 @@ export interface ContainerLogicConfig {
     type: 'hidden';
 }
 
+// @public
+export interface ContainerValidation {
+    readonly required?: boolean;
+    readonly validationMessages?: ValidationMessages;
+    readonly validators?: ValidatorConfig[];
+}
+
 // @public (undocumented)
 export function createAddonActionRegistry(): ReadonlyMap<string, AddonActionHandler>;
 
@@ -467,6 +475,9 @@ export function createInitializationTracker(eventBus: EventBus, expectedCount: n
 
 // @public
 export function createLogicFunction<TValue>(expression: ConditionalExpression): LogicFn<TValue, boolean>;
+
+// @public
+export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T> | undefined>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
 
 // @internal
 export function createWarningTracker(): WarningTracker;
@@ -748,6 +759,9 @@ export type ExtractField<T extends AvailableFieldTypes> = T extends keyof FieldT
 export function extractStringDependencies(expression: string): string[];
 
 // @public
+export const FIELD_ERROR_DISPLAY: InjectionToken<FieldErrorDisplayClaim>;
+
+// @public
 export const FIELD_REGISTRY: InjectionToken<Map<string, FieldTypeDefinition<any>>>;
 
 // @public
@@ -817,6 +831,48 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
 }
 
 // @public
+export interface FieldErrorDisplayClaim {
+    readonly claimedKey: Signal<string | undefined>;
+}
+
+// @public
+export interface FieldErrors {
+    readonly errorId: Signal<string>;
+    readonly errors: Signal<ResolvedError[]>;
+    readonly errorsToDisplay: Signal<ResolvedError[]>;
+    readonly showErrors: Signal<boolean>;
+}
+
+// @public (undocumented)
+export interface FieldErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages?: Signal<ValidationMessages | undefined>;
+}
+
+// @public
+export interface FieldErrorsWrapper {
+    // (undocumented)
+    readonly type: 'field-errors';
+    readonly validationMessages?: ValidationMessages;
+}
+
+// @public
+export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
+    readonly claimedKey: i0.Signal<string | undefined>;
+    // (undocumented)
+    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    // (undocumented)
+    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
+    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
+}
+
+// @public
 export interface FieldMeta {
     [key: `data-${string}`]: string | undefined;
     [key: `aria-${string}`]: boolean | string | undefined;
@@ -864,6 +920,8 @@ export interface FieldRegistryLeaves {
 
 // @public
 export interface FieldRegistryWrappers {
+    // (undocumented)
+    'field-errors': FieldErrorsWrapper;
     // (undocumented)
     css: CssWrapper;
     // (undocumented)
@@ -1111,7 +1169,7 @@ export interface GroupContext {
 }
 
 // @public
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never>, ContainerValidation {
     // (undocumented)
     readonly fields: TFields;
     readonly label?: never;
@@ -1261,6 +1319,9 @@ export interface InitialPageConfig {
 
 // @public
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
+
+// @public
+export function injectFieldErrors(options: FieldErrorsOptions): FieldErrors;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;
@@ -1551,6 +1612,9 @@ export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
+// @public
+export function provideFieldErrorDisplay(wrapper: () => Type<FieldErrorDisplayClaim>): Provider;
+
 // @internal
 export function readFieldStateInfo(fieldSource: FieldTree<unknown> | ReadonlyFieldState<unknown> | undefined, reactive: boolean): FieldStateInfo | undefined;
 
@@ -1590,6 +1654,14 @@ export type RegisteredWrapperTypes = keyof DynamicFormFieldRegistry['wrappers'];
 
 // @public
 export type RenderReadyInput = 'field' | (string & {});
+
+// @public
+export interface ResolvedError {
+    // (undocumented)
+    kind: string;
+    // (undocumented)
+    message: string;
+}
 
 // @public
 export type ResolvedValidationExecutionConfig = Required<ValidationExecutionConfig>;
@@ -1632,6 +1704,17 @@ export type RowAllowedChildren = ContainerAllowedChildren;
 
 // @public (undocumented)
 export type RowComponent = FieldComponent<RowField<RowAllowedChildren[]>>;
+
+// @public
+export function rowError(ctx: FieldContext<unknown>, index: number, key: string, error: RowErrorSpec): ValidationError_2;
+
+// @public
+export interface RowErrorSpec {
+    // (undocumented)
+    readonly [param: string]: unknown;
+    readonly kind: string;
+    readonly message?: string;
+}
 
 // @public
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
@@ -1680,7 +1763,10 @@ export function setupInitializationTracking(options: InitializationTrackingOptio
 export function shouldLog(config: DerivationLogConfig, minLevel: 'summary' | 'verbose'): boolean;
 
 // @public
-export interface SimplifiedArrayField extends FieldDef<never> {
+export function shouldShowErrors<T>(field: Signal<FieldTree<T> | undefined>): Signal<boolean>;
+
+// @public
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
     readonly addButton?: ArrayButtonConfig | false;
     readonly fields?: never;
     readonly label?: never;
@@ -1894,6 +1980,9 @@ export interface ValidationMessages {
 }
 
 // @public
+export type ValidatorAttachment = 'field' | 'tree';
+
+// @public
 export type ValidatorConfig = AsyncValidatorConfig | BuiltInValidatorConfig | CustomValidatorConfig | DeclarativeHttpValidatorConfig | FunctionHttpValidatorConfig;
 
 // @public
@@ -1933,7 +2022,7 @@ export const WRAPPER_AUTO_ASSOCIATIONS: InjectionToken<WrapperAutoAssociations>;
 export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
+export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.FieldErrorsWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
 
 // @public
 export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;
@@ -1970,6 +2059,7 @@ export interface WrapperFieldInputs {
 // @public
 export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
     loadComponent: LazyComponentLoader;
+    rendersFieldErrors?: boolean;
     types?: readonly string[];
     _wrapper?: T;
     wrapperName: string;

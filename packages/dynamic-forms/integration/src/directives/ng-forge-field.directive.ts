@@ -1,10 +1,17 @@
 import { afterRenderEffect, computed, Directive, inject, input, isDevMode, Signal, signal, untracked } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import { DEFAULT_VALIDATION_MESSAGES, DynamicText, FieldMeta, ValidationMessages } from '@ng-forge/dynamic-forms/internal';
+import {
+  createResolvedErrorsSignal,
+  DEFAULT_VALIDATION_MESSAGES,
+  DynamicText,
+  FIELD_ERROR_DISPLAY,
+  FieldMeta,
+  ResolvedError,
+  shouldShowErrors,
+  ValidationMessages,
+} from '@ng-forge/dynamic-forms/internal';
 import { createAriaDescribedBySignal } from '../utils/create-aria-described-by';
-import { createResolvedErrorsSignal, ResolvedError } from '../utils/create-resolved-errors-signal';
-import { shouldShowErrors } from '../utils/should-show-errors';
 import type { AssertTupleLockstep } from './assert-input-lockstep';
 import { NgForgeFieldShell } from './ng-forge-field-shell.directive';
 
@@ -73,7 +80,16 @@ export class NgForgeField {
     this.defaultValidationMessages,
   );
   readonly showErrors: Signal<boolean> = shouldShowErrors(this.field);
-  readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => (this.showErrors() ? this.errors() : []));
+
+  /** An ancestor wrapper's claim to render errors — see `FIELD_ERROR_DISPLAY`. */
+  private readonly errorDisplayClaim = inject(FIELD_ERROR_DISPLAY, { optional: true });
+
+  readonly errorsToDisplay: Signal<ResolvedError[]> = computed(() => {
+    // Only yield to a claim on THIS field. A wrapper around a container reaches every
+    // descendant, and must not silence the inputs inside it.
+    if (this.errorDisplayClaim?.claimedKey() === this.key()) return [];
+    return this.showErrors() ? this.errors() : [];
+  });
 
   // ───────────────────────────────────────────────────────────────────────────
   // Accessibility helpers

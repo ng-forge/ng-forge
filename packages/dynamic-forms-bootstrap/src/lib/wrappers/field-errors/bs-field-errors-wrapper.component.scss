@@ -1,0 +1,8 @@
+// Bootstrap styles `.invalid-feedback` globally, so the colour and size already come
+// from the design system. Restated with the shared `--df-*` override in front so a
+// container message stays customizable through the documented variables, falling back
+// to Bootstrap's own tokens.
+.invalid-feedback {
+  color: var(--df-error-color, var(--bs-form-invalid-color, var(--bs-danger, #dc3545)));
+  font-size: var(--df-error-font-size, 0.875em);
+}

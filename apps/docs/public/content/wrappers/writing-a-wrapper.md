@@ -144,6 +144,47 @@ export default class SectionWrapperComponent implements FieldWrapper {
 }
 ```
 
+### Rendering the field's errors
+
+`fieldInputs.field.errors()` gives raw `ValidationError` objects, not display strings. Resolving those against `validationMessages`, form-level defaults, `DynamicText` sources and `{{param}}` interpolation is the job of `NgForgeField` inside a field component, and a wrapper cannot reach it: the wrapper chain is built before the field component it wraps exists, so `inject(NgForgeField)` has nothing to find.
+
+`injectFieldErrors` gives a wrapper that same surface from the `fieldInputs` bag it already has. This is what makes a shared form-field wrapper (label, control, hint and error in one place) possible without reimplementing message resolution:
+
+```typescript name="form-field-wrapper.component.ts"
+import { ChangeDetectionStrategy, Component, input, ViewContainerRef, viewChild } from '@angular/core';
+import { injectFieldErrors } from '@ng-forge/dynamic-forms/integration';
+import type { FieldWrapper, WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+
+@Component({
+  selector: 'app-form-field',
+  template: `
+    <label [for]="ngf.errorId()">{{ fieldInputs()?.label }}</label>
+    <ng-container #fieldComponent></ng-container>
+    @if (ngf.errorsToDisplay()[0]; as error) {
+      <span class="field-error" [id]="ngf.errorId()">{{ error.message }}</span>
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class FormFieldWrapperComponent implements FieldWrapper {
+  readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
+  readonly fieldInputs = input<WrapperFieldInputs>();
+
+  protected readonly ngf = injectFieldErrors({ fieldInputs: this.fieldInputs });
+}
+```
+
+It returns four signals, matching what `injectNgForgeField()` exposes to a field component:
+
+| Signal            | Meaning                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `errors`          | Every resolved error, whether or not it should be shown yet |
+| `showErrors`      | Invalid, touched, and at least one error                    |
+| `errorsToDisplay` | `errors()` gated by `showErrors()` — render this            |
+| `errorId`         | `{key}-error`, for wiring `aria-describedby` on the control |
+
+Container fields push no `fieldInputs.field`, so the helper falls back to resolving the container's own node by key from `FIELD_SIGNAL_CONTEXT` — the same call works for a `group` or `array` wrapper. For a wrapper that renders errors and nothing else, extend `FieldErrorsWrapperBase` instead and write only the template; see [Group-Level Validation](/prebuilt/form-groups#group-level-validation).
+
 ### Wrappers on container fields
 
 A wrapper around a `type: 'container'` field wraps a **children template**, not a single field. No single `field` is in scope, so containers don't push a `fieldInputs.field`. If you need to decorate a container based on form state, pass the relevant key(s) through config and look them up from the form tree, or inject `FIELD_SIGNAL_CONTEXT` when you need the broader form root. For most wrappers this isn't necessary; design them to take what they need as props.

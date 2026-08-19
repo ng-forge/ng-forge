@@ -68,7 +68,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   const features = items.filter(isDynamicFormFeature);
 
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
-  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const customWrappers = [...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const wrappers = [...BUILT_IN_WRAPPERS, ...customWrappers];
 
   // Extract providers from features (includes config features like material-config, bootstrap-config, etc.)
   const featureProviders: Provider[] = [];
@@ -118,12 +119,21 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
       useFactory: () => {
         const logger = inject(DynamicFormLogger);
         const registry = new Map();
-        // Add custom wrapper types
-        wrappers.forEach((wrapperType) => {
-          if (registry.has(wrapperType.wrapperName)) {
-            logger.warn(`Wrapper type "${wrapperType.wrapperName}" is already registered. Overwriting.`);
+        // Seed the built-ins, then let later registrations replace them. Overriding a
+        // built-in name is supported — an adapter restyles `field-errors` that way,
+        // and an app may then override the adapter's — so those never warn. Only two
+        // custom registrations colliding on a name of their own is a mistake.
+        const builtInNames = new Set(BUILT_IN_WRAPPERS.map((w) => w.wrapperName));
+        BUILT_IN_WRAPPERS.forEach((wrapperType) => registry.set(wrapperType.wrapperName, wrapperType));
+
+        const seenCustom = new Set<string>();
+        customWrappers.forEach((wrapperType) => {
+          const name = wrapperType.wrapperName;
+          if (seenCustom.has(name) && !builtInNames.has(name)) {
+            logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
           }
-          registry.set(wrapperType.wrapperName, wrapperType);
+          seenCustom.add(name);
+          registry.set(name, wrapperType);
         });
         return registry;
       },

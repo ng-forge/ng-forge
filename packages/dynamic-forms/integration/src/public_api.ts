@@ -143,6 +143,10 @@ export type { NonFieldLogicContext, NonFieldLogicType, NonFieldLogicConfig } fro
 
 export { createWrappers, isWrappersBundle, wrapperProps } from '@ng-forge/dynamic-forms';
 export type { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+// Error surface for wrapper authors: resolves the wrapped field's errors (leaf or
+// container), plus the token a wrapper provides to take error rendering over.
+export { injectFieldErrors, FIELD_ERROR_DISPLAY, FieldErrorsWrapperBase, provideFieldErrorDisplay } from '@ng-forge/dynamic-forms/internal';
+export type { FieldErrors, FieldErrorsOptions, FieldErrorDisplayClaim } from '@ng-forge/dynamic-forms/internal';
 export type {
   FieldWrapper,
   WrapperRegistration,

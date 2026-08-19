@@ -15,6 +15,7 @@ import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { CssWrapper } from '@ng-forge/dynamic-forms/internal';
 import { RowWrapper } from '@ng-forge/dynamic-forms/internal';
+import { FieldErrorsWrapper } from '@ng-forge/dynamic-forms/internal';
 
 /** Built-in field types provided by the dynamic form library. */
 /**
@@ -96,4 +97,9 @@ export const BUILT_IN_WRAPPERS: WrapperTypeDefinition[] = [
     wrapperName: 'row',
     loadComponent: () => import('../wrappers/row/row-wrapper.component'),
   } satisfies WrapperTypeDefinition<RowWrapper>,
+  {
+    wrapperName: 'field-errors',
+    loadComponent: () => import('../wrappers/field-errors/field-errors-wrapper.component'),
+    rendersFieldErrors: true,
+  } satisfies WrapperTypeDefinition<FieldErrorsWrapper>,
 ];

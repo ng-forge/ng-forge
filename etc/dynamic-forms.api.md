@@ -132,7 +132,7 @@ export function arrayEvent(arrayKey: string): {
 };
 
 // @public
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never>, ContainerValidation {
     readonly fields: TFields;
     readonly label?: never;
     readonly logic?: ContainerLogicConfig[];
@@ -598,6 +598,8 @@ export interface FieldRegistryLeaves {
 // @public
 export interface FieldRegistryWrappers {
     // (undocumented)
+    'field-errors': FieldErrorsWrapper;
+    // (undocumented)
     css: CssWrapper;
     // (undocumented)
     row: RowWrapper;
@@ -726,7 +728,7 @@ export class GoToPageEvent implements FormEvent {
 export type GroupAllowedChildren = ArrayField | ContainerField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never>, ContainerValidation {
     // (undocumented)
     readonly fields: TFields;
     readonly label?: never;
@@ -1040,6 +1042,17 @@ export function resolveDynamicValue<T>(value: DynamicValue<T> | undefined, fallb
 export type RowAllowedChildren = ContainerAllowedChildren;
 
 // @public
+export function rowError(ctx: FieldContext<unknown>, index: number, key: string, error: RowErrorSpec): ValidationError_2;
+
+// @public
+export interface RowErrorSpec {
+    // (undocumented)
+    readonly [param: string]: unknown;
+    readonly kind: string;
+    readonly message?: string;
+}
+
+// @public
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;
@@ -1091,7 +1104,7 @@ export class ShiftArrayItemEvent implements FormEvent {
 }
 
 // @public
-export interface SimplifiedArrayField extends FieldDef<never> {
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
     readonly addButton?: ArrayButtonConfig | false;
     readonly fields?: never;
     readonly label?: never;
@@ -1305,6 +1318,7 @@ export interface WrappersBundle<T extends readonly WrapperRegistration[] = reado
 // @public
 export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
     loadComponent: LazyComponentLoader;
+    rendersFieldErrors?: boolean;
     types?: readonly string[];
     _wrapper?: T;
     wrapperName: string;

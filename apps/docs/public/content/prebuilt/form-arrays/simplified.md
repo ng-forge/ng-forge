@@ -16,12 +16,15 @@ The simplified array API provides a concise way to define dynamic arrays. Instea
 
 The simplified API is built around `template` and `value`, plus optional `minLength`/`maxLength`:
 
-| Property    | Description                                                                |
-| ----------- | -------------------------------------------------------------------------- |
-| `template`  | Defines the structure of a single array item (single field or field array) |
-| `value`     | Initial data array -- each element creates one pre-filled item             |
-| `minLength` | Minimum number of array items (form invalid if fewer)                      |
-| `maxLength` | Maximum number of array items (form invalid if more)                       |
+| Property             | Description                                                                |
+| -------------------- | -------------------------------------------------------------------------- |
+| `template`           | Defines the structure of a single array item (single field or field array) |
+| `value`              | Initial data array -- each element creates one pre-filled item             |
+| `minLength`          | Minimum number of array items (form invalid if fewer)                      |
+| `maxLength`          | Maximum number of array items (form invalid if more)                       |
+| `validators`         | Rules over the item list -- `ctx.value()` is the array of items            |
+| `validationMessages` | Messages keyed by error kind for the array's own validators                |
+| `validateWhenHidden` | Run the array's validators while it is hidden (default `false`)            |
 
 The `template` shape determines the array variant:
 
@@ -290,6 +293,34 @@ Use `minLength` and `maxLength` to constrain the number of items. When violated,
 ```
 
 Both properties are optional and can be used independently or together.
+
+## Array-Level Validation
+
+Size bounds only count items. To validate their contents -- typically comparing two fields of the same row -- declare `validators` on the array. `ctx.value()` resolves to the item list:
+
+```typescript
+{
+  key: 'periods',
+  type: 'array',
+  template: [
+    { key: 'from', type: 'input', label: 'From', props: { type: 'datetime-local' } },
+    { key: 'to', type: 'input', label: 'To', props: { type: 'datetime-local' } },
+  ],
+  value: [{ from: '', to: '' }],
+  minLength: 1,
+  validators: [{ type: 'custom', functionName: 'periodOrder' }],
+  validationMessages: { periodOrder: 'Every period must end after it starts.' },
+}
+```
+
+```typescript
+const periodOrder: CustomValidator = (ctx) => {
+  const rows = (ctx.value() as { from?: string; to?: string }[]) ?? [];
+  return rows.some((r) => r.from && r.to && r.to < r.from) ? { kind: 'periodOrder' } : null;
+};
+```
+
+The message renders below the array's items via the built-in `field-errors` wrapper, which is appended automatically when a container declares `validators`. See [Array-Level Validation](/prebuilt/form-arrays/complete#array-level-validation) in the complete API guide for the full details and how to restyle the wrapper.
 
 ## Conditional Visibility
 

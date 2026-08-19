@@ -55,6 +55,7 @@ import { ThemePalette } from '@angular/material/core';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public

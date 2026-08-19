@@ -27,6 +27,21 @@ const routes: Routes = [
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getGroupFieldsScenario('group-cross-field-validation') },
   },
+  {
+    path: 'container-validator',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getGroupFieldsScenario('group-container-validator-test') },
+  },
+  {
+    path: 'delegated-field-errors',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getGroupFieldsScenario('delegated-field-errors-test') },
+  },
+  {
+    path: 'custom-error-wrapper',
+    loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
+    data: { scenario: getGroupFieldsScenario('custom-error-wrapper-test') },
+  },
 ];
 
 export default routes;
