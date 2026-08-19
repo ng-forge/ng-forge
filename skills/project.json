@@ -24,7 +24,9 @@
       "cache": true,
       "inputs": [
         "{workspaceRoot}/scripts/generate-skills.ts",
+        "{workspaceRoot}/scripts/skill-adapters.ts",
         "{workspaceRoot}/skills/dynamic-forms/**/*.md",
+        "{workspaceRoot}/skills/dynamic-forms-*/**/*.md",
         "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/**",
         "{workspaceRoot}/packages/dynamic-form-mcp/src/tools/**",
         "{workspaceRoot}/internal/dynamic-forms-validation/reporting/**",

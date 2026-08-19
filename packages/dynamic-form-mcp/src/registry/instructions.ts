@@ -516,17 +516,14 @@ All features are exported from \`@ng-forge/dynamic-forms\`.
 
 ## CRITICAL: UI Library Differences
 
-Different UI libraries support different properties. Always validate against the correct library using \`ngforge_validate\` with the appropriate \`uiIntegration\` parameter.
+Different UI libraries support different \`props\`. Always validate against the library the project actually uses.
 
-### Property Differences by Library
+Which props exist is answered per adapter, not here: use the adapter's own reference
+(\`ngforge_lookup\` with the adapter, or the \`ng-forge-dynamic-forms-<adapter>\` skill). A table
+repeated here would be a second copy of the adapter registries and would drift from them.
 
-| Property | Material | Bootstrap | PrimeNG | Ionic |
-|----------|----------|-----------|---------|-------|
-| \`appearance\` | ✓ (fill, outline) | ✗ | ✗ | ✓ (fill, outline) |
-| \`subscriptSizing\` | ✓ | ✗ | ✗ | ✗ |
-| \`floatLabel\` | ✓ (auto, always, never) | ✗ | ✗ | ✗ |
-| \`hideRequiredMarker\` | ✓ | ✗ | ✗ | ✗ |
-| \`hint\` | ✓ | ✓ (as \`helpText\`) | ✓ | ✓ |
+Two adapters cannot both provide the same field type, so a project has one adapter per
+field type; TypeScript reports error 2717 when two try.
 
 ### Container Fields
 

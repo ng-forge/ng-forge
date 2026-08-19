@@ -84,4 +84,16 @@ Read these on demand rather than up front:
 
 A config is validated against one adapter: `material`, `bootstrap`,
 `primeng`, or `ionic`. Field types are shared, but `props` differ per
-adapter. Check which adapter the project provides before writing `props`.
+adapter, and this skill documents none of them.
+
+Install the skill for the adapter the project uses, which carries its `props`:
+
+| Adapter | Skill |
+| ------- | ----- |
+| `material` | `ng-forge-dynamic-forms-material` |
+| `bootstrap` | `ng-forge-dynamic-forms-bootstrap` |
+| `primeng` | `ng-forge-dynamic-forms-primeng` |
+| `ionic` | `ng-forge-dynamic-forms-ionic` |
+
+Two adapters cannot both provide the same field type, so a project has one
+adapter per field type. Check which one it provides before writing `props`.

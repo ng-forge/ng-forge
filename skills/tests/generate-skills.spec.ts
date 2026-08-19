@@ -8,6 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { withTableOfContents, TOC_LINE_THRESHOLD, buildOutputs, findStaleOutputs } from '../../scripts/generate-skills.ts';
+import { UI_ADAPTERS } from '../../packages/dynamic-form-mcp/src/registry/ui-adapters.ts';
 
 function longDoc(sections: string[], filler = 200): string {
   const body = sections.map((s) => `## ${s}\n\n${'text\n'.repeat(filler / sections.length)}`).join('\n');
@@ -65,17 +66,69 @@ describe('withTableOfContents', () => {
 });
 
 describe('generated outputs', () => {
-  it('produces the five expected files', async () => {
+  it('produces the core skill plus one skill per adapter', async () => {
     const outputs = await buildOutputs();
-    const names = outputs.map(([path]) => path.split('/').slice(-2).join('/'));
+    const paths = outputs.map(([path]) => path.replace(/^.*\/skills\//, ''));
 
-    expect(names).toEqual([
+    expect(paths).toEqual([
       'dynamic-forms/SKILL.md',
-      'references/rules.md',
-      'references/field-types.md',
-      'references/patterns.md',
-      'references/pitfalls.md',
+      'dynamic-forms/references/rules.md',
+      'dynamic-forms/references/field-types.md',
+      'dynamic-forms/references/patterns.md',
+      'dynamic-forms/references/pitfalls.md',
+      'dynamic-forms-material/SKILL.md',
+      'dynamic-forms-material/references/props.md',
+      'dynamic-forms-bootstrap/SKILL.md',
+      'dynamic-forms-bootstrap/references/props.md',
+      'dynamic-forms-primeng/SKILL.md',
+      'dynamic-forms-primeng/references/props.md',
+      'dynamic-forms-ionic/SKILL.md',
+      'dynamic-forms-ionic/references/props.md',
     ]);
+  });
+
+  it('gives every adapter in the registry its own skill', async () => {
+    // A new adapter must not silently ship without one, which would leave its
+    // props undocumented while the core skill claims a skill exists for it.
+    const paths = (await buildOutputs()).map(([path]) => path);
+
+    for (const adapter of UI_ADAPTERS) {
+      expect(
+        paths.some((p) => p.includes(`dynamic-forms-${adapter.library}/SKILL.md`)),
+        `${adapter.library} has no skill`,
+      ).toBe(true);
+    }
+  });
+
+  it('keeps adapter props out of the core skill', async () => {
+    // The core skill is adapter independent. If Material props leak into it,
+    // agents working in a Bootstrap project get properties that do not exist.
+    const core = (await buildOutputs()).filter(([path]) => path.includes('/dynamic-forms/'));
+    const text = core.map(([, contents]) => contents).join('\n');
+
+    for (const marker of ['subscriptSizing', 'hideRequiredMarker', 'MatInputFieldComponent']) {
+      expect(text, `core skill leaks ${marker}`).not.toContain(marker);
+    }
+  });
+
+  it('points the core skill at every adapter skill', async () => {
+    const [, skill] = (await buildOutputs()).find(([path]) => path.endsWith('dynamic-forms/SKILL.md'))!;
+
+    for (const adapter of UI_ADAPTERS) {
+      expect(skill, `core skill does not mention ${adapter.library}`).toContain(`ng-forge-dynamic-forms-${adapter.library}`);
+    }
+  });
+
+  it('names each adapter skill after its package', async () => {
+    // `npx skills add` installs by directory name, so the skill a user asks for
+    // has to match the adapter package they already depend on.
+    for (const adapter of UI_ADAPTERS) {
+      const [, skill] = (await buildOutputs()).find(([path]) => path.includes(`dynamic-forms-${adapter.library}/SKILL.md`))!;
+
+      expect(skill).toContain(`name: ng-forge-dynamic-forms-${adapter.library}`);
+      expect(skill, 'should name the package it belongs to').toContain(adapter.package);
+      expect(skill, 'should carry the matching --ui flag').toContain(`--ui ${adapter.library}`);
+    }
   });
 
   it('marks every file as generated', async () => {
