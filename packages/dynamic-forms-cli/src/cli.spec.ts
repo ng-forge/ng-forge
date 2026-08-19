@@ -64,7 +64,7 @@ describe('createProgram', () => {
       .options.map((o) => o.long)
       .sort();
 
-    expect(flags).toEqual(['--json', '--quiet', '--ui']);
+    expect(flags).toEqual(['--json', '--quiet', '--require-config', '--ui']);
   });
 
   it('defaults the UI integration to material', () => {

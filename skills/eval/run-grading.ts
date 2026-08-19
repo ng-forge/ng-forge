@@ -18,7 +18,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { EVAL_TASKS, FIXTURES } from './tasks.ts';
@@ -71,6 +71,15 @@ async function readIfPresent(path: string): Promise<string | undefined> {
   }
 }
 
+/** Epoch seconds the file was last written, for ordering against the invocation log. */
+async function mtimeIfPresent(path: string): Promise<number | undefined> {
+  try {
+    return (await stat(path)).mtimeMs / 1000;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function gradeAll(trialsDir: string, reportsDir?: string) {
   const entries = await readdir(trialsDir, { withFileTypes: true });
   const workspaces = entries.filter((e) => e.isDirectory()).map((e) => e.name);
@@ -96,7 +105,9 @@ export async function gradeAll(trialsDir: string, reportsDir?: string) {
 
       const invocations = (await readIfPresent(join(workspace, INVOCATION_LOG))) ?? '';
       const report = reportsDir ? ((await readIfPresent(join(reportsDir, `${name}.txt`))) ?? '') : '';
-      const producedFile = task.expectedFile ? await readIfPresent(join(workspace, task.expectedFile)) : undefined;
+      const producedPath = task.expectedFile ? join(workspace, task.expectedFile) : undefined;
+      const producedFile = producedPath ? await readIfPresent(producedPath) : undefined;
+      const producedFileMtime = producedPath ? await mtimeIfPresent(producedPath) : undefined;
 
       if (reportsDir && report === '') {
         missing.push(name);
@@ -112,7 +123,7 @@ export async function gradeAll(trialsDir: string, reportsDir?: string) {
       }
 
       results.push(
-        gradeTrial(task, { taskId: task.id, invocations, transcript: report, producedFile }, cliValidator(workspace), {
+        gradeTrial(task, { taskId: task.id, invocations, transcript: report, producedFile, producedFileMtime }, cliValidator(workspace), {
           canObserveTriggering: Boolean(reportsDir),
         }),
       );

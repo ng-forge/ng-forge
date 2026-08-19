@@ -12,11 +12,15 @@ import {
   gradeTrial,
   summariseTask,
   formatSummary,
+  parseInvocations,
+  validatedExpectedFile,
+  validatedWithAdapter,
+  validatedAfterEditing,
   PASS_THRESHOLD,
   type ConfigValidator,
 } from '../eval/grade.ts';
 import { validateSource } from '@ng-forge/dynamic-forms-validation';
-import { EVAL_TASKS, type EvalTask } from '../eval/tasks.ts';
+import { EVAL_TASKS, FIXTURES, type EvalTask } from '../eval/tasks.ts';
 
 /** In-process validator for the unit tests: the graders take it as a parameter. */
 const validate: ConfigValidator = (source, filePath, ui) => {
@@ -104,7 +108,13 @@ describe('gradeTrial, positive tasks', () => {
   it('omits the trigger grader when triggering cannot be observed', () => {
     const result = gradeTrial(
       task('implicit-select'),
-      { taskId: 'implicit-select', invocations: 'src/signup.form.ts', transcript: '', producedFile: VALID_CONFIG },
+      {
+        taskId: 'implicit-select',
+        invocations: '1700000100 src/signup.form.ts --ui material\n',
+        producedFileMtime: 1700000000,
+        transcript: '',
+        producedFile: VALID_CONFIG,
+      },
       validate,
       { canObserveTriggering: false },
     );
@@ -119,7 +129,8 @@ describe('gradeTrial, positive tasks', () => {
       task('implicit-select'),
       {
         taskId: 'implicit-select',
-        invocations: 'src/signup.form.ts --ui material\n',
+        invocations: '1700000100 src/signup.form.ts --ui material\n',
+        producedFileMtime: 1700000000,
         transcript: 'Read SKILL.md.',
         producedFile: VALID_CONFIG,
       },
@@ -287,7 +298,83 @@ describe('task set', () => {
     }
   });
 
+  it('covers every UI integration', () => {
+    // A skill that only ever gets exercised against material would ship with
+    // its adapter guidance untested.
+    const covered = new Set(EVAL_TASKS.filter((t) => t.shouldTrigger).map((t) => t.ui));
+    expect([...covered].sort()).toEqual(['bootstrap', 'ionic', 'material', 'primeng']);
+  });
+
+  it('includes an adapter task whose adapter is not named in the prompt', () => {
+    // With the adapter stated outright, the trial only shows the agent can read
+    // an instruction. At least one has to require finding it in the project.
+    const implicit = EVAL_TASKS.filter(
+      (t) => t.shouldTrigger && t.ui !== 'material' && !t.prompt.toLowerCase().includes(t.ui.toLowerCase()),
+    );
+
+    expect(implicit.length).toBeGreaterThan(0);
+    for (const t of implicit) {
+      const fixtures = Object.values(FIXTURES[t.id] ?? {}).join('\n');
+      expect(fixtures.toLowerCase(), `${t.id} gives no way to discover its adapter`).toContain(t.ui.toLowerCase());
+    }
+  });
+
+  it('gives every task fixtures for the file it is graded on', () => {
+    for (const t of EVAL_TASKS) {
+      if (!t.expectedFile) continue;
+      expect(Object.keys(FIXTURES[t.id] ?? {}), `${t.id} is graded on a file it was never given`).toContain(t.expectedFile);
+    }
+  });
+
   it('uses a pass threshold that requires more than triggering alone', () => {
     expect(PASS_THRESHOLD).toBeGreaterThan(0.5);
+  });
+});
+
+describe('invocation detail graders', () => {
+  const log = (args: string, at = 1700000100) => `${at} ${args}\n`;
+
+  it('parses the wrapper log into timestamped runs', () => {
+    const runs = parseInvocations('1700000100 a.ts --ui material\n1700000200 b.ts\n');
+
+    expect(runs).toHaveLength(2);
+    expect(runs[0]).toEqual({ at: 1700000100, args: 'a.ts --ui material' });
+  });
+
+  it('accepts a run that names the target file', () => {
+    expect(validatedExpectedFile(log('src/signup.form.ts --ui material'), 'src/signup.form.ts')).toBe(true);
+  });
+
+  it('accepts a glob that would cover the target', () => {
+    expect(validatedExpectedFile(log('"src/**/*.form.ts" --ui material'), 'src/signup.form.ts')).toBe(true);
+  });
+
+  it('rejects a run against a different file', () => {
+    expect(validatedExpectedFile(log('src/other.form.ts --ui material'), 'src/signup.form.ts')).toBe(false);
+  });
+
+  it('accepts the adapter when named explicitly', () => {
+    expect(validatedWithAdapter(log('src/a.ts --ui bootstrap'), 'bootstrap')).toBe(true);
+  });
+
+  it('rejects the wrong adapter', () => {
+    expect(validatedWithAdapter(log('src/a.ts --ui material'), 'bootstrap')).toBe(false);
+  });
+
+  it('treats an absent --ui as material, which is the default', () => {
+    expect(validatedWithAdapter(log('src/a.ts'), 'material')).toBe(true);
+    expect(validatedWithAdapter(log('src/a.ts'), 'bootstrap')).toBe(false);
+  });
+
+  it('rejects a run made before the file was edited', () => {
+    expect(validatedAfterEditing(log('src/a.ts', 1700000000), 1700000500)).toBe(false);
+  });
+
+  it('accepts a run made after the file was edited', () => {
+    expect(validatedAfterEditing(log('src/a.ts', 1700000500), 1700000000)).toBe(true);
+  });
+
+  it('cannot pass when the file time is unknown', () => {
+    expect(validatedAfterEditing(log('src/a.ts'), undefined)).toBe(false);
   });
 });

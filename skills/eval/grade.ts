@@ -27,11 +27,15 @@ export interface TrialRecord {
   taskId: string;
   /**
    * Contents of the workspace's validator invocation log, written by a wrapper
-   * the agent never sees. Kept separate from `transcript` on purpose: grading
-   * "did it run the validator" against anything the agent authored lets a
-   * trial pass by merely claiming to have run it.
+   * the agent never sees. One line per call: `<epoch seconds> <argv>`.
+   *
+   * Kept separate from `transcript` on purpose: grading "did it run the
+   * validator" against anything the agent authored lets a trial pass by merely
+   * claiming to have run it.
    */
   invocations: string;
+  /** Epoch seconds the expected file was last written, for ordering checks. */
+  producedFileMtime?: number;
   /** The agent's own account of what it did. Self-reported, so trigger signal only. */
   transcript: string;
   /** Final contents of the file the task expected, if it exists. */
@@ -58,17 +62,64 @@ export interface TrialResult {
 /** A trial passes at or above this weighted score. */
 export const PASS_THRESHOLD = 0.8;
 
+/** One recorded run of the validator. */
+export interface Invocation {
+  /** Epoch seconds, from the wrapper. */
+  at: number;
+  /** Everything after the timestamp, as written. */
+  args: string;
+}
+
+/** Parse the wrapper's log. Lines without a leading timestamp are tolerated. */
+export function parseInvocations(invocations: string): Invocation[] {
+  return invocations
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .map((line) => {
+      const match = /^(\d+)\s+(.*)$/.exec(line);
+      return match ? { at: Number(match[1]), args: match[2] } : { at: 0, args: line };
+    });
+}
+
 /**
  * Did the agent invoke the validator?
  *
- * The workspace wrapper appends one line per invocation and nothing else ever
- * writes to that file, so a non-empty log is the run. This deliberately does
- * not pattern-match a command line: an earlier version did, which meant the
- * check passed on any text merely naming the command, and the agent's own
- * summary was being fed in alongside the log.
+ * A non-empty log is the run: the wrapper is the only writer, so this cannot be
+ * satisfied by anything the agent says. It deliberately does not pattern-match a
+ * command line, because an earlier version did and passed on any text naming the
+ * command, with the agent's own summary fed in alongside.
+ *
+ * Note this is the weakest of the invocation checks. On its own it credits a run
+ * against the wrong file, the wrong adapter, or one made before the edit, which
+ * is why the graders below narrow it.
  */
 export function ranValidator(invocations: string): boolean {
   return invocations.trim().length > 0;
+}
+
+/** Did any run target the file the task is about? */
+export function validatedExpectedFile(invocations: string, expectedFile: string): boolean {
+  const basename = expectedFile.split('/').pop() ?? expectedFile;
+  // A glob counts: `src/**/*.form.ts` legitimately covers the target.
+  return parseInvocations(invocations).some((i) => i.args.includes(basename) || /\*/.test(i.args));
+}
+
+/** Did any run use the adapter the task specifies? */
+export function validatedWithAdapter(invocations: string, ui: string): boolean {
+  // material is the CLI default, so an absent --ui still selects it.
+  return parseInvocations(invocations).some(
+    (i) => new RegExp(`--ui[= ]${ui}\\b`).test(i.args) || (ui === 'material' && !/--ui/.test(i.args)),
+  );
+}
+
+/** Was the last run made after the file was last written? */
+export function validatedAfterEditing(invocations: string, mtime: number | undefined): boolean {
+  if (mtime === undefined) return false;
+  const runs = parseInvocations(invocations).filter((i) => i.at > 0);
+  if (runs.length === 0) return false;
+  // One second of slack: the wrapper logs whole seconds.
+  return Math.max(...runs.map((i) => i.at)) >= Math.floor(mtime) - 1;
 }
 
 /** Did the agent read the skill at all? */
@@ -126,6 +177,25 @@ export function gradeTrial(task: EvalTask, record: TrialRecord, validate: Config
     weight: 2,
     detail: validated ? 'validator invoked' : 'validator never invoked',
   });
+
+  if (task.expectedFile) {
+    // Running the validator on something else, with the wrong adapter, or
+    // before making the edit all used to earn full credit for this grader.
+    const onTarget = validatedExpectedFile(record.invocations, task.expectedFile);
+    const withAdapter = validatedWithAdapter(record.invocations, task.ui);
+    const afterEdit = validatedAfterEditing(record.invocations, record.producedFileMtime);
+
+    graders.push({
+      name: 'validated-correctly',
+      score: onTarget && withAdapter && afterEdit ? 1 : 0,
+      weight: 2,
+      detail: [
+        onTarget ? 'target file' : 'wrong or unknown target',
+        withAdapter ? `--ui ${task.ui}` : `not run with --ui ${task.ui}`,
+        afterEdit ? 'after the edit' : 'not re-run after the edit',
+      ].join(', '),
+    });
+  }
 
   if (task.expectedFile) {
     const source = record.producedFile;

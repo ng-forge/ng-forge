@@ -16,7 +16,7 @@
  * Usage: node scripts/package-smoke-test.mjs <dist-dir>
  * e.g.   node scripts/package-smoke-test.mjs dist/packages/dynamic-form-mcp
  */
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -159,6 +159,33 @@ if (unloadable.length > 0) {
   process.exit(1);
 }
 
+// Importing an entry point does not execute the bin, and a bin has its own
+// relative imports and its own shebang. A broken one ships silently otherwise,
+// because nothing else in the pipeline ever runs it.
+const brokenBins = [];
+for (const [name, relative] of Object.entries(pkg.bin ?? {})) {
+  const binPath = join(process.cwd(), DIST, relative);
+
+  if (!existsSync(binPath)) {
+    brokenBins.push(`${name}: ${relative} is not present in the built output`);
+    continue;
+  }
+
+  const result = spawnSync(process.execPath, [binPath, '--help'], { encoding: 'utf8' });
+  if (result.status !== 0) {
+    const detail = (result.stderr || result.stdout || '').split('\n')[0];
+    brokenBins.push(`${name}: --help exited ${result.status}${detail ? ` (${detail})` : ''}`);
+  }
+}
+
+if (brokenBins.length > 0) {
+  console.error(`[smoke:${LABEL}] FAIL: declared bin(s) do not run:`);
+  for (const detail of brokenBins) {
+    console.error(`  - ${detail}`);
+  }
+  process.exit(1);
+}
+
 // Loading from dist proves the code runs; it says nothing about what npm will
 // actually ship. `files` is what decides that, and an emitted-but-unpacked file
 // fails only for the consumer. Enabling esbuild code splitting produced exactly
@@ -177,4 +204,6 @@ if (unpacked.length > 0) {
   process.exit(1);
 }
 
-console.log(`[smoke:${LABEL}] OK: ${files.length} emitted file(s) declared and packed, ${targets.size} entry point(s) load.`);
+console.log(
+  `[smoke:${LABEL}] OK: ${files.length} emitted file(s) declared and packed, ${targets.size} entry point(s) load, ${Object.keys(pkg.bin ?? {}).length} bin(s) run.`,
+);

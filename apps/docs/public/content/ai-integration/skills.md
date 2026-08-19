@@ -39,8 +39,10 @@ All of it is generated from the same registries that back the [MCP server](/ai-i
 An assistant's confidence in its own output is not evidence. The skill's central instruction is to run a validator, which ships as a command:
 
 ```bash
-npx @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
 ```
+
+Requires Node 24 or newer. `--yes` keeps npx from pausing on its first-install prompt, which matters when an agent runs the command.
 
 It finds every FormConfig in the matched files, validates it against the schema for your adapter, and reports the exact property that is wrong along with the fix. This is the same validation the MCP server performs, because both call the same package.
 
@@ -69,6 +71,7 @@ It finds every FormConfig in the matched files, validates it against the schema 
 | `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic` |
 | `--json`                 | off        | Emit machine-readable JSON instead of the report   |
 | `-q, --quiet`            | off        | Only print failures                                |
+| `--require-config`       | off        | Fail when the matched files contain no FormConfig  |
 
 ### Exit codes
 
@@ -80,11 +83,11 @@ It finds every FormConfig in the matched files, validates it against the schema 
 
 Code `2` is separate from `1` so a typo in a glob does not read as a passing run.
 
-One case to know about before relying on this as a gate: if files match but none of them contains a FormConfig the extractor recognises, the command reports that on stderr and still exits `0`. A refactor that moves configs somewhere the extractor cannot see them turns the gate quiet rather than red.
+One case to know about before relying on this as a gate: if files match but none of them contains a FormConfig the extractor recognises, the command reports that on stderr and still exits `0`. Pass `--require-config` to make that a failure, which is what the CI snippet below does. Without it, a refactor that moves configs somewhere the extractor cannot see them turns the gate quiet rather than red.
 
 ```yaml
 - name: Validate form configs
-  run: npx @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet
+  run: npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet --require-config
 ```
 
 ## What the compiler already covers
@@ -130,7 +133,7 @@ The whole documentation site is published in a form assistants can read without 
 
 | MCP tool           | Equivalent with the skill                                                 |
 | ------------------ | ------------------------------------------------------------------------- |
-| `ngforge_validate` | `npx @ng-forge/dynamic-forms-cli`, or its `/validate` entry point         |
+| `ngforge_validate` | `npx --yes @ng-forge/dynamic-forms-cli`, or its `/validate` entry point   |
 | `ngforge_lookup`   | `references/rules.md` and `references/field-types.md`, or `llms-full.txt` |
 | `ngforge_examples` | `references/patterns.md`                                                  |
 | `ngforge_scaffold` | The patterns, adapted by the assistant                                    |

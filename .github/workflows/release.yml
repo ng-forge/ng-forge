@@ -51,7 +51,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp openapi-generator'
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-forms-cli dynamic-form-mcp openapi-generator'
 
 jobs:
   # Push to release-* branches just surfaces this workflow in the PR checks — the actual

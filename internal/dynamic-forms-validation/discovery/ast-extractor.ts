@@ -72,89 +72,117 @@ export function createSourceFile(source: string, fileName = 'temp.ts'): SourceFi
 }
 
 /** Find all potential FormConfig objects in a source file. */
+/** A declaration that could carry a FormConfig, normalised across the shapes we support. */
+interface DeclarationLike {
+  name: string;
+  startLine: number;
+  typeNode: Node | undefined;
+  initializer: Node | undefined;
+}
+
+/**
+ * Every declaration shape a FormConfig is realistically written as.
+ *
+ * Variable declarations cover the common case. Class properties matter for
+ * component-scoped configs, and a default export is how a config module is
+ * often written. Anything not listed here is genuinely unsupported rather
+ * than silently missed, which is what the tests assert.
+ */
+function collectDeclarations(sourceFile: SourceFile): DeclarationLike[] {
+  const declarations: DeclarationLike[] = [];
+
+  for (const varDecl of sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+    declarations.push({
+      name: varDecl.getName(),
+      startLine: varDecl.getStartLineNumber(),
+      typeNode: varDecl.getTypeNode(),
+      initializer: varDecl.getInitializer(),
+    });
+  }
+
+  for (const prop of sourceFile.getDescendantsOfKind(SyntaxKind.PropertyDeclaration)) {
+    declarations.push({
+      name: prop.getName(),
+      startLine: prop.getStartLineNumber(),
+      typeNode: prop.getTypeNode(),
+      initializer: prop.getInitializer(),
+    });
+  }
+
+  for (const assignment of sourceFile.getDescendantsOfKind(SyntaxKind.ExportAssignment)) {
+    declarations.push({
+      name: 'default',
+      startLine: assignment.getStartLineNumber(),
+      typeNode: undefined,
+      initializer: assignment.getExpression(),
+    });
+  }
+
+  return declarations;
+}
+
+/**
+ * Find every FormConfig in a source file.
+ *
+ * An explicit `FormConfig` annotation, `satisfies`, or cast is treated as
+ * sufficient evidence on its own. Requiring the object to *also* look
+ * structurally valid meant a config the author had explicitly typed but
+ * written wrongly was reported as "no config found" and passed, which is the
+ * one case where saying nothing is most harmful. Structural matching remains
+ * only as the fallback for configs carrying no type evidence at all.
+ */
 export function findFormConfigCandidates(sourceFile: SourceFile): FormConfigCandidate[] {
   const candidates: FormConfigCandidate[] = [];
-  const foundNames = new Set<string>();
+  // Keyed on source position, not name: two scopes may each declare `form`,
+  // and deduplicating by name silently dropped all but the first.
+  const seen = new Set<number>();
 
-  // Get all variable declarations
-  const variableDeclarations = sourceFile.getDescendantsOfKind(SyntaxKind.VariableDeclaration);
+  const add = (
+    name: string,
+    startLine: number,
+    objectLiteral: ObjectLiteralExpression,
+    matchReason: FormConfigCandidate['matchReason'],
+  ): boolean => {
+    const position = objectLiteral.getPos();
+    if (seen.has(position)) return false;
+    seen.add(position);
+    candidates.push({ name, startLine, objectLiteral, matchReason });
+    return true;
+  };
 
-  for (const varDecl of variableDeclarations) {
-    const name = varDecl.getName();
-    if (foundNames.has(name)) continue;
-
-    const startLine = varDecl.getStartLineNumber();
-    const initializer = varDecl.getInitializer();
-
-    // Strategy 1: Type annotation contains "FormConfig" (case-insensitive)
-    const typeNode = varDecl.getTypeNode();
-    if (typeNode) {
-      const typeText = typeNode.getText();
-      if (/formconfig/i.test(typeText)) {
-        const objectLiteral = findObjectLiteral(initializer);
-        if (objectLiteral && hasFormConfigStructure(objectLiteral)) {
-          candidates.push({
-            name,
-            startLine,
-            objectLiteral,
-            matchReason: 'type-annotation',
-          });
-          foundNames.add(name);
-          continue;
-        }
+  for (const { name, startLine, typeNode, initializer } of collectDeclarations(sourceFile)) {
+    // Strategy 1: an explicit `: FormConfig` annotation.
+    if (typeNode && /formconfig/i.test(typeNode.getText())) {
+      const objectLiteral = findObjectLiteral(initializer);
+      if (objectLiteral) {
+        add(name, startLine, objectLiteral, 'type-annotation');
+        continue;
       }
     }
 
-    // Strategy 2: Check for satisfies clause
-    if (initializer) {
-      const satisfiesExpr = findSatisfiesExpression(initializer);
-      if (satisfiesExpr) {
-        const satisfiesType = satisfiesExpr.getTypeNode()?.getText() || '';
-        if (/formconfig/i.test(satisfiesType)) {
-          const objectLiteral = findObjectLiteralInSatisfies(satisfiesExpr);
-          if (objectLiteral && hasFormConfigStructure(objectLiteral)) {
-            candidates.push({
-              name,
-              startLine,
-              objectLiteral,
-              matchReason: 'satisfies',
-            });
-            foundNames.add(name);
-            continue;
-          }
-        }
+    // Strategy 2: `satisfies FormConfig`, including `as const satisfies`.
+    const satisfiesExpr = findSatisfiesExpression(initializer);
+    if (satisfiesExpr && /formconfig/i.test(satisfiesExpr.getTypeNode()?.getText() ?? '')) {
+      const objectLiteral = findObjectLiteralInSatisfies(satisfiesExpr);
+      if (objectLiteral) {
+        add(name, startLine, objectLiteral, 'satisfies');
+        continue;
       }
     }
 
-    // Strategy 3: Check for "as FormConfig" cast
-    if (initializer && Node.isAsExpression(initializer)) {
-      const typeText = initializer.getTypeNode()?.getText() || '';
-      if (/formconfig/i.test(typeText)) {
-        const expression = initializer.getExpression();
-        const objectLiteral = findObjectLiteral(expression);
-        if (objectLiteral && hasFormConfigStructure(objectLiteral)) {
-          candidates.push({
-            name,
-            startLine,
-            objectLiteral,
-            matchReason: 'as-cast',
-          });
-          foundNames.add(name);
-          continue;
-        }
+    // Strategy 3: `as FormConfig`.
+    if (initializer && Node.isAsExpression(initializer) && /formconfig/i.test(initializer.getTypeNode()?.getText() ?? '')) {
+      const objectLiteral = findObjectLiteral(initializer.getExpression());
+      if (objectLiteral) {
+        add(name, startLine, objectLiteral, 'as-cast');
+        continue;
       }
     }
 
-    // Strategy 4: Structural detection - has fields array with form-like objects
+    // Strategy 4: no type evidence, so the shape has to carry it.
     const objectLiteral = findObjectLiteral(initializer);
     if (objectLiteral && hasFormConfigStructure(objectLiteral)) {
-      candidates.push({
-        name,
-        startLine,
-        objectLiteral,
-        matchReason: 'structural',
-      });
-      foundNames.add(name);
+      add(name, startLine, objectLiteral, 'structural');
     }
   }
 

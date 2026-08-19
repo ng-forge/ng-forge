@@ -101,6 +101,7 @@ export { validateFormConfig }
 export interface ValidateOptions {
     json: boolean;
     quiet: boolean;
+    requireConfig?: boolean;
     ui: string;
 }
 

@@ -27,6 +27,15 @@ export interface ValidateOptions {
   json: boolean;
   /** Suppress per-file success lines and the closing summary. */
   quiet: boolean;
+  /**
+   * Fail when the matched files contain no FormConfig at all.
+   *
+   * Off by default, because interactively a glob that catches unrelated files
+   * is not an error. On as a CI gate, where "found nothing" and "found nothing
+   * wrong" must not look the same: a refactor that moves configs somewhere the
+   * extractor cannot see them would otherwise turn the gate green.
+   */
+  requireConfig?: boolean;
 }
 
 /**
@@ -69,6 +78,10 @@ function toJsonSummary(results: FileValidationResult[], uiIntegration: UiIntegra
         matchReason: c.matchReason,
         valid: c.validation.valid,
         errors: c.validation.errors ?? [],
+        // Runtime values are replaced with placeholders before validating. A
+        // JSON consumer that cannot see that has no way to know the verdict
+        // was reached against a substitute rather than the real value.
+        extractionWarnings: c.extraction.warnings.map((w) => ({ path: w.path, issue: w.issue })),
       })),
     })),
   };
@@ -102,7 +115,12 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
 
   if (options.json) {
     console.log(JSON.stringify(toJsonSummary(results, uiIntegration), null, 2));
-    return results.every((r) => r.valid) ? EXIT_OK : EXIT_INVALID_CONFIG;
+
+    if (!results.every((r) => r.valid)) {
+      return EXIT_INVALID_CONFIG;
+    }
+    const found = results.reduce((sum, r) => sum + r.results.length, 0);
+    return options.requireConfig && found === 0 ? EXIT_INVALID_CONFIG : EXIT_OK;
   }
 
   const failing = results.filter((r) => !r.valid);
@@ -125,7 +143,7 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
     console.error(
       `No FormConfig objects found in ${files.length} file(s). Check the pattern, or annotate configs with \`satisfies FormConfig\`.`,
     );
-    return EXIT_OK;
+    return options.requireConfig ? EXIT_INVALID_CONFIG : EXIT_OK;
   }
 
   if (failing.length > 0) {

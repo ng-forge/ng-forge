@@ -87,13 +87,38 @@ export const EVAL_TASKS: EvalTask[] = [
     ui: 'material',
     expectedFile: 'src/broken.form.ts',
   },
+  // Adapter tasks. Note what these can and cannot measure: the four adapter
+  // schemas accept the same field types and are passthrough on props, so a
+  // config written for one adapter validates under all four. Nothing in the
+  // produced file can therefore prove the agent picked the right adapter, and
+  // asserting on file content here would be theatre. The `--ui` flag in the
+  // invocation log is the only real evidence, which is what the
+  // `validated-correctly` grader checks.
   {
     id: 'bootstrap-adapter',
-    intent: 'The skill should validate against the adapter the project actually uses',
+    intent: 'Adapter named in the prompt: the agent should validate with --ui bootstrap',
     prompt: 'Add a required email field to the contact form in src/contact.form.ts. This project uses Bootstrap.',
     shouldTrigger: true,
     ui: 'bootstrap',
     expectedFile: 'src/contact.form.ts',
+    mustContain: ["type: 'input'"],
+  },
+  {
+    id: 'primeng-adapter',
+    intent: 'Adapter discoverable only from the code: the agent has to look before choosing --ui',
+    prompt: 'Add a required phone field to the contact form in src/contact.form.ts.',
+    shouldTrigger: true,
+    ui: 'primeng',
+    expectedFile: 'src/contact.form.ts',
+    mustContain: ["type: 'input'"],
+  },
+  {
+    id: 'ionic-adapter',
+    intent: 'Adapter named in the prompt, fourth integration',
+    prompt: 'Add a required full name field to the profile form in src/profile.form.ts. This is an Ionic app.',
+    shouldTrigger: true,
+    ui: 'ionic',
+    expectedFile: 'src/profile.form.ts',
     mustContain: ["type: 'input'"],
   },
   {
@@ -177,6 +202,44 @@ export const contactForm = {
     { key: 'name', type: 'input', label: 'Name', required: true },
   ],
 } as const satisfies FormConfig;
+`,
+  },
+  'primeng-adapter': {
+    'src/contact.form.ts': `import { FormConfig } from '@ng-forge/dynamic-forms';
+
+export const contactForm = {
+  fields: [
+    { key: 'name', type: 'input', label: 'Name', required: true },
+  ],
+} as const satisfies FormConfig;
+`,
+    // The prompt never says PrimeNG. This file is the only clue, so the trial
+    // measures whether the agent goes looking for the adapter at all.
+    'src/app.config.ts': `import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withPrimeNGFields } from '@ng-forge/dynamic-forms-primeng';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(withPrimeNGFields())],
+};
+`,
+  },
+  'ionic-adapter': {
+    'src/profile.form.ts': `import { FormConfig } from '@ng-forge/dynamic-forms';
+
+export const profileForm = {
+  fields: [
+    { key: 'email', type: 'input', label: 'Email', required: true, email: true },
+  ],
+} as const satisfies FormConfig;
+`,
+    'src/app.config.ts': `import { ApplicationConfig } from '@angular/core';
+import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withIonicFields } from '@ng-forge/dynamic-forms-ionic';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideDynamicForm(withIonicFields())],
+};
 `,
   },
   'negative-unrelated-angular': {},

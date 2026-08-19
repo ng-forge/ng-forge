@@ -11,8 +11,10 @@ Validates `@ng-forge/dynamic-forms` FormConfig objects from the command line.
 ## Quick start
 
 ```bash
-npx @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
 ```
+
+Requires **Node 24 or newer**. Pass `--yes` when a script or an agent runs it, so npx does not stop at its first-install prompt.
 
 It finds every FormConfig in the matched files, validates each against the schema for your UI integration, and prints the errors with a suggested fix.
 
@@ -55,6 +57,16 @@ The file is parsed with ts-morph and searched, in order, for:
 3. `as FormConfig`
 4. Structural match: an object with a `fields` array
 
+Any of the first three counts on its own. A config you have explicitly typed is validated even when its shape is wrong, which is the case where staying silent would be most misleading. The structural match is only for configs carrying no type evidence at all.
+
+Configs are found in these declaration positions:
+
+- `const` / `let` declarations
+- class properties
+- default exports
+
+Anything else, a config returned from a factory function for instance, is not discovered. Assign it to a variable if you want it checked.
+
 Values that only exist at runtime (function calls, identifiers, `new Date()`) are replaced with placeholders so the rest of the config can still be checked. Those substitutions are listed under "Extraction Notes" in the report.
 
 ## Options
@@ -64,14 +76,15 @@ Values that only exist at runtime (function calls, identifiers, `new Date()`) ar
 | `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic` |
 | `--json`                 | off        | Emit machine-readable JSON instead of the report   |
 | `-q, --quiet`            | off        | Only print failures                                |
+| `--require-config`       | off        | Fail when the matched files contain no FormConfig  |
 
 ## Exit codes
 
-| Code | Meaning                                                      |
-| ---- | ------------------------------------------------------------ |
-| `0`  | Every config valid, or no configs found in the matched files |
-| `1`  | At least one config failed validation                        |
-| `2`  | Bad invocation: unknown UI integration, or no files matched  |
+| Code | Meaning                                                             |
+| ---- | ------------------------------------------------------------------- |
+| `0`  | Every config valid, or no configs found (unless `--require-config`) |
+| `1`  | At least one config failed validation                               |
+| `2`  | Bad invocation: unknown UI integration, or no files matched         |
 
 Code `2` is kept separate from `1` so a typo in your glob does not read as a passing run.
 
@@ -79,8 +92,10 @@ Code `2` is kept separate from `1` so a typo in your glob does not read as a pas
 
 ```yaml
 - name: Validate form configs
-  run: npx @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet
+  run: npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet --require-config
 ```
+
+`--require-config` is what makes this a real gate. Without it, a refactor that moves configs somewhere the extractor cannot see reports success rather than failure.
 
 ## Programmatic use
 

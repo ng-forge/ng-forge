@@ -54,8 +54,13 @@ This skill documents version **${version}**.
 Check what the project actually has installed:
 
 \`\`\`bash
-node -p "require('./package.json').dependencies['@ng-forge/dynamic-forms']"
+node -p "require('@ng-forge/dynamic-forms/package.json').version"
 \`\`\`
+
+That reads the resolved package, so it works in a monorepo and when the library
+is a dev dependency. Reading \`dependencies\` from the nearest package.json
+reports a range like \`^1.2.0\` rather than what is installed, and misses both
+cases.
 
 If it does not match ${version}, say so before generating a config. The rules
 below track ${version} and some of them have changed between releases.
@@ -65,12 +70,19 @@ below track ${version} and some of them have changed between releases.
 Do not hand back a config you have not checked. The library ships a validator:
 
 \`\`\`bash
-npx @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material
 \`\`\`
+
+\`--yes\` matters: without it npx prompts before its first install and waits for
+an answer that will never come. Requires Node 24 or newer.
 
 It reports the exact property that is wrong and how to fix it. Exit code 1
 means a config failed, 2 means the invocation was wrong. Run it after writing
 or editing any config, and fix what it reports before replying.
+
+Pass \`--require-config\` when the file is supposed to contain a config: without
+it, a file the extractor finds nothing in exits 0, which reads the same as a
+clean run.
 
 If the config is written in TypeScript, \`as const satisfies FormConfig\` plus
 a typecheck already catches a large share of mistakes. Use both.

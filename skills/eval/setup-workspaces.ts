@@ -10,10 +10,10 @@
  * Usage: node skills/eval/setup-workspaces.ts <output-dir> [trials]
  */
 
-import { chmod, cp, mkdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { chmod, cp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EVAL_TASKS, FIXTURES } from './tasks.ts';
+import { EVAL_TASKS, FIXTURES, type UiIntegration } from './tasks.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SKILL_SOURCE = join(ROOT, 'skills', 'dynamic-forms');
@@ -21,6 +21,20 @@ const CLI_DIST = join(ROOT, 'dist', 'packages', 'dynamic-forms-cli');
 
 /** Runtime dependencies the bundled CLI expects to resolve from node_modules. */
 const CLI_RUNTIME_DEPS = ['commander', 'ts-morph', 'zod', 'zod-to-json-schema'];
+
+/** Package that provides each adapter's fields, as a real project would depend on it. */
+const ADAPTER_PACKAGE: Record<UiIntegration, string> = {
+  material: '@ng-forge/dynamic-forms-material',
+  bootstrap: '@ng-forge/dynamic-forms-bootstrap',
+  primeng: '@ng-forge/dynamic-forms-primeng',
+  ionic: '@ng-forge/dynamic-forms-ionic',
+};
+
+/** The release the workspaces should claim, read rather than hardcoded. */
+async function libraryVersion(): Promise<string> {
+  const pkg = JSON.parse(await readFile(join(ROOT, 'packages', 'dynamic-forms', 'package.json'), 'utf-8'));
+  return pkg.version;
+}
 
 /**
  * Install the built CLI into a workspace so the exact command the skill
@@ -50,7 +64,7 @@ async function installCli(workspace: string): Promise<void> {
   const wrapper = join(modules, '.bin', 'ng-forge-validate');
   await writeFile(
     wrapper,
-    ['#!/bin/sh', `echo "$@" >> "${join(workspace, INVOCATION_LOG)}"`, `exec node "${bin}" "$@"`, ''].join('\n'),
+    ['#!/bin/sh', `echo "$(date +%s) $@" >> "${join(workspace, INVOCATION_LOG)}"`, `exec node "${bin}" "$@"`, ''].join('\n'),
     'utf-8',
   );
   await chmod(wrapper, 0o755);
@@ -65,8 +79,9 @@ export const INVOCATION_LOG = '.validator-invocations.log';
  * comparison a high pass rate says nothing, because it cannot distinguish a
  * skill that works from a task an agent would have got right anyway.
  */
-export async function setupWorkspaces(outputDir: string, trials: number, withSkill = true): Promise<string[]> {
+export async function setupWorkspaces(outputDir: string, trials: number, withSkill = true, withCli = true): Promise<string[]> {
   await rm(outputDir, { recursive: true, force: true });
+  const version = await libraryVersion();
   const created: string[] = [];
 
   for (const task of EVAL_TASKS) {
@@ -91,8 +106,16 @@ export async function setupWorkspaces(outputDir: string, trials: number, withSki
         JSON.stringify(
           {
             name: `trial-${task.id}`,
-            dependencies: { '@ng-forge/dynamic-forms': '1.1.0' },
-            devDependencies: { '@ng-forge/dynamic-forms-cli': '1.1.0' },
+            dependencies: {
+              '@ng-forge/dynamic-forms': version,
+              // Only for tasks that should trigger. Naming an adapter in a
+              // negative control's manifest would be a hint towards the very
+              // behaviour those trials exist to rule out.
+              ...(task.shouldTrigger ? { [ADAPTER_PACKAGE[task.ui]]: version } : {}),
+            },
+            // 17: omitted for the clean baseline. Listing the CLI is itself a
+            // hint an agent can act on, which inflates the no-skill arm.
+            ...(withCli ? { devDependencies: { '@ng-forge/dynamic-forms-cli': version } } : {}),
           },
           null,
           2,
@@ -100,7 +123,9 @@ export async function setupWorkspaces(outputDir: string, trials: number, withSki
         'utf-8',
       );
 
-      await installCli(workspace);
+      if (withCli) {
+        await installCli(workspace);
+      }
 
       created.push(workspace);
     }
@@ -113,12 +138,13 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const outputDir = process.argv[2];
   const trials = Number(process.argv[3] ?? 2);
   const withSkill = !process.argv.includes('--no-skill');
+  const withCli = !process.argv.includes('--no-cli');
 
   if (!outputDir) {
-    console.error('usage: node skills/eval/setup-workspaces.ts <output-dir> [trials] [--no-skill]');
+    console.error('usage: node skills/eval/setup-workspaces.ts <output-dir> [trials] [--no-skill] [--no-cli]');
     process.exitCode = 2;
   } else {
-    const created = await setupWorkspaces(outputDir, trials, withSkill);
+    const created = await setupWorkspaces(outputDir, trials, withSkill, withCli);
     console.log(`created ${created.length} workspace(s) under ${outputDir}`);
     for (const path of created) {
       console.log(`  ${path}`);
