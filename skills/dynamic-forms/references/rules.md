@@ -541,9 +541,20 @@ field type; TypeScript reports error 2717 when two try.
 
 ### Container Fields
 
-Container fields (`page`, `group`, `row`) do NOT support these properties:
-- `label` - Use `text` field type for headings instead
-- `required`, `email`, `min`, `max`, etc. - Validation is for leaf fields only
+No container has a `label`. Use a `text` field for a heading instead.
+
+Validation splits by whether the container owns a value:
+
+- `group` and `array` DO accept `required`, `validators`, `validationMessages`
+  and `validateWhenHidden`. A validator there runs against the container's own
+  subtree, so a cross-field rule (dateTo after dateFrom) belongs on the group
+  rather than on one of its children. `ctx.value()` is the group's object or the
+  array's item list.
+- `page`, `row` and `container` do NOT. They flatten into their parent and have
+  no schema path, so a validator on them would have nothing to run against.
+
+Leaf-level validators such as `email`, `min` and `max` belong on the field that
+holds the value, on any container.
 
 ### Common Mistakes to Avoid
 
@@ -561,32 +572,47 @@ Container fields (`page`, `group`, `row`) do NOT support these properties:
 
 3. **Adding `id` to FormConfig** - The root FormConfig does not accept an `id` property.
 
-4. **Putting slider min/max in props** - For slider fields, `min`, `max`, and `step` are field-level properties:
+4. **Using `min`/`max` for a slider's range** - A slider's range is
+   `minValue`, `maxValue` and `step`, at field level. `min` and `max` are
+   validation shorthands: they typecheck, they validate clean, and the slider
+   still renders its default 0-100 range, so nothing catches the mistake.
    ```typescript
-   // ❌ WRONG
+   // ❌ WRONG - validates clean, renders the wrong range
    { key: 'volume', type: 'slider', label: 'Volume', props: { min: 0, max: 100 } }
+   { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
 
    // ✅ CORRECT
-   { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
+   { key: 'volume', type: 'slider', label: 'Volume', minValue: 0, maxValue: 100, step: 5 }
    ```
 
 5. **Using unsupported field types** - Each UI library supports specific field types. Use `ngforge_lookup` with `depth: "schema"` to see available types.
 
 ## Validation Before Use
 
-Always validate your FormConfig using the `ngforge_validate` tool before using it. This tool uses the actual TypeScript/Zod schemas, so if validation passes, the config will work correctly at runtime.
+Never hand back a config you have not checked. Two routes, depending on what is
+available:
 
-```typescript
-// Always specify the UI integration you're using
-ngforge_validate({
-  uiIntegration: 'material',  // or 'bootstrap', 'primeng', 'ionic'
-  config: { fields: [...] }
-})
-```
+- With the MCP server: `ngforge_validate({ uiIntegration: 'material', config })`
+- Without it: `npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material`
 
-To understand what properties are supported for each field type, use `ngforge_lookup` with `depth: "schema"`:
+Both run the same schemas, so they agree.
 
-```typescript
-ngforge_lookup({ topic: 'input', depth: 'schema', uiIntegration: 'material' })
-```
+### What a clean run does and does not mean
+
+A clean run means the structure is right: the field types exist, required
+properties are present, options are in the right place, and containers are not
+carrying properties they cannot have.
+
+It does NOT mean every property you wrote is real. The schemas strip unknown keys
+rather than rejecting them, so an invented or misplaced property passes
+validation and is silently dropped at runtime. Measured examples that pass today:
+`hideWhen` on a field, `targetProperty` inside a derivation, and `initialPage`
+under `options`.
+
+`as const satisfies FormConfig` is what catches those, because TypeScript checks
+the property names. Use both: the type annotation for what exists, the validator
+for what is structurally correct.
+
+To see which properties a field type supports, use `ngforge_lookup` with
+`depth: "schema"`, or read the field-types reference in the skill.
 

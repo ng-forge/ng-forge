@@ -514,11 +514,21 @@ Button to append a new item to the end of an array field. Must be placed within 
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -528,6 +538,11 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
+
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
 
 ```typescript
 {
@@ -543,6 +558,12 @@ Button to insert a new item at a specific index in an array field (set via the i
 
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
+
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `index` | `number` | yes |  | REQUIRED. The position to insert at. |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
 
 ```typescript
 {

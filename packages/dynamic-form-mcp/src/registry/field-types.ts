@@ -810,16 +810,35 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
     example: `{
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item' }`,
+    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'prepend-array-item',
@@ -827,7 +846,21 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     description: 'Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
@@ -845,7 +878,27 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      index: {
+        name: 'index',
+        type: 'number',
+        description: 'REQUIRED. The position to insert at.',
+        required: true,
+      },
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
