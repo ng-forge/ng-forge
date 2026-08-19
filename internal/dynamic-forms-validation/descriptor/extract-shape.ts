@@ -182,12 +182,22 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
       return { kind: 'union', of: [{ kind: 'field' }, ...others] };
     }
 
-    // A union of config objects: logic, validators, wrappers. These are the
-    // richest part of a config, so leaving them unconstrained is the most
-    // expensive gap in a derived schema. Each arm is described one level deep;
-    // anything nested inside is named rather than followed.
-    if (!context.shallow && context.objects && arms.every((a) => a.getProperties().length > 0 && a.getCallSignatures().length === 0)) {
-      return { kind: 'union', of: arms.map((arm) => describeConfigShape(arm, at, context)) };
+    // A union of config shapes: logic, validators, wrappers, conditions. These
+    // are the richest part of a config, so leaving them unconstrained is the
+    // most expensive gap in a derived schema. Each object arm is described one
+    // level deep; anything nested inside is named rather than followed.
+    //
+    // Arms may be mixed. `condition` is `ConditionalExpression | boolean`, and
+    // requiring every arm to be an object left all of those unconstrained
+    // because of the two boolean arms sitting beside them.
+    const describable = (arm: Type) =>
+      isDirectlyExpressible(arm) || (arm.getProperties().length > 0 && arm.getCallSignatures().length === 0);
+
+    if ((context.configDepth ?? 0) < MAX_CONFIG_DEPTH && context.objects && arms.every(describable)) {
+      return {
+        kind: 'union',
+        of: arms.map((arm) => (isDirectlyExpressible(arm) ? describeType(arm, at, context, path) : describeConfigShape(arm, at, context))),
+      };
     }
 
     return record(context, path, `union of ${arms.map((a) => bareTypeName(a.getText(at))).join(' | ')}`);
@@ -238,6 +248,16 @@ function shapeName(type: Type, at: Node): string {
   return `${base}~${digest(text)}`;
 }
 
+/**
+ * How many levels of config shape to describe.
+ *
+ * Two reaches a logic config and the condition inside it, which is where the
+ * rules an agent gets wrong actually live. Deeper pulls in the Angular and RxJS
+ * types those configs eventually reference: an unbounded attempt produced 155
+ * shapes at ten times the size.
+ */
+const MAX_CONFIG_DEPTH = 2;
+
 /** Longest structural text kept as a name before falling back to a digest. */
 const MAX_INLINE_SHAPE_NAME = 48;
 
@@ -265,7 +285,7 @@ function describeConfigShape(type: Type, at: Node, context: ShapeContext): Descr
     context.objects[name] = { policy: 'strip', keys: {} };
 
     const keys: Record<string, DescriptorProperty> = {};
-    const nested: ShapeContext = { ...context, shallow: true, path: name };
+    const nested: ShapeContext = { ...context, shallow: true, path: name, configDepth: (context.configDepth ?? 0) + 1 };
     for (const prop of type.getProperties()) {
       keys[prop.getName()] = describeProperty(prop, at, nested, `${name}.${prop.getName()}`);
     }

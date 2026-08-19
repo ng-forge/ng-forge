@@ -3855,6 +3855,99 @@
     "version": "1.1.0"
   },
   "objects": {
+    "AndCondition": {
+      "keys": {
+        "conditions": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["and"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncConditionBase~0e2545": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["async"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncConditionBase~3185d5": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["async"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "AsyncFunctionDerivationShared~2786f9": {
       "keys": {
         "asyncFn": {
@@ -3872,7 +3965,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -3991,7 +4130,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4110,7 +4295,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4229,7 +4460,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4363,7 +4640,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -4400,7 +4715,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -4515,7 +4868,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -4591,7 +4982,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -4614,7 +5043,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4732,7 +5207,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4840,7 +5361,65 @@
         "condition": {
           "required": true,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              },
+              {
+                "kind": "enum",
+                "values": ["formInvalid"]
+              },
+              {
+                "kind": "enum",
+                "values": ["formSubmitting"]
+              },
+              {
+                "kind": "enum",
+                "values": ["pageInvalid"]
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -4883,7 +5462,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5011,7 +5636,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -5036,6 +5699,49 @@
       },
       "policy": "strip"
     },
+    "FieldValueCondition": {
+      "keys": {
+        "fieldPath": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "operator": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contains",
+              "endsWith",
+              "equals",
+              "greater",
+              "greaterOrEqual",
+              "less",
+              "lessOrEqual",
+              "matches",
+              "notEquals",
+              "startsWith"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["fieldValue"]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "FunctionDerivationShared~0e36ce": {
       "keys": {
         "asyncFn": {
@@ -5053,7 +5759,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5171,7 +5923,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5289,7 +6087,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5407,7 +6251,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5539,7 +6429,45 @@
         "when": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         }
       },
@@ -5577,7 +6505,88 @@
         "when": {
           "required": false,
           "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "HttpCondition": {
+      "keys": {
+        "cacheDurationMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
             "kind": "opaque"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["http"]
           }
         }
       },
@@ -5588,7 +6597,65 @@
         "condition": {
           "required": true,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              },
+              {
+                "kind": "enum",
+                "values": ["formInvalid"]
+              },
+              {
+                "kind": "enum",
+                "values": ["formSubmitting"]
+              },
+              {
+                "kind": "enum",
+                "values": ["pageInvalid"]
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5614,6 +6681,24 @@
       },
       "policy": "strip"
     },
+    "JavascriptCondition": {
+      "keys": {
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["javascript"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "OnChangeExpressionDerivationLogicConfig": {
       "keys": {
         "asyncFn": {
@@ -5631,7 +6716,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5749,7 +6880,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5869,7 +7046,53 @@
         "condition": {
           "required": false,
           "type": {
-            "kind": "opaque"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "enum",
+                "values": [null]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
           }
         },
         "debounceMs": {
@@ -5971,6 +7194,27 @@
       },
       "policy": "strip"
     },
+    "OrCondition": {
+      "keys": {
+        "conditions": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["or"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "RowWrapper": {
       "keys": {
         "type": {
@@ -5982,9 +7226,62 @@
         }
       },
       "policy": "strip"
+    },
+    "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["custom"]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "{ type: \"custom\"; functionName: string; fn?: never; }~edf1b2": {
+      "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": ["custom"]
+          }
+        }
+      },
+      "policy": "strip"
     }
   },
   "unresolved": [
+    {
+      "fallback": "passthrough",
+      "paths": ["AsyncConditionBase~0e2545.asyncFn"],
+      "reason": "callable AsyncConditionFunction"
+    },
     {
       "fallback": "passthrough",
       "paths": ["AsyncFunctionDerivationShared~2786f9.asyncFn", "AsyncFunctionDerivationShared~6ab423.asyncFn"],
@@ -5992,7 +7289,11 @@
     },
     {
       "fallback": "passthrough",
-      "paths": ["FunctionDerivationShared~5204ab.fn", "FunctionDerivationShared~8b26a1.fn"],
+      "paths": [
+        "FunctionDerivationShared~5204ab.fn",
+        "FunctionDerivationShared~8b26a1.fn",
+        "{ type: \"custom\"; fn: CustomFunction; functionName?: never; }~682550.fn"
+      ],
       "reason": "callable CustomFunction"
     },
     {
@@ -6007,46 +7308,13 @@
     },
     {
       "fallback": "passthrough",
-      "paths": [
-        "AsyncValidatorConfigShared~3e5579.when",
-        "AsyncValidatorConfigShared~ebb855.when",
-        "BuiltInValidatorConfig.when",
-        "CustomValidatorConfig.when",
-        "DeclarativeHttpValidatorConfig.when",
-        "FunctionHttpValidatorConfigShared~4faf65.when",
-        "FunctionHttpValidatorConfigShared~6064b3.when"
-      ],
+      "paths": ["AndCondition.conditions[]", "OrCondition.conditions[]"],
       "reason": "union of FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
     },
     {
       "fallback": "passthrough",
       "paths": ["text.logic[]"],
       "reason": "union of ImmediateStateLogicConfig & { type: NonFieldLogicType; } | DebouncedStateLogicConfig & { type: NonFieldLogicType; } | never | never | never | never | never | never | never | never | never | never | never | never | never | never"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": [
-        "AsyncFunctionDerivationShared~2786f9.condition",
-        "AsyncFunctionDerivationShared~6ab423.condition",
-        "AsyncFunctionDerivationShared~806a82.condition",
-        "AsyncFunctionDerivationShared~8b3ac2.condition",
-        "DebouncedExpressionDerivationLogicConfig.condition",
-        "DebouncedHttpDerivationLogicConfig.condition",
-        "DebouncedValueDerivationLogicConfig.condition",
-        "FunctionDerivationShared~0e36ce.condition",
-        "FunctionDerivationShared~5204ab.condition",
-        "FunctionDerivationShared~8b26a1.condition",
-        "FunctionDerivationShared~dee103.condition",
-        "OnChangeExpressionDerivationLogicConfig.condition",
-        "OnChangeHttpDerivationLogicConfig.condition",
-        "OnChangeValueDerivationLogicConfig.condition"
-      ],
-      "reason": "union of false | true | FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
-    },
-    {
-      "fallback": "passthrough",
-      "paths": ["DebouncedStateLogicConfig.condition", "ImmediateStateLogicConfig.condition"],
-      "reason": "union of false | true | FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition | \"formInvalid\" | \"formSubmitting\" | \"pageInvalid\""
     }
   ]
 }
