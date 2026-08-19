@@ -26,6 +26,15 @@ export type DescriptorType =
   | { readonly kind: 'array'; readonly of: DescriptorType }
   /** A named entry in {@link Descriptor.objects}. */
   | { readonly kind: 'ref'; readonly name: string }
+  /**
+   * Any field type registered in this descriptor.
+   *
+   * `fields` and `template` accept the whole field union. Recording that as
+   * unresolved understates it twice over: the set is known — it is
+   * {@link Descriptor.fieldTypes} — and the union's text names the adapter's own
+   * prop types, which would make an otherwise shared core adapter-specific.
+   */
+  | { readonly kind: 'field' }
   /** Deliberately unconstrained, e.g. a `value` that may be any JSON. */
   | { readonly kind: 'unknown' }
   /**

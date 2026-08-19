@@ -59,6 +59,24 @@ function record(context: ShapeContext, path: string, reason: string): Descriptor
   return { kind: 'opaque' };
 }
 
+/**
+ * True when a type is one of the registry's field definitions.
+ *
+ * Identified structurally, by carrying a literal `type` discriminant and a
+ * `key`, rather than by name: adapters name their field types freely, and the
+ * point is to recognise the shape wherever it comes from.
+ */
+function isFieldType(type: Type, at: Node): boolean {
+  const discriminant = type.getProperty('type')?.getTypeAtLocation(at)?.getNonNullableType();
+  if (!discriminant || !type.getProperty('key')) return false;
+
+  // The discriminant may be a union: array actions declare both spellings, e.g.
+  // `'add-array-item' | 'addArrayItem'`. Requiring a single literal missed those
+  // arms, and one missed arm makes the whole union look unresolved.
+  const arms = discriminant.isUnion() ? discriminant.getUnionTypes() : [discriminant];
+  return arms.length > 0 && arms.every((arm) => arm.isStringLiteral());
+}
+
 /** Resolve a type to its JSON-expressible descriptor form. */
 export function describeType(type: Type, at: Node, context: ShapeContext, path: string): DescriptorProperty['type'] {
   const nonNullable = type.getNonNullableType();
@@ -98,6 +116,10 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
     }
     if (arms.every((a) => a.isBooleanLiteral())) return { kind: 'boolean' };
 
+    // `fields` and `template` accept the whole field union. It is not unresolved:
+    // the accepted set is this descriptor's own `fieldTypes`.
+    if (arms.length > 1 && arms.every((a) => isFieldType(a, at))) return { kind: 'field' };
+
     return record(context, path, `union of ${arms.map((a) => bareTypeName(a.getText(at))).join(' | ')}`);
   }
 
@@ -109,6 +131,8 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
   // a JSON config. Recording it as a describable ref would claim we can validate
   // a value that cannot be written down.
   if (isNonSerializableArm(text)) return record(context, path, `not expressible in a static config: ${text}`);
+
+  if (isFieldType(nonNullable, at)) return { kind: 'field' };
 
   if (nonNullable.isObject()) return { kind: 'ref', name: text };
 

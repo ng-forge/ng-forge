@@ -54,6 +54,19 @@ export interface ResolveRegistryOptions {
   adapterPackage: string;
   /** Overridable for tests; the package declaring the registry interfaces. */
   corePackage?: string;
+  /**
+   * Path fragment identifying the adapter's files, for programs where the
+   * package specifier does not appear in the path.
+   *
+   * A consumer resolves `@ng-forge/dynamic-forms-material` to
+   * `node_modules/@ng-forge/dynamic-forms-material/...`, so the specifier is in
+   * the path. In this repo, tsconfig path mappings resolve it to
+   * `packages/dynamic-forms-material/src/...`, which contains no specifier at
+   * all, and every membership test would silently fail.
+   */
+  adapterSourceRoot?: string;
+  /** Same, for the core package. */
+  coreSourceRoot?: string;
 }
 
 const CORE_PACKAGE = '@ng-forge/dynamic-forms';
@@ -110,9 +123,14 @@ function readRegistry(project: Project, dir: string, adapterPackage: string, cor
   return { file, decl, members: decl?.getType().getProperties() ?? [] };
 }
 
+/** True when a file belongs to a package, by specifier or by source root. */
+function belongsTo(filePath: string, specifier: string, sourceRoot?: string): boolean {
+  return filePath.includes(specifier) || (sourceRoot !== undefined && filePath.includes(sourceRoot));
+}
+
 /** True when a symbol has at least one declaration inside the adapter package. */
-function declaredInAdapter(symbol: TsSymbol, adapterPackage: string): boolean {
-  return symbol.getDeclarations().some((d) => d.getSourceFile().getFilePath().includes(adapterPackage));
+function declaredInAdapter(symbol: TsSymbol, adapterPackage: string, sourceRoot?: string): boolean {
+  return symbol.getDeclarations().some((d) => belongsTo(d.getSourceFile().getFilePath(), adapterPackage, sourceRoot));
 }
 
 /**
@@ -129,12 +147,16 @@ function declaredInAdapter(symbol: TsSymbol, adapterPackage: string): boolean {
  * where it was written. Preference order: the requested adapter, then core for
  * types the adapter does not override, then whatever exists.
  */
-function declarationFor(symbol: TsSymbol, adapterPackage: string, corePackage: string): Node | undefined {
+function declarationFor(
+  symbol: TsSymbol,
+  options: Required<Pick<ResolveRegistryOptions, 'adapterPackage'>> & ResolveRegistryOptions,
+): Node | undefined {
   const declarations = symbol.getDeclarations();
+  const core = options.corePackage ?? CORE_PACKAGE;
 
   return (
-    declarations.find((d) => d.getSourceFile().getFilePath().includes(adapterPackage)) ??
-    declarations.find((d) => d.getSourceFile().getFilePath().includes(corePackage)) ??
+    declarations.find((d) => belongsTo(d.getSourceFile().getFilePath(), options.adapterPackage, options.adapterSourceRoot)) ??
+    declarations.find((d) => belongsTo(d.getSourceFile().getFilePath(), core, options.coreSourceRoot)) ??
     declarations[0]
   );
 }
@@ -169,7 +191,7 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
   const adapterInProgram = project
     .getProgram()
     .compilerObject.getSourceFiles()
-    .some((f) => f.fileName.includes(adapterPackage));
+    .some((f) => belongsTo(f.fileName, adapterPackage, options.adapterSourceRoot));
 
   if (!adapterInProgram) {
     return {
@@ -188,7 +210,7 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
   ];
 
   // The silent-partial trap: the adapter resolved, but merged nothing.
-  if (!all.some(({ symbol }) => declaredInAdapter(symbol, adapterPackage))) {
+  if (!all.some(({ symbol }) => declaredInAdapter(symbol, adapterPackage, options.adapterSourceRoot))) {
     return {
       ok: false,
       failure: {
@@ -211,7 +233,7 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
 
     // Resolve at the declaration belonging to the requested adapter, not at the
     // merged symbol, or every adapter would describe the same shape.
-    const declaration = declarationFor(symbol, adapterPackage, corePackage);
+    const declaration = declarationFor(symbol, options);
     const resolveAt = declaration ?? at;
     const type = declaredType(declaration) ?? symbol.getTypeAtLocation(at);
     const declared = stringLiterals(type.getProperty('type')?.getTypeAtLocation(resolveAt));
