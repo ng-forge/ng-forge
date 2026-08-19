@@ -44,8 +44,10 @@
                 "kind": "field"
               },
               {
-                "as": "readonly ArrayAllowedChildren[]",
-                "kind": "opaque"
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
               }
             ]
           }
@@ -85,8 +87,10 @@
                   "kind": "field"
                 },
                 {
-                  "as": "ArrayItemTemplate",
-                  "kind": "opaque"
+                  "kind": "array",
+                  "of": {
+                    "kind": "field"
+                  }
                 }
               ]
             }
@@ -878,8 +882,10 @@
                 "kind": "field"
               },
               {
-                "as": "readonly ArrayAllowedChildren[]",
-                "kind": "opaque"
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
               }
             ]
           }
@@ -1250,8 +1256,10 @@
                 "kind": "field"
               },
               {
-                "as": "readonly ArrayAllowedChildren[]",
-                "kind": "opaque"
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
               }
             ]
           }

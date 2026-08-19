@@ -47,6 +47,15 @@ export interface AcmeSelectField extends BaseField {
   props?: object;
 }
 
+/** A field, or a list of fields: primitive array item vs object array item. */
+export type AcmeItemDefinition = AcmeInputField | AcmeSelectField | readonly (AcmeInputField | AcmeSelectField)[];
+
+export interface AcmeArrayField {
+  key: string;
+  type: 'array';
+  readonly fields: readonly AcmeItemDefinition[];
+}
+
 /** wrappers is REQUIRED. That requirement is the whole type. */
 export interface AcmeContainerField {
   key: string;
@@ -60,6 +69,7 @@ export interface FieldRegistryLeaves {
   input: AcmeInputField;
   select: AcmeSelectField;
   container: AcmeContainerField;
+  array: AcmeArrayField;
 }
 `;
 
@@ -220,6 +230,29 @@ describe('narrowing', () => {
 
   it('keeps the narrowing table small and deliberate', () => {
     expect(Object.keys(NARROWING_TABLE)).toEqual(['DynamicText']);
+  });
+});
+
+describe('field unions', () => {
+  it('describes an array item as a field or a list of fields', () => {
+    // `ArrayItemDefinition` is one field for a primitive item, or a list of
+    // fields for an object item. Recording the second half as opaque would drop
+    // a form the config genuinely accepts.
+    const structural = describeStructural(members.get('array')!, at, context('array'));
+
+    expect(structural['fields'].type).toEqual({
+      kind: 'array',
+      of: { kind: 'union', of: [{ kind: 'field' }, { kind: 'array', of: { kind: 'field' } }] },
+    });
+  });
+
+  it('names no adapter type in a field union', () => {
+    // Spelling the union out named the adapter's own prop types, which made an
+    // otherwise identical core differ between adapters.
+    const ctx = context('array');
+    describeStructural(members.get('array')!, at, ctx);
+
+    expect(JSON.stringify(ctx.unresolved)).not.toContain('AcmeInputProps');
   });
 });
 

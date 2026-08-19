@@ -77,6 +77,13 @@ function isFieldType(type: Type, at: Node): boolean {
   return arms.length > 0 && arms.every((arm) => arm.isStringLiteral());
 }
 
+/** True when every arm of a type is a field definition. */
+function isFieldUnion(type: Type, at: Node): boolean {
+  const nonNullable = type.getNonNullableType();
+  const arms = nonNullable.isUnion() ? nonNullable.getUnionTypes() : [nonNullable];
+  return arms.length > 0 && arms.every((arm) => isFieldType(arm, at));
+}
+
 /** Resolve a type to its JSON-expressible descriptor form. */
 export function describeType(type: Type, at: Node, context: ShapeContext, path: string): DescriptorProperty['type'] {
   const nonNullable = type.getNonNullableType();
@@ -120,17 +127,25 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
     // the accepted set is this descriptor's own `fieldTypes`.
     if (arms.length > 1 && arms.every((a) => isFieldType(a, at))) return { kind: 'field' };
 
-    // Mostly field types, plus something else — an array item is a field
-    // definition or the simplified `ArrayItemTemplate`. Collapsing the field arms
-    // keeps this adapter-independent, where spelling the union out named the
-    // adapter's own prop types and made an otherwise shared core differ.
+    // Mostly field types, plus something else. `ArrayItemDefinition` is the case
+    // that matters: one field for a primitive array item, or a list of fields for
+    // an object item. Collapsing the field arms also keeps this
+    // adapter-independent, where spelling the union out named the adapter's own
+    // prop types and made an otherwise shared core differ between adapters.
     if (arms.length > 1 && arms.some((a) => isFieldType(a, at))) {
-      const others = arms.filter((a) => !isFieldType(a, at)).map((a) => bareTypeName(a.getText(at)));
+      const others = arms
+        .filter((a) => !isFieldType(a, at))
+        .map((arm): DescriptorType => {
+          // A list of field definitions is expressible, so say so rather than
+          // giving up on it: `readonly ArrayAllowedChildren[]` is exactly the
+          // object-item form of an array template.
+          const element = arm.getArrayElementType();
+          if (element && isFieldUnion(element, at)) return { kind: 'array', of: { kind: 'field' } };
 
-      return {
-        kind: 'union',
-        of: [{ kind: 'field' }, ...others.sort().map((name) => ({ kind: 'opaque' as const, as: name }))],
-      };
+          return { kind: 'opaque', as: bareTypeName(arm.getText(at)) };
+        });
+
+      return { kind: 'union', of: [{ kind: 'field' }, ...others] };
     }
 
     return record(context, path, `union of ${arms.map((a) => bareTypeName(a.getText(at))).join(' | ')}`);
