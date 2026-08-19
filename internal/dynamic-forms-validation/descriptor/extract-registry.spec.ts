@@ -16,6 +16,7 @@ import { resolveRegistry } from './extract-registry';
 
 const CORE = '@ngforge-test/core';
 const ADAPTER = '@ngforge-test/adapter';
+const OTHER_ADAPTER = '@ngforge-test/other-adapter';
 
 /** Core package: declares the registries with one built-in type each. */
 const CORE_DTS = `
@@ -48,6 +49,26 @@ declare module '${target}' {
 }
 `;
 
+/**
+ * A second adapter declaring the SAME registry key with different props.
+ *
+ * `declare module` merges globally, so with both installed the checker holds one
+ * merged `FieldRegistryLeaves` and resolving `input` from it yields whichever
+ * declaration it picked, not the one belonging to the adapter we asked for.
+ */
+const OTHER_ADAPTER_DTS = `
+import type { BaseField } from '${CORE}';
+
+export interface OtherInputProps { spacing?: 'tight' | 'loose'; }
+export interface OtherInputField extends BaseField { type: 'input'; props?: OtherInputProps; }
+
+declare module '${CORE}' {
+  interface FieldRegistryLeaves {
+    input: OtherInputField;
+  }
+}
+`;
+
 let root: string;
 
 async function writePackage(dir: string, name: string, dts: string) {
@@ -62,7 +83,7 @@ async function writePackage(dir: string, name: string, dts: string) {
  * specifier that resolves to nothing reproduces the silent-partial failure:
  * the adapter loads, and merges nothing.
  */
-async function workspace(name: string, opts: { withAdapter?: boolean; augmentationTarget?: string } = {}) {
+async function workspace(name: string, opts: { withAdapter?: boolean; augmentationTarget?: string; withSecondAdapter?: boolean } = {}) {
   const dir = join(root, name);
   await mkdir(join(dir, 'src'), { recursive: true });
 
@@ -79,6 +100,12 @@ async function workspace(name: string, opts: { withAdapter?: boolean; augmentati
   await writePackage(dir, CORE, CORE_DTS);
   if (opts.withAdapter !== false) {
     await writePackage(dir, ADAPTER, ADAPTER_DTS(opts.augmentationTarget ?? CORE));
+  }
+  if (opts.withSecondAdapter) {
+    await writePackage(dir, OTHER_ADAPTER, OTHER_ADAPTER_DTS);
+    // The consumer's own code pulls both in, which is what makes the merge
+    // unavoidable: importing only the requested adapter in a probe is too late.
+    await writeFile(join(dir, 'src', 'app.ts'), `import '${ADAPTER}';\nimport '${OTHER_ADAPTER}';\n`, 'utf-8');
   }
 
   return join(dir, 'tsconfig.json');
@@ -154,6 +181,39 @@ describe('resolveRegistry, happy path', () => {
 
     expect(result.closure.length).toBeGreaterThan(0);
     expect(result.closure.some((f) => f.includes('adapter'))).toBe(true);
+  });
+});
+
+describe('adapter isolation when several adapters are installed', () => {
+  // Installing more than one adapter is normal: demos, an in-progress migration,
+  // a shared library supporting several. The descriptor must describe the one
+  // that was asked for, not whichever declaration the checker happened to merge.
+  let tsConfigFilePath: string;
+
+  beforeAll(async () => {
+    tsConfigFilePath = await workspace('two-adapters', { withSecondAdapter: true });
+  });
+
+  function propsOf(adapterPackage: string) {
+    const result = resolveRegistry({ tsConfigFilePath, adapterPackage, corePackage: CORE });
+    if (!result.ok) throw new Error(result.failure.detail);
+
+    const input = result.entries.find((e) => e.canonical === 'input');
+    const props = input?.type.getProperty('props')?.getTypeAtLocation(input.at)?.getNonNullableType();
+    return (props?.getProperties() ?? []).map((p) => p.getName()).sort();
+  }
+
+  it('returns the requested adapter own props', () => {
+    // `appearance` is its own; `placeholder` is inherited from InputProps.
+    expect(propsOf(ADAPTER)).toEqual(['appearance', 'placeholder']);
+  });
+
+  it('returns the other adapter own props when that one is requested', () => {
+    expect(propsOf(OTHER_ADAPTER)).toEqual(['spacing']);
+  });
+
+  it('does not return the same shape for two different adapters', () => {
+    expect(propsOf(ADAPTER)).not.toEqual(propsOf(OTHER_ADAPTER));
   });
 });
 

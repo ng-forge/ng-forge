@@ -18,7 +18,7 @@
  * types with no error anywhere.
  */
 
-import { Project, type Node, type Type, type Symbol as TsSymbol } from 'ts-morph';
+import { Node, Project, type Type, type Symbol as TsSymbol } from 'ts-morph';
 import { join } from 'node:path';
 
 /** A field type as declared in the registry, before its shape is read. */
@@ -115,6 +115,44 @@ function declaredInAdapter(symbol: TsSymbol, adapterPackage: string): boolean {
   return symbol.getDeclarations().some((d) => d.getSourceFile().getFilePath().includes(adapterPackage));
 }
 
+/**
+ * The declaration that belongs to the adapter we were asked about.
+ *
+ * `declare module` merges globally, so with several adapters installed the
+ * checker holds one `FieldRegistryLeaves` in which a key both adapters declare —
+ * `input`, `select` — resolves to whichever declaration it picked. Reading the
+ * merged symbol therefore describes an arbitrary adapter rather than the
+ * requested one, and installing more than one adapter is normal: demos, an
+ * in-progress migration, a shared library supporting several.
+ *
+ * The merged symbol keeps every declaration, so the right one can be selected by
+ * where it was written. Preference order: the requested adapter, then core for
+ * types the adapter does not override, then whatever exists.
+ */
+function declarationFor(symbol: TsSymbol, adapterPackage: string, corePackage: string): Node | undefined {
+  const declarations = symbol.getDeclarations();
+
+  return (
+    declarations.find((d) => d.getSourceFile().getFilePath().includes(adapterPackage)) ??
+    declarations.find((d) => d.getSourceFile().getFilePath().includes(corePackage)) ??
+    declarations[0]
+  );
+}
+
+/**
+ * The type a declaration actually writes down.
+ *
+ * `declaration.getType()` answers with the *merged* property type, which is the
+ * first declaration's, so asking a second adapter's declaration what it declares
+ * returns the first adapter's type. Reading the type node instead returns what
+ * that declaration wrote, which is the only way to tell two adapters apart.
+ */
+function declaredType(declaration: Node | undefined): Type | undefined {
+  if (!declaration) return undefined;
+  if (Node.isPropertySignature(declaration)) return declaration.getTypeNode()?.getType();
+  return declaration.getType();
+}
+
 export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult {
   const { tsConfigFilePath, adapterPackage } = options;
   const corePackage = options.corePackage ?? CORE_PACKAGE;
@@ -171,8 +209,12 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
   for (const { symbol, kind, at } of all) {
     if (!at) continue;
 
-    const type = symbol.getTypeAtLocation(at);
-    const declared = stringLiterals(type.getProperty('type')?.getTypeAtLocation(at));
+    // Resolve at the declaration belonging to the requested adapter, not at the
+    // merged symbol, or every adapter would describe the same shape.
+    const declaration = declarationFor(symbol, adapterPackage, corePackage);
+    const resolveAt = declaration ?? at;
+    const type = declaredType(declaration) ?? symbol.getTypeAtLocation(at);
+    const declared = stringLiterals(type.getProperty('type')?.getTypeAtLocation(resolveAt));
     const spellings = declared.length > 0 ? declared : [symbol.getName()];
     const canonical = pickCanonical(spellings);
 
@@ -187,7 +229,7 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
       aliases: [...aliases].sort(),
       kind: existing?.kind ?? kind,
       type: existing?.type ?? type,
-      at: existing?.at ?? at,
+      at: existing?.at ?? resolveAt,
     });
   }
 
