@@ -120,6 +120,12 @@
             }
           }
         },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "logic": {
           "required": false,
           "type": {
@@ -134,6 +140,12 @@
           "required": false,
           "type": {
             "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "minLength": {
@@ -599,6 +611,12 @@
             }
           }
         },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "logic": {
           "required": false,
           "type": {
@@ -607,6 +625,12 @@
               "as": "ContainerLogicConfig",
               "kind": "opaque"
             }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "type": {
@@ -934,6 +958,12 @@
             }
           }
         },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "logic": {
           "required": false,
           "type": {
@@ -942,6 +972,12 @@
               "as": "ContainerLogicConfig",
               "kind": "opaque"
             }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "required": {
@@ -1843,6 +1879,12 @@
             }
           }
         },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "logic": {
           "required": false,
           "type": {
@@ -1851,6 +1893,12 @@
               "as": "ContainerLogicConfig",
               "kind": "opaque"
             }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "type": {
@@ -2488,6 +2536,12 @@
             }
           }
         },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "logic": {
           "required": false,
           "type": {
@@ -2496,6 +2550,12 @@
               "as": "ContainerLogicConfig",
               "kind": "opaque"
             }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "type": {
@@ -3803,10 +3863,22 @@
             "kind": "opaque"
           }
         },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -3824,10 +3896,40 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "source": {
@@ -3861,6 +3963,12 @@
           "type": {
             "kind": "enum",
             "values": ["derivation"]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         }
       },
@@ -3874,6 +3982,12 @@
             "kind": "opaque"
           }
         },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -3901,10 +4015,40 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "source": {
@@ -3939,12 +4083,24 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "AsyncFunctionDerivationShared~806a82": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "asyncFunctionName": {
           "required": true,
           "type": {
@@ -3955,6 +4111,12 @@
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -3972,10 +4134,40 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "source": {
@@ -4010,12 +4202,24 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "AsyncFunctionDerivationShared~8b3ac2": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "asyncFunctionName": {
           "required": true,
           "type": {
@@ -4049,10 +4253,40 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "source": {
@@ -4087,6 +4321,12 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
@@ -4098,6 +4338,12 @@
           "type": {
             "as": "AsyncCustomValidator<unknown, unknown, unknown>",
             "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "params": {
@@ -4125,6 +4371,12 @@
     },
     "AsyncValidatorConfigShared~ebb855": {
       "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "functionName": {
           "required": true,
           "type": {
@@ -4347,6 +4599,18 @@
     },
     "DebouncedExpressionDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -4380,10 +4644,40 @@
             "kind": "string"
           }
         },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4411,12 +4705,30 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "DebouncedHttpDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -4442,6 +4754,24 @@
             "of": {
               "kind": "string"
             }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "http": {
@@ -4495,6 +4825,12 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
@@ -4532,6 +4868,18 @@
     },
     "DebouncedValueDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -4559,10 +4907,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4654,6 +5038,18 @@
     },
     "FunctionDerivationShared~0e36ce": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -4681,16 +5077,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "functionName": {
           "required": true,
           "type": {
             "kind": "string"
           }
         },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4717,6 +5143,12 @@
           "type": {
             "kind": "enum",
             "values": ["derivation"]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         }
       },
@@ -4724,10 +5156,28 @@
     },
     "FunctionDerivationShared~5204ab": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -4745,16 +5195,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "fn": {
           "required": true,
           "type": {
             "kind": "opaque"
           }
         },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4782,12 +5262,30 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "FunctionDerivationShared~8b26a1": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
@@ -4815,16 +5313,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "fn": {
           "required": true,
           "type": {
             "kind": "opaque"
           }
         },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4852,16 +5380,40 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "FunctionDerivationShared~dee103": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -4879,16 +5431,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "functionName": {
           "required": true,
           "type": {
             "kind": "string"
           }
         },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -4916,12 +5498,24 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "FunctionHttpValidatorConfigShared~4faf65": {
       "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "functionName": {
           "required": true,
           "type": {
@@ -4960,6 +5554,12 @@
             "kind": "opaque"
           }
         },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "params": {
           "required": false,
           "type": {
@@ -4991,6 +5591,12 @@
             "kind": "opaque"
           }
         },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "trigger": {
           "required": false,
           "type": {
@@ -5010,10 +5616,28 @@
     },
     "OnChangeExpressionDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -5037,10 +5661,40 @@
             "kind": "string"
           }
         },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {
@@ -5068,16 +5722,40 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "OnChangeHttpDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -5093,6 +5771,24 @@
             "of": {
               "kind": "string"
             }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "http": {
@@ -5146,16 +5842,40 @@
             "kind": "enum",
             "values": ["derivation"]
           }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
         }
       },
       "policy": "strip"
     },
     "OnChangeValueDerivationLogicConfig": {
       "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "condition": {
           "required": false,
           "type": {
             "kind": "opaque"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "debugName": {
@@ -5173,10 +5893,46 @@
             }
           }
         },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
         "reEngageOnDependencyChange": {
           "required": false,
           "type": {
             "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
           }
         },
         "stopOnUserOverride": {

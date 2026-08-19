@@ -110,6 +110,11 @@ function isFieldUnion(type: Type, at: Node): boolean {
 export function describeType(type: Type, at: Node, context: ShapeContext, path: string): DescriptorProperty['type'] {
   const nonNullable = type.getNonNullableType();
 
+  // A forbidden property, e.g. `label?: never` on a container. Recorded rather
+  // than skipped: it is a rule the validator enforces, and one of the mistakes
+  // agents make most often.
+  if (nonNullable.isNever()) return { kind: 'never' };
+
   if (nonNullable.isString()) return { kind: 'string' };
   if (nonNullable.isNumber()) return { kind: 'number' };
   if (nonNullable.isBoolean()) return { kind: 'boolean' };
@@ -262,11 +267,6 @@ function describeConfigShape(type: Type, at: Node, context: ShapeContext): Descr
     const keys: Record<string, DescriptorProperty> = {};
     const nested: ShapeContext = { ...context, shallow: true, path: name };
     for (const prop of type.getProperties()) {
-      // `never` marks a key as forbidden on this arm, e.g. `debounceMs?: never`
-      // on the non-debounced variant. It is the absence of a property, not a
-      // property whose type we failed to work out.
-      if (prop.getTypeAtLocation(at).getNonNullableType().isNever()) continue;
-
       keys[prop.getName()] = describeProperty(prop, at, nested, `${name}.${prop.getName()}`);
     }
 
@@ -329,9 +329,6 @@ export function describeFieldLevel(fieldType: Type, at: Node, context: ShapeCont
     const name = symbol.getName();
     if (SKIPPED_FIELD_KEYS.has(name)) continue;
 
-    // `label?: never` and friends mark a key as forbidden rather than optional.
-    if (symbol.getTypeAtLocation(at).getNonNullableType().isNever()) continue;
-
     out[name] = describeProperty(symbol, at, context, `${context.path}.${name}`);
   }
 
@@ -377,7 +374,6 @@ export function describeStructural(fieldType: Type, at: Node, context: ShapeCont
   for (const name of ['fields', 'wrappers']) {
     const symbol = fieldType.getProperty(name);
     if (!symbol) continue;
-    if (symbol.getTypeAtLocation(at).getNonNullableType().isNever()) continue;
 
     out[name] = describeProperty(symbol, at, context, `${context.path}.${name}`);
   }

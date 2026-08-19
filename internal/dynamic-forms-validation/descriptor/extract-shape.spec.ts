@@ -152,10 +152,14 @@ describe('field-level properties', () => {
     expect(fieldLevel['options'].type.kind).toBe('array');
   });
 
-  it('omits keys typed never, which mark a property as forbidden', () => {
+  it('records a never key as forbidden rather than dropping it', () => {
+    // `label?: never` on a container is a rule the validator enforces, and one
+    // of the mistakes agents make most often. Omitting it would let a schema
+    // derived from this descriptor accept a label on a container.
     const fieldLevel = describeFieldLevel(members.get('container')!, at, context('container'));
 
-    expect(Object.keys(fieldLevel)).not.toContain('label');
+    expect(fieldLevel['label']?.type).toEqual({ kind: 'never' });
+    expect(fieldLevel['label']?.required).toBe(false);
   });
 });
 

@@ -47,6 +47,15 @@ export type DescriptorType =
   /** Deliberately unconstrained, e.g. a `value` that may be any JSON. */
   | { readonly kind: 'unknown' }
   /**
+   * The property is forbidden here.
+   *
+   * `label?: never` on a container is a rule, not an absent property: the
+   * hand-written schema writes it as `z.never().optional()` and "containers do
+   * NOT have a label" is among the pitfalls the skill teaches most often.
+   * Dropping it would let a derived schema accept a label on a row.
+   */
+  | { readonly kind: 'never' }
+  /**
    * The extractor could not express this type. Always permissive at validation
    * time: a guessed rejection is worse than no check, because agents act on it.
    */
