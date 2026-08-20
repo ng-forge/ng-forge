@@ -548,7 +548,12 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 {
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -570,7 +575,12 @@ Button to insert a new item at a specific index in an array field (set via the i
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 

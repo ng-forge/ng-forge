@@ -867,9 +867,14 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     example: `{
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First' }`,
+    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'insert-array-item',
@@ -906,9 +911,14 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0 }`,
+    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0, template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'remove-array-item',
