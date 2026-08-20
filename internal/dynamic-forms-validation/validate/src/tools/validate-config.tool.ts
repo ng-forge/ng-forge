@@ -438,9 +438,13 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
   },
   row: {
+    // A row resolves to a container at runtime, and RowAllowedChildren is an
+    // alias of ContainerAllowedChildren, so it takes rows and hidden fields too.
     allowed: [
+      'row',
       'group',
       'array',
+      'hidden',
       'input',
       'textarea',
       'select',
@@ -462,8 +466,8 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'pop-array-item',
       'shift-array-item',
     ],
-    forbidden: ['page', 'row', 'hidden'],
-    message: 'Rows cannot contain pages, other rows, or hidden fields. Hidden fields should be at page or form level.',
+    forbidden: ['page'],
+    message: 'Rows cannot contain pages. ALL top-level fields must be pages if using multi-page mode.',
   },
   group: {
     allowed: [

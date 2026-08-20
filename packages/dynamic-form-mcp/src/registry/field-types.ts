@@ -281,8 +281,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields'],
-    notAllowedIn: ['row', 'top-level when using pages'],
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'row.fields', 'container.fields'],
+    notAllowedIn: ['top-level when using pages'],
     example: `// Hidden field - value is REQUIRED!
 {
   key: 'userId',

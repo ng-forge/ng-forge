@@ -223,7 +223,7 @@ Numeric range slider for value selection
 Hidden field that participates in form values without rendering. REQUIRED: The "value" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.
 
 - Value type: `string | number | boolean | (string | number | boolean)[]`
-- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`
+- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `row.fields`, `container.fields`
 - Validators supported: no
 
 ```typescript
