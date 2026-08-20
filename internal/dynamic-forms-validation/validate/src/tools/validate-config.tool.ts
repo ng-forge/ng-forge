@@ -32,6 +32,17 @@ const fieldSchemas: Record<UiIntegration, z.ZodTypeAny> = {
   ionic: IonicFieldSchema,
 };
 
+/** Options for one validation run. */
+export interface ValidateConfigOptions {
+  /**
+   * Rule ids the project has switched off, already resolved.
+   *
+   * Resolved by the caller so an unknown id fails once, where the config is
+   * read, rather than silently doing nothing on every run.
+   */
+  disabledRules?: ReadonlySet<string>;
+}
+
 /**
  * Validation result for form configuration.
  */
@@ -65,6 +76,23 @@ export interface FormattedValidationError {
    * Path to the invalid field (e.g., 'fields[0].props.type').
    */
   path: string;
+
+  /**
+   * The named rule this violates, when it is a semantic one.
+   *
+   * Absent for anything the type system enforces on its own. Those carry no
+   * identifier by design: they cannot be switched off, because a config that
+   * breaks them does not compile whatever the validator says.
+   */
+  ruleId?: string;
+
+  /**
+   * `warning` when the project has disabled this rule.
+   *
+   * Disabling downgrades rather than silences, so an agent still sees the
+   * finding and can tell it was a deliberate choice.
+   */
+  severity?: 'error' | 'warning';
 
   /**
    * Error message.
@@ -351,7 +379,24 @@ const FORBIDDEN_HIDDEN_PROPS = [
  * Properties that are FORBIDDEN on container fields (row, group, array).
  * Note: page supports logic (hidden only).
  */
-const CONTAINER_FORBIDDEN_PROPS = ['validators', 'required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'value'];
+const CONTAINER_FORBIDDEN_PROPS = ['email', 'min', 'max', 'pattern', 'value'];
+
+/**
+ * Containers that own a schema path and therefore support container-level
+ * validation, mirroring which interfaces extend `ContainerValidation`.
+ *
+ * The type system states the rule: a validator on a container runs against its
+ * own subtree, so `ctx.value()` needs something to resolve to. `group` gives an
+ * object and `array` gives the item list; `page`, `row` and `container` flatten
+ * into their parent and have no path of their own.
+ */
+const VALIDATING_CONTAINERS = ['group', 'array'];
+
+/** Container-level validation keys, accepted only by {@link VALIDATING_CONTAINERS}. */
+const CONTAINER_VALIDATION_PROPS = ['validators', 'required', 'validationMessages'];
+
+/** Array size constraints. Valid on `array`, meaningless elsewhere. */
+const ARRAY_SIZE_PROPS = ['minLength', 'maxLength'];
 
 /**
  * Field types that require the 'options' property.
@@ -393,9 +438,13 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
   },
   row: {
+    // A row resolves to a container at runtime, and RowAllowedChildren is an
+    // alias of ContainerAllowedChildren, so it takes rows and hidden fields too.
     allowed: [
+      'row',
       'group',
       'array',
+      'hidden',
       'input',
       'textarea',
       'select',
@@ -417,8 +466,8 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
       'pop-array-item',
       'shift-array-item',
     ],
-    forbidden: ['page', 'row', 'hidden'],
-    message: 'Rows cannot contain pages, other rows, or hidden fields. Hidden fields should be at page or form level.',
+    forbidden: ['page'],
+    message: 'Rows cannot contain pages. ALL top-level fields must be pages if using multi-page mode.',
   },
   group: {
     allowed: [
@@ -553,6 +602,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (prop in v) {
               errors.push({
                 path: `${path}.validators[${vIdx}].${prop}`,
+                ruleId: 'core/validation-messages-location',
                 message: `"${prop}" is NOT a valid validator property. Error messages go in "validationMessages" at the FIELD level, not on the validator config. Use "kind" to specify an error key, then define the message in the field's validationMessages.`,
               });
             }
@@ -561,8 +611,8 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       });
     }
 
-    // Check for invalid properties on containers (row, group, array - NOT page)
-    if (['row', 'group', 'array'].includes(fieldType || '')) {
+    // Check for invalid properties on containers (row, group, array, container - NOT page)
+    if (['row', 'group', 'array', 'container'].includes(fieldType || '')) {
       for (const prop of INVALID_CONTAINER_PROPS) {
         if (prop in f) {
           errors.push({
@@ -572,7 +622,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         }
       }
 
-      // Check for forbidden validation-related properties
+      // Value-level properties, which no container holds.
       // Note: 'value' is allowed on array fields using the simplified API (template + value)
       for (const prop of CONTAINER_FORBIDDEN_PROPS) {
         if (prop in f) {
@@ -583,8 +633,32 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const expected = EXPECTED_STRUCTURE[fieldType || ''] || '';
           errors.push({
             path: `${path}.${prop}`,
-            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values or validate - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
+            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
           });
+        }
+      }
+
+      // Container-level validation, which only containers with a schema path own.
+      if (!VALIDATING_CONTAINERS.includes(fieldType || '')) {
+        for (const prop of CONTAINER_VALIDATION_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". They flatten into their parent and have no schema path, so a container-level validator would have no value to run against. Use "group" or "array" for cross-field rules, or move the rule onto a child field.`,
+            });
+          }
+        }
+      }
+
+      // Array size constraints are meaningless on anything that is not an array.
+      if (fieldType !== 'array') {
+        for (const prop of ARRAY_SIZE_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". Array size constraints apply to "array" fields only.`,
+            });
+          }
         }
       }
 
@@ -597,6 +671,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const invalidTypes = nonHiddenLogic.map((l) => `"${l['type']}"`).join(', ');
           errors.push({
             path: `${path}.logic`,
+            ruleId: 'core/container-logic-hidden-only',
             message: `"${fieldType}" containers only support 'hidden' logic type. Found unsupported logic types: ${invalidTypes}. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.`,
           });
         }
@@ -629,6 +704,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (fieldType && rules.forbidden.includes(fieldType)) {
         errors.push({
           path: path,
+          ruleId: 'core/nesting',
           message: `"${fieldType}" is NOT allowed inside "${parentType}". ${rules.message}`,
         });
       }
@@ -643,11 +719,13 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!hasOptionsAtFieldLevel && hasOptionsInProps) {
         errors.push({
           path: `${path}.props.options`,
+          ruleId: 'core/options-at-field-level',
           message: `"options" MUST be at FIELD level, NOT inside props! Move it from props.options to the field's root level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (!hasOptionsAtFieldLevel && !hasOptionsInProps) {
         errors.push({
           path: `${path}.options`,
+          ruleId: 'core/options-required',
           message: `"${fieldType}" field "${fieldKey || 'unknown'}" is MISSING required "options" property. Options must be an array of { label: string, value: T } objects at FIELD level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (hasOptionsAtFieldLevel) {
@@ -659,12 +737,14 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (!('label' in firstOption) || !('value' in firstOption)) {
               errors.push({
                 path: `${path}.options[0]`,
+                ruleId: 'core/options-shape',
                 message: `Invalid options format. Each option MUST have { label: string, value: T }. Found: ${JSON.stringify(firstOption)}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
               });
             }
           } else if (typeof firstOption !== 'object') {
             errors.push({
               path: `${path}.options`,
+              ruleId: 'core/options-shape',
               message: `Invalid options format. Options must be objects with { label, value }, not primitives. Found: ${JSON.stringify(options.slice(0, 3))}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
             });
           }
@@ -684,6 +764,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         if (wrongProps.length > 0) {
           errors.push({
             path: `${path}.props`,
+            ruleId: 'core/slider-range-properties',
             message: `Slider has properties in wrong location: ${wrongProps.join(', ')}. For sliders, use minValue, maxValue, and step at FIELD level, not inside props. Expected structure: ${EXPECTED_STRUCTURE['slider']}`,
           });
         }
@@ -696,6 +777,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('value' in f)) {
         errors.push({
           path: `${path}.value`,
+          ruleId: 'core/hidden-requires-value',
           message: `Hidden field "${fieldKey || 'unknown'}" is MISSING REQUIRED "value" property. Hidden fields MUST have a value - they exist only to pass values through the form. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -712,6 +794,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         const propList = foundForbidden.map((p) => `"${p}"`).join(', ');
         errors.push({
           path: path,
+          ruleId: 'core/hidden-minimal',
           message: `Hidden field "${fieldKey || 'unknown'}" has FORBIDDEN properties: ${propList}. Hidden fields ONLY support: key, type, value, className. They do not render and cannot be validated. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -722,11 +805,13 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" is MISSING required "fields" property. Containers must have a fields array containing child fields. Expected structure: ${EXPECTED_STRUCTURE[fieldType || '']}`,
         });
       } else if (!Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }
@@ -740,16 +825,19 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (hasFields && hasTemplate) {
         errors.push({
           path: path,
+          ruleId: 'core/array-api-exclusive',
           message: `Array "${fieldKey || 'unknown'}" has BOTH "fields" and "template". These are mutually exclusive. Use "fields" for the full API or "template" + "value" for the simplified API. ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (!hasFields && !hasTemplate) {
         errors.push({
           path: path,
+          ruleId: 'core/array-api-required',
           message: `Array "${fieldKey || 'unknown'}" is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API). ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (hasFields && !Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `Array "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }
@@ -842,7 +930,26 @@ function normalizeLegacyArrayActionTypes(value: unknown): unknown {
   return value;
 }
 
-export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult {
+/**
+ * Apply the project's disabled rules.
+ *
+ * A disabled rule becomes a warning and stops counting towards validity, rather
+ * than disappearing. The consumer is usually an agent, and a finding that
+ * vanishes teaches it nothing, where one marked as deliberately off is
+ * information it can act on and a reviewer can question.
+ *
+ * Only findings that carry a rule id can be downgraded. Everything else comes
+ * from the types and is not something a project may switch off.
+ */
+function applyDisabledRules(errors: FormattedValidationError[], disabled: ReadonlySet<string>): FormattedValidationError[] {
+  if (disabled.size === 0) return errors;
+
+  return errors.map((error) =>
+    error.ruleId && disabled.has(error.ruleId) ? { ...error, severity: 'warning' as const } : { ...error, severity: 'error' as const },
+  );
+}
+
+export function validateFormConfig(uiIntegration: UiIntegration, config: unknown, options?: ValidateConfigOptions): ValidationResult {
   const schema = formConfigSchemas[uiIntegration];
 
   if (!schema) {
@@ -877,12 +984,19 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
 
   // Combine pre-validation errors with Zod errors
   const zodErrors = result.success ? [] : formatZodError(result.error, uiIntegration, normalizedConfig);
-  const allErrors = [...preErrors, ...zodErrors];
+  const allErrors = applyDisabledRules([...preErrors, ...zodErrors], options?.disabledRules ?? new Set());
+
+  // A config whose only findings are disabled rules is valid: that is what
+  // disabling one means.
+  const blocking = allErrors.filter((error) => error.severity !== 'warning');
+  if (blocking.length === 0) {
+    return { valid: true, data: result.success ? result.data : undefined, errors: allErrors };
+  }
 
   return {
     valid: false,
     errors: allErrors,
-    errorSummary: generateErrorSummary(allErrors),
+    errorSummary: generateErrorSummary(blocking),
   };
 }
 

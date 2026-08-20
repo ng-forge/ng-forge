@@ -2910,6 +2910,27 @@ describe('DynamicFormComponent', () => {
       });
     });
 
+    it('should carry a hidden field inside a row', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'row',
+            type: 'row',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'Ada' },
+              { key: 'source', type: 'hidden', value: 'web' },
+            ],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // The hidden value survives the row's flattening like any other child.
+      expect(component.formValue()).toEqual({ firstName: 'Ada', source: 'web' });
+    });
+
     it('should flatten nested rows (row inside row)', async () => {
       const config = {
         fields: [

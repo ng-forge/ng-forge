@@ -281,8 +281,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields'],
-    notAllowedIn: ['row', 'top-level when using pages'],
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'row.fields', 'container.fields'],
+    notAllowedIn: ['top-level when using pages'],
     example: `// Hidden field - value is REQUIRED!
 {
   key: 'userId',
@@ -598,6 +598,71 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
   },
   {
+    type: 'container',
+    category: 'container',
+    description:
+      "Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values \u2014 child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.",
+    valueType: undefined,
+    baseInterface: 'FieldDef',
+    props: {
+      fields: {
+        name: 'fields',
+        type: 'ContainerAllowedChildren[]',
+        description:
+          'Child fields to render inside the wrapper chain. Allowed: rows, groups, arrays, nested containers, hidden fields, and value fields (input, select, etc). NOT ALLOWED: pages',
+        required: true,
+      },
+      wrappers: {
+        name: 'wrappers',
+        type: 'WrapperConfig[]',
+        description:
+          "REQUIRED. Wrapper components chained around the children, outermost first. Use [] for no chrome. Each entry needs a 'type'; the built-in wrapper is 'css', which takes 'cssClasses'. Custom wrapper types can be registered.",
+        required: true,
+      },
+    },
+    validationSupported: false,
+    source: 'core',
+    allowedIn: ['top-level', 'page', 'group', 'array', 'row', 'container'],
+    notAllowedIn: [],
+    canContain: [
+      'row',
+      'group',
+      'array',
+      'container',
+      'hidden',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+    ],
+    cannotContain: ['page'],
+    example: `{
+  key: 'billingChrome',
+  type: 'container',
+  // NOTE: Containers do NOT have a label property
+  // wrappers is REQUIRED \u2014 use [] when no chrome is needed
+  wrappers: [{ type: 'css', cssClasses: 'card p-3' }],
+  fields: [
+    { key: 'street', type: 'input', label: 'Street' },
+    { key: 'city', type: 'input', label: 'City' }
+  ]
+}
+// Values flatten: { street: '', city: '' } \u2014 no 'billingChrome' key
+// NOT ALLOWED in containers:
+// - type: 'page' (pages are top-level only)`,
+    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [...] }`,
+  },
+  {
     type: 'page',
     category: 'container',
     description:
@@ -745,16 +810,35 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
     example: `{
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item' }`,
+    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'prepend-array-item',
@@ -762,16 +846,35 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     description: 'Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
     example: `{
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First' }`,
+    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'insert-array-item',
@@ -780,7 +883,27 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      index: {
+        name: 'index',
+        type: 'number',
+        description: 'REQUIRED. The position to insert at.',
+        required: true,
+      },
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group'],
@@ -788,9 +911,14 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0 }`,
+    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0, template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'remove-array-item',

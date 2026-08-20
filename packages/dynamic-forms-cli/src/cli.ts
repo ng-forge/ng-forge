@@ -3,6 +3,14 @@
 import { Command } from 'commander';
 import { UI_INTEGRATIONS } from '@ng-forge/dynamic-forms-validation';
 import { runValidate, EXIT_OK, EXIT_USAGE, type ValidateOptions } from './run-validate.js';
+import { createRequire } from 'node:module';
+
+/**
+ * Our own version, so `--version` works and a mismatch with the project's
+ * library can be reported. Read from the manifest rather than hardcoded, since a
+ * hardcoded copy is one more thing to drift at release.
+ */
+const CLI_VERSION: string = createRequire(import.meta.url)('../package.json').version;
 
 /** Build the commander program. Exposed for tests. */
 export function createProgram(): Command {
@@ -16,6 +24,8 @@ export function createProgram(): Command {
     .option('--json', 'emit machine-readable JSON instead of a report', false)
     .option('-q, --quiet', 'only report failures', false)
     .option('--require-config', 'fail when the matched files contain no FormConfig', false)
+    .option('--tsconfig <path>', 'tsconfig to resolve types with; discovered from the working directory when omitted')
+    .version(CLI_VERSION, '-v, --version')
     .action(async (patterns: string[], options: ValidateOptions) => {
       process.exitCode = await runValidate(patterns, options);
     });

@@ -23,3 +23,6 @@ export * from './discovery/validate-file';
 // Report formatting and the error-to-fix table.
 export * from './reporting/fix-suggestions';
 export * from './reporting/report';
+
+// The named semantic rules, and resolving a project's opt-outs.
+export * from './rules/catalogue';

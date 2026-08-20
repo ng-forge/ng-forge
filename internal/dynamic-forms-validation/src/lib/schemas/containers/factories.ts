@@ -41,7 +41,7 @@ const ContainerLogicSchema = z.object({
  * | Container | Allowed Children                      | NOT Allowed |
  * |-----------|---------------------------------------|-------------|
  * | Page      | rows, groups, arrays, leaves          | pages       |
- * | Row       | groups, arrays, leaves (except hidden)| pages, rows |
+ * | Row       | same as Container                     | pages       |
  * | Group     | rows, leaves                          | pages, groups|
  * | Array     | rows, groups, leaves                  | pages, arrays|
  *
@@ -68,6 +68,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
       RowFieldSchema as z.ZodType<GenericField>,
       GroupFieldSchema as z.ZodType<GenericField>,
       ArrayFieldSchema as z.ZodType<GenericField>,
+      ContainerFieldSchema as z.ZodType<GenericField>,
     ]),
   );
 
@@ -82,6 +83,33 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     meta: z.never().optional(),
   });
 
+  /**
+   * Wrapper reference. Wrapper types are extensible through registry
+   * augmentation, so the set cannot be enumerated here; accept any `type` with
+   * its own configuration rather than rejecting wrappers we have not heard of.
+   */
+  const WrapperConfigSchema = z.object({ type: z.string() }).passthrough();
+
+  /**
+   * Container: wraps children in UI chrome.
+   *
+   * `wrappers` is REQUIRED, and that is the whole point of the type. A container
+   * with no wrappers array is not a container, it is a group spelled
+   * differently, and treating the property as optional would erase the
+   * distinction that justifies the type existing.
+   *
+   * Child placement and cardinality are deliberately not constrained here: the
+   * schemas do not enforce nesting for any container (see the limitation noted
+   * on this factory), and adding it for `container` alone would be inconsistent
+   * as well as out of scope.
+   */
+  const ContainerFieldSchema = ContainerBaseSchema.extend({
+    type: z.literal('container'),
+    fields: z.array(AnyFieldSchema),
+    wrappers: z.array(WrapperConfigSchema),
+    logic: z.array(ContainerLogicSchema).optional(),
+  });
+
   // Page can contain: rows, groups, arrays, leaves (no pages)
   // We validate structure rather than exact child types for simplicity
   const PageFieldSchema = ContainerBaseSchema.extend({
@@ -92,7 +120,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     title: z.never().optional(),
   });
 
-  // Row can contain: groups, arrays, leaves (no pages, rows)
+  // Row can contain whatever a container can (it resolves to one): no pages.
   // Rows support only 'hidden' logic type for conditional visibility
   const RowFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('row'),
@@ -168,6 +196,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     RowFieldSchema,
     GroupFieldSchema,
     ArrayFieldSchema,
+    ContainerFieldSchema,
     AllFieldsSchema,
   };
 }

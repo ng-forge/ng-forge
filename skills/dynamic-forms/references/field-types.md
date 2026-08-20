@@ -223,7 +223,7 @@ Numeric range slider for value selection
 Hidden field that participates in form values without rendering. REQUIRED: The "value" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.
 
 - Value type: `string | number | boolean | (string | number | boolean)[]`
-- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`
+- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `row.fields`, `container.fields`
 - Validators supported: no
 
 ```typescript
@@ -377,6 +377,35 @@ Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label prop
 //     ? { kind: 'periodOrder' } : null
 ```
 
+### `container`
+
+Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values — child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.
+
+- Allowed in: `top-level`, `page`, `group`, `array`, `row`, `container`
+- Validators supported: no
+
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `fields` | `ContainerAllowedChildren[]` | yes |  | Child fields to render inside the wrapper chain. Allowed: rows, groups, arrays, nested containers, hidden fields, and value fields (input, select, etc). NOT ALLOWED: pages |
+| `wrappers` | `WrapperConfig[]` | yes |  | REQUIRED. Wrapper components chained around the children, outermost first. Use [] for no chrome. Each entry needs a 'type'; the built-in wrapper is 'css', which takes 'cssClasses'. Custom wrapper types can be registered. |
+
+```typescript
+{
+  key: 'billingChrome',
+  type: 'container',
+  // NOTE: Containers do NOT have a label property
+  // wrappers is REQUIRED — use [] when no chrome is needed
+  wrappers: [{ type: 'css', cssClasses: 'card p-3' }],
+  fields: [
+    { key: 'street', type: 'input', label: 'Street' },
+    { key: 'city', type: 'input', label: 'City' }
+  ]
+}
+// Values flatten: { street: '', city: '' } — no 'billingChrome' key
+// NOT ALLOWED in containers:
+// - type: 'page' (pages are top-level only)
+```
+
 ### `page`
 
 Multi-step form page container for wizard-style forms. Pages do NOT have label or title properties. ALL top-level fields must be pages if using multi-page mode. IMPORTANT: Navigation buttons (next, previous) must be added as fields WITHIN each page that needs them.
@@ -485,11 +514,21 @@ Button to append a new item to the end of an array field. Must be placed within 
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -500,11 +539,21 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -515,12 +564,23 @@ Button to insert a new item at a specific index in an array field (set via the i
 - Allowed in: `array`, `row`, `group`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `index` | `number` | yes |  | REQUIRED. The position to insert at. |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 

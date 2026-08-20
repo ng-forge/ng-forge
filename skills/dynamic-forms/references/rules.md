@@ -15,12 +15,13 @@
 - [Anti-patterns to Avoid](#anti-patterns-to-avoid)
 - [CRITICAL: UI Library Differences](#critical-ui-library-differences)
 - [Validation Before Use](#validation-before-use)
+- [Named rules](#named-rules)
 
 You MUST follow these practices when generating FormConfig objects for ng-forge.
 
 ## Core Principles
 
-1. **Configuration-driven**: ng-forge wraps Angular Reactive Forms. Define structure declaratively via `FormConfig`, not imperatively.
+1. **Configuration-driven**: ng-forge is built on Angular Signal Forms. Define structure declaratively via `FormConfig`, not imperatively.
 2. **Type-safe**: Use TypeScript interfaces for form values. The library provides full type inference.
 3. **Validation-first**: Always include validation and user-friendly error messages.
 
@@ -530,23 +531,31 @@ All features are exported from `@ng-forge/dynamic-forms`.
 
 ## CRITICAL: UI Library Differences
 
-Different UI libraries support different properties. Always validate against the correct library using `ngforge_validate` with the appropriate `uiIntegration` parameter.
+Different UI libraries support different `props`. Always validate against the library the project actually uses.
 
-### Property Differences by Library
+Which props exist is answered per adapter, not here: use the adapter's own reference
+(`ngforge_lookup` with the adapter, or the `ng-forge-dynamic-forms-<adapter>` skill). A table
+repeated here would be a second copy of the adapter registries and would drift from them.
 
-| Property | Material | Bootstrap | PrimeNG | Ionic |
-|----------|----------|-----------|---------|-------|
-| `appearance` | ✓ (fill, outline) | ✗ | ✗ | ✓ (fill, outline) |
-| `subscriptSizing` | ✓ | ✗ | ✗ | ✗ |
-| `floatLabel` | ✓ (auto, always, never) | ✗ | ✗ | ✗ |
-| `hideRequiredMarker` | ✓ | ✗ | ✗ | ✗ |
-| `hint` | ✓ | ✓ (as `helpText`) | ✓ | ✓ |
+Two adapters cannot both provide the same field type, so a project has one adapter per
+field type; TypeScript reports error 2717 when two try.
 
 ### Container Fields
 
-Container fields (`page`, `group`, `row`) do NOT support these properties:
-- `label` - Use `text` field type for headings instead
-- `required`, `email`, `min`, `max`, etc. - Validation is for leaf fields only
+No container has a `label`. Use a `text` field for a heading instead.
+
+Validation splits by whether the container owns a value:
+
+- `group` and `array` DO accept `required`, `validators`, `validationMessages`
+  and `validateWhenHidden`. A validator there runs against the container's own
+  subtree, so a cross-field rule (dateTo after dateFrom) belongs on the group
+  rather than on one of its children. `ctx.value()` is the group's object or the
+  array's item list.
+- `page`, `row` and `container` do NOT. They flatten into their parent and have
+  no schema path, so a validator on them would have nothing to run against.
+
+Leaf-level validators such as `email`, `min` and `max` belong on the field that
+holds the value, on any container.
 
 ### Common Mistakes to Avoid
 
@@ -564,32 +573,72 @@ Container fields (`page`, `group`, `row`) do NOT support these properties:
 
 3. **Adding `id` to FormConfig** - The root FormConfig does not accept an `id` property.
 
-4. **Putting slider min/max in props** - For slider fields, `min`, `max`, and `step` are field-level properties:
+4. **Using `min`/`max` for a slider's range** - A slider's range is
+   `minValue`, `maxValue` and `step`, at field level. `min` and `max` are
+   validation shorthands: they typecheck, they validate clean, and the slider
+   still renders its default 0-100 range, so nothing catches the mistake.
    ```typescript
-   // ❌ WRONG
+   // ❌ WRONG - validates clean, renders the wrong range
    { key: 'volume', type: 'slider', label: 'Volume', props: { min: 0, max: 100 } }
+   { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
 
    // ✅ CORRECT
-   { key: 'volume', type: 'slider', label: 'Volume', min: 0, max: 100 }
+   { key: 'volume', type: 'slider', label: 'Volume', minValue: 0, maxValue: 100, step: 5 }
    ```
 
 5. **Using unsupported field types** - Each UI library supports specific field types. Use `ngforge_lookup` with `depth: "schema"` to see available types.
 
 ## Validation Before Use
 
-Always validate your FormConfig using the `ngforge_validate` tool before using it. This tool uses the actual TypeScript/Zod schemas, so if validation passes, the config will work correctly at runtime.
+Never hand back a config you have not checked. Two routes, depending on what is
+available:
 
-```typescript
-// Always specify the UI integration you're using
-ngforge_validate({
-  uiIntegration: 'material',  // or 'bootstrap', 'primeng', 'ionic'
-  config: { fields: [...] }
-})
-```
+- With the MCP server: `ngforge_validate({ uiIntegration: 'material', config })`
+- Without it: `npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material`
 
-To understand what properties are supported for each field type, use `ngforge_lookup` with `depth: "schema"`:
+Both run the same schemas, so they agree.
 
-```typescript
-ngforge_lookup({ topic: 'input', depth: 'schema', uiIntegration: 'material' })
-```
+### What a clean run does and does not mean
 
+A clean run means the structure is right: the field types exist, required
+properties are present, options are in the right place, and containers are not
+carrying properties they cannot have.
+
+It does NOT mean every property you wrote is real. The schemas strip unknown keys
+rather than rejecting them, so an invented or misplaced property passes
+validation and is silently dropped at runtime. Measured examples that pass today:
+`hideWhen` on a field, `targetProperty` inside a derivation, and `initialPage`
+under `options`.
+
+`as const satisfies FormConfig` is what catches those, because TypeScript checks
+the property names. Use both: the type annotation for what exists, the validator
+for what is structurally correct.
+
+To see which properties a field type supports, use `ngforge_lookup` with
+`depth: "schema"`, or read the field-types reference in the skill.
+
+
+## Named rules
+
+These are conventions checked on top of the schema. A project may switch one
+off in `.ng-forge/rules.json`, in which case it reports as a warning rather
+than an error, and the identifier below is what appears there.
+
+Constraints that come from the types — a container having no `label`, an
+array-add button needing a `template` — are not in this list and cannot be
+disabled: the config would not compile either way.
+
+| Rule | What it asks | Why |
+| ---- | ------------ | --- |
+| `core/array-api-exclusive` | Use `fields` or `template`, not both | They are two different array APIs; supplying both leaves the intent ambiguous. |
+| `core/array-api-required` | Give an array either `fields` or `template` | Without one there is nothing to render for an item. |
+| `core/container-logic-hidden-only` | Use only `hidden` logic on a container | Containers have no value of their own, so disabled, required and derivation logic have nothing to act on. Put them on the children. |
+| `core/container-requires-fields` | Give every container a `fields` array | A container with no children renders nothing and is almost always a mistake rather than an intent. |
+| `core/hidden-minimal` | Keep hidden fields to `key`, `type`, `value` and `className` | Hidden fields render nothing, so labels, validation and layout properties on them have no effect and mislead the next reader. |
+| `core/hidden-requires-value` | Give a hidden field a `value` | A hidden field exists to carry a value through the form; without one it contributes nothing. |
+| `core/nesting` | Respect which field types may nest inside which | A page inside a row, or an array inside an array, has no rendering path and fails at runtime rather than at build time. |
+| `core/options-at-field-level` | Put `options` on the field, not inside `props` | Inside props it is silently ignored and the field renders with no choices. This is the single most common mistake. |
+| `core/options-required` | Give select, radio and multi-checkbox their `options` | Without them the field renders empty and cannot be used. |
+| `core/options-shape` | Write each option as `{ label, value }` | Primitives and other shapes are dropped, leaving a field with fewer choices than intended. |
+| `core/slider-range-properties` | Use `minValue`, `maxValue` and `step` for a slider range | `min` and `max` are validation shorthands. They typecheck and validate clean, and the slider still renders its default range, so nothing catches the mistake. |
+| `core/validation-messages-location` | Put error text in `validationMessages`, not on the validator | A message on the validator object is dropped and the field falls back to the default text. |

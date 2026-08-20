@@ -23,6 +23,32 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "descriptors-update": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "SWC_NODE_PROJECT=./internal/dynamic-forms-validation/tsconfig.json node --import @swc-node/register/esm-register scripts/generate-descriptors.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "descriptors-check": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/scripts/generate-descriptors.ts",
+        "{workspaceRoot}/internal/dynamic-forms-validation/descriptor/**",
+        "{workspaceRoot}/packages/dynamic-forms/**/*.ts",
+        "{workspaceRoot}/packages/dynamic-forms-material/src/**/*.ts",
+        "{workspaceRoot}/packages/dynamic-forms-bootstrap/src/**/*.ts",
+        "{workspaceRoot}/packages/dynamic-forms-primeng/src/**/*.ts",
+        "{workspaceRoot}/packages/dynamic-forms-ionic/src/**/*.ts",
+        "{workspaceRoot}/packages/dynamic-forms/package.json"
+      ],
+      "options": {
+        "command": "SWC_NODE_PROJECT=./internal/dynamic-forms-validation/tsconfig.json node --import @swc-node/register/esm-register scripts/generate-descriptors.ts --check",
+        "cwd": "{workspaceRoot}"
+      }
     }
   }
 }
