@@ -71,12 +71,14 @@ It finds every FormConfig in the matched files, validates it against the schema 
 
 ### Options
 
-| Flag                     | Default    | Description                                        |
-| ------------------------ | ---------- | -------------------------------------------------- |
-| `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic` |
-| `--json`                 | off        | Emit machine-readable JSON instead of the report   |
-| `-q, --quiet`            | off        | Only print failures                                |
-| `--require-config`       | off        | Fail when the matched files contain no FormConfig  |
+| Flag                     | Default    | Description                                                                   |
+| ------------------------ | ---------- | ----------------------------------------------------------------------------- |
+| `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic`                            |
+| `--json`                 | off        | Emit machine-readable JSON instead of the report                              |
+| `-q, --quiet`            | off        | Only print failures                                                           |
+| `--require-config`       | off        | Fail when the matched files contain no FormConfig                             |
+| `--tsconfig <path>`      | discovered | tsconfig used to resolve types; found from the working directory when omitted |
+| `-v, --version`          | —          | Print this CLI's version                                                      |
 
 ### Exit codes
 

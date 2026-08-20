@@ -3,6 +3,7 @@
 import { glob } from 'node:fs/promises';
 import { relative } from 'node:path';
 import { markFail, markOk, bad, bold, cyan, dim, plural, rule, startSpinner, warn } from './terminal.js';
+import { discoverProject, versionMismatch } from './discover-project.js';
 import {
   formatFileReport,
   UI_INTEGRATIONS,
@@ -22,6 +23,10 @@ export const EXIT_USAGE = 2;
 const DEFAULT_EXCLUDES = ['**/node_modules/**', '**/dist/**', '**/.git/**'];
 
 export interface ValidateOptions {
+  /** tsconfig to resolve types with. Discovered when omitted. */
+  tsconfig?: string;
+  /** This CLI's own version, for the mismatch check. Injected so tests can set it. */
+  cliVersion?: string;
   /** UI integration to validate against. Defaults to `material` at the CLI layer. */
   ui: string;
   /** Emit machine-readable JSON instead of a human report. */
@@ -100,6 +105,15 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
   if (!UI_INTEGRATIONS.includes(uiIntegration)) {
     console.error(`${markFail()} Unknown UI integration ${cyan(options.ui)}. Expected one of: ${UI_INTEGRATIONS.join(', ')}`);
     return EXIT_USAGE;
+  }
+
+  // Discovered rather than asked for: an agent runs this wherever the file it is
+  // editing happens to live, and has no way to know where the tsconfig is.
+  const project = await discoverProject({ tsconfig: options.tsconfig });
+
+  if (!options.json) {
+    const mismatch = options.cliVersion ? versionMismatch(options.cliVersion, project.libraryVersion) : undefined;
+    if (mismatch) console.error(warn(mismatch));
   }
 
   const files = await resolveFiles(patterns);
