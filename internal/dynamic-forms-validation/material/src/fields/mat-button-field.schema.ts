@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { BaseFieldDefSchema } from '../../../src/lib/schemas/field/field-def.schema';
+import { ArrayItemTemplateSchema } from '../../../src/lib/schemas/field/array-item-template.schema';
 import { LogicArraySchema } from '../../../src/lib/schemas/logic/logic-config.schema';
 import { MatButtonPropsSchema } from '../props/mat-button-props.schema';
 
@@ -81,6 +82,11 @@ export const MatPreviousButtonFieldSchema = BaseFieldDefSchema.extend({
  * Schema for add array item button field.
  */
 export const MatAddArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  /**
+   * REQUIRED. What one new item looks like: a field definition for a primitive
+   * item, or a list of them for an object item.
+   */
+  template: ArrayItemTemplateSchema,
   type: z.literal('add-array-item'),
   /**
    * Key of the array field to add items to.
@@ -107,6 +113,11 @@ export const MatRemoveArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
  * Schema for prepend array item button field.
  */
 export const MatPrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  /**
+   * REQUIRED. What one new item looks like: a field definition for a primitive
+   * item, or a list of them for an object item.
+   */
+  template: ArrayItemTemplateSchema,
   type: z.literal('prepend-array-item'),
   /**
    * Key of the array field to prepend items to.
@@ -120,6 +131,11 @@ export const MatPrependArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
  * Schema for insert array item button field.
  */
 export const MatInsertArrayItemButtonFieldSchema = BaseFieldDefSchema.extend({
+  /**
+   * REQUIRED. What one new item looks like: a field definition for a primitive
+   * item, or a list of them for an object item.
+   */
+  template: ArrayItemTemplateSchema,
   type: z.literal('insert-array-item'),
   /**
    * Key of the array field to insert items into.

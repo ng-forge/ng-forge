@@ -26,8 +26,14 @@ const ARRAY_ACTION_TYPES: ReadonlyArray<readonly [string, string]> = [
   ['shift-array-item', 'shiftArrayItem'],
 ];
 
+/** The three buttons that add an item declare a required `template`. */
+const ADDS_AN_ITEM = ['add-array-item', 'addArrayItem', 'prepend-array-item', 'prependArrayItem', 'insert-array-item', 'insertArrayItem'];
+
 function configWith(type: string): unknown {
-  return { fields: [{ key: 'btn', type, label: 'Test', arrayKey: 'items', index: 0 }] };
+  // This guards type-name parity, so the config only has to be otherwise valid.
+  const template = ADDS_AN_ITEM.includes(type) ? { template: { key: 'item', type: 'input', label: 'Item' } } : {};
+
+  return { fields: [{ key: 'btn', type, label: 'Test', arrayKey: 'items', index: 0, ...template }] };
 }
 
 describe('array-action field-type parity (library <-> zod/MCP)', () => {
