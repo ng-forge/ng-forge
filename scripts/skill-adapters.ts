@@ -12,6 +12,7 @@
  */
 
 import type { UIAdapterInfo } from '../packages/dynamic-form-mcp/src/registry/index.ts';
+import { adapterPropsFromDescriptor, readAdapterDescriptor } from './descriptor-props.ts';
 
 /** Human-facing name for an adapter, used in prose. */
 const ADAPTER_LABELS: Record<string, string> = {
@@ -82,35 +83,19 @@ can accept a config this project will not render. Requires Node 24 or newer.
 `;
 }
 
-/** Per field type, the props this adapter adds on top of the core definition. */
+/**
+ * Per field type, the props this adapter adds on top of the core definition.
+ *
+ * Read from the adapter's descriptor rather than the hand-written registry. The
+ * registry covered five field types for Material and two for Bootstrap; the
+ * descriptor covers twenty for each, and being derived it cannot fall behind
+ * the types the way a maintained copy does.
+ */
 export function adapterPropsMd(adapter: UIAdapterInfo, deps: AdapterSkillDeps): string {
-  const label = labelFor(adapter.library);
-  const lines: string[] = [deps.generatedNote, '', `# ${label} field properties`, ''];
-
-  lines.push(
-    `These keys go inside \`props\`. Everything else about a field — its \`key\`,`,
-    `\`type\`, \`label\`, validation and logic — is adapter independent and documented`,
-    'in the core skill.',
-    '',
-  );
-
-  for (const field of adapter.fieldTypes) {
-    const props = Object.values(field.additionalProps ?? {});
-    if (props.length === 0) continue;
-
-    lines.push(`## \`${field.type}\``, '');
-    lines.push(`Rendered by \`${field.componentName}\`.`, '');
-    lines.push('| Prop | Type | Required | Default | Description |');
-    lines.push('| ---- | ---- | -------- | ------- | ----------- |');
-
-    for (const prop of props) {
-      const dflt = prop.default === undefined ? '' : `\`${deps.cell(String(prop.default))}\``;
-      lines.push(
-        `| \`${deps.cell(prop.name)}\` | \`${deps.cell(prop.type)}\` | ${prop.required ? 'yes' : 'no'} | ${dflt} | ${deps.cell(prop.description ?? '')} |`,
-      );
-    }
-    lines.push('');
-  }
-
-  return deps.withTableOfContents(lines.join('\n'));
+  return adapterPropsFromDescriptor(readAdapterDescriptor(adapter.library), {
+    generatedNote: deps.generatedNote,
+    cell: deps.cell,
+    withTableOfContents: deps.withTableOfContents,
+    label: labelFor(adapter.library),
+  });
 }

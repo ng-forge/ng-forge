@@ -25,6 +25,8 @@
       "inputs": [
         "{workspaceRoot}/scripts/generate-skills.ts",
         "{workspaceRoot}/scripts/skill-adapters.ts",
+        "{workspaceRoot}/internal/dynamic-forms-validation/descriptor/generated/*.json",
+        "{workspaceRoot}/scripts/descriptor-props.ts",
         "{workspaceRoot}/skills/dynamic-forms/**/*.md",
         "{workspaceRoot}/skills/dynamic-forms-*/**/*.md",
         "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/**",

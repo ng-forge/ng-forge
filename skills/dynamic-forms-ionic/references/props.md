@@ -2,31 +2,284 @@
 
 # Ionic field properties
 
+## Contents
+
+- [`add-array-item`](#add-array-item)
+- [`button`](#button)
+- [`checkbox`](#checkbox)
+- [`datepicker`](#datepicker)
+- [`input`](#input)
+- [`insert-array-item`](#insert-array-item)
+- [`multi-checkbox`](#multi-checkbox)
+- [`next`](#next)
+- [`pop-array-item`](#pop-array-item)
+- [`prepend-array-item`](#prepend-array-item)
+- [`previous`](#previous)
+- [`radio`](#radio)
+- [`remove-array-item`](#remove-array-item)
+- [`select`](#select)
+- [`shift-array-item`](#shift-array-item)
+- [`slider`](#slider)
+- [`submit`](#submit)
+- [`text`](#text)
+- [`textarea`](#textarea)
+- [`toggle`](#toggle)
+- [Properties this reference cannot describe](#properties-this-reference-cannot-describe)
+
 These keys go inside `props`. Everything else about a field — its `key`,
 `type`, `label`, validation and logic — is adapter independent and documented
 in the core skill.
 
+Derived from `@ng-forge/dynamic-forms-ionic` 1.1.0, so this list is
+what the types actually declare rather than a copy maintained beside them.
+
+## `add-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `button`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `checkbox`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `indeterminate` | `boolean` | no |  |
+| `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
+| `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
+
+## `datepicker`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `cancelText` | `string` | no |  |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `doneText` | `string` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `multiple` | `boolean` | no |  |
+| `preferWheel` | `boolean` | no |  |
+| `presentation` | `'date' \| 'date-time' \| 'month' \| 'month-year' \| 'time' \| 'time-date' \| 'year'` | no |  |
+| `showClearButton` | `boolean` | no |  |
+| `showDefaultButtons` | `boolean` | no |  |
+| `showDefaultTimeLabel` | `boolean` | no |  |
+| `showDefaultTitle` | `boolean` | no |  |
+| `size` | `'cover' \| 'fixed'` | no |  |
+
 ## `input`
 
-Rendered by `IonicInputFieldComponent`.
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `clearInput` | `boolean` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `counter` | `boolean` | no |  |
+| `errorText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `fill` | `'outline' \| 'solid'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPlacement` | `'end' \| 'fixed' \| 'floating' \| 'stacked' \| 'start'` | no |  |
+| `shape` | `'round'` | no |  |
+| `type` | `'email' \| 'number' \| 'password' \| 'search' \| 'tel' \| 'text' \| 'url'` | no |  |
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `fill` | `'solid' \| 'outline'` | no | `solid` | Input fill style |
-| `labelPlacement` | `'fixed' \| 'stacked' \| 'floating'` | no | `floating` | Label placement style |
+## `insert-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `multi-checkbox`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
+| `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
+
+## `next`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `pop-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `prepend-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `previous`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `radio`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `compareWith` | `unknown` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
+| `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
+
+## `remove-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
 
 ## `select`
 
-Rendered by `IonicSelectFieldComponent`.
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `cancelText` | `string` | no |  |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `compareWith` | `unknown` | no |  |
+| `fill` | `'outline' \| 'solid'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `interface` | `'action-sheet' \| 'alert' \| 'popover'` | no |  |
+| `interfaceOptions` | `{}` | no |  |
+| `labelPlacement` | `'end' \| 'fixed' \| 'floating' \| 'stacked' \| 'start'` | no |  |
+| `multiple` | `boolean` | no |  |
+| `okText` | `string` | no |  |
+| `shape` | `'round'` | no |  |
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `interface` | `'alert' \| 'action-sheet' \| 'popover'` | no | `alert` | Selection interface style |
+## `shift-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `slider`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `dualKnobs` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
+| `max` | `number` | no |  |
+| `min` | `number` | no |  |
+| `pin` | `boolean` | no |  |
+| `pinFormatter` | `unknown` | no |  |
+| `snaps` | `boolean` | no |  |
+| `step` | `number` | no |  |
+| `ticks` | `boolean` | no |  |
+
+## `submit`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `expand` | `'block' \| 'full'` | no |  |
+| `fill` | `'clear' \| 'default' \| 'outline' \| 'solid'` | no |  |
+| `shape` | `'round'` | no |  |
+| `size` | `'default' \| 'large' \| 'small'` | no |  |
+| `strong` | `boolean` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `text`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `elementType` | `'h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6' \| 'p' \| 'span'` | yes |  |
+
+## `textarea`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `autoGrow` | `boolean` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `cols` | `number` | no |  |
+| `counter` | `boolean` | no |  |
+| `errorText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `fill` | `'outline' \| 'solid'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPlacement` | `'end' \| 'fixed' \| 'floating' \| 'stacked' \| 'start'` | no |  |
+| `rows` | `number` | no |  |
+| `shape` | `'round'` | no |  |
 
 ## `toggle`
 
-Rendered by `IonicToggleFieldComponent`.
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `enableOnOffLabels` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
+| `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `enableOnOffLabels` | `boolean` | no | `false` | Show on/off labels |
+## Properties this reference cannot describe
+
+These exist and are accepted, but their type cannot be written in a static
+config, so nothing here constrains them.
+
+- radio.props.compareWith, select.props.compareWith — callable (o1: ValueType, o2: ValueType) => boolean
+- slider.props.pinFormatter — callable (value: number) => string \| number

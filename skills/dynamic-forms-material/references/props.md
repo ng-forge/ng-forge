@@ -2,64 +2,219 @@
 
 # Angular Material field properties
 
+## Contents
+
+- [`add-array-item`](#add-array-item)
+- [`button`](#button)
+- [`checkbox`](#checkbox)
+- [`datepicker`](#datepicker)
+- [`input`](#input)
+- [`insert-array-item`](#insert-array-item)
+- [`multi-checkbox`](#multi-checkbox)
+- [`next`](#next)
+- [`pop-array-item`](#pop-array-item)
+- [`prepend-array-item`](#prepend-array-item)
+- [`previous`](#previous)
+- [`radio`](#radio)
+- [`remove-array-item`](#remove-array-item)
+- [`select`](#select)
+- [`shift-array-item`](#shift-array-item)
+- [`slider`](#slider)
+- [`submit`](#submit)
+- [`text`](#text)
+- [`textarea`](#textarea)
+- [`toggle`](#toggle)
+- [Properties this reference cannot describe](#properties-this-reference-cannot-describe)
+
 These keys go inside `props`. Everything else about a field — its `key`,
 `type`, `label`, validation and logic — is adapter independent and documented
 in the core skill.
 
-## `input`
+Derived from `@ng-forge/dynamic-forms-material` 1.1.0, so this list is
+what the types actually declare rather than a copy maintained beside them.
 
-Rendered by `MatInputFieldComponent`.
+## `add-array-item`
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `appearance` | `'fill' \| 'outline'` | no | `outline` | Material form field appearance |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | no | `dynamic` | Error/hint text sizing |
-| `floatLabel` | `'auto' \| 'always' \| 'never'` | no | `auto` | Label float behavior |
-| `hideRequiredMarker` | `boolean` | no | `false` | Hide the required asterisk |
-| `hint` | `DynamicText` | no |  | Hint text below the field |
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
 
-## `select`
+## `button`
 
-Rendered by `MatSelectFieldComponent`.
-
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `appearance` | `'fill' \| 'outline'` | no | `outline` | Material form field appearance |
-| `floatLabel` | `'auto' \| 'always' \| 'never'` | no | `auto` | Label float behavior |
-| `hideRequiredMarker` | `boolean` | no | `false` | Hide the required asterisk |
-| `hint` | `DynamicText` | no |  | Hint text below the field |
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
 
 ## `checkbox`
 
-Rendered by `MatCheckboxFieldComponent`.
-
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `color` | `'primary' \| 'accent' \| 'warn'` | no | `primary` | Checkbox color theme |
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `indeterminate` | `boolean` | no |  |
+| `labelPosition` | `'after' \| 'before'` | no |  |
 
 ## `datepicker`
 
-Rendered by `MatDatepickerFieldComponent`.
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `floatLabel` | `'always' \| 'auto'` | no |  |
+| `hideRequiredMarker` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `startView` | `'month' \| 'multi-year' \| 'year'` | no |  |
+| `subscriptSizing` | `'dynamic' \| 'fixed'` | no |  |
+| `touchUi` | `boolean` | no |  |
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `appearance` | `'fill' \| 'outline'` | no | `outline` | Material form field appearance |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | no | `dynamic` | Error/hint text sizing |
-| `floatLabel` | `'auto' \| 'always' \| 'never'` | no | `auto` | Label float behavior |
-| `hideRequiredMarker` | `boolean` | no | `false` | Hide the required asterisk |
-| `startView` | `'month' \| 'year' \| 'multi-year'` | no | `month` | Initial calendar view |
-| `touchUi` | `boolean` | no | `false` | Use touch-friendly calendar UI |
-| `hint` | `DynamicText` | no |  | Hint text below the field |
+## `input`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `floatLabel` | `'always' \| 'auto'` | no |  |
+| `hideRequiredMarker` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `subscriptSizing` | `'dynamic' \| 'fixed'` | no |  |
+| `type` | `'email' \| 'number' \| 'password' \| 'tel' \| 'text' \| 'url'` | no |  |
+
+## `insert-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `multi-checkbox`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPosition` | `'after' \| 'before'` | no |  |
+
+## `next`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `pop-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `prepend-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `previous`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `radio`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPosition` | `'after' \| 'before'` | no |  |
+
+## `remove-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `select`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `compareWith` | `unknown` | no |  |
+| `floatLabel` | `'always' \| 'auto'` | no |  |
+| `hideRequiredMarker` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `multiple` | `boolean` | no |  |
+| `panelMaxHeight` | `string` | no |  |
+| `subscriptSizing` | `'dynamic' \| 'fixed'` | no |  |
+
+## `shift-array-item`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `slider`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `showThumbLabel` | `boolean` | no |  |
+| `step` | `number` | no |  |
+| `thumbLabel` | `boolean` | no |  |
+| `tickInterval` | `number \| 'auto'` | no |  |
+
+## `submit`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `type` | `'button' \| 'reset' \| 'submit'` | no |  |
+
+## `text`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `elementType` | `'h1' \| 'h2' \| 'h3' \| 'h4' \| 'h5' \| 'h6' \| 'p' \| 'span'` | yes |  |
 
 ## `textarea`
 
-Rendered by `MatTextareaFieldComponent`.
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `cols` | `number` | no |  |
+| `floatLabel` | `'always' \| 'auto'` | no |  |
+| `hideRequiredMarker` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `resize` | `'both' \| 'horizontal' \| 'none' \| 'vertical'` | no |  |
+| `rows` | `number` | no |  |
+| `subscriptSizing` | `'dynamic' \| 'fixed'` | no |  |
 
-| Prop | Type | Required | Default | Description |
-| ---- | ---- | -------- | ------- | ----------- |
-| `appearance` | `'fill' \| 'outline'` | no | `outline` | Material form field appearance |
-| `subscriptSizing` | `'fixed' \| 'dynamic'` | no | `dynamic` | Error/hint text sizing |
-| `floatLabel` | `'auto' \| 'always' \| 'never'` | no | `auto` | Label float behavior |
-| `hideRequiredMarker` | `boolean` | no | `false` | Hide the required asterisk |
-| `hint` | `DynamicText` | no |  | Hint text below the field |
-| `resize` | `'none' \| 'both' \| 'horizontal' \| 'vertical'` | no | `vertical` | Resize handle behavior |
+## `toggle`
+
+| Prop | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `appearance` | `'fill' \| 'outline'` | no |  |
+| `color` | `'accent' \| 'primary' \| 'warn'` | no |  |
+| `disableRipple` | `boolean` | no |  |
+| `hideIcon` | `boolean` | no |  |
+| `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `labelPosition` | `'after' \| 'before'` | no |  |
+
+## Properties this reference cannot describe
+
+These exist and are accepted, but their type cannot be written in a static
+config, so nothing here constrains them.
+
+- select.props.compareWith — callable (o1: ValueType, o2: ValueType) => boolean
