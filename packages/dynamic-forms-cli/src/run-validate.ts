@@ -4,6 +4,7 @@ import { glob } from 'node:fs/promises';
 import { relative } from 'node:path';
 import { markFail, markOk, bad, bold, cyan, dim, plural, rule, startSpinner, warn } from './terminal.js';
 import { discoverProject, versionMismatch } from './discover-project.js';
+import { loadProjectRules } from './project-rules.js';
 import {
   formatFileReport,
   UI_INTEGRATIONS,
@@ -116,6 +117,20 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
     if (mismatch) console.error(warn(mismatch));
   }
 
+  // Fails when the file is malformed or names a rule that does not exist, rather
+  // than running with a configuration the user wrote and the tool ignored.
+  let projectRules;
+  try {
+    projectRules = await loadProjectRules(project.packageJsonPath);
+  } catch (cause) {
+    console.error(`${markFail()} ${(cause as Error).message}`);
+    return EXIT_USAGE;
+  }
+
+  if (!options.json && !options.quiet && projectRules.disabled.size > 0) {
+    console.error(dim(`${plural(projectRules.disabled.size, 'rule')} disabled by ${displayPath(projectRules.source ?? '')}`));
+  }
+
   const files = await resolveFiles(patterns);
 
   if (files.length === 0) {
@@ -132,7 +147,7 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
   try {
     for (const [index, file] of files.entries()) {
       spinner?.update(`validating ${displayPath(file)} ${dim(`(${index + 1}/${files.length})`)}`);
-      results.push(await validateFile(file, uiIntegration));
+      results.push(await validateFile(file, uiIntegration, { disabledRules: projectRules.disabled }));
     }
   } finally {
     spinner?.stop();

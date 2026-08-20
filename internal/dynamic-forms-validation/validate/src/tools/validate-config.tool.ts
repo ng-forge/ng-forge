@@ -32,6 +32,17 @@ const fieldSchemas: Record<UiIntegration, z.ZodTypeAny> = {
   ionic: IonicFieldSchema,
 };
 
+/** Options for one validation run. */
+export interface ValidateConfigOptions {
+  /**
+   * Rule ids the project has switched off, already resolved.
+   *
+   * Resolved by the caller so an unknown id fails once, where the config is
+   * read, rather than silently doing nothing on every run.
+   */
+  disabledRules?: ReadonlySet<string>;
+}
+
 /**
  * Validation result for form configuration.
  */
@@ -65,6 +76,23 @@ export interface FormattedValidationError {
    * Path to the invalid field (e.g., 'fields[0].props.type').
    */
   path: string;
+
+  /**
+   * The named rule this violates, when it is a semantic one.
+   *
+   * Absent for anything the type system enforces on its own. Those carry no
+   * identifier by design: they cannot be switched off, because a config that
+   * breaks them does not compile whatever the validator says.
+   */
+  ruleId?: string;
+
+  /**
+   * `warning` when the project has disabled this rule.
+   *
+   * Disabling downgrades rather than silences, so an agent still sees the
+   * finding and can tell it was a deliberate choice.
+   */
+  severity?: 'error' | 'warning';
 
   /**
    * Error message.
@@ -570,6 +598,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (prop in v) {
               errors.push({
                 path: `${path}.validators[${vIdx}].${prop}`,
+                ruleId: 'core/validation-messages-location',
                 message: `"${prop}" is NOT a valid validator property. Error messages go in "validationMessages" at the FIELD level, not on the validator config. Use "kind" to specify an error key, then define the message in the field's validationMessages.`,
               });
             }
@@ -638,6 +667,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const invalidTypes = nonHiddenLogic.map((l) => `"${l['type']}"`).join(', ');
           errors.push({
             path: `${path}.logic`,
+            ruleId: 'core/container-logic-hidden-only',
             message: `"${fieldType}" containers only support 'hidden' logic type. Found unsupported logic types: ${invalidTypes}. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.`,
           });
         }
@@ -670,6 +700,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (fieldType && rules.forbidden.includes(fieldType)) {
         errors.push({
           path: path,
+          ruleId: 'core/nesting',
           message: `"${fieldType}" is NOT allowed inside "${parentType}". ${rules.message}`,
         });
       }
@@ -684,11 +715,13 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!hasOptionsAtFieldLevel && hasOptionsInProps) {
         errors.push({
           path: `${path}.props.options`,
+          ruleId: 'core/options-at-field-level',
           message: `"options" MUST be at FIELD level, NOT inside props! Move it from props.options to the field's root level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (!hasOptionsAtFieldLevel && !hasOptionsInProps) {
         errors.push({
           path: `${path}.options`,
+          ruleId: 'core/options-required',
           message: `"${fieldType}" field "${fieldKey || 'unknown'}" is MISSING required "options" property. Options must be an array of { label: string, value: T } objects at FIELD level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (hasOptionsAtFieldLevel) {
@@ -700,12 +733,14 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (!('label' in firstOption) || !('value' in firstOption)) {
               errors.push({
                 path: `${path}.options[0]`,
+                ruleId: 'core/options-shape',
                 message: `Invalid options format. Each option MUST have { label: string, value: T }. Found: ${JSON.stringify(firstOption)}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
               });
             }
           } else if (typeof firstOption !== 'object') {
             errors.push({
               path: `${path}.options`,
+              ruleId: 'core/options-shape',
               message: `Invalid options format. Options must be objects with { label, value }, not primitives. Found: ${JSON.stringify(options.slice(0, 3))}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
             });
           }
@@ -725,6 +760,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         if (wrongProps.length > 0) {
           errors.push({
             path: `${path}.props`,
+            ruleId: 'core/slider-range-properties',
             message: `Slider has properties in wrong location: ${wrongProps.join(', ')}. For sliders, use minValue, maxValue, and step at FIELD level, not inside props. Expected structure: ${EXPECTED_STRUCTURE['slider']}`,
           });
         }
@@ -737,6 +773,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('value' in f)) {
         errors.push({
           path: `${path}.value`,
+          ruleId: 'core/hidden-requires-value',
           message: `Hidden field "${fieldKey || 'unknown'}" is MISSING REQUIRED "value" property. Hidden fields MUST have a value - they exist only to pass values through the form. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -753,6 +790,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         const propList = foundForbidden.map((p) => `"${p}"`).join(', ');
         errors.push({
           path: path,
+          ruleId: 'core/hidden-minimal',
           message: `Hidden field "${fieldKey || 'unknown'}" has FORBIDDEN properties: ${propList}. Hidden fields ONLY support: key, type, value, className. They do not render and cannot be validated. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -763,11 +801,13 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" is MISSING required "fields" property. Containers must have a fields array containing child fields. Expected structure: ${EXPECTED_STRUCTURE[fieldType || '']}`,
         });
       } else if (!Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }
@@ -781,16 +821,19 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (hasFields && hasTemplate) {
         errors.push({
           path: path,
+          ruleId: 'core/array-api-exclusive',
           message: `Array "${fieldKey || 'unknown'}" has BOTH "fields" and "template". These are mutually exclusive. Use "fields" for the full API or "template" + "value" for the simplified API. ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (!hasFields && !hasTemplate) {
         errors.push({
           path: path,
+          ruleId: 'core/array-api-required',
           message: `Array "${fieldKey || 'unknown'}" is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API). ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (hasFields && !Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
+          ruleId: 'core/container-requires-fields',
           message: `Array "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }
@@ -883,7 +926,26 @@ function normalizeLegacyArrayActionTypes(value: unknown): unknown {
   return value;
 }
 
-export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult {
+/**
+ * Apply the project's disabled rules.
+ *
+ * A disabled rule becomes a warning and stops counting towards validity, rather
+ * than disappearing. The consumer is usually an agent, and a finding that
+ * vanishes teaches it nothing, where one marked as deliberately off is
+ * information it can act on and a reviewer can question.
+ *
+ * Only findings that carry a rule id can be downgraded. Everything else comes
+ * from the types and is not something a project may switch off.
+ */
+function applyDisabledRules(errors: FormattedValidationError[], disabled: ReadonlySet<string>): FormattedValidationError[] {
+  if (disabled.size === 0) return errors;
+
+  return errors.map((error) =>
+    error.ruleId && disabled.has(error.ruleId) ? { ...error, severity: 'warning' as const } : { ...error, severity: 'error' as const },
+  );
+}
+
+export function validateFormConfig(uiIntegration: UiIntegration, config: unknown, options?: ValidateConfigOptions): ValidationResult {
   const schema = formConfigSchemas[uiIntegration];
 
   if (!schema) {
@@ -918,12 +980,19 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
 
   // Combine pre-validation errors with Zod errors
   const zodErrors = result.success ? [] : formatZodError(result.error, uiIntegration, normalizedConfig);
-  const allErrors = [...preErrors, ...zodErrors];
+  const allErrors = applyDisabledRules([...preErrors, ...zodErrors], options?.disabledRules ?? new Set());
+
+  // A config whose only findings are disabled rules is valid: that is what
+  // disabling one means.
+  const blocking = allErrors.filter((error) => error.severity !== 'warning');
+  if (blocking.length === 0) {
+    return { valid: true, data: result.success ? result.data : undefined, errors: allErrors };
+  }
 
   return {
     valid: false,
     errors: allErrors,
-    errorSummary: generateErrorSummary(allErrors),
+    errorSummary: generateErrorSummary(blocking),
   };
 }
 

@@ -1,7 +1,7 @@
 /** FormConfig discovery and validation over source files. */
 
 import { readFile } from 'node:fs/promises';
-import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src';
+import { validateFormConfig, type UiIntegration, type ValidateConfigOptions, type ValidationResult } from '../validate/src';
 import {
   createSourceFile,
   findFormConfigCandidates,
@@ -47,7 +47,12 @@ export interface FileValidationResult {
  * Kept separate from {@link validateFile} so callers that already hold the
  * source (an editor buffer, an MCP tool argument) do not have to touch disk.
  */
-export function validateSource(source: string, filePath: string, uiIntegration: UiIntegration): FileValidationResult {
+export function validateSource(
+  source: string,
+  filePath: string,
+  uiIntegration: UiIntegration,
+  options?: ValidateConfigOptions,
+): FileValidationResult {
   const sourceFile = createSourceFile(source, filePath);
   const candidates = findFormConfigCandidates(sourceFile);
 
@@ -58,7 +63,7 @@ export function validateSource(source: string, filePath: string, uiIntegration: 
       line: candidate.startLine,
       matchReason: candidate.matchReason,
       extraction,
-      validation: validateFormConfig(uiIntegration, extraction.value),
+      validation: validateFormConfig(uiIntegration, extraction.value, options),
     };
   });
 
@@ -73,9 +78,13 @@ export function validateSource(source: string, filePath: string, uiIntegration: 
 }
 
 /** Read a source file from disk and validate every FormConfig it declares. */
-export async function validateFile(filePath: string, uiIntegration: UiIntegration): Promise<FileValidationResult> {
+export async function validateFile(
+  filePath: string,
+  uiIntegration: UiIntegration,
+  options?: ValidateConfigOptions,
+): Promise<FileValidationResult> {
   const source = await readFile(filePath, 'utf-8');
-  return validateSource(source, filePath, uiIntegration);
+  return validateSource(source, filePath, uiIntegration, options);
 }
 
 /** Validate an already-parsed config object. */
