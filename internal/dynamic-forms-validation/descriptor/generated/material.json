@@ -16,14 +16,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -39,14 +47,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -58,7 +74,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "disableRipple": {
@@ -68,7 +88,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -85,7 +108,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["after", "before"]
+            "values": [
+              "after",
+              "before"
+            ]
           }
         }
       },
@@ -101,14 +127,21 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "color": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "disableRipple": {
@@ -121,7 +154,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["always", "auto"]
+            "values": [
+              "always",
+              "auto"
+            ]
           }
         },
         "hideRequiredMarker": {
@@ -131,7 +167,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -142,14 +181,21 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["month", "multi-year", "year"]
+            "values": [
+              "month",
+              "multi-year",
+              "year"
+            ]
           }
         },
         "subscriptSizing": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["dynamic", "fixed"]
+            "values": [
+              "dynamic",
+              "fixed"
+            ]
           }
         },
         "touchUi": {
@@ -175,7 +221,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "disableRipple": {
@@ -188,7 +237,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["always", "auto"]
+            "values": [
+              "always",
+              "auto"
+            ]
           }
         },
         "hideRequiredMarker": {
@@ -198,7 +250,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -209,14 +264,24 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["dynamic", "fixed"]
+            "values": [
+              "dynamic",
+              "fixed"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["email", "number", "password", "tel", "text", "url"]
+            "values": [
+              "email",
+              "number",
+              "password",
+              "tel",
+              "text",
+              "url"
+            ]
           }
         }
       },
@@ -228,14 +293,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -247,7 +320,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "disableRipple": {
@@ -257,7 +334,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -268,7 +348,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["after", "before"]
+            "values": [
+              "after",
+              "before"
+            ]
           }
         }
       },
@@ -280,14 +363,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -303,14 +394,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -322,14 +421,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -341,14 +448,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -360,7 +475,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "disableRipple": {
@@ -370,7 +489,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -381,7 +503,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["after", "before"]
+            "values": [
+              "after",
+              "before"
+            ]
           }
         }
       },
@@ -393,14 +518,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -416,7 +549,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "compareWith": {
@@ -429,7 +565,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["always", "auto"]
+            "values": [
+              "always",
+              "auto"
+            ]
           }
         },
         "hideRequiredMarker": {
@@ -439,7 +578,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -462,7 +604,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["dynamic", "fixed"]
+            "values": [
+              "dynamic",
+              "fixed"
+            ]
           }
         }
       },
@@ -474,14 +619,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -493,18 +646,28 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "color": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -539,7 +702,9 @@
               },
               {
                 "kind": "enum",
-                "values": ["auto"]
+                "values": [
+                  "auto"
+                ]
               }
             ]
           }
@@ -553,14 +718,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -572,7 +745,16 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"]
+            "values": [
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "p",
+              "span"
+            ]
           }
         }
       },
@@ -584,7 +766,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "cols": {
@@ -597,7 +782,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["always", "auto"]
+            "values": [
+              "always",
+              "auto"
+            ]
           }
         },
         "hideRequiredMarker": {
@@ -607,7 +795,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -618,7 +809,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["both", "horizontal", "none", "vertical"]
+            "values": [
+              "both",
+              "horizontal",
+              "none",
+              "vertical"
+            ]
           }
         },
         "rows": {
@@ -631,7 +827,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["dynamic", "fixed"]
+            "values": [
+              "dynamic",
+              "fixed"
+            ]
           }
         }
       },
@@ -643,14 +842,21 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["fill", "outline"]
+            "values": [
+              "fill",
+              "outline"
+            ]
           }
         },
         "color": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["accent", "primary", "warn"]
+            "values": [
+              "accent",
+              "primary",
+              "warn"
+            ]
           }
         },
         "disableRipple": {
@@ -666,7 +872,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -677,7 +886,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["after", "before"]
+            "values": [
+              "after",
+              "before"
+            ]
           }
         }
       },
@@ -687,7 +899,9 @@
   "unresolved": [
     {
       "fallback": "passthrough",
-      "paths": ["select.props.compareWith"],
+      "paths": [
+        "select.props.compareWith"
+      ],
       "reason": "callable (o1: ValueType, o2: ValueType) => boolean"
     }
   ]

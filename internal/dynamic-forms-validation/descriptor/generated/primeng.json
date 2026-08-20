@@ -22,7 +22,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -47,7 +52,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -60,7 +74,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -82,7 +100,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -107,7 +130,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -120,7 +152,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -142,7 +178,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -178,7 +217,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -195,7 +237,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["multiple", "range", "single"]
+            "values": [
+              "multiple",
+              "range",
+              "single"
+            ]
           }
         },
         "showButtonBar": {
@@ -226,7 +272,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["date", "month", "year"]
+            "values": [
+              "date",
+              "month",
+              "year"
+            ]
           }
         }
       },
@@ -243,7 +293,10 @@
     "input": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -254,7 +307,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["large", "small"]
+            "values": [
+              "large",
+              "small"
+            ]
           }
         },
         "styleClass": {
@@ -267,14 +323,24 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["email", "number", "password", "tel", "text", "url"]
+            "values": [
+              "email",
+              "number",
+              "password",
+              "tel",
+              "text",
+              "url"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["filled", "outlined"]
+            "values": [
+              "filled",
+              "outlined"
+            ]
           }
         }
       },
@@ -292,7 +358,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -317,7 +388,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -330,7 +410,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -339,7 +423,10 @@
     "multi-checkbox": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -367,7 +454,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -392,7 +484,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -405,7 +506,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -427,7 +532,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -452,7 +562,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -465,7 +584,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -483,7 +606,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -508,7 +636,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -521,7 +658,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -539,7 +680,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -564,7 +710,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -577,7 +732,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -586,7 +745,10 @@
     "radio": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -620,7 +782,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -645,7 +812,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -658,7 +834,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -683,7 +863,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -723,7 +906,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -748,7 +936,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -761,7 +958,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -770,7 +971,10 @@
     "slider": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -793,7 +997,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["horizontal", "vertical"]
+            "values": [
+              "horizontal",
+              "vertical"
+            ]
           }
         },
         "range": {
@@ -829,7 +1036,12 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["bottom", "left", "right", "top"]
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
           }
         },
         "outlined": {
@@ -854,7 +1066,16 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["contrast", "danger", "help", "info", "primary", "secondary", "success", "warn"]
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
           }
         },
         "text": {
@@ -867,7 +1088,11 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         }
       },
@@ -879,7 +1104,16 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"]
+            "values": [
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "p",
+              "span"
+            ]
           }
         }
       },
@@ -900,7 +1134,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -925,7 +1162,10 @@
     "toggle": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -945,7 +1185,9 @@
   "unresolved": [
     {
       "fallback": "passthrough",
-      "paths": ["select.props.compareWith"],
+      "paths": [
+        "select.props.compareWith"
+      ],
       "reason": "callable (o1: ValueType, o2: ValueType) => boolean"
     }
   ]

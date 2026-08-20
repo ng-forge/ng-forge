@@ -34,21 +34,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -82,21 +99,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -105,7 +139,10 @@
     "checkbox": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -158,7 +195,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -166,7 +206,10 @@
           }
         },
         "invalidFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -177,14 +220,22 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["arrows", "none", "select"]
+            "values": [
+              "arrows",
+              "none",
+              "select"
+            ]
           }
         },
         "outsideDays": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["collapsed", "hidden", "visible"]
+            "values": [
+              "collapsed",
+              "hidden",
+              "visible"
+            ]
           }
         },
         "showWeekNumbers": {
@@ -197,7 +248,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "useNgBootstrap": {
@@ -207,7 +261,10 @@
           }
         },
         "validFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -234,7 +291,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -242,7 +302,10 @@
           }
         },
         "invalidFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -259,18 +322,31 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["email", "number", "password", "tel", "text", "url"]
+            "values": [
+              "email",
+              "number",
+              "password",
+              "tel",
+              "text",
+              "url"
+            ]
           }
         },
         "validFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -304,21 +380,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -327,7 +420,10 @@
     "multi-checkbox": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -379,21 +475,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -427,21 +540,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -471,21 +601,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -515,21 +662,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -547,11 +711,17 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -597,21 +767,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -636,7 +823,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -650,7 +840,10 @@
           }
         },
         "invalidFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -667,11 +860,17 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "validFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -705,21 +904,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -728,7 +944,10 @@
     "slider": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -798,21 +1017,38 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "type": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["button", "reset", "submit"]
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
           }
         },
         "variant": {
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["danger", "dark", "info", "light", "link", "primary", "secondary", "success", "warning"]
+            "values": [
+              "danger",
+              "dark",
+              "info",
+              "light",
+              "link",
+              "primary",
+              "secondary",
+              "success",
+              "warning"
+            ]
           }
         }
       },
@@ -824,7 +1060,16 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"]
+            "values": [
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "p",
+              "span"
+            ]
           }
         }
       },
@@ -845,7 +1090,10 @@
           }
         },
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -853,7 +1101,10 @@
           }
         },
         "invalidFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -870,11 +1121,17 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         },
         "validFeedback": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -887,7 +1144,10 @@
     "toggle": {
       "keys": {
         "hint": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -910,7 +1170,10 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["lg", "sm"]
+            "values": [
+              "lg",
+              "sm"
+            ]
           }
         }
       },
@@ -920,7 +1183,9 @@
   "unresolved": [
     {
       "fallback": "passthrough",
-      "paths": ["select.props.compareWith"],
+      "paths": [
+        "select.props.compareWith"
+      ],
       "reason": "callable (o1: string, o2: string) => boolean"
     }
   ]

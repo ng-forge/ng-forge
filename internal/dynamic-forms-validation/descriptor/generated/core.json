@@ -1,7 +1,9 @@
 {
   "fieldTypes": {
     "add-array-item": {
-      "aliases": ["addArrayItem"],
+      "aliases": [
+        "addArrayItem"
+      ],
       "canonical": "add-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -12,7 +14,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -66,7 +71,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["add-array-item", "addArrayItem"]
+            "values": [
+              "add-array-item",
+              "addArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -164,7 +172,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["array"]
+            "values": [
+              "array"
+            ]
           }
         },
         "validationMessages": {
@@ -266,18 +276,25 @@
                 },
                 {
                   "kind": "enum",
-                  "values": [null]
+                  "values": [
+                    null
+                  ]
                 },
                 {
                   "kind": "enum",
-                  "values": [null]
+                  "values": [
+                    null
+                  ]
                 }
               ]
             }
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -314,7 +331,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["button"]
+            "values": [
+              "button"
+            ]
           }
         },
         "wrappers": {
@@ -361,7 +380,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -481,7 +503,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -489,7 +513,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -516,7 +543,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["checkbox"]
+            "values": [
+              "checkbox"
+            ]
           }
         },
         "validationMessages": {
@@ -637,7 +666,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["container"]
+            "values": [
+              "container"
+            ]
           }
         },
         "wrappers": {
@@ -684,7 +715,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -773,7 +807,9 @@
           }
         },
         "maxDate": {
-          "droppedArms": ["Date"],
+          "droppedArms": [
+            "Date"
+          ],
           "narrowedFrom": "string | Date | null | undefined",
           "required": false,
           "type": {
@@ -800,7 +836,9 @@
           }
         },
         "minDate": {
-          "droppedArms": ["Date"],
+          "droppedArms": [
+            "Date"
+          ],
           "narrowedFrom": "string | Date | null | undefined",
           "required": false,
           "type": {
@@ -820,7 +858,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -828,7 +868,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -861,7 +904,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["datepicker"]
+            "values": [
+              "datepicker"
+            ]
           }
         },
         "validationMessages": {
@@ -911,7 +956,9 @@
           }
         },
         "value": {
-          "droppedArms": ["Date"],
+          "droppedArms": [
+            "Date"
+          ],
           "narrowedFrom": "string | Date | null | undefined",
           "required": false,
           "type": {
@@ -990,7 +1037,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["group"]
+            "values": [
+              "group"
+            ]
           }
         },
         "validationMessages": {
@@ -1071,7 +1120,10 @@
       "extends": "BaseFieldProperties",
       "fieldLevel": {
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1089,7 +1141,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["hidden"]
+            "values": [
+              "hidden"
+            ]
           }
         },
         "value": {
@@ -1105,11 +1159,15 @@
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "array",
@@ -1124,11 +1182,15 @@
                     },
                     {
                       "kind": "enum",
-                      "values": [null]
+                      "values": [
+                        null
+                      ]
                     },
                     {
                       "kind": "enum",
-                      "values": [null]
+                      "values": [
+                        null
+                      ]
                     }
                   ]
                 }
@@ -1180,7 +1242,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1300,7 +1365,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -1308,7 +1375,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1335,7 +1405,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["input"]
+            "values": [
+              "input"
+            ]
           }
         },
         "validationMessages": {
@@ -1425,7 +1497,9 @@
       "kind": "leaf"
     },
     "insert-array-item": {
-      "aliases": ["insertArrayItem"],
+      "aliases": [
+        "insertArrayItem"
+      ],
       "canonical": "insert-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -1442,7 +1516,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1496,7 +1573,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["insert-array-item", "insertArrayItem"]
+            "values": [
+              "insert-array-item",
+              "insertArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -1543,7 +1623,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1673,7 +1756,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -1681,7 +1766,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1708,7 +1796,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["multi-checkbox"]
+            "values": [
+              "multi-checkbox"
+            ]
           }
         },
         "validationMessages": {
@@ -1799,7 +1889,10 @@
       "extends": "BaseFieldProperties",
       "fieldLevel": {
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1836,7 +1929,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["next"]
+            "values": [
+              "next"
+            ]
           }
         },
         "wrappers": {
@@ -1905,7 +2000,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["page"]
+            "values": [
+              "page"
+            ]
           }
         },
         "wrappers": {
@@ -1935,7 +2032,9 @@
       "kind": "container"
     },
     "pop-array-item": {
-      "aliases": ["popArrayItem"],
+      "aliases": [
+        "popArrayItem"
+      ],
       "canonical": "pop-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -1946,7 +2045,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -1983,7 +2085,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["pop-array-item", "popArrayItem"]
+            "values": [
+              "pop-array-item",
+              "popArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -2013,7 +2118,9 @@
       "kind": "leaf"
     },
     "prepend-array-item": {
-      "aliases": ["prependArrayItem"],
+      "aliases": [
+        "prependArrayItem"
+      ],
       "canonical": "prepend-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -2024,7 +2131,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2078,7 +2188,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["prepend-array-item", "prependArrayItem"]
+            "values": [
+              "prepend-array-item",
+              "prependArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -2113,7 +2226,10 @@
       "extends": "BaseFieldProperties",
       "fieldLevel": {
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2150,7 +2266,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["previous"]
+            "values": [
+              "previous"
+            ]
           }
         },
         "wrappers": {
@@ -2197,7 +2315,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2327,7 +2448,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -2335,7 +2458,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2362,7 +2488,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["radio"]
+            "values": [
+              "radio"
+            ]
           }
         },
         "validationMessages": {
@@ -2445,7 +2573,9 @@
       "kind": "leaf"
     },
     "remove-array-item": {
-      "aliases": ["removeArrayItem"],
+      "aliases": [
+        "removeArrayItem"
+      ],
       "canonical": "remove-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -2456,7 +2586,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2493,7 +2626,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["remove-array-item", "removeArrayItem"]
+            "values": [
+              "remove-array-item",
+              "removeArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -2562,7 +2698,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["row"]
+            "values": [
+              "row"
+            ]
           }
         },
         "wrappers": {
@@ -2609,7 +2747,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2739,7 +2880,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -2747,7 +2890,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2774,7 +2920,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["select"]
+            "values": [
+              "select"
+            ]
           }
         },
         "validationMessages": {
@@ -2857,7 +3005,9 @@
       "kind": "leaf"
     },
     "shift-array-item": {
-      "aliases": ["shiftArrayItem"],
+      "aliases": [
+        "shiftArrayItem"
+      ],
       "canonical": "shift-array-item",
       "extends": "BaseFieldProperties",
       "fieldLevel": {
@@ -2868,7 +3018,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -2905,7 +3058,10 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["shift-array-item", "shiftArrayItem"]
+            "values": [
+              "shift-array-item",
+              "shiftArrayItem"
+            ]
           }
         },
         "wrappers": {
@@ -2952,7 +3108,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3084,7 +3243,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -3092,7 +3253,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3125,7 +3289,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["slider"]
+            "values": [
+              "slider"
+            ]
           }
         },
         "validationMessages": {
@@ -3212,7 +3378,10 @@
       "extends": "BaseFieldProperties",
       "fieldLevel": {
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3249,7 +3418,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["submit"]
+            "values": [
+              "submit"
+            ]
           }
         },
         "wrappers": {
@@ -3284,7 +3455,10 @@
       "extends": "BaseFieldProperties",
       "fieldLevel": {
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3311,7 +3485,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["text"]
+            "values": [
+              "text"
+            ]
           }
         },
         "wrappers": {
@@ -3358,7 +3534,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3478,7 +3657,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -3486,7 +3667,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3513,7 +3697,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["textarea"]
+            "values": [
+              "textarea"
+            ]
           }
         },
         "validationMessages": {
@@ -3612,7 +3798,10 @@
           }
         },
         "label": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3732,7 +3921,9 @@
           }
         },
         "pattern": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | RegExp | undefined",
           "required": false,
           "type": {
@@ -3740,7 +3931,10 @@
           }
         },
         "placeholder": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -3767,7 +3961,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["toggle"]
+            "values": [
+              "toggle"
+            ]
           }
         },
         "validationMessages": {
@@ -3870,7 +4066,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["and"]
+            "values": [
+              "and"
+            ]
           }
         }
       },
@@ -3906,7 +4104,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["async"]
+            "values": [
+              "async"
+            ]
           }
         }
       },
@@ -3942,7 +4142,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["async"]
+            "values": [
+              "async"
+            ]
           }
         }
       },
@@ -3969,11 +4171,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -4075,7 +4281,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["asyncFunction"]
+            "values": [
+              "asyncFunction"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -4094,14 +4302,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -4134,11 +4346,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -4240,7 +4456,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["asyncFunction"]
+            "values": [
+              "asyncFunction"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -4259,14 +4477,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -4299,11 +4521,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -4405,7 +4631,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["asyncFunction"]
+            "values": [
+              "asyncFunction"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -4424,14 +4652,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -4464,11 +4696,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -4570,7 +4806,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["asyncFunction"]
+            "values": [
+              "asyncFunction"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -4589,14 +4827,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -4634,7 +4876,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["async"]
+            "values": [
+              "async"
+            ]
           }
         },
         "when": {
@@ -4709,7 +4953,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["async"]
+            "values": [
+              "async"
+            ]
           }
         },
         "when": {
@@ -4854,11 +5100,21 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["email", "max", "maxLength", "min", "minLength", "pattern", "required"]
+            "values": [
+              "email",
+              "max",
+              "maxLength",
+              "min",
+              "minLength",
+              "pattern",
+              "required"
+            ]
           }
         },
         "value": {
-          "droppedArms": ["RegExp"],
+          "droppedArms": [
+            "RegExp"
+          ],
           "narrowedFrom": "string | number | RegExp | undefined",
           "required": false,
           "type": {
@@ -4915,7 +5171,10 @@
     "CssWrapper": {
       "keys": {
         "cssClasses": {
-          "droppedArms": ["Observable<string>", "Signal<string>"],
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
           "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
@@ -4926,7 +5185,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["css"]
+            "values": [
+              "css"
+            ]
           }
         }
       },
@@ -4976,7 +5237,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["custom"]
+            "values": [
+              "custom"
+            ]
           }
         },
         "when": {
@@ -5047,11 +5310,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -5171,14 +5438,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -5211,11 +5482,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -5318,7 +5593,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -5337,14 +5614,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -5365,11 +5646,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -5409,15 +5694,21 @@
               },
               {
                 "kind": "enum",
-                "values": ["formInvalid"]
+                "values": [
+                  "formInvalid"
+                ]
               },
               {
                 "kind": "enum",
-                "values": ["formSubmitting"]
+                "values": [
+                  "formSubmitting"
+                ]
               },
               {
                 "kind": "enum",
-                "values": ["pageInvalid"]
+                "values": [
+                  "pageInvalid"
+                ]
               }
             ]
           }
@@ -5432,14 +5723,21 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["disabled", "hidden", "readonly", "required"]
+            "values": [
+              "disabled",
+              "hidden",
+              "readonly",
+              "required"
+            ]
           }
         }
       },
@@ -5466,11 +5764,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -5590,14 +5892,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -5630,7 +5936,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         },
         "when": {
@@ -5686,7 +5994,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["field-errors"]
+            "values": [
+              "field-errors"
+            ]
           }
         },
         "validationMessages": {
@@ -5729,7 +6039,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["fieldValue"]
+            "values": [
+              "fieldValue"
+            ]
           }
         },
         "value": {
@@ -5763,11 +6075,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -5887,14 +6203,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -5927,11 +6247,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6051,14 +6375,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -6091,11 +6419,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6215,14 +6547,18 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["debounced"]
+            "values": [
+              "debounced"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -6255,11 +6591,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6379,14 +6719,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -6423,7 +6767,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         },
         "when": {
@@ -6499,7 +6845,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         },
         "when": {
@@ -6586,7 +6934,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         }
       },
@@ -6601,11 +6951,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6645,15 +6999,21 @@
               },
               {
                 "kind": "enum",
-                "values": ["formInvalid"]
+                "values": [
+                  "formInvalid"
+                ]
               },
               {
                 "kind": "enum",
-                "values": ["formSubmitting"]
+                "values": [
+                  "formSubmitting"
+                ]
               },
               {
                 "kind": "enum",
-                "values": ["pageInvalid"]
+                "values": [
+                  "pageInvalid"
+                ]
               }
             ]
           }
@@ -6668,14 +7028,21 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["disabled", "hidden", "readonly", "required"]
+            "values": [
+              "disabled",
+              "hidden",
+              "readonly",
+              "required"
+            ]
           }
         }
       },
@@ -6693,7 +7060,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["javascript"]
+            "values": [
+              "javascript"
+            ]
           }
         }
       },
@@ -6720,11 +7089,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6844,14 +7217,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -6884,11 +7261,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -6991,7 +7372,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["http"]
+            "values": [
+              "http"
+            ]
           }
         },
         "stopOnUserOverride": {
@@ -7010,14 +7393,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -7050,11 +7437,15 @@
             "of": [
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "enum",
-                "values": [null]
+                "values": [
+                  null
+                ]
               },
               {
                 "kind": "ref",
@@ -7174,14 +7565,18 @@
           "required": false,
           "type": {
             "kind": "enum",
-            "values": ["onChange"]
+            "values": [
+              "onChange"
+            ]
           }
         },
         "type": {
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["derivation"]
+            "values": [
+              "derivation"
+            ]
           }
         },
         "value": {
@@ -7209,7 +7604,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["or"]
+            "values": [
+              "or"
+            ]
           }
         }
       },
@@ -7221,7 +7618,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["row"]
+            "values": [
+              "row"
+            ]
           }
         }
       },
@@ -7245,7 +7644,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["custom"]
+            "values": [
+              "custom"
+            ]
           }
         }
       },
@@ -7269,7 +7670,9 @@
           "required": true,
           "type": {
             "kind": "enum",
-            "values": ["custom"]
+            "values": [
+              "custom"
+            ]
           }
         }
       },
@@ -7279,12 +7682,17 @@
   "unresolved": [
     {
       "fallback": "passthrough",
-      "paths": ["AsyncConditionBase~0e2545.asyncFn"],
+      "paths": [
+        "AsyncConditionBase~0e2545.asyncFn"
+      ],
       "reason": "callable AsyncConditionFunction"
     },
     {
       "fallback": "passthrough",
-      "paths": ["AsyncFunctionDerivationShared~2786f9.asyncFn", "AsyncFunctionDerivationShared~6ab423.asyncFn"],
+      "paths": [
+        "AsyncFunctionDerivationShared~2786f9.asyncFn",
+        "AsyncFunctionDerivationShared~6ab423.asyncFn"
+      ],
       "reason": "callable AsyncDerivationFunction"
     },
     {
@@ -7298,22 +7706,31 @@
     },
     {
       "fallback": "passthrough",
-      "paths": ["CustomValidatorConfig.fn"],
+      "paths": [
+        "CustomValidatorConfig.fn"
+      ],
       "reason": "callable CustomValidator"
     },
     {
       "fallback": "passthrough",
-      "paths": ["datepicker.startAt"],
+      "paths": [
+        "datepicker.startAt"
+      ],
       "reason": "not expressible in a static config: Date"
     },
     {
       "fallback": "passthrough",
-      "paths": ["AndCondition.conditions[]", "OrCondition.conditions[]"],
+      "paths": [
+        "AndCondition.conditions[]",
+        "OrCondition.conditions[]"
+      ],
       "reason": "union of FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
     },
     {
       "fallback": "passthrough",
-      "paths": ["text.logic[]"],
+      "paths": [
+        "text.logic[]"
+      ],
       "reason": "union of ImmediateStateLogicConfig & { type: NonFieldLogicType; } | DebouncedStateLogicConfig & { type: NonFieldLogicType; } | never | never | never | never | never | never | never | never | never | never | never | never | never | never"
     }
   ]
