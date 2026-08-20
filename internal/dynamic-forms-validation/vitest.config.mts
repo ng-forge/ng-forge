@@ -12,7 +12,7 @@ export default defineConfig(() => ({
     globals: true,
     environment: 'node',
     include: [
-      '{src,tests,material,bootstrap,primeng,ionic,validate,discovery,reporting,descriptor}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      '{src,tests,material,bootstrap,primeng,ionic,validate,discovery,reporting,descriptor,rules}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
     reporters: ['default'],
     coverage: {

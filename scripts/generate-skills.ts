@@ -24,6 +24,7 @@ import { UI_ADAPTERS } from '../packages/dynamic-form-mcp/src/registry/ui-adapte
 import { adapterSkillMd, adapterPropsMd, adapterSkillName } from './skill-adapters.ts';
 import { PATTERNS } from '../packages/dynamic-form-mcp/src/tools/examples.tool.ts';
 import { FIX_SUGGESTIONS } from '../internal/dynamic-forms-validation/reporting/fix-suggestions.ts';
+import { RULES, RULE_IDS } from '../internal/dynamic-forms-validation/rules/catalogue.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SKILL_DIR = join(ROOT, 'skills', 'dynamic-forms');
@@ -147,8 +148,41 @@ adapter per field type. Check which one it provides before writing \`props\`.
 `;
 }
 
+/**
+ * The named rules, appended to the authoring instructions.
+ *
+ * An agent needs the identifier to make sense of a project that has switched one
+ * off, and to report accurately why something was accepted. Only semantic rules
+ * appear: constraints the type system enforces are not opt-out-able and have no
+ * id, because disabling one would ask the validator to accept a config that
+ * still would not compile.
+ */
+function ruleCatalogueMd(): string {
+  const lines: string[] = ['## Named rules', ''];
+
+  lines.push(
+    'These are conventions checked on top of the schema. A project may switch one',
+    'off in `.ng-forge/rules.json`, in which case it reports as a warning rather',
+    'than an error, and the identifier below is what appears there.',
+    '',
+    'Constraints that come from the types — a container having no `label`, an',
+    'array-add button needing a `template` — are not in this list and cannot be',
+    'disabled: the config would not compile either way.',
+    '',
+    '| Rule | What it asks | Why |',
+    '| ---- | ------------ | --- |',
+  );
+
+  for (const id of RULE_IDS) {
+    const entry = RULES[id];
+    lines.push(`| \`${cell(id)}\` | ${cell(entry.summary)} | ${cell(entry.why)} |`);
+  }
+
+  return lines.join('\n');
+}
+
 function rulesMd(): string {
-  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n`);
+  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n\n${ruleCatalogueMd()}\n`);
 }
 
 /**
