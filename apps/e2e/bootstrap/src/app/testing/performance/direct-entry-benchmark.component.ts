@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { DynamicForm, EventDispatcher, NextPageEvent, PagerStateEvent, PreviousPageEvent, type FormOptions } from '@ng-forge/dynamic-forms';
 import {
   DIRECT_ENTRY_PAGE_COUNT,
+  DIRECT_ENTRY_PROFILE,
   DIRECT_ENTRY_TOTAL_FIELDS,
   directEntryFullConfig,
   directEntryWizardConfig,
@@ -23,6 +24,7 @@ const FULL_FORM_MARK = 'ng-forge:full-form-initialized';
       data-testid="direct-entry-benchmark"
       [attr.data-mode]="mode"
       [attr.data-total-fields]="totalFields"
+      [attr.data-profile]="profile"
       [attr.data-preload-window]="preloadWindow()"
       [attr.data-field-windowing-eager]="fieldWindowingEager()"
       [attr.data-active-page-ready]="activePageReady()"
@@ -87,6 +89,7 @@ export class DirectEntryBenchmarkComponent {
 
   readonly mode = this.benchmarkUrl.pathname === '/full' ? 'full' : 'wizard';
   readonly totalFields = DIRECT_ENTRY_TOTAL_FIELDS;
+  readonly profile = DIRECT_ENTRY_PROFILE;
   readonly pageCount = DIRECT_ENTRY_PAGE_COUNT;
   readonly config = this.mode === 'full' ? directEntryFullConfig() : directEntryWizardConfig();
   readonly currentPage = signal(0);

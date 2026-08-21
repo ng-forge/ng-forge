@@ -27,8 +27,10 @@ test.describe('direct-entry performance benchmark', () => {
 
     const benchmark = page.getByTestId('direct-entry-benchmark');
     await expect(benchmark).toHaveAttribute('data-field-windowing-eager', '12');
-    await expect(page.locator('.df-field-placeholder')).toHaveCount(28);
-    await expect(page.locator('input[id$="-input"]')).toHaveCount(12);
+    await expect(page.locator('.df-field-placeholder')).toHaveCount(24);
+    // Twelve eager top-level controls plus four children owned by the eager
+    // group and array containers. Container children are not window slots.
+    await expect(page.locator('input[id$="-input"]')).toHaveCount(16);
   });
 
   test('paints the active page before starting neighbour preload work', async ({ page }) => {
@@ -83,6 +85,21 @@ test.describe('direct-entry performance benchmark', () => {
     const pageStatus = page.locator('[aria-live="polite"]');
     await expect(benchmark).toHaveAttribute('data-active-page-ready', 'true');
 
+    for (const label of [
+      'Required profile name',
+      'Conditional details',
+      'Conditionally disabled',
+      'Field 15',
+      'Field 20',
+      'Field 25',
+      'Field 30',
+      'Field 35',
+      'Field 40',
+    ]) {
+      await page.getByLabel(label).fill('valid');
+    }
+    await page.getByLabel('Schema email').fill('valid@example.com');
+
     await page.getByRole('button', { name: 'Next' }).click();
     await expect(pageStatus).toHaveText('Page 2 of 6');
     await expect(benchmark).toHaveAttribute('data-active-page-ready', 'true');
@@ -93,5 +110,35 @@ test.describe('direct-entry performance benchmark', () => {
 
     const activePageMarks = await page.evaluate(() => performance.getEntriesByName('ng-forge:active-page-initialized', 'mark').length);
     expect(activePageMarks).toBe(1);
+  });
+
+  test('runs the representative form capabilities used by the scored route', async ({ page }) => {
+    await page.goto('/#/wizard?preload=1', { waitUntil: 'networkidle' });
+
+    const benchmark = page.getByTestId('direct-entry-benchmark');
+    await expect(benchmark).toHaveAttribute('data-profile', 'representative');
+
+    const requiredField = page.getByLabel('Required profile name');
+    await requiredField.focus();
+    await requiredField.blur();
+    await expect(requiredField).toHaveClass(/is-invalid/);
+
+    await expect(page.getByText('profile', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Conditional details')).toBeVisible();
+
+    await page.getByLabel('Account type').fill('hidden');
+    await expect(page.getByLabel('Conditional details')).toBeHidden();
+
+    const asyncField = page.getByLabel('Async username');
+    await asyncField.fill('x');
+    await asyncField.blur();
+    await expect(asyncField).toHaveClass(/is-invalid/);
+
+    await page.getByLabel('Derivation source').fill('forge');
+    await expect(page.getByLabel('Derived summary')).toHaveValue('forge-derived');
+
+    await expect(page.locator('fieldset[group-field]')).toHaveCount(2);
+    await expect(page.locator('array-field')).toHaveCount(2);
+    await expect(page.getByLabel('Cross-page summary')).toHaveValue('forge-page-2');
   });
 });

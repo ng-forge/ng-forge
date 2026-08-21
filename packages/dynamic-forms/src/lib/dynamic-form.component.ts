@@ -257,7 +257,7 @@ export class DynamicForm<
   // `derivationReady` is false only while a derivation-bearing config waits for
   // the lazily-loaded engine to wire, so fields render already-derived (no flash).
   private derivationReady = inject(DERIVATION_RENDER_GATE);
-  shouldRender = computed(() => this.stateManager.shouldRender() && this.derivationReady());
+  shouldRender = computed(() => this.stateManager.shouldRender() && this.stateManager.formSchemaReady() && this.derivationReady());
 
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;

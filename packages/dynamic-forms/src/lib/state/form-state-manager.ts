@@ -2,11 +2,13 @@ import {
   computed,
   DestroyRef,
   inject,
+  injectAsync,
   Injectable,
   InjectionToken,
   Injector,
   linkedSignal,
   OnDestroy,
+  resource,
   runInInjectionContext,
   signal,
   Signal,
@@ -38,8 +40,6 @@ import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
-import { createSchemaFromFields } from '../core/schema-builder';
-import { createFormLevelSchema } from '../core/form-schema-merger';
 import { deepMergeDefaults, isEqual } from '@ng-forge/dynamic-forms/internal';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -409,7 +409,7 @@ export class FormStateManager<
    */
   private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
     const setup = this.formSetup();
-    if (!this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) return {};
+    if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) return {};
 
     const snapshot: Record<string, FieldExclusionAxes> = {};
     collectFieldStateSnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
@@ -465,31 +465,53 @@ export class FormStateManager<
     },
   );
 
+  /** Loads once, on the first non-empty schema request. Angular memoizes the import promise. */
+  private readonly loadFormSchemaService = injectAsync(() => import('../core/form-schema.service'));
+
   /**
-   * Schema derived from the current form config and field setup.
-   * Separated from `form` so schema construction is memoized independently.
-   * Requires `runInInjectionContext` because `createSchemaFromFields` calls `inject()` internally.
+   * The actual schema request. There is deliberately no `requiresSchema` capability predicate:
+   * the first value-bearing field requests the lazy compiler, including a plain field with no
+   * optional rules. An empty form remains the only no-request case.
    */
+  private readonly formSchemaRequest = computed(() => {
+    const setup = this.formSetup();
+    const config = this.activeConfig();
+    if (!config || (!(setup.schemaFields?.length > 0) && !config.schema)) return undefined;
+
+    return {
+      fields: setup.schemaFields ?? [],
+      registry: setup.registry,
+      formLevelSchema: config.schema,
+      validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
+    };
+  });
+
+  /**
+   * Declarative async bridge between `injectAsync()` and Signal Forms' synchronous schema API.
+   * The service is resolved first; schema construction then runs synchronously in this form's
+   * injection context. `resource()` also participates in Angular application stability and SSR.
+   */
+  private readonly formSchemaResource = resource({
+    params: () => this.formSchemaRequest(),
+    loader: async ({ params }) => {
+      const schemaService = await this.loadFormSchemaService();
+      // FormConfig stores Standard Schema input as `unknown`; TModel is inferred independently
+      // from the same field definitions. The service stays model-agnostic and this boundary
+      // restores the state manager's inferred type after compilation.
+      return runInInjectionContext(this.injector, () => schemaService.create(params)) as Schema<TModel>;
+    },
+  });
+
+  /** True once the lazy compiler has produced the schema, or failed and opened the degraded path. */
+  readonly formSchemaReady = computed(() => {
+    if (!this.formSchemaRequest()) return true;
+    const status = this.formSchemaResource.status();
+    return status === 'resolved' || status === 'local' || status === 'error';
+  });
+
+  /** Schema derived from the current form config and field setup. */
   private readonly formSchema = computed((): Schema<TModel> | undefined =>
-    runInInjectionContext(this.injector, () => {
-      const setup = this.formSetup();
-      const config = this.activeConfig();
-
-      if (!config) return undefined;
-
-      if (setup.schemaFields?.length) {
-        return createSchemaFromFields(setup.schemaFields, setup.registry, {
-          formLevelSchema: config.schema,
-          validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
-        }) as Schema<TModel>;
-      }
-
-      if (config.schema) {
-        return createFormLevelSchema(config.schema) as Schema<TModel>;
-      }
-
-      return undefined;
-    }),
+    this.formSchemaResource.hasValue() ? this.formSchemaResource.value() : undefined,
   );
 
   /** The Angular Signal Form instance. */
@@ -547,7 +569,7 @@ export class FormStateManager<
     const setup = this.formSetup();
     const options = this.effectiveFormOptions();
 
-    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+    if (!this.formSchemaReady() || !setup.schemaFields || setup.schemaFields.length === 0) {
       return rawValue;
     }
 
@@ -583,7 +605,7 @@ export class FormStateManager<
     const setup = this.formSetup();
     const options = this.effectiveFormOptions();
 
-    if (!this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) {
+    if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) {
       return rawValue;
     }
 
@@ -606,29 +628,29 @@ export class FormStateManager<
   });
 
   /** Whether the form is currently valid. */
-  readonly valid = computed(() => this.formInstance().valid());
+  readonly valid = computed(() => this.formSchemaReady() && this.formInstance().valid());
 
   /** Whether the form is currently invalid. */
-  readonly invalid = computed(() => this.formInstance().invalid());
+  readonly invalid = computed(() => !this.formSchemaReady() || this.formInstance().invalid());
 
   /** Whether any form field has been modified. */
-  readonly dirty = computed(() => this.formInstance().dirty());
+  readonly dirty = computed(() => this.formSchemaReady() && this.formInstance().dirty());
 
   /** Whether any form field has been touched (blurred). */
-  readonly touched = computed(() => this.formInstance().touched());
+  readonly touched = computed(() => this.formSchemaReady() && this.formInstance().touched());
 
   /** Current validation errors from all fields. */
-  readonly errors = computed(() => this.formInstance().errors());
+  readonly errors = computed(() => (this.formSchemaReady() ? this.formInstance().errors() : []));
 
   /** Whether the form is disabled (from options or form state). */
   readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
-    const formDisabled = this.formInstance().disabled();
+    const formDisabled = this.formSchemaReady() && this.formInstance().disabled();
     return optionsDisabled ?? formDisabled;
   });
 
   /** Whether the form is currently submitting. */
-  readonly submitting = computed(() => this.formInstance().submitting());
+  readonly submitting = computed(() => this.formSchemaReady() && this.formInstance().submitting());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
@@ -926,6 +948,12 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
+    explicitEffect([this.formSchemaResource.error], ([error]) => {
+      if (error) {
+        this.logger.error('[Dynamic Forms] Failed to load the form schema service; rendering without the configured schema.', error);
+      }
+    });
+
     explicitEffect([this.deps.config], ([config]) => {
       this.fieldLoadingErrors.set([]);
 

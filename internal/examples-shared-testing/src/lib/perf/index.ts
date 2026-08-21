@@ -14,6 +14,7 @@ export { runPerfBench, assertPerf, type AssertPerfOpts } from './perf-spec-helpe
 export {
   DIRECT_ENTRY_FIELDS_PER_PAGE,
   DIRECT_ENTRY_PAGE_COUNT,
+  DIRECT_ENTRY_PROFILE,
   DIRECT_ENTRY_TOTAL_FIELDS,
   directEntryFullConfig,
   directEntryWizardConfig,
