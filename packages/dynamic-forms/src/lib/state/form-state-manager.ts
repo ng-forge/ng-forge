@@ -51,7 +51,7 @@ import { walkAndValidateAddons } from '../utils/validate-form-config/validate-fi
 import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
 import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
-import { filterFormValue } from '../utils/value-filter/value-filter';
+import { filterFormValue, hasEnabledValueExclusion } from '../utils/value-filter/value-filter';
 import { DEV_MODE } from '../utils/dev-mode';
 import { ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
@@ -389,6 +389,19 @@ export class FormStateManager<
     return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
   });
 
+  /** Whether outward value binding needs the reactive exclusion pipeline. */
+  private readonly boundValueExclusionEnabled = computed(() => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return false;
+
+    const options = this.effectiveFormOptions();
+    return hasEnabledValueExclusion(setup.schemaFields, BOUND_VALUE_EXCLUSION_BASELINE, {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    });
+  });
+
   /**
    * Per-field exclusion-axis state (hidden/disabled/readonly) keyed by dotted path. Drives the
    * save-on-exclude effect's transition detection. Walks recursively into groups so nested-leaf
@@ -396,7 +409,7 @@ export class FormStateManager<
    */
   private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
     const setup = this.formSetup();
-    if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
+    if (!this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) return {};
 
     const snapshot: Record<string, FieldExclusionAxes> = {};
     collectFieldStateSnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
@@ -570,7 +583,7 @@ export class FormStateManager<
     const setup = this.formSetup();
     const options = this.effectiveFormOptions();
 
-    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+    if (!this.boundValueExclusionEnabled() || !setup.schemaFields || setup.schemaFields.length === 0) {
       return rawValue;
     }
 

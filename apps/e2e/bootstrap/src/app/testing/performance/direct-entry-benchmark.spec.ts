@@ -22,6 +22,15 @@ test.describe('direct-entry performance benchmark', () => {
     await expect(page.locator('input[id$="-input"]')).toHaveCount(80);
   });
 
+  test('enables per-form field windowing from the benchmark URL', async ({ page }) => {
+    await page.goto('/#/wizard?preload=0&eager=12', { waitUntil: 'networkidle' });
+
+    const benchmark = page.getByTestId('direct-entry-benchmark');
+    await expect(benchmark).toHaveAttribute('data-field-windowing-eager', '12');
+    await expect(page.locator('.df-field-placeholder')).toHaveCount(28);
+    await expect(page.locator('input[id$="-input"]')).toHaveCount(12);
+  });
+
   test('paints the active page before starting neighbour preload work', async ({ page }) => {
     await page.addInitScript(() => {
       const pending = new Map<number, IdleRequestCallback>();

@@ -24,6 +24,7 @@ const FULL_FORM_MARK = 'ng-forge:full-form-initialized';
       [attr.data-mode]="mode"
       [attr.data-total-fields]="totalFields"
       [attr.data-preload-window]="preloadWindow()"
+      [attr.data-field-windowing-eager]="fieldWindowingEager()"
       [attr.data-active-page-ready]="activePageReady()"
     >
       <div class="heading-slot">
@@ -99,7 +100,21 @@ export class DirectEntryBenchmarkComponent {
     return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 1;
   });
 
-  readonly formOptions = computed<FormOptions>(() => ({ pagePreloadWindow: this.preloadWindow() }));
+  readonly fieldWindowingEager = computed(() => {
+    const raw = this.benchmarkUrl.searchParams.get('eager');
+    if (raw === null) return null;
+
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : null;
+  });
+
+  readonly formOptions = computed<FormOptions>(() => {
+    const eager = this.fieldWindowingEager();
+    return {
+      pagePreloadWindow: this.preloadWindow(),
+      ...(eager === null ? {} : { fieldWindowing: { eager } }),
+    };
+  });
   readonly heading = computed(() =>
     this.mode === 'wizard'
       ? `Performance benchmark, page ${this.currentPage() + 1} of ${this.pageCount}`

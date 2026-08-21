@@ -26,6 +26,24 @@ export function resolveExclusionConfig(
   };
 }
 
+/** Returns whether any field has at least one effective value-exclusion axis enabled. */
+export function hasEnabledValueExclusion(
+  fields: readonly FieldDef<unknown>[],
+  global: ResolvedValueExclusionConfig,
+  form: ValueExclusionConfig | undefined,
+): boolean {
+  return fields.some((field) => {
+    const resolved = resolveExclusionConfig(global, form, field);
+    if (resolved.excludeValueIfHidden || resolved.excludeValueIfDisabled || resolved.excludeValueIfReadonly) {
+      return true;
+    }
+
+    return (
+      isGroupField(field) && !!field.fields && hasEnabledValueExclusion(Object.values(field.fields) as FieldDef<unknown>[], global, form)
+    );
+  });
+}
+
 /**
  * Static exclusion state a field may have inherited from a discarded flatten
  * container (page/row) ancestor during flattening. See `FlattenedField`.
@@ -86,6 +104,10 @@ export function filterFormValue<T extends Record<string, unknown>>(
   globalDefaults: ResolvedValueExclusionConfig,
   formOptions: ValueExclusionConfig | undefined,
 ): Partial<T> {
+  if (!hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions)) {
+    return rawValue;
+  }
+
   const result: Record<string, unknown> = {};
 
   for (const field of schemaFields) {

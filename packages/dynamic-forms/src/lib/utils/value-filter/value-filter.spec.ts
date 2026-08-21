@@ -4,7 +4,7 @@ import { FieldTree } from '@angular/forms/signals';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
-import { resolveExclusionConfig, filterFormValue } from './value-filter';
+import { filterFormValue, hasEnabledValueExclusion, resolveExclusionConfig } from './value-filter';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Test Helpers
@@ -113,6 +113,45 @@ describe('resolveExclusionConfig', () => {
 // filterFormValue
 // ─────────────────────────────────────────────────────────────────────────────
 
+describe('hasEnabledValueExclusion', () => {
+  it('should skip the exclusion pipeline when every effective option is disabled', () => {
+    const fields: FieldDef<unknown>[] = [
+      { key: 'name', type: 'input' },
+      { key: 'email', type: 'input', excludeValueIfHidden: false },
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_DISABLED, undefined)).toBe(false);
+  });
+
+  it('should detect a field-level opt-in nested inside a group', () => {
+    const fields: FieldDef<unknown>[] = [
+      {
+        key: 'address',
+        type: 'group',
+        fields: {
+          street: { key: 'street', type: 'input', excludeValueIfReadonly: true },
+        },
+      } as FieldDef<unknown>,
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_DISABLED, undefined)).toBe(true);
+  });
+
+  it('should honor field overrides that disable enabled defaults', () => {
+    const fields: FieldDef<unknown>[] = [
+      {
+        key: 'name',
+        type: 'input',
+        excludeValueIfHidden: false,
+        excludeValueIfDisabled: false,
+        excludeValueIfReadonly: false,
+      },
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_ENABLED, undefined)).toBe(false);
+  });
+});
+
 describe('filterFormValue', () => {
   const registry = createRegistry(
     ['input', { valueHandling: 'include' }],
@@ -140,6 +179,18 @@ describe('filterFormValue', () => {
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
       expect(result).toEqual({ name: 'John', email: 'john@test.com' });
+    });
+
+    it('should not read field state when all exclusion is disabled', () => {
+      const rawValue = { name: 'John' };
+      const fields: FieldDef<unknown>[] = [{ key: 'name', type: 'input' }];
+      const fieldState = createFieldState();
+      const trackedFieldState = vi.fn(fieldState) as unknown as FieldTree<unknown>;
+
+      const result = filterFormValue(rawValue, fields, { name: trackedFieldState }, registry, ALL_DISABLED, undefined);
+
+      expect(result).toBe(rawValue);
+      expect(trackedFieldState).not.toHaveBeenCalled();
     });
 
     it('should exclude hidden field values when excludeValueIfHidden is enabled', () => {

@@ -138,6 +138,20 @@ function getNumberValidationConfig(fieldDef: FieldWithValidation): NumberValidat
   return { min: minVal, max: maxVal };
 }
 
+/** Returns whether mapping this leaf needs a validation schema branch. */
+export function hasValidationRules(fieldDef: FieldDef<unknown> & FieldWithValidation, context: FieldTreeMappingContext): boolean {
+  const declaresRequiredLogic = fieldDef.logic?.some(isValidationStateLogic) ?? false;
+  const required = fieldDef.required ?? (declaresRequiredLogic ? false : context.ancestorRequired);
+
+  return (
+    required === true ||
+    declaresRequiredLogic ||
+    getStringValidationConfig(fieldDef) !== undefined ||
+    getNumberValidationConfig(fieldDef) !== undefined ||
+    (fieldDef.validators?.length ?? 0) > 0
+  );
+}
+
 /**
  * Maps a field definition to the Angular Signal Forms schema.
  *
@@ -253,6 +267,10 @@ function mapLeafField(fieldDef: FieldDef<unknown>, fieldPath: AnySchemaPath, con
     for (const config of validationField.schemas) {
       applySchema(config, fieldPath);
     }
+  }
+
+  if (!hasValidationRules(validationField, context)) {
+    return;
   }
 
   // Validation block — gated by `validateWhenHidden` when hidden.
