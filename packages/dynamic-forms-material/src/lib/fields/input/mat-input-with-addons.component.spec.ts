@@ -13,7 +13,7 @@ import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-fo
 import { describe, expect, it, vi } from 'vitest';
 import { MatButtonAddonComponent } from '../../addons/mat-button-addon.component';
 import { MatIconAddonComponent } from '../../addons/mat-icon-addon.component';
-import type { MatButtonAddon, MatIconAddon } from '../../types/addons';
+import type { MatButtonAddon, MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 import MatInputFieldComponent from './mat-input.component';
 import type { MatInputAddon } from './mat-input.type';
 

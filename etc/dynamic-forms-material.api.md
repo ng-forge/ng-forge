@@ -6,8 +6,6 @@
 
 import { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { AddonActionPreset } from '@ng-forge/dynamic-forms';
-import * as _angular_core from '@angular/core';
-import * as _angular_material_form_field from '@angular/material/form-field';
 import { AppendArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms';
 import { BaseAddon } from '@ng-forge/dynamic-forms';
@@ -17,7 +15,6 @@ import { DatepickerField } from '@ng-forge/dynamic-forms/integration';
 import { DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 import { DynamicText } from '@ng-forge/dynamic-forms';
 import { DynamicValue } from '@ng-forge/dynamic-forms';
-import { FieldOption } from '@ng-forge/dynamic-forms';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType } from '@angular/material/form-field';
 import { FormConfig } from '@ng-forge/dynamic-forms';
@@ -32,8 +29,6 @@ import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { NarrowFields } from '@ng-forge/dynamic-forms';
 import { NextPageEvent } from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms_integration from '@ng-forge/dynamic-forms/integration';
 import { PopArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PrependArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PreviousPageEvent } from '@ng-forge/dynamic-forms';
@@ -54,7 +49,6 @@ import { TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
-import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
@@ -78,43 +72,8 @@ export interface MatAddonExtensions {
 // @public
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
 
-// @public
-export class MatButtonAddonComponent {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.TypedNgForgeAddonAction<MatButtonAddon>;
-    protected readonly addon: _angular_core.Signal<MatButtonAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    protected readonly isIconOnly: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly label: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatButtonAddonComponent, "df-mat-button-addon", never, {}, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddonAction; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatButtonAddonComponent, never>;
-}
-
 // @public (undocumented)
 export type MatButtonField<TEvent extends FormEvent> = ButtonField<MatButtonProps, TEvent>;
-
-// @public (undocumented)
-export class MatButtonFieldComponent<TEvent extends FormEvent> {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.NgForgeAction<TEvent>;
-    // (undocumented)
-    readonly buttonTestId: _angular_core.Signal<string>;
-    // (undocumented)
-    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
-    // (undocumented)
-    onClick(): void;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatButtonProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatButtonFieldComponent<any>, "df-mat-button", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeActionHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatButtonFieldComponent<any>, never>;
-}
 
 // @public (undocumented)
 export interface MatButtonProps {
@@ -126,20 +85,6 @@ export interface MatButtonProps {
 
 // @public (undocumented)
 export type MatCheckboxField = CheckboxField<MatCheckboxProps>;
-
-// @public (undocumented)
-export class MatCheckboxFieldComponent {
-    // (undocumented)
-    readonly disableRipple: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatCheckboxProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatCheckboxFieldComponent, "df-mat-checkbox", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatCheckboxFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatCheckboxProps {
@@ -157,32 +102,6 @@ export interface MatCheckboxProps {
 
 // @public (undocumented)
 export type MatDatepickerField = DatepickerField<MatDatepickerProps>;
-
-// @public (undocumented)
-export class MatDatepickerFieldComponent {
-    // (undocumented)
-    readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
-    // (undocumented)
-    readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
-    // (undocumented)
-    readonly hideRequiredMarker: _angular_core.Signal<boolean>;
-    // (undocumented)
-    readonly maxDate: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    readonly minDate: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatDatepickerProps | undefined>;
-    // (undocumented)
-    readonly startAt: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatDatepickerFieldComponent, "df-mat-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatDatepickerFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatDatepickerProps extends DatepickerProps {
@@ -257,25 +176,12 @@ export type MatFormProps = MaterialConfig;
 
 // @public
 export interface MatIconAddon extends BaseAddon {
+    // (undocumented)
     readonly ariaLabel?: DynamicText;
+    // (undocumented)
     readonly icon: string;
     // (undocumented)
     readonly type: 'mat-icon';
-}
-
-// @public
-export class MatIconAddonComponent {
-    // (undocumented)
-    readonly addon: _angular_core.InputSignal<MatIconAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    protected readonly hasAriaLabel: _angular_core.Signal<boolean>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatIconAddonComponent, "df-mat-icon-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatIconAddonComponent, never>;
 }
 
 // @public
@@ -285,30 +191,6 @@ export type MatInputAddon = MatAddonExtension | MatButtonAddon | MatIconAddon | 
 export type MatInputField = InputField<MatInputProps> & {
     addons?: ReadonlyArray<MatInputAddon>;
 };
-
-// @public (undocumented)
-export class MatInputFieldComponent {
-    // (undocumented)
-    readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
-    // (undocumented)
-    readonly hideRequiredMarker: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<MatInputAddon>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatInputProps | undefined>;
-    // (undocumented)
-    readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
-    protected readonly type: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatInputFieldComponent, "df-mat-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatInputFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatInputProps extends InputProps {
@@ -338,26 +220,6 @@ export type MatInsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemE
 
 // @public (undocumented)
 export type MatMultiCheckboxField<T> = MultiCheckboxField<T, MatMultiCheckboxProps>;
-
-// @public (undocumented)
-export class MatMultiCheckboxFieldComponent {
-    constructor();
-    readonly checkedValuesMap: _angular_core.Signal<Record<string, boolean>>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType[]>;
-    // (undocumented)
-    onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatMultiCheckboxProps | undefined>;
-    // (undocumented)
-    valueViewModel: _angular_core.WritableSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatMultiCheckboxFieldComponent, "df-mat-multi-checkbox", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatMultiCheckboxFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatMultiCheckboxProps {
@@ -398,20 +260,6 @@ export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'ev
 export type MatRadioField<T> = RadioField<T, MatRadioProps>;
 
 // @public (undocumented)
-export class MatRadioFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatRadioProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatRadioFieldComponent, "df-mat-radio", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatRadioFieldComponent, never>;
-}
-
-// @public (undocumented)
 export interface MatRadioProps {
     // (undocumented)
     color?: ThemePalette;
@@ -431,30 +279,6 @@ export type MatRemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEve
 
 // @public (undocumented)
 export type MatSelectField<T> = SelectField<T, MatSelectProps>;
-
-// @public (undocumented)
-export class MatSelectFieldComponent {
-    // (undocumented)
-    readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
-    // (undocumented)
-    defaultCompare: (value1: any, value2: any) => boolean;
-    // (undocumented)
-    readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
-    // (undocumented)
-    readonly hideRequiredMarker: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatSelectProps | undefined>;
-    // (undocumented)
-    readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatSelectFieldComponent, "df-mat-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatSelectFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatSelectProps extends SelectProps {
@@ -486,20 +310,6 @@ export type MatShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEve
 export type MatSliderField = SliderField<MatSliderProps>;
 
 // @public (undocumented)
-export class MatSliderFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<number>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatSliderProps | undefined>;
-    // (undocumented)
-    readonly step: _angular_core.InputSignal<number | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatSliderFieldComponent, "df-mat-slider", never, { "step": { "alias": "step"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatSliderFieldComponent, never>;
-}
-
-// @public (undocumented)
 export interface MatSliderProps {
     // (undocumented)
     appearance?: MatFormFieldAppearance;
@@ -526,26 +336,6 @@ export type MatSubmitButtonField = Omit<MatButtonField<FormSubmitEvent>, 'event'
 export type MatTextareaField = TextareaField<MatTextareaProps>;
 
 // @public (undocumented)
-export class MatTextareaFieldComponent {
-    // (undocumented)
-    readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
-    // (undocumented)
-    readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
-    // (undocumented)
-    readonly hideRequiredMarker: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatTextareaProps | undefined>;
-    // (undocumented)
-    readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatTextareaFieldComponent, "df-mat-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatTextareaFieldComponent, never>;
-}
-
-// @public (undocumented)
 export interface MatTextareaProps extends TextareaProps {
     // (undocumented)
     appearance?: MatFormFieldAppearance;
@@ -563,20 +353,6 @@ export interface MatTextareaProps extends TextareaProps {
 
 // @public (undocumented)
 export type MatToggleField = ToggleField<MatToggleProps>;
-
-// @public (undocumented)
-export class MatToggleFieldComponent {
-    // (undocumented)
-    readonly disableRipple: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<MatToggleProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatToggleFieldComponent, "df-mat-toggle", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatToggleFieldComponent, never>;
-}
 
 // @public (undocumented)
 export interface MatToggleProps {

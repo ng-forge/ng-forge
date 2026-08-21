@@ -1,23 +1,4 @@
-export {
-  BsButtonFieldComponent,
-  BsCheckboxFieldComponent,
-  BsDatepickerFieldComponent,
-  BsInputFieldComponent,
-  BsMultiCheckboxFieldComponent,
-  BsRadioFieldComponent,
-  BsSelectFieldComponent,
-  BsSliderFieldComponent,
-  BsTextareaFieldComponent,
-  BsToggleFieldComponent,
-  BOOTSTRAP_FIELD_TYPES,
-  BOOTSTRAP_CONFIG,
-  BsField,
-  withBootstrapFields,
-  withBootstrapAddons,
-  BsIconAddonComponent,
-  BsButtonAddonComponent,
-  BS_INPUT_TYPE_OVERRIDE,
-} from './lib';
+export { BOOTSTRAP_FIELD_TYPES, BOOTSTRAP_CONFIG, BsField, withBootstrapFields, withBootstrapAddons, BS_INPUT_TYPE_OVERRIDE } from './lib';
 
 export type { BsIconAddon, BsButtonAddon, BsAddon, BsInputAddon, BsAddonExtensions } from './lib';
 export type {

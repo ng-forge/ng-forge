@@ -1,16 +1,5 @@
-// Field components
-export {
-  BsButtonFieldComponent,
-  BsCheckboxFieldComponent,
-  BsDatepickerFieldComponent,
-  BsInputFieldComponent,
-  BsMultiCheckboxFieldComponent,
-  BsRadioFieldComponent,
-  BsSelectFieldComponent,
-  BsSliderFieldComponent,
-  BsTextareaFieldComponent,
-  BsToggleFieldComponent,
-} from './fields';
+// Field types remain available for declarative configuration. Runtime field
+// components are implementation details loaded by withBootstrapFields().
 export type {
   BsButtonProps,
   BsButtonField,
@@ -45,8 +34,7 @@ export type {
 
 // Configuration
 export { BOOTSTRAP_FIELD_TYPES } from './config/bootstrap-field-config';
-export type { BootstrapConfig } from './models';
-export { BOOTSTRAP_CONFIG } from './models';
+export { BOOTSTRAP_CONFIG, BS_INPUT_TYPE_OVERRIDE, type BootstrapConfig } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 // Types and constants
 export { BsField, type BsFieldType } from './types/types';
@@ -57,14 +45,10 @@ export type { BsFormProps, BsFormConfig } from './types/form-config';
 // `type: 'bs-icon'`, and similar resolve at the call site. Without these,
 // consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
-import './types/addons';
 
 // Providers
 export { withBootstrapFields, withBootstrapAddons } from './providers/bootstrap-providers';
 
 // Addon types
-export { BsIconAddonComponent } from './addons/bs-icon-addon.component';
-export { BsButtonAddonComponent } from './addons/bs-button-addon.component';
-export type { BsIconAddon, BsButtonAddon, BsAddon } from './types/addons';
+export type { BsIconAddon, BsButtonAddon, BsAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 export type { BsInputAddon, BsAddonExtensions } from './fields/input/bs-input.type';
-export { BS_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

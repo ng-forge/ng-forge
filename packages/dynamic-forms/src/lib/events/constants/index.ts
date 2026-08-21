@@ -1,4 +1,5 @@
 export { FormSubmitEvent } from './submit.event';
+export { ActivePageInitializedEvent } from './active-page-initialized.event';
 export { GoToPageEvent } from './go-to-page.event';
 export type { PageNavigationOptions } from './go-to-page.event';
 export { NextPageEvent } from './next-page.event';

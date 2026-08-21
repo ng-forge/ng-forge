@@ -23,7 +23,7 @@
     "form-builder",
     "ng-forge"
   ],
-  "sideEffects": true,
+  "sideEffects": false,
   "exports": {
     ".": {
       "default": "./src/index.ts"

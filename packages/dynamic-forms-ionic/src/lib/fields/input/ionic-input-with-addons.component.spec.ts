@@ -5,7 +5,7 @@ import { createNgForgeFieldFixture } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
 import { IonicButtonAddonComponent } from '../../addons/ion-button-addon.component';
 import { IonicIconAddonComponent } from '../../addons/ion-icon-addon.component';
-import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
+import type { IonicButtonAddon, IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 import type { IonicInputAddon } from './ionic-input.type';
 import IonicInputFieldComponent from './ionic-input.component';
 

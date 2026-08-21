@@ -1,16 +1,5 @@
-// Field components
-export {
-  PrimeCheckboxFieldComponent,
-  PrimeDatepickerFieldComponent,
-  PrimeInputFieldComponent,
-  PrimeMultiCheckboxFieldComponent,
-  PrimeRadioFieldComponent,
-  PrimeSelectFieldComponent,
-  PrimeSliderFieldComponent,
-  PrimeButtonFieldComponent,
-  PrimeTextareaFieldComponent,
-  PrimeToggleFieldComponent,
-} from './fields';
+// Field types remain available for declarative configuration. Runtime field
+// components are implementation details loaded by withPrimeNGFields().
 export type {
   PrimeCheckboxProps,
   PrimeCheckboxField,
@@ -45,8 +34,7 @@ export type {
 
 // Configuration
 export { PRIMENG_FIELD_TYPES } from './config/primeng-field-config';
-export type { PrimeNGConfig } from './models';
-export { PRIMENG_CONFIG } from './models';
+export { PRIMENG_CONFIG, PRIME_INPUT_TYPE_OVERRIDE, type PrimeNGConfig } from '@ng-forge/dynamic-forms-primeng/shared';
 
 // Types and constants
 export { PrimeField, type PrimeFieldType } from './types/types';
@@ -57,14 +45,10 @@ export type { PrimeFormProps, PrimeFormConfig } from './types/form-config';
 // `type: 'prime-icon'`, and similar resolve at the call site. Without these,
 // consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
-import './types/addons';
 
 // Providers
 export { withPrimeNGFields, withPrimeNGAddons } from './providers/primeng-providers';
 
 // Addon types
-export { PrimeIconAddonComponent } from './addons/prime-icon-addon.component';
-export { PrimeButtonAddonComponent } from './addons/prime-button-addon.component';
-export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon } from './types/addons';
+export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 export type { PrimeInputAddon, PrimeAddonExtensions } from './fields/input/prime-input.type';
-export { PRIME_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

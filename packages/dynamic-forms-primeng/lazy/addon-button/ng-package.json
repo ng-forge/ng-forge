@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/addons/prime-button-addon.component.ts"
+  }
+}

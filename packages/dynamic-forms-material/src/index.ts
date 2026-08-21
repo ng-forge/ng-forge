@@ -1,23 +1,4 @@
-export {
-  MatButtonFieldComponent,
-  MatCheckboxFieldComponent,
-  MatDatepickerFieldComponent,
-  MatInputFieldComponent,
-  MatMultiCheckboxFieldComponent,
-  MatRadioFieldComponent,
-  MatSelectFieldComponent,
-  MatSliderFieldComponent,
-  MatTextareaFieldComponent,
-  MatToggleFieldComponent,
-  MATERIAL_FIELD_TYPES,
-  MATERIAL_CONFIG,
-  MatField,
-  withMaterialFields,
-  withMaterialAddons,
-  MatIconAddonComponent,
-  MatButtonAddonComponent,
-  MAT_INPUT_TYPE_OVERRIDE,
-} from './lib';
+export { MATERIAL_FIELD_TYPES, MATERIAL_CONFIG, MatField, withMaterialFields, withMaterialAddons, MAT_INPUT_TYPE_OVERRIDE } from './lib';
 
 export type { MatIconAddon, MatButtonAddon, MatAddon, MatInputAddon, MatAddonExtensions } from './lib';
 

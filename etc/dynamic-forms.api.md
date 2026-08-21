@@ -34,6 +34,17 @@ import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
 
 // @public
+export class ActivePageInitializedEvent implements FormEvent {
+    constructor(pageIndex: number, pageKey: string);
+    // (undocumented)
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly pageKey: string;
+    // (undocumented)
+    readonly type: "active-page-initialized";
+}
+
+// @public
 export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
 
 // @public
@@ -366,6 +377,7 @@ export class DfTemplate {
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormModel<TFields>> {
     constructor();
     activeConfig: Signal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
+    activePageInitialized: _angular_core.OutputRef<ActivePageInitializedEvent>;
     cleared: _angular_core.OutputRef<FormClearEvent>;
     config: _angular_core.InputSignal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
     defaultValues: WritableSignal<TModel>;
@@ -425,7 +437,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "activePageInitialized": "activePageInitialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }

@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/addons/mat-button-addon.component.ts"
+  }
+}

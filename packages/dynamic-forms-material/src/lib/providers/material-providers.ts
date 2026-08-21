@@ -1,10 +1,9 @@
+/* eslint-disable @nx/enforce-module-boundaries -- Package self-imports preserve ng-packagr secondary entry points. */
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
 import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { MATERIAL_CONFIG, type MaterialConfig, type MatButtonAddon, type MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
-import { MaterialConfig } from '../models/material-config';
-import { MATERIAL_CONFIG } from '../models/material-config.token';
-import type { MatButtonAddon, MatIconAddon } from '../types/addons';
 
 /** Field type definitions for Material Design components. */
 export type MaterialFieldTypes = FieldTypeDefinition[];
@@ -65,7 +64,7 @@ export function withMaterialFields(config?: MaterialConfig): MaterialFieldsWithA
 
 const MAT_ICON_KIND: AddonTypeDefinition<MatIconAddon> = {
   type: 'mat-icon',
-  loadComponent: () => import('../addons/mat-icon-addon.component').then((m) => m.MatIconAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-material/lazy/addon-icon').then((m) => m.MatIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'mat-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -75,7 +74,7 @@ const MAT_ICON_KIND: AddonTypeDefinition<MatIconAddon> = {
 
 const MAT_BUTTON_KIND: AddonTypeDefinition<MatButtonAddon> = {
   type: 'mat-button',
-  loadComponent: () => import('../addons/mat-button-addon.component').then((m) => m.MatButtonAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-material/lazy/addon-button').then((m) => m.MatButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

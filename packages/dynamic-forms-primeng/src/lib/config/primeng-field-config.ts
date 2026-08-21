@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries -- package self-imports preserve real lazy secondary entrypoints. */
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import {
   addArrayItemButtonMapper,
@@ -24,6 +25,29 @@ const BUTTON_FIELD_TYPES_BASE = {
   valueHandling: 'exclude',
 } as const;
 
+const loadInputComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/input').then(({ PrimeInputFieldComponent }) => PrimeInputFieldComponent);
+const loadSelectComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/select').then(({ PrimeSelectFieldComponent }) => PrimeSelectFieldComponent);
+const loadCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/checkbox').then(({ PrimeCheckboxFieldComponent }) => PrimeCheckboxFieldComponent);
+const loadButtonComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/button').then(({ PrimeButtonFieldComponent }) => PrimeButtonFieldComponent);
+const loadTextareaComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/textarea').then(({ PrimeTextareaFieldComponent }) => PrimeTextareaFieldComponent);
+const loadRadioComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/radio').then(({ PrimeRadioFieldComponent }) => PrimeRadioFieldComponent);
+const loadMultiCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/multi-checkbox').then(
+    ({ PrimeMultiCheckboxFieldComponent }) => PrimeMultiCheckboxFieldComponent,
+  );
+const loadDatepickerComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/datepicker').then(({ PrimeDatepickerFieldComponent }) => PrimeDatepickerFieldComponent);
+const loadSliderComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/slider').then(({ PrimeSliderFieldComponent }) => PrimeSliderFieldComponent);
+const loadToggleComponent = () =>
+  import('@ng-forge/dynamic-forms-primeng/lazy/toggle').then(({ PrimeToggleFieldComponent }) => PrimeToggleFieldComponent);
+
 /**
  * PrimeNG field type definitions
  * Follows the FieldTypeDefinition interface for proper registry integration
@@ -31,7 +55,7 @@ const BUTTON_FIELD_TYPES_BASE = {
 export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: PrimeField.Input,
-    loadComponent: () => import('../fields/input/prime-input.component'),
+    loadComponent: loadInputComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
@@ -42,81 +66,81 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   },
   {
     name: PrimeField.Select,
-    loadComponent: () => import('../fields/select/prime-select.component'),
+    loadComponent: loadSelectComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Checkbox,
-    loadComponent: () => import('../fields/checkbox/prime-checkbox.component'),
+    loadComponent: loadCheckboxComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Button,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: buttonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Submit,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: submitButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Next,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: nextButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Previous,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: previousButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.AddArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: addArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.PrependArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: prependArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.InsertArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: insertArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.RemoveArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: removeArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.PopArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: popArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.ShiftArrayItem,
-    loadComponent: () => import('../fields/button/prime-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: shiftArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Textarea,
-    loadComponent: () => import('../fields/textarea/prime-textarea.component'),
+    loadComponent: loadTextareaComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['rows', 'cols'],
     scope: 'text-input',
@@ -124,35 +148,35 @@ export const PRIMENG_FIELD_TYPES: FieldTypeDefinition[] = [
   },
   {
     name: PrimeField.Radio,
-    loadComponent: () => import('../fields/radio/prime-radio.component'),
+    loadComponent: loadRadioComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.MultiCheckbox,
-    loadComponent: () => import('../fields/multi-checkbox/prime-multi-checkbox.component'),
+    loadComponent: loadMultiCheckboxComponent,
     mapper: optionsFieldMapper,
     scope: 'multi-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Datepicker,
-    loadComponent: () => import('../fields/datepicker/prime-datepicker.component'),
+    loadComponent: loadDatepickerComponent,
     mapper: datepickerFieldMapper,
     scope: 'date',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Slider,
-    loadComponent: () => import('../fields/slider/prime-slider.component'),
+    loadComponent: loadSliderComponent,
     mapper: valueFieldMapper,
     scope: 'numeric',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: PrimeField.Toggle,
-    loadComponent: () => import('../fields/toggle/prime-toggle.component'),
+    loadComponent: loadToggleComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,

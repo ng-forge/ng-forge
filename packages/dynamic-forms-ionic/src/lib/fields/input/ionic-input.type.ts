@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { IonicButtonAddon, IonicIconAddon } from '../../types/addons';
+import type { IonicButtonAddon, IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 
 export interface IonicInputProps extends InputProps {
   fill?: 'solid' | 'outline';

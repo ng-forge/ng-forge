@@ -43,7 +43,7 @@ export default [
   },
   {
     // Inline addon renders directly on <ion-button> so Ionic's ::slotted shadow CSS matches.
-    files: ['**/addons/ion-inline-button-addon.component.ts'],
+    files: ['**/shared/ionic-inline-button-addon.component.ts'],
     rules: {
       '@angular-eslint/component-selector': 'off',
     },

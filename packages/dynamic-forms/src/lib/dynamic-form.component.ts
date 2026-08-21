@@ -35,6 +35,7 @@ import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { PageChangeEvent } from './events/constants/page-change.event';
 import { PagerStateEvent } from './events/constants/pager-state.event';
+import { ActivePageInitializedEvent } from './events/constants/active-page-initialized.event';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { FormStateManager, FORM_STATE_DEPS } from './state/form-state-manager';
 import { provideDynamicFormDI } from './providers/dynamic-form-di';
@@ -321,6 +322,9 @@ export class DynamicForm<
    * Useful for E2E testing to ensure the form is fully rendered before interaction.
    */
   initialized = outputFromObservable(this.initialized$);
+
+  /** Emits after the currently visible page and all of its visible fields render. */
+  activePageInitialized = outputFromObservable(this.eventBus.on<ActivePageInitializedEvent>('active-page-initialized'));
 
   /** Emits when the current page changes in paged forms. */
   onPageChange = outputFromObservable(this.eventBus.on<PageChangeEvent>('page-change'));

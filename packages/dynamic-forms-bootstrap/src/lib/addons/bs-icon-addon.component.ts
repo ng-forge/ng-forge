@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import type { BsIconAddon } from '../types/addons';
+import type { BsIconAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 /** Renderer for the `bs-icon` addon type. */
 @Component({

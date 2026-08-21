@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { IonIcon } from '@ionic/angular/standalone';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import type { IonicIconAddon } from '../types/addons';
+import type { IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 
 /** Renderer for the `ion-icon` addon type. */
 @Component({

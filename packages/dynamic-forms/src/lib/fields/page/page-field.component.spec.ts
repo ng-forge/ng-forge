@@ -1,6 +1,11 @@
 import PageFieldComponent from './page-field.component';
 import { PageField, validatePageNesting } from '@ng-forge/dynamic-forms/internal';
 import { setupSimpleTest } from '../../../../test-utils/src/simple-test-utils';
+import { TestBed } from '@angular/core/testing';
+import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { ActivePageInitializedEvent } from '../../events/constants/active-page-initialized.event';
+import { delay } from '@ng-forge/utils';
+import { createPropertyOverrideStore, PROPERTY_OVERRIDE_STORE } from '../../core/property-derivation/property-override-store';
 
 describe('PageFieldComponent', () => {
   it('should create', () => {
@@ -37,6 +42,29 @@ describe('PageFieldComponent', () => {
 
     const { component } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: true });
     expect(component.disabled()).toBe(true);
+  });
+
+  it('emits active-page readiness after the visible page fields render', async () => {
+    const field: PageField<any> = {
+      key: 'test-page',
+      type: 'page',
+      fields: [{ key: 'name', type: 'test' }],
+    };
+    TestBed.configureTestingModule({
+      providers: [{ provide: PROPERTY_OVERRIDE_STORE, useFactory: createPropertyOverrideStore }],
+    });
+    const { fixture } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 2, isVisible: true });
+    const eventBus = TestBed.inject(EventBus);
+    const events: ActivePageInitializedEvent[] = [];
+    eventBus.on<ActivePageInitializedEvent>('active-page-initialized').subscribe((event) => events.push(event));
+
+    await delay(0);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(events).toEqual([new ActivePageInitializedEvent(2, 'test-page')]);
   });
 
   it('should validate page nesting and prevent nested pages', () => {

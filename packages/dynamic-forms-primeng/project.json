@@ -59,6 +59,14 @@
         "configFile": "packages/dynamic-forms-primeng/vite.config.typecheck.ts"
       }
     },
+    "lazy-entry-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node scripts/check-adapter-lazy-entries.mjs primeng",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "api-check": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],

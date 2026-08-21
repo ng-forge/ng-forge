@@ -33,7 +33,7 @@ import { clampWindowSize } from '../../providers/features/clamp-window';
   selector: 'div[page-orchestrator]',
   imports: [PageFieldComponent],
   template: `
-    @for (pageField of pageFields(); track pageField.key; let i = $index) {
+    @for (page of pageRenderStates(); track page.field.key) {
       <!--
         Skip pages hidden by 'hidden' logic conditions entirely. FormStateManager
         derives schema/value/validators from config (not from mounted components),
@@ -41,37 +41,23 @@ import { clampWindowSize } from '../../providers/features/clamp-window';
         CD cost. This is the page-level equivalent of the existing field-level
         \`@if (!field.hidden())\` gate in page-field.component.ts.
       -->
-      @if (!pageHiddenStates()[i]) {
-        @if (isWithinPreloadWindow(i)) {
-          <!-- Current and preloaded neighbour pages: render immediately for flicker-free navigation -->
-          @defer (on immediate) {
-            <section
-              page-field
-              [field]="pageField"
-              [key]="pageField.key"
-              [pageIndex]="i"
-              [isVisible]="i === state().currentPageIndex"
-            ></section>
+      @if (!page.hidden) {
+        @if (page.active) {
+          <section page-field [field]="page.field" [key]="page.field.key" [pageIndex]="page.index" [isVisible]="true"></section>
+        } @else if (page.preload) {
+          @defer (on idle) {
+            <section page-field [field]="page.field" [key]="page.field.key" [pageIndex]="page.index" [isVisible]="false"></section>
           } @placeholder {
-            <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+            <div class="df-page-placeholder" [attr.data-page-index]="page.index" [attr.data-page-key]="page.field.key"></div>
           }
         } @else {
           <!--
-            Pages outside the preload window render only a lightweight placeholder
-            — they are NOT mounted. Mounting every page eagerly (previously via
-            \`@defer (on idle)\`, which fires almost immediately post-load) put all
-            fields of every page in the DOM at once: O(all-fields) initial render
-            blocking + O(all-fields) change detection on every keystroke, with no
-            visible benefit since only one page is shown at a time.
-
-            Form state (schema/value/validators) derives from config, not from
-            mounted components, so leaving a page unmounted does not affect
-            validity, derivations, or navigation. A page mounts the moment
-            navigation brings it into the preload window (above), which is
-            flicker-free for sequential next/previous navigation. The window size
-            is configurable via \`withPagePreload(n)\` or \`FormOptions.pagePreloadWindow\`.
+            Pages outside the preload window remain lightweight placeholders.
+            Form state derives from config, so leaving their components unmounted
+            does not affect validity, derivations, or navigation. The active page
+            renders directly; configured neighbours preload declaratively on idle.
           -->
-          <div class="df-page-placeholder" [attr.data-page-index]="i" [attr.data-page-key]="pageField.key"></div>
+          <div class="df-page-placeholder" [attr.data-page-index]="page.index" [attr.data-page-key]="page.field.key"></div>
         }
       }
     }
@@ -243,7 +229,7 @@ export class PageOrchestratorComponent {
   }));
 
   /**
-   * Effective preload window (pages mounted on each side of the current page).
+   * Effective preload window (pages preloaded on idle on each side of the current page).
    * Per-form `FormOptions.pagePreloadWindow` wins over the global
    * `withPagePreload(n)` default; both fall back to `1`. Clamped to `>= 0`.
    */
@@ -253,13 +239,20 @@ export class PageOrchestratorComponent {
     return clampWindowSize(perForm, this.globalPreloadWindow);
   });
 
-  /**
-   * Whether page `i` is inside the preload window around the current page and
-   * should therefore be mounted (vs. rendering a placeholder).
-   */
-  isWithinPreloadWindow(i: number): boolean {
-    return Math.abs(i - this.state().currentPageIndex) <= this.preloadWindow();
-  }
+  /** Declarative render mode for every configured page. */
+  readonly pageRenderStates = computed(() => {
+    const activeIndex = this.currentPageIndex();
+    const hiddenStates = this.pageHiddenStates();
+    const preloadWindow = this.preloadWindow();
+
+    return this.pageFields().map((field, index) => ({
+      field,
+      index,
+      hidden: hiddenStates[index],
+      active: index === activeIndex,
+      preload: index !== activeIndex && Math.abs(index - activeIndex) <= preloadWindow,
+    }));
+  });
 
   constructor() {
     // Setup event listeners for navigation

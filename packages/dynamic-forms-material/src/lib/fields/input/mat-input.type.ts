@@ -1,7 +1,7 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
 import { FloatLabelType, MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
-import type { MatButtonAddon, MatIconAddon } from '../../types/addons';
+import type { MatButtonAddon, MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 
 export interface MatInputProps extends InputProps {
   appearance?: MatFormFieldAppearance;

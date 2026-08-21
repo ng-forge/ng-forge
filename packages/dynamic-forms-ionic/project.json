@@ -59,6 +59,14 @@
         "configFile": "packages/dynamic-forms-ionic/vite.config.typecheck.ts"
       }
     },
+    "lazy-entry-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node scripts/check-adapter-lazy-entries.mjs ionic",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "api-check": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],

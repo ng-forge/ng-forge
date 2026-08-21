@@ -11,3 +11,10 @@ export {
   type BenchOptions,
 } from './bench-harness';
 export { runPerfBench, assertPerf, type AssertPerfOpts } from './perf-spec-helper';
+export {
+  DIRECT_ENTRY_FIELDS_PER_PAGE,
+  DIRECT_ENTRY_PAGE_COUNT,
+  DIRECT_ENTRY_TOTAL_FIELDS,
+  directEntryFullConfig,
+  directEntryWizardConfig,
+} from './direct-entry-config';

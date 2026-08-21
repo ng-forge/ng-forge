@@ -1,23 +1,4 @@
-export {
-  IonicButtonFieldComponent,
-  IonicCheckboxFieldComponent,
-  IonicDatepickerFieldComponent,
-  IonicInputFieldComponent,
-  IonicMultiCheckboxFieldComponent,
-  IonicRadioFieldComponent,
-  IonicSelectFieldComponent,
-  IonicSliderFieldComponent,
-  IonicTextareaFieldComponent,
-  IonicToggleFieldComponent,
-  IONIC_FIELD_TYPES,
-  IONIC_CONFIG,
-  IonicField,
-  withIonicFields,
-  withIonicAddons,
-  IonicIconAddonComponent,
-  IonicButtonAddonComponent,
-  IONIC_INPUT_TYPE_OVERRIDE,
-} from './lib';
+export { IONIC_FIELD_TYPES, IONIC_CONFIG, IonicField, withIonicFields, withIonicAddons, IONIC_INPUT_TYPE_OVERRIDE } from './lib';
 export type {
   IonicButtonProps,
   IonicButtonField,

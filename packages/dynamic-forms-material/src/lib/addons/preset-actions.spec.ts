@@ -1,7 +1,7 @@
 import { signal, WritableSignal } from '@angular/core';
 import type { AddonActionContext } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { type PresetCollaborators, runMatPresetAction } from './preset-actions';
+import { type PresetCollaborators, runMatPresetAction } from '@ng-forge/dynamic-forms-material/shared';
 
 // Field-bound stub — opaque form object; the runner discriminates on
 // `form !== null`, not on tree methods.

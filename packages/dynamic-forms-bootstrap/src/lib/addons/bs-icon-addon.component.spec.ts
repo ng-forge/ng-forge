@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { BsIconAddonComponent } from './bs-icon-addon.component';
-import type { BsIconAddon } from '../types/addons';
+import type { BsIconAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 function setup(addon: BsIconAddon) {
   TestBed.configureTestingModule({ imports: [BsIconAddonComponent] });

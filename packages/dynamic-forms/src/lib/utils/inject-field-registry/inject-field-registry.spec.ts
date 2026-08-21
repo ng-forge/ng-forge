@@ -159,6 +159,28 @@ describe('injectFieldRegistry', () => {
       expect(inputComp).toBe(TestComponent);
       expect(checkboxComp).toBe(AnotherComponent);
     });
+
+    it('should share one in-flight component load across concurrent fields of the same type', async () => {
+      let loadCount = 0;
+      let resolveLoad: ((component: Type<unknown>) => void) | undefined;
+
+      registry.set('input', {
+        name: 'input',
+        loadComponent: () => {
+          loadCount += 1;
+          return new Promise<Type<unknown>>((resolve) => {
+            resolveLoad = resolve;
+          });
+        },
+      });
+
+      const first = fieldRegistry.loadTypeComponent('input');
+      const second = fieldRegistry.loadTypeComponent('input');
+
+      expect(loadCount).toBe(1);
+      resolveLoad?.(TestComponent);
+      await expect(Promise.all([first, second])).resolves.toEqual([TestComponent, TestComponent]);
+    });
   });
 
   describe('getTypes', () => {

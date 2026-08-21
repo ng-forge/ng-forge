@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, EnvironmentInjector, inject, Injector, input } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  input,
+} from '@angular/core';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -16,6 +26,7 @@ import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
 import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
+import { ActivePageInitializedEvent } from '../../events/constants/active-page-initialized.event';
 
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({
@@ -137,6 +148,11 @@ export default class PageFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
+  private readonly renderReady = computed(() => {
+    const fields = this.resolvedFields();
+    return fields.length > 0 && fields.every((field) => field.renderReady());
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Constructor
   // ─────────────────────────────────────────────────────────────────────────────
@@ -168,6 +184,14 @@ export default class PageFieldComponent {
 
   private setupEffects(): void {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'page', () => this.field().key, this.injector);
+
+    afterRenderEffect({
+      write: () => {
+        if (this.isVisible() && this.renderReady()) {
+          this.eventBus.dispatch(ActivePageInitializedEvent, this.pageIndex(), this.key());
+        }
+      },
+    });
 
     explicitEffect([this.isValid, this.field], ([valid, pageField]) => {
       if (!valid) {
