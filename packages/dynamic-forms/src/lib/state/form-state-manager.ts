@@ -428,6 +428,26 @@ export class FormStateManager<
   /** Tracks per-path exclusion state across save-effect runs to detect newly-excluded fields. */
   private readonly prevFieldStateSnapshot = signal<Record<string, FieldExclusionAxes>>({});
 
+  /** Last reference pushed to `deps.value` by the outward-sync effect. */
+  private readonly lastOutwardValue: { current: unknown } = { current: undefined };
+
+  /** Last `deps.value` accepted as a genuine host change (memo for {@link externalValue}). */
+  private readonly lastExternalValue: { current: unknown } = { current: undefined };
+
+  /**
+   * `deps.value` with our own outward sync filtered out. Without this the form reacts to the
+   * value it just published: `entity` re-derives, which moves `boundFormValue`, which writes
+   * `deps.value` again — a full whole-form merge per keystroke.
+   */
+  private readonly externalValue = computed<TModel>(() => {
+    const incoming = this.deps.value();
+    if (incoming === this.lastOutwardValue.current) {
+      return this.lastExternalValue.current as TModel;
+    }
+    this.lastExternalValue.current = incoming;
+    return incoming as TModel;
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
@@ -435,7 +455,7 @@ export class FormStateManager<
   /** Entity (form value merged with defaults). */
   readonly entity = linkedSignal<TModel>(
     () => {
-      const inputValue = this.deps.value();
+      const inputValue = this.externalValue();
       const defaults = this.defaultValues();
       const keys = this.validKeys();
       const saved = this.excludedValueStore();
@@ -1024,6 +1044,9 @@ export class FormStateManager<
     explicitEffect([this.boundFormValue], ([currentBound]) => {
       const currentValue = this.deps.value();
       if (!isEqual(currentBound, currentValue)) {
+        // Record before writing so `externalValue` can recognise the echo.
+        this.lastOutwardValue.current = currentBound;
+        this.lastExternalValue.current = currentBound;
         this.deps.value.set(currentBound as TModel);
       }
     });
@@ -1105,18 +1128,22 @@ export class FormStateManager<
       this.addonKindRegistry,
       source,
     );
-    const nextKeys = new Set<string>();
-    for (const w of addonWarnings) {
-      // Dedup uses a structural fingerprint so different fields with the
-      // same warning category never collide; the rendered message is what
-      // we log.
-      const key = addonWarningKey(w);
-      nextKeys.add(key);
-      if (!this.lastAddonWarningKeys.has(key)) {
-        this.logger.warn(formatAddonWarning(w));
+    // Diagnostics only — the addon *filtering* above is what's load-bearing.
+    // Gated so `addonWarningKey`/`formatAddonWarning` tree-shake out of prod builds.
+    if (DEV_MODE) {
+      const nextKeys = new Set<string>();
+      for (const w of addonWarnings) {
+        // Dedup uses a structural fingerprint so different fields with the
+        // same warning category never collide; the rendered message is what
+        // we log.
+        const key = addonWarningKey(w);
+        nextKeys.add(key);
+        if (!this.lastAddonWarningKeys.has(key)) {
+          this.logger.warn(formatAddonWarning(w));
+        }
       }
+      this.lastAddonWarningKeys = nextKeys;
     }
-    this.lastAddonWarningKeys = nextKeys;
     const validatedFields = sanitizedFields as FieldDef<unknown>[];
 
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(validatedFields, registry);

@@ -17,6 +17,12 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
  * @returns true if values are deeply equal by their string-keyed properties
  */
 export function isEqual(a: unknown, b: unknown): boolean {
+  // Primitives and identical refs can't cycle, so skip allocating the tracking maps.
+  if (a === b) return true;
+  if (typeof a === 'number' && typeof b === 'number') return Object.is(a, b);
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return Object.is(a, b);
+
   return isEqualInternal(a, b, new WeakMap(), new WeakMap());
 }
 
