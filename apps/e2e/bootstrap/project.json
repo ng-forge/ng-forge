@@ -104,6 +104,34 @@
           "statsJson": true,
           "outputHashing": "all",
           "baseHref": "/"
+        },
+        "raw": {
+          "outputPath": "dist/apps/e2e/bootstrap-raw",
+          "browser": "apps/e2e/bootstrap/src/main.raw.ts",
+          "index": {
+            "input": "apps/e2e/bootstrap/src/index.raw.html",
+            "output": "index.html"
+          },
+          "assets": [],
+          "styles": ["apps/e2e/bootstrap/src/styles.performance.scss"],
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "800kb",
+              "maximumError": "900kb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "12kb"
+            }
+          ],
+          "optimization": true,
+          "extractLicenses": true,
+          "sourceMap": false,
+          "statsJson": true,
+          "outputHashing": "all",
+          "baseHref": "/"
         }
       },
       "defaultConfiguration": "production"

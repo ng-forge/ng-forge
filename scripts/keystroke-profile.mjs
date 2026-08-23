@@ -19,7 +19,10 @@ const CHARS = Number(process.argv[2] ?? 40);
 const CPU = Number(process.env.CPU_THROTTLE ?? 20);
 
 const TARGETS = {
-  'ng-forge': { url: 'http://localhost:4321/#/wizard?preload=0', dist: 'dist/apps/e2e/bootstrap-performance/browser' },
+  'ng-forge': {
+    url: process.env.NG_URL ?? 'http://localhost:4321/#/wizard?preload=0',
+    dist: 'dist/apps/e2e/bootstrap-performance/browser',
+  },
   formly: { url: 'http://localhost:4322/', dist: 'dist/apps/e2e/bootstrap-formly/browser' },
 };
 

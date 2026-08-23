@@ -2,7 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/c
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FieldArrayType, FormlyModule, type FormlyFieldConfig } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
-import { DIRECT_ENTRY_PAGE_COUNT, DIRECT_ENTRY_TOTAL_FIELDS, formlyDirectEntryPages } from '@ng-forge/examples-shared-testing/perf';
+import {
+  DIRECT_ENTRY_PAGE_COUNT,
+  DIRECT_ENTRY_TOTAL_FIELDS,
+  formlyDirectEntryFlat,
+  formlyDirectEntryPages,
+  formlyDirectEntryPlain,
+} from '@ng-forge/examples-shared-testing/perf';
 
 /**
  * Minimal `repeat` type. Formly ships no array type, so the head-to-head needs
@@ -73,8 +79,15 @@ export class FormlyBenchmarkComponent {
     ...Object.fromEntries(Array.from({ length: DIRECT_ENTRY_PAGE_COUNT }, (_, i) => [`page${i + 1}Items`, [{}]])),
   };
 
+  // `?flat` instantiates all 240 controls at once. Formly couples control registration to
+  // rendering — a hidden field gets no control — so matching ng-forge's whole-form model
+  // means rendering every page, not hiding the inactive ones.
+  private readonly params = new URL(location.href).searchParams;
+  private readonly flat = this.params.has('flat');
+  private readonly plain = this.params.has('plain');
   private readonly pages = formlyDirectEntryPages();
-  readonly activeFields = computed<FormlyFieldConfig[]>(() => this.pages[this.currentPage()]);
+  private readonly flatFields = this.plain ? formlyDirectEntryPlain() : formlyDirectEntryFlat();
+  readonly activeFields = computed<FormlyFieldConfig[]>(() => (this.flat || this.plain ? this.flatFields : this.pages[this.currentPage()]));
 
   readonly heading = computed(() => `Performance benchmark, page ${this.currentPage() + 1} of ${this.pageCount}`);
 

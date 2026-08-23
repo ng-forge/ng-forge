@@ -12,7 +12,12 @@
  * Usage: node scripts/formly-head-to-head.mjs [trials]
  * Expects both apps served: ng-forge on :4321, formly on :4322.
  */
-import { chromium } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
+
+// CPU throttling is Chromium-only (CDP), so cross-browser runs are unthrottled.
+const ENGINES = { chromium, firefox, webkit };
+const ENGINE_NAME = process.env.BROWSER ?? 'chromium';
+const ENGINE = ENGINES[ENGINE_NAME] ?? chromium;
 
 const TRIALS = Number(process.argv[2] ?? 7);
 const WARMUP = 2;
@@ -170,8 +175,8 @@ function stat(xs) {
 async function runOne(browser, url, cpuThrottle) {
   const context = await browser.newContext();
   const page = await context.newPage();
-  const client = await context.newCDPSession(page);
-  if (cpuThrottle > 1) await client.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottle });
+  const client = ENGINE_NAME === 'chromium' ? await context.newCDPSession(page) : null;
+  if (client && cpuThrottle > 1) await client.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottle });
 
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.waitForSelector('#field2-input', { timeout: 20000 });
@@ -208,12 +213,24 @@ async function runOne(browser, url, cpuThrottle) {
 }
 
 const cpu = Number(process.env.CPU_THROTTLE ?? 1);
-const browser = await chromium.launch();
-const results = {};
-for (const [name, url] of Object.entries(TARGETS)) {
-  process.stdout.write(`running ${name} (cpu ${cpu}x) ... `);
-  results[name] = await runOne(browser, url, cpu);
-  console.log('done');
+const REPS = Number(process.env.REPS ?? 3);
+const browser = await ENGINE.launch();
+
+// Repeat, and alternate order within each rep. Both libraries must be measured
+// close together or machine drift is indistinguishable from a real change.
+// The first rep is discarded: browser launch and JIT warmup skew it well beyond
+// the per-page warmup the inner loop already does.
+const reps = [];
+for (let rep = 0; rep < REPS + 1; rep++) {
+  const order = rep % 2 === 0 ? ['ng-forge', 'formly'] : ['formly', 'ng-forge'];
+  const round = {};
+  const label = rep === 0 ? 'warmup' : `rep ${rep}/${REPS}`;
+  for (const name of order) {
+    process.stdout.write(`${label}  ${name} (cpu ${cpu}x) ... `);
+    round[name] = await runOne(browser, TARGETS[name], cpu);
+    console.log('done');
+  }
+  if (rep > 0) reps.push(round);
 }
 await browser.close();
 
@@ -224,20 +241,40 @@ const METRICS = [
   ['pageNavigationMs', 'page navigation'],
 ];
 
-console.log(`\nTrials ${TRIALS} (+${WARMUP} warmup), ${CHARS} chars/trial, CPU ${cpu}x\n`);
-console.log('metric'.padEnd(32) + 'ng-forge'.padStart(18) + 'formly'.padStart(18) + '  verdict');
-console.log('-'.repeat(88));
+const med = (xs) => {
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)];
+};
+
+console.log(`\n${REPS} reps x ${TRIALS} trials (+${WARMUP} warmup), ${CHARS} chars/trial, CPU ${cpu}x`);
+console.log('Ratio is the trustworthy figure: both libraries measured back-to-back per rep.\n');
+console.log('metric'.padEnd(31) + 'ng-forge'.padStart(14) + 'formly'.padStart(14) + 'ratio'.padStart(9) + '  per-rep ratios');
+console.log('-'.repeat(100));
+
 for (const [key, label] of METRICS) {
-  const a = results['ng-forge'][key];
-  const b = results['formly'][key];
-  if (!a || !b) {
-    console.log(label.padEnd(32) + 'n/a'.padStart(18) + 'n/a'.padStart(18));
+  const perRep = reps
+    .map((r) => ({ a: r['ng-forge'][key], b: r['formly'][key] }))
+    .filter(({ a, b }) => a && b)
+    .map(({ a, b }) => ({ a: a.median, b: b.median, ratio: a.median / b.median }));
+
+  if (!perRep.length) {
+    console.log(label.padEnd(31) + 'n/a'.padStart(14) + 'n/a'.padStart(14));
     continue;
   }
-  const fmt = (s) => `${s.median} / ${s.p95}`;
-  const ratio = a.median / b.median;
-  const verdict =
-    ratio < 0.95 ? `ng-forge ${(1 / ratio).toFixed(2)}x faster` : ratio > 1.05 ? `formly ${ratio.toFixed(2)}x faster` : 'parity';
-  console.log(label.padEnd(32) + fmt(a).padStart(18) + fmt(b).padStart(18) + '  ' + verdict);
+
+  const ratios = perRep.map((r) => r.ratio);
+  const spread = `${Math.min(...ratios).toFixed(2)}-${Math.max(...ratios).toFixed(2)}`;
+
+  console.log(
+    label.padEnd(31) +
+      med(perRep.map((r) => r.a))
+        .toFixed(1)
+        .padStart(14) +
+      med(perRep.map((r) => r.b))
+        .toFixed(1)
+        .padStart(14) +
+      med(ratios).toFixed(2).padStart(9) +
+      `  [${ratios.map((r) => r.toFixed(2)).join(', ')}]  spread ${spread}`,
+  );
 }
-console.log('\n(median / p95 milliseconds)');
+console.log('\nmedian ms per library; ratio >1 means formly faster. Wide spread means the run is noise-bound.');

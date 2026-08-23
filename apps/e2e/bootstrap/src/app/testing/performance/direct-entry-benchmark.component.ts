@@ -26,6 +26,8 @@ const FULL_FORM_MARK = 'ng-forge:full-form-initialized';
       [attr.data-total-fields]="totalFields"
       [attr.data-profile]="profile"
       [attr.data-preload-window]="preloadWindow()"
+      [attr.data-page-scope]="formOptions().pageScope ?? false"
+      [attr.data-schema-size]="schemaSize()"
       [attr.data-field-windowing-eager]="fieldWindowingEager()"
       [attr.data-active-page-ready]="activePageReady()"
     >
@@ -91,9 +93,26 @@ export class DirectEntryBenchmarkComponent {
   readonly totalFields = DIRECT_ENTRY_TOTAL_FIELDS;
   readonly profile = DIRECT_ENTRY_PROFILE;
   readonly pageCount = DIRECT_ENTRY_PAGE_COUNT;
-  readonly config = this.mode === 'full' ? directEntryFullConfig() : directEntryWizardConfig();
+  // `?pages=N` truncates the wizard to N pages, shrinking the whole schema rather than just
+  // what renders. Isolates schema size from rendered size.
+  readonly config = this.mode === 'full' ? directEntryFullConfig() : this.truncatedWizardConfig();
   readonly currentPage = signal(0);
   readonly activePageReady = signal(this.mode === 'full');
+
+  /** Number of leaf controls the active schema actually covers — proves pageScope is applied. */
+  readonly schemaSize = computed(() => {
+    const count = (fields: readonly Record<string, unknown>[]): number =>
+      fields.reduce((n, f) => n + (Array.isArray(f['fields']) ? count(f['fields'] as Record<string, unknown>[]) : 1), 0);
+    const pages = this.config.fields as unknown as Record<string, unknown>[];
+    return this.formOptions().pageScope ? count([pages[this.currentPage()]]) : count(pages);
+  });
+
+  private truncatedWizardConfig() {
+    const config = directEntryWizardConfig();
+    const raw = Number(this.benchmarkUrl.searchParams.get('pages'));
+    if (!Number.isFinite(raw) || raw <= 0) return config;
+    return { ...config, fields: config.fields.slice(0, Math.trunc(raw)) } as typeof config;
+  }
 
   readonly preloadWindow = computed(() => {
     const raw = this.benchmarkUrl.searchParams.get('preload');
@@ -116,6 +135,7 @@ export class DirectEntryBenchmarkComponent {
     return {
       pagePreloadWindow: this.preloadWindow(),
       ...(eager === null ? {} : { fieldWindowing: { eager } }),
+      ...(this.benchmarkUrl.searchParams.has('pageScope') ? { pageScope: true } : {}),
     };
   });
   readonly heading = computed(() =>

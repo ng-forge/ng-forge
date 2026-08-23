@@ -19,4 +19,4 @@ export {
   directEntryFullConfig,
   directEntryWizardConfig,
 } from './direct-entry-config';
-export { formlyDirectEntryFlat, formlyDirectEntryPages, setBenchHttpClient } from './formly-direct-entry-config';
+export { formlyDirectEntryFlat, formlyDirectEntryPages, formlyDirectEntryPlain, setBenchHttpClient } from './formly-direct-entry-config';

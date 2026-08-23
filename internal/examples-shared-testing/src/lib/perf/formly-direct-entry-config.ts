@@ -152,6 +152,16 @@ export function formlyDirectEntryPages(): FormlyFieldConfig[][] {
   return Array.from({ length: DIRECT_ENTRY_PAGE_COUNT }, (_, pageIndex) => createPageFields(pageIndex));
 }
 
+/** 240 bare inputs, no rules. Formly counterpart of `directEntryPlainConfig`. */
+export function formlyDirectEntryPlain(): FormlyFieldConfig[] {
+  return Array.from({ length: DIRECT_ENTRY_PAGE_COUNT * DIRECT_ENTRY_FIELDS_PER_PAGE }, (_, i) => ({
+    key: `field${i + 1}`,
+    id: `field${i + 1}-input`,
+    type: 'input',
+    props: { label: `Field ${i + 1}` },
+  }));
+}
+
 /** Flat equivalent, matching `directEntryFullConfig`. */
 export function formlyDirectEntryFlat(): FormlyFieldConfig[] {
   return formlyDirectEntryPages().flat();
