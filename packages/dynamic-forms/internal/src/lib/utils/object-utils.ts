@@ -331,6 +331,31 @@ export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>
  * @param current - Current object state
  * @returns Set of keys that have different values
  */
+/**
+ * {@link getChangedKeys} restricted to `keys`. Callers that only care about a handful of
+ * paths avoid diffing an entire form value on every change.
+ */
+export function getChangedKeysWithin(
+  previous: Record<string, unknown> | null | undefined,
+  current: Record<string, unknown> | null | undefined,
+  keys: ReadonlySet<string>,
+): Set<string> {
+  const changed = new Set<string>();
+  if (keys.size === 0) return changed;
+
+  const before = previous ?? {};
+  const after = current ?? {};
+
+  for (const key of keys) {
+    const inBefore = key in before;
+    const inAfter = key in after;
+    if (!inBefore && !inAfter) continue;
+    if (inBefore !== inAfter || !isEqual(before[key], after[key])) changed.add(key);
+  }
+
+  return changed;
+}
+
 export function getChangedKeys(
   previous: Record<string, unknown> | null | undefined,
   current: Record<string, unknown> | null | undefined,

@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_DEBOUNCE_MS } from '../../utils/debounce/debounce';
-import { getChangedKeys } from '@ng-forge/dynamic-forms/internal';
+import { getChangedKeys, getChangedKeysWithin } from '@ng-forge/dynamic-forms/internal';
 import { getDebouncePeriods } from './debounce-period-utils';
 import { BaseDerivationEntry } from './derivation-entry-base';
 import { buildEntryStreamPipeline } from './entry-set-utils';
@@ -35,7 +35,31 @@ import { buildEntryStreamPipeline } from './entry-set-utils';
  * @internal
  */
 export interface ReactiveDerivationCollection {
-  entries: ReadonlyArray<Pick<BaseDerivationEntry, 'trigger' | 'debounceMs'>>;
+  entries: ReadonlyArray<Pick<BaseDerivationEntry, 'trigger' | 'debounceMs' | 'fieldKey' | 'dependsOn'>>;
+}
+
+/** Root segment of a possibly-dotted path, which is the granularity of a form-value diff. */
+function rootSegment(path: string): string {
+  const dot = path.indexOf('.');
+  return dot === -1 ? path : path.slice(0, dot);
+}
+
+/**
+ * Root keys any entry could react to. Entries are matched against changed fields by exact
+ * `dependsOn` hit or by root-prefix on `dependsOn`/`fieldKey`, so nothing outside this set
+ * can change which entries run. A wildcard entry always runs, so it needs no key at all.
+ */
+function watchedRootKeys(collection: ReactiveDerivationCollection): Set<string> | null {
+  const watched = new Set<string>();
+
+  for (const entry of collection.entries) {
+    const dependsOn = entry.dependsOn ?? [];
+    if (dependsOn.length === 0 || dependsOn.includes('*')) continue;
+    for (const dep of dependsOn) watched.add(rootSegment(dep));
+    if (entry.fieldKey) watched.add(rootSegment(entry.fieldKey));
+  }
+
+  return watched;
 }
 
 /**
@@ -85,18 +109,24 @@ export function setupOnChangeStream<TCollection extends ReactiveDerivationCollec
   collection$
     .pipe(
       filter((collection): collection is TCollection => collection !== null),
+      // Resolved per collection, not per value emission, so a keystroke never rescans entries.
+      map((collection) => [collection, watchedRootKeys(collection)] as const),
       combineLatestWith(formValue$, ...extra$),
       auditTime(0),
       startWith(null as readonly unknown[] | null),
       pairwise(),
       filter((pair): pair is [readonly unknown[] | null, readonly unknown[]] => pair[1] !== null),
-      map(([previous, current]) => ({
-        collection: current[0] as TCollection,
-        changedFields: getChangedKeys(
-          (previous?.[1] as Record<string, unknown> | undefined) ?? null,
-          current[1] as Record<string, unknown>,
-        ),
-      })),
+      map(([previous, current]) => {
+        const [collection, watched] = current[0] as readonly [TCollection, Set<string>];
+        return {
+          collection,
+          changedFields: getChangedKeysWithin(
+            (previous?.[1] as Record<string, unknown> | undefined) ?? null,
+            current[1] as Record<string, unknown>,
+            watched,
+          ),
+        };
+      }),
       exhaustMap(({ collection, changedFields }) => {
         opts.applyOnChange(collection, changedFields);
         return scheduled([null], queueScheduler);
