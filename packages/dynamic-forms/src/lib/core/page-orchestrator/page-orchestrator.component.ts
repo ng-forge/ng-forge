@@ -18,11 +18,10 @@ import { ConditionalExpression } from '@ng-forge/dynamic-forms/internal';
 import { evaluateCondition } from '@ng-forge/dynamic-forms/internal';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { FieldContextRegistryService } from '@ng-forge/dynamic-forms/internal';
-import { FieldDef } from '@ng-forge/dynamic-forms/internal';
-import { isRowField } from '@ng-forge/dynamic-forms/internal';
-import { isGenericContainerField } from '@ng-forge/dynamic-forms/internal';
 import { PAGE_PRELOAD_WINDOW } from '../../providers/features/page-preload/page-preload.token';
 import { clampWindowSize } from '../../providers/features/clamp-window';
+import { collectLeafFieldKeys } from '../../utils/page-utils/collect-leaf-field-keys';
+import { FormStateManager } from '../../state/form-state-manager';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -83,6 +82,7 @@ export class PageOrchestratorComponent {
   private readonly functionRegistry = inject(FunctionRegistryService);
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalPreloadWindow = inject(PAGE_PRELOAD_WINDOW);
+  private readonly stateManager = inject(FormStateManager, { optional: true });
 
   /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
@@ -499,6 +499,9 @@ export class PageOrchestratorComponent {
       });
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
+
+    // Publish upward so FormStateManager can scope the schema to the mounted pages.
+    explicitEffect([this.currentPageIndex], ([index]) => this.stateManager?.activePageIndex.set(index));
   }
 
   /**
@@ -543,26 +546,4 @@ export class PageOrchestratorComponent {
 
     return false;
   }
-}
-
-/**
- * Recursively collects form-tree keys for all value-bearing nodes on a page.
- *
- * Layout containers (`row`, `container`) are flattened by `mapFieldToForm`, so no form
- * node exists under their own key — traverse their children instead. `group` and `array`
- * own a node whose `valid()` already aggregates descendants, so their key is used as-is.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- accepts any field shape for recursive traversal
-function collectLeafFieldKeys(fields: readonly FieldDef<any>[]): string[] {
-  const keys: string[] = [];
-
-  for (const field of fields) {
-    if (isRowField(field) || isGenericContainerField(field)) {
-      keys.push(...collectLeafFieldKeys(field.fields as readonly FieldDef<unknown>[]));
-    } else if (field.key) {
-      keys.push(field.key);
-    }
-  }
-
-  return keys;
 }

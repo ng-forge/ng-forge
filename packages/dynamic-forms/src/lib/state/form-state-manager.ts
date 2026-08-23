@@ -47,6 +47,7 @@ import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { validateFormConfig } from '../utils/config-validation/config-validator';
+import { collectLeafFieldKeys } from '../utils/page-utils/collect-leaf-field-keys';
 import { walkAndValidateAddons } from '../utils/validate-form-config/validate-field-addons';
 import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
 import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
@@ -324,6 +325,39 @@ export class FormStateManager<
     return { ...configOptions, ...inputOptions };
   });
 
+  /** Active page index, published by the page orchestrator. Drives {@link scopedSchemaFields}. */
+  readonly activePageIndex = signal(0);
+
+  /** Whether the schema should cover only the mounted pages. */
+  private readonly pageScopeEnabled = computed(
+    () => this.effectiveFormOptions().pageScope === true && this.formModeDetection().mode === 'paged',
+  );
+
+  /**
+   * Schema fields narrowed to the mounted pages when `pageScope` is on. Per-keystroke cost
+   * scales with schema size, so a paged form otherwise pays for every off-screen page.
+   */
+  private readonly scopedSchemaFields = computed(() => {
+    const setup = this.formSetup();
+    const all = setup.schemaFields;
+    if (!this.pageScopeEnabled() || !all?.length) return all;
+
+    const pages = this.pageFieldDefinitions();
+    if (pages.length === 0) return all;
+
+    const window = Math.max(0, this.effectiveFormOptions().pagePreloadWindow ?? 0);
+    const active = Math.min(Math.max(this.activePageIndex(), 0), pages.length - 1);
+    const from = Math.max(0, active - window);
+    const to = Math.min(pages.length - 1, active + window);
+
+    const mounted = new Set<string>();
+    for (let i = from; i <= to; i++) {
+      for (const key of collectLeafFieldKeys(pages[i].fields ?? [])) mounted.add(key);
+    }
+
+    return all.filter((field) => field.key !== undefined && mounted.has(field.key));
+  });
+
   /** Page field definitions (for paged forms). */
   readonly pageFieldDefinitions = computed(() => {
     const config = this.activeConfig();
@@ -499,7 +533,7 @@ export class FormStateManager<
     if (!config || (!(setup.schemaFields?.length > 0) && !config.schema)) return undefined;
 
     return {
-      fields: setup.schemaFields ?? [],
+      fields: this.scopedSchemaFields() ?? [],
       registry: setup.registry,
       formLevelSchema: config.schema,
       validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,

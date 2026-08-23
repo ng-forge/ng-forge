@@ -157,6 +157,18 @@ export interface FormOptions {
   pagePreloadWindow?: number;
 
   /**
+   * For paged forms: build the validation schema from the mounted pages only, instead of the
+   * whole config. Per-keystroke cost scales with schema size, so a 6-page form spends most of
+   * each keystroke on fields that are not on screen.
+   *
+   * Rules that reach across pages (validators or derivations depending on another page's
+   * field) cannot run under this mode: they throw in dev and warn in production.
+   *
+   * @default false
+   */
+  pageScope?: boolean;
+
+  /**
    * For flat (single-page) forms: progressive field mounting ("field
    * windowing"). Fields beyond the eager count render as a placeholder and
    * mount only once scrolled near/into view, instead of all mounting eagerly.
