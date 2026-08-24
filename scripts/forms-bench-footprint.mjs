@@ -11,13 +11,17 @@ import { chromium } from 'playwright';
 const CPU = Number(process.env.CPU_THROTTLE ?? 1);
 const REPS = Number(process.env.REPS ?? 3);
 
+const NG = process.env.NG_PORT ?? '4321';
+const FORMLY = process.env.FORMLY_PORT ?? '4322';
+const RAW = process.env.RAW_PORT ?? '4323';
+
 const TARGETS = {
-  'ng-forge flat 240': 'http://localhost:4321/#/full',
-  'formly flat 240': 'http://localhost:4322/?flat',
-  'ng-forge page 40': 'http://localhost:4321/#/wizard?preload=0',
-  'formly page 40': 'http://localhost:4322/',
-  'raw Signal 240': 'http://localhost:4323/?raw=signal',
-  'raw Reactive 240': 'http://localhost:4323/?raw=reactive',
+  'ng-forge flat 240': `http://localhost:${NG}/#/full`,
+  'formly flat 240': `http://localhost:${FORMLY}/?flat`,
+  'ng-forge page 40': `http://localhost:${NG}/#/wizard?preload=0`,
+  'formly page 40': `http://localhost:${FORMLY}/`,
+  'raw Signal 240': `http://localhost:${RAW}/?raw=signal`,
+  'raw Reactive 240': `http://localhost:${RAW}/?raw=reactive`,
 };
 
 async function measure(browser, url) {

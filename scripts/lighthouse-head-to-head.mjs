@@ -11,11 +11,14 @@ const RUNS = Number(process.env.RUNS ?? 5);
 const OUT = '/tmp/lh-h2h';
 mkdirSync(OUT, { recursive: true });
 
+const A = process.env.NG_PORT ?? '4331';
+const B = process.env.FORMLY_PORT ?? '4332';
+
 const TARGETS = {
-  'ng-forge paged': 'http://localhost:4331/#/wizard',
-  'ng-forge flat': 'http://localhost:4331/#/full',
-  'formly paged': 'http://localhost:4332/',
-  'formly flat': 'http://localhost:4332/?flat',
+  'ng-forge paged': `http://localhost:${A}/#/wizard`,
+  'ng-forge flat': `http://localhost:${A}/#/full`,
+  'formly paged': `http://localhost:${B}/`,
+  'formly flat': `http://localhost:${B}/?flat`,
 };
 
 const METRICS = [

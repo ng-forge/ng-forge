@@ -24,8 +24,8 @@ const WARMUP = 2;
 const CHARS = 20;
 
 const TARGETS = {
-  'ng-forge': 'http://localhost:4321/#/wizard?preload=0',
-  formly: 'http://localhost:4322/',
+  'ng-forge': process.env.NG_URL ?? 'http://localhost:4321/#/wizard?preload=0',
+  formly: process.env.FORMLY_URL ?? 'http://localhost:4322/',
 };
 
 /** Runs in the page. Returns raw per-trial samples; stats are computed in node. */
