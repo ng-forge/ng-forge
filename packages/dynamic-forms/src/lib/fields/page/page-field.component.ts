@@ -1,5 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, EnvironmentInjector, inject, Injector, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  input,
+  TemplateRef,
+} from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
+import { DF_FIELD_PLACEHOLDERS, type FieldPlaceholderContext } from '../../directives/df-placeholder/df-placeholder.directive';
+import { resolvePlaceholderTemplate } from '../../directives/df-placeholder/resolve-placeholder-template';
 import { outputFromObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -20,7 +33,7 @@ import { resolveFieldWindowing } from '../../providers/features/field-windowing/
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({
   selector: 'section[page-field]',
-  imports: [DfFieldOutlet],
+  imports: [DfFieldOutlet, NgTemplateOutlet],
   template: `
     @for (field of resolvedFields(); track field.key; let i = $index) {
       @if (!field.hidden()) {
@@ -33,7 +46,11 @@ import { resolveFieldWindowing } from '../../providers/features/field-windowing/
               [style.min-height]="fieldWindowing().placeholderHeight"
               [attr.data-field-key]="field.key"
               aria-hidden="true"
-            ></div>
+            >
+              @if (placeholderTemplate(field); as tpl) {
+                <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="placeholderContext(field)" />
+              }
+            </div>
           }
         } @else {
           <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
@@ -67,6 +84,8 @@ export default class PageFieldComponent {
   private readonly logger = inject(DynamicFormLogger);
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
+  private readonly fieldPlaceholders = inject(DF_FIELD_PLACEHOLDERS, { optional: true });
+  private readonly placeholderCtx = new Map<string, FieldPlaceholderContext>();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -160,6 +179,24 @@ export default class PageFieldComponent {
   protected placeholderGridClass(field: ResolvedField): string {
     const grid = getGridClassString(field.fieldDef);
     return grid ? `df-field-placeholder ${grid}` : 'df-field-placeholder';
+  }
+
+  /** Projected placeholder template for a windowed field, or null for the built-in bare div. */
+  protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null {
+    const placeholders = this.fieldPlaceholders?.();
+    return placeholders ? resolvePlaceholderTemplate(placeholders, { key: field.key, type: field.fieldDef.type }) : null;
+  }
+
+  /** Memoised template context for a windowed field's projected placeholder. */
+  protected placeholderContext(field: ResolvedField): FieldPlaceholderContext {
+    let ctx = this.placeholderCtx.get(field.key);
+    if (!ctx) {
+      const label = typeof field.fieldDef.label === 'string' ? field.fieldDef.label : undefined;
+      const info = { key: field.key, type: field.fieldDef.type, label, col: field.fieldDef.col };
+      ctx = { $implicit: info, field: info };
+      this.placeholderCtx.set(field.key, ctx);
+    }
+    return ctx;
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
