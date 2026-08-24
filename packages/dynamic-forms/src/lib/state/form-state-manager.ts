@@ -620,17 +620,45 @@ export class FormStateManager<
     },
   });
 
-  /** True once the lazy compiler has produced the schema, or failed and opened the degraded path. */
+  /**
+   * Last schema the resource produced, with the request it was built from.
+   *
+   * A params change (a page change under `pageScope`) clears the resource's value, not just its
+   * status, so without this the form would rebuild schemaless and then rebuild again — and the
+   * render gate would close, unmounting every field. Instance-scoped, never module-scoped, so it
+   * stays SSR-safe.
+   */
+  private readonly schemaCache: { current: { schema: Schema<TModel>; request: unknown } | undefined } = { current: undefined };
+
+  /** Keeps {@link schemaCache} in step with the resource, and drops it on failure. */
+  private readonly trackSchemaCache = computed(() => {
+    const request = this.formSchemaRequest();
+    if (this.formSchemaResource.status() === 'error') {
+      this.schemaCache.current = undefined;
+      return undefined;
+    }
+    if (this.formSchemaResource.hasValue()) {
+      this.schemaCache.current = { schema: this.formSchemaResource.value(), request };
+    }
+    return this.schemaCache.current;
+  });
+
+  /** Whether the schema in hand was built from the current request. */
+  readonly isSchemaCurrent = computed(() => {
+    const request = this.formSchemaRequest();
+    if (!request) return true;
+    return this.trackSchemaCache()?.request === request;
+  });
+
+  /** True once a schema is in hand, or the compiler failed and the degraded path opened. */
   readonly formSchemaReady = computed(() => {
     if (!this.formSchemaRequest()) return true;
-    const status = this.formSchemaResource.status();
-    return status === 'resolved' || status === 'local' || status === 'error';
+    if (this.formSchemaResource.status() === 'error') return true;
+    return this.trackSchemaCache() !== undefined;
   });
 
   /** Schema derived from the current form config and field setup. */
-  private readonly formSchema = computed((): Schema<TModel> | undefined =>
-    this.formSchemaResource.hasValue() ? this.formSchemaResource.value() : undefined,
-  );
+  private readonly formSchema = computed((): Schema<TModel> | undefined => this.trackSchemaCache()?.schema);
 
   /** The Angular Signal Form instance. */
   readonly form = computed(() => {

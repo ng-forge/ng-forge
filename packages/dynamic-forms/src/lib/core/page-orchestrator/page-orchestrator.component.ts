@@ -193,7 +193,9 @@ export class PageOrchestratorComponent {
    *
    * @returns `true` if current page is valid, `false` otherwise
    */
-  readonly currentPageValid = computed(() => this.isPageValid(this.currentPageIndex()));
+  // Reports invalid while the schema is stale: the incoming page's fields are mounted but not
+  // yet validated, so trusting them would let a second click skip a page.
+  readonly currentPageValid = computed(() => (this.stateManager?.isSchemaCurrent() ?? true) && this.isPageValid(this.currentPageIndex()));
 
   /**
    * Whether all fields on the given page are currently valid.
