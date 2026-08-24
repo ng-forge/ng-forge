@@ -5,6 +5,7 @@ import {
   DIRECT_ENTRY_PROFILE,
   DIRECT_ENTRY_TOTAL_FIELDS,
   directEntryFullConfig,
+  toggleVisibilityConfig,
   directEntryWizardConfig,
 } from '@ng-forge/examples-shared-testing/perf';
 
@@ -89,13 +90,18 @@ export class DirectEntryBenchmarkComponent {
   private readonly dispatcher = inject(EventDispatcher);
   private readonly benchmarkUrl = new URL(location.hash.replace(/^#/, '') || '/wizard', location.origin);
 
-  readonly mode = this.benchmarkUrl.pathname === '/full' ? 'full' : 'wizard';
+  readonly mode = this.benchmarkUrl.pathname === '/full' || this.benchmarkUrl.pathname === '/toggle' ? 'full' : 'wizard';
   readonly totalFields = DIRECT_ENTRY_TOTAL_FIELDS;
   readonly profile = DIRECT_ENTRY_PROFILE;
   readonly pageCount = DIRECT_ENTRY_PAGE_COUNT;
   // `?pages=N` truncates the wizard to N pages, shrinking the whole schema rather than just
   // what renders. Isolates schema size from rendered size.
-  readonly config = this.mode === 'full' ? directEntryFullConfig() : this.truncatedWizardConfig();
+  readonly config =
+    this.benchmarkUrl.pathname === '/toggle'
+      ? toggleVisibilityConfig()
+      : this.mode === 'full'
+        ? directEntryFullConfig()
+        : this.truncatedWizardConfig();
   readonly currentPage = signal(0);
   readonly activePageReady = signal(this.mode === 'full');
 
@@ -104,7 +110,8 @@ export class DirectEntryBenchmarkComponent {
     const count = (fields: readonly Record<string, unknown>[]): number =>
       fields.reduce((n, f) => n + (Array.isArray(f['fields']) ? count(f['fields'] as Record<string, unknown>[]) : 1), 0);
     const pages = this.config.fields as unknown as Record<string, unknown>[];
-    return this.formOptions().pageScope ? count([pages[this.currentPage()]]) : count(pages);
+    if (!this.formOptions().pageScope || !pages[this.currentPage()]) return count(pages);
+    return count([pages[this.currentPage()]]);
   });
 
   private truncatedWizardConfig() {
