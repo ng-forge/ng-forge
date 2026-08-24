@@ -130,7 +130,15 @@ export class PageOrchestratorComponent {
     if (totalPages === 0) return 0;
 
     // Untracked: re-land on a config swap, but never on a later validity or visibility change.
-    return untracked(() => this.resolveInitialLanding());
+    return untracked(() => {
+      // Under `pageScope` a page change reloads the schema, which closes the render gate and
+      // remounts this component. FormStateManager owns the index across that, so restore it
+      // rather than re-landing; it resets to 0 on a genuine config swap.
+      const owned = this.stateManager?.activePageIndex() ?? 0;
+      if (owned > 0 && owned < totalPages) return owned;
+
+      return this.resolveInitialLanding();
+    });
   });
 
   /** Where `initialPage` actually lands: hidden targets resolve forward, gated ones stop on the first invalid page. */

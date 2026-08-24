@@ -325,7 +325,11 @@ export class FormStateManager<
     return { ...configOptions, ...inputOptions };
   });
 
-  /** Active page index, published by the page orchestrator. Drives {@link scopedSchemaFields}. */
+  /**
+   * Active page index. Owned here rather than by the page orchestrator because under
+   * `pageScope` a page change reloads the schema, which closes the render gate and
+   * remounts the orchestrator — a component-owned index would reset to its landing page.
+   */
   readonly activePageIndex = signal(0);
 
   /** Whether the schema should cover only the mounted pages. */
@@ -1056,6 +1060,7 @@ export class FormStateManager<
     // schema starts with an empty template/itemOrder/id-counter state.
     let warnedAboutMissingArrayRegistry = false;
     explicitEffect([this.formSetup], () => {
+      this.activePageIndex.set(0);
       this.prevFieldStateSnapshot.set({});
       if (Object.keys(this.excludedValueStore()).length > 0) {
         this.excludedValueStore.set({});
