@@ -5,6 +5,7 @@ import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
+import { DEV_MODE } from '../dev-mode';
 
 /** Data collected during a single config traversal. */
 interface ConfigTraversalData {
@@ -100,7 +101,12 @@ function validateRegexPattern(pattern: string, fieldKey: string, errors: string[
   try {
     new RegExp(pattern);
   } catch (e) {
-    errors.push(`Invalid regex pattern in validator for field '${fieldKey}': '${pattern}' — ${e instanceof Error ? e.message : String(e)}`);
+    // Detail (field key + engine message) is dev-only; the pattern alone identifies it in prod.
+    errors.push(
+      DEV_MODE
+        ? `Invalid regex pattern in validator for field '${fieldKey}': '${pattern}' — ${e instanceof Error ? e.message : String(e)}`
+        : `Invalid regex pattern: '${pattern}'`,
+    );
   }
 }
 
@@ -125,8 +131,11 @@ function validateNoDuplicateKeys(allKeys: string[]): void {
     const duplicateList = Array.from(duplicates)
       .map((k) => `'${k}'`)
       .join(', ');
+    // Throw is load-bearing; only the explanatory tail is dev-only.
     throw new DynamicFormError(
-      `Duplicate field keys detected: ${duplicateList}. Field keys must be unique within their group scope (the same key may appear inside different groups).`,
+      DEV_MODE
+        ? `Duplicate field keys detected: ${duplicateList}. Field keys must be unique within their group scope (the same key may appear inside different groups).`
+        : `Duplicate field keys detected: ${duplicateList}.`,
     );
   }
 }
@@ -151,10 +160,13 @@ function validateNoDomIdCollisions(domIds: string[]): void {
     const duplicateList = Array.from(duplicates)
       .map((k) => `'${k}'`)
       .join(', ');
+    // Throw is load-bearing; only the explanatory tail is dev-only.
     throw new DynamicFormError(
-      `DOM id collision detected for: ${duplicateList}. Group-nested keys are joined with '_' to form DOM ids ` +
-        `(e.g. group 'foo' + leaf 'bar' renders as id='foo_bar'). A separate top-level key like 'foo_bar' or a different ` +
-        `group/leaf pair that underscores to the same string will produce duplicate ids. Rename one of the colliding keys.`,
+      DEV_MODE
+        ? `DOM id collision detected for: ${duplicateList}. Group-nested keys are joined with '_' to form DOM ids ` +
+            `(e.g. group 'foo' + leaf 'bar' renders as id='foo_bar'). A separate top-level key like 'foo_bar' or a different ` +
+            `group/leaf pair that underscores to the same string will produce duplicate ids. Rename one of the colliding keys.`
+        : `DOM id collision detected for: ${duplicateList}.`,
     );
   }
 }
@@ -206,15 +218,19 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
     const list = Array.from(new Set(data.dottedKeys))
       .map((k) => `'${k}'`)
       .join(', ');
+    // Throw is load-bearing; only the explanatory tail is dev-only.
     throw new DynamicFormError(
-      `Field key(s) contain a dot: ${list}. Dotted keys are not supported — express nesting with 'group' fields ` +
-        `(e.g. { type: 'group', key: 'address', fields: [{ type: 'input', key: 'city' }] }).`,
+      DEV_MODE
+        ? `Field key(s) contain a dot: ${list}. Dotted keys are not supported — express nesting with 'group' fields ` +
+            `(e.g. { type: 'group', key: 'address', fields: [{ type: 'input', key: 'city' }] }).`
+        : `Field key(s) contain a dot: ${list}.`,
     );
   }
 
   validateNoDuplicateKeys(data.keys);
   validateNoDomIdCollisions(data.domIds);
-  validateFieldTypesRegistered(data.types, registry, logger);
+  // Warn-only diagnostic — unknown types already degrade gracefully at render time.
+  if (DEV_MODE) validateFieldTypesRegistered(data.types, registry, logger);
 
   if (data.regexErrors.length > 0) {
     throw new DynamicFormError(

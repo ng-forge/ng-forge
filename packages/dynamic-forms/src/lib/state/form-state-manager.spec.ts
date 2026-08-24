@@ -16,6 +16,8 @@ import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/inter
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { createMockLogger, MockLogger } from '../../../test-utils/src/mock-logger';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
 
 type TestModel = Record<string, unknown>;
 type TestFields = RegisteredFieldTypes[];
@@ -44,6 +46,8 @@ function initManager(
   overrides?: Partial<{
     formOptions: Signal<FormOptions | undefined>;
     value: WritableSignal<Partial<TestModel> | undefined>;
+    /** Registers the built-in field types so container types actually flatten. */
+    withBuiltInFields: boolean;
   }>,
 ) {
   mockLogger = createMockLogger();
@@ -71,6 +75,7 @@ function initManager(
       HttpConditionFunctionCacheService,
       DynamicValueFunctionCacheService,
       { provide: DynamicFormLogger, useValue: mockLogger },
+      ...(overrides?.withBuiltInFields ? [{ provide: FIELD_REGISTRY, useValue: new Map(BUILT_IN_FIELDS.map((f) => [f.name, f])) }] : []),
     ],
   });
 
@@ -482,6 +487,119 @@ describe('FormStateManager', () => {
       const entity = stateManager.entity();
       expect(entity).toEqual(expect.objectContaining({ name: 'John' }));
       expect(entity).not.toHaveProperty('extraField');
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Page scoping
+  // ─────────────────────────────────────────────────────────────────────
+
+  describe('pageScope', () => {
+    const PAGE_COUNT = 6;
+
+    /** Six pages, one input each: page1 -> f1, page2 -> f2, ... */
+    const pagedConfig = {
+      fields: Array.from({ length: PAGE_COUNT }, (_, i) => ({
+        type: 'page',
+        key: `page${i + 1}`,
+        fields: [{ type: 'input', key: `f${i + 1}`, label: `F${i + 1}`, value: `d${i + 1}` }],
+      })),
+    } as unknown as TestFormConfig;
+
+    const scoped = () => signal<FormOptions | undefined>({ pageScope: true, pagePreloadWindow: 0 });
+    const unscoped = () => signal<FormOptions | undefined>({ pagePreloadWindow: 0 });
+
+    const allKeys = Array.from({ length: PAGE_COUNT }, (_, i) => `f${i + 1}`);
+
+    it('keeps every page in the entity when pageScope is off', () => {
+      const { stateManager } = initManager(pagedConfig, { formOptions: unscoped(), withBuiltInFields: true });
+
+      expect(Object.keys(stateManager.entity()).sort()).toEqual([...allKeys].sort());
+    });
+
+    it('narrows the entity to the mounted page when pageScope is on', () => {
+      const { stateManager } = initManager(pagedConfig, { formOptions: scoped(), withBuiltInFields: true });
+
+      expect(Object.keys(stateManager.entity())).toEqual(['f1']);
+
+      stateManager.activePageIndex.set(1);
+      expect(Object.keys(stateManager.entity())).toEqual(['f2']);
+    });
+
+    it('widens the entity with the preload window', () => {
+      const { stateManager } = initManager(pagedConfig, {
+        formOptions: signal<FormOptions | undefined>({ pageScope: true, pagePreloadWindow: 1 }),
+        withBuiltInFields: true,
+      });
+
+      stateManager.activePageIndex.set(2);
+      expect(Object.keys(stateManager.entity()).sort()).toEqual(['f2', 'f3', 'f4']);
+    });
+
+    it('still reports every page through formValue and filteredFormValue', async () => {
+      const { stateManager } = initManager(pagedConfig, { formOptions: scoped(), withBuiltInFields: true });
+      await waitForFormSchema(stateManager);
+
+      stateManager.activePageIndex.set(1);
+      TestBed.flushEffects();
+
+      expect(Object.keys(stateManager.entity())).toEqual(['f2']);
+      expect(Object.keys(stateManager.formValue() as Record<string, unknown>).sort()).toEqual([...allKeys].sort());
+      expect(Object.keys(stateManager.filteredFormValue() as Record<string, unknown>).sort()).toEqual([...allKeys].sort());
+    });
+
+    it('submits a value typed on page 1 from page 6, alongside a page nobody visited', async () => {
+      const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+      const { stateManager } = initManager(pagedConfig, { formOptions: scoped(), value: valueSignal, withBuiltInFields: true });
+      await waitForFormSchema(stateManager);
+
+      const root = stateManager.form()() as unknown as { value: WritableSignal<TestModel> };
+      root.value.set({ f1: 'typed-on-page-1' } as TestModel);
+      TestBed.flushEffects();
+
+      // Walk to the last page. Pages 2-5 are mounted in passing, page 4 is never touched by hand.
+      for (let page = 1; page < PAGE_COUNT; page++) {
+        stateManager.activePageIndex.set(page);
+        TestBed.flushEffects();
+      }
+      await waitForFormSchema(stateManager);
+      expect(Object.keys(stateManager.entity())).toEqual([`f${PAGE_COUNT}`]);
+      expect(stateManager.valid()).toBe(true);
+
+      const submitted: TestModel[] = [];
+      const sub = stateManager.submitted$.subscribe((value) => submitted.push(value));
+      stateManager.submit();
+      TestBed.flushEffects();
+      sub.unsubscribe();
+
+      expect(submitted).toHaveLength(1);
+      expect(submitted[0]).toEqual(expect.objectContaining({ f1: 'typed-on-page-1', f4: 'd4', f6: 'd6' }));
+    });
+
+    it('restores a value typed on page 1 into the entity when navigating back', async () => {
+      const { stateManager } = initManager(pagedConfig, { formOptions: scoped(), withBuiltInFields: true });
+      await waitForFormSchema(stateManager);
+
+      const root = stateManager.form()() as unknown as { value: WritableSignal<TestModel> };
+      root.value.set({ f1: 'typed-on-page-1' } as TestModel);
+      TestBed.flushEffects();
+
+      stateManager.activePageIndex.set(3);
+      TestBed.flushEffects();
+      stateManager.activePageIndex.set(0);
+      TestBed.flushEffects();
+
+      expect(stateManager.entity()).toEqual({ f1: 'typed-on-page-1' });
+    });
+
+    it('keeps a host-supplied value for a page that is never mounted', async () => {
+      const valueSignal = signal<Partial<TestModel> | undefined>({ f5: 'from-host' });
+      const { stateManager } = initManager(pagedConfig, { formOptions: scoped(), value: valueSignal, withBuiltInFields: true });
+      await waitForFormSchema(stateManager);
+      TestBed.flushEffects();
+
+      expect(Object.keys(stateManager.entity())).toEqual(['f1']);
+      expect(stateManager.filteredFormValue()).toEqual(expect.objectContaining({ f5: 'from-host' }));
     });
   });
 

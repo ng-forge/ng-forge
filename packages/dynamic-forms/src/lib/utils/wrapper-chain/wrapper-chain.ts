@@ -12,6 +12,7 @@ import { catchError, forkJoin, from, map, Observable, of } from 'rxjs';
 import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
+import { DEV_MODE } from '../dev-mode';
 
 /**
  * Module-level cache keyed by component class. `reflectComponentType` returns
@@ -94,7 +95,10 @@ export function loadWrapperComponents(
         catchError(() => of(undefined)),
         map((component) => {
           if (!component) {
-            logger.error(`Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`);
+            // Diagnostic only — dropping the wrapper is what keeps the chain usable.
+            if (DEV_MODE) {
+              logger.error(`Wrapper type '${config.type}' could not be loaded. Ensure it is registered via provideDynamicForm().`);
+            }
             return null;
           }
           return { config, component } satisfies LoadedWrapper;
@@ -193,11 +197,14 @@ function renderStep(
 
   const inner = resolveInnerSlot(ref);
   if (!inner) {
-    options.logger.error(
-      `Wrapper component for type '${wrapper.config.type}' does not provide a 'fieldComponent' ViewContainerRef. ` +
-        `Ensure the wrapper component has a viewChild('fieldComponent', { read: ViewContainerRef }) query ` +
-        `and that #fieldComponent is not inside a conditional (@if, @defer).`,
-    );
+    // Diagnostic only — the unwind below is what keeps the DOM consistent.
+    if (DEV_MODE) {
+      options.logger.error(
+        `Wrapper component for type '${wrapper.config.type}' does not provide a 'fieldComponent' ViewContainerRef. ` +
+          `Ensure the wrapper component has a viewChild('fieldComponent', { read: ViewContainerRef }) query ` +
+          `and that #fieldComponent is not inside a conditional (@if, @defer).`,
+      );
+    }
     // Unwind: destroy every wrapper built so far, including this one, so the
     // caller doesn't end up with a partial chain left in the DOM.
     while (refs.length) refs.pop()!.destroy();
