@@ -8,6 +8,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { brotliCompressSync, gzipSync, constants } from 'node:zlib';
+import { createHash } from 'node:crypto';
 
 const ROOT = process.argv[2];
 const PORT = Number(process.argv[3] ?? 4321);
@@ -48,7 +49,9 @@ createServer(async (req, res) => {
   }
 
   if (encoding) {
-    const key = `${file}:${encoding}`;
+    // Keyed on content, not path: index.html is not content-hashed, so a path-keyed cache
+    // keeps serving a stale index pointing at a deleted bundle after a rebuild.
+    const key = `${file}:${encoding}:${body.length}:${createHash('sha1').update(body).digest('hex')}`;
     if (!cache.has(key)) {
       cache.set(
         key,
