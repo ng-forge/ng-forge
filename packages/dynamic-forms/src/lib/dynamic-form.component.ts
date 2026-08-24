@@ -89,25 +89,22 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key; let i = $index) {
-            <!-- @if + DfFieldOutlet's own renderReady-&-!hidden gate together silence NG01916:
-                 the template @if removes the host from the DOM (Angular's prescribed pattern), and
-                 the directive's gate stops a same-CD-pass mount before [formField] can warn.
-                 Don't dedupe one without the other — see DfFieldOutlet.renderReady. -->
-            @if (!field.hidden()) {
-              @if (windowsField(field, i)) {
-                @defer (on viewport) {
-                  <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
-                } @placeholder {
-                  <div
-                    [class]="placeholderGridClass(field)"
-                    [style.min-height]="fieldWindowing().placeholderHeight"
-                    [attr.data-field-key]="field.key"
-                    aria-hidden="true"
-                  ></div>
-                }
-              } @else {
+            <!-- Hidden fields are gated inside DfFieldOutlet, which detaches the mounted chain
+                 rather than destroying it — rebuilding costs ~5x. Its renderReady-&-!hidden gate
+                 still blocks the first mount, which is what silences NG01916. -->
+            @if (windowsField(field, i)) {
+              @defer (on viewport) {
                 <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+              } @placeholder {
+                <div
+                  [class]="placeholderGridClass(field)"
+                  [style.min-height]="fieldWindowing().placeholderHeight"
+                  [attr.data-field-key]="field.key"
+                  aria-hidden="true"
+                ></div>
               }
+            } @else {
+              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
             }
           }
         }

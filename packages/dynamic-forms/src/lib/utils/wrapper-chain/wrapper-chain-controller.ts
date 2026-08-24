@@ -1,4 +1,14 @@
-import { ComponentRef, computed, DestroyRef, EnvironmentInjector, inject, Injector, Signal, ViewContainerRef } from '@angular/core';
+import {
+  ComponentRef,
+  computed,
+  DestroyRef,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  Signal,
+  ViewContainerRef,
+  ViewRef,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { map, Observable, of, switchMap } from 'rxjs';
@@ -77,6 +87,7 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
   const state = createStateSignal(opts);
 
   const mounted = { value: null as MountedChain | null };
+  const detached = { value: null as ViewRef | null };
   let refs: ComponentRef<unknown>[] = [];
 
   // INVARIANT: toObservable schedules emissions as microtasks, so `renderInnermost`
@@ -89,17 +100,21 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
       // caller's renderInnermost blew up, etc.) would otherwise terminate
       // the subscription and silently freeze subsequent chain updates.
       try {
-        refs = applyEmission(emission, { opts, deps, mounted, refs });
+        refs = applyEmission(emission, { opts, deps, mounted, refs, detached });
       } catch (err) {
         deps.logger.error('Wrapper chain render failed; tearing down partial state.', err);
         opts.vcr().clear();
         refs = [];
         mounted.value = null;
+        detached.value = null;
       }
     });
 
   pushFieldInputsOnChange(opts, () => refs);
-  deps.destroyRef.onDestroy(() => opts.vcr().clear());
+  deps.destroyRef.onDestroy(() => {
+    detached.value?.destroy();
+    opts.vcr().clear();
+  });
 }
 
 interface ChainDeps {
@@ -131,6 +146,8 @@ interface EmissionApplyContext {
   readonly deps: ChainDeps;
   readonly mounted: { value: MountedChain | null };
   readonly refs: ComponentRef<unknown>[];
+  /** View detached while the gate is closed, re-inserted when it reopens. */
+  readonly detached: { value: ViewRef | null };
 }
 
 function injectChainDeps(): ChainDeps {
@@ -189,9 +206,19 @@ function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyConte
   const structurallyChanged = isStructurallyDifferent(mounted.value, state);
 
   // Gate-only flicker after first mount — keep the chain alive so the user's
-  // focus / caret / scroll survive. The caller's rawInputs effect continues
-  // to push live mapper outputs through the still-mounted innermost.
-  if (!structurallyChanged && !state.open) return refs;
+  // focus / caret / scroll survive, and detach it so it leaves the DOM and stops
+  // taking change detection. Rebuilding instead costs ~5x the teardown.
+  if (!structurallyChanged && !state.open) {
+    if (vcr.length > 0) ctx.detached.value = vcr.detach(0) ?? ctx.detached.value;
+    return refs;
+  }
+
+  // Re-opening a chain we detached rather than destroyed: put the view back.
+  if (state.open && !structurallyChanged && mounted.value !== null && ctx.detached.value) {
+    vcr.insert(ctx.detached.value);
+    ctx.detached.value = null;
+    return refs;
+  }
 
   // Real structural change — tear down. Angular cascades destroy through
   // every nested ComponentRef, so walking `refs` manually is redundant.
