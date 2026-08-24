@@ -10,7 +10,7 @@ const KEYS = Array.from({ length: FIELD_COUNT }, (_, i) => `field${i + 1}`);
  * on either side. `?raw=signal` or `?raw=reactive`.
  */
 @Component({
-  selector: 'bs-raw-forms-benchmark',
+  selector: 'bs-example-raw-forms-benchmark',
   imports: [ReactiveFormsModule, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `

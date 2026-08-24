@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FieldArrayType, FormlyModule, type FormlyFieldConfig } from '@ngx-formly/core';
-import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
 import {
   DIRECT_ENTRY_PAGE_COUNT,
   DIRECT_ENTRY_TOTAL_FIELDS,
@@ -15,7 +14,7 @@ import {
  * one to match the ng-forge fixture's array fields.
  */
 @Component({
-  selector: 'bs-formly-repeat',
+  selector: 'bs-example-formly-repeat',
   imports: [FormlyModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -32,7 +31,7 @@ export class FormlyRepeatTypeComponent extends FieldArrayType {}
  * controls the other isn't rendering.
  */
 @Component({
-  selector: 'bs-formly-benchmark',
+  selector: 'bs-example-formly-benchmark',
   imports: [ReactiveFormsModule, FormlyModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
