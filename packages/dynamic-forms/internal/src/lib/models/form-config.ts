@@ -157,6 +157,11 @@ export interface FormOptions {
   pagePreloadWindow?: number;
 
   /**
+   * EXPERIMENTAL. Off by default, and currently measures slower than leaving it off: on a
+   * 240-control six-page fixture it cost about 10ms more per keystroke and roughly doubled
+   * page navigation. The shape may change or the option may be withdrawn. Do not enable it
+   * in production.
+   *
    * For paged forms: build the validation schema from the mounted pages only, instead of the
    * whole config. Per-keystroke cost scales with schema size, so a 6-page form spends most of
    * each keystroke on fields that are not on screen.

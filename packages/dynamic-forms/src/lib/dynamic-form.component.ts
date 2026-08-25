@@ -320,7 +320,13 @@ export class DynamicForm<
    */
   initialized = outputFromObservable(this.initialized$);
 
-  /** Emits after the currently visible page and all of its visible fields render. */
+  /**
+   * EXPERIMENTAL. Added alongside page preloading; the emission contract may change.
+   *
+   * Emits after the currently visible page and all of its visible fields render. Announced
+   * once per visit to a page, and again when that page is returned to. Prefer `initialized`
+   * unless you specifically need the visible page rather than the whole form.
+   */
   activePageInitialized = outputFromObservable(this.eventBus.on<ActivePageInitializedEvent>('active-page-initialized'));
 
   /** Emits when the current page changes in paged forms. */
