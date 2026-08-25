@@ -1,5 +1,16 @@
-// Field types remain available for declarative configuration. Runtime field
-// components are implementation details loaded by withBootstrapFields().
+// Field components
+export {
+  BsButtonFieldComponent,
+  BsCheckboxFieldComponent,
+  BsDatepickerFieldComponent,
+  BsInputFieldComponent,
+  BsMultiCheckboxFieldComponent,
+  BsRadioFieldComponent,
+  BsSelectFieldComponent,
+  BsSliderFieldComponent,
+  BsTextareaFieldComponent,
+  BsToggleFieldComponent,
+} from './fields';
 export type {
   BsButtonProps,
   BsButtonField,
@@ -50,5 +61,7 @@ import './types/registry-augmentation';
 export { withBootstrapFields, withBootstrapAddons } from './providers/bootstrap-providers';
 
 // Addon types
+export { BsIconAddonComponent } from './addons/bs-icon-addon.component';
+export { BsButtonAddonComponent } from './addons/bs-button-addon.component';
 export type { BsIconAddon, BsButtonAddon, BsAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 export type { BsInputAddon, BsAddonExtensions } from './fields/input/bs-input.type';

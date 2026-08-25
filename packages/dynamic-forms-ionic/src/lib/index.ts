@@ -1,5 +1,16 @@
-// Field types remain available for declarative configuration. Runtime field
-// components are implementation details loaded by withIonicFields().
+// Field components
+export {
+  IonicButtonFieldComponent,
+  IonicCheckboxFieldComponent,
+  IonicDatepickerFieldComponent,
+  IonicInputFieldComponent,
+  IonicMultiCheckboxFieldComponent,
+  IonicRadioFieldComponent,
+  IonicSelectFieldComponent,
+  IonicSliderFieldComponent,
+  IonicTextareaFieldComponent,
+  IonicToggleFieldComponent,
+} from './fields';
 export type {
   IonicButtonProps,
   IonicButtonField,
@@ -48,5 +59,8 @@ import './types/registry-augmentation';
 export { withIonicAddons, withIonicFields } from './providers/ionic-providers';
 
 // Addon types remain declarative; renderers load from lazy entry points.
+export { IonicButtonAddonComponent } from './addons/ion-button-addon.component';
+export { IonicIconAddonComponent } from './addons/ion-icon-addon.component';
+export { IonicInlineButtonAddonComponent } from '@ng-forge/dynamic-forms-ionic/shared';
 export type { IonicAddon, IonicButtonAddon, IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 export type { IonicInputAddon, IonicAddonExtensions } from './fields/input/ionic-input.type';

@@ -6,6 +6,7 @@
 
 import { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { AddonActionPreset } from '@ng-forge/dynamic-forms';
+import * as _angular_core from '@angular/core';
 import { AppendArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms';
 import { BaseAddon } from '@ng-forge/dynamic-forms';
@@ -15,10 +16,12 @@ import { DatepickerField } from '@ng-forge/dynamic-forms/integration';
 import { DatepickerProps } from '@ng-forge/dynamic-forms/integration';
 import { DynamicText } from '@ng-forge/dynamic-forms';
 import { DynamicValue } from '@ng-forge/dynamic-forms';
+import { FieldOption } from '@ng-forge/dynamic-forms';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
+import * as i1 from '@ng-forge/dynamic-forms/integration';
 import { InferFormValue } from '@ng-forge/dynamic-forms';
 import { InjectionToken } from '@angular/core';
 import { InputField } from '@ng-forge/dynamic-forms/integration';
@@ -27,6 +30,7 @@ import { InsertArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { NarrowFields } from '@ng-forge/dynamic-forms';
 import { NextPageEvent } from '@ng-forge/dynamic-forms';
+import * as _ng_forge_dynamic_forms from '@ng-forge/dynamic-forms';
 import { PopArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PrependArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PreviousPageEvent } from '@ng-forge/dynamic-forms';
@@ -45,6 +49,7 @@ import { TextareaField } from '@ng-forge/dynamic-forms/integration';
 import { TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
+import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
@@ -74,8 +79,47 @@ export interface IonicAddonExtensions {
 // @public
 export type IonicButtonAddon = IonicButtonBase & IonicButtonContent & IonicButtonClick;
 
+// @public
+export class IonicButtonAddonComponent {
+    // (undocumented)
+    protected readonly action: i1.TypedNgForgeAddonAction<IonicButtonAddon>;
+    protected readonly addon: _angular_core.Signal<IonicButtonAddon>;
+    // (undocumented)
+    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
+    protected readonly color: _angular_core.Signal<"danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning" | undefined>;
+    // (undocumented)
+    protected readonly fill: _angular_core.Signal<"clear" | "default" | "outline" | "solid">;
+    // (undocumented)
+    protected readonly icon: _angular_core.Signal<string | undefined>;
+    protected readonly iconOnly: _angular_core.Signal<boolean>;
+    // (undocumented)
+    protected readonly label: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicButtonAddonComponent, "df-ion-button-addon", never, {}, {}, never, never, true, [{ directive: typeof i1.NgForgeAddonAction; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicButtonAddonComponent, never>;
+}
+
 // @public (undocumented)
 export type IonicButtonField<TEvent extends FormEvent> = ButtonField<IonicButtonProps, TEvent>;
+
+// @public (undocumented)
+export class IonicButtonFieldComponent<TEvent extends FormEvent> {
+    // (undocumented)
+    protected readonly action: i1.NgForgeAction<TEvent>;
+    // (undocumented)
+    readonly buttonTestId: _angular_core.Signal<string>;
+    // (undocumented)
+    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
+    // (undocumented)
+    onClick(): void;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicButtonProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicButtonFieldComponent<any>, "df-ion-button", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeActionHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicButtonFieldComponent<any>, never>;
+}
 
 // @public (undocumented)
 export interface IonicButtonProps {
@@ -97,6 +141,18 @@ export interface IonicButtonProps {
 
 // @public (undocumented)
 export type IonicCheckboxField = CheckboxField<IonicCheckboxProps>;
+
+// @public (undocumented)
+export class IonicCheckboxFieldComponent {
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<boolean>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicCheckboxProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicCheckboxFieldComponent, "df-ion-checkbox", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicCheckboxFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicCheckboxProps {
@@ -126,6 +182,36 @@ export interface IonicConfig {
 
 // @public (undocumented)
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
+
+// @public (undocumented)
+export class IonicDatepickerFieldComponent {
+    // (undocumented)
+    closeModal(): void;
+    // (undocumented)
+    dateToIsoString(date: Date | null | undefined): string | undefined;
+    // (undocumented)
+    formatDisplayDate(date: Date | null | undefined): string;
+    // (undocumented)
+    readonly isModalOpen: _angular_core.WritableSignal<boolean>;
+    // (undocumented)
+    readonly maxDate: _angular_core.InputSignal<Date | null>;
+    // (undocumented)
+    readonly minDate: _angular_core.InputSignal<Date | null>;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<Date | null>;
+    // (undocumented)
+    onDateChange(event: CustomEvent): void;
+    // (undocumented)
+    openModal(): void;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicDatepickerProps | undefined>;
+    // (undocumented)
+    readonly startAt: _angular_core.InputSignal<Date | null>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicDatepickerFieldComponent, "df-ion-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicDatepickerFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicDatepickerProps extends DatepickerProps {
@@ -189,12 +275,27 @@ export type IonicFormProps = IonicConfig;
 
 // @public
 export interface IonicIconAddon extends BaseAddon {
-    // (undocumented)
     readonly ariaLabel?: DynamicText;
-    // (undocumented)
     readonly icon: string;
     // (undocumented)
     readonly type: 'ion-icon';
+}
+
+// @public
+export class IonicIconAddonComponent {
+    // (undocumented)
+    readonly addon: _angular_core.InputSignal<IonicIconAddon>;
+    // (undocumented)
+    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
+    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
+    // (undocumented)
+    protected readonly hasAriaLabel: _angular_core.Signal<boolean>;
+    // (undocumented)
+    protected readonly iconName: _angular_core.Signal<string>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicIconAddonComponent, "df-ion-icon-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicIconAddonComponent, never>;
 }
 
 // @public
@@ -204,6 +305,37 @@ export type IonicInputAddon = IonicAddonExtension | IonicButtonAddon | IonicIcon
 export type IonicInputField = InputField<IonicInputProps> & {
     addons?: ReadonlyArray<IonicInputAddon>;
 };
+
+// @public (undocumented)
+export class IonicInputFieldComponent {
+    constructor();
+    protected readonly buttonPrefixAddons: _angular_core.Signal<_ng_forge_dynamic_forms_ionic.IonicButtonAddon[]>;
+    // (undocumented)
+    protected readonly buttonSuffixAddons: _angular_core.Signal<_ng_forge_dynamic_forms_ionic.IonicButtonAddon[]>;
+    // (undocumented)
+    protected readonly color: _angular_core.Signal<"danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning" | undefined>;
+    // (undocumented)
+    protected readonly decorativePrefixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
+    // (undocumented)
+    protected readonly decorativeSuffixAddons: _angular_core.Signal<(_ng_forge_dynamic_forms.TemplateAddon | _ng_forge_dynamic_forms.TextAddon | _ng_forge_dynamic_forms_ionic.IonicIconAddon)[]>;
+    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
+    // (undocumented)
+    protected readonly fill: _angular_core.Signal<"outline" | "solid">;
+    protected readonly labelPlacement: _angular_core.Signal<"end" | "fixed" | "floating" | "stacked" | "start">;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<string>;
+    // (undocumented)
+    protected readonly ngfa: i1.TypedNgForgeAddons<IonicInputAddon>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicInputProps | undefined>;
+    // (undocumented)
+    protected readonly shape: _angular_core.Signal<"round" | undefined>;
+    protected readonly type: _angular_core.Signal<string>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicInputFieldComponent, "df-ion-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof i1.NgForgeAddons; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicInputFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicInputProps extends InputProps {
@@ -235,6 +367,26 @@ export type IonicInsertArrayItemButtonField = Omit<IonicButtonField<InsertArrayI
 
 // @public (undocumented)
 export type IonicMultiCheckboxField<T> = MultiCheckboxField<T, IonicMultiCheckboxProps>;
+
+// @public (undocumented)
+export class IonicMultiCheckboxFieldComponent {
+    constructor();
+    readonly checkedValuesMap: _angular_core.Signal<Record<string, boolean>>;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<ValueType[]>;
+    // (undocumented)
+    onCheckboxChange(option: FieldOption<ValueType>, checked: boolean): void;
+    // (undocumented)
+    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicMultiCheckboxProps | undefined>;
+    // (undocumented)
+    valueViewModel: _angular_core.WritableSignal<FieldOption<ValueType>[]>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicMultiCheckboxFieldComponent, "df-ion-multi-checkbox", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicMultiCheckboxFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicMultiCheckboxProps {
@@ -275,6 +427,22 @@ export type IonicPreviousButtonField = Omit<IonicButtonField<PreviousPageEvent>,
 export type IonicRadioField<T> = RadioField<T, IonicRadioProps>;
 
 // @public (undocumented)
+export class IonicRadioFieldComponent {
+    // (undocumented)
+    defaultCompare: (value1: any, value2: any) => boolean;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<ValueType>;
+    // (undocumented)
+    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicRadioProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicRadioFieldComponent, "df-ion-radio", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicRadioFieldComponent, never>;
+}
+
+// @public (undocumented)
 export interface IonicRadioProps {
     // (undocumented)
     color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
@@ -296,6 +464,22 @@ export type IonicRemoveArrayItemButtonField = Omit<IonicButtonField<RemoveAtInde
 
 // @public (undocumented)
 export type IonicSelectField<T> = SelectField<T, IonicSelectProps>;
+
+// @public (undocumented)
+export class IonicSelectFieldComponent {
+    // (undocumented)
+    defaultCompare: (value1: any, value2: any) => boolean;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<ValueType>;
+    // (undocumented)
+    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicSelectProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicSelectFieldComponent, "df-ion-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicSelectFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicSelectProps extends SelectProps {
@@ -333,6 +517,22 @@ export type IonicShiftArrayItemButtonField = Omit<IonicButtonField<ShiftArrayIte
 export type IonicSliderField = SliderField<IonicSliderProps>;
 
 // @public (undocumented)
+export class IonicSliderFieldComponent {
+    // (undocumented)
+    protected defaultPinFormatter: (value: number) => string;
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<number>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicSliderProps | undefined>;
+    // (undocumented)
+    readonly step: _angular_core.InputSignal<number | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicSliderFieldComponent, "df-ion-slider", never, { "step": { "alias": "step"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof i1.NgForgeHostControl; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicSliderFieldComponent, never>;
+}
+
+// @public (undocumented)
 export interface IonicSliderProps {
     // (undocumented)
     color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
@@ -364,6 +564,19 @@ export type IonicSubmitButtonField = Omit<IonicButtonField<FormSubmitEvent>, 'ev
 export type IonicTextareaField = TextareaField<IonicTextareaProps>;
 
 // @public (undocumented)
+export class IonicTextareaFieldComponent {
+    constructor();
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<string>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicTextareaProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicTextareaFieldComponent, "df-ion-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicTextareaFieldComponent, never>;
+}
+
+// @public (undocumented)
 export interface IonicTextareaProps extends TextareaProps {
     // (undocumented)
     autoGrow?: boolean;
@@ -385,6 +598,18 @@ export interface IonicTextareaProps extends TextareaProps {
 
 // @public (undocumented)
 export type IonicToggleField = ToggleField<IonicToggleProps>;
+
+// @public (undocumented)
+export class IonicToggleFieldComponent {
+    // (undocumented)
+    protected readonly ngf: i1.TypedNgForgeField<boolean>;
+    // (undocumented)
+    readonly props: _angular_core.InputSignal<IonicToggleProps | undefined>;
+    // (undocumented)
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<IonicToggleFieldComponent, "df-ion-toggle", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof i1.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    // (undocumented)
+    static ɵfac: _angular_core.ɵɵFactoryDeclaration<IonicToggleFieldComponent, never>;
+}
 
 // @public (undocumented)
 export interface IonicToggleProps {

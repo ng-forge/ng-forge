@@ -1,4 +1,23 @@
-export { PRIMENG_FIELD_TYPES, PRIMENG_CONFIG, PrimeField, withPrimeNGFields, withPrimeNGAddons, PRIME_INPUT_TYPE_OVERRIDE } from './lib';
+export {
+  PrimeButtonFieldComponent,
+  PrimeCheckboxFieldComponent,
+  PrimeDatepickerFieldComponent,
+  PrimeInputFieldComponent,
+  PrimeMultiCheckboxFieldComponent,
+  PrimeRadioFieldComponent,
+  PrimeSelectFieldComponent,
+  PrimeSliderFieldComponent,
+  PrimeTextareaFieldComponent,
+  PrimeToggleFieldComponent,
+  PRIMENG_FIELD_TYPES,
+  PRIMENG_CONFIG,
+  PrimeField,
+  withPrimeNGFields,
+  withPrimeNGAddons,
+  PrimeIconAddonComponent,
+  PrimeButtonAddonComponent,
+  PRIME_INPUT_TYPE_OVERRIDE,
+} from './lib';
 
 export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon, PrimeInputAddon, PrimeAddonExtensions } from './lib';
 

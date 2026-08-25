@@ -4,7 +4,9 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 /** Decorative icon addon for Material fields. */
 export interface MatIconAddon extends BaseAddon {
   readonly type: 'mat-icon';
+  /** Material Icons name (ligature, e.g., `'search'`, `'close'`). */
   readonly icon: string;
+  /** Accessible label for icons that convey meaning. */
   readonly ariaLabel?: DynamicText;
 }
 

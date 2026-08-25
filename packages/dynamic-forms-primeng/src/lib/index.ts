@@ -1,5 +1,16 @@
-// Field types remain available for declarative configuration. Runtime field
-// components are implementation details loaded by withPrimeNGFields().
+// Field components
+export {
+  PrimeCheckboxFieldComponent,
+  PrimeDatepickerFieldComponent,
+  PrimeInputFieldComponent,
+  PrimeMultiCheckboxFieldComponent,
+  PrimeRadioFieldComponent,
+  PrimeSelectFieldComponent,
+  PrimeSliderFieldComponent,
+  PrimeButtonFieldComponent,
+  PrimeTextareaFieldComponent,
+  PrimeToggleFieldComponent,
+} from './fields';
 export type {
   PrimeCheckboxProps,
   PrimeCheckboxField,
@@ -50,5 +61,7 @@ import './types/registry-augmentation';
 export { withPrimeNGFields, withPrimeNGAddons } from './providers/primeng-providers';
 
 // Addon types
+export { PrimeIconAddonComponent } from './addons/prime-icon-addon.component';
+export { PrimeButtonAddonComponent } from './addons/prime-button-addon.component';
 export type { PrimeIconAddon, PrimeButtonAddon, PrimeAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 export type { PrimeInputAddon, PrimeAddonExtensions } from './fields/input/prime-input.type';

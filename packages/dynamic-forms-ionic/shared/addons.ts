@@ -4,7 +4,9 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 /** Decorative icon addon for Ionic fields. */
 export interface IonicIconAddon extends BaseAddon {
   readonly type: 'ion-icon';
+  /** Ionons name (e.g., `'search-outline'`, `'close-outline'`). */
   readonly icon: string;
+  /** Accessible label for icons that convey meaning. */
   readonly ariaLabel?: DynamicText;
 }
 

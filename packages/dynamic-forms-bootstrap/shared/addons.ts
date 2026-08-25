@@ -4,7 +4,9 @@ import type { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 /** Decorative icon addon for Bootstrap fields. */
 export interface BsIconAddon extends BaseAddon {
   readonly type: 'bs-icon';
+  /** Bootstrap Icons name without the `bi-` prefix (e.g., `'search'`, `'x'`). */
   readonly icon: string;
+  /** Accessible label for icons that convey meaning. */
   readonly ariaLabel?: DynamicText;
 }
 
