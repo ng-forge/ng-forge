@@ -325,13 +325,6 @@ export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>
 }
 
 /**
- * Gets the keys that differ between two objects.
- *
- * @param previous - Previous object state
- * @param current - Current object state
- * @returns Set of keys that have different values
- */
-/**
  * {@link getChangedKeys} restricted to `keys`. Callers that only care about a handful of
  * paths avoid diffing an entire form value on every change.
  */
@@ -356,6 +349,13 @@ export function getChangedKeysWithin(
   return changed;
 }
 
+/**
+ * Gets the keys that differ between two objects.
+ *
+ * @param previous - Previous object state
+ * @param current - Current object state
+ * @returns Set of keys that have different values
+ */
 export function getChangedKeys(
   previous: Record<string, unknown> | null | undefined,
   current: Record<string, unknown> | null | undefined,

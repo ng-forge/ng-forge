@@ -164,6 +164,13 @@ export interface FormOptions {
    * Rules that reach across pages (validators or derivations depending on another page's
    * field) cannot run under this mode: they throw in dev and warn in production.
    *
+   * Trades navigation cost for typing cost. Each page change recompiles that page's schema
+   * rather than reusing one built for the whole form, so navigation gets more expensive while
+   * every keystroke gets cheaper. Worth enabling on large paged forms where users type a lot
+   * per page, not on short wizards they click through.
+   *
+   * Values on unmounted pages are preserved and still submit.
+   *
    * @default false
    */
   pageScope?: boolean;

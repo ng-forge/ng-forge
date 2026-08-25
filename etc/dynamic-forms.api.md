@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as _angular_forms from '@angular/forms';
 import * as _angular_forms_signals from '@angular/forms/signals';
 import { EnvironmentInjector } from '@angular/core';
 import { EnvironmentProviders } from '@angular/core';
@@ -392,6 +391,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
         initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
         pagePreloadWindow?: number;
+        pageScope?: boolean;
         fieldWindowing?: boolean | {
             eager?: number;
             placeholderHeight?: string;
@@ -412,7 +412,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     form: Signal<FieldTree<TModel, number | string, "writable">>;
     formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
     formOptions: _angular_core.InputSignal<FormOptions | undefined>;
-    formValue: Signal<(TModel extends infer T ? T extends TModel ? T extends _angular_forms.AbstractControl<unknown, infer TValue extends unknown, any> ? TValue : never : never : never) | TModel>;
+    formValue: Signal<TModel>;
     protected readonly idPrefix: Signal<string>;
     // (undocumented)
     initialized$: rxjs.Observable<boolean>;
@@ -704,6 +704,7 @@ export interface FormOptions {
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
+    pageScope?: boolean;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
 }
