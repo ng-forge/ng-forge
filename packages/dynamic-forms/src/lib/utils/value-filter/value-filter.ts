@@ -104,8 +104,18 @@ export function filterFormValue<T extends Record<string, unknown>>(
   globalDefaults: ResolvedValueExclusionConfig,
   formOptions: ValueExclusionConfig | undefined,
 ): Partial<T> {
+  // No exclusion axis enabled: skip the per-field state reads and config resolution, but still
+  // strip non-value field types and undeclared keys, which the loop below does unconditionally.
   if (!hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions)) {
-    return rawValue;
+    const kept: Record<string, unknown> = {};
+    for (const field of schemaFields) {
+      const key = field.key;
+      if (!key || !(key in rawValue)) continue;
+      const valueHandling = getFieldValueHandling(field.type, registry);
+      if (valueHandling === 'exclude' || valueHandling === 'flatten') continue;
+      kept[key] = rawValue[key];
+    }
+    return kept as Partial<T>;
   }
 
   const result: Record<string, unknown> = {};

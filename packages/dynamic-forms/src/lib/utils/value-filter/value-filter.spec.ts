@@ -189,7 +189,9 @@ describe('filterFormValue', () => {
 
       const result = filterFormValue(rawValue, fields, { name: trackedFieldState }, registry, ALL_DISABLED, undefined);
 
-      expect(result).toBe(rawValue);
+      // Value equality, not identity: returning rawValue itself skipped the unconditional
+      // strips. The assertion that matters is the one below — no field state was read.
+      expect(result).toStrictEqual(rawValue);
       expect(trackedFieldState).not.toHaveBeenCalled();
     });
 
@@ -288,7 +290,8 @@ describe('filterFormValue', () => {
 
   describe('value handling modes', () => {
     it('should skip fields with exclude valueHandling', () => {
-      const rawValue = { name: 'John', submit: undefined };
+      // A defined value, and toStrictEqual: `undefined` + toEqual passed even when the key leaked.
+      const rawValue = { name: 'John', submit: 'CLICKED' };
       const fields: FieldDef<unknown>[] = [
         { key: 'name', type: 'input' },
         { key: 'submit', type: 'button' },
@@ -300,11 +303,12 @@ describe('filterFormValue', () => {
 
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
-      expect(result).toEqual({ name: 'John' });
+      expect(result).toStrictEqual({ name: 'John' });
     });
 
     it('should skip fields with flatten valueHandling', () => {
-      const rawValue = { name: 'John' };
+      // `row1` present in rawValue: absent, it passed whether or not flatten was stripped.
+      const rawValue = { name: 'John', row1: 'FLATTENED' };
       const fields: FieldDef<unknown>[] = [
         { key: 'name', type: 'input' },
         { key: 'row1', type: 'row' },
@@ -315,7 +319,19 @@ describe('filterFormValue', () => {
 
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
-      expect(result).toEqual({ name: 'John' });
+      expect(result).toStrictEqual({ name: 'John' });
+    });
+
+    it('should drop keys that no schema field declares', () => {
+      const rawValue = { name: 'John', stray: 'LEAK' };
+      const fields: FieldDef<unknown>[] = [{ key: 'name', type: 'input' }];
+      const formTree = {
+        name: createFieldState(),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
+
+      expect(result).toStrictEqual({ name: 'John' });
     });
   });
 

@@ -162,7 +162,9 @@ export interface FormOptions {
    * each keystroke on fields that are not on screen.
    *
    * Rules that reach across pages (validators or derivations depending on another page's
-   * field) cannot run under this mode: they throw in dev and warn in production.
+   * field) cannot see those fields under this mode, because the schema only covers the
+   * mounted pages. There is no diagnostic for this yet: such a rule goes quiet rather than
+   * failing loudly, so check for cross-page rules before enabling it.
    *
    * Trades navigation cost for typing cost. Each page change recompiles that page's schema
    * rather than reusing one built for the whole form, so navigation gets more expensive while
