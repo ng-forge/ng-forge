@@ -26,6 +26,7 @@ import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { GoToPageEvent, PageNavigationOptions } from '../events/constants/go-to-page.event';
 import { FormClearEvent } from '../events/constants/form-clear.event';
 import { FormResetEvent } from '../events/constants/form-reset.event';
 import { FormSubmitEvent } from '../events/constants/submit.event';
@@ -348,6 +349,14 @@ export class FormStateManager<
    * remounts the orchestrator — a component-owned index would reset to its landing page.
    */
   readonly activePageIndex = signal(0);
+
+  /**
+   * A page the form has been asked to navigate to but that no pager has applied yet.
+   * Held here because the orchestrator mounts behind the render gate: a request made on
+   * `initialized` reaches the bus before that subscription exists, and would otherwise be
+   * dropped. The orchestrator drains this once it can resolve visibility and validity.
+   */
+  readonly pendingPageRequest = signal<{ index: number; options?: PageNavigationOptions } | null>(null);
 
   /** Whether the schema should cover only the mounted pages. */
   private readonly pageScopeEnabled = computed(
@@ -1012,6 +1021,13 @@ export class FormStateManager<
       map(() => undefined as void),
       takeUntilDestroyed(this.destroyRef),
     );
+
+    // Record page requests here rather than only in the pager, so one made before the
+    // orchestrator mounts survives until it can be applied.
+    this.eventBus
+      .on<GoToPageEvent>('go-to-page')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => this.pendingPageRequest.set({ index: event.pageIndex, options: event.options }));
 
     // Create the state machine eagerly
     this.machine = createFormStateMachine<TFields>({

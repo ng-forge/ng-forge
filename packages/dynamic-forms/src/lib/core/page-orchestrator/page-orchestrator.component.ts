@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
-import { GoToPageEvent, PageNavigationOptions } from '../../events/constants/go-to-page.event';
+import { PageNavigationOptions } from '../../events/constants/go-to-page.event';
 import { NextPageEvent } from '../../events/constants/next-page.event';
 import { PageChangeEvent } from '../../events/constants/page-change.event';
 import { PreviousPageEvent } from '../../events/constants/previous-page.event';
@@ -83,6 +83,9 @@ export class PageOrchestratorComponent {
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalPreloadWindow = inject(PAGE_PRELOAD_WINDOW);
   private readonly stateManager = inject(FormStateManager, { optional: true });
+
+  /** Pending programmatic page request, owned by FormStateManager. */
+  private readonly pendingPageRequest = computed(() => this.stateManager?.pendingPageRequest() ?? null);
 
   /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
@@ -500,13 +503,15 @@ export class PageOrchestratorComponent {
         this.navigateToPreviousPage();
       });
 
-    // Listen for programmatic jumps to a specific page
-    this.eventBus
-      .on<GoToPageEvent>('go-to-page')
-      .pipe(takeUntilDestroyed())
-      .subscribe((event) => {
-        this.navigateToPage(event.pageIndex, event.options);
-      });
+    // Programmatic jumps arrive as pending intent on FormStateManager rather than as a live
+    // subscription here: this component mounts behind the render gate, so a request made on
+    // `initialized` would otherwise reach the bus before this listener existed. Draining it
+    // here keeps visibility and validity resolution in the one place that knows about them.
+    explicitEffect([this.pendingPageRequest], ([request]) => {
+      if (!request) return;
+      this.stateManager?.pendingPageRequest.set(null);
+      this.navigateToPage(request.index, request.options);
+    });
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
 
