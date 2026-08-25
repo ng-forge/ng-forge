@@ -541,7 +541,15 @@ export class FormStateManager<
   /** Entity (form value merged with defaults). */
   readonly entity = linkedSignal<TModel>(
     () => {
-      const inputValue = this.externalValue();
+      // Read for the dependency only: `externalValue` filters our own echo so this does not
+      // re-derive on the value it just published. Content comes from the live host signal,
+      // because the filter's memo is stale by exactly the amount it suppressed.
+      //
+      // The narrowing this buys: a host write that `isEqual` considers identical to our last
+      // outward push no longer re-derives the entity. That is correct here (the value is the
+      // same) but it does mean host writes are deduplicated by value, not by reference.
+      this.externalValue();
+      const inputValue = untracked(() => this.deps.value()) as TModel;
       const defaults = this.defaultValues();
       const keys = this.validKeys();
       const saved = this.excludedValueStore();
@@ -1149,7 +1157,9 @@ export class FormStateManager<
    */
   private snapshotOffPageValues(mounted: ReadonlySet<string>): Record<string, unknown> {
     const defaults = this.defaultValues() as Record<string, unknown>;
-    const host = (this.externalValue() ?? {}) as Record<string, unknown>;
+    // The live host model, not `externalValue`: that one filters our own echo for the entity's
+    // benefit, and its memo would be stale by exactly the values this needs to retain.
+    const host = (this.deps.value() ?? {}) as Record<string, unknown>;
     return { ...omitKeys(defaults, mounted), ...omitKeys(host, mounted) };
   }
 
@@ -1235,9 +1245,11 @@ export class FormStateManager<
     explicitEffect([this.boundFormValue], ([currentBound]) => {
       const currentValue = this.deps.value();
       if (!isEqual(currentBound, currentValue)) {
-        // Record before writing so `externalValue` can recognise the echo.
+        // Record before writing so `externalValue` can recognise the echo. Only
+        // `lastOutwardValue` — writing `lastExternalValue` here turned its memo into a
+        // poisoned cache that returned a fresh object every keystroke, which notified
+        // `entity` anyway. It is now written solely inside `externalValue`.
         this.lastOutwardValue.current = currentBound;
-        this.lastExternalValue.current = currentBound;
         this.deps.value.set(currentBound as TModel);
       }
     });
