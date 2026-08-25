@@ -282,6 +282,21 @@ export default defineConfig(({ mode }) => {
       reportCompressedSize: true,
       target: ['es2020'],
     },
+    resolve: {
+      // The adapters' built bundles import their own `/shared` and `/lazy/*` entry points
+      // by package specifier. nxViteTsPaths would map those to workspace .ts sources, which
+      // the Nitro rollup pass cannot parse. Alias runs before plugins, so dist wins.
+      alias: [
+        {
+          find: /^@ng-forge\/dynamic-forms-(material|bootstrap|primeng|ionic)\/shared$/,
+          replacement: resolve(__dirname, '../../dist/packages/dynamic-forms-$1/fesm2022/ng-forge-dynamic-forms-$1-shared.mjs'),
+        },
+        {
+          find: /^@ng-forge\/dynamic-forms-(material|bootstrap|primeng|ionic)\/lazy\/(.+)$/,
+          replacement: resolve(__dirname, '../../dist/packages/dynamic-forms-$1/fesm2022/ng-forge-dynamic-forms-$1-lazy-$2.mjs'),
+        },
+      ],
+    },
     css: {
       preprocessorOptions: {
         scss: {

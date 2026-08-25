@@ -74,13 +74,15 @@
       "inputs": [
         "{workspaceRoot}/dist/{projectRoot}/types/**/*.d.ts",
         "{projectRoot}/api-extractor.json",
+        "{projectRoot}/api-extractor.shared.json",
         "{workspaceRoot}/config/api-extractor.base.json",
         "{workspaceRoot}/etc/dynamic-forms-ionic.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-ionic-shared.api.md",
         "{workspaceRoot}/scripts/api-check.mjs",
         "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
-        "command": "node scripts/api-check.mjs packages/dynamic-forms-ionic/api-extractor.json",
+        "command": "node scripts/api-check.mjs packages/dynamic-forms-ionic/api-extractor.json packages/dynamic-forms-ionic/api-extractor.shared.json",
         "cwd": "{workspaceRoot}"
       }
     },
@@ -91,7 +93,9 @@
         "commands": [
           "nx run dynamic-forms-ionic:build --skip-nx-cache",
           "api-extractor run --local --config packages/dynamic-forms-ionic/api-extractor.json",
-          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-ionic.api.md"
+          "api-extractor run --local --config packages/dynamic-forms-ionic/api-extractor.shared.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-ionic.api.md",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-ionic-shared.api.md"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"
