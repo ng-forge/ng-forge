@@ -11,13 +11,3 @@ export {
   type BenchOptions,
 } from './bench-harness';
 export { runPerfBench, assertPerf, type AssertPerfOpts } from './perf-spec-helper';
-export {
-  DIRECT_ENTRY_FIELDS_PER_PAGE,
-  DIRECT_ENTRY_PAGE_COUNT,
-  DIRECT_ENTRY_PROFILE,
-  DIRECT_ENTRY_TOTAL_FIELDS,
-  directEntryFullConfig,
-  directEntryWizardConfig,
-} from './direct-entry-config';
-export { formlyDirectEntryFlat, formlyDirectEntryPages, formlyDirectEntryPlain, setBenchHttpClient } from './formly-direct-entry-config';
-export { toggleVisibilityConfig, TOGGLE_GATED_COUNT } from './toggle-config';
