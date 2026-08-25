@@ -49,7 +49,7 @@ function rootSegment(path: string): string {
  * `dependsOn` hit or by root-prefix on `dependsOn`/`fieldKey`, so nothing outside this set
  * can change which entries run. A wildcard entry always runs, so it needs no key at all.
  */
-function watchedRootKeys(collection: ReactiveDerivationCollection): Set<string> | null {
+function watchedRootKeys(collection: ReactiveDerivationCollection): Set<string> {
   const watched = new Set<string>();
 
   for (const entry of collection.entries) {

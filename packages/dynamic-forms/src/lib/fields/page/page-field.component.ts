@@ -183,11 +183,20 @@ export default class PageFieldComponent {
   private setupEffects(): void {
     setupContainerInitEffect(this.resolvedFields, this.eventBus, 'page', () => this.field().key, this.injector);
 
+    // Announced once per visit. `renderReady` tracks `resolvedFields`, which moves on every
+    // reconciliation, so without this an event named "initialized" re-fires for one page.
+    // Cleared when the page goes away, so returning to it announces again.
+    let announced: string | null = null;
     afterRenderEffect({
       write: () => {
-        if (this.isVisible() && this.renderReady()) {
-          this.eventBus.dispatch(ActivePageInitializedEvent, this.pageIndex(), this.key());
+        if (!this.isVisible() || !this.renderReady()) {
+          announced = null;
+          return;
         }
+        const visit = `${this.pageIndex()}:${this.key()}`;
+        if (announced === visit) return;
+        announced = visit;
+        this.eventBus.dispatch(ActivePageInitializedEvent, this.pageIndex(), this.key());
       },
     });
 

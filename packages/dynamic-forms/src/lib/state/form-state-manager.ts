@@ -792,12 +792,21 @@ export class FormStateManager<
   });
 
   /** Whether the form is currently valid. */
+  /**
+   * Whether the form is currently valid.
+   *
+   * Schema compilation is lazy, so there is a window on first load, and after a config swap,
+   * where no schema is in hand yet. Validity is unknown then rather than true: this reports
+   * `false` and {@link invalid} reports `true` for that window, so a guard cannot let an
+   * unvalidated form through. {@link dirty}, {@link touched} and {@link submitting} likewise
+   * report `false` until the schema lands.
+   */
   readonly valid = computed(() => this.formSchemaReady() && this.formInstance().valid());
 
-  /** Whether the form is currently invalid. */
+  /** Whether the form is currently invalid. True while the schema loads — see {@link valid}. */
   readonly invalid = computed(() => !this.formSchemaReady() || this.formInstance().invalid());
 
-  /** Whether any form field has been modified. */
+  /** Whether any form field has been modified. False while the schema loads — see {@link valid}. */
   readonly dirty = computed(() => this.formSchemaReady() && this.formInstance().dirty());
 
   /** Whether any form field has been touched (blurred). */
