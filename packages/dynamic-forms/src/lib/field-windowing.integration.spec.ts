@@ -4,9 +4,18 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { delay } from '@ng-forge/utils';
 import { DynamicForm } from './dynamic-form.component';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
-import { FIELD_WINDOWING, FieldWindowingConfig } from './providers/features/field-windowing/field-windowing.token';
+import { FIELD_WINDOWING, FieldParkingConfig, FieldWindowingConfig } from './providers/features/field-windowing/field-windowing.token';
+
 import { FIELD_REGISTRY, FieldTypeDefinition, FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+
+/**
+ * These specs are about *mounting* — which fields render eagerly and which
+ * arrive on scroll. Parking is orthogonal (it freezes already-mounted fields)
+ * and is exercised in `field-parking.integration.spec.ts`, so it stays off here
+ * to keep the DOM assertions about one thing.
+ */
+const PARK_OFF: FieldParkingConfig = { enabled: false, margin: '100%' };
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
@@ -101,7 +110,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('mounts only the eager window when windowing is enabled globally, with placeholders for the rest', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 5, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 5, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const fixture = createHost(flatConfig(40));
@@ -118,7 +127,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('mounts the remaining fields once the last placeholder is scrolled into view', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 5, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 5, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const fixture = createHost(flatConfig(40));
@@ -149,7 +158,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('FormOptions.fieldWindowing: false forces a fully-eager render even when the global feature is enabled', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 5, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 5, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const fixture = createHost(flatConfig(40, { fieldWindowing: false }));
@@ -172,7 +181,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('does not reserve placeholder space for hidden fields outside the eager window', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const config = flatConfig(10);
@@ -187,7 +196,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('does not reserve placeholder space for hidden fields on the active page', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const config = {
@@ -214,7 +223,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('never windows container fields: a group beyond the eager window mounts instead of deferring', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     // Group at index 2 (>= eager) and off-viewport. Containers emit
@@ -253,7 +262,7 @@ describe('Field windowing (progressive field mounting)', () => {
 
   it('keeps unmounted fields participating in the form value at their default', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
-      useValue: { enabled: true, eager: 5, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+      useValue: { enabled: true, eager: 5, placeholderHeight: '80px', park: PARK_OFF } satisfies FieldWindowingConfig,
     });
 
     const fixture = createHost(flatConfig(40));

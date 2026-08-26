@@ -9,9 +9,17 @@ import {
   Signal,
   signal,
   Type,
+  untracked,
   ViewContainerRef,
 } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
+import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
+import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
+import { FieldViewportObserver } from './field-viewport-observer.service';
+
+/** Stand-in visibility for a field with nothing to observe — never parks. */
+const ALWAYS_IN_VIEW = signal(true).asReadonly();
 import { ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { WRAPPER_REGISTRY, WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
 import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
@@ -102,6 +110,34 @@ export class DfFieldOutlet {
    */
   private readonly outermostHostClasses = computed(() => getGridClassString(this.dfFieldOutlet().fieldDef) || undefined);
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // Parking — hold scrolled-away fields out of change detection, DOM intact.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
+  private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
+  /** Optional so a field rendered outside a `DynamicForm` (tests, harnesses) simply never parks. */
+  private readonly viewportObserver = inject(FieldViewportObserver, { optional: true });
+
+  private readonly parking = computed(() => resolveFieldWindowing(this.globalFieldWindowing, this.formOptions?.()?.fieldWindowing).park);
+
+  /**
+   * Host element of the mounted field component. `DfFieldOutlet` is structural,
+   * so it has no element of its own — the thing to observe is whatever the slot
+   * currently holds, which is why this derives from the slot's state signal.
+   */
+  private readonly observedElement = computed(() => {
+    const state = this.fieldComponent.snapshot();
+    return state.phase === 'empty' ? null : (state.ref.location.nativeElement as HTMLElement);
+  });
+
+  /** Visibility signal for the current element, swapped whenever the element changes. */
+  private readonly visibility = signal<Signal<boolean>>(ALWAYS_IN_VIEW);
+  /** Bumped on focus crossing the field boundary, so parking is re-decided when focus leaves. */
+  private readonly focusEpoch = signal(0);
+
+  private readonly parked = computed(() => this.parking().enabled && !this.visibility()());
+
   constructor() {
     createWrapperChainController({
       vcr: this.vcr,
@@ -145,6 +181,50 @@ export class DfFieldOutlet {
       }
     });
 
+    // Track the mounted element's visibility. Re-runs when the slot swaps refs
+    // (component-class change), moving the observation to the new element.
+    explicitEffect([this.observedElement], ([element], onCleanup) => {
+      const observer = this.viewportObserver;
+      if (!element || !observer) {
+        this.visibility.set(ALWAYS_IN_VIEW);
+        return;
+      }
+      this.visibility.set(observer.observe(element, untracked(this.parking).margin));
+      const bumpEpoch = () => this.focusEpoch.update((n) => n + 1);
+      element.addEventListener('focusin', bumpEpoch);
+      element.addEventListener('focusout', bumpEpoch);
+      onCleanup(() => {
+        element.removeEventListener('focusin', bumpEpoch);
+        element.removeEventListener('focusout', bumpEpoch);
+        observer.unobserve(element);
+      });
+    });
+
+    // Apply the parking decision. The two "never park" guards are read
+    // untracked on purpose: subscribing to `errors()` here would make this
+    // directive a consumer of the root form node for every field, which is the
+    // exact per-keystroke cost parking exists to remove.
+    explicitEffect([this.parked, this.focusEpoch], ([parked]) => {
+      if (parked && untracked(() => this.canPark())) this.fieldComponent.park();
+      else this.fieldComponent.unpark();
+    });
+
     this.destroyRef.onDestroy(() => this.fieldComponent.destroyOnTeardown());
+  }
+
+  /**
+   * Whether it is safe to freeze this field right now. Focus is excluded
+   * because parking a focused field strands the caret and breaks IME
+   * composition mid-word; a field showing an error is excluded because the
+   * message is already rendered and would go stale where an error summary can
+   * still link to it.
+   */
+  private canPark(): boolean {
+    const element = this.observedElement();
+    if (!element) return false;
+    if (element.contains(document.activeElement)) return false;
+
+    const field = this.rawInputs()['field'] as (() => { errors?: () => readonly unknown[] }) | undefined;
+    return !(typeof field === 'function' && (field()?.errors?.().length ?? 0) > 0);
   }
 }

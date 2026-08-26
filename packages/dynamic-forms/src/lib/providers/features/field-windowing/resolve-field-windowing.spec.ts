@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { resolveFieldWindowing } from './resolve-field-windowing';
-import { FieldWindowingConfig } from './field-windowing.token';
+import { resolveFieldParking, resolveFieldWindowing } from './resolve-field-windowing';
+import { FieldParkingConfig, FieldWindowingConfig } from './field-windowing.token';
 
 describe('resolveFieldWindowing', () => {
-  const disabledGlobal: FieldWindowingConfig = { enabled: false, eager: 12, placeholderHeight: '4rem' };
-  const enabledGlobal: FieldWindowingConfig = { enabled: true, eager: 8, placeholderHeight: '3rem' };
+  const park: FieldParkingConfig = { enabled: true, margin: '100%' };
+  const disabledGlobal: FieldWindowingConfig = { enabled: false, eager: 12, placeholderHeight: '4rem', park };
+  const enabledGlobal: FieldWindowingConfig = { enabled: true, eager: 8, placeholderHeight: '3rem', park };
 
   it('returns the global config unchanged when no per-form override is given', () => {
     expect(resolveFieldWindowing(disabledGlobal, undefined)).toEqual(disabledGlobal);
@@ -24,21 +25,53 @@ describe('resolveFieldWindowing', () => {
       enabled: true,
       eager: 3,
       placeholderHeight: disabledGlobal.placeholderHeight,
+      park,
     });
     expect(resolveFieldWindowing(disabledGlobal, { placeholderHeight: '2rem' })).toEqual({
       enabled: true,
       eager: disabledGlobal.eager,
       placeholderHeight: '2rem',
+      park,
     });
     expect(resolveFieldWindowing(disabledGlobal, {})).toEqual({
       enabled: true,
       eager: disabledGlobal.eager,
       placeholderHeight: disabledGlobal.placeholderHeight,
+      park,
     });
   });
 
   it('clamps and floors a per-form eager override', () => {
     expect(resolveFieldWindowing(disabledGlobal, { eager: -5 }).eager).toBe(0);
     expect(resolveFieldWindowing(disabledGlobal, { eager: 4.9 }).eager).toBe(4);
+  });
+
+  it('carries a per-form parking override through', () => {
+    expect(resolveFieldWindowing(disabledGlobal, { park: false }).park).toEqual({ enabled: false, margin: '100%' });
+    expect(resolveFieldWindowing(disabledGlobal, { park: { margin: '50%' } }).park).toEqual({ enabled: true, margin: '50%' });
+  });
+});
+
+describe('resolveFieldParking', () => {
+  const global: FieldParkingConfig = { enabled: true, margin: '100%' };
+
+  it('keeps parking on when a form says nothing about it', () => {
+    expect(resolveFieldParking(global, undefined)).toEqual(global);
+  });
+
+  it('lets a form opt out entirely', () => {
+    expect(resolveFieldParking(global, false)).toEqual({ enabled: false, margin: '100%' });
+  });
+
+  it('re-enables against a globally disabled default', () => {
+    expect(resolveFieldParking({ enabled: false, margin: '100%' }, true)).toEqual(global);
+  });
+
+  it('an object override enables parking and tunes the margin', () => {
+    expect(resolveFieldParking({ enabled: false, margin: '100%' }, { margin: '25%' })).toEqual({ enabled: true, margin: '25%' });
+  });
+
+  it('falls back to the global margin when the object omits it', () => {
+    expect(resolveFieldParking(global, {})).toEqual(global);
   });
 });

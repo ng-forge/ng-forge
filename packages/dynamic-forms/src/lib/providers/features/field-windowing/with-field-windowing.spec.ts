@@ -2,7 +2,10 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 import { withFieldWindowing } from './with-field-windowing';
-import { FIELD_WINDOWING } from './field-windowing.token';
+import { FIELD_WINDOWING, FieldParkingConfig } from './field-windowing.token';
+
+/** Parking is on unless a caller opts out, so it shows up in every default. */
+const PARK_ON: FieldParkingConfig = { enabled: true, margin: '100%' };
 
 describe('withFieldWindowing', () => {
   it('creates a field-windowing feature', () => {
@@ -14,13 +17,13 @@ describe('withFieldWindowing', () => {
   it('enables windowing with default eager count and placeholder height', () => {
     TestBed.configureTestingModule({ providers: [...withFieldWindowing().ɵproviders] });
     runInInjectionContext(TestBed.inject(Injector), () => {
-      expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: true, eager: 12, placeholderHeight: '4rem' });
+      expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: true, eager: 12, placeholderHeight: '4rem', park: PARK_ON });
     });
   });
 
   it('overrides eager and placeholderHeight', () => {
     TestBed.configureTestingModule({ providers: [...withFieldWindowing({ eager: 5, placeholderHeight: '80px' }).ɵproviders] });
-    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: true, eager: 5, placeholderHeight: '80px' });
+    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: true, eager: 5, placeholderHeight: '80px', park: PARK_ON });
   });
 
   it('clamps negative eager to 0', () => {
@@ -34,6 +37,6 @@ describe('withFieldWindowing', () => {
   });
 
   it('defaults to disabled when the feature is not provided', () => {
-    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: false, eager: 12, placeholderHeight: '4rem' });
+    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: false, eager: 12, placeholderHeight: '4rem', park: PARK_ON });
   });
 });

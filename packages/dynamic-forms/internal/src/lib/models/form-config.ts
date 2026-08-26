@@ -163,13 +163,18 @@ export interface FormOptions {
    *
    * `true` enables windowing using the global `withFieldWindowing()` defaults;
    * `false` force-disables it even if the global feature is enabled; an object
-   * enables it with per-form `eager` / `placeholderHeight` overrides.
+   * enables it with per-form `eager` / `placeholderHeight` / `park` overrides.
+   *
+   * `park` (on by default) holds scrolled-away fields out of change detection
+   * while leaving their DOM in place, so they stay findable, autofillable and
+   * reachable by assistive tech. Set `park: false` to opt out, or
+   * `park: { margin }` to change how far outside the viewport stays live.
    *
    * Overrides the global `withFieldWindowing(...)` default for this form.
    *
    * @default undefined (uses global setting, which defaults to disabled)
    */
-  fieldWindowing?: boolean | { eager?: number; placeholderHeight?: string };
+  fieldWindowing?: boolean | { eager?: number; placeholderHeight?: string; park?: boolean | { margin?: string } };
 
   /**
    * Whether to exclude values of hidden fields from submission output.

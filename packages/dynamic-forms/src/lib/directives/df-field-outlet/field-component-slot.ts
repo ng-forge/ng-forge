@@ -52,10 +52,22 @@ export class FieldComponentSlot {
    */
   private lastInputs: Record<string, unknown> | null = null;
 
+  /**
+   * Parking intent, not a record of what was done to the LView. Orthogonal to
+   * `phase` — it's about whether the mounted ref's own view participates in
+   * change detection, not about where the view lives — so it isn't folded into
+   * the state discriminant. Held as intent because `ViewContainerRef.insert()`
+   * re-attaches the view it inserts, so a reuse-path remount silently undoes
+   * the detach and `mountOrReuse` has to re-apply it.
+   */
+  private readonly _parked = signal(false);
+
   /** Read-only view of the lifecycle phase. Useful for tests and assertions. */
   readonly phase = () => this.state().phase;
   /** Read-only view of the full state. Exposed so tests can assert ref stability. */
   readonly snapshot = () => this.state();
+  /** Whether this field's view is currently held out of change detection. */
+  readonly parked = this._parked.asReadonly();
 
   /**
    * Mount the field component into `slot`. Reuses the existing `ComponentRef`
@@ -77,6 +89,9 @@ export class FieldComponentSlot {
       slot.insert(current.ref.hostView);
       this.lastInputs = null;
       this.state.set(Object.freeze({ phase: 'mounted', ref: current.ref, slot }));
+      // `slot.insert` re-attaches the host view to change detection, so a
+      // standing park intent has to be re-applied before anything can refresh.
+      if (this._parked()) current.ref.changeDetectorRef.detach();
       this.pushInputs(rawInputs, fieldInputs);
       if (current.phase === 'detached') this.replayFocus(current.focusSnapshot);
       return;
@@ -88,6 +103,9 @@ export class FieldComponentSlot {
     // would try to re-insert.
     if (current.phase !== 'empty') current.ref.destroy();
     this.lastInputs = null;
+    // A different component class is a different field shape — the old ref's
+    // parked state says nothing about the new one, which mounts live.
+    this._parked.set(false);
     this.state.set(EMPTY_STATE);
     const ref = slot.createComponent(component, {
       environmentInjector,
@@ -144,6 +162,41 @@ export class FieldComponentSlot {
   }
 
   /**
+   * Detach the mounted component's view from change detection, leaving its DOM
+   * in place. Angular's `[formField]` reads all 16 pieces of field state from
+   * inside the view's update pass, and a detached view is skipped before its
+   * producers are even polled — so parking takes the field out of the
+   * per-keystroke cost entirely while keeping it findable, autofillable and
+   * reachable by assistive tech.
+   *
+   * User input still writes through: Angular binds `input` / `blur` with plain
+   * DOM listeners that set the model synchronously, and those are not
+   * view-scoped. Only the model → DOM direction is suspended.
+   *
+   * Policy (never park the focused field, never park a field showing an error)
+   * belongs to the caller; this is the mechanism only.
+   */
+  park(): void {
+    const current = this.state();
+    if (current.phase === 'empty') return;
+    current.ref.changeDetectorRef.detach();
+    this._parked.set(true);
+  }
+
+  /**
+   * Re-attach a parked view and force one refresh, so the DOM catches up with
+   * every model change it slept through. `markForCheck` is required as well as
+   * `reattach` — reattaching alone leaves an `OnPush` view clean.
+   */
+  unpark(): void {
+    const current = this.state();
+    if (current.phase === 'empty') return;
+    current.ref.changeDetectorRef.reattach();
+    current.ref.changeDetectorRef.markForCheck();
+    this._parked.set(false);
+  }
+
+  /**
    * Called on directive teardown. Only destroys when the host view is still
    * detached — otherwise the outer `vcr.clear()` cascade has already destroyed
    * it (calling `.destroy()` again would throw).
@@ -152,6 +205,7 @@ export class FieldComponentSlot {
     const current = this.state();
     if (current.phase === 'detached') current.ref.destroy();
     this.lastInputs = null;
+    this._parked.set(false);
     this.state.set(EMPTY_STATE);
   }
 
