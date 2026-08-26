@@ -227,13 +227,13 @@ function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyConte
   // `beforeRebuild` gives the caller a chance to detach views it wants to
   // preserve (e.g. the innermost field when only wrappers changed).
   if (structurallyChanged && mounted.value !== null) {
-    // Destroy any view detached by an earlier gate close first: it is not in the container,
-    // so vcr.clear() cannot reach it, and the next close would overwrite the handle and orphan
-    // it with its subscriptions and Signal Forms bindings still live. Before `beforeRebuild`,
-    // which may detach a view it intends to keep.
+    // Preserve the innermost field before destroying a detached outer chain. Destroying the
+    // ancestor first also destroys the field ref and leaves the caller holding a dead view.
+    opts.beforeRebuild?.();
+    // A view detached by an earlier gate close is not in the container, so vcr.clear() cannot
+    // reach it. Once the preservable inner view is detached, destroy the remaining chain.
     ctx.detached.value?.destroy();
     ctx.detached.value = null;
-    opts.beforeRebuild?.();
     vcr.clear();
     mounted.value = null;
   }

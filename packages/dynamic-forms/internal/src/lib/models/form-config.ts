@@ -157,32 +157,6 @@ export interface FormOptions {
   pagePreloadWindow?: number;
 
   /**
-   * EXPERIMENTAL. Off by default, and currently measures slower than leaving it off: on a
-   * 240-control six-page fixture it cost about 10ms more per keystroke and roughly doubled
-   * page navigation. The shape may change or the option may be withdrawn. Do not enable it
-   * in production.
-   *
-   * For paged forms: build the validation schema from the mounted pages only, instead of the
-   * whole config. Per-keystroke cost scales with schema size, so a 6-page form spends most of
-   * each keystroke on fields that are not on screen.
-   *
-   * Rules that reach across pages (validators or derivations depending on another page's
-   * field) cannot see those fields under this mode, because the schema only covers the
-   * mounted pages. There is no diagnostic for this yet: such a rule goes quiet rather than
-   * failing loudly, so check for cross-page rules before enabling it.
-   *
-   * Trades navigation cost for typing cost. Each page change recompiles that page's schema
-   * rather than reusing one built for the whole form, so navigation gets more expensive while
-   * every keystroke gets cheaper. Worth enabling on large paged forms where users type a lot
-   * per page, not on short wizards they click through.
-   *
-   * Values on unmounted pages are preserved and still submit.
-   *
-   * @default false
-   */
-  pageScope?: boolean;
-
-  /**
    * For flat (single-page) forms: progressive field mounting ("field
    * windowing"). Fields beyond the eager count render as a placeholder and
    * mount only once scrolled near/into view, instead of all mounting eagerly.

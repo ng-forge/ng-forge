@@ -391,7 +391,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
         initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
         pagePreloadWindow?: number;
-        pageScope?: boolean;
         fieldWindowing?: boolean | {
             eager?: number;
             placeholderHeight?: string;
@@ -414,7 +413,6 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     formOptions: _angular_core.InputSignal<FormOptions | undefined>;
     formValue: Signal<TModel>;
     protected readonly idPrefix: Signal<string>;
-    // (undocumented)
     initialized$: rxjs.Observable<boolean>;
     initialized: _angular_core.OutputRef<boolean>;
     invalid: Signal<boolean>;
@@ -704,7 +702,6 @@ export interface FormOptions {
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
-    pageScope?: boolean;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
 }

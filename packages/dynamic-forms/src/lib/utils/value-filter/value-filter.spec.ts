@@ -195,6 +195,32 @@ describe('filterFormValue', () => {
       expect(trackedFieldState).not.toHaveBeenCalled();
     });
 
+    it('should recursively strip undeclared and non-value keys without reading field state', () => {
+      const rawValue = {
+        address: {
+          street: 'Main',
+          submit: 'CLICKED',
+          stray: 'LEAK',
+        },
+      };
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'address',
+          type: 'group',
+          fields: {
+            street: { key: 'street', type: 'input' },
+            submit: { key: 'submit', type: 'button' },
+          },
+        } as FieldDef<unknown>,
+      ];
+      const groupState = vi.fn(createFieldState()) as unknown as FieldTree<unknown>;
+
+      const result = filterFormValue(rawValue, fields, { address: groupState }, registry, ALL_DISABLED, undefined);
+
+      expect(result).toStrictEqual({ address: { street: 'Main' } });
+      expect(groupState).not.toHaveBeenCalled();
+    });
+
     it('should exclude hidden field values when excludeValueIfHidden is enabled', () => {
       const rawValue = { name: 'John', email: 'john@test.com' };
       const fields: FieldDef<unknown>[] = [

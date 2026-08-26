@@ -8,13 +8,19 @@ import {
   inject,
   Injector,
   input,
+  signal,
 } from '@angular/core';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
-import { outputFromObservable } from '@angular/core/rxjs-interop';
+import { outputFromObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
+import {
+  collectInitializingContainerKeys,
+  computeContainerHostClasses,
+  initializationComponentKey,
+  setupContainerInitEffect,
+} from '../../utils/container-utils/container-utils';
 import { PageField, validatePageNesting } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
@@ -27,6 +33,7 @@ import { isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
 import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
 import { ActivePageInitializedEvent } from '../../events/constants/active-page-initialized.event';
+import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
 
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({
@@ -146,9 +153,19 @@ export default class PageFieldComponent {
     { initialValue: [] as ResolvedField[], injector: this.injector },
   );
 
+  private readonly initializedContainers = signal<ReadonlySet<string>>(new Set());
+
+  private readonly expectedContainerKeys = computed(() => collectInitializingContainerKeys(this.fieldsSource()));
+
   private readonly renderReady = computed(() => {
+    const source = this.fieldsSource();
     const fields = this.resolvedFields();
-    return fields.length > 0 && fields.every((field) => field.renderReady());
+    const initialized = this.initializedContainers();
+    return (
+      fields.length === source.length &&
+      fields.every((field) => field.renderReady()) &&
+      this.expectedContainerKeys().every((key) => initialized.has(key))
+    );
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -156,6 +173,18 @@ export default class PageFieldComponent {
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
+    this.eventBus
+      .on<ComponentInitializedEvent>('component-initialized')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        const key = initializationComponentKey(event.componentType, event.componentId);
+        this.initializedContainers.update((current) => {
+          if (current.has(key)) return current;
+          const next = new Set(current);
+          next.add(key);
+          return next;
+        });
+      });
     this.setupEffects();
   }
 

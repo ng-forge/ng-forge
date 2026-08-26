@@ -4,6 +4,7 @@ import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { GoToPageEvent } from '../../events/constants/go-to-page.event';
+import { PageChangeEvent } from '../../events/constants/page-change.event';
 import { DynamicForm } from '../../dynamic-form.component';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
@@ -24,7 +25,10 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
 async function settle(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200): Promise<void> {
   fixture.detectChanges();
   TestBed.flushEffects();
-  await firstValueFrom(race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))));
+  const initialized = await firstValueFrom(
+    race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))),
+  );
+  expect(initialized).toBe(true);
   for (let i = 0; i < 2; i++) {
     TestBed.flushEffects();
     fixture.detectChanges();
@@ -135,17 +139,25 @@ describe('active page index ownership', () => {
     expect(activePage(fixture)).toBe(0);
   });
 
-  it('does not lose a navigation dispatched while another is still settling', async () => {
+  it('does not lose navigation requested after page change but before the destination settles', async () => {
     const fixture = TestBed.createComponent(DynamicForm);
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v1'));
     fixture.componentRef.setInput('value', { a: 'filled' });
     await settle(fixture);
 
     const bus = fixture.debugElement.injector.get(EventBus);
+    let requestedDuringTransition = false;
+    const pageChangeSubscription = bus.on<PageChangeEvent>('page-change').subscribe((event) => {
+      if (event.currentPageIndex !== 1 || requestedDuringTransition) return;
+      requestedDuringTransition = true;
+      queueMicrotask(() => bus.dispatch(new GoToPageEvent(2, { validate: false })));
+    });
+
     bus.dispatch(new GoToPageEvent(1, { validate: false }));
-    bus.dispatch(new GoToPageEvent(2, { validate: false }));
     await settle(fixture);
 
+    expect(requestedDuringTransition).toBe(true);
     expect(activePage(fixture)).toBe(2);
+    pageChangeSubscription.unsubscribe();
   });
 });

@@ -134,9 +134,8 @@ export class PageOrchestratorComponent {
 
     // Untracked: re-land on a config swap, but never on a later validity or visibility change.
     return untracked(() => {
-      // Under `pageScope` a page change reloads the schema, which closes the render gate and
-      // remounts this component. FormStateManager owns the index across that, so restore it
-      // rather than re-landing; it resets to 0 on a genuine config swap.
+      // FormStateManager owns navigation intent before this component mounts, so restore its
+      // index rather than re-landing; it resets to 0 on a genuine config swap.
       const owned = this.stateManager?.activePageIndex() ?? 0;
       if (owned > 0 && owned < totalPages) return owned;
 

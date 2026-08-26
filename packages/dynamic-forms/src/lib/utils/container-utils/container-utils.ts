@@ -3,6 +3,42 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized, InitializationComponentType } from '../emit-initialization/emit-initialization';
 import { ResolvedField } from '../resolve-field/resolve-field';
+import {
+  FieldDef,
+  hasChildFields,
+  isArrayField,
+  isGenericContainerField,
+  isGroupField,
+  isPageField,
+  normalizeFieldsArray,
+} from '@ng-forge/dynamic-forms/internal';
+
+/** Event identity used by containers that participate in initialization readiness. */
+export function initializationComponentKey(type: InitializationComponentType, key: string): string {
+  return `${type}:${key}`;
+}
+
+/** Collects the initialization events expected from rendered container components. */
+export function collectInitializingContainerKeys(fields: readonly FieldDef<unknown>[]): string[] {
+  const keys: string[] = [];
+
+  for (const field of fields) {
+    let type: InitializationComponentType | undefined;
+    if (isPageField(field)) type = 'page';
+    else if (isGroupField(field)) type = 'group';
+    else if (isArrayField(field)) type = 'array';
+    else if (isGenericContainerField(field)) type = 'container';
+
+    if (type && field.key) keys.push(initializationComponentKey(type, field.key));
+
+    if (!hasChildFields(field)) continue;
+    for (const child of normalizeFieldsArray(field.fields)) {
+      keys.push(...collectInitializingContainerKeys((Array.isArray(child) ? child : [child]) as readonly FieldDef<unknown>[]));
+    }
+  }
+
+  return keys;
+}
 
 /**
  * Computes the host class string for a container component.

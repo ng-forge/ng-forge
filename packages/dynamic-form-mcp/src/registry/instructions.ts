@@ -193,10 +193,9 @@ dispatcher.dispatch(new GoToPageEvent(3));                     // gated, stops o
 dispatcher.dispatch(new GoToPageEvent(3, { validate: false })); // skips the gate, for resume
 \`\`\`
 
-Paged forms may virtualize inactive pages. Use the DynamicForm
-\`(activePageInitialized)\` output when work only requires the visible page to be
-rendered. The existing \`(initialized)\` output retains whole-form component
-readiness semantics and may not emit until every configured page has mounted.
+Paged forms may virtualize inactive pages. DynamicForm \`(initialized)\` emits after
+the initially active page is ready. Use \`(activePageInitialized)\` when work must run
+after every visible-page transition; it announces once per visit.
 
 ## Validation
 

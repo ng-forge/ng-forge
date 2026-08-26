@@ -280,6 +280,41 @@ describe('DfFieldOutlet', () => {
     expect(fixture.nativeElement.querySelector('.leaf')).toBeTruthy();
   });
 
+  it('preserves the field when wrappers change while the outlet is hidden', async () => {
+    const sectionDef: WrapperTypeDefinition = {
+      wrapperName: 'section',
+      loadComponent: () => Promise.resolve({ default: TestSectionWrapper }),
+    };
+    TestBed.overrideProvider(WRAPPER_REGISTRY, { useValue: new Map([['section', sectionDef]]) });
+
+    const envInjector = TestBed.inject(EnvironmentInjector);
+    const hidden = signal(false);
+    fixture = TestBed.createComponent(OutletHostComponent);
+    fixture.componentRef.setInput('field', buildResolvedField({ wrappers: [{ type: 'section' }], hidden, injector: envInjector }));
+    fixture.detectChanges();
+    await flush();
+
+    expect(TestLeafComponent.instances).toBe(1);
+    expect(fixture.nativeElement.querySelector('.section .leaf')).toBeTruthy();
+
+    hidden.set(true);
+    fixture.detectChanges();
+    await flush();
+    expect(fixture.nativeElement.querySelector('.leaf')).toBeNull();
+
+    fixture.componentRef.setInput('field', buildResolvedField({ wrappers: [], hidden, injector: envInjector }));
+    fixture.detectChanges();
+    await flush();
+
+    hidden.set(false);
+    fixture.detectChanges();
+    await flush();
+
+    expect(TestLeafComponent.instances).toBe(1);
+    expect(fixture.nativeElement.querySelector('.section')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.leaf')).toBeTruthy();
+  });
+
   it('silently drops mapper keys the field component does not declare (Angular 21 setInput leniency)', async () => {
     // Regression pin: `setInput` is lenient on unknown input names in
     // Angular 21 — `pushRawInputs` does NOT throw NG0303 for a mapper

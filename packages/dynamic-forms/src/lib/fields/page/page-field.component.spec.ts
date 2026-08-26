@@ -65,6 +65,42 @@ describe('PageFieldComponent', () => {
     fixture.detectChanges();
 
     expect(events).toEqual([new ActivePageInitializedEvent(2, 'test-page')]);
+
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    expect(events).toHaveLength(1);
+
+    fixture.componentRef.setInput('isVisible', false);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.componentRef.setInput('isVisible', true);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(events).toEqual([new ActivePageInitializedEvent(2, 'test-page'), new ActivePageInitializedEvent(2, 'test-page')]);
+  });
+
+  it('emits active-page readiness when an empty page becomes visible', async () => {
+    const field: PageField<never[]> = {
+      key: 'empty-page',
+      type: 'page',
+      fields: [],
+    };
+    const { fixture } = setupSimpleTest(PageFieldComponent, { field, pageIndex: 0, isVisible: false });
+    const eventBus = TestBed.inject(EventBus);
+    const events: ActivePageInitializedEvent[] = [];
+    eventBus.on<ActivePageInitializedEvent>('active-page-initialized').subscribe((event) => events.push(event));
+
+    fixture.componentRef.setInput('isVisible', true);
+    await delay(0);
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(events).toEqual([new ActivePageInitializedEvent(0, 'empty-page')]);
   });
 
   it('should validate page nesting and prevent nested pages', () => {

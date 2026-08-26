@@ -1080,7 +1080,6 @@ export interface FormOptions {
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
-    pageScope?: boolean;
     submitButton?: SubmitButtonOptions;
     validateWhenHidden?: boolean;
 }

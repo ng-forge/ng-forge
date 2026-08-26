@@ -13,20 +13,20 @@ import {
   Signal,
   TemplateRef,
   WritableSignal,
+  signal,
 } from '@angular/core';
-import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { DfFieldOutlet } from './directives/df-field-outlet/df-field-outlet.directive';
 import { FieldTree } from '@angular/forms/signals';
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { filter, shareReplay, take } from 'rxjs';
 import { createSubmissionHandler } from './utils/submission-handler/submission-handler';
 import { FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
 import { RegisteredFieldTypes } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from './events/constants/submit.event';
 import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
-import { setupInitializationTracking } from '@ng-forge/dynamic-forms/internal';
 import { InferFormModel } from '@ng-forge/dynamic-forms/internal';
-import { hasChildFields, isContainerField } from '@ng-forge/dynamic-forms/internal';
+import { isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { DERIVATION_RENDER_GATE } from './core/derivation/derivation-render-gate';
@@ -47,6 +47,7 @@ import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedField } from './utils/resolve-field/resolve-field';
 import { FIELD_WINDOWING } from './providers/features/field-windowing/field-windowing.token';
 import { resolveFieldWindowing } from './providers/features/field-windowing/resolve-field-windowing';
+import { collectInitializingContainerKeys, initializationComponentKey } from './utils/container-utils/container-utils';
 
 /**
  * Renders a form from a {@link FormConfig}. Attribute component on a native
@@ -89,22 +90,24 @@ import { resolveFieldWindowing } from './providers/features/field-windowing/reso
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key; let i = $index) {
-            <!-- Hidden fields are gated inside DfFieldOutlet, which detaches the mounted chain
-                 rather than destroying it — rebuilding costs ~5x. Its renderReady-&-!hidden gate
-                 still blocks the first mount, which is what silences NG01916. -->
-            @if (windowsField(field, i)) {
-              @defer (on viewport) {
+            @if (!field.hidden()) {
+              <!-- Once mounted, hidden fields are gated inside DfFieldOutlet, which detaches the
+                   chain rather than destroying it. This outer gate also prevents unmounted hidden
+                   fields from reserving placeholder space. -->
+              @if (windowsField(field, i)) {
+                @defer (on viewport) {
+                  <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+                } @placeholder {
+                  <div
+                    [class]="placeholderGridClass(field)"
+                    [style.min-height]="fieldWindowing().placeholderHeight"
+                    [attr.data-field-key]="field.key"
+                    aria-hidden="true"
+                  ></div>
+                }
+              } @else {
                 <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
-              } @placeholder {
-                <div
-                  [class]="placeholderGridClass(field)"
-                  [style.min-height]="fieldWindowing().placeholderHeight"
-                  [attr.data-field-key]="field.key"
-                  aria-hidden="true"
-                ></div>
               }
-            } @else {
-              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
             }
           }
         }
@@ -272,25 +275,33 @@ export class DynamicForm<
   // Computed Signals - Internal
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Recursively counts container components that will emit ComponentInitializedEvent.
-   * Includes the dynamic-form component itself (+1).
-   */
-  private totalComponentsCount = computed(() => {
-    const fields = this.stateManager.formSetup()?.fields ?? [];
-    return countContainersRecursive(fields) + 1;
+  private readonly initializedComponents = signal<ReadonlySet<string>>(new Set());
+  private readonly initialPageReady = signal(false);
+
+  private readonly initializationReady = computed(() => {
+    const config = this.activeConfig();
+    if (!config) return false;
+
+    if (this.formModeDetection().mode === 'paged') return this.initialPageReady();
+
+    const initialized = this.initializedComponents();
+    const expected = [
+      initializationComponentKey('dynamic-form', this.componentId),
+      ...collectInitializingContainerKeys(config.fields ?? []),
+    ];
+    return expected.every((key) => initialized.has(key));
   });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Initialization
   // ─────────────────────────────────────────────────────────────────────────────
 
-  initialized$ = setupInitializationTracking({
-    eventBus: this.eventBus,
-    totalComponentsCount: this.totalComponentsCount,
-    injector: this.injector,
-    componentId: this.componentId,
-  });
+  /** Replayable readiness so late subscribers cannot miss hot EventBus announcements. */
+  initialized$ = toObservable(this.initializationReady, { injector: this.injector }).pipe(
+    filter((ready) => ready),
+    take(1),
+    shareReplay({ bufferSize: 1, refCount: false }),
+  );
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Outputs
@@ -315,8 +326,9 @@ export class DynamicForm<
   events = outputFromObservable(this.eventBus.events$);
 
   /**
-   * Emits when all form components are initialized and ready for interaction.
-   * Useful for E2E testing to ensure the form is fully rendered before interaction.
+   * Emits when a non-paged form is fully initialized, or when the initially active page of a
+   * paged form is ready for interaction. Virtualized inactive pages are not part of initial
+   * readiness because they intentionally remain unmounted.
    */
   initialized = outputFromObservable(this.initialized$);
 
@@ -324,8 +336,8 @@ export class DynamicForm<
    * EXPERIMENTAL. Added alongside page preloading; the emission contract may change.
    *
    * Emits after the currently visible page and all of its visible fields render. Announced
-   * once per visit to a page, and again when that page is returned to. Prefer `initialized`
-   * unless you specifically need the visible page rather than the whole form.
+   * once per visit to a page, and again when that page is returned to. Use this when work must
+   * run after every page transition; `initialized` emits only for the initial page.
    */
   activePageInitialized = outputFromObservable(this.eventBus.on<ActivePageInitializedEvent>('active-page-initialized'));
 
@@ -340,6 +352,23 @@ export class DynamicForm<
   // ─────────────────────────────────────────────────────────────────────────────
 
   constructor() {
+    this.eventBus
+      .on<ComponentInitializedEvent>('component-initialized')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        const key = initializationComponentKey(event.componentType, event.componentId);
+        this.initializedComponents.update((current) => {
+          if (current.has(key)) return current;
+          const next = new Set(current);
+          next.add(key);
+          return next;
+        });
+      });
+    this.eventBus
+      .on<ActivePageInitializedEvent>('active-page-initialized')
+      .pipe(takeUntilDestroyed(this.destroyRef), take(1))
+      .subscribe(() => this.initialPageReady.set(true));
+
     this.dispatcher?.connect(this.eventBus);
     this.destroyRef.onDestroy(() => this.dispatcher?.disconnect());
 
@@ -398,8 +427,8 @@ export class DynamicForm<
     });
 
     // Emit initialization event for non-paged forms
-    explicitEffect([this.resolvedFields, this.formModeDetection], ([fields, { mode }]) => {
-      if (mode === 'non-paged' && fields.length > 0) {
+    explicitEffect([this.resolvedFields, this.formModeDetection, this.activeConfig], ([, { mode }, config]) => {
+      if (config && mode === 'non-paged') {
         afterNextRender(
           () => {
             this.eventBus.dispatch(ComponentInitializedEvent, 'dynamic-form', this.componentId);
@@ -448,32 +477,4 @@ export class DynamicForm<
         error: (err) => this.logger.error('Submission handler error', err),
       });
   }
-}
-
-/**
- * Recursively counts container fields (page, row, group, array, wrapper) in a field tree.
- * Descends into container children including array item templates to ensure
- * nested containers are counted for accurate initialization tracking.
- */
-function countContainersRecursive(fields: FieldDef<unknown>[]): number {
-  let count = 0;
-  for (const field of fields) {
-    if (isContainerField(field)) {
-      count += 1;
-      if (hasChildFields(field)) {
-        const children = field.fields;
-        if (Array.isArray(children)) {
-          for (const child of children) {
-            if (Array.isArray(child)) {
-              // Array item template: FieldDef[] (object items)
-              count += countContainersRecursive(child as FieldDef<unknown>[]);
-            } else if (child != null && isContainerField(child as FieldDef<unknown>)) {
-              count += countContainersRecursive([child as FieldDef<unknown>]);
-            }
-          }
-        }
-      }
-    }
-  }
-  return count;
 }

@@ -56,6 +56,33 @@ interface FieldWithInheritedExclusion {
   };
 }
 
+/** Keeps only declared value-bearing fields without consulting reactive field state. */
+function filterDeclaredValueShape(
+  rawValue: Record<string, unknown>,
+  fields: readonly FieldDef<unknown>[],
+  registry: Map<string, FieldTypeDefinition>,
+): Record<string, unknown> {
+  const kept: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    const key = field.key;
+    if (!key || !(key in rawValue)) continue;
+
+    const valueHandling = getFieldValueHandling(field.type, registry);
+    if (valueHandling === 'exclude' || valueHandling === 'flatten') continue;
+
+    const value = rawValue[key];
+    if (isGroupField(field) && field.fields && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      kept[key] = filterDeclaredValueShape(value as Record<string, unknown>, Object.values(field.fields) as FieldDef<unknown>[], registry);
+      continue;
+    }
+
+    kept[key] = value;
+  }
+
+  return kept;
+}
+
 /**
  * Determines whether a field's value should be excluded based on its reactive state,
  * the field def's static state (for fields whose `state.hidden()` isn't wired — e.g. groups,
@@ -107,15 +134,7 @@ export function filterFormValue<T extends Record<string, unknown>>(
   // No exclusion axis enabled: skip the per-field state reads and config resolution, but still
   // strip non-value field types and undeclared keys, which the loop below does unconditionally.
   if (!hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions)) {
-    const kept: Record<string, unknown> = {};
-    for (const field of schemaFields) {
-      const key = field.key;
-      if (!key || !(key in rawValue)) continue;
-      const valueHandling = getFieldValueHandling(field.type, registry);
-      if (valueHandling === 'exclude' || valueHandling === 'flatten') continue;
-      kept[key] = rawValue[key];
-    }
-    return kept as Partial<T>;
+    return filterDeclaredValueShape(rawValue, schemaFields, registry) as Partial<T>;
   }
 
   const result: Record<string, unknown> = {};

@@ -29,11 +29,14 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
 ];
 
 /** Waits for the form to fully initialize, using initialized$ for reliability. */
-async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200): Promise<void> {
+async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200, expectReady = true): Promise<void> {
   fixture.detectChanges();
   TestBed.flushEffects();
 
-  await firstValueFrom(race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))));
+  const initialized = await firstValueFrom(
+    race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))),
+  );
+  expect(initialized).toBe(expectReady);
 
   for (let i = 0; i < 2; i++) {
     TestBed.flushEffects();
@@ -480,7 +483,7 @@ describe('PageOrchestratorComponent', () => {
       let pageChangeCount = 0;
       eventBus.on<PageChangeEvent>('page-change').subscribe(() => pageChangeCount++);
 
-      await waitForFormInit(fixture);
+      await waitForFormInit(fixture, 200, false);
       TestBed.flushEffects();
       fixture.detectChanges();
       await delay(0);

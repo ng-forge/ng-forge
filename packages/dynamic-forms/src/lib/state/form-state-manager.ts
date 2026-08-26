@@ -48,7 +48,6 @@ import { reconcileFields, ResolvedField, resolveField, resolveFieldSync } from '
 import { FormModeValidator } from '../utils/form-validation/form-mode-validator';
 import { injectFieldRegistry } from '../utils/inject-field-registry/inject-field-registry';
 import { validateFormConfig } from '../utils/config-validation/config-validator';
-import { collectLeafFieldKeys } from '../utils/page-utils/collect-leaf-field-keys';
 import { walkAndValidateAddons } from '../utils/validate-form-config/validate-field-addons';
 import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
 import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
@@ -95,30 +94,6 @@ const BOUND_VALUE_EXCLUSION_BASELINE = {
   excludeValueIfDisabled: false,
   excludeValueIfReadonly: false,
 } as const;
-
-/** Set equality by membership — keeps the mounted-key computed from churning on re-navigation. */
-function keySetsEqual(a: ReadonlySet<string> | undefined, b: ReadonlySet<string> | undefined): boolean {
-  if (a === b) return true;
-  if (!a || !b || a.size !== b.size) return false;
-  for (const key of a) if (!b.has(key)) return false;
-  return true;
-}
-
-/** Shallow copy of `source` restricted to `keys` it actually has. */
-function pickKeys(source: Record<string, unknown> | undefined, keys: ReadonlySet<string>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  if (!source) return out;
-  for (const key of keys) if (key in source) out[key] = source[key];
-  return out;
-}
-
-/** Shallow copy of `source` without `keys`. */
-function omitKeys(source: Record<string, unknown> | undefined, keys: ReadonlySet<string>): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  if (!source) return out;
-  for (const key of Object.keys(source)) if (!keys.has(key)) out[key] = source[key];
-  return out;
-}
 
 /** Per-field axes that can drive value exclusion. */
 interface FieldExclusionAxes {
@@ -343,11 +318,7 @@ export class FormStateManager<
     return { ...configOptions, ...inputOptions };
   });
 
-  /**
-   * Active page index. Owned here rather than by the page orchestrator because under
-   * `pageScope` a page change reloads the schema, which closes the render gate and
-   * remounts the orchestrator — a component-owned index would reset to its landing page.
-   */
+  /** Active page index, owned here so pre-mount navigation intent survives pager setup. */
   readonly activePageIndex = signal(0);
 
   /**
@@ -357,49 +328,6 @@ export class FormStateManager<
    * dropped. The orchestrator drains this once it can resolve visibility and validity.
    */
   readonly pendingPageRequest = signal<{ index: number; options?: PageNavigationOptions } | null>(null);
-
-  /** Whether the schema should cover only the mounted pages. */
-  private readonly pageScopeEnabled = computed(
-    () => this.effectiveFormOptions().pageScope === true && this.formModeDetection().mode === 'paged',
-  );
-
-  /**
-   * Top-level model keys owned by the mounted pages, or `undefined` when the whole config is in
-   * scope. Single source of truth for every page-scoped narrowing below.
-   */
-  private readonly mountedPageKeys = computed<ReadonlySet<string> | undefined>(
-    () => {
-      if (!this.pageScopeEnabled()) return undefined;
-
-      const pages = this.pageFieldDefinitions();
-      if (pages.length === 0) return undefined;
-
-      const window = Math.max(0, this.effectiveFormOptions().pagePreloadWindow ?? 0);
-      const active = Math.min(Math.max(this.activePageIndex(), 0), pages.length - 1);
-      const from = Math.max(0, active - window);
-      const to = Math.min(pages.length - 1, active + window);
-
-      const mounted = new Set<string>();
-      for (let i = from; i <= to; i++) {
-        for (const key of collectLeafFieldKeys(pages[i].fields ?? [])) mounted.add(key);
-      }
-
-      return mounted;
-    },
-    { equal: keySetsEqual },
-  );
-
-  /**
-   * Schema fields narrowed to the mounted pages when `pageScope` is on. Per-keystroke cost
-   * scales with schema size, so a paged form otherwise pays for every off-screen page.
-   */
-  private readonly scopedSchemaFields = computed(() => {
-    const all = this.formSetup().schemaFields;
-    const mounted = this.mountedPageKeys();
-    if (!mounted || !all?.length) return all;
-
-    return all.filter((field) => field.key !== undefined && mounted.has(field.key));
-  });
 
   /** Page field definitions (for paged forms). */
   readonly pageFieldDefinitions = computed(() => {
@@ -464,12 +392,9 @@ export class FormStateManager<
     const schemaFields = this.formSetup().schemaFields;
     if (!schemaFields || schemaFields.length === 0) return undefined;
 
-    const mounted = this.mountedPageKeys();
     const keys = new Set<string>();
     for (const field of schemaFields) {
-      // Page-scoped: the entity carries only the mounted slice, so the tree Signal Forms builds
-      // over it is sized by what is on screen instead of by the whole config.
-      if (field.key === undefined || (mounted && !mounted.has(field.key))) continue;
+      if (field.key === undefined) continue;
       keys.add(field.key);
     }
     return keys;
@@ -494,7 +419,7 @@ export class FormStateManager<
    * transitions are captured. Arrays are treated as leaves (whole-array preservation only).
    */
   private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
-    const schemaFields = this.scopedSchemaFields();
+    const schemaFields = this.formSetup().schemaFields;
     if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !schemaFields || schemaFields.length === 0) return {};
 
     const snapshot: Record<string, FieldExclusionAxes> = {};
@@ -514,8 +439,8 @@ export class FormStateManager<
   /** Tracks per-path exclusion state across save-effect runs to detect newly-excluded fields. */
   private readonly prevFieldStateSnapshot = signal<Record<string, FieldExclusionAxes>>({});
 
-  /** Last reference pushed to `deps.value` by the outward-sync effect. */
-  private readonly lastOutwardValue: { current: unknown } = { current: undefined };
+  /** Pending reference pushed to `deps.value` by the outward-sync effect. */
+  private readonly lastOutwardValue: { current: unknown; pending: boolean } = { current: undefined, pending: false };
 
   /** Last `deps.value` accepted as a genuine host change (memo for {@link externalValue}). */
   private readonly lastExternalValue: { current: unknown } = { current: undefined };
@@ -527,9 +452,11 @@ export class FormStateManager<
    */
   private readonly externalValue = computed<TModel>(() => {
     const incoming = this.deps.value();
-    if (incoming === this.lastOutwardValue.current) {
+    if (this.lastOutwardValue.pending && incoming === this.lastOutwardValue.current) {
+      this.lastOutwardValue.pending = false;
       return this.lastExternalValue.current as TModel;
     }
+    this.lastOutwardValue.pending = false;
     this.lastExternalValue.current = incoming;
     return incoming as TModel;
   });
@@ -553,17 +480,6 @@ export class FormStateManager<
       const defaults = this.defaultValues();
       const keys = this.validKeys();
       const saved = this.excludedValueStore();
-      const mounted = this.mountedPageKeys();
-
-      // Page-scoped: slice every layer to the mounted keys BEFORE merging, so both the merge and
-      // the Signal Forms tree it feeds cost what is on screen, not the whole config. Keys left
-      // behind live in `offPageValues` and are merged back on the way out.
-      if (mounted && keys) {
-        const scopedDefaults = pickKeys(defaults as Record<string, unknown>, keys);
-        const scopedSaved = deepMergeDefaults(scopedDefaults, pickKeys(saved, keys));
-        return deepMergeDefaults(scopedSaved, pickKeys(inputValue as Record<string, unknown>, keys)) as TModel;
-      }
-
       // Deep-merge so a partial nested object in `inputValue` (e.g. a group
       // value missing one of its declared sub-field keys) does not orphan
       // the absent sub-field in the Signal Forms validation graph.
@@ -589,17 +505,6 @@ export class FormStateManager<
     },
   );
 
-  /**
-   * Values for keys the page-scoped entity left behind. Refreshed only when the mounted window
-   * moves, so the per-keystroke merge back is a spread of stable references rather than a walk
-   * of the whole model. Empty (and never consulted) when `pageScope` is off.
-   */
-  private readonly offPageValues = linkedSignal<ReadonlySet<string> | undefined, Record<string, unknown>>({
-    source: () => this.mountedPageKeys(),
-    // Untracked: `externalValue` moves on every keystroke and this must only follow navigation.
-    computation: (mounted) => (mounted ? untracked(() => this.snapshotOffPageValues(mounted)) : {}),
-  });
-
   /** Loads once, on the first non-empty schema request. Angular memoizes the import promise. */
   private readonly loadFormSchemaService = injectAsync(() => import('../core/form-schema.service'));
 
@@ -614,7 +519,7 @@ export class FormStateManager<
     if (!config || (!(setup.schemaFields?.length > 0) && !config.schema)) return undefined;
 
     return {
-      fields: this.scopedSchemaFields() ?? [],
+      fields: setup.schemaFields ?? [],
       registry: setup.registry,
       formLevelSchema: config.schema,
       validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
@@ -640,9 +545,8 @@ export class FormStateManager<
   /**
    * Last schema the resource produced, with the request it was built from.
    *
-   * A params change (a page change under `pageScope`) clears the resource's value, not just its
-   * status, so without this the form would rebuild schemaless and then rebuild again — and the
-   * render gate would close, unmounting every field. Instance-scoped, never module-scoped, so it
+   * A params change clears the resource's value, not just its status, so without this the form
+   * would rebuild schemaless and then rebuild again. Instance-scoped, never module-scoped, so it
    * stays SSR-safe.
    */
   private readonly schemaCache: { current: { schema: Schema<TModel>; request: unknown } | undefined } = { current: undefined };
@@ -723,21 +627,21 @@ export class FormStateManager<
   /** Intermediate computed that unwraps the double-signal (form()()) once. */
   private readonly formInstance = computed(() => this.form()());
 
-  /** Value of the model Signal Forms owns — the mounted slice only when `pageScope` is on. */
-  private readonly mountedFormValue = computed(() => this.formInstance().value());
+  /** Value of the model Signal Forms owns. */
+  private readonly modelValue = computed(() => this.formInstance().value());
 
-  /** Current form values (reactive). Page-scoped forms get their off-page keys merged back. */
-  readonly formValue = computed(() => this.withOffPageValues(this.mountedFormValue() as Record<string, unknown>) as TModel);
+  /** Current form values (reactive). */
+  readonly formValue = computed(() => this.modelValue() as TModel);
 
   /** Form values filtered by value exclusion rules. */
   readonly filteredFormValue = computed(() => {
-    const rawValue = this.mountedFormValue();
+    const rawValue = this.modelValue();
     const setup = this.formSetup();
-    const schemaFields = this.scopedSchemaFields();
+    const schemaFields = setup.schemaFields;
     const options = this.effectiveFormOptions();
 
     if (!this.formSchemaReady() || !schemaFields || schemaFields.length === 0) {
-      return this.withOffPageValues(rawValue as Record<string, unknown>);
+      return rawValue;
     }
 
     // form() returns the FieldTree<TModel> — a callable with per-key sub-trees.
@@ -756,27 +660,25 @@ export class FormStateManager<
     // FieldTree doesn't expose this index signature, so we use a helper cast.
     const fieldTreeRecord = asFieldTreeRecord(formTree);
 
-    return this.withOffPageValues(
-      filterFormValue(
-        rawValue as Record<string, unknown>,
-        schemaFields,
-        fieldTreeRecord,
-        setup.registry,
-        this.valueExclusionDefaults,
-        formOptions,
-      ),
+    return filterFormValue(
+      rawValue as Record<string, unknown>,
+      schemaFields,
+      fieldTreeRecord,
+      setup.registry,
+      this.valueExclusionDefaults,
+      formOptions,
     );
   });
 
   /** Form value used for the outward two-way binding sync. */
   private readonly boundFormValue = computed(() => {
-    const rawValue = this.mountedFormValue();
+    const rawValue = this.modelValue();
     const setup = this.formSetup();
-    const schemaFields = this.scopedSchemaFields();
+    const schemaFields = setup.schemaFields;
     const options = this.effectiveFormOptions();
 
     if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !schemaFields || schemaFields.length === 0) {
-      return this.withOffPageValues(rawValue as Record<string, unknown>);
+      return rawValue;
     }
 
     const formTree = this.form();
@@ -787,15 +689,13 @@ export class FormStateManager<
     };
     const fieldTreeRecord = asFieldTreeRecord(formTree);
 
-    return this.withOffPageValues(
-      filterFormValue(
-        rawValue as Record<string, unknown>,
-        schemaFields,
-        fieldTreeRecord,
-        setup.registry,
-        BOUND_VALUE_EXCLUSION_BASELINE,
-        formOptions,
-      ),
+    return filterFormValue(
+      rawValue as Record<string, unknown>,
+      schemaFields,
+      fieldTreeRecord,
+      setup.registry,
+      BOUND_VALUE_EXCLUSION_BASELINE,
+      formOptions,
     );
   });
 
@@ -809,10 +709,12 @@ export class FormStateManager<
    * unvalidated form through. {@link dirty}, {@link touched} and {@link submitting} likewise
    * report `false` until the schema lands.
    */
-  readonly valid = computed(() => this.formSchemaReady() && this.formInstance().valid());
+  readonly valid = computed(() => this.formSchemaReady() && this.formSchemaResource.status() !== 'error' && this.formInstance().valid());
 
   /** Whether the form is currently invalid. True while the schema loads — see {@link valid}. */
-  readonly invalid = computed(() => !this.formSchemaReady() || this.formInstance().invalid());
+  readonly invalid = computed(
+    () => !this.formSchemaReady() || this.formSchemaResource.status() === 'error' || this.formInstance().invalid(),
+  );
 
   /** Whether any form field has been modified. False while the schema loads — see {@link valid}. */
   readonly dirty = computed(() => this.formSchemaReady() && this.formInstance().dirty());
@@ -1111,10 +1013,7 @@ export class FormStateManager<
     const rootField = this.form()();
     this.excludedValueStore.set({});
     const defaults = this.defaultValues();
-    const mounted = this.mountedPageKeys();
-    // Page-scoped: the root only owns the mounted slice, so off-page defaults go to the store.
-    if (mounted) this.offPageValues.set(omitKeys(defaults as Record<string, unknown>, mounted));
-    (rootField.value as WritableSignal<TModel>).set(this.scopeToMountedKeys(defaults));
+    (rootField.value as WritableSignal<TModel>).set(defaults);
     this.deps.value.set(defaults as Partial<TModel>);
     rootField.reset();
   }
@@ -1123,7 +1022,6 @@ export class FormStateManager<
   clear(): void {
     const rootField = this.form()();
     this.excludedValueStore.set({});
-    this.offPageValues.set({});
     const emptyValue = {} as TModel;
     (rootField.value as WritableSignal<TModel>).set(emptyValue);
     this.deps.value.set(emptyValue);
@@ -1136,41 +1034,16 @@ export class FormStateManager<
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Private Methods - Page Scoping
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  /** Re-attaches the keys the page-scoped entity left behind. Identity when `pageScope` is off. */
-  private withOffPageValues<T extends Record<string, unknown>>(value: T): T {
-    if (!this.mountedPageKeys()) return value;
-    return { ...this.offPageValues(), ...value } as T;
-  }
-
-  /** Narrows a whole-model value to the mounted keys. Identity when `pageScope` is off. */
-  private scopeToMountedKeys(value: TModel): TModel {
-    const mounted = this.mountedPageKeys();
-    return mounted ? (pickKeys(value as Record<string, unknown>, mounted) as TModel) : value;
-  }
-
-  /**
-   * Current values for keys outside `mounted`, read from the host model (which the outward sync
-   * keeps whole) with declared defaults as the floor. Called only when the window moves.
-   */
-  private snapshotOffPageValues(mounted: ReadonlySet<string>): Record<string, unknown> {
-    const defaults = this.defaultValues() as Record<string, unknown>;
-    // The live host model, not `externalValue`: that one filters our own echo for the entity's
-    // benefit, and its memo would be stale by exactly the values this needs to retain.
-    const host = (this.deps.value() ?? {}) as Record<string, unknown>;
-    return { ...omitKeys(defaults, mounted), ...omitKeys(host, mounted) };
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
   // Private Methods - Setup
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
     explicitEffect([this.formSchemaResource.error], ([error]) => {
       if (error) {
-        this.logger.error('[Dynamic Forms] Failed to load the form schema service; rendering without the configured schema.', error);
+        this.logger.error(
+          '[Dynamic Forms] Failed to compile the form schema; rendering without validation and blocking submission.',
+          error,
+        );
       }
     });
 
@@ -1250,6 +1123,7 @@ export class FormStateManager<
         // poisoned cache that returned a fresh object every keystroke, which notified
         // `entity` anyway. It is now written solely inside `externalValue`.
         this.lastOutwardValue.current = currentBound;
+        this.lastOutwardValue.pending = true;
         this.deps.value.set(currentBound as TModel);
       }
     });
