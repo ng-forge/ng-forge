@@ -41,11 +41,9 @@ import { FormStateManager } from '../../state/form-state-manager';
         \`@if (!field.hidden())\` gate in page-field.component.ts.
       -->
       @if (!page.hidden) {
-        @if (page.active) {
-          <section page-field [field]="page.field" [key]="page.field.key" [pageIndex]="page.index" [isVisible]="true"></section>
-        } @else if (page.preload) {
-          @defer (on idle) {
-            <section page-field [field]="page.field" [key]="page.field.key" [pageIndex]="page.index" [isVisible]="false"></section>
+        @if (page.active || page.preload) {
+          @defer (when page.active; on idle) {
+            <section page-field [field]="page.field" [key]="page.field.key" [pageIndex]="page.index" [isVisible]="page.active"></section>
           } @placeholder {
             <div class="df-page-placeholder" [attr.data-page-index]="page.index" [attr.data-page-key]="page.field.key"></div>
           }

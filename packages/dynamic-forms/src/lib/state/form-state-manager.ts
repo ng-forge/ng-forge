@@ -413,6 +413,19 @@ export class FormStateManager<
     });
   });
 
+  /** Whether filtered values need reactive hidden/disabled/readonly state reads. */
+  private readonly valueExclusionEnabled = computed(() => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return false;
+
+    const options = this.effectiveFormOptions();
+    return hasEnabledValueExclusion(setup.schemaFields, this.valueExclusionDefaults, {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    });
+  });
+
   /**
    * Per-field exclusion-axis state (hidden/disabled/readonly) keyed by dotted path. Drives the
    * save-on-exclude effect's transition detection. Walks recursively into groups so nested-leaf
@@ -554,6 +567,10 @@ export class FormStateManager<
   /** Keeps {@link schemaCache} in step with the resource, and drops it on failure. */
   private readonly trackSchemaCache = computed(() => {
     const request = this.formSchemaRequest();
+    if (!request) {
+      this.schemaCache.current = undefined;
+      return undefined;
+    }
     if (this.formSchemaResource.status() === 'error') {
       this.schemaCache.current = undefined;
       return undefined;
@@ -667,6 +684,7 @@ export class FormStateManager<
       setup.registry,
       this.valueExclusionDefaults,
       formOptions,
+      this.valueExclusionEnabled(),
     );
   });
 
@@ -677,7 +695,7 @@ export class FormStateManager<
     const schemaFields = setup.schemaFields;
     const options = this.effectiveFormOptions();
 
-    if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !schemaFields || schemaFields.length === 0) {
+    if (!this.formSchemaReady() || !schemaFields || schemaFields.length === 0) {
       return rawValue;
     }
 
@@ -696,6 +714,7 @@ export class FormStateManager<
       setup.registry,
       BOUND_VALUE_EXCLUSION_BASELINE,
       formOptions,
+      this.boundValueExclusionEnabled(),
     );
   });
 

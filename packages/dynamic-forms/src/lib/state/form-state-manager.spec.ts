@@ -175,6 +175,24 @@ describe('FormStateManager', () => {
       subscription.unsubscribe();
     });
 
+    it('drops the cached schema when the replacement config has no schema request', async () => {
+      const { stateManager, deps } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name', value: '', required: true }],
+      } as TestFormConfig);
+      await waitForFormSchema(stateManager);
+      expect(stateManager.invalid()).toBe(true);
+
+      // createFormStateDeps constructs this dependency with signal(), so it is writable in this test.
+      const config = deps.config as WritableSignal<TestFormConfig>;
+      config.set({ fields: [] } as unknown as TestFormConfig);
+      TestBed.flushEffects();
+
+      await vi.waitFor(() => expect(stateManager.activeConfig()?.fields).toEqual([]));
+      expect(stateManager.formSchemaReady()).toBe(true);
+      expect(stateManager.isSchemaCurrent()).toBe(true);
+      expect(stateManager.valid()).toBe(true);
+    });
+
     it('should register schemas from config during initialization', () => {
       mockLogger = createMockLogger();
       const config: TestFormConfig = {
@@ -1387,6 +1405,27 @@ describe('FormStateManager', () => {
     });
 
     describe('group fields', () => {
+      it('strips undeclared nested keys from the outward value when exclusion axes are disabled', async () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({
+          address: { street: '123 Main', stray: 'remove me' },
+        });
+        const { stateManager } = initManager(
+          {
+            fields: [
+              {
+                type: 'group',
+                key: 'address',
+                fields: [{ type: 'input', key: 'street', label: 'Street' }],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        await waitForFormSchema(stateManager);
+
+        expect(valueSignal()).toEqual({ address: { street: '123 Main' } });
+      });
+
       it('should omit a hidden + excluded group from deps.value', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
         const { stateManager } = initManager(

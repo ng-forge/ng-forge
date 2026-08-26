@@ -220,10 +220,11 @@ export default class PageFieldComponent {
     let announced: string | null = null;
     afterRenderEffect({
       write: () => {
-        if (!this.isVisible() || !this.renderReady()) {
+        if (!this.isVisible()) {
           announced = null;
           return;
         }
+        if (!this.renderReady()) return;
         const visit = `${this.pageIndex()}:${this.key()}`;
         if (announced === visit) return;
         announced = visit;

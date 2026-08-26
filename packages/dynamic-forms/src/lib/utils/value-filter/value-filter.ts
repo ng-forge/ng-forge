@@ -121,6 +121,7 @@ function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unkn
  * @param registry - Field type registry for valueHandling mode lookup
  * @param globalDefaults - Global exclusion defaults from VALUE_EXCLUSION_DEFAULTS
  * @param formOptions - Form-level exclusion overrides from FormOptions
+ * @param exclusionEnabled - Precomputed exclusion capability for hot callers
  * @returns Filtered value with excluded field values omitted
  */
 export function filterFormValue<T extends Record<string, unknown>>(
@@ -130,10 +131,11 @@ export function filterFormValue<T extends Record<string, unknown>>(
   registry: Map<string, FieldTypeDefinition>,
   globalDefaults: ResolvedValueExclusionConfig,
   formOptions: ValueExclusionConfig | undefined,
+  exclusionEnabled = hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions),
 ): Partial<T> {
   // No exclusion axis enabled: skip the per-field state reads and config resolution, but still
   // strip non-value field types and undeclared keys, which the loop below does unconditionally.
-  if (!hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions)) {
+  if (!exclusionEnabled) {
     return filterDeclaredValueShape(rawValue, schemaFields, registry) as Partial<T>;
   }
 
@@ -190,6 +192,7 @@ export function filterFormValue<T extends Record<string, unknown>>(
           registry,
           globalDefaults,
           formOptions,
+          true,
         );
       } else {
         result[key] = groupValue;

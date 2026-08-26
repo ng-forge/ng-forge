@@ -70,6 +70,17 @@ describe('PageFieldComponent', () => {
     TestBed.flushEffects();
     expect(events).toHaveLength(1);
 
+    fixture.componentRef.setInput('field', {
+      ...field,
+      fields: [{ key: 'name', type: 'test', label: 'Updated' }],
+    });
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(events).toHaveLength(1);
+
     fixture.componentRef.setInput('isVisible', false);
     fixture.detectChanges();
     TestBed.flushEffects();
