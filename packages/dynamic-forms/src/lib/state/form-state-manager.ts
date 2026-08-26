@@ -318,9 +318,6 @@ export class FormStateManager<
     return { ...configOptions, ...inputOptions };
   });
 
-  /** Active page index, owned here so pre-mount navigation intent survives pager setup. */
-  readonly activePageIndex = signal(0);
-
   /**
    * A page the form has been asked to navigate to but that no pager has applied yet.
    * Held here because the orchestrator mounts behind the render gate: a request made on
@@ -382,6 +379,20 @@ export class FormStateManager<
     }
 
     return this.createEmptyFormSetup(registry);
+  });
+
+  /**
+   * Active page index, owned here so navigation survives the pager unmounting and remounting
+   * behind the render gate.
+   *
+   * Linked to `formSetup` rather than reset from an effect: the orchestrator re-lands on
+   * `initialPage` by reading this the moment `pageFieldDefinitions` changes, and an effect
+   * would still be queued at that point. It would then read the previous page, restore it, and
+   * write it straight back, so a config swap kept whatever page the user had navigated to.
+   */
+  readonly activePageIndex = linkedSignal<FormSetup, number>({
+    source: this.formSetup,
+    computation: () => 0,
   });
 
   /** Default values computed from field definitions. */
@@ -1114,7 +1125,6 @@ export class FormStateManager<
     // schema starts with an empty template/itemOrder/id-counter state.
     let warnedAboutMissingArrayRegistry = false;
     explicitEffect([this.formSetup], () => {
-      this.activePageIndex.set(0);
       this.prevFieldStateSnapshot.set({});
       if (Object.keys(this.excludedValueStore()).length > 0) {
         this.excludedValueStore.set({});
