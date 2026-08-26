@@ -116,6 +116,19 @@ describe('Field parking', () => {
     TestBed.resetTestingModule();
   });
 
+  it('parks by default, with no fieldWindowing option set at all', async () => {
+    const fixture = await createHost(flatConfig(2));
+    const [, second] = inputs(fixture);
+
+    observer.setVisibleFor(second, false);
+    await settle(fixture);
+
+    fixture.componentInstance.value.set({ f0: 'v0', f1: 'from model' });
+    await settle(fixture);
+
+    expect(second.value).toBe('v1');
+  });
+
   it('observes every rendered field', async () => {
     const fixture = await createHost(flatConfig(4, { fieldWindowing: { park: true } }));
     expect(observer.states.size).toBe(4);

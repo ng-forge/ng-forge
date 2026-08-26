@@ -50,6 +50,19 @@ describe('resolveFieldWindowing', () => {
     expect(resolveFieldWindowing(disabledGlobal, { park: false }).park).toEqual({ enabled: false, margin: '100%' });
     expect(resolveFieldWindowing(disabledGlobal, { park: { margin: '50%' } }).park).toEqual({ enabled: true, margin: '50%' });
   });
+
+  it('a park-only override leaves progressive mounting alone', () => {
+    // Parking and deferred mounting are independent axes. Tuning one must not
+    // silently switch the form's mounting strategy.
+    expect(resolveFieldWindowing(disabledGlobal, { park: false }).enabled).toBe(false);
+    expect(resolveFieldWindowing(disabledGlobal, { park: true }).enabled).toBe(false);
+    expect(resolveFieldWindowing(enabledGlobal, { park: false }).enabled).toBe(true);
+  });
+
+  it('still force-enables when the override touches mounting', () => {
+    expect(resolveFieldWindowing(disabledGlobal, { eager: 3, park: false }).enabled).toBe(true);
+    expect(resolveFieldWindowing(disabledGlobal, { placeholderHeight: '2rem' }).enabled).toBe(true);
+  });
 });
 
 describe('resolveFieldParking', () => {

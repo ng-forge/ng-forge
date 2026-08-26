@@ -16,6 +16,11 @@ export type FieldWindowingOption = boolean | { eager?: number; placeholderHeight
  * - `false` — force-disable for this form
  * - `true` — force-enable, using `global`'s `eager` / `placeholderHeight` / `park`
  * - object — force-enable; per-form keys win over `global`'s
+ *
+ * A `park`-only object is the one exception: parking and progressive mounting
+ * are independent, so tuning parking must not silently switch a form over to
+ * deferred mounting. `{ park: false }` means "don't park", not "start
+ * deferring everything".
  */
 export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: FieldWindowingOption | undefined): FieldWindowingConfig {
   if (perForm === undefined) {
@@ -26,8 +31,10 @@ export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: Fie
     return { ...global, enabled: perForm };
   }
 
+  const configuresMounting = perForm.eager !== undefined || perForm.placeholderHeight !== undefined || Object.keys(perForm).length === 0;
+
   return {
-    enabled: true,
+    enabled: configuresMounting ? true : global.enabled,
     eager: clampWindowSize(perForm.eager, global.eager),
     placeholderHeight: perForm.placeholderHeight ?? global.placeholderHeight,
     park: resolveFieldParking(global.park, perForm.park),
