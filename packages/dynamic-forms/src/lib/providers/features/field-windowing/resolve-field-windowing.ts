@@ -41,7 +41,12 @@ export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: Fie
   };
 }
 
-/** Parking stays on unless a form explicitly turns it off — it costs nothing to keep. */
+/**
+ * A form inherits whatever parking the global config sets — off by default, on
+ * when `withFieldWindowing()` is in play — and can override it either way.
+ * `{ park: true }` on a form that isn't windowed is legal and does park; the two
+ * are independent axes.
+ */
 export function resolveFieldParking(global: FieldParkingConfig, perForm: FieldParkingOption | undefined): FieldParkingConfig {
   if (perForm === undefined) return global;
   if (typeof perForm === 'boolean') return { ...global, enabled: perForm };

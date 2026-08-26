@@ -18,8 +18,9 @@ import { FieldParkingOption, resolveFieldParking } from './resolve-field-windowi
  *
  * Mounting is one-way — `@defer (on viewport)` never unmounts — so on its own
  * that bound is temporary: scroll a long form once and every field is live
- * again for the rest of the session. **Parking** closes the gap and is on by
- * default. A field scrolled outside `park.margin` leaves change detection but
+ * again for the rest of the session. **Parking** closes the gap and comes on
+ * with this feature (it is off when the feature is not used, since it changes
+ * rendering behaviour). A field scrolled outside `park.margin` leaves change detection but
  * keeps its DOM, so it costs nothing per keystroke while staying findable by
  * browser search, fillable by autofill, and reachable by assistive tech. Its
  * own edits still reach the model: Angular binds `input` / `blur` with plain

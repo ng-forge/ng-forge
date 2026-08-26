@@ -27,6 +27,12 @@ export interface FieldWindowingConfig {
  * detection but keeps its DOM, so it stays findable, autofillable and
  * reachable by assistive tech.
  *
+ * Off in this default, on whenever `withFieldWindowing()` is used. Parking
+ * suspends model → DOM updates for a scrolled-away field until it returns, so
+ * it is a rendering behaviour change and is not something a form should get
+ * without asking. It exists to bound what windowing leaves mounted, which is
+ * why enabling windowing enables it too.
+ *
  * @internal
  */
 export interface FieldParkingConfig {
@@ -38,5 +44,5 @@ export interface FieldParkingConfig {
 
 export const FIELD_WINDOWING = new InjectionToken<FieldWindowingConfig>('FIELD_WINDOWING', {
   providedIn: 'root',
-  factory: () => ({ enabled: false, eager: 12, placeholderHeight: '4rem', park: { enabled: true, margin: '100%' } }),
+  factory: () => ({ enabled: false, eager: 12, placeholderHeight: '4rem', park: { enabled: false, margin: '100%' } }),
 });

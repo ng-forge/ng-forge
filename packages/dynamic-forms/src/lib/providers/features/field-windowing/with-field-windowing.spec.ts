@@ -4,8 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { withFieldWindowing } from './with-field-windowing';
 import { FIELD_WINDOWING, FieldParkingConfig } from './field-windowing.token';
 
-/** Parking is on unless a caller opts out, so it shows up in every default. */
+/** Asking for windowing turns parking on with it, unless the caller opts out. */
 const PARK_ON: FieldParkingConfig = { enabled: true, margin: '100%' };
+/** Without the feature, parking stays off — it changes rendering behaviour. */
+const PARK_OFF: FieldParkingConfig = { enabled: false, margin: '100%' };
 
 describe('withFieldWindowing', () => {
   it('creates a field-windowing feature', () => {
@@ -36,7 +38,12 @@ describe('withFieldWindowing', () => {
     expect(TestBed.inject(FIELD_WINDOWING).eager).toBe(4);
   });
 
-  it('defaults to disabled when the feature is not provided', () => {
-    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: false, eager: 12, placeholderHeight: '4rem', park: PARK_ON });
+  it('defaults to disabled, and to no parking, when the feature is not provided', () => {
+    expect(TestBed.inject(FIELD_WINDOWING)).toEqual({ enabled: false, eager: 12, placeholderHeight: '4rem', park: PARK_OFF });
+  });
+
+  it('turns parking on along with windowing', () => {
+    TestBed.configureTestingModule({ providers: [...withFieldWindowing().ɵproviders] });
+    expect(TestBed.inject(FIELD_WINDOWING).park).toEqual(PARK_ON);
   });
 });

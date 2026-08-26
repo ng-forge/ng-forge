@@ -165,10 +165,12 @@ export interface FormOptions {
    * `false` force-disables it even if the global feature is enabled; an object
    * enables it with per-form `eager` / `placeholderHeight` / `park` overrides.
    *
-   * `park` (on by default) holds scrolled-away fields out of change detection
-   * while leaving their DOM in place, so they stay findable, autofillable and
-   * reachable by assistive tech. Set `park: false` to opt out, or
-   * `park: { margin }` to change how far outside the viewport stays live.
+   * `park` holds scrolled-away fields out of change detection while leaving
+   * their DOM in place, so they stay findable, autofillable and reachable by
+   * assistive tech. It is off unless `withFieldWindowing()` is used, because it
+   * suspends model → DOM updates for a scrolled-away field until it returns.
+   * Set `park: true` to opt in without deferred mounting, `park: false` to opt
+   * out, or `park: { margin }` to change how far outside the viewport stays live.
    *
    * Overrides the global `withFieldWindowing(...)` default for this form.
    *

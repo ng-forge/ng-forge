@@ -116,17 +116,20 @@ describe('Field parking', () => {
     TestBed.resetTestingModule();
   });
 
-  it('parks by default, with no fieldWindowing option set at all', async () => {
+  it('does not park a form that never asked for windowing', async () => {
     const fixture = await createHost(flatConfig(2));
     const [, second] = inputs(fixture);
 
     observer.setVisibleFor(second, false);
     await settle(fixture);
 
+    // Parking suspends model → DOM for a scrolled-away field, which is a
+    // rendering behaviour change. A form that configured nothing must keep
+    // behaving exactly as it did before parking existed.
     fixture.componentInstance.value.set({ f0: 'v0', f1: 'from model' });
     await settle(fixture);
 
-    expect(second.value).toBe('v1');
+    expect(second.value).toBe('from model');
   });
 
   it('observes every rendered field', async () => {
