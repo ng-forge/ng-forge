@@ -33,6 +33,8 @@ import { observeArrayActions } from '../../utils/array-field/array-event-handler
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ArrayFieldTree } from '@ng-forge/dynamic-forms/internal';
 import { getNormalizedArrayMetadata } from '../../utils/array-field/normalized-array-metadata';
+import { GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { initializationComponentPath } from '../../utils/container-utils/container-utils';
 
 /** Container component for rendering dynamic arrays of fields. */
 @Component({
@@ -76,6 +78,7 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
   private readonly eventBus = inject(EventBus);
   private readonly logger = inject(DynamicFormLogger);
   private readonly arrayItemRegistry = inject(ArrayItemRegistryService);
+  private readonly groupContext = inject(GROUP_CONTEXT, { optional: true });
   // Form-scoped slot keyed by the array's path. Survives this component's lifecycle so that
   // `@if`-gated arrays can be destroyed and recreated without losing dynamically-added items.
   // NOTE: keyed by `field().key` for now — nested arrays with the same key in different scopes
@@ -289,7 +292,12 @@ export default class ArrayFieldComponent<TModel extends Record<string, unknown> 
 
     explicitEffect([this.fsm.state, this.allResolvedFieldsRenderReady], ([, allReady]) => {
       if (this.fsm.shouldEmit(allReady)) {
-        emitComponentInitialized(this.eventBus, 'array', this.field().key, this.parentInjector);
+        emitComponentInitialized(
+          this.eventBus,
+          'array',
+          initializationComponentPath(this.field().key, this.groupContext?.groupPath()),
+          this.parentInjector,
+        );
       }
     });
   }

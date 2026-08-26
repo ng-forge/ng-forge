@@ -42,15 +42,17 @@ import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
   template: `
     @for (field of resolvedFields(); track field.key; let i = $index) {
       @if (windowsField(field, i)) {
-        @defer (on viewport) {
-          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
-        } @placeholder {
-          <div
-            [class]="placeholderGridClass(field)"
-            [style.min-height]="fieldWindowing().placeholderHeight"
-            [attr.data-field-key]="field.key"
-            aria-hidden="true"
-          ></div>
+        @if (!field.hidden()) {
+          @defer (on viewport) {
+            <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
+          } @placeholder {
+            <div
+              [class]="placeholderGridClass(field)"
+              [style.min-height]="fieldWindowing().placeholderHeight"
+              [attr.data-field-key]="field.key"
+              aria-hidden="true"
+            ></div>
+          }
         }
       } @else {
         <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />

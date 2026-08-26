@@ -18,22 +18,34 @@ export function initializationComponentKey(type: InitializationComponentType, ke
   return `${type}:${key}`;
 }
 
+/** Joins a container's local key to its group scope for initialization identity. */
+export function initializationComponentPath(key: string, groupPath?: string): string {
+  return groupPath ? `${groupPath}.${key}` : key;
+}
+
 /** Collects the initialization events expected from rendered container components. */
-export function collectInitializingContainerKeys(fields: readonly FieldDef<unknown>[]): string[] {
+export function collectInitializingContainerKeys(fields: readonly FieldDef<unknown>[], groupPath = ''): string[] {
   const keys: string[] = [];
 
   for (const field of fields) {
+    // A statically hidden container never mounts, and neither can its descendants.
+    if (field.hidden === true) continue;
+
     let type: InitializationComponentType | undefined;
     if (isPageField(field)) type = 'page';
     else if (isGroupField(field)) type = 'group';
     else if (isArrayField(field)) type = 'array';
     else if (isGenericContainerField(field)) type = 'container';
 
-    if (type && field.key) keys.push(initializationComponentKey(type, field.key));
+    const componentPath = initializationComponentPath(field.key, groupPath);
+    if (type && field.key) keys.push(initializationComponentKey(type, componentPath));
 
     if (!hasChildFields(field)) continue;
+    const childGroupPath = isGroupField(field) ? componentPath : groupPath;
     for (const child of normalizeFieldsArray(field.fields)) {
-      keys.push(...collectInitializingContainerKeys((Array.isArray(child) ? child : [child]) as readonly FieldDef<unknown>[]));
+      keys.push(
+        ...collectInitializingContainerKeys((Array.isArray(child) ? child : [child]) as readonly FieldDef<unknown>[], childGroupPath),
+      );
     }
   }
 

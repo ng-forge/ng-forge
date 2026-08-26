@@ -16,7 +16,11 @@ import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
+import {
+  computeContainerHostClasses,
+  initializationComponentPath,
+  setupContainerInitEffect,
+} from '../../utils/container-utils/container-utils';
 import { CONTAINER_FIELD_PROCESSORS } from '../../utils/container-utils/container-field-processors';
 import { isEqual } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
@@ -251,7 +255,13 @@ export default class GroupFieldComponent<TModel extends Record<string, unknown> 
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
-    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'group', () => this.field().key, this.injector);
+    setupContainerInitEffect(
+      this.resolvedFields,
+      this.eventBus,
+      'group',
+      () => initializationComponentPath(this.field().key, this.parentGroupContext?.groupPath()),
+      this.injector,
+    );
 
     explicitEffect(
       [this.nestedFieldTree, this.field],

@@ -90,11 +90,8 @@ import { collectInitializingContainerKeys, initializationComponentKey } from './
         }
         @case ('non-paged') {
           @for (field of resolvedFields(); track field.key; let i = $index) {
-            @if (!field.hidden()) {
-              <!-- Once mounted, hidden fields are gated inside DfFieldOutlet, which detaches the
-                   chain rather than destroying it. This outer gate also prevents unmounted hidden
-                   fields from reserving placeholder space. -->
-              @if (windowsField(field, i)) {
+            @if (windowsField(field, i)) {
+              @if (!field.hidden()) {
                 @defer (on viewport) {
                   <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
                 } @placeholder {
@@ -105,9 +102,11 @@ import { collectInitializingContainerKeys, initializationComponentKey } from './
                     aria-hidden="true"
                   ></div>
                 }
-              } @else {
-                <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
               }
+            } @else {
+              <!-- DfFieldOutlet owns the hidden gate so an already-mounted field can be detached
+                   and restored without recreating its component and wrapper chain. -->
+              <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
             }
           }
         }

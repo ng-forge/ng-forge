@@ -9,6 +9,7 @@ import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import type { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { By } from '@angular/platform-browser';
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   {
@@ -191,6 +192,11 @@ describe('DynamicForm — hidden field rendering (NG01916)', () => {
 
       // visible
       expect(harnessCount(fixture)).toBe(2);
+      const detailBefore = fixture.debugElement
+        .queryAll(By.directive(TestInputHarnessComponent))
+        .map((debugElement) => debugElement.componentInstance as TestInputHarnessComponent)
+        .find((harness) => harness.key() === 'detail');
+      expect(detailBefore).toBeDefined();
 
       // hidden
       component.value.set({ show: 'no', detail: '' });
@@ -201,6 +207,11 @@ describe('DynamicForm — hidden field rendering (NG01916)', () => {
       component.value.set({ show: 'yes', detail: '' });
       await waitForRender(fixture);
       expect(harnessCount(fixture)).toBe(2);
+      const detailAfter = fixture.debugElement
+        .queryAll(By.directive(TestInputHarnessComponent))
+        .map((debugElement) => debugElement.componentInstance as TestInputHarnessComponent)
+        .find((harness) => harness.key() === 'detail');
+      expect(detailAfter).toBe(detailBefore);
 
       expect(warnSpy).not.toHaveBeenCalled();
     });
