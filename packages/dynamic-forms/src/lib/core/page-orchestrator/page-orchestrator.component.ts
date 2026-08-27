@@ -88,6 +88,9 @@ export class PageOrchestratorComponent {
   /** Whether validation belongs to the page definitions currently being rendered. */
   private readonly schemaCurrent = computed(() => this.stateManager?.isSchemaCurrent() ?? true);
 
+  /** Stable ownership scope; page arrays can be recreated during one config transition. */
+  private readonly configScope = computed(() => this.stateManager?.activeConfig());
+
   /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
 
@@ -124,30 +127,54 @@ export class PageOrchestratorComponent {
       .map((item) => item.index);
   });
 
-  /**
-   * Internal signal for current page index that tracks with page fields.
-   * This tracks the actual page index, not the visible page index.
-   */
-  private readonly currentPageIndex = linkedSignal(() => {
-    const totalPages = this.pageFields().length;
+  /** Current page ownership, reset atomically when the active config changes. */
+  private readonly activePageOwnership = linkedSignal<
+    object | undefined,
+    {
+      config: object | undefined;
+      initialized: boolean;
+      index: number;
+    }
+  >({
+    source: this.configScope,
+    computation: (config, previous) => {
+      const totalPages = this.pageFields().length;
 
-    if (totalPages === 0) return 0;
+      if (totalPages === 0) return { config, initialized: true, index: 0 };
 
-    // Untracked: re-land on a config swap, but never on a later validity or visibility change.
-    return untracked(() => {
-      // FormStateManager owns navigation intent before this component mounts, so restore its
-      // index only when it belongs to this exact page-definition set. The outgoing pager may
-      // publish after a config transition starts, so an unscoped index can be stale.
-      const owned = this.stateManager?.activePageState();
-      if (owned?.definitions === this.pageFields() && owned.initialized && owned.index >= 0 && owned.index < totalPages) {
-        return owned.index;
-      }
+      // Untracked: re-land on a config swap, but never on a later validity or visibility change.
+      return untracked(() => {
+        // A newly mounted pager may restore ownership for the same config. An existing pager must
+        // ignore ownership when the config changes because its outgoing effect can still publish
+        // the previous index during that transition.
+        const owned = this.stateManager?.activePageState();
+        const mayRestore = previous === undefined || previous.source === config;
+        if (
+          mayRestore &&
+          owned !== undefined &&
+          owned.config === config &&
+          owned.initialized &&
+          owned.index >= 0 &&
+          owned.index < totalPages
+        ) {
+          return { config, initialized: true, index: owned.index };
+        }
 
-      if (this.initialPage().validate && !this.schemaCurrent()) return 0;
+        if (this.initialPage().validate && !this.schemaCurrent()) {
+          return { config, initialized: false, index: 0 };
+        }
 
-      return this.resolveInitialLanding();
-    });
+        return { config, initialized: true, index: this.resolveInitialLanding() };
+      });
+    },
   });
+
+  /** Actual page index, excluding hidden pages from its numbering. */
+  private readonly currentPageIndex = computed(() => this.activePageOwnership().index);
+
+  private setCurrentPageIndex(index: number): void {
+    this.activePageOwnership.update((ownership) => ({ ...ownership, initialized: true, index }));
+  }
 
   /** Where `initialPage` actually lands: hidden targets resolve forward, gated ones stop on the first invalid page. */
   private resolveInitialLanding(): number {
@@ -278,10 +305,10 @@ export class PageOrchestratorComponent {
 
     // A config swap exposes its page definitions before their schema is current. Defer a gated
     // landing until those fields can be validated, then resolve it exactly once for this page set.
-    explicitEffect([this.schemaCurrent, this.pageFields], ([schemaCurrent, definitions]) => {
-      const owned = this.stateManager?.activePageState();
-      if (!schemaCurrent || owned?.definitions !== definitions || owned.initialized) return;
-      this.currentPageIndex.set(this.resolveInitialLanding());
+    explicitEffect([this.schemaCurrent, this.pageFields], ([schemaCurrent]) => {
+      const ownership = this.activePageOwnership();
+      if (!schemaCurrent || ownership.initialized) return;
+      this.activePageOwnership.set({ ...ownership, initialized: true, index: this.resolveInitialLanding() });
     });
 
     // B15: Auto-navigate away when current page becomes hidden
@@ -465,7 +492,7 @@ export class PageOrchestratorComponent {
 
     // Perform navigation
     const previousIndex = currentState.currentPageIndex;
-    this.currentPageIndex.set(pageIndex);
+    this.setCurrentPageIndex(pageIndex);
 
     // Emit page change event
     this.eventBus.dispatch(PageChangeEvent, pageIndex, totalPages, previousIndex);
@@ -527,10 +554,7 @@ export class PageOrchestratorComponent {
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
 
     // Publish upward so navigation survives this pager being temporarily unmounted.
-    explicitEffect([this.currentPageIndex, this.pageFields], ([index, definitions]) => {
-      const initialized = !this.initialPage().validate || this.schemaCurrent();
-      this.stateManager?.activePageState.set({ definitions, initialized, index });
-    });
+    explicitEffect([this.activePageOwnership], ([ownership]) => this.stateManager?.activePageState.set(ownership));
   }
 
   /**

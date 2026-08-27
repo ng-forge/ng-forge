@@ -381,17 +381,17 @@ export class FormStateManager<
     return this.createEmptyFormSetup(registry);
   });
 
-  /** Active page state, retained across pager remounts and scoped to its page definitions. */
+  /** Active page state, retained across pager remounts and scoped to its form config. */
   readonly activePageState = linkedSignal<
-    PageField[],
+    object | undefined,
     {
-      definitions: PageField[];
+      config: object | undefined;
       initialized: boolean;
       index: number;
     }
   >({
-    source: this.pageFieldDefinitions,
-    computation: (definitions) => ({ definitions, initialized: false, index: 0 }),
+    source: this.activeConfig,
+    computation: (config) => ({ config, initialized: false, index: 0 }),
   });
 
   /** Default values computed from field definitions. */
