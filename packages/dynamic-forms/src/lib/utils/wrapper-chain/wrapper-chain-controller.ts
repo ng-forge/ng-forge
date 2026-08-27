@@ -71,9 +71,11 @@ export interface WrapperChainControllerOptions {
    * Called right before the mounted chain is cleared on a structural change.
    * Lets the caller detach views it wants to preserve — e.g. `DfFieldOutlet`
    * detaches the innermost field's hostView so focus / caret / scroll survive
-   * when only the wrapper chain changes. Not invoked on the pre-first-render path.
+   * when only the wrapper chain changes. Return true when the caller owns the
+   * controller's already-detached outer view and will reinsert it itself. Not
+   * invoked on the pre-first-render path.
    */
-  readonly beforeRebuild?: () => void;
+  readonly beforeRebuild?: () => boolean | void;
 }
 
 /**
@@ -229,10 +231,10 @@ function applyEmission({ state, loaded }: ChainEmission, ctx: EmissionApplyConte
   if (structurallyChanged && mounted.value !== null) {
     // Preserve the innermost field before destroying a detached outer chain. Destroying the
     // ancestor first also destroys the field ref and leaves the caller holding a dead view.
-    opts.beforeRebuild?.();
+    const preservesDetachedOuterView = opts.beforeRebuild?.() === true;
     // A view detached by an earlier gate close is not in the container, so vcr.clear() cannot
     // reach it. Once the preservable inner view is detached, destroy the remaining chain.
-    ctx.detached.value?.destroy();
+    if (ctx.detached.value && !preservesDetachedOuterView) ctx.detached.value.destroy();
     ctx.detached.value = null;
     vcr.clear();
     mounted.value = null;

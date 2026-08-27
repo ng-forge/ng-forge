@@ -38,4 +38,16 @@ describe('collectInitializingContainerKeys', () => {
 
     expect(collectInitializingContainerKeys(fields)).toEqual(['group:visible']);
   });
+
+  it('tracks rows using the container identity emitted by ContainerFieldComponent', () => {
+    const fields = [
+      {
+        key: 'nameRow',
+        type: 'row',
+        fields: [{ key: 'name', type: 'input' }],
+      },
+    ] as FieldDef<unknown>[];
+
+    expect(collectInitializingContainerKeys(fields)).toEqual(['container:nameRow']);
+  });
 });

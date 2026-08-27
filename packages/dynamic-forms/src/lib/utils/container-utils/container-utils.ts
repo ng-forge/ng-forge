@@ -10,6 +10,7 @@ import {
   isGenericContainerField,
   isGroupField,
   isPageField,
+  isRowField,
   normalizeFieldsArray,
 } from '@ng-forge/dynamic-forms/internal';
 
@@ -23,33 +24,47 @@ export function initializationComponentPath(key: string, groupPath?: string): st
   return groupPath ? `${groupPath}.${key}` : key;
 }
 
-/** Collects the initialization events expected from rendered container components. */
-export function collectInitializingContainerKeys(fields: readonly FieldDef<unknown>[], groupPath = ''): string[] {
-  const keys: string[] = [];
+/** Component-initialization identity emitted by a rendered container field. */
+export function initializationComponentType(field: FieldDef<unknown>): InitializationComponentType | undefined {
+  if (isPageField(field)) return 'page';
+  if (isGroupField(field)) return 'group';
+  if (isArrayField(field)) return 'array';
+  if (isRowField(field) || isGenericContainerField(field)) return 'container';
+  return undefined;
+}
+
+export interface InitializationComponentIdentity {
+  readonly type: InitializationComponentType;
+  readonly path: string;
+}
+
+/** Collects the initialization identities expected from rendered container components. */
+export function collectInitializingContainers(fields: readonly FieldDef<unknown>[], groupPath = ''): InitializationComponentIdentity[] {
+  const identities: InitializationComponentIdentity[] = [];
 
   for (const field of fields) {
     // A statically hidden container never mounts, and neither can its descendants.
     if (field.hidden === true) continue;
 
-    let type: InitializationComponentType | undefined;
-    if (isPageField(field)) type = 'page';
-    else if (isGroupField(field)) type = 'group';
-    else if (isArrayField(field)) type = 'array';
-    else if (isGenericContainerField(field)) type = 'container';
-
+    const type = initializationComponentType(field);
     const componentPath = initializationComponentPath(field.key, groupPath);
-    if (type && field.key) keys.push(initializationComponentKey(type, componentPath));
+    if (type && field.key) identities.push({ type, path: componentPath });
 
     if (!hasChildFields(field)) continue;
     const childGroupPath = isGroupField(field) ? componentPath : groupPath;
     for (const child of normalizeFieldsArray(field.fields)) {
-      keys.push(
-        ...collectInitializingContainerKeys((Array.isArray(child) ? child : [child]) as readonly FieldDef<unknown>[], childGroupPath),
+      identities.push(
+        ...collectInitializingContainers((Array.isArray(child) ? child : [child]) as readonly FieldDef<unknown>[], childGroupPath),
       );
     }
   }
 
-  return keys;
+  return identities;
+}
+
+/** Collects the initialization events expected from rendered container components. */
+export function collectInitializingContainerKeys(fields: readonly FieldDef<unknown>[], groupPath = ''): string[] {
+  return collectInitializingContainers(fields, groupPath).map(({ type, path }) => initializationComponentKey(type, path));
 }
 
 /**

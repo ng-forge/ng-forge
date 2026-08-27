@@ -1,4 +1,16 @@
-import { computed, DestroyRef, Directive, EnvironmentInjector, inject, input, Signal, signal, Type, ViewContainerRef } from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  Directive,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  input,
+  Signal,
+  signal,
+  Type,
+  ViewContainerRef,
+} from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ResolvedField } from '../../utils/resolve-field/resolve-field';
 import { WRAPPER_REGISTRY, WRAPPER_AUTO_ASSOCIATIONS } from '@ng-forge/dynamic-forms/internal';
@@ -10,6 +22,9 @@ import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { buildFieldInputs } from '../../utils/build-field-inputs/build-field-inputs';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
 import { FieldComponentSlot } from './field-component-slot';
+import { EventBus, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
+import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
+import { collectInitializingContainers } from '../../utils/container-utils/container-utils';
 
 /**
  * Structural directive that renders a `ResolvedField` with its effective
@@ -31,6 +46,8 @@ export class DfFieldOutlet {
   private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
   private readonly readonlyFieldCache = inject(READONLY_FIELD_TREE_CACHE);
+  private readonly eventBus = inject(EventBus, { optional: true });
+  private readonly injector = inject(Injector);
 
   /** Encapsulates Angular's imperative ComponentRef / ViewContainerRef lifecycle. */
   private readonly fieldComponent = new FieldComponentSlot();
@@ -43,6 +60,7 @@ export class DfFieldOutlet {
    * window is exactly where Angular Signal Forms' `[formField]` directive emits NG01916.
    */
   private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady() && !this.dfFieldOutlet().hidden());
+  private readonly hidden = computed(() => this.dfFieldOutlet().hidden());
   private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
   /**
@@ -114,6 +132,18 @@ export class DfFieldOutlet {
     explicitEffect([this.rawInputs, this.fieldInputs], ([rawInputs, fieldInputs]) =>
       this.fieldComponent.pushInputs(rawInputs, fieldInputs),
     );
+
+    // A hidden container intentionally has no component instance to announce readiness.
+    // Emit the same identity on its behalf so ancestor initialization trackers do not wait
+    // forever for a subtree that is deliberately absent from the DOM.
+    explicitEffect([this.hidden], ([hidden]) => {
+      if (!hidden || !this.eventBus) return;
+      const resolved = this.dfFieldOutlet();
+      const groupContext = resolved.injector.get(GROUP_CONTEXT, null);
+      for (const { type, path } of collectInitializingContainers([resolved.fieldDef], groupContext?.groupPath())) {
+        emitComponentInitialized(this.eventBus, type, path, this.injector);
+      }
+    });
 
     this.destroyRef.onDestroy(() => this.fieldComponent.destroyOnTeardown());
   }

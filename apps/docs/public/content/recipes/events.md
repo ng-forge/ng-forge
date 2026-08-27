@@ -96,7 +96,7 @@ For observing events from a host component, use the output bindings exposed dire
 | `(activePageInitialized)`       | **EXPERIMENTAL.** ActivePageInitializedEvent after the visible page and its fields render                    |
 | `(validityChange)`              | Boolean, whenever form validity changes                                                                      |
 | `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                   |
-| `(initialized)`                 | Once all configured field components have rendered and reported ready                                        |
+| `(initialized)`                 | Once a non-paged form, or the initially active page of a paged form, is ready for interaction                |
 
 ### Examples
 

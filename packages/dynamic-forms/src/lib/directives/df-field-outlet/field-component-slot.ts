@@ -127,17 +127,20 @@ export class FieldComponentSlot {
   /**
    * Detach the host view from its current slot, capturing focus + caret so the
    * next `mountOrReuse()` can replay them after re-inserting into the new
-   * slot. A stranded `mounted` state with a bad slot index (re-entrancy during
-   * a partial rebuild) is treated like `empty` to avoid leaks.
+   * slot. Returns true when the outer wrapper controller already detached this
+   * exact unwrapped field view, so it can transfer ownership without destroying it.
    */
-  detach(): void {
+  detach(): boolean {
     const current = this.state();
-    if (current.phase !== 'mounted') return;
+    if (current.phase !== 'mounted') return false;
     const focusSnapshot = this.captureFocus(current.ref);
     const idx = current.slot.indexOf(current.ref.hostView);
     if (idx >= 0) current.slot.detach(idx);
     this.lastInputs = null;
     this.state.set(Object.freeze({ phase: 'detached', ref: current.ref, focusSnapshot }));
+    // When the outer chain is already detached and there are no wrappers, the field's
+    // host view is that outer view. Tell the controller not to destroy its detached handle.
+    return idx < 0;
   }
 
   /**
