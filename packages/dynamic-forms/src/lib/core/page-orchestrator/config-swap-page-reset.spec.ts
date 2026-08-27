@@ -1,7 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { firstValueFrom, race, timer } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { GoToPageEvent } from '../../events/constants/go-to-page.event';
 import { DynamicForm } from '../../dynamic-form.component';
@@ -9,7 +7,7 @@ import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/int
 import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
-import { delay } from '@ng-forge/utils';
+import { FormStateManager } from '../../state/form-state-manager';
 
 // Configs are cast because `input` is registered at runtime below, not in the compile-time registry.
 
@@ -21,18 +19,23 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
   },
 ];
 
-async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200): Promise<void> {
+async function waitForActivePage(fixture: ComponentFixture<DynamicForm>, expectedPage: number, timeoutMs = 1000): Promise<void> {
   fixture.detectChanges();
-  TestBed.flushEffects();
-  await firstValueFrom(race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))));
-  for (let i = 0; i < 2; i++) {
-    TestBed.flushEffects();
-    fixture.detectChanges();
-    await delay(0);
-  }
-  await fixture.whenStable();
-  TestBed.flushEffects();
-  fixture.detectChanges();
+  const stateManager = fixture.debugElement.injector.get(FormStateManager);
+
+  await vi.waitFor(
+    async () => {
+      TestBed.flushEffects();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      TestBed.flushEffects();
+      fixture.detectChanges();
+
+      expect(stateManager.isSchemaCurrent()).toBe(true);
+      expect(activePage(fixture)).toBe(expectedPage);
+    },
+    { timeout: timeoutMs, interval: 10 },
+  );
 }
 
 function pagedConfig(label: string, initialPage?: number | { index: number; validate?: boolean }): FormConfig {
@@ -84,36 +87,29 @@ describe('config swap resets the active page', () => {
     const fixture = TestBed.createComponent(DynamicForm);
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v1'));
     fixture.componentRef.setInput('value', {});
-    await waitForFormInit(fixture);
+    await waitForActivePage(fixture, 0);
 
     const bus = fixture.debugElement.injector.get(EventBus);
     bus.dispatch(new GoToPageEvent(2, { validate: false }));
-    await waitForFormInit(fixture);
-    expect(activePage(fixture)).toBe(2);
+    await waitForActivePage(fixture, 2);
 
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v2'));
-    await waitForFormInit(fixture, 600);
-
-    expect(activePage(fixture)).toBe(0);
+    await waitForActivePage(fixture, 0);
   });
 
   it('resets to initialPage when one is set', async () => {
     const fixture = TestBed.createComponent(DynamicForm);
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v1', 1));
     fixture.componentRef.setInput('value', {});
-    await waitForFormInit(fixture);
-    expect(activePage(fixture)).toBe(1);
+    await waitForActivePage(fixture, 1);
 
     const bus = fixture.debugElement.injector.get(EventBus);
     bus.dispatch(new GoToPageEvent(2, { validate: false }));
-    await waitForFormInit(fixture);
-    expect(activePage(fixture)).toBe(2);
+    await waitForActivePage(fixture, 2);
 
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v2', 1));
-    await waitForFormInit(fixture, 600);
-
     // Reset target follows the config, so the deep-linked page survives a swap.
-    expect(activePage(fixture)).toBe(1);
+    await waitForActivePage(fixture, 1);
   });
 
   it('re-applies a gated initialPage after a swap', async () => {
@@ -121,19 +117,14 @@ describe('config swap resets the active page', () => {
     const fixture = TestBed.createComponent(DynamicForm);
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v1', gated));
     fixture.componentRef.setInput('value', { a: 'filled' });
-    await waitForFormInit(fixture);
     // Page 1 is invalid, so the gated landing cannot reach page 2.
-    expect(activePage(fixture)).toBe(1);
-
+    await waitForActivePage(fixture, 1);
     const bus = fixture.debugElement.injector.get(EventBus);
     bus.dispatch(new GoToPageEvent(2, { validate: false }));
-    await waitForFormInit(fixture);
-    expect(activePage(fixture)).toBe(2);
+    await waitForActivePage(fixture, 2);
 
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v2', gated));
-    await waitForFormInit(fixture, 600);
-
     // The gated landing must re-apply, matching the ungated case above.
-    expect(activePage(fixture)).toBe(1);
+    await waitForActivePage(fixture, 1);
   });
 });

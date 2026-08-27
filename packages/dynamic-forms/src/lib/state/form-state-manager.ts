@@ -381,6 +381,22 @@ export class FormStateManager<
     return this.createEmptyFormSetup(registry);
   });
 
+  /** Config generation that owns the current form setup. */
+  private readonly formSetupConfig = computed(() => {
+    const state = this.machine.state();
+
+    if (isReadyState(state)) return state.config;
+    if (isTransitioningState(state)) {
+      if (state.phase === Phase.Restoring && state.pendingFormSetup) {
+        return state.pendingConfig;
+      }
+      return state.currentConfig;
+    }
+    if (state.type === LifecycleState.Initializing) return state.config;
+    if (state.type === LifecycleState.Uninitialized) return this.activeConfig();
+    return undefined;
+  });
+
   /** Active page state, retained across pager remounts and scoped to its form config. */
   readonly activePageState = linkedSignal<
     object | undefined,
@@ -593,6 +609,7 @@ export class FormStateManager<
 
   /** Whether the schema in hand was built from the current request. */
   readonly isSchemaCurrent = computed(() => {
+    if (this.formSetupConfig() !== this.activeConfig()) return false;
     const request = this.formSchemaRequest();
     if (!request) return true;
     return this.trackSchemaCache()?.request === request;
@@ -600,6 +617,7 @@ export class FormStateManager<
 
   /** True once a schema is in hand, or the compiler failed and the degraded path opened. */
   readonly formSchemaReady = computed(() => {
+    if (this.formSetupConfig() !== this.activeConfig()) return false;
     if (!this.formSchemaRequest()) return true;
     if (this.formSchemaResource.status() === 'error') return true;
     return this.trackSchemaCache() !== undefined;
