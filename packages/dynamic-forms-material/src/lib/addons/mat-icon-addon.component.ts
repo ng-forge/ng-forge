@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { MatIcon } from '@angular/material/icon';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import type { MatIconAddon } from '../types/addons';
+import type { MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 
 /** Renderer for the `mat-icon` addon type. */
 @Component({

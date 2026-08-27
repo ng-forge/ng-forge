@@ -4,7 +4,7 @@ import { FieldTree } from '@angular/forms/signals';
 import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedValueExclusionConfig, ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
-import { resolveExclusionConfig, filterFormValue } from './value-filter';
+import { filterFormValue, hasEnabledValueExclusion, resolveExclusionConfig } from './value-filter';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Test Helpers
@@ -113,6 +113,45 @@ describe('resolveExclusionConfig', () => {
 // filterFormValue
 // ─────────────────────────────────────────────────────────────────────────────
 
+describe('hasEnabledValueExclusion', () => {
+  it('should skip the exclusion pipeline when every effective option is disabled', () => {
+    const fields: FieldDef<unknown>[] = [
+      { key: 'name', type: 'input' },
+      { key: 'email', type: 'input', excludeValueIfHidden: false },
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_DISABLED, undefined)).toBe(false);
+  });
+
+  it('should detect a field-level opt-in nested inside a group', () => {
+    const fields: FieldDef<unknown>[] = [
+      {
+        key: 'address',
+        type: 'group',
+        fields: {
+          street: { key: 'street', type: 'input', excludeValueIfReadonly: true },
+        },
+      } as FieldDef<unknown>,
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_DISABLED, undefined)).toBe(true);
+  });
+
+  it('should honor field overrides that disable enabled defaults', () => {
+    const fields: FieldDef<unknown>[] = [
+      {
+        key: 'name',
+        type: 'input',
+        excludeValueIfHidden: false,
+        excludeValueIfDisabled: false,
+        excludeValueIfReadonly: false,
+      },
+    ];
+
+    expect(hasEnabledValueExclusion(fields, ALL_ENABLED, undefined)).toBe(false);
+  });
+});
+
 describe('filterFormValue', () => {
   const registry = createRegistry(
     ['input', { valueHandling: 'include' }],
@@ -140,6 +179,46 @@ describe('filterFormValue', () => {
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
       expect(result).toEqual({ name: 'John', email: 'john@test.com' });
+    });
+
+    it('should not read field state when all exclusion is disabled', () => {
+      const rawValue = { name: 'John' };
+      const fields: FieldDef<unknown>[] = [{ key: 'name', type: 'input' }];
+      const fieldState = createFieldState();
+      const trackedFieldState = vi.fn(fieldState) as unknown as FieldTree<unknown>;
+
+      const result = filterFormValue(rawValue, fields, { name: trackedFieldState }, registry, ALL_DISABLED, undefined);
+
+      // Value equality, not identity: returning rawValue itself skipped the unconditional
+      // strips. The assertion that matters is the one below — no field state was read.
+      expect(result).toStrictEqual(rawValue);
+      expect(trackedFieldState).not.toHaveBeenCalled();
+    });
+
+    it('should recursively strip undeclared and non-value keys without reading field state', () => {
+      const rawValue = {
+        address: {
+          street: 'Main',
+          submit: 'CLICKED',
+          stray: 'LEAK',
+        },
+      };
+      const fields: FieldDef<unknown>[] = [
+        {
+          key: 'address',
+          type: 'group',
+          fields: {
+            street: { key: 'street', type: 'input' },
+            submit: { key: 'submit', type: 'button' },
+          },
+        } as FieldDef<unknown>,
+      ];
+      const groupState = vi.fn(createFieldState()) as unknown as FieldTree<unknown>;
+
+      const result = filterFormValue(rawValue, fields, { address: groupState }, registry, ALL_DISABLED, undefined);
+
+      expect(result).toStrictEqual({ address: { street: 'Main' } });
+      expect(groupState).not.toHaveBeenCalled();
     });
 
     it('should exclude hidden field values when excludeValueIfHidden is enabled', () => {
@@ -237,7 +316,8 @@ describe('filterFormValue', () => {
 
   describe('value handling modes', () => {
     it('should skip fields with exclude valueHandling', () => {
-      const rawValue = { name: 'John', submit: undefined };
+      // A defined value, and toStrictEqual: `undefined` + toEqual passed even when the key leaked.
+      const rawValue = { name: 'John', submit: 'CLICKED' };
       const fields: FieldDef<unknown>[] = [
         { key: 'name', type: 'input' },
         { key: 'submit', type: 'button' },
@@ -249,11 +329,12 @@ describe('filterFormValue', () => {
 
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
-      expect(result).toEqual({ name: 'John' });
+      expect(result).toStrictEqual({ name: 'John' });
     });
 
     it('should skip fields with flatten valueHandling', () => {
-      const rawValue = { name: 'John' };
+      // `row1` present in rawValue: absent, it passed whether or not flatten was stripped.
+      const rawValue = { name: 'John', row1: 'FLATTENED' };
       const fields: FieldDef<unknown>[] = [
         { key: 'name', type: 'input' },
         { key: 'row1', type: 'row' },
@@ -264,7 +345,19 @@ describe('filterFormValue', () => {
 
       const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
 
-      expect(result).toEqual({ name: 'John' });
+      expect(result).toStrictEqual({ name: 'John' });
+    });
+
+    it('should drop keys that no schema field declares', () => {
+      const rawValue = { name: 'John', stray: 'LEAK' };
+      const fields: FieldDef<unknown>[] = [{ key: 'name', type: 'input' }];
+      const formTree = {
+        name: createFieldState(),
+      } as unknown as Record<string, FieldTree<unknown>>;
+
+      const result = filterFormValue(rawValue, fields, formTree, registry, ALL_DISABLED, undefined);
+
+      expect(result).toStrictEqual({ name: 'John' });
     });
   });
 

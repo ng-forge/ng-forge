@@ -8,7 +8,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { MatSelectProps } from './mat-select.type';
 import { AsyncPipe } from '@angular/common';
-import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
 @Component({
   selector: 'df-mat-select',

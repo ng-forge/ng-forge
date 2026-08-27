@@ -16,6 +16,9 @@ import { HttpConditionFunctionCacheService } from '@ng-forge/dynamic-forms/inter
 import { DynamicValueFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { createMockLogger, MockLogger } from '../../../test-utils/src/mock-logger';
+import { FIELD_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import { BUILT_IN_FIELDS } from '../providers/built-in-fields';
+import { VALIDATION_EXECUTION_DEFAULTS } from '../providers/features/validation-execution/validation-execution.token';
 
 type TestModel = Record<string, unknown>;
 type TestFields = RegisteredFieldTypes[];
@@ -44,6 +47,9 @@ function initManager(
   overrides?: Partial<{
     formOptions: Signal<FormOptions | undefined>;
     value: WritableSignal<Partial<TestModel> | undefined>;
+    /** Registers the built-in field types so container types actually flatten. */
+    withBuiltInFields: boolean;
+    schemaCompilerFailure: Error;
   }>,
 ) {
   mockLogger = createMockLogger();
@@ -71,6 +77,17 @@ function initManager(
       HttpConditionFunctionCacheService,
       DynamicValueFunctionCacheService,
       { provide: DynamicFormLogger, useValue: mockLogger },
+      ...(overrides?.schemaCompilerFailure
+        ? [
+            {
+              provide: VALIDATION_EXECUTION_DEFAULTS,
+              useFactory: () => {
+                throw overrides.schemaCompilerFailure;
+              },
+            },
+          ]
+        : []),
+      ...(overrides?.withBuiltInFields ? [{ provide: FIELD_REGISTRY, useValue: new Map(BUILT_IN_FIELDS.map((f) => [f.name, f])) }] : []),
     ],
   });
 
@@ -79,6 +96,14 @@ function initManager(
   TestBed.flushEffects();
 
   return { stateManager, deps, mockLogger };
+}
+
+async function waitForFormSchema(stateManager: FormStateManager<TestFields, TestModel>): Promise<void> {
+  await vi.waitFor(() => {
+    expect(stateManager.formSchemaReady()).toBe(true);
+    expect(stateManager.isSchemaCurrent()).toBe(true);
+  });
+  TestBed.flushEffects();
 }
 
 describe('FormStateManager', () => {
@@ -104,6 +129,68 @@ describe('FormStateManager', () => {
       expect(result).toBeDefined();
       expect(result!.fields).toHaveLength(1);
       expect(result!.fields[0].key).toBe('name');
+    });
+
+    it('loads the schema injectable for the first plain field instead of gating on optional rules', async () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name' }],
+      } as TestFormConfig);
+
+      expect(stateManager.formSchemaReady()).toBe(false);
+      await vi.waitFor(() => expect(stateManager.formSchemaReady()).toBe(true));
+    });
+
+    it('preserves validation when the lazy schema injectable resolves', async () => {
+      const { stateManager } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name', value: '', required: true }],
+      } as TestFormConfig);
+
+      await vi.waitFor(() => expect(stateManager.formSchemaReady()).toBe(true));
+
+      const formTree = stateManager.form() as unknown as FieldTree<{ name: string }>;
+      expect(formTree.name().invalid()).toBe(true);
+    });
+
+    it('keeps submission invalid when schema compilation fails', async () => {
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name', value: '', required: true }],
+        } as TestFormConfig,
+        { schemaCompilerFailure: new Error('schema compiler unavailable') },
+      );
+      const submitted: TestModel[] = [];
+      const subscription = stateManager.submitted$.subscribe((value) => submitted.push(value));
+
+      await vi.waitFor(() => expect(mockLogger.error).toHaveBeenCalled());
+
+      expect(stateManager.formSchemaReady()).toBe(true);
+      expect(stateManager.isSchemaCurrent()).toBe(false);
+      expect(stateManager.valid()).toBe(false);
+      expect(stateManager.invalid()).toBe(true);
+
+      stateManager.submit();
+      TestBed.flushEffects();
+
+      expect(submitted).toEqual([]);
+      subscription.unsubscribe();
+    });
+
+    it('drops the cached schema when the replacement config has no schema request', async () => {
+      const { stateManager, deps } = initManager({
+        fields: [{ type: 'input', key: 'name', label: 'Name', value: '', required: true }],
+      } as TestFormConfig);
+      await waitForFormSchema(stateManager);
+      expect(stateManager.invalid()).toBe(true);
+
+      // createFormStateDeps constructs this dependency with signal(), so it is writable in this test.
+      const config = deps.config as WritableSignal<TestFormConfig>;
+      config.set({ fields: [] } as unknown as TestFormConfig);
+      TestBed.flushEffects();
+
+      await vi.waitFor(() => expect(stateManager.activeConfig()?.fields).toEqual([]));
+      expect(stateManager.formSchemaReady()).toBe(true);
+      expect(stateManager.isSchemaCurrent()).toBe(true);
+      expect(stateManager.valid()).toBe(true);
     });
 
     it('should register schemas from config during initialization', () => {
@@ -306,19 +393,21 @@ describe('FormStateManager', () => {
   // ─────────────────────────────────────────────────────────────────────
 
   describe('form state signals', () => {
-    it('should report valid as true for a form with no required fields', () => {
+    it('should report valid as true for a form with no required fields', async () => {
       const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       expect(stateManager.valid()).toBe(true);
     });
 
-    it('should report invalid as false for a valid form', () => {
+    it('should report invalid as false for a valid form', async () => {
       const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name' }],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       expect(stateManager.invalid()).toBe(false);
     });
 
@@ -477,11 +566,12 @@ describe('FormStateManager', () => {
       expect(valueSignal()).toEqual(expect.objectContaining({ name: 'Default' }));
     });
 
-    it('should clear touched and dirty state', () => {
+    it('should clear touched and dirty state', async () => {
       const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       const rootField = stateManager.form()();
       rootField.markAsTouched();
       rootField.markAsDirty();
@@ -494,7 +584,7 @@ describe('FormStateManager', () => {
       expect(stateManager.dirty()).toBe(false);
     });
 
-    it('should clear touched and dirty state on a nested field', () => {
+    it('should clear touched and dirty state on a nested field', async () => {
       const { stateManager } = initManager({
         fields: [
           {
@@ -505,6 +595,7 @@ describe('FormStateManager', () => {
         ],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       const nestedForm = stateManager.form() as unknown as FieldTree<{ address: { street: string } }>;
       const childField = nestedForm.address.street();
       childField.markAsTouched();
@@ -538,11 +629,12 @@ describe('FormStateManager', () => {
       expect(valueSignal()).toEqual({});
     });
 
-    it('should clear touched and dirty state', () => {
+    it('should clear touched and dirty state', async () => {
       const { stateManager } = initManager({
         fields: [{ type: 'input', key: 'name', label: 'Name', value: 'Default' }],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       const rootField = stateManager.form()();
       rootField.markAsTouched();
       rootField.markAsDirty();
@@ -555,7 +647,7 @@ describe('FormStateManager', () => {
       expect(stateManager.dirty()).toBe(false);
     });
 
-    it('should clear touched and dirty state on a nested field', () => {
+    it('should clear touched and dirty state on a nested field', async () => {
       const { stateManager } = initManager({
         fields: [
           {
@@ -566,6 +658,7 @@ describe('FormStateManager', () => {
         ],
       } as TestFormConfig);
 
+      await waitForFormSchema(stateManager);
       const nestedForm = stateManager.form() as unknown as FieldTree<{ address: { street: string } }>;
       const childField = nestedForm.address.street();
       childField.markAsTouched();
@@ -791,6 +884,28 @@ describe('FormStateManager', () => {
       expect(formInstance).toBeDefined();
       expect(formInstance.value()).toEqual(expect.objectContaining({ name: 'Hello' }));
     });
+
+    it('accepts a host write that reuses a reference previously emitted by the form', async () => {
+      const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
+      const { stateManager } = initManager(
+        {
+          fields: [{ type: 'input', key: 'name', label: 'Name', value: 'first' }],
+        } as TestFormConfig,
+        { value: valueSignal },
+      );
+      await waitForFormSchema(stateManager);
+
+      const previouslyEmitted = valueSignal();
+      expect(previouslyEmitted).toEqual({ name: 'first' });
+
+      valueSignal.set({ name: 'second' });
+      TestBed.flushEffects();
+      expect(stateManager.formValue()).toEqual({ name: 'second' });
+
+      valueSignal.set(previouslyEmitted);
+      TestBed.flushEffects();
+      expect(stateManager.formValue()).toEqual({ name: 'first' });
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────
@@ -884,52 +999,52 @@ describe('FormStateManager', () => {
 
   describe('excludeValueIfHidden + outward value sync', () => {
     describe('static hidden fields', () => {
-      it('should not emit NaN for a hidden number field with field-level excludeValueIfHidden', () => {
+      it('should not emit NaN for a hidden number field with field-level excludeValueIfHidden', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true, excludeValueIfHidden: true }],
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         const synced = valueSignal();
         expect(synced).not.toHaveProperty('myNum');
       });
 
-      it('should omit a hidden input string field from deps.value when excludeValueIfHidden is true', () => {
+      it('should omit a hidden input string field from deps.value when excludeValueIfHidden is true', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [{ type: 'input', key: 'name', label: 'Name', value: 'hello', hidden: true, excludeValueIfHidden: true }],
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         const synced = valueSignal();
         expect(synced).not.toHaveProperty('name');
       });
 
-      it('should respect form-level excludeValueIfHidden when field-level is unset', () => {
+      it('should respect form-level excludeValueIfHidden when field-level is unset', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
         const formOptions = signal({ excludeValueIfHidden: true } as FormOptions | undefined);
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true }],
           } as TestFormConfig,
           { value: valueSignal, formOptions },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         const synced = valueSignal();
         expect(synced).not.toHaveProperty('myNum');
       });
 
-      it('should exclude a componentless field type (no FieldTree) when statically hidden + excludeValueIfHidden', () => {
+      it('should exclude a componentless field type (no FieldTree) when statically hidden + excludeValueIfHidden', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ hiddenField: 'secret' });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               // The 'hidden' field type is componentless — schema-builder doesn't allocate a FieldTree
@@ -939,28 +1054,27 @@ describe('FormStateManager', () => {
           } as unknown as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         expect(valueSignal()).not.toHaveProperty('hiddenField');
       });
 
-      it('should still emit hidden-field value when excludeValueIfHidden is explicitly false', () => {
-        const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
-        initManager(
+      it('should still emit hidden-field value when excludeValueIfHidden is explicitly false', async () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({ myNum: 7 });
+        const { stateManager } = initManager(
           {
             fields: [{ type: 'input', key: 'myNum', label: 'Num', props: { type: 'number' }, hidden: true, excludeValueIfHidden: false }],
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
-        // Field-level opt-out → key present even though hidden.
-        expect(valueSignal()).toHaveProperty('myNum');
+        expect(valueSignal()).toStrictEqual({ myNum: 7 });
       });
 
-      it('should leave non-hidden sibling fields untouched in deps.value', () => {
+      it('should leave non-hidden sibling fields untouched in deps.value', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ visible: 'keep' });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'visible', label: 'Visible' },
@@ -969,7 +1083,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         const synced = valueSignal();
         expect(synced).toHaveProperty('visible', 'keep');
@@ -978,9 +1092,9 @@ describe('FormStateManager', () => {
     });
 
     describe('dynamic hidden fields (logic-driven)', () => {
-      it('should remove the key from deps.value when the field transitions visible → hidden', () => {
+      it('should remove the key from deps.value when the field transitions visible → hidden', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1001,7 +1115,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         // Field initially visible → value present
         expect(valueSignal()).toHaveProperty('myNum', 5);
@@ -1013,9 +1127,9 @@ describe('FormStateManager', () => {
         expect(valueSignal()).not.toHaveProperty('myNum');
       });
 
-      it('should restore the previously entered value when the field becomes visible again', () => {
+      it('should restore the previously entered value when the field becomes visible again', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1036,7 +1150,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         valueSignal.set({ trigger: 'hide', myNum: 5 });
         TestBed.flushEffects();
@@ -1047,9 +1161,9 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 5);
       });
 
-      it('should preserve the last value across multiple hide/show cycles', () => {
+      it('should preserve the last value across multiple hide/show cycles', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1070,7 +1184,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         valueSignal.set({ trigger: 'hide', myNum: 5 });
         TestBed.flushEffects();
@@ -1088,9 +1202,9 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 7);
       });
 
-      it('should restore the previously entered value when an excluded-when-disabled field becomes enabled again', () => {
+      it('should restore the previously entered value when an excluded-when-disabled field becomes enabled again', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'enabled', myNum: 42 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1111,7 +1225,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         valueSignal.set({ trigger: 'disable', myNum: 42 });
         TestBed.flushEffects();
@@ -1122,9 +1236,9 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 42);
       });
 
-      it('should restore the previously entered value when an excluded-when-readonly field becomes editable again', () => {
+      it('should restore the previously entered value when an excluded-when-readonly field becomes editable again', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'editable', myNum: 99 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1145,7 +1259,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         valueSignal.set({ trigger: 'readonly', myNum: 99 });
         TestBed.flushEffects();
@@ -1156,9 +1270,9 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 99);
       });
 
-      it('should preserve the saved value across overlapping axis transitions (hide then disable then re-show)', () => {
+      it('should preserve the saved value across overlapping axis transitions (hide then disable then re-show)', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ visibility: 'show', enabled: true, myNum: 5 });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'visibility', label: 'Visibility' },
@@ -1185,7 +1299,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         // Hide → captured.
         valueSignal.set({ visibility: 'hide', enabled: true, myNum: 5 });
@@ -1202,13 +1316,13 @@ describe('FormStateManager', () => {
         expect(valueSignal()).toHaveProperty('myNum', 5);
       });
 
-      it('should hide one field independently without affecting other fields', () => {
+      it('should hide one field independently without affecting other fields', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({
           trigger: 'show',
           numA: 1,
           numB: 2,
         });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1230,7 +1344,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         valueSignal.set({ trigger: 'hide', numA: 1, numB: 2 });
         TestBed.flushEffects();
@@ -1242,7 +1356,7 @@ describe('FormStateManager', () => {
     });
 
     describe('form reset clears saved hidden values', () => {
-      it('should not restore previously saved values after form reset', () => {
+      it('should not restore previously saved values after form reset', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({ trigger: 'show', myNum: 5 });
         const { stateManager } = initManager(
           {
@@ -1265,31 +1379,56 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
-        // Hide while value present → store should capture 5
+        // Prove the store captured the value before testing that reset clears it.
         valueSignal.set({ trigger: 'hide', myNum: 5 });
         TestBed.flushEffects();
+        await vi.waitFor(() => expect(valueSignal()).not.toHaveProperty('myNum'));
+        valueSignal.set({ trigger: 'show' });
+        TestBed.flushEffects();
+        await vi.waitFor(() => expect(valueSignal()).toHaveProperty('myNum', 5));
 
-        // Reset — should clear the saved store
+        valueSignal.set({ trigger: 'hide', myNum: 5 });
+        TestBed.flushEffects();
+        await vi.waitFor(() => expect(valueSignal()).not.toHaveProperty('myNum'));
+
         stateManager.reset();
         TestBed.flushEffects();
 
-        // Show again — value should NOT be restored from the saved store
         valueSignal.set({ trigger: 'show' });
         TestBed.flushEffects();
 
-        // After reset, the field's default applies — for a number input, that's NaN, not the
-        // previously-saved 5. (Restored values would prove the store wasn't cleared.)
         const myNum = (valueSignal() as Record<string, unknown> | undefined)?.['myNum'];
         expect(Number.isNaN(myNum)).toBe(true);
       });
     });
 
     describe('group fields', () => {
-      it('should omit a hidden + excluded group from deps.value', () => {
+      it('strips undeclared nested keys from the outward value when exclusion axes are disabled', async () => {
+        const valueSignal = signal<Partial<TestModel> | undefined>({
+          address: { street: '123 Main', stray: 'remove me' },
+        });
+        const { stateManager } = initManager(
+          {
+            fields: [
+              {
+                type: 'group',
+                key: 'address',
+                fields: [{ type: 'input', key: 'street', label: 'Street' }],
+              },
+            ],
+          } as TestFormConfig,
+          { value: valueSignal },
+        );
+        await waitForFormSchema(stateManager);
+
+        expect(valueSignal()).toEqual({ address: { street: '123 Main' } });
+      });
+
+      it('should omit a hidden + excluded group from deps.value', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>(undefined);
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               {
@@ -1306,18 +1445,18 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         const synced = valueSignal();
         expect(synced).not.toHaveProperty('address');
       });
 
-      it('should preserve a nested field value when only that child field toggles hidden inside a visible group', () => {
+      it('should preserve a nested field value when only that child field toggles hidden inside a visible group', async () => {
         const valueSignal = signal<Partial<TestModel> | undefined>({
           trigger: 'show',
           address: { street: '123 Main', city: 'Springfield' },
         });
-        initManager(
+        const { stateManager } = initManager(
           {
             fields: [
               { type: 'input', key: 'trigger', label: 'Trigger' },
@@ -1344,7 +1483,7 @@ describe('FormStateManager', () => {
           } as TestFormConfig,
           { value: valueSignal },
         );
-        TestBed.flushEffects();
+        await waitForFormSchema(stateManager);
 
         expect((valueSignal() as Record<string, Record<string, unknown>>).address.street).toBe('123 Main');
 

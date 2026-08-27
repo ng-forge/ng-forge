@@ -260,6 +260,7 @@ export {
 
 // Events
 export {
+  ActivePageInitializedEvent,
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,

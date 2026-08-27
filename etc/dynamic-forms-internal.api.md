@@ -1146,6 +1146,9 @@ export function getArrayLength<T>(arrayFieldTree: ArrayFieldTree<T>): number;
 export function getChangedKeys(previous: Record<string, unknown> | null | undefined, current: Record<string, unknown> | null | undefined): Set<string>;
 
 // @public
+export function getChangedKeysWithin(previous: Record<string, unknown> | null | undefined, current: Record<string, unknown> | null | undefined, keys: ReadonlySet<string>): Set<string>;
+
+// @public
 export function getFieldValueHandling(fieldType: string, registry: Map<string, FieldTypeDefinition>): ValueHandlingMode;
 
 // @public

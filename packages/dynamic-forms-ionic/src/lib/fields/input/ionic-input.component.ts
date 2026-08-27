@@ -16,10 +16,12 @@ import {
   NgForgeFieldHost,
 } from '@ng-forge/dynamic-forms/integration';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import { runIonicPresetAction } from '../../addons/preset-actions';
-import { IonicInlineButtonAddonComponent } from '../../addons/ion-inline-button-addon.component';
-import { IONIC_CONFIG } from '../../models/ionic-config.token';
-import { IONIC_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import {
+  IONIC_CONFIG,
+  IONIC_INPUT_TYPE_OVERRIDE,
+  IonicInlineButtonAddonComponent,
+  runIonicPresetAction,
+} from '@ng-forge/dynamic-forms-ionic/shared';
 import { IonicInputAddon, IonicInputProps } from './ionic-input.type';
 
 // minlength/maxlength bindings: Signal Forms auto-syncs these on NATIVE

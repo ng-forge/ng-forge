@@ -17,9 +17,7 @@ import { AsyncPipe } from '@angular/common';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputText } from 'primeng/inputtext';
-import { runPrimePresetAction } from '../../addons/preset-actions';
-import { PRIMENG_CONFIG } from '../../models/primeng-config.token';
-import { PRIME_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { PRIMENG_CONFIG, PRIME_INPUT_TYPE_OVERRIDE, runPrimePresetAction } from '@ng-forge/dynamic-forms-primeng/shared';
 import { PrimeInputAddon, PrimeInputProps } from './prime-input.type';
 
 @Component({

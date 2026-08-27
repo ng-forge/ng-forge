@@ -170,6 +170,48 @@ describe('Field windowing (progressive field mounting)', () => {
     expect(placeholderCount(fixture)).toBe(10 - mounted);
   });
 
+  it('does not reserve placeholder space for hidden fields outside the eager window', async () => {
+    TestBed.overrideProvider(FIELD_WINDOWING, {
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+    });
+
+    const config = flatConfig(10);
+    config.fields[9] = { ...config.fields[9], hidden: true };
+    const fixture = createHost(config);
+    await settle(fixture, 4);
+    await delay(100);
+    await settle(fixture, 2);
+
+    expect(fixture.nativeElement.querySelector('[data-field-key="f9"].df-field-placeholder')).toBeNull();
+  });
+
+  it('does not reserve placeholder space for hidden fields on the active page', async () => {
+    TestBed.overrideProvider(FIELD_WINDOWING, {
+      useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,
+    });
+
+    const config = {
+      fields: [
+        {
+          key: 'page-1',
+          type: 'page',
+          fields: Array.from({ length: 10 }, (_, i) => ({
+            key: `f${i}`,
+            type: 'input',
+            value: `v${i}`,
+            ...(i === 9 ? { hidden: true } : {}),
+          })),
+        },
+      ],
+    } as FormConfig;
+    const fixture = createHost(config);
+    await settle(fixture, 4);
+    await delay(100);
+    await settle(fixture, 2);
+
+    expect(fixture.nativeElement.querySelector('[data-field-key="f9"].df-field-placeholder')).toBeNull();
+  });
+
   it('never windows container fields: a group beyond the eager window mounts instead of deferring', async () => {
     TestBed.overrideProvider(FIELD_WINDOWING, {
       useValue: { enabled: true, eager: 2, placeholderHeight: '80px' } satisfies FieldWindowingConfig,

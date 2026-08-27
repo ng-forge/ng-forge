@@ -4,7 +4,7 @@ import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import { ADDON_ACTION_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
 import { BsButtonAddonComponent } from './bs-button-addon.component';
-import type { BsButtonAddon } from '../types/addons';
+import type { BsButtonAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 function setup(addon: BsButtonAddon) {
   TestBed.configureTestingModule({

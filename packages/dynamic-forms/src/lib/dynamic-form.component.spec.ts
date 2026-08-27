@@ -1933,6 +1933,144 @@ describe('DynamicFormComponent', () => {
 
       expect(emissionCount).toBe(1);
     });
+
+    it('should emit initialized when a statically hidden container never mounts', async () => {
+      const config = {
+        fields: [
+          { key: 'firstName', type: 'input', value: 'John' },
+          {
+            key: 'internal',
+            type: 'group',
+            hidden: true,
+            fields: [{ key: 'secret', type: 'input', value: 'hidden' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      const initializationPromise = firstValueFrom(component.initialized$.pipe(timeout(1000)));
+
+      await waitForDynamicComponents(fixture);
+
+      await initializationPromise;
+    });
+
+    it('should emit initialized when a dynamically hidden container never mounts', async () => {
+      const config = {
+        fields: [
+          { key: 'show', type: 'input', value: 'no' },
+          {
+            key: 'details',
+            type: 'group',
+            logic: [
+              {
+                type: 'hidden',
+                condition: { type: 'fieldValue', fieldPath: 'show', operator: 'notEquals', value: 'yes' },
+              },
+            ],
+            fields: [
+              {
+                key: 'address',
+                type: 'group',
+                fields: [{ key: 'name', type: 'input', value: 'hidden' }],
+              },
+            ],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      let initialized = false;
+      component.initialized.subscribe(() => {
+        initialized = true;
+      });
+
+      await waitForDynamicComponents(fixture);
+
+      expect(fixture.nativeElement.querySelector('[data-testid="details"]')).toBeNull();
+      expect(initialized).toBe(true);
+    });
+
+    it('should wait for same-named containers in different group scopes', async () => {
+      let resolveSlowInput!: (component: typeof TestInputHarnessComponent) => void;
+      const slowInput = new Promise<typeof TestInputHarnessComponent>((resolve) => {
+        resolveSlowInput = resolve;
+      });
+      const registry = new Map(BUILT_IN_FIELDS.map((fieldType) => [fieldType.name, fieldType]));
+      TEST_FIELD_TYPES.forEach((fieldType) => registry.set(fieldType.name, fieldType));
+      registry.set('slow-input', {
+        name: 'slow-input',
+        loadComponent: () => slowInput,
+        mapper: valueFieldMapper,
+      });
+      TestBed.overrideProvider(FIELD_REGISTRY, { useValue: registry });
+
+      const config = {
+        fields: [
+          {
+            key: 'billing',
+            type: 'group',
+            fields: [{ key: 'details', type: 'group', fields: [{ key: 'name', type: 'input', value: 'ready' }] }],
+          },
+          {
+            key: 'shipping',
+            type: 'group',
+            fields: [{ key: 'details', type: 'group', fields: [{ key: 'name', type: 'slow-input', value: 'pending' }] }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      let initialized = false;
+      component.initialized.subscribe(() => {
+        initialized = true;
+      });
+
+      await waitForDynamicComponents(fixture);
+      expect(initialized).toBe(false);
+
+      resolveSlowInput(TestInputHarnessComponent);
+      await waitForDynamicComponents(fixture);
+      expect(initialized).toBe(true);
+    });
+
+    it('should wait for fields nested in a row', async () => {
+      let resolveSlowInput!: (component: typeof TestInputHarnessComponent) => void;
+      const slowInput = new Promise<typeof TestInputHarnessComponent>((resolve) => {
+        resolveSlowInput = resolve;
+      });
+      const registry = new Map(BUILT_IN_FIELDS.map((fieldType) => [fieldType.name, fieldType]));
+      TEST_FIELD_TYPES.forEach((fieldType) => registry.set(fieldType.name, fieldType));
+      registry.set('slow-input', {
+        name: 'slow-input',
+        loadComponent: () => slowInput,
+        mapper: valueFieldMapper,
+      });
+      TestBed.overrideProvider(FIELD_REGISTRY, { useValue: registry });
+
+      const config = {
+        fields: [
+          {
+            key: 'nameRow',
+            type: 'row',
+            fields: [{ key: 'name', type: 'slow-input', value: 'pending' }],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      let initialized = false;
+      component.initialized.subscribe(() => {
+        initialized = true;
+      });
+
+      await waitForDynamicComponents(fixture);
+      expect(initialized).toBe(false);
+
+      resolveSlowInput(TestInputHarnessComponent);
+      await waitForDynamicComponents(fixture);
+      expect(initialized).toBe(true);
+    });
   });
 
   describe('Dynamic Field Addition and Removal', () => {

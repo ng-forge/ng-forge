@@ -26,6 +26,24 @@ export function resolveExclusionConfig(
   };
 }
 
+/** Returns whether any field has at least one effective value-exclusion axis enabled. */
+export function hasEnabledValueExclusion(
+  fields: readonly FieldDef<unknown>[],
+  global: ResolvedValueExclusionConfig,
+  form: ValueExclusionConfig | undefined,
+): boolean {
+  return fields.some((field) => {
+    const resolved = resolveExclusionConfig(global, form, field);
+    if (resolved.excludeValueIfHidden || resolved.excludeValueIfDisabled || resolved.excludeValueIfReadonly) {
+      return true;
+    }
+
+    return (
+      isGroupField(field) && !!field.fields && hasEnabledValueExclusion(Object.values(field.fields) as FieldDef<unknown>[], global, form)
+    );
+  });
+}
+
 /**
  * Static exclusion state a field may have inherited from a discarded flatten
  * container (page/row) ancestor during flattening. See `FlattenedField`.
@@ -36,6 +54,33 @@ interface FieldWithInheritedExclusion {
     readonly disabled?: boolean;
     readonly readonly?: boolean;
   };
+}
+
+/** Keeps only declared value-bearing fields without consulting reactive field state. */
+function filterDeclaredValueShape(
+  rawValue: Record<string, unknown>,
+  fields: readonly FieldDef<unknown>[],
+  registry: Map<string, FieldTypeDefinition>,
+): Record<string, unknown> {
+  const kept: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    const key = field.key;
+    if (!key || !(key in rawValue)) continue;
+
+    const valueHandling = getFieldValueHandling(field.type, registry);
+    if (valueHandling === 'exclude' || valueHandling === 'flatten') continue;
+
+    const value = rawValue[key];
+    if (isGroupField(field) && field.fields && value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      kept[key] = filterDeclaredValueShape(value as Record<string, unknown>, Object.values(field.fields) as FieldDef<unknown>[], registry);
+      continue;
+    }
+
+    kept[key] = value;
+  }
+
+  return kept;
 }
 
 /**
@@ -76,6 +121,7 @@ function shouldExcludeField(field: FieldDef<unknown>, fieldState: FieldTree<unkn
  * @param registry - Field type registry for valueHandling mode lookup
  * @param globalDefaults - Global exclusion defaults from VALUE_EXCLUSION_DEFAULTS
  * @param formOptions - Form-level exclusion overrides from FormOptions
+ * @param exclusionEnabled - Precomputed exclusion capability for hot callers
  * @returns Filtered value with excluded field values omitted
  */
 export function filterFormValue<T extends Record<string, unknown>>(
@@ -85,7 +131,14 @@ export function filterFormValue<T extends Record<string, unknown>>(
   registry: Map<string, FieldTypeDefinition>,
   globalDefaults: ResolvedValueExclusionConfig,
   formOptions: ValueExclusionConfig | undefined,
+  exclusionEnabled = hasEnabledValueExclusion(schemaFields, globalDefaults, formOptions),
 ): Partial<T> {
+  // No exclusion axis enabled: skip the per-field state reads and config resolution, but still
+  // strip non-value field types and undeclared keys, which the loop below does unconditionally.
+  if (!exclusionEnabled) {
+    return filterDeclaredValueShape(rawValue, schemaFields, registry) as Partial<T>;
+  }
+
   const result: Record<string, unknown> = {};
 
   for (const field of schemaFields) {
@@ -139,6 +192,7 @@ export function filterFormValue<T extends Record<string, unknown>>(
           registry,
           globalDefaults,
           formOptions,
+          true,
         );
       } else {
         result[key] = groupValue;

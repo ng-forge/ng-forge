@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import type { IonicIconAddon } from '../types/addons';
+import type { IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 import { IonicIconAddonComponent } from './ion-icon-addon.component';
 
 function setup(addon: IonicIconAddon) {

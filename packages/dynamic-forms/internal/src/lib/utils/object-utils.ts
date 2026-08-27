@@ -17,6 +17,12 @@ import { DynamicFormError } from '../errors/dynamic-form-error';
  * @returns true if values are deeply equal by their string-keyed properties
  */
 export function isEqual(a: unknown, b: unknown): boolean {
+  // Primitives and identical refs can't cycle, so skip allocating the tracking maps.
+  if (a === b) return true;
+  if (typeof a === 'number' && typeof b === 'number') return Object.is(a, b);
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return Object.is(a, b);
+
   return isEqualInternal(a, b, new WeakMap(), new WeakMap());
 }
 
@@ -316,6 +322,31 @@ export function memoize<TFunc extends (...args: any[]) => any>(
  */
 export function normalizeFieldsArray<T>(fields: readonly T[] | Record<string, T>): T[] {
   return Array.isArray(fields) ? [...fields] : Object.values(fields);
+}
+
+/**
+ * {@link getChangedKeys} restricted to `keys`. Callers that only care about a handful of
+ * paths avoid diffing an entire form value on every change.
+ */
+export function getChangedKeysWithin(
+  previous: Record<string, unknown> | null | undefined,
+  current: Record<string, unknown> | null | undefined,
+  keys: ReadonlySet<string>,
+): Set<string> {
+  const changed = new Set<string>();
+  if (keys.size === 0) return changed;
+
+  const before = previous ?? {};
+  const after = current ?? {};
+
+  for (const key of keys) {
+    const inBefore = key in before;
+    const inAfter = key in after;
+    if (!inBefore && !inAfter) continue;
+    if (inBefore !== inAfter || !isEqual(before[key], after[key])) changed.add(key);
+  }
+
+  return changed;
 }
 
 /**

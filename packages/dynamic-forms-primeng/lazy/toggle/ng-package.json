@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/fields/toggle/index.ts"
+  }
+}

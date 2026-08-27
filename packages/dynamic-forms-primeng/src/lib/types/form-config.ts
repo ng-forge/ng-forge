@@ -1,5 +1,5 @@
 import { FormConfig, InferFormValue, NarrowFields, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
-import { PrimeNGConfig } from '../models/primeng-config';
+import type { PrimeNGConfig } from '@ng-forge/dynamic-forms-primeng/shared';
 
 /** PrimeNG-specific props that can be set at form level and cascade to all fields. */
 export type PrimeFormProps = PrimeNGConfig;

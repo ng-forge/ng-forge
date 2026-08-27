@@ -15,6 +15,7 @@ import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
 import { valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import { delay } from '@ng-forge/utils';
+import PageFieldComponent from '../../fields/page/page-field.component';
 
 // Configs are cast because `input` is registered at runtime below, not in the compile-time registry.
 
@@ -29,11 +30,14 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
 ];
 
 /** Waits for the form to fully initialize, using initialized$ for reliability. */
-async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200): Promise<void> {
+async function waitForFormInit(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200, expectReady = true): Promise<void> {
   fixture.detectChanges();
   TestBed.flushEffects();
 
-  await firstValueFrom(race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))));
+  const initialized = await firstValueFrom(
+    race(fixture.componentInstance.initialized$.pipe(map(() => true)), timer(timeoutMs).pipe(map(() => false))),
+  );
+  expect(initialized).toBe(expectReady);
 
   for (let i = 0; i < 2; i++) {
     TestBed.flushEffects();
@@ -78,6 +82,29 @@ describe('PageOrchestratorComponent', () => {
   });
 
   // ─── Validity guard (B2 / disableWhenPageInvalid) ───────────────────────────
+
+  it('preserves page component instances across adjacent navigation', async () => {
+    const fixture = createForm(
+      {
+        fields: [
+          { key: 'page1', type: 'page', fields: [{ key: 'name', type: 'input', label: 'Name' }] },
+          { key: 'page2', type: 'page', fields: [{ key: 'email', type: 'input', label: 'Email' }] },
+        ],
+      } as unknown as FormConfig,
+      {},
+    );
+    await waitForFormInit(fixture);
+
+    const page1 = fixture.debugElement.query(By.directive(PageFieldComponent)).componentInstance;
+    expect(page1).toBeDefined();
+
+    fixture.debugElement.injector.get(EventBus).dispatch(NextPageEvent);
+    await waitForFormInit(fixture);
+    fixture.debugElement.injector.get(EventBus).dispatch(new GoToPageEvent(0, { validate: false }));
+    await waitForFormInit(fixture);
+
+    expect(fixture.debugElement.query(By.directive(PageFieldComponent)).componentInstance).toBe(page1);
+  });
 
   describe('currentPageValid / validity guard', () => {
     it('blocks next-page navigation when a required plain field is empty', async () => {
@@ -480,7 +507,7 @@ describe('PageOrchestratorComponent', () => {
       let pageChangeCount = 0;
       eventBus.on<PageChangeEvent>('page-change').subscribe(() => pageChangeCount++);
 
-      await waitForFormInit(fixture);
+      await waitForFormInit(fixture, 200, false);
       TestBed.flushEffects();
       fixture.detectChanges();
       await delay(0);

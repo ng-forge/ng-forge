@@ -8,7 +8,7 @@ import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/
 import { MatDatepickerProps } from './mat-datepicker.type';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
-import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
 @Component({
   selector: 'df-mat-datepicker',

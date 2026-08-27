@@ -16,9 +16,7 @@ import {
   NgForgeControl,
   NgForgeFieldHost,
 } from '@ng-forge/dynamic-forms/integration';
-import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { runMatPresetAction } from '../../addons/preset-actions';
-import { MAT_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { MATERIAL_CONFIG, MAT_INPUT_TYPE_OVERRIDE, runMatPresetAction } from '@ng-forge/dynamic-forms-material/shared';
 import { MatInputAddon, MatInputProps } from './mat-input.type';
 
 @Component({

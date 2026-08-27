@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
-import { PRIMENG_CONFIG } from '../models/primeng-config.token';
-import type { PrimeNGConfig } from '../models/primeng-config';
+import { PRIMENG_CONFIG, type PrimeNGConfig } from '@ng-forge/dynamic-forms-primeng/shared';
 import { withPrimeNGFields } from './primeng-providers';
 
 describe('withPrimeNGFields', () => {

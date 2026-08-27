@@ -196,6 +196,7 @@ export function setupSimpleTest<T>(componentType: Type<T>, config: SimpleCompone
     name: 'test',
     loadComponent: async () => TestFieldComponent,
     mapper: () => computed(() => ({})), // Simple mapper that returns empty inputs signal for testing
+    renderReadyWhen: [],
   };
 
   TestBed.configureTestingModule({

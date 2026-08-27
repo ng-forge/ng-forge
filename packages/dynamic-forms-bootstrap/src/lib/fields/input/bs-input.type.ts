@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { BsButtonAddon, BsIconAddon } from '../../types/addons';
+import type { BsButtonAddon, BsIconAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 export interface BsInputProps extends InputProps {
   size?: 'sm' | 'lg';

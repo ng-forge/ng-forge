@@ -26,9 +26,29 @@
       "@ng-forge/dynamic-forms/integration": ["./packages/dynamic-forms/integration/src/public_api.ts"],
       "@ng-forge/dynamic-forms/schema": ["./packages/dynamic-forms/schema/src/public_api.ts"],
       "@ng-forge/dynamic-forms-bootstrap": ["./packages/dynamic-forms-bootstrap/src/index.ts"],
+      "@ng-forge/dynamic-forms-bootstrap/shared": ["./packages/dynamic-forms-bootstrap/shared/public-api.ts"],
+      "@ng-forge/dynamic-forms-bootstrap/lazy/*": [
+        "./packages/dynamic-forms-bootstrap/lazy/*/index.ts",
+        "./packages/dynamic-forms-bootstrap/src/lib/fields/*/index.ts"
+      ],
       "@ng-forge/dynamic-forms-ionic": ["./packages/dynamic-forms-ionic/src/index.ts"],
+      "@ng-forge/dynamic-forms-ionic/shared": ["./packages/dynamic-forms-ionic/shared/public-api.ts"],
+      "@ng-forge/dynamic-forms-ionic/lazy/*": [
+        "./packages/dynamic-forms-ionic/lazy/*/index.ts",
+        "./packages/dynamic-forms-ionic/src/lib/fields/*/index.ts"
+      ],
       "@ng-forge/dynamic-forms-material": ["./packages/dynamic-forms-material/src/index.ts"],
+      "@ng-forge/dynamic-forms-material/shared": ["./packages/dynamic-forms-material/shared/public-api.ts"],
+      "@ng-forge/dynamic-forms-material/lazy/*": [
+        "./packages/dynamic-forms-material/lazy/*/index.ts",
+        "./packages/dynamic-forms-material/src/lib/fields/*/index.ts"
+      ],
       "@ng-forge/dynamic-forms-primeng": ["./packages/dynamic-forms-primeng/src/index.ts"],
+      "@ng-forge/dynamic-forms-primeng/shared": ["./packages/dynamic-forms-primeng/shared/public-api.ts"],
+      "@ng-forge/dynamic-forms-primeng/lazy/*": [
+        "./packages/dynamic-forms-primeng/lazy/*/index.ts",
+        "./packages/dynamic-forms-primeng/src/lib/fields/*/index.ts"
+      ],
       "@ng-forge/dynamic-form-mcp": ["./packages/dynamic-form-mcp/src/index.ts"],
       "@ng-forge/examples-material": ["./internal/examples-material/src/index.ts"],
       "@ng-forge/examples-bootstrap": ["./internal/examples-bootstrap/src/index.ts"],

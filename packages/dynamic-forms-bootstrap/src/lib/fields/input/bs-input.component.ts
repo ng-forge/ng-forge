@@ -14,9 +14,7 @@ import {
   NgForgeControl,
   NgForgeFieldHost,
 } from '@ng-forge/dynamic-forms/integration';
-import { BOOTSTRAP_CONFIG } from '../../models/bootstrap-config.token';
-import { runBsPresetAction } from '../../addons/preset-actions';
-import { BS_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { BOOTSTRAP_CONFIG, BS_INPUT_TYPE_OVERRIDE, runBsPresetAction } from '@ng-forge/dynamic-forms-bootstrap/shared';
 import { BsInputAddon, BsInputProps } from './bs-input.type';
 
 @Component({

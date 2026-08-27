@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
-import type { BsButtonAddon } from '../types/addons';
+import type { BsButtonAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 /** Renderer for the `bs-button` addon type. */
 @Component({

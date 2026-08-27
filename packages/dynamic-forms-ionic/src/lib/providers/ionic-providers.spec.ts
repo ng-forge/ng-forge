@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { afterEach, describe, expect, it } from 'vitest';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
-import { IONIC_CONFIG } from '../models/ionic-config.token';
-import type { IonicConfig } from '../models/ionic-config';
+import { IONIC_CONFIG, type IonicConfig } from '@ng-forge/dynamic-forms-ionic/shared';
 import { withIonicFields } from './ionic-providers';
 
 describe('withIonicFields', () => {

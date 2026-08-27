@@ -5,7 +5,7 @@ import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-fo
 import { describe, expect, it, vi } from 'vitest';
 import { PrimeButtonAddonComponent } from '../../addons/prime-button-addon.component';
 import { PrimeIconAddonComponent } from '../../addons/prime-icon-addon.component';
-import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
+import type { PrimeButtonAddon, PrimeIconAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 import type { PrimeInputAddon } from './prime-input.type';
 import PrimeInputFieldComponent from './prime-input.component';
 
