@@ -113,6 +113,7 @@
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
+      "parallelism": false,
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "configFile": "vite.config.ts"
