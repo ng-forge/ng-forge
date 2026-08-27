@@ -40,7 +40,11 @@ function pagedConfig(label: string, initialPage?: number | { index: number; vali
     ...(initialPage !== undefined ? { options: { initialPage } } : {}),
     fields: [
       { key: 'p1', type: 'page', fields: [{ key: 'a', type: 'input', label: `A-${label}` }] },
-      { key: 'p2', type: 'page', fields: [{ key: 'b', type: 'input', label: `B-${label}` }] },
+      {
+        key: 'p2',
+        type: 'page',
+        fields: [{ key: 'b', type: 'input', label: `B-${label}`, validators: [{ type: 'required' }] }],
+      },
       { key: 'p3', type: 'page', fields: [{ key: 'c', type: 'input', label: `C-${label}` }] },
     ],
   } as unknown as FormConfig;
@@ -113,11 +117,12 @@ describe('config swap resets the active page', () => {
   });
 
   it('re-applies a gated initialPage after a swap', async () => {
-    const gated = { index: 1, validate: true };
+    const gated = { index: 2, validate: true };
     const fixture = TestBed.createComponent(DynamicForm);
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v1', gated));
-    fixture.componentRef.setInput('value', {});
+    fixture.componentRef.setInput('value', { a: 'filled' });
     await waitForFormInit(fixture);
+    // Page 1 is invalid, so the gated landing cannot reach page 2.
     expect(activePage(fixture)).toBe(1);
 
     const bus = fixture.debugElement.injector.get(EventBus);

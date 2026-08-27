@@ -85,6 +85,9 @@ export class PageOrchestratorComponent {
   /** Pending programmatic page request, owned by FormStateManager. */
   private readonly pendingPageRequest = computed(() => this.stateManager?.pendingPageRequest() ?? null);
 
+  /** Whether validation belongs to the page definitions currently being rendered. */
+  private readonly schemaCurrent = computed(() => this.stateManager?.isSchemaCurrent() ?? true);
+
   /** Array of page field definitions to render */
   pageFields = input.required<PageField[]>();
 
@@ -133,9 +136,14 @@ export class PageOrchestratorComponent {
     // Untracked: re-land on a config swap, but never on a later validity or visibility change.
     return untracked(() => {
       // FormStateManager owns navigation intent before this component mounts, so restore its
-      // index rather than re-landing; it resets to 0 on a genuine config swap.
-      const owned = this.stateManager?.activePageIndex() ?? 0;
-      if (owned > 0 && owned < totalPages) return owned;
+      // index only when it belongs to this exact page-definition set. The outgoing pager may
+      // publish after a config transition starts, so an unscoped index can be stale.
+      const owned = this.stateManager?.activePageState();
+      if (owned?.definitions === this.pageFields() && owned.initialized && owned.index >= 0 && owned.index < totalPages) {
+        return owned.index;
+      }
+
+      if (this.initialPage().validate && !this.schemaCurrent()) return 0;
 
       return this.resolveInitialLanding();
     });
@@ -268,8 +276,14 @@ export class PageOrchestratorComponent {
     // Setup event listeners for navigation
     this.setupEventListeners();
 
-    // Apply a gated `initialPage` once the form is available, reusing the normal
-    // forward-jump path so it stops on the first invalid page.
+    // A config swap exposes its page definitions before their schema is current. Defer a gated
+    // landing until those fields can be validated, then resolve it exactly once for this page set.
+    explicitEffect([this.schemaCurrent, this.pageFields], ([schemaCurrent, definitions]) => {
+      const owned = this.stateManager?.activePageState();
+      if (!schemaCurrent || owned?.definitions !== definitions || owned.initialized) return;
+      this.currentPageIndex.set(this.resolveInitialLanding());
+    });
+
     // B15: Auto-navigate away when current page becomes hidden
     explicitEffect([this.state, this.visiblePageIndices], ([state, visibleIndices]) => {
       const currentVisiblePosition = visibleIndices.indexOf(state.currentPageIndex);
@@ -512,8 +526,11 @@ export class PageOrchestratorComponent {
 
     explicitEffect([this.state], ([state]) => this.eventBus.dispatch(PagerStateEvent, state));
 
-    // Publish upward so FormStateManager can scope the schema to the mounted pages.
-    explicitEffect([this.currentPageIndex], ([index]) => this.stateManager?.activePageIndex.set(index));
+    // Publish upward so navigation survives this pager being temporarily unmounted.
+    explicitEffect([this.currentPageIndex, this.pageFields], ([index, definitions]) => {
+      const initialized = !this.initialPage().validate || this.schemaCurrent();
+      this.stateManager?.activePageState.set({ definitions, initialized, index });
+    });
   }
 
   /**
