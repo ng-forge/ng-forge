@@ -2028,6 +2028,9 @@ export const WRAPPER_AUTO_ASSOCIATIONS: InjectionToken<WrapperAutoAssociations>;
 export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
+export const WRAPPER_COMPONENT_LOAD_CACHE: InjectionToken<Map<string, Promise<Type<unknown> | undefined>>>;
+
+// @public
 export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.FieldErrorsWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
 
 // @public

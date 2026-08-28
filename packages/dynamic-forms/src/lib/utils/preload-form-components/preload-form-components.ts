@@ -5,6 +5,7 @@ import {
   FormConfig,
   isPageField,
   WRAPPER_AUTO_ASSOCIATIONS,
+  WRAPPER_COMPONENT_LOAD_CACHE,
   WRAPPER_REGISTRY,
 } from '@ng-forge/dynamic-forms/internal';
 import { WRAPPER_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
@@ -74,12 +75,21 @@ export function injectFormComponentPreloader(): FormComponentPreloader {
   const fieldRegistry = injectFieldRegistry();
   const wrapperRegistry = inject(WRAPPER_REGISTRY);
   const wrapperCache = inject(WRAPPER_COMPONENT_CACHE);
+  const wrapperLoadCache = inject(WRAPPER_COMPONENT_LOAD_CACHE);
   const autoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   const defaultWrappers = inject(DEFAULT_WRAPPERS, { optional: true });
   const preloadedConfigs = new WeakSet<FormConfig>();
+  const preloadedFieldRoots = new WeakSet<FieldDef<unknown>>();
 
   const preloadFields = (fields: readonly FieldDef<unknown>[]): void => {
-    const normalizedFields = normalizeSimplifiedArrays([...fields]);
+    const unseenFields = fields.filter((field) => {
+      if (preloadedFieldRoots.has(field)) return false;
+      preloadedFieldRoots.add(field);
+      return true;
+    });
+    if (unseenFields.length === 0) return;
+
+    const normalizedFields = normalizeSimplifiedArrays(unseenFields);
     const defs = collectFieldDefs(normalizedFields);
     if (defs.length === 0) return;
 
@@ -103,7 +113,9 @@ export function injectFormComponentPreloader(): FormComponentPreloader {
     }
     for (const type of wrapperTypes) {
       if (wrapperCache.has(type)) continue;
-      started.push(loadWrapperComponent(type, wrapperRegistry, wrapperCache).catch((): Type<unknown> | undefined => undefined));
+      started.push(
+        loadWrapperComponent(type, wrapperRegistry, wrapperCache, wrapperLoadCache).catch((): Type<unknown> | undefined => undefined),
+      );
     }
     // Deliberately not awaited: rendering must not be gated on the head start.
     void Promise.allSettled(started);

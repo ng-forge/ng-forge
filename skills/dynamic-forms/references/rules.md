@@ -235,6 +235,7 @@ Use `options.fieldWindowing` for large flat forms:
 - `eager` mounts that many leading leaf fields immediately. Remaining fields mount near the viewport.
 - `placeholderHeight` reserves layout space before a field mounts.
 - `park` keeps mounted offscreen DOM in place but removes its view from routine change detection. Safety-related state such as disabled, readonly, required, and validation state stays current. Other model-to-DOM updates catch up when the field returns.
+- `park.margin` follows `IntersectionObserver.rootMargin`: use one to four `px` or `%` values. Unsupported units fall back to the inherited margin.
 - `fieldWindowing: false` disables inherited deferred mounting for that form.
 - A park-only object changes parking without changing the inherited mounting mode. Use `{ park: false }` to opt out or `{ park: true }` to opt in.
 
@@ -623,4 +624,3 @@ To understand what properties are supported for each field type, use `ngforge_lo
 ```typescript
 ngforge_lookup({ topic: 'input', depth: 'schema', uiIntegration: 'material' })
 ```
-

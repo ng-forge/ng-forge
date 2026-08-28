@@ -1,5 +1,6 @@
 import { DestroyRef, inject, Injectable, PLATFORM_ID, Signal, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { normalizeFieldParkingMargin } from '../../providers/features/field-windowing/field-parking-margin';
 
 /** Every field is treated as visible where `IntersectionObserver` can't run. */
 const ALWAYS_VISIBLE = signal(true).asReadonly();
@@ -23,12 +24,12 @@ export class FieldViewportObserver {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID)) && typeof IntersectionObserver !== 'undefined';
 
   /** One observer per distinct `rootMargin`; each tracks many elements. */
-  private readonly observers = new Map<string, IntersectionObserver>();
+  private readonly observers = new Map<string, { readonly observer: IntersectionObserver; readonly elements: Set<Element> }>();
   private readonly observations = new WeakMap<Element, { readonly state: ReturnType<typeof signal<boolean>>; margin: string }>();
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
-      for (const observer of this.observers.values()) observer.disconnect();
+      for (const { observer } of this.observers.values()) observer.disconnect();
       this.observers.clear();
     });
   }
@@ -41,20 +42,21 @@ export class FieldViewportObserver {
    */
   observe(el: Element, rootMargin: string): Signal<boolean> {
     if (!this.isBrowser) return ALWAYS_VISIBLE;
+    rootMargin = normalizeFieldParkingMargin(rootMargin);
 
     const existing = this.observations.get(el);
     if (existing) {
       if (existing.margin !== rootMargin) {
-        this.observerFor(existing.margin).unobserve(el);
+        this.stopObserving(el, existing.margin);
         existing.margin = rootMargin;
-        this.observerFor(rootMargin).observe(el);
+        this.startObserving(el, rootMargin);
       }
       return existing.state.asReadonly();
     }
 
     const state = signal(true);
     this.observations.set(el, { state, margin: rootMargin });
-    this.observerFor(rootMargin).observe(el);
+    this.startObserving(el, rootMargin);
     return state.asReadonly();
   }
 
@@ -64,10 +66,26 @@ export class FieldViewportObserver {
     const observation = this.observations.get(el);
     if (!observation) return;
     this.observations.delete(el);
-    this.observers.get(observation.margin)?.unobserve(el);
+    this.stopObserving(el, observation.margin);
   }
 
-  private observerFor(rootMargin: string): IntersectionObserver {
+  private startObserving(el: Element, rootMargin: string): void {
+    const entry = this.observerFor(rootMargin);
+    entry.elements.add(el);
+    entry.observer.observe(el);
+  }
+
+  private stopObserving(el: Element, rootMargin: string): void {
+    const entry = this.observers.get(rootMargin);
+    if (!entry) return;
+    entry.observer.unobserve(el);
+    entry.elements.delete(el);
+    if (entry.elements.size > 0) return;
+    entry.observer.disconnect();
+    this.observers.delete(rootMargin);
+  }
+
+  private observerFor(rootMargin: string): { readonly observer: IntersectionObserver; readonly elements: Set<Element> } {
     const existing = this.observers.get(rootMargin);
     if (existing) return existing;
 
@@ -79,7 +97,8 @@ export class FieldViewportObserver {
       },
       { rootMargin },
     );
-    this.observers.set(rootMargin, observer);
-    return observer;
+    const entry = { observer, elements: new Set<Element>() };
+    this.observers.set(rootMargin, entry);
+    return entry;
   }
 }

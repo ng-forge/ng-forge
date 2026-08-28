@@ -63,16 +63,24 @@ export async function loadWrapperComponent(
   type: string,
   registry: ReadonlyMap<string, WrapperTypeDefinition>,
   cache: Map<string, Type<unknown>>,
+  loadCache?: Map<string, Promise<Type<unknown> | undefined>>,
 ): Promise<Type<unknown> | undefined> {
   const cached = cache.get(type);
   if (cached) return cached;
 
+  const pending = loadCache?.get(type);
+  if (pending) return pending;
+
   const definition = registry.get(type);
   if (!definition) return undefined;
 
-  const component = resolveDefaultExport(await definition.loadComponent());
-  if (component) cache.set(type, component);
-  return component;
+  const load = (async () => {
+    const component = resolveDefaultExport(await definition.loadComponent());
+    if (component) cache.set(type, component);
+    return component;
+  })().finally(() => loadCache?.delete(type));
+  loadCache?.set(type, load);
+  return load;
 }
 
 /**
@@ -86,12 +94,13 @@ export function loadWrapperComponents(
   registry: ReadonlyMap<string, WrapperTypeDefinition>,
   cache: Map<string, Type<unknown>>,
   logger: Logger,
+  loadCache?: Map<string, Promise<Type<unknown> | undefined>>,
 ): Observable<LoadedWrapper[]> {
   if (configs.length === 0) return of([]);
 
   return forkJoin(
     configs.map((config) =>
-      from(loadWrapperComponent(config.type, registry, cache)).pipe(
+      from(loadWrapperComponent(config.type, registry, cache, loadCache)).pipe(
         catchError(() => of(undefined)),
         map((component) => {
           if (!component) {

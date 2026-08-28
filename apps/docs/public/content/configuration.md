@@ -47,6 +47,7 @@ const config = {
 - `eager` mounts the leading leaf fields immediately.
 - `placeholderHeight` reserves layout space before a deferred field mounts.
 - `park` leaves mounted offscreen DOM in place while removing its view from routine change detection. Disabled, readonly, required, and validation state stays current. Other model-to-DOM updates catch up when the field returns.
+- `park.margin` follows `IntersectionObserver.rootMargin`: use one to four `px` or `%` values. Unsupported units fall back to the inherited margin.
 - `fieldWindowing: false` disables inherited deferred mounting for this form.
 - A park-only object changes parking without changing the inherited mounting mode. Use `{ park: false }` to opt out or `{ park: true }` to opt in.
 

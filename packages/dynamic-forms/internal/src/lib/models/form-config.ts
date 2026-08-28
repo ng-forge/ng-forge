@@ -171,6 +171,8 @@ export interface FormOptions {
    * suspends model → DOM updates for a scrolled-away field until it returns.
    * Set `park: true` to opt in without deferred mounting, `park: false` to opt
    * out, or `park: { margin }` to change how far outside the viewport stays live.
+   * The margin follows `IntersectionObserver.rootMargin` and accepts one to four
+   * pixel or percentage values; unsupported units fall back to the inherited margin.
    *
    * Overrides the global `withFieldWindowing(...)` default for this form.
    *

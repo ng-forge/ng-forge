@@ -7,6 +7,7 @@ import {
   FieldTypeDefinition,
   FormConfig,
   WRAPPER_COMPONENT_CACHE,
+  WRAPPER_COMPONENT_LOAD_CACHE,
   WRAPPER_REGISTRY,
 } from '@ng-forge/dynamic-forms/internal';
 import { COMPONENT_CACHE } from '../inject-field-registry/inject-field-registry';
@@ -51,6 +52,7 @@ describe('injectFormComponentPreloader', () => {
         { provide: WRAPPER_REGISTRY, useValue: wrappers },
         { provide: COMPONENT_CACHE, useValue: new Map<string, Type<unknown>>() },
         { provide: WRAPPER_COMPONENT_CACHE, useValue: new Map<string, Type<unknown>>() },
+        { provide: WRAPPER_COMPONENT_LOAD_CACHE, useValue: new Map<string, Promise<Type<unknown> | undefined>>() },
       ],
     });
   });
@@ -76,6 +78,16 @@ describe('injectFormComponentPreloader', () => {
     // The point of preloading is to collapse a waterfall, not to trade it for a
     // burst of duplicate imports.
     expect(loadInput).toHaveBeenCalledTimes(1);
+  });
+
+  it('warms wrapper components named by the selected fields', async () => {
+    preloaderFor({
+      fields: [{ key: 'a', type: 'input', wrappers: [{ type: 'css' }] }],
+    } as FormConfig);
+    await flush();
+
+    expect(loadWrapper).toHaveBeenCalledTimes(1);
+    expect(TestBed.inject(WRAPPER_COMPONENT_CACHE).get('css')).toBe(StubComponent);
   });
 
   it('does not walk the same config more than once', () => {
@@ -133,6 +145,25 @@ describe('injectFormComponentPreloader', () => {
 
     expect(loadInput).toHaveBeenCalledTimes(1);
     expect(loadTextarea).not.toHaveBeenCalled();
+  });
+
+  it('does not walk the same page definition more than once', () => {
+    const injector = TestBed.inject(Injector);
+    const preload = runInInjectionContext(injector, () => injectFormComponentPreloader());
+    const readChildren = vi.fn(() => [{ key: 'a', type: 'input' }]);
+    const page = {
+      key: 'first',
+      type: 'page',
+      get fields() {
+        return readChildren();
+      },
+    } as unknown as FieldDef<unknown>;
+
+    preload.preloadFields([page]);
+    const readsAfterFirstWalk = readChildren.mock.calls.length;
+    preload.preloadFields([page]);
+
+    expect(readChildren).toHaveBeenCalledTimes(readsAfterFirstWalk);
   });
 
   it('preloads a simplified array template and its generated actions', async () => {

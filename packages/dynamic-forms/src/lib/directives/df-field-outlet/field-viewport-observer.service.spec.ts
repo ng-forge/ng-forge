@@ -83,6 +83,65 @@ describe('FieldViewportObserver', () => {
     it('unobserve is inert for an element that was never observed', () => {
       expect(() => observer.unobserve(makeElement())).not.toThrow();
     });
+
+    it('disconnects and releases an observer after its final element leaves', () => {
+      const instances: MockIntersectionObserver[] = [];
+
+      class MockIntersectionObserver implements IntersectionObserver {
+        readonly root = null;
+        readonly thresholds = [0];
+        readonly rootMargin: string;
+        readonly observe = vi.fn();
+        readonly unobserve = vi.fn();
+        readonly disconnect = vi.fn();
+        readonly takeRecords = vi.fn(() => [] as IntersectionObserverEntry[]);
+
+        constructor(_callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+          this.rootMargin = options?.rootMargin ?? '0px';
+          instances.push(this);
+        }
+      }
+
+      vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [FieldViewportObserver] });
+      observer = TestBed.inject(FieldViewportObserver);
+      const first = makeElement();
+
+      observer.observe(first, margin);
+      observer.unobserve(first);
+      observer.observe(makeElement(), margin);
+
+      expect(instances).toHaveLength(2);
+      expect(instances[0].disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back safely when called with an unsupported CSS unit', () => {
+      const margins: string[] = [];
+
+      class MockIntersectionObserver implements IntersectionObserver {
+        readonly root = null;
+        readonly thresholds = [0];
+        readonly rootMargin: string;
+        readonly observe = vi.fn();
+        readonly unobserve = vi.fn();
+        readonly disconnect = vi.fn();
+        readonly takeRecords = vi.fn(() => [] as IntersectionObserverEntry[]);
+
+        constructor(_callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+          this.rootMargin = options?.rootMargin ?? '0px';
+          margins.push(this.rootMargin);
+        }
+      }
+
+      vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [FieldViewportObserver] });
+      observer = TestBed.inject(FieldViewportObserver);
+
+      expect(() => observer.observe(makeElement(), '1rem')).not.toThrow();
+      expect(margins).toEqual(['100%']);
+    });
   });
 
   describe('on the server', () => {

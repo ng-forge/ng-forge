@@ -1,8 +1,14 @@
 import { FieldParkingConfig, FieldWindowingConfig } from './field-windowing.token';
 import { clampWindowSize } from '../clamp-window';
+import { normalizeFieldParkingMargin } from './field-parking-margin';
 
 /** Per-form override shape for parking. `false` opts out; an object tunes the margin. */
-export type FieldParkingOption = boolean | { margin?: string };
+export type FieldParkingOption =
+  | boolean
+  | {
+      /** IntersectionObserver root margin. Supports one to four `px` or `%` values. */
+      margin?: string;
+    };
 
 /** Per-form override shape for `FormOptions.fieldWindowing`. */
 export type FieldWindowingOption = boolean | { eager?: number; placeholderHeight?: string; park?: FieldParkingOption };
@@ -50,5 +56,5 @@ export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: Fie
 export function resolveFieldParking(global: FieldParkingConfig, perForm: FieldParkingOption | undefined): FieldParkingConfig {
   if (perForm === undefined) return global;
   if (typeof perForm === 'boolean') return { ...global, enabled: perForm };
-  return { enabled: true, margin: perForm.margin ?? global.margin };
+  return { enabled: true, margin: normalizeFieldParkingMargin(perForm.margin, global.margin) };
 }

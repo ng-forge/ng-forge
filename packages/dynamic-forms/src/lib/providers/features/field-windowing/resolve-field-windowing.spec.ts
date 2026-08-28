@@ -91,4 +91,12 @@ describe('resolveFieldParking', () => {
   it('falls back to the global margin when the object omits it', () => {
     expect(resolveFieldParking(global, {})).toEqual(global);
   });
+
+  it('falls back to the global margin when the override is not valid rootMargin syntax', () => {
+    expect(resolveFieldParking(global, { margin: '1rem' })).toEqual(global);
+  });
+
+  it.each(['+1px', '1e2px', '-.5%'])('accepts Chromium-supported rootMargin number syntax: %s', (margin) => {
+    expect(resolveFieldParking(global, { margin })).toEqual({ enabled: true, margin });
+  });
 });

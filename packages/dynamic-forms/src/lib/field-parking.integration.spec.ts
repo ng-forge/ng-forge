@@ -205,6 +205,26 @@ describe('Field parking', () => {
     expect(second.disabled).toBe(true);
   });
 
+  it('unparks an out-of-view field as soon as it becomes invalid', async () => {
+    const fixture = await createHost({
+      fields: [
+        { key: 'f0', type: 'input', value: 'v0' },
+        { key: 'f1', type: 'input', value: 'valid', required: true },
+      ],
+      options: { fieldWindowing: { park: true } },
+    } as FormConfig);
+    const [, second] = inputs(fixture);
+
+    observer.setVisibleFor(second, false);
+    await settle(fixture);
+    fixture.componentInstance.value.set({ f0: 'v0', f1: '' });
+    await settle(fixture);
+
+    // The required error must wake the detached field immediately. Without the
+    // reactive error source, its DOM would remain frozen at the old value.
+    expect(second.value).toBe('');
+  });
+
   it('still writes a parked field own edits through to the form value', async () => {
     const fixture = await createHost(flatConfig(2, { fieldWindowing: { park: true } }));
     const [, second] = inputs(fixture);
