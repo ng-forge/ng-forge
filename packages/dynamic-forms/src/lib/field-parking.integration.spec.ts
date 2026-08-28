@@ -1,4 +1,4 @@
-import { Component, input, signal, Signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal, Signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { delay } from '@ng-forge/utils';
@@ -62,6 +62,7 @@ function flatConfig(count: number, options?: FormConfig['options']): FormConfig 
   selector: 'field-parking-test-host',
   imports: [DynamicForm],
   template: `<form [dynamic-form]="config()" [(value)]="value"></form>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 class TestHostComponent {
   config = input.required<FormConfig>();
