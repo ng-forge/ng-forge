@@ -127,7 +127,7 @@ adapter. Check which adapter the project provides before writing \`props\`.
 }
 
 function rulesMd(): string {
-  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n`);
+  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS.trimEnd()}\n`);
 }
 
 /**
