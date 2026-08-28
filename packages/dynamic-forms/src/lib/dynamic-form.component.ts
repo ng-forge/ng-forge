@@ -28,6 +28,7 @@ import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
 import { InferFormModel } from '@ng-forge/dynamic-forms/internal';
 import { isContainerField } from '@ng-forge/dynamic-forms/internal';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { injectFormComponentPreloader } from './utils/preload-form-components/preload-form-components';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { DERIVATION_RENDER_GATE } from './core/derivation/derivation-render-gate';
 import { FORM_INITIALIZER } from './providers/form-initializer.token';
@@ -378,6 +379,14 @@ export class DynamicForm<
     // static reference to that feature's classes leaks into this component.
     // Runs after dispatcher.connect() to preserve the prior bootstrap order.
     inject(FORM_INITIALIZER, { optional: true });
+
+    // Start every field and wrapper chunk this config needs, in parallel, before
+    // rendering asks for any of them. Wrapper chains are otherwise discovered
+    // per-field inside DfFieldOutlet, which cannot exist until that field's own
+    // component has loaded — a dependent waterfall that costs a round trip per
+    // wave. Fire-and-forget: nothing here gates render.
+    const preload = injectFormComponentPreloader();
+    explicitEffect([this.config], ([config]) => preload.preloadConfig(config as FormConfig));
 
     this.setupEffects();
     this.setupEventHandlers();

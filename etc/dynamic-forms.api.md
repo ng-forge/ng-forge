@@ -394,6 +394,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         fieldWindowing?: boolean | {
             eager?: number;
             placeholderHeight?: string;
+            park?: boolean | {
+                margin?: string;
+            };
         };
         excludeValueIfHidden?: boolean;
         excludeValueIfDisabled?: boolean;
@@ -579,6 +582,11 @@ export interface FieldOption<T = unknown> {
 }
 
 // @public
+export type FieldParkingOption = boolean | {
+    margin?: string;
+};
+
+// @public
 export type FieldPathAccess<TValue> = {
     [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };
@@ -696,6 +704,9 @@ export interface FormOptions {
     fieldWindowing?: boolean | {
         eager?: number;
         placeholderHeight?: string;
+        park?: boolean | {
+            margin?: string;
+        };
     };
     idPrefix?: string;
     initialPage?: InitialPageConfig | number;
@@ -1277,6 +1288,7 @@ export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;
 export function withFieldWindowing(config?: {
     eager?: number;
     placeholderHeight?: string;
+    park?: FieldParkingOption;
 }): DynamicFormFeature<'field-windowing'>;
 
 // @public (undocumented)

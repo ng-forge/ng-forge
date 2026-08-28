@@ -6,6 +6,7 @@ import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
 import { FormIdPrefixService } from '../core/registry/form-id-prefix.service';
+import { FieldViewportObserver } from '../directives/df-field-outlet/field-viewport-observer.service';
 import { FormStateManager, FORM_STATE_DEPS, FormStateDeps } from '../state/form-state-manager';
 import {
   DEFAULT_PROPS,
@@ -84,6 +85,9 @@ function coreProviders(): Provider[] {
     // Per-form DOM-id prefix: registers this instance with the root registry for
     // multi-form collision detection and publishes the resolved prefix signal.
     FormIdPrefixService,
+    // Form-scoped, never root: it holds a mutable observer map, and
+    // module-scoped mutable state is shared across requests under SSR.
+    FieldViewportObserver,
     {
       provide: FORM_ID_PREFIX,
       useFactory: (svc: FormIdPrefixService) => svc.prefix,

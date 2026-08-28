@@ -21,7 +21,13 @@ export type { AddonTypeDefinition, AddonTypeSchema, AddonShapeValidator, FieldAd
 export { ADDON_TYPE_REGISTRY } from './addon/addon-type';
 export { DF_FIELD_TEMPLATES } from './addon/df-field-templates.token';
 export type { WrapperTypeDefinition, FieldWrapper, WrapperConfig } from './wrapper-type';
-export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRAPPER_AUTO_ASSOCIATIONS } from './wrapper-type';
+export {
+  isWrapperTypeDefinition,
+  WRAPPER_REGISTRY,
+  WRAPPER_COMPONENT_CACHE,
+  WRAPPER_COMPONENT_LOAD_CACHE,
+  WRAPPER_AUTO_ASSOCIATIONS,
+} from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,

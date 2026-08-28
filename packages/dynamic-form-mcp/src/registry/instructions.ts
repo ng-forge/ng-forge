@@ -197,6 +197,34 @@ Paged forms may virtualize inactive pages. DynamicForm \`(initialized)\` emits a
 the initially active page is ready. Use \`(activePageInitialized)\` when work must run
 after every visible-page transition; it announces once per visit.
 
+### Rendering Performance
+
+Use \`options.pagePreloadWindow\` for paged forms. It controls how many neighbouring
+pages are mounted and have their component chunks preloaded. \`0\` keeps only the
+active page in the render window; the default is \`1\`.
+
+Use \`options.fieldWindowing\` for large flat forms:
+
+\`\`\`typescript
+{
+  options: {
+    fieldWindowing: {
+      eager: 20,
+      placeholderHeight: '4rem',
+      park: { margin: '100%' },
+    },
+  },
+  fields: [ /* flat fields */ ],
+}
+\`\`\`
+
+- \`eager\` mounts that many leading leaf fields immediately. Remaining fields mount near the viewport.
+- \`placeholderHeight\` reserves layout space before a field mounts.
+- \`park\` keeps mounted offscreen DOM in place but removes its view from routine change detection. Safety-related state such as disabled, readonly, required, and validation state stays current. Other model-to-DOM updates catch up when the field returns.
+- \`park.margin\` follows \`IntersectionObserver.rootMargin\`: use one to four \`px\` or \`%\` values. Unsupported units fall back to the inherited margin.
+- \`fieldWindowing: false\` disables inherited deferred mounting for that form.
+- A park-only object changes parking without changing the inherited mounting mode. Use \`{ park: false }\` to opt out or \`{ park: true }\` to opt in.
+
 ## Validation
 
 ### Shorthand Validators (Preferred)

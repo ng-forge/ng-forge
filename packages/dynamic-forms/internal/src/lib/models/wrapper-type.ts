@@ -82,6 +82,15 @@ export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unkno
   factory: () => new Map(),
 });
 
+/** Pending wrapper loads, shared by preloading and the normal render path. */
+export const WRAPPER_COMPONENT_LOAD_CACHE = new InjectionToken<Map<string, Promise<Type<unknown> | undefined>>>(
+  'WRAPPER_COMPONENT_LOAD_CACHE',
+  {
+    providedIn: 'root',
+    factory: () => new Map(),
+  },
+);
+
 /**
  * Pre-computed reverse index: `fieldType → WrapperConfig[]` for every
  * registered `WrapperTypeDefinition.types` entry. Built once in the

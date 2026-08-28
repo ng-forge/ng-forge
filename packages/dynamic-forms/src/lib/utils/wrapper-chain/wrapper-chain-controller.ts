@@ -12,7 +12,13 @@ import {
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { map, Observable, of, switchMap } from 'rxjs';
-import { WRAPPER_COMPONENT_CACHE, WRAPPER_REGISTRY, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
+import {
+  WRAPPER_COMPONENT_CACHE,
+  WRAPPER_COMPONENT_LOAD_CACHE,
+  WRAPPER_REGISTRY,
+  WrapperConfig,
+  WrapperTypeDefinition,
+} from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/internal';
@@ -124,6 +130,7 @@ export function createWrapperChainController(opts: WrapperChainControllerOptions
 interface ChainDeps {
   readonly registry: ReadonlyMap<string, WrapperTypeDefinition>;
   readonly cache: Map<string, import('@angular/core').Type<unknown>>;
+  readonly loadCache: Map<string, Promise<import('@angular/core').Type<unknown> | undefined>>;
   readonly logger: Logger;
   readonly destroyRef: DestroyRef;
   readonly environmentInjector: EnvironmentInjector;
@@ -158,6 +165,7 @@ function injectChainDeps(): ChainDeps {
   return {
     registry: inject(WRAPPER_REGISTRY),
     cache: inject(WRAPPER_COMPONENT_CACHE),
+    loadCache: inject(WRAPPER_COMPONENT_LOAD_CACHE),
     logger: inject(DynamicFormLogger),
     destroyRef: inject(DestroyRef),
     environmentInjector: inject(EnvironmentInjector),
@@ -195,7 +203,9 @@ function resolveLoadedWrappers(state: ChainState, deps: ChainDeps): Observable<C
     return of({ state, loaded });
   }
 
-  return loadWrapperComponents(state.wrappers, deps.registry, deps.cache, deps.logger).pipe(map((loaded) => ({ state, loaded })));
+  return loadWrapperComponents(state.wrappers, deps.registry, deps.cache, deps.logger, deps.loadCache).pipe(
+    map((loaded) => ({ state, loaded })),
+  );
 }
 
 /**

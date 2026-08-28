@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { PageOrchestratorComponent } from './page-orchestrator.component';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { firstValueFrom, race, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
@@ -60,7 +60,12 @@ function createForm(config: FormConfig, initialValue?: Record<string, unknown>):
 }
 
 describe('PageOrchestratorComponent', () => {
+  let loadTextarea: ReturnType<typeof vi.fn>;
+
   beforeEach(async () => {
+    loadTextarea = vi
+      .fn()
+      .mockImplementation(() => import('../../../../test-utils/src/harnesses/test-input.harness').then((m) => m.default));
     await TestBed.configureTestingModule({
       imports: [DynamicForm],
       providers: [
@@ -70,6 +75,11 @@ describe('PageOrchestratorComponent', () => {
             const registry = new Map();
             BUILT_IN_FIELDS.forEach((t) => registry.set(t.name, t));
             TEST_FIELD_TYPES.forEach((t) => registry.set(t.name, t));
+            registry.set('textarea', {
+              name: 'textarea',
+              loadComponent: loadTextarea,
+              mapper: valueFieldMapper,
+            } as FieldTypeDefinition);
             return registry;
           },
         },
@@ -82,6 +92,24 @@ describe('PageOrchestratorComponent', () => {
   });
 
   // ─── Validity guard (B2 / disableWhenPageInvalid) ───────────────────────────
+
+  it('loads component chunks only when their page enters the render window', async () => {
+    const fixture = createForm({
+      fields: [
+        { key: 'page1', type: 'page', fields: [{ key: 'name', type: 'input', label: 'Name' }] },
+        { key: 'page2', type: 'page', fields: [{ key: 'notes', type: 'textarea', label: 'Notes' }] },
+      ],
+      options: { pagePreloadWindow: 0 },
+    } as unknown as FormConfig);
+    await waitForFormInit(fixture);
+
+    expect(loadTextarea).not.toHaveBeenCalled();
+
+    fixture.debugElement.injector.get(EventBus).dispatch(new GoToPageEvent(1, { validate: false }));
+    await waitForFormInit(fixture);
+
+    expect(loadTextarea).toHaveBeenCalledTimes(1);
+  });
 
   it('preserves page component instances across adjacent navigation', async () => {
     const fixture = createForm(
