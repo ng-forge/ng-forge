@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, input, signal, Signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { delay } from '@ng-forge/utils';
 import { DynamicForm } from './dynamic-form.component';
 import { BUILT_IN_FIELDS } from './providers/built-in-fields';
@@ -24,29 +25,30 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
  * scrolling is covered by the E2E layer.
  */
 class FakeViewportObserver {
-  readonly states = new Map<Element, WritableSignal<boolean>>();
+  readonly states = new Map<Element, BehaviorSubject<boolean>>();
 
-  observe(el: Element): Signal<boolean> {
-    const existing = this.states.get(el);
-    if (existing) return existing.asReadonly();
-    const state = signal(true);
-    this.states.set(el, state);
-    return state.asReadonly();
-  }
-
-  unobserve(el: Element): void {
-    this.states.delete(el);
+  observe(el: Element): Observable<boolean> {
+    return new Observable((subscriber) => {
+      const state = new BehaviorSubject(true);
+      this.states.set(el, state);
+      const subscription = state.subscribe(subscriber);
+      return () => {
+        subscription.unsubscribe();
+        state.complete();
+        this.states.delete(el);
+      };
+    });
   }
 
   /** Scroll every tracked field out of (or back into) view. */
   setAllVisible(visible: boolean): void {
-    for (const state of this.states.values()) state.set(visible);
+    for (const state of this.states.values()) state.next(visible);
   }
 
   /** Scroll just the field whose host element contains `input` out of view. */
   setVisibleFor(input: Element, visible: boolean): void {
     for (const [el, state] of this.states) {
-      if (el.contains(input)) state.set(visible);
+      if (el.contains(input)) state.next(visible);
     }
   }
 }

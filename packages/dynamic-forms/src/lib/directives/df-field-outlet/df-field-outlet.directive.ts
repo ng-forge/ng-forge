@@ -12,6 +12,8 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { derivedFrom } from 'ngxtension/derived-from';
+import { of, pipe, switchMap } from 'rxjs';
 import { FORM_OPTIONS } from '@ng-forge/dynamic-forms/internal';
 import { FIELD_WINDOWING } from '../../providers/features/field-windowing/field-windowing.token';
 import { resolveFieldWindowing } from '../../providers/features/field-windowing/resolve-field-windowing';
@@ -29,9 +31,8 @@ import { FieldComponentSlot } from './field-component-slot';
 import { EventBus, GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { emitComponentInitialized } from '../../utils/emit-initialization/emit-initialization';
 import { collectInitializingContainers } from '../../utils/container-utils/container-utils';
-
-/** Stand-in visibility for a field with nothing to observe — never parks. */
-const ALWAYS_IN_VIEW = signal(true).asReadonly();
+import { isSameParkedDomState, snapshotParkedDomState } from './field-parking-state';
+import type { ParkableFieldTree, ParkedDomState } from './field-parking-state';
 
 /**
  * Structural directive that renders a `ResolvedField` with its effective
@@ -56,38 +57,22 @@ export class DfFieldOutlet {
   private readonly eventBus = inject(EventBus, { optional: true });
   private readonly injector = inject(Injector);
 
-  /** Encapsulates Angular's imperative ComponentRef / ViewContainerRef lifecycle. */
   private readonly fieldComponent = new FieldComponentSlot();
 
   private readonly componentIdentity: Signal<Type<unknown>> = computed(() => this.dfFieldOutlet().component);
-  /**
-   * Gate for the wrapper chain controller: true only when required inputs are populated AND the
-   * field isn't hidden. Combining the two prevents an initial-mount race where the chain mounts
-   * during the brief window between `renderReady` flipping true and `hidden()` settling — that
-   * window is exactly where Angular Signal Forms' `[formField]` directive emits NG01916.
-   */
+  /** Avoids the NG01916 window between `renderReady` and hidden state settling. */
   private readonly renderReady: Signal<boolean> = computed(() => this.dfFieldOutlet().renderReady() && !this.dfFieldOutlet().hidden());
   private readonly hidden = computed(() => this.dfFieldOutlet().hidden());
   private readonly rawInputs = computed(() => this.dfFieldOutlet().inputs());
 
-  /**
-   * Effective wrapper chain. Element-wise identity comparison keeps the signal
-   * stable across `ResolvedField` reference changes that don't actually change
-   * the chain — avoids rebuilds on reconciled fields.
-   */
+  /** Preserve wrapper identity across reconciled field snapshots. */
   private readonly wrappers = computed(
     () =>
       resolveWrappers(this.dfFieldOutlet().fieldDef, this.defaultWrappersSignal?.(), this.wrapperAutoAssociations, this.wrapperRegistry),
     { equal: isSameWrapperChain },
   );
 
-  /**
-   * `fieldInputs` bag handed to every wrapper in the chain AND forwarded to
-   * the innermost field component (when it declares `fieldInputs` as an
-   * input). Memoised on `rawInputs` identity so repeated emissions with the
-   * same underlying object return the same view and don't cascade OnPush
-   * re-evaluations.
-   */
+  /** Shared input view for wrappers and addon-aware leaf components. */
   private readonly fieldInputs = computed<WrapperFieldInputs>(() =>
     buildFieldInputs(
       this.rawInputs(),
@@ -98,45 +83,37 @@ export class DfFieldOutlet {
   );
 
   private readonly defaultEnvInjector = inject(EnvironmentInjector);
-  /** Environment injector for the innermost field component — `[environmentInjector]` input takes precedence over the directive's own DI. */
   private readonly fieldEnvInjector = computed(() => this.dfFieldOutletEnvironmentInjector() ?? this.defaultEnvInjector);
-  /** Field-level injector (FIELD_SIGNAL_CONTEXT, ARRAY_CONTEXT, …). Threaded to the controller so wrappers can inject it too. */
   private readonly fieldInjector = computed(() => this.dfFieldOutlet().injector);
-  /**
-   * Grid column class for the OUTERMOST wrapper host. When wrappers exist,
-   * the outermost wrapper (not the field component) is the row's direct flex
-   * child, so `df-col-N` must land there for the row grid CSS to match.
-   */
+  /** The outer wrapper is the row's grid child when wrappers exist. */
   private readonly outermostHostClasses = computed(() => getGridClassString(this.dfFieldOutlet().fieldDef) || undefined);
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Parking — hold scrolled-away fields out of change detection, DOM intact.
-  // ───────────────────────────────────────────────────────────────────────────
 
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
-  /** Optional so a field rendered outside a `DynamicForm` (tests, harnesses) simply never parks. */
   private readonly viewportObserver = inject(FieldViewportObserver, { optional: true });
 
   private readonly parking = computed(() => resolveFieldWindowing(this.globalFieldWindowing, this.formOptions?.()?.fieldWindowing).park);
 
-  /**
-   * Host element of the mounted field component. `DfFieldOutlet` is structural,
-   * so it has no element of its own — the thing to observe is whatever the slot
-   * currently holds, which is why this derives from the slot's state signal.
-   */
+  /** A structural directive observes the mounted component's host element. */
   private readonly observedElement = computed(() => {
     const state = this.fieldComponent.snapshot();
     return state.phase === 'empty' ? null : (state.ref.location.nativeElement as HTMLElement);
   });
 
-  /** Visibility signal for the current element, swapped whenever the element changes. */
-  private readonly visibility = signal<Signal<boolean>>(ALWAYS_IN_VIEW);
-  /** Bumped on focus crossing the field boundary, so parking is re-decided when focus leaves. */
+  private readonly visibility = derivedFrom(
+    [this.observedElement, this.parking],
+    pipe(
+      switchMap(([element, parking]) => {
+        const observer = this.viewportObserver;
+        return parking.enabled && element && observer ? observer.observe(element, parking.margin) : of(true);
+      }),
+    ),
+    { initialValue: true },
+  );
+
   private readonly focusEpoch = signal(0);
 
-  private readonly parked = computed(() => this.parking().enabled && !this.visibility()());
-  /** Stable FieldTree identity, isolated from mapper snapshots that change on value writes. */
+  private readonly parked = computed(() => this.parking().enabled && !this.visibility());
   private readonly fieldTree = computed(
     () => {
       const candidate = this.rawInputs()['field'];
@@ -144,25 +121,9 @@ export class DfFieldOutlet {
     },
     { equal: Object.is },
   );
-  /**
-   * Narrow state that must stay reflected in DOM while a view is parked. This
-   * subscribes only after the field is outside the parking margin, so live
-   * fields remain absent from the root field-state dependency graph.
-   */
+  /** Subscribe to field state only while its view is parked. */
   private readonly parkedDomState = computed<ParkedDomState | null>(
-    () => {
-      if (!this.parked()) return null;
-      const state = this.fieldTree()?.();
-      if (!state) return null;
-      return {
-        disabled: state.disabled?.() ?? false,
-        readonly: state.readonly?.() ?? false,
-        required: state.required?.() ?? false,
-        touched: state.touched?.() ?? false,
-        dirty: state.dirty?.() ?? false,
-        errors: state.errors?.() ?? EMPTY_ERRORS,
-      };
-    },
+    () => (this.parked() ? snapshotParkedDomState(this.fieldTree()) : null),
     { equal: isSameParkedDomState },
   );
 
@@ -189,17 +150,12 @@ export class DfFieldOutlet {
       },
     });
 
-    // Push rawInputs (plus the wrapper-style fieldInputs bag) to the innermost
-    // field on every change. The slot dedupes per-key, so the initial render's
-    // synchronous push from `renderInnermost` and the effect's first fire
-    // converge cleanly with no double-pushing.
+    // The slot deduplicates the initial render and this reactive push.
     explicitEffect([this.rawInputs, this.fieldInputs], ([rawInputs, fieldInputs]) =>
       this.fieldComponent.pushInputs(rawInputs, fieldInputs),
     );
 
-    // A hidden container intentionally has no component instance to announce readiness.
-    // Emit the same identity on its behalf so ancestor initialization trackers do not wait
-    // forever for a subtree that is deliberately absent from the DOM.
+    // Hidden containers still need to release ancestor initialization trackers.
     explicitEffect([this.hidden], ([hidden]) => {
       if (!hidden || !this.eventBus) return;
       const resolved = this.dfFieldOutlet();
@@ -209,18 +165,10 @@ export class DfFieldOutlet {
       }
     });
 
-    // Track the mounted element's visibility. Re-runs when the slot swaps refs
-    // (component-class change), moving the observation to the new element.
+    // Focus changes can make an otherwise offscreen field safe to park.
     explicitEffect([this.observedElement, this.parking], ([element, parking], onCleanup) => {
-      const observer = this.viewportObserver;
-      if (!parking.enabled || !element || !observer) {
-        this.visibility.set(ALWAYS_IN_VIEW);
-        return;
-      }
-      this.visibility.set(observer.observe(element, parking.margin));
-      // A template update can synchronously move focus, for example when
-      // reactive logic disables the active input. Defer the signal write until
-      // that render pass has finished to avoid Angular's NG0600 render guard.
+      if (!parking.enabled || !element) return;
+      // Reactive disabling can move focus during render; defer past NG0600.
       const bumpEpoch = () =>
         queueMicrotask(() => {
           if (!this.destroyRef.destroyed) this.focusEpoch.update((n) => n + 1);
@@ -230,13 +178,10 @@ export class DfFieldOutlet {
       onCleanup(() => {
         element.removeEventListener('focusin', bumpEpoch);
         element.removeEventListener('focusout', bumpEpoch);
-        observer.unobserve(element);
       });
     });
 
-    // Apply the parking decision. Safety state is tracked only while the field
-    // is outside the margin. A parked view receives one local refresh when that
-    // narrow state changes, without rejoining application change detection.
+    // Refresh safety state without returning a parked view to application CD.
     explicitEffect([this.parked, this.focusEpoch, this.parkedDomState], ([parked, , domState]) => {
       if (parked && this.canPark(domState)) {
         const alreadyParked = this.fieldComponent.parked();
@@ -250,55 +195,11 @@ export class DfFieldOutlet {
     this.destroyRef.onDestroy(() => this.fieldComponent.destroyOnTeardown());
   }
 
-  /**
-   * Whether it is safe to freeze this field right now. Focus is excluded
-   * because parking a focused field strands the caret and breaks IME
-   * composition mid-word; a field showing an error is excluded because the
-   * message is already rendered and would go stale where an error summary can
-   * still link to it.
-   */
+  /** Focused and invalid fields must keep their DOM live. */
   private canPark(domState: ParkedDomState | null): boolean {
     const element = this.observedElement();
     if (!element) return false;
-    // SSR never reaches this DOM read: FieldViewportObserver reports every
-    // field as visible off-browser, so the parking effect short-circuits first.
     if (element.contains(document.activeElement)) return false;
     return (domState?.errors.length ?? 0) === 0;
   }
-}
-
-const EMPTY_ERRORS: readonly unknown[] = Object.freeze([]);
-
-interface ParkedFieldState {
-  readonly disabled?: Signal<boolean>;
-  readonly readonly?: Signal<boolean>;
-  readonly required?: Signal<boolean>;
-  readonly touched?: Signal<boolean>;
-  readonly dirty?: Signal<boolean>;
-  readonly errors?: Signal<readonly unknown[]>;
-}
-
-type ParkableFieldTree = () => ParkedFieldState;
-
-interface ParkedDomState {
-  readonly disabled: boolean;
-  readonly readonly: boolean;
-  readonly required: boolean;
-  readonly touched: boolean;
-  readonly dirty: boolean;
-  readonly errors: readonly unknown[];
-}
-
-function isSameParkedDomState(a: ParkedDomState | null, b: ParkedDomState | null): boolean {
-  return (
-    a === b ||
-    (a !== null &&
-      b !== null &&
-      a.disabled === b.disabled &&
-      a.readonly === b.readonly &&
-      a.required === b.required &&
-      a.touched === b.touched &&
-      a.dirty === b.dirty &&
-      a.errors === b.errors)
-  );
 }
