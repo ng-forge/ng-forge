@@ -21,6 +21,7 @@ import { FormStateManager } from './state/form-state-manager';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { arrayEvent } from './events/array-event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
+import { COMPONENT_CACHE } from './utils/inject-field-registry/inject-field-registry';
 
 // Test specific form config type
 type TestFormConfig = {
@@ -4056,24 +4057,11 @@ describe('DynamicFormComponent', () => {
         ],
       };
 
-      // First mount: cold COMPONENT_CACHE → async resolveField path. By the time
-      // mapFieldToInputs runs, the orchestrator's effect has already registered
-      // 'dest', so the mapper wraps in computed and the override applies.
-      const first = createComponent(configWithDerivation, { src: 'FROM_FIRST', dest: '' });
-      await waitForDynamicComponents(first.fixture);
+      // Prime the cache directly to reproduce a form remount without spending
+      // this regression test's timeout budget on an unrelated cold dynamic import.
+      TestBed.inject(COMPONENT_CACHE).set('input', TestInputHarnessComponent);
 
-      const firstHarnesses = first.fixture.debugElement.queryAll(
-        (by: DebugElement) => by.componentInstance instanceof TestInputHarnessComponent,
-      );
-      const firstDest = firstHarnesses.find((h) => h.componentInstance.key() === 'dest');
-      expect(firstDest, 'dest harness should render on first mount').toBeDefined();
-      expect(firstDest!.componentInstance.label()).toBe('FROM_FIRST');
-
-      // Tear down — mimics navigation away from the form route.
-      first.fixture.destroy();
-
-      // Second mount: COMPONENT_CACHE is warm (root-scoped, survives component
-      // destruction), so FormStateManager takes resolveFieldSync. Mapper runs in
+      // With COMPONENT_CACHE warm, FormStateManager takes resolveFieldSync. Mapper runs in
       // the same task as the orchestrator's construction, before its effect has
       // fired. The fix decouples the mapper's hasOverrides check from store
       // registration timing by inspecting the FieldDef directly.
