@@ -6,7 +6,7 @@ description: "Render icons, buttons, or text inside a field's prefix and suffix 
 
 Addons decorate a field with inline content (a search icon, a clear button, a currency symbol, a password-visibility toggle) placed in the field's `prefix` or `suffix` slot. They're typed, JSON-safe, and ship as a first-class feature of every UI adapter.
 
-> **Prerequisites.** Addons attach to a field, not the form. You need a working ng-forge setup first: `provideDynamicForm(...with{Adapter}Fields())` at the application config and a `[dynamic-form]`-bearing form using a field type that supports addons (today: every adapter's `input`). See [Getting Started](/getting-started) if you're new to ng-forge.
+> **Prerequisites.** Addons attach to a field, not the form. You need a working ng-forge setup first: `provideDynamicForm(...with{Adapter}Fields())` at the application config and a `[dynamic-form]`-bearing form using a field type that supports addons (today: every adapter's `input`, plus Material's `select`, `textarea`, and `datepicker`). See [Getting Started](/getting-started) if you're new to ng-forge.
 
 ## Quickstart
 

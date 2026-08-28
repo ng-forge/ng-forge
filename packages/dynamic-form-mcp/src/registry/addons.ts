@@ -268,7 +268,8 @@ export const ADDON_TYPES: AddonTypeInfo[] = [
       preset: {
         name: 'preset',
         type: "'clear' | 'reset' | 'paste' | 'copy' | 'toggle-password-visibility' | string",
-        description: 'Built-in preset action. Mutually exclusive with `actionRef` and `action`.',
+        description:
+          'Built-in preset action for Material input fields. Other Material addon-capable fields should use `actionRef` or `action`. Mutually exclusive with `actionRef` and `action`.',
         required: false,
       },
       actionRef: {

@@ -1,13 +1,6 @@
-import { Injector, signal } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { type AddonTypeDefinition, DynamicFormLogger } from '@ng-forge/dynamic-forms';
-import {
-  ADDON_ACTION_REGISTRY,
-  ADDON_TYPE_COMPONENT_CACHE,
-  ADDON_TYPE_REGISTRY,
-  FIELD_SIGNAL_CONTEXT,
-  type FieldSignalContext,
-} from '@ng-forge/dynamic-forms/integration';
+import { ADDON_ACTION_REGISTRY, ADDON_TYPE_COMPONENT_CACHE, ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import type { Type } from '@angular/core';
 import { createNgForgeFieldFixture, provideTestValidationMessages } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
@@ -33,15 +26,6 @@ function makeTypeRegistry(): ReadonlyMap<string, AddonTypeDefinition> {
   ]);
 }
 
-function stubFieldSignalContext(): FieldSignalContext {
-  return {
-    injector: undefined as unknown as Injector,
-    value: signal<Record<string, unknown> | undefined>({}),
-    defaultValues: () => ({}),
-    form: {} as FieldSignalContext['form'],
-  };
-}
-
 function createFixture(addons: ReadonlyArray<AnyAddon>) {
   return createNgForgeFieldFixture<MatTextareaFieldComponent, string>(MatTextareaFieldComponent, {
     key: 'field-1',
@@ -52,7 +36,6 @@ function createFixture(addons: ReadonlyArray<AnyAddon>) {
       { provide: ADDON_TYPE_REGISTRY, useValue: makeTypeRegistry() },
       { provide: ADDON_TYPE_COMPONENT_CACHE, useFactory: () => new Map<string, Type<unknown>>() },
       { provide: ADDON_ACTION_REGISTRY, useValue: new Map() },
-      { provide: FIELD_SIGNAL_CONTEXT, useFactory: stubFieldSignalContext },
       { provide: DynamicFormLogger, useValue: { warn: vi.fn(), error: vi.fn(), info: vi.fn(), debug: vi.fn() } },
       provideTestValidationMessages({}),
     ],
@@ -77,7 +60,6 @@ describe('MatTextareaFieldComponent — addon rendering', () => {
       slot: 'suffix',
       icon: 'close',
       ariaLabel: 'Clear',
-      preset: 'clear',
     };
     const { fixture } = createFixture([suffix]);
     fixture.detectChanges();
@@ -91,7 +73,7 @@ describe('MatTextareaFieldComponent — addon rendering', () => {
   it('renders both prefix and suffix slots when both addons are supplied', async () => {
     const addons: AnyAddon[] = [
       { type: 'mat-icon', slot: 'prefix', icon: 'search', ariaLabel: 'Search' },
-      { type: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear', preset: 'clear' },
+      { type: 'mat-button', slot: 'suffix', icon: 'close', ariaLabel: 'Clear' },
     ];
     const { fixture } = createFixture(addons);
     fixture.detectChanges();

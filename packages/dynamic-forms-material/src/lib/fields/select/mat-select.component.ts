@@ -56,6 +56,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
           [addon]="a"
           [fieldInputs]="fieldInputs()"
           [hidden]="ngfa.hiddenSignalCache().get(a)"
+          (click)="$event.stopPropagation()"
         />
       }
       <mat-select
@@ -79,6 +80,7 @@ import { MATERIAL_CONFIG } from '../../models/material-config.token';
           [addon]="a"
           [fieldInputs]="fieldInputs()"
           [hidden]="ngfa.hiddenSignalCache().get(a)"
+          (click)="$event.stopPropagation()"
         />
       }
 
