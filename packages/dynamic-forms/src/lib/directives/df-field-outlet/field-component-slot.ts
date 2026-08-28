@@ -178,9 +178,16 @@ export class FieldComponentSlot {
    */
   park(): void {
     const current = this.state();
-    if (current.phase === 'empty') return;
+    if (current.phase === 'empty' || this._parked()) return;
     current.ref.changeDetectorRef.detach();
     this._parked.set(true);
+  }
+
+  /** Refresh a parked view once without returning it to the application CD tree. */
+  refresh(): void {
+    const current = this.state();
+    if (current.phase === 'empty' || !this._parked()) return;
+    current.ref.changeDetectorRef.detectChanges();
   }
 
   /**
@@ -190,7 +197,7 @@ export class FieldComponentSlot {
    */
   unpark(): void {
     const current = this.state();
-    if (current.phase === 'empty') return;
+    if (current.phase === 'empty' || !this._parked()) return;
     current.ref.changeDetectorRef.reattach();
     current.ref.changeDetectorRef.markForCheck();
     this._parked.set(false);

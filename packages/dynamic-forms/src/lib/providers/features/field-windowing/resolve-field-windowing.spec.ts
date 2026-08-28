@@ -63,6 +63,10 @@ describe('resolveFieldWindowing', () => {
     expect(resolveFieldWindowing(disabledGlobal, { eager: 3, park: false }).enabled).toBe(true);
     expect(resolveFieldWindowing(disabledGlobal, { placeholderHeight: '2rem' }).enabled).toBe(true);
   });
+
+  it('treats an explicit undefined eager key as a mounting override', () => {
+    expect(resolveFieldWindowing(disabledGlobal, { eager: undefined }).enabled).toBe(true);
+  });
 });
 
 describe('resolveFieldParking', () => {

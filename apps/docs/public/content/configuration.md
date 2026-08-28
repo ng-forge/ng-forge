@@ -21,6 +21,39 @@ ng-forge applies props in priority order: more specific always wins.
 
 ---
 
+## Large-form rendering
+
+Paged and flat forms use separate rendering controls.
+
+For a paged form, `options.pagePreloadWindow` controls how many neighbouring pages are mounted and preloaded. The default is `1`. Set it to `0` when only the active page should load, or increase it when fast jump navigation matters more than initial work.
+
+For a large flat form, `options.fieldWindowing` can defer leaf fields until they approach the viewport:
+
+```typescript
+const config = {
+  options: {
+    fieldWindowing: {
+      eager: 20,
+      placeholderHeight: '4rem',
+      park: { margin: '100%' },
+    },
+  },
+  fields: [
+    // Flat field definitions
+  ],
+} as const satisfies FormConfig;
+```
+
+- `eager` mounts the leading leaf fields immediately.
+- `placeholderHeight` reserves layout space before a deferred field mounts.
+- `park` leaves mounted offscreen DOM in place while removing its view from routine change detection. Disabled, readonly, required, and validation state stays current. Other model-to-DOM updates catch up when the field returns.
+- `fieldWindowing: false` disables inherited deferred mounting for this form.
+- A park-only object changes parking without changing the inherited mounting mode. Use `{ park: false }` to opt out or `{ park: true }` to opt in.
+
+Use `withFieldWindowing()` at provider level when the same defaults should apply to every form. Per-form options take precedence.
+
+---
+
 ## Field-level Props
 
 Each field type also accepts its own adapter-specific `props`. See [Field Types](/field-types/text-inputs) for the full per-field reference.

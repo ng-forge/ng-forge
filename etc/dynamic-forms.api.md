@@ -582,6 +582,11 @@ export interface FieldOption<T = unknown> {
 }
 
 // @public
+export type FieldParkingOption = boolean | {
+    margin?: string;
+};
+
+// @public
 export type FieldPathAccess<TValue> = {
     [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };

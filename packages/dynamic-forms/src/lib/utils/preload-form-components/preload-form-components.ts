@@ -1,9 +1,18 @@
 import { inject, Type } from '@angular/core';
-import { DEFAULT_WRAPPERS, FieldDef, FormConfig, WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY } from '@ng-forge/dynamic-forms/internal';
+import {
+  DEFAULT_WRAPPERS,
+  FieldDef,
+  FormConfig,
+  isPageField,
+  WRAPPER_AUTO_ASSOCIATIONS,
+  WRAPPER_REGISTRY,
+} from '@ng-forge/dynamic-forms/internal';
 import { WRAPPER_COMPONENT_CACHE } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../inject-field-registry/inject-field-registry';
 import { loadWrapperComponent } from '../wrapper-chain/wrapper-chain';
 import { resolveWrappers } from '../resolve-wrappers/resolve-wrappers';
+import { normalizeSimplifiedArrays } from '../array-field/normalize-simplified-arrays';
+import { getNormalizedArrayMetadata } from '../array-field/normalized-array-metadata';
 
 /**
  * Collects every field type named anywhere in a config, including inside
@@ -21,8 +30,21 @@ function collectFieldDefs(fields: readonly FieldDef<unknown>[] | undefined, out:
         else collectFieldDefs([child as FieldDef<unknown>], out);
       }
     }
+
+    const metadata = getNormalizedArrayMetadata(field);
+    const template = metadata?.template;
+    if (Array.isArray(template)) collectFieldDefs(template as readonly FieldDef<unknown>[], out);
+    else if (template) collectFieldDefs([template as FieldDef<unknown>], out);
+    if (metadata?.autoRemoveButton) collectFieldDefs([metadata.autoRemoveButton], out);
   }
   return out;
+}
+
+export interface FormComponentPreloader {
+  /** Preload a complete non-paged form config. Paged configs are orchestrator-owned. */
+  readonly preloadConfig: (config: FormConfig) => void;
+  /** Preload the exact field subtree selected for rendering. */
+  readonly preloadFields: (fields: readonly FieldDef<unknown>[]) => void;
 }
 
 /**
@@ -35,8 +57,8 @@ function collectFieldDefs(fields: readonly FieldDef<unknown>[] | undefined, out:
  * waterfall put the last wrapper chunk 30ms before first paint on localhost,
  * where a round trip costs ~1ms — on a real network each wave costs a full RTT.
  *
- * Nothing extra is fetched: this is exactly the set that would load anyway, only
- * sooner and at the same time. Both loaders dedupe (field loads through
+ * Only the current render scope is fetched: a flat form, or the active page
+ * window selected by PageOrchestrator. Both loaders dedupe (field loads through
  * `COMPONENT_LOAD_CACHE`, wrapper loads through the module system's own
  * `import()` dedup), so racing the normal resolution path is safe.
  *
@@ -48,15 +70,17 @@ function collectFieldDefs(fields: readonly FieldDef<unknown>[] | undefined, out:
  * step — every one of these types is loaded again through the normal path,
  * which owns the real error reporting.
  */
-export function injectFormComponentPreloader(): (config: FormConfig) => void {
+export function injectFormComponentPreloader(): FormComponentPreloader {
   const fieldRegistry = injectFieldRegistry();
   const wrapperRegistry = inject(WRAPPER_REGISTRY);
   const wrapperCache = inject(WRAPPER_COMPONENT_CACHE);
   const autoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   const defaultWrappers = inject(DEFAULT_WRAPPERS, { optional: true });
+  const preloadedConfigs = new WeakSet<FormConfig>();
 
-  return (config: FormConfig): void => {
-    const defs = collectFieldDefs(config.fields as readonly FieldDef<unknown>[]);
+  const preloadFields = (fields: readonly FieldDef<unknown>[]): void => {
+    const normalizedFields = normalizeSimplifiedArrays([...fields]);
+    const defs = collectFieldDefs(normalizedFields);
     if (defs.length === 0) return;
 
     const fieldTypes = new Set<string>();
@@ -83,5 +107,20 @@ export function injectFormComponentPreloader(): (config: FormConfig) => void {
     }
     // Deliberately not awaited: rendering must not be gated on the head start.
     void Promise.allSettled(started);
+  };
+
+  return {
+    preloadConfig: (config: FormConfig): void => {
+      if (preloadedConfigs.has(config)) return;
+      preloadedConfigs.add(config);
+
+      const fields = config.fields as readonly FieldDef<unknown>[];
+      // PageOrchestrator owns paged rendering and calls preloadFields for the
+      // active page plus its configured neighbours. Walking the raw config here
+      // would eagerly fetch chunks for every distant page.
+      if (fields.length > 0 && fields.every(isPageField)) return;
+      preloadFields(fields);
+    },
+    preloadFields,
   };
 }

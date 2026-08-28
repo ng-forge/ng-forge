@@ -31,7 +31,7 @@ export function resolveFieldWindowing(global: FieldWindowingConfig, perForm: Fie
     return { ...global, enabled: perForm };
   }
 
-  const configuresMounting = perForm.eager !== undefined || perForm.placeholderHeight !== undefined || Object.keys(perForm).length === 0;
+  const configuresMounting = 'eager' in perForm || 'placeholderHeight' in perForm || Object.keys(perForm).length === 0;
 
   return {
     enabled: configuresMounting ? true : global.enabled,

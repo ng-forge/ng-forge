@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   FIELD_REGISTRY,
+  FieldDef,
   FieldTypeDefinition,
   FormConfig,
   WRAPPER_COMPONENT_CACHE,
@@ -18,19 +19,30 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 describe('injectFormComponentPreloader', () => {
   let loadInput: ReturnType<typeof vi.fn>;
+  let loadTextarea: ReturnType<typeof vi.fn>;
+  let loadAdd: ReturnType<typeof vi.fn>;
+  let loadRemove: ReturnType<typeof vi.fn>;
   let loadWrapper: ReturnType<typeof vi.fn>;
 
   const preloaderFor = (config: FormConfig) => {
     const injector = TestBed.inject(Injector);
     const preload = runInInjectionContext(injector, () => injectFormComponentPreloader());
-    preload(config);
+    preload.preloadConfig(config);
   };
 
   beforeEach(() => {
     loadInput = vi.fn().mockResolvedValue({ default: StubComponent });
+    loadTextarea = vi.fn().mockResolvedValue({ default: StubComponent });
+    loadAdd = vi.fn().mockResolvedValue({ default: StubComponent });
+    loadRemove = vi.fn().mockResolvedValue({ default: StubComponent });
     loadWrapper = vi.fn().mockResolvedValue({ default: StubComponent });
 
-    const fields = new Map<string, FieldTypeDefinition>([['input', { name: 'input', loadComponent: loadInput } as FieldTypeDefinition]]);
+    const fields = new Map<string, FieldTypeDefinition>([
+      ['input', { name: 'input', loadComponent: loadInput } as FieldTypeDefinition],
+      ['textarea', { name: 'textarea', loadComponent: loadTextarea } as FieldTypeDefinition],
+      ['add-array-item', { name: 'add-array-item', loadComponent: loadAdd } as FieldTypeDefinition],
+      ['remove-array-item', { name: 'remove-array-item', loadComponent: loadRemove } as FieldTypeDefinition],
+    ]);
     const wrappers = new Map([['css', { name: 'css', loadComponent: loadWrapper }]]);
 
     TestBed.configureTestingModule({
@@ -66,6 +78,23 @@ describe('injectFormComponentPreloader', () => {
     expect(loadInput).toHaveBeenCalledTimes(1);
   });
 
+  it('does not walk the same config more than once', () => {
+    const injector = TestBed.inject(Injector);
+    const preload = runInInjectionContext(injector, () => injectFormComponentPreloader());
+    const fields = [{ key: 'a', type: 'input' }];
+    const readFields = vi.fn(() => fields);
+    const config = {
+      get fields() {
+        return readFields();
+      },
+    } as unknown as FormConfig;
+
+    preload.preloadConfig(config);
+    preload.preloadConfig(config);
+
+    expect(readFields).toHaveBeenCalledTimes(1);
+  });
+
   it('reaches field types nested inside containers', async () => {
     preloaderFor({ fields: [{ key: 'g', type: 'group', fields: [{ key: 'a', type: 'input' }] }] } as unknown as FormConfig);
     await flush();
@@ -80,6 +109,41 @@ describe('injectFormComponentPreloader', () => {
     await flush();
 
     expect(loadInput).toHaveBeenCalled();
+  });
+
+  it('leaves paged configs to the page orchestrator', async () => {
+    preloaderFor({
+      fields: [
+        { key: 'first', type: 'page', fields: [{ key: 'a', type: 'input' }] },
+        { key: 'later', type: 'page', fields: [{ key: 'b', type: 'textarea' }] },
+      ],
+      options: { pagePreloadWindow: 0 },
+    } as unknown as FormConfig);
+    await flush();
+
+    expect(loadInput).not.toHaveBeenCalled();
+    expect(loadTextarea).not.toHaveBeenCalled();
+  });
+
+  it('preloads only the page fields selected by the orchestrator', async () => {
+    const injector = TestBed.inject(Injector);
+    const preload = runInInjectionContext(injector, () => injectFormComponentPreloader());
+    preload.preloadFields([{ key: 'first', type: 'page', fields: [{ key: 'a', type: 'input' }] } as unknown as FieldDef<unknown>]);
+    await flush();
+
+    expect(loadInput).toHaveBeenCalledTimes(1);
+    expect(loadTextarea).not.toHaveBeenCalled();
+  });
+
+  it('preloads a simplified array template and its generated actions', async () => {
+    preloaderFor({
+      fields: [{ key: 'tags', type: 'array', template: { key: 'tag', type: 'input' }, value: ['one'] }],
+    } as unknown as FormConfig);
+    await flush();
+
+    expect(loadInput).toHaveBeenCalledTimes(1);
+    expect(loadAdd).toHaveBeenCalledTimes(1);
+    expect(loadRemove).toHaveBeenCalledTimes(1);
   });
 
   it('skips a type that is already cached', async () => {

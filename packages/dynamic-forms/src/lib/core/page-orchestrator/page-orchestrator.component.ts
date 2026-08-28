@@ -22,6 +22,7 @@ import { PAGE_PRELOAD_WINDOW } from '../../providers/features/page-preload/page-
 import { clampWindowSize } from '../../providers/features/clamp-window';
 import { collectLeafFieldKeys } from '../../utils/page-utils/collect-leaf-field-keys';
 import { FormStateManager } from '../../state/form-state-manager';
+import { injectFormComponentPreloader } from '../../utils/preload-form-components/preload-form-components';
 
 /**
  * PageOrchestrator manages page navigation and visibility for paged forms.
@@ -302,6 +303,14 @@ export class PageOrchestratorComponent {
   constructor() {
     // Setup event listeners for navigation
     this.setupEventListeners();
+
+    // Warm only the pages that can currently render. When navigation moves the
+    // window this effect preloads the newly selected subtree before its deferred
+    // page component discovers those chunks field by field.
+    const preloader = injectFormComponentPreloader();
+    explicitEffect([this.pageRenderStates], ([states]) => {
+      preloader.preloadFields(states.filter((page) => !page.hidden && (page.active || page.preload)).map((page) => page.field));
+    });
 
     // A config swap exposes its page definitions before their schema is current. Defer a gated
     // landing until those fields can be validated, then resolve it exactly once for this page set.

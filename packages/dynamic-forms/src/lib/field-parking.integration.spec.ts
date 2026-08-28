@@ -132,6 +132,11 @@ describe('Field parking', () => {
     expect(second.value).toBe('from model');
   });
 
+  it('does not observe fields when parking is disabled', async () => {
+    await createHost(flatConfig(4));
+    expect(observer.states.size).toBe(0);
+  });
+
   it('observes every rendered field', async () => {
     const fixture = await createHost(flatConfig(4, { fieldWindowing: { park: true } }));
     expect(observer.states.size).toBe(4);
@@ -169,6 +174,36 @@ describe('Field parking', () => {
     expect(second.value).toBe('from model');
   });
 
+  it('keeps safety-relevant DOM state current while a field is parked', async () => {
+    const fixture = await createHost({
+      fields: [
+        { key: 'f0', type: 'input', value: 'enabled' },
+        {
+          key: 'f1',
+          type: 'input',
+          value: 'v1',
+          logic: [
+            {
+              type: 'disabled',
+              condition: { type: 'fieldValue', fieldPath: 'f0', operator: 'equals', value: 'disabled' },
+            },
+          ],
+        },
+      ],
+      options: { fieldWindowing: { park: true } },
+    } as FormConfig);
+    const [first, second] = inputs(fixture);
+    expect(second.disabled).toBe(false);
+
+    observer.setVisibleFor(second, false);
+    await settle(fixture);
+    fixture.componentInstance.value.set({ f0: 'disabled', f1: 'v1' });
+    await settle(fixture);
+
+    expect(first.value).toBe('disabled');
+    expect(second.disabled).toBe(true);
+  });
+
   it('still writes a parked field own edits through to the form value', async () => {
     const fixture = await createHost(flatConfig(2, { fieldWindowing: { park: true } }));
     const [, second] = inputs(fixture);
@@ -204,6 +239,33 @@ describe('Field parking', () => {
 
     expect(document.activeElement).toBe(second);
     expect(second.value).toBe('from model');
+  });
+
+  it('rechecks parking safely when reactive logic disables the focused field', async () => {
+    const fixture = await createHost({
+      fields: [
+        { key: 'f0', type: 'input', value: 'enabled' },
+        {
+          key: 'f1',
+          type: 'input',
+          value: 'v1',
+          logic: [
+            {
+              type: 'disabled',
+              condition: { type: 'fieldValue', fieldPath: 'f0', operator: 'equals', value: 'disabled' },
+            },
+          ],
+        },
+      ],
+      options: { fieldWindowing: { park: true } },
+    } as FormConfig);
+    const [, second] = inputs(fixture);
+    second.focus();
+
+    fixture.componentInstance.value.set({ f0: 'disabled', f1: 'v1' });
+    await expect(settle(fixture)).resolves.toBeUndefined();
+
+    expect(second.disabled).toBe(true);
   });
 
   it('leaves out-of-view fields live when the form turns parking off', async () => {

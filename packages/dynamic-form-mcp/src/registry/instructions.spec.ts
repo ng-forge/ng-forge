@@ -40,6 +40,12 @@ async function getSchemasResourceText(): Promise<string> {
 }
 
 describe('AI-facing tool-name references', () => {
+  it('documents field-windowing and page-preload options', () => {
+    expect(INSTRUCTIONS).toContain('options.fieldWindowing');
+    expect(INSTRUCTIONS).toContain('options.pagePreloadWindow');
+    expect(INSTRUCTIONS).toContain('park: { margin:');
+  });
+
   it('INSTRUCTIONS references only registered tools', () => {
     const names = extractToolNames(INSTRUCTIONS);
 

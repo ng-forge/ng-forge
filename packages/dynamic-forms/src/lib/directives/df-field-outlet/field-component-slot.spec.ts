@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -228,6 +228,30 @@ describe('FieldComponentSlot', () => {
 
       expect(slot.parked()).toBe(false);
       expect(renderedLabel()).toBe('two');
+    });
+
+    it('refresh() updates a parked view without reattaching it', () => {
+      const slot = mounted();
+      slot.park();
+      slot.pushInputs({ label: 'two' });
+
+      slot.refresh();
+
+      expect(slot.parked()).toBe(true);
+      expect(renderedLabel()).toBe('two');
+    });
+
+    it('unpark() is inert when the view is already live', () => {
+      const slot = mounted();
+      const snapshot = slot.snapshot();
+      if (snapshot.phase === 'empty') throw new Error('expected a mounted component');
+      const reattach = vi.spyOn(snapshot.ref.changeDetectorRef, 'reattach');
+      const markForCheck = vi.spyOn(snapshot.ref.changeDetectorRef, 'markForCheck');
+
+      slot.unpark();
+
+      expect(reattach).not.toHaveBeenCalled();
+      expect(markForCheck).not.toHaveBeenCalled();
     });
 
     it('park() is inert on an empty slot', () => {

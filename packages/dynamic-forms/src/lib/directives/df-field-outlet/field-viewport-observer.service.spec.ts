@@ -1,6 +1,6 @@
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FieldViewportObserver } from './field-viewport-observer.service';
 
 /**
@@ -11,6 +11,8 @@ import { FieldViewportObserver } from './field-viewport-observer.service';
  */
 describe('FieldViewportObserver', () => {
   const margin = '100px';
+
+  afterEach(() => vi.unstubAllGlobals());
 
   const makeElement = (): HTMLElement => {
     const el = document.createElement('div');
@@ -44,6 +46,38 @@ describe('FieldViewportObserver', () => {
       const first = observer.observe(el, margin);
       observer.unobserve(el);
       expect(observer.observe(el, margin)).not.toBe(first);
+    });
+
+    it('moves an existing element when its root margin changes', () => {
+      const instances: MockIntersectionObserver[] = [];
+
+      class MockIntersectionObserver implements IntersectionObserver {
+        readonly root = null;
+        readonly thresholds = [0];
+        readonly rootMargin: string;
+        readonly observe = vi.fn();
+        readonly unobserve = vi.fn();
+        readonly disconnect = vi.fn();
+        readonly takeRecords = vi.fn(() => [] as IntersectionObserverEntry[]);
+
+        constructor(_callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+          this.rootMargin = options?.rootMargin ?? '0px';
+          instances.push(this);
+        }
+      }
+
+      vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({ providers: [FieldViewportObserver] });
+      observer = TestBed.inject(FieldViewportObserver);
+      const el = makeElement();
+
+      const visibility = observer.observe(el, '100px');
+      expect(observer.observe(el, '200px')).toBe(visibility);
+
+      expect(instances.map((instance) => instance.rootMargin)).toEqual(['100px', '200px']);
+      expect(instances[0].unobserve).toHaveBeenCalledWith(el);
+      expect(instances[1].observe).toHaveBeenCalledWith(el);
     });
 
     it('unobserve is inert for an element that was never observed', () => {

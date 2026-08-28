@@ -386,7 +386,7 @@ export class DynamicForm<
     // component has loaded — a dependent waterfall that costs a round trip per
     // wave. Fire-and-forget: nothing here gates render.
     const preload = injectFormComponentPreloader();
-    explicitEffect([this.config], ([config]) => preload(config as FormConfig));
+    explicitEffect([this.config], ([config]) => preload.preloadConfig(config as FormConfig));
 
     this.setupEffects();
     this.setupEventHandlers();

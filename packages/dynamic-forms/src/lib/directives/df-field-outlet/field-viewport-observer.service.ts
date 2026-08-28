@@ -24,7 +24,7 @@ export class FieldViewportObserver {
 
   /** One observer per distinct `rootMargin`; each tracks many elements. */
   private readonly observers = new Map<string, IntersectionObserver>();
-  private readonly visibility = new WeakMap<Element, ReturnType<typeof signal<boolean>>>();
+  private readonly observations = new WeakMap<Element, { readonly state: ReturnType<typeof signal<boolean>>; margin: string }>();
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
@@ -42,11 +42,18 @@ export class FieldViewportObserver {
   observe(el: Element, rootMargin: string): Signal<boolean> {
     if (!this.isBrowser) return ALWAYS_VISIBLE;
 
-    const existing = this.visibility.get(el);
-    if (existing) return existing.asReadonly();
+    const existing = this.observations.get(el);
+    if (existing) {
+      if (existing.margin !== rootMargin) {
+        this.observerFor(existing.margin).unobserve(el);
+        existing.margin = rootMargin;
+        this.observerFor(rootMargin).observe(el);
+      }
+      return existing.state.asReadonly();
+    }
 
     const state = signal(true);
-    this.visibility.set(el, state);
+    this.observations.set(el, { state, margin: rootMargin });
     this.observerFor(rootMargin).observe(el);
     return state.asReadonly();
   }
@@ -54,8 +61,10 @@ export class FieldViewportObserver {
   /** Stop tracking `el`. Safe to call for an element that was never observed. */
   unobserve(el: Element): void {
     if (!this.isBrowser) return;
-    this.visibility.delete(el);
-    for (const observer of this.observers.values()) observer.unobserve(el);
+    const observation = this.observations.get(el);
+    if (!observation) return;
+    this.observations.delete(el);
+    this.observers.get(observation.margin)?.unobserve(el);
   }
 
   private observerFor(rootMargin: string): IntersectionObserver {
@@ -65,7 +74,7 @@ export class FieldViewportObserver {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          this.visibility.get(entry.target)?.set(entry.isIntersecting);
+          this.observations.get(entry.target)?.state.set(entry.isIntersecting);
         }
       },
       { rootMargin },
