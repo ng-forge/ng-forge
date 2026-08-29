@@ -20,7 +20,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'email',
   type: 'input',
@@ -55,7 +55,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'description',
   type: 'textarea',
@@ -89,7 +89,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'country',
   type: 'select',
@@ -111,7 +111,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'acceptTerms',
   type: 'checkbox',
@@ -136,7 +136,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'interests',
   type: 'multi-checkbox',
@@ -166,7 +166,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'gender',
   type: 'radio',
@@ -201,7 +201,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'birthDate',
   type: 'datepicker',
@@ -220,7 +220,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'notifications',
   type: 'toggle',
@@ -259,7 +259,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'volume',
   type: 'slider',
@@ -281,7 +281,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields'],
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'container'],
     notAllowedIn: ['row', 'top-level when using pages'],
     example: `// Hidden field - value is REQUIRED!
 {
@@ -318,7 +318,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'sectionTitle',
   type: 'text',
@@ -428,11 +428,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'array', 'container'],
     notAllowedIn: ['group'],
     canContain: [
       'row',
       'array',
+      'container',
       'input',
       'textarea',
       'select',
@@ -531,11 +532,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'group'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'container'],
     notAllowedIn: ['array'],
     canContain: [
       'row',
       'group',
+      'container',
       'input',
       'textarea',
       'select',
@@ -681,11 +683,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     validationSupported: false,
     source: 'core',
     allowedIn: ['top-level'],
-    notAllowedIn: ['page', 'row', 'group', 'array'],
+    notAllowedIn: ['page', 'row', 'group', 'array', 'container'],
     canContain: [
       'row',
       'group',
       'array',
+      'container',
       'input',
       'textarea',
       'select',
@@ -725,7 +728,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'next',
   type: 'next',
@@ -742,7 +745,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'back',
   type: 'previous',
@@ -768,7 +771,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `// RECOMMENDED: Use pre-defined button types for common actions
 { key: 'submit', type: 'submit', label: 'Submit Form' }
 { key: 'next', type: 'next', label: 'Next' }
@@ -795,7 +798,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'submit',
   type: 'submit',

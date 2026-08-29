@@ -494,6 +494,37 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
     forbidden: ['page', 'array'],
     message: 'Arrays cannot contain pages or other arrays (no nested arrays).',
   },
+  container: {
+    allowed: [
+      'row',
+      'group',
+      'array',
+      'container',
+      'input',
+      'textarea',
+      'select',
+      'checkbox',
+      'multi-checkbox',
+      'radio',
+      'datepicker',
+      'toggle',
+      'slider',
+      'hidden',
+      'text',
+      'button',
+      'submit',
+      'next',
+      'previous',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
+    ],
+    forbidden: ['page'],
+    message: 'Containers cannot contain pages. Pages are top-level fields only.',
+  },
 };
 
 /**
@@ -659,6 +690,14 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           errors.push({
             path: `${path}.${prop}`,
             message: `"page" containers do NOT support "${prop}". Pages are purely for multi-step form layout.`,
+          });
+        }
+      }
+      for (const prop of [...CONTAINER_VALIDATION_PROPS, ...ARRAY_SIZE_PROPS]) {
+        if (prop in f) {
+          errors.push({
+            path: `${path}.${prop}`,
+            message: `"page" containers do NOT support "${prop}". Pages flatten into the form and have no schema path of their own.`,
           });
         }
       }

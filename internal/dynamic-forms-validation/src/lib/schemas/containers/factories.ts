@@ -1,6 +1,8 @@
 import { z, ZodTypeAny } from 'zod';
 import { BaseFieldDefSchema } from '../field/field-def.schema';
 import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
+import { ValidatorsArraySchema } from '../validation/validator-config.schema';
+import { ValidationMessagesSchema } from '../validation/validation-messages.schema';
 
 /**
  * Options for creating container schemas.
@@ -83,6 +85,12 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     meta: z.never().optional(),
   });
 
+  const ContainerValidationShape = {
+    required: z.boolean().optional(),
+    validators: ValidatorsArraySchema.optional(),
+    validationMessages: ValidationMessagesSchema.optional(),
+  };
+
   /**
    * Wrapper reference. Wrapper types are extensible through registry
    * augmentation, so the set cannot be enumerated here; accept any `type` with
@@ -134,6 +142,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const GroupFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('group'),
     fields: z.array(AnyFieldSchema),
+    ...ContainerValidationShape,
     // Container logic - only 'hidden' type allowed (same as pages)
     logic: z.array(ContainerLogicSchema).optional(),
   });
@@ -148,6 +157,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const FullArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
+    ...ContainerValidationShape,
     logic: z.array(ContainerLogicSchema).optional(),
     // Full API does not use template
     template: z.never().optional(),
@@ -167,6 +177,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   // Simplified Array API: uses `template` + `value` with auto-generated buttons
   const SimplifiedArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
+    ...ContainerValidationShape,
     // Template: single field (primitive array) or array of fields (object array)
     // Only ArrayAllowedChildren (leaf fields, rows, groups) are valid — no pages or nested arrays.
     template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]),

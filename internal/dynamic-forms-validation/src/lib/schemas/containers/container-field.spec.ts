@@ -95,6 +95,21 @@ describe('container inherits the container base rules', () => {
 
     expect(messagesFor(config).valid).toBe(true);
   });
+
+  it('rejects a page nested inside a container', () => {
+    const config = {
+      fields: [
+        {
+          key: 'chrome',
+          type: 'container',
+          wrappers: [],
+          fields: [{ key: 'nested-page', type: 'page', fields: [] }],
+        },
+      ],
+    };
+
+    expect(messagesFor(config).valid).toBe(false);
+  });
 });
 
 describe('accepting container did not loosen anything else', () => {
