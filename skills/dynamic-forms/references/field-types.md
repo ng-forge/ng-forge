@@ -511,7 +511,7 @@ Form submit button
 
 Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -526,7 +526,7 @@ Button to append a new item to the end of an array field. Must be placed within 
 
 Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -541,7 +541,7 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 
 Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -557,7 +557,7 @@ Button to insert a new item at a specific index in an array field (set via the i
 
 Button to remove the current item from an array field. Typically placed within each array item template. (Legacy alias: removeArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -572,7 +572,7 @@ Button to remove the current item from an array field. Typically placed within e
 
 Button to remove the last item from an array field. (Legacy alias: popArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -588,7 +588,7 @@ Button to remove the last item from an array field. (Legacy alias: popArrayItem.
 
 Button to remove the first item from an array field. (Legacy alias: shiftArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript

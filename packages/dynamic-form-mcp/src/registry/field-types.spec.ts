@@ -10,6 +10,23 @@ function field(type: string) {
 }
 
 describe('container placement metadata', () => {
+  it('includes array action fields supported by ContainerAllowedChildren', () => {
+    const container = field('container');
+    const arrayActions = [
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
+    ];
+
+    for (const actionType of arrayActions) {
+      expect(container.canContain, `container.canContain must include ${actionType}`).toContain(actionType);
+      expect(field(actionType).allowedIn, `${actionType}.allowedIn must include container`).toContain('container');
+    }
+  });
+
   it('agrees with every child entry about placement inside a container', () => {
     const container = field('container');
 

@@ -646,6 +646,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'submit',
       'next',
       'previous',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     cannotContain: ['page'],
     example: `{
@@ -816,7 +822,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'addContact',
   type: 'add-array-item',
@@ -833,7 +839,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'prependContact',
   type: 'prepend-array-item',
@@ -851,7 +857,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'insertContact',
   type: 'insert-array-item',
@@ -870,7 +876,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'removeContact',
   type: 'remove-array-item',
@@ -887,7 +893,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'popContact',
   type: 'pop-array-item',
@@ -905,7 +911,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'shiftContact',
   type: 'shift-array-item',
