@@ -14,7 +14,14 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { FieldWrapper, WrapperConfig, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { hasDefaultExport, loadWrapperComponents, renderWrapperChain, resolveDefaultExport, setInputIfDeclared } from './wrapper-chain';
+import {
+  hasDefaultExport,
+  loadWrapperComponent,
+  loadWrapperComponents,
+  renderWrapperChain,
+  resolveDefaultExport,
+  setInputIfDeclared,
+} from './wrapper-chain';
 
 /** No-op logger for tests that don't assert on log output. */
 function silentLogger(): Logger {
@@ -153,6 +160,27 @@ describe('wrapper-chain', () => {
   });
 
   describe('loadWrapperComponents', () => {
+    it('shares an in-flight load between competing callers', async () => {
+      let finishLoad!: (component: { default: Type<unknown> }) => void;
+      const loadComponent = vi.fn(
+        () =>
+          new Promise<{ default: Type<unknown> }>((resolve) => {
+            finishLoad = resolve;
+          }),
+      );
+      const registry = new Map<string, WrapperTypeDefinition>([['a', { wrapperName: 'a', loadComponent }]]);
+      const cache = new Map<string, Type<unknown>>();
+      const pending = new Map<string, Promise<Type<unknown> | undefined>>();
+
+      const first = loadWrapperComponent('a', registry, cache, pending);
+      const second = loadWrapperComponent('a', registry, cache, pending);
+
+      expect(loadComponent).toHaveBeenCalledTimes(1);
+      finishLoad({ default: TestWrapperA });
+      await expect(Promise.all([first, second])).resolves.toEqual([TestWrapperA, TestWrapperA]);
+      expect(pending.size).toBe(0);
+    });
+
     it('emits an empty array for an empty config list', async () => {
       const registry = new Map<string, WrapperTypeDefinition>();
       const cache = new Map<string, Type<unknown>>();

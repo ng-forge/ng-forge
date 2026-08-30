@@ -56,6 +56,7 @@ export { withPagePreload } from './providers/features/page-preload/with-page-pre
 
 // Field Windowing Feature (progressive field mounting for flat forms)
 export { withFieldWindowing } from './providers/features/field-windowing/with-field-windowing';
+export type { FieldParkingOption } from './providers/features/field-windowing/resolve-field-windowing';
 
 // WebMCP Feature (expose forms to browser AI agents) — experimental
 export { withWebMcp } from './providers/features/web-mcp/with-web-mcp';
@@ -134,7 +135,13 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 
 // Submission Config
-export type { SubmissionConfig, SubmissionActionResult, SubmitButtonOptions, NextButtonOptions } from '@ng-forge/dynamic-forms/internal';
+export type {
+  SubmissionConfig,
+  SubmissionActionResult,
+  SubmitButtonOptions,
+  NextButtonOptions,
+  InitialPageConfig,
+} from '@ng-forge/dynamic-forms/internal';
 
 // Form State Condition
 export type { FormStateCondition } from '@ng-forge/dynamic-forms/internal';
@@ -170,6 +177,9 @@ export type {
 } from '@ng-forge/dynamic-forms/internal';
 export { isRowField, isSimplifiedArrayField } from '@ng-forge/dynamic-forms/internal';
 
+// Paged-form navigation state — payload of PagerStateEvent / the onPageNavigationStateChange output
+export type { PagerState } from './core';
+
 // Hidden Field (display-only, value pass-through)
 export type { HiddenField, HiddenValue, HiddenScalar } from '@ng-forge/dynamic-forms/internal';
 
@@ -188,6 +198,9 @@ export type { HttpRequestConfig, HttpValidationResponseMapping } from '@ng-forge
 
 // Validator Function Types (for customFnConfig)
 export type { AsyncCustomValidator, CustomValidator, HttpCustomValidator } from './core/validation';
+// Targets a container validator's error at one row's field — see `rowError`.
+export { rowError } from '@ng-forge/dynamic-forms/internal';
+export type { RowErrorSpec } from '@ng-forge/dynamic-forms/internal';
 
 // Logic & Expression Types
 export type {
@@ -251,13 +264,16 @@ export {
 
 // Events
 export {
+  ActivePageInitializedEvent,
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,
+  GoToPageEvent,
   InsertArrayItemEvent,
   MoveArrayItemEvent,
   NextPageEvent,
   PageChangeEvent,
+  PagerStateEvent,
   PopArrayItemEvent,
   PrependArrayItemEvent,
   PreviousPageEvent,
@@ -268,7 +284,7 @@ export {
 
 // Array event builder (recommended public API)
 export { arrayEvent } from './events';
-export type { ArrayItemTemplate, ArrayItemDefinitionTemplate } from './events';
+export type { ArrayItemTemplate, ArrayItemDefinitionTemplate, PageNavigationOptions } from './events';
 
 export type { FormEvent, FormEventConstructor, TokenContext, ArrayItemContext } from './events';
 

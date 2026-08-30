@@ -66,6 +66,14 @@
         "configFile": "packages/dynamic-forms-bootstrap/vite.config.typecheck.ts"
       }
     },
+    "lazy-entry-check": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node scripts/check-adapter-lazy-entries.mjs bootstrap",
+        "cwd": "{workspaceRoot}"
+      }
+    },
     "api-check": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],
@@ -73,13 +81,15 @@
       "inputs": [
         "{workspaceRoot}/dist/{projectRoot}/types/**/*.d.ts",
         "{projectRoot}/api-extractor.json",
+        "{projectRoot}/api-extractor.shared.json",
         "{workspaceRoot}/config/api-extractor.base.json",
         "{workspaceRoot}/etc/dynamic-forms-bootstrap.api.md",
+        "{workspaceRoot}/etc/dynamic-forms-bootstrap-shared.api.md",
         "{workspaceRoot}/scripts/api-check.mjs",
         "{workspaceRoot}/scripts/normalize-api-unions.mjs"
       ],
       "options": {
-        "command": "node scripts/api-check.mjs packages/dynamic-forms-bootstrap/api-extractor.json",
+        "command": "node scripts/api-check.mjs packages/dynamic-forms-bootstrap/api-extractor.json packages/dynamic-forms-bootstrap/api-extractor.shared.json",
         "cwd": "{workspaceRoot}"
       }
     },
@@ -90,7 +100,9 @@
         "commands": [
           "nx run dynamic-forms-bootstrap:build --skip-nx-cache",
           "api-extractor run --local --config packages/dynamic-forms-bootstrap/api-extractor.json",
-          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-bootstrap.api.md"
+          "api-extractor run --local --config packages/dynamic-forms-bootstrap/api-extractor.shared.json",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-bootstrap.api.md",
+          "node scripts/normalize-api-unions.mjs etc/dynamic-forms-bootstrap-shared.api.md"
         ],
         "parallel": false,
         "cwd": "{workspaceRoot}"

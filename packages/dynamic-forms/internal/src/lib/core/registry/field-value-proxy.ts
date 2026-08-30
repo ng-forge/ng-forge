@@ -19,13 +19,19 @@ export function createFieldValueProxy(
   getRootForm: () => FieldTree<unknown> | undefined,
   getRootFormValue: () => Record<string, unknown>,
 ): Record<string, unknown> {
-  // `hit` is false when the key is not a navigable field, so the caller falls back.
-  const readField = (key: string): { hit: boolean; value: unknown } => {
+  // Resolves a key to its FieldTree child accessor, or undefined when not a field.
+  const resolveAccessor = (key: string): (() => unknown) | undefined => {
     const root = getRootForm() as Record<string, unknown> | undefined;
     const accessor = root?.[key];
-    if (typeof accessor === 'function') {
+    return typeof accessor === 'function' ? (accessor as () => unknown) : undefined;
+  };
+
+  // `hit` is false when the key is not a navigable field, so the caller falls back.
+  const readField = (key: string): { hit: boolean; value: unknown } => {
+    const accessor = resolveAccessor(key);
+    if (accessor) {
       // FieldState structurally (untracked); read `value()` tracked to subscribe to this field only.
-      const state = untracked(() => (accessor as () => unknown)());
+      const state = untracked(() => accessor());
       const valueSig = state && (state as { value?: unknown }).value;
       if (typeof valueSig === 'function') {
         return { hit: true, value: (valueSig as () => unknown)() };
@@ -42,8 +48,10 @@ export function createFieldValueProxy(
     },
     has(_target, prop) {
       if (typeof prop === 'symbol') return false;
-      const root = getRootForm() as Record<string, unknown> | undefined;
-      if (root && prop in root) return true;
+      // A Signal Forms FieldTree is a Proxy with no `has` trap, so `prop in tree` is
+      // false even for real fields. Probe the child accessor instead — using `in`
+      // here sent every structured condition down the whole-form fallback below.
+      if (resolveAccessor(prop)) return true;
       return prop in getRootFormValue();
     },
     // Enumeration needs every key, so it reads the eager value (subscribes to all).

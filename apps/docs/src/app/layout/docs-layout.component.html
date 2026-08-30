@@ -126,6 +126,9 @@
                         <circle cx="12" cy="12" r="4.5" fill="currentColor" />
                       </svg>
                       {{ child.label }}
+                      @if (child.badge) {
+                        <span class="nav-badge">{{ child.badge }}</span>
+                      }
                     </a>
                   }
                 }

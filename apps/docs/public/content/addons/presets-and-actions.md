@@ -14,7 +14,7 @@ Pick the leftmost variant that covers your case. Most addon buttons map to a pre
 
 ## Built-in presets
 
-Five presets ship with the library, available in every adapter:
+Five presets ship with the library. Adapter input fields provide the built-in preset handler. Material `select`, `textarea`, and `datepicker` support addon rendering, but use `actionRef` or `action` for click behavior:
 
 | Preset                         | Behaviour                                                                                                                                                                                       |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

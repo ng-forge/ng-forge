@@ -1,10 +1,9 @@
+/* eslint-disable @nx/enforce-module-boundaries -- Package self-imports preserve ng-packagr secondary entry points. */
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { MATERIAL_CONFIG, type MaterialConfig, type MatButtonAddon, type MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
-import { MaterialConfig } from '../models/material-config';
-import { MATERIAL_CONFIG } from '../models/material-config.token';
-import type { MatButtonAddon, MatIconAddon } from '../types/addons';
 
 /** Field type definitions for Material Design components. */
 export type MaterialFieldTypes = FieldTypeDefinition[];
@@ -18,9 +17,20 @@ type MaterialConfigFeature = {
  * Default `withMaterialFields()` shape — field defs + the auto-included
  * addons feature so `mat-icon` / `mat-button` work out of the box.
  */
-type MaterialFieldsWithAddons = [...MaterialFieldTypes, MaterialAddonsFeature];
+type MaterialFieldsWithAddons = [...MaterialFieldTypes, MaterialAddonsFeature, WrapperTypeDefinition];
 
-type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialAddonsFeature, MaterialConfigFeature];
+type MaterialFieldsWithConfig = [...MaterialFieldTypes, MaterialAddonsFeature, WrapperTypeDefinition, MaterialConfigFeature];
+
+/**
+ * Replaces the neutral core `field-errors` wrapper with the Material one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const MATERIAL_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/mat-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
+};
 
 /**
  * Configure dynamic forms with Material Design field types, with
@@ -37,7 +47,7 @@ export function withMaterialFields(config: MaterialConfig | undefined): Material
 export function withMaterialFields(config?: MaterialConfig): MaterialFieldsWithAddons | MaterialFieldsWithConfig {
   // Always include the addons feature — mat-icon / mat-button are part of
   // the canonical Material surface.
-  const base: unknown[] = [...MATERIAL_FIELD_TYPES, withMaterialAddons()];
+  const base: unknown[] = [...MATERIAL_FIELD_TYPES, withMaterialAddons(), MATERIAL_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({
@@ -54,7 +64,7 @@ export function withMaterialFields(config?: MaterialConfig): MaterialFieldsWithA
 
 const MAT_ICON_KIND: AddonTypeDefinition<MatIconAddon> = {
   type: 'mat-icon',
-  loadComponent: () => import('../addons/mat-icon-addon.component').then((m) => m.MatIconAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-material/lazy/addon-icon').then((m) => m.MatIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'mat-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -64,7 +74,7 @@ const MAT_ICON_KIND: AddonTypeDefinition<MatIconAddon> = {
 
 const MAT_BUTTON_KIND: AddonTypeDefinition<MatButtonAddon> = {
   type: 'mat-button',
-  loadComponent: () => import('../addons/mat-button-addon.component').then((m) => m.MatButtonAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-material/lazy/addon-button').then((m) => m.MatButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

@@ -1,5 +1,5 @@
 import { FormConfig, InferFormValue, NarrowFields, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
-import { BootstrapConfig } from '../models/bootstrap-config';
+import type { BootstrapConfig } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 /** Bootstrap-specific props that can be set at form level and cascade to all fields. */
 export type BsFormProps = BootstrapConfig;

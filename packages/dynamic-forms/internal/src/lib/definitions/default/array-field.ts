@@ -1,6 +1,7 @@
 import { FieldComponent, FieldDef } from '../base/field-def';
 import { ArrayAllowedChildren } from '../../models/types/nesting-constraints';
 import { ContainerLogicConfig } from '../base/container-logic-config';
+import { ContainerValidation } from '../base/container-validation';
 
 /**
  * An array item template is an array of allowed children that defines one OBJECT array item's fields.
@@ -16,7 +17,8 @@ export type ArrayItemTemplate = readonly ArrayAllowedChildren[];
 export type ArrayItemDefinition = ArrayAllowedChildren | ArrayItemTemplate;
 
 /** Array field interface for creating dynamic field collections that map to array values. */
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]>
+  extends FieldDef<never>, ContainerValidation {
   type: 'array';
 
   /**
@@ -75,7 +77,7 @@ export interface ArrayButtonConfig {
 }
 
 /** Simplified array field interface for common use cases. */
-export interface SimplifiedArrayField extends FieldDef<never> {
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
   type: 'array';
 
   /**

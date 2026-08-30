@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it } from 'vitest';
-import type { IonicButtonAddon } from '../types/addons';
+import type { IonicButtonAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 import { IonicButtonAddonComponent } from './ion-button-addon.component';
 
 function setup(addon: IonicButtonAddon, handlers: ReadonlyMap<string, AddonActionHandler> = new Map()) {

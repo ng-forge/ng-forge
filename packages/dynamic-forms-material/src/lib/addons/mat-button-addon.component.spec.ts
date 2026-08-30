@@ -4,7 +4,7 @@ import { type AddonActionContext, DynamicFormLogger } from '@ng-forge/dynamic-fo
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler, NgForgeAddonActionBase } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import type { MatButtonAddon } from '../types/addons';
+import type { MatButtonAddon } from '@ng-forge/dynamic-forms-material/shared';
 import { MatButtonAddonComponent } from './mat-button-addon.component';
 
 function silentLogger() {

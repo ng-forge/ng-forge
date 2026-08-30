@@ -5,6 +5,8 @@ import { expectTypeOf } from 'vitest';
 import type { GroupField, GroupComponent } from './group-field';
 import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { GroupAllowedChildren } from '../../models/types/nesting-constraints';
+import type { ValidatorConfig } from '../../models/validation/validator-config';
+import type { ValidationMessages } from '../../models/validation-types';
 import type { RequiredKeys } from '@ng-forge/utils';
 
 // ============================================================================
@@ -37,7 +39,10 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'skipDefaultWrappers'
     | 'addons'
     | 'fields'
-    | 'logic';
+    | 'logic'
+    | 'validators'
+    | 'validationMessages'
+    | 'required';
 
   type ActualKeys = keyof GroupField;
 
@@ -99,6 +104,18 @@ describe('GroupField - Exhaustive Whitelist', () => {
 
     it('logic', () => {
       expectTypeOf<GroupField['logic']>().toEqualTypeOf<ContainerLogicConfig[] | undefined>();
+    });
+
+    it('required (cascades to descendants)', () => {
+      expectTypeOf<GroupField['required']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('validators', () => {
+      expectTypeOf<GroupField['validators']>().toEqualTypeOf<ValidatorConfig[] | undefined>();
+    });
+
+    it('validationMessages', () => {
+      expectTypeOf<GroupField['validationMessages']>().toEqualTypeOf<ValidationMessages | undefined>();
     });
   });
 
@@ -206,6 +223,22 @@ describe('GroupField - Usage Tests', () => {
     } as const satisfies GroupField;
 
     expectTypeOf(field.logic).not.toBeUndefined();
+  });
+
+  it('should accept group with a container-level validator and message', () => {
+    const field = {
+      key: 'period',
+      type: 'group',
+      fields: [
+        { key: 'dateFrom', type: 'hidden', value: '' },
+        { key: 'dateTo', type: 'hidden', value: '' },
+      ],
+      validators: [{ type: 'custom', functionName: 'dateOrder' }],
+      validationMessages: { dateOrder: 'The end must not be before the start.' },
+    } as const satisfies GroupField;
+
+    expectTypeOf(field.validators).not.toBeUndefined();
+    expectTypeOf(field.validationMessages).not.toBeUndefined();
   });
 
   it('should accept group with col sizing', () => {

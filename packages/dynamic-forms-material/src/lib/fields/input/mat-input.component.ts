@@ -16,9 +16,7 @@ import {
   NgForgeControl,
   NgForgeFieldHost,
 } from '@ng-forge/dynamic-forms/integration';
-import { MATERIAL_CONFIG } from '../../models/material-config.token';
-import { runMatPresetAction } from '../../addons/preset-actions';
-import { MAT_INPUT_TYPE_OVERRIDE } from '../../tokens/input-type-override.token';
+import { MATERIAL_CONFIG, MAT_INPUT_TYPE_OVERRIDE, runMatPresetAction } from '@ng-forge/dynamic-forms-material/shared';
 import { MatInputAddon, MatInputProps } from './mat-input.type';
 
 @Component({
@@ -92,43 +90,6 @@ import { MatInputAddon, MatInputProps } from './mat-input.type';
       }
       :host([hidden]) {
         display: none !important;
-      }
-      /* matPrefix/matSuffix elements have no default Material spacing.
-         All four sides + the text-type variants are independent CSS custom
-         properties so consumers can tune each individually:
-           prefix-outer = prefix slot's left (border-facing) padding
-           prefix-inner = prefix slot's right (text-facing) padding
-           suffix-inner = suffix slot's left (text-facing) padding
-           suffix-outer = suffix slot's right (border-facing) padding
-         Text variants override only the INNER side because <mat-icon> has
-         ~4-6px optical padding inside its glyph box (so it looks "padded"
-         even with a small CSS value) while text glyphs sit flush against
-         their bounding box and need the extra room to match. */
-      :host {
-        --df-mat-addon-prefix-outer-padding: 0.75em;
-        --df-mat-addon-prefix-inner-padding: 0.5em;
-        --df-mat-addon-suffix-inner-padding: 0.5em;
-        --df-mat-addon-suffix-outer-padding: 0.75em;
-        --df-mat-addon-prefix-text-outer-padding: 1em;
-        --df-mat-addon-prefix-text-inner-padding: 1em;
-        --df-mat-addon-suffix-text-inner-padding: 1em;
-        --df-mat-addon-suffix-text-outer-padding: 1em;
-      }
-      df-addon-slot[matprefix] {
-        padding-left: var(--df-mat-addon-prefix-outer-padding);
-        padding-right: var(--df-mat-addon-prefix-inner-padding);
-      }
-      df-addon-slot[matsuffix] {
-        padding-left: var(--df-mat-addon-suffix-inner-padding);
-        padding-right: var(--df-mat-addon-suffix-outer-padding);
-      }
-      df-addon-slot[matprefix].df-mat-addon-text {
-        padding-left: var(--df-mat-addon-prefix-text-outer-padding);
-        padding-right: var(--df-mat-addon-prefix-text-inner-padding);
-      }
-      df-addon-slot[matsuffix].df-mat-addon-text {
-        padding-left: var(--df-mat-addon-suffix-text-inner-padding);
-        padding-right: var(--df-mat-addon-suffix-text-outer-padding);
       }
     `,
   ],

@@ -2,9 +2,11 @@
  * Exhaustive type tests for ArrayField type.
  */
 import { expectTypeOf } from 'vitest';
-import type { ArrayField, ArrayComponent, ArrayItemDefinition, ArrayItemTemplate } from './array-field';
+import type { ArrayField, ArrayComponent, ArrayItemDefinition, ArrayItemTemplate, SimplifiedArrayField } from './array-field';
 import type { ContainerLogicConfig } from '../base/container-logic-config';
 import type { RequiredKeys } from '@ng-forge/utils';
+import type { ValidatorConfig } from '../../models/validation/validator-config';
+import type { ValidationMessages } from '../../models/validation-types';
 
 // ============================================================================
 // ArrayField - Whitelist Test
@@ -38,7 +40,10 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'fields'
     | 'logic'
     | 'minLength'
-    | 'maxLength';
+    | 'maxLength'
+    | 'validators'
+    | 'validationMessages'
+    | 'required';
 
   type ActualKeys = keyof ArrayField;
 
@@ -108,6 +113,18 @@ describe('ArrayField - Exhaustive Whitelist', () => {
 
     it('maxLength', () => {
       expectTypeOf<ArrayField['maxLength']>().toEqualTypeOf<number | undefined>();
+    });
+
+    it('required (cascades to descendants)', () => {
+      expectTypeOf<ArrayField['required']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('validators', () => {
+      expectTypeOf<ArrayField['validators']>().toEqualTypeOf<ValidatorConfig[] | undefined>();
+    });
+
+    it('validationMessages', () => {
+      expectTypeOf<ArrayField['validationMessages']>().toEqualTypeOf<ValidationMessages | undefined>();
     });
   });
 
@@ -306,5 +323,47 @@ describe('ArrayField - Usage Tests', () => {
 
     expectTypeOf(field.minLength).toEqualTypeOf<1>();
     expectTypeOf(field.maxLength).toEqualTypeOf<10>();
+  });
+
+  it('should accept array with a container-level validator and message', () => {
+    const field = {
+      key: 'periods',
+      type: 'array',
+      fields: [
+        [
+          { key: 'from', type: 'hidden', value: '' },
+          { key: 'to', type: 'hidden', value: '' },
+        ],
+      ],
+      minLength: 1,
+      validators: [{ type: 'custom', functionName: 'periodOrder' }],
+      validationMessages: { periodOrder: 'The end must not be before the start.' },
+    } as const satisfies ArrayField;
+
+    expectTypeOf(field.validators).not.toBeUndefined();
+    expectTypeOf(field.validationMessages).not.toBeUndefined();
+  });
+});
+
+// ============================================================================
+// SimplifiedArrayField - Container Validators
+// ============================================================================
+
+describe('SimplifiedArrayField - Container Validators', () => {
+  it('should accept a container-level validator and message', () => {
+    const field = {
+      key: 'periods',
+      type: 'array',
+      template: [
+        { key: 'from', type: 'hidden', value: '' },
+        { key: 'to', type: 'hidden', value: '' },
+      ],
+      minLength: 1,
+      validators: [{ type: 'custom', functionName: 'periodOrder' }],
+      validationMessages: { periodOrder: 'The end must not be before the start.' },
+    } as const satisfies SimplifiedArrayField;
+
+    expectTypeOf(field.validators).not.toBeUndefined();
+    expectTypeOf(field.validationMessages).not.toBeUndefined();
   });
 });

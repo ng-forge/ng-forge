@@ -119,4 +119,19 @@ describe('buildFieldInputs', () => {
       warnSpy.mockRestore();
     }
   });
+
+  it('threads container validationMessages onto the wrapper-facing bag', () => {
+    const cache = new WeakMap();
+    const messages = { dateOrder: 'The end must not be before the start.' };
+
+    const out = buildFieldInputs({ key: 'period' }, cache, 'group', messages);
+
+    expect(out.validationMessages).toEqual(messages);
+  });
+
+  it('omits validationMessages when the field declares none', () => {
+    const cache = new WeakMap();
+
+    expect(buildFieldInputs({ key: 'period' }, cache, 'group')).not.toHaveProperty('validationMessages');
+  });
 });

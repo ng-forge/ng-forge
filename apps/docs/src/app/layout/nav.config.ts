@@ -126,6 +126,7 @@ export const NAV_ITEMS: NavItem[] = [
     cssClass: 'sidebar-link--ai',
     children: [
       { label: 'IDE Usage (MCP)', path: 'ai-integration/mcp-server' },
+      { label: 'Agent Skill', path: 'ai-integration/skills' },
       { label: 'WebMCP', path: 'ai-integration/webmcp', badge: 'NEW' },
     ],
   },

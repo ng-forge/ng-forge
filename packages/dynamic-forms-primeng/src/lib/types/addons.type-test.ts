@@ -12,7 +12,7 @@
  *
  * Type-only file: no runtime emit. Vitest is happy to skip it.
  */
-import type { PrimeButtonAddon } from './addons';
+import type { PrimeButtonAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 
 // ============================================================================
 // Click-axis XOR — at most one of preset / actionRef / action

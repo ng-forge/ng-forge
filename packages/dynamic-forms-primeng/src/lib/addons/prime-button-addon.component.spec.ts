@@ -4,7 +4,7 @@ import { DynamicFormLogger } from '@ng-forge/dynamic-forms';
 import { ADDON_ACTION_REGISTRY } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_PRESET_HANDLER, type AddonPresetHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import type { PrimeButtonAddon } from '../types/addons';
+import type { PrimeButtonAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 import { PrimeButtonAddonComponent } from './prime-button-addon.component';
 
 interface LoggerStub {

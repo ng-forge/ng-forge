@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, runInInjectionContext, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { form, required, schema, FieldTree, type SchemaPath } from '@angular/forms/signals';
-import { DEFAULT_VALIDATION_MESSAGES } from '@ng-forge/dynamic-forms/internal';
+import { DEFAULT_VALIDATION_MESSAGES, FIELD_ERROR_DISPLAY } from '@ng-forge/dynamic-forms/internal';
 import { ValidationMessages } from '@ng-forge/dynamic-forms/internal';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgForgeField } from './ng-forge-field.directive';
@@ -574,6 +574,60 @@ describe('NgForgeField', () => {
       // stable error code or the "required" wording so the test fails if
       // Angular ever changes the format.
       expect(() => fixture.detectChanges()).toThrow(/NG0950|required/i);
+    });
+  });
+
+  describe('error-display delegation (FIELD_ERROR_DISPLAY)', () => {
+    it('renders its own errors when no wrapper claims display', () => {
+      TestBed.configureTestingModule({ imports: [TestHostComponent] });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      const { field } = setupInvalidTouchedField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('validationMessages', { required: 'Username is required' } as ValidationMessages);
+      fixture.detectChanges();
+
+      expect(directive.showErrors()).toBe(true);
+      expect(directive.errorsToDisplay()).toHaveLength(1);
+    });
+
+    it('renders nothing when a wrapper claims display, leaving the errors intact', () => {
+      TestBed.configureTestingModule({
+        imports: [TestHostComponent],
+        providers: [{ provide: FIELD_ERROR_DISPLAY, useValue: { claimedKey: signal('username') } }],
+      });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      const { field } = setupInvalidTouchedField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('validationMessages', { required: 'Username is required' } as ValidationMessages);
+      fixture.detectChanges();
+
+      // Only the rendering moves — the field is still invalid and still resolves messages,
+      // so validity gating and the wrapper's own output are unaffected.
+      expect(directive.errorsToDisplay()).toEqual([]);
+      expect(directive.showErrors()).toBe(true);
+      expect(directive.errors()).toHaveLength(1);
+    });
+
+    it('keeps rendering its own errors when the claim names a different field', () => {
+      // A wrapper around a container reaches every descendant. Without key scoping it
+      // would silence every input inside an array or group.
+      TestBed.configureTestingModule({
+        imports: [TestHostComponent],
+        providers: [{ provide: FIELD_ERROR_DISPLAY, useValue: { claimedKey: signal('periods') } }],
+      });
+      const fixture = TestBed.createComponent(TestHostComponent);
+      const directive = fixture.componentRef.injector.get(NgForgeField);
+      const { field } = setupInvalidTouchedField();
+      fixture.componentRef.setInput('field', field);
+      fixture.componentRef.setInput('key', 'username');
+      fixture.componentRef.setInput('validationMessages', { required: 'Username is required' } as ValidationMessages);
+      fixture.detectChanges();
+
+      expect(directive.errorsToDisplay()).toHaveLength(1);
     });
   });
 });

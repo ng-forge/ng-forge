@@ -1,5 +1,5 @@
 import { computed, Signal } from '@angular/core';
-import { ResolvedError } from './create-resolved-errors-signal';
+import { ResolvedError } from '@ng-forge/dynamic-forms/internal';
 
 /**
  * Creates a signal that computes the aria-describedby value based on errors and hint state.

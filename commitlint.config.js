@@ -37,6 +37,8 @@ export default {
         'mcp',
         // OpenAPI generator
         'openapi-generator',
+        // Validation CLI
+        'cli',
         // Apps
         'docs',
         'examples',

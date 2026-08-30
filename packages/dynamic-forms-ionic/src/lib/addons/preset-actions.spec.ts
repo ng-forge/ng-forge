@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import type { AddonActionContext, AddonActionPreset, Logger } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runIonicPresetAction } from './preset-actions';
+import { runIonicPresetAction } from '@ng-forge/dynamic-forms-ionic/shared';
 
 interface Spies {
   setValue: ReturnType<typeof vi.fn>;

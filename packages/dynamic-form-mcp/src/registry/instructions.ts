@@ -167,6 +167,64 @@ Use for wizard-style forms:
 }
 \`\`\`
 
+##### Starting on a specific page (deep links, session resume)
+
+Set \`options.initialPage\` to open a paged form somewhere other than page 0:
+
+\`\`\`typescript
+{
+  options: { initialPage: 2 },   // lands on page 2 regardless of earlier pages
+  fields: [ /* pages */ ]
+}
+\`\`\`
+
+The shorthand lands unconditionally, which is what restoring a saved session wants.
+Use \`{ index: 2, validate: true }\` to apply the same validity gate a forward
+\`GoToPageEvent\` uses, which stops on the first invalid page instead.
+
+Out-of-range indices clamp to the last page; negative or non-numeric values fall back
+to \`0\`; a hidden target resolves to the nearest visible page.
+
+To move pages at runtime, dispatch \`GoToPageEvent\`. \`validate: false\` bypasses the
+validity gate only — the target must still be in range and visible:
+
+\`\`\`typescript
+dispatcher.dispatch(new GoToPageEvent(3));                     // gated, stops on first invalid page
+dispatcher.dispatch(new GoToPageEvent(3, { validate: false })); // skips the gate, for resume
+\`\`\`
+
+Paged forms may virtualize inactive pages. DynamicForm \`(initialized)\` emits after
+the initially active page is ready. Use \`(activePageInitialized)\` when work must run
+after every visible-page transition; it announces once per visit.
+
+### Rendering Performance
+
+Use \`options.pagePreloadWindow\` for paged forms. It controls how many neighbouring
+pages are mounted and have their component chunks preloaded. \`0\` keeps only the
+active page in the render window; the default is \`1\`.
+
+Use \`options.fieldWindowing\` for large flat forms:
+
+\`\`\`typescript
+{
+  options: {
+    fieldWindowing: {
+      eager: 20,
+      placeholderHeight: '4rem',
+      park: { margin: '100%' },
+    },
+  },
+  fields: [ /* flat fields */ ],
+}
+\`\`\`
+
+- \`eager\` mounts that many leading leaf fields immediately. Remaining fields mount near the viewport.
+- \`placeholderHeight\` reserves layout space before a field mounts.
+- \`park\` keeps mounted offscreen DOM in place but removes its view from routine change detection. Safety-related state such as disabled, readonly, required, and validation state stays current. Other model-to-DOM updates catch up when the field returns.
+- \`park.margin\` follows \`IntersectionObserver.rootMargin\`: use one to four \`px\` or \`%\` values. Unsupported units fall back to the inherited margin.
+- \`fieldWindowing: false\` disables inherited deferred mounting for that form.
+- A park-only object changes parking without changing the inherited mounting mode. Use \`{ park: false }\` to opt out or \`{ park: true }\` to opt in.
+
 ## Validation
 
 ### Shorthand Validators (Preferred)

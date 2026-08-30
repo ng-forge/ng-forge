@@ -1,5 +1,5 @@
 import { FormConfig, NarrowFields, RegisteredFieldTypes, InferFormValue } from '@ng-forge/dynamic-forms';
-import { MaterialConfig } from '../models/material-config';
+import type { MaterialConfig } from '@ng-forge/dynamic-forms-material/shared';
 
 /** Material-specific props that can be set at form level and cascade to all fields. */
 export type MatFormProps = MaterialConfig;

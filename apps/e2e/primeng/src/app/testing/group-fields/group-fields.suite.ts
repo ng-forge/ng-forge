@@ -2,6 +2,9 @@ import { TestSuite } from '../shared/types';
 import { groupValuePropagationScenario } from './scenarios/group-value-propagation.scenario';
 import { groupInitialValuesScenario } from './scenarios/group-initial-values.scenario';
 import { groupNestedScenario } from './scenarios/group-nested.scenario';
+import { groupContainerValidatorScenario } from './scenarios/group-container-validator.scenario';
+import { delegatedFieldErrorsScenario } from './scenarios/delegated-field-errors.scenario';
+import { arrayContainerValidatorScenario } from './scenarios/array-container-validator.scenario';
 
 /**
  * Group Fields Suite
@@ -13,7 +16,14 @@ export const groupFieldsSuite: TestSuite = {
   title: 'Group Fields Tests',
   description: 'Test scenarios for group field operations',
   path: '/test/group-fields',
-  scenarios: [groupValuePropagationScenario, groupInitialValuesScenario, groupNestedScenario],
+  scenarios: [
+    groupValuePropagationScenario,
+    groupInitialValuesScenario,
+    groupNestedScenario,
+    groupContainerValidatorScenario,
+    delegatedFieldErrorsScenario,
+    arrayContainerValidatorScenario,
+  ],
 };
 
 /**

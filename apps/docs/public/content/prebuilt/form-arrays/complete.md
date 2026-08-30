@@ -78,6 +78,92 @@ Use `minLength` and `maxLength` on the array field to constrain the number of it
 
 Both properties are optional and can be used independently or together.
 
+## Required Items
+
+Setting `required` on the array marks every field inside each item as required, without repeating it on each template field:
+
+```typescript
+{
+  key: 'contacts',
+  type: 'array',
+  required: true,
+  fields: [[
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' },
+    { key: 'note', type: 'input', label: 'Note', required: false },
+  ]],
+}
+```
+
+A template field that declares its own `required` wins, so `note` above stays optional. A field whose requiredness is conditional (`logic: [{ type: 'required', when }]`) also keeps its own condition rather than being forced by the cascade.
+
+This is about item _contents_; for "the array must have at least one item", use `minLength: 1`. It applies to object items only. Primitive-item arrays (a single field per item, producing `['a', 'b']`) hold plain values with no field to mark, so `required` on the array has no effect there.
+
+## Array-Level Validation
+
+Size bounds only count items. For a rule about the item _contents_ — most commonly a per-row rule whose two fields have to be compared against each other — declare `validators` on the array. `ctx.value()` resolves to the item list:
+
+```typescript
+{
+  key: 'periods',
+  type: 'array',
+  minLength: 1,
+  fields: [
+    [
+      { key: 'from', type: 'input', label: 'From', props: { type: 'datetime-local' }, value: '' },
+      { key: 'to', type: 'input', label: 'To', props: { type: 'datetime-local' }, value: '' },
+    ],
+  ],
+  validators: [{ type: 'custom', functionName: 'periodOrder' }],
+  validationMessages: { periodOrder: 'Every period must end after it starts.' },
+}
+```
+
+The registered function sees every row at once, so it can compare fields within a row:
+
+```typescript
+const periodOrder: CustomValidator = (ctx) => {
+  const rows = (ctx.value() as { from?: string; to?: string }[]) ?? [];
+  return rows.some((r) => r.from && r.to && r.to < r.from) ? { kind: 'periodOrder' } : null;
+};
+```
+
+This is the only way to express a rule that spans two fields of the same row. A validator placed on the `to` template field cannot see its sibling `from`, because sibling access needs schema paths that only exist while the schema is being built.
+
+### Pointing at the offending row
+
+One message for the whole list cannot say _which_ row is wrong. `rowError` targets the error at one row's field, where the adapter renders it like any other field error:
+
+```typescript
+import { rowError, type CustomValidator } from '@ng-forge/dynamic-forms';
+
+const periodOrder: CustomValidator = (ctx) => {
+  const rows = (ctx.value() ?? []) as { from?: string; to?: string }[];
+
+  return rows.flatMap((row, index) =>
+    row.from && row.to && row.to < row.from
+      ? [rowError(ctx, index, 'to', { kind: 'periodOrder', message: 'The end must not be before the start.' })]
+      : [],
+  );
+};
+```
+
+A targeted error needs its own `message`: the container's `validationMessages` are keyed to the container, not to the child the error moves to. If the row or field cannot be resolved, the error stays on the container rather than disappearing.
+
+Errors returned without `rowError` stay on the container and use `validationMessages` as usual.
+
+The error lands on the array itself, so it gates form and page validity. Array validators are skipped while the array is hidden, unless you set `validateWhenHidden: true`. The same properties work on the [simplified array API](/prebuilt/form-arrays/simplified).
+
+### Rendering the message
+
+Like a group, an array has no form element to hang a message on. Declaring `validators` on the array makes ng-forge append the built-in `field-errors` wrapper, which renders the first resolved message below the array's items:
+
+```html
+<div class="df-field-error" role="alert">Every period must end after it starts.</div>
+```
+
+Each UI adapter ships its own version of this wrapper, so the message renders in the adapter's native error style out of the box. To restyle it, register your own wrapper under the same `field-errors` name — the later registration replaces the built-in everywhere. See [Group-Level Validation](/prebuilt/form-groups#group-level-validation) for the full override example, and [Registering and Applying](/wrappers/registering-and-applying) for the wrapper pipeline.
+
 ## Initial Values
 
 Initial values are defined directly on each field via the `value` property - no separate `initialValue` is needed:

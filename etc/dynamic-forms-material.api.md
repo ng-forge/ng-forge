@@ -55,6 +55,7 @@ import { ThemePalette } from '@angular/material/core';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -161,6 +162,7 @@ export type MatDatepickerField = DatepickerField<MatDatepickerProps>;
 export class MatDatepickerFieldComponent {
     // (undocumented)
     readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
+    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
     // (undocumented)
@@ -172,13 +174,15 @@ export class MatDatepickerFieldComponent {
     // (undocumented)
     protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
     // (undocumented)
+    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<_ng_forge_dynamic_forms.AnyAddon>;
+    // (undocumented)
     readonly props: _angular_core.InputSignal<MatDatepickerProps | undefined>;
     // (undocumented)
     readonly startAt: _angular_core.InputSignal<Date | null>;
     // (undocumented)
     readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatDatepickerFieldComponent, "df-mat-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatDatepickerFieldComponent, "df-mat-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatDatepickerFieldComponent, never>;
 }
@@ -437,6 +441,7 @@ export class MatSelectFieldComponent {
     readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
     // (undocumented)
     defaultCompare: (value1: any, value2: any) => boolean;
+    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
     // (undocumented)
@@ -444,13 +449,15 @@ export class MatSelectFieldComponent {
     // (undocumented)
     protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
     // (undocumented)
+    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<_ng_forge_dynamic_forms.AnyAddon>;
+    // (undocumented)
     readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
     // (undocumented)
     readonly props: _angular_core.InputSignal<MatSelectProps | undefined>;
     // (undocumented)
     readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatSelectFieldComponent, "df-mat-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatSelectFieldComponent, "df-mat-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatSelectFieldComponent, never>;
 }
@@ -528,6 +535,7 @@ export type MatTextareaField = TextareaField<MatTextareaProps>;
 export class MatTextareaFieldComponent {
     // (undocumented)
     readonly appearance: _angular_core.Signal<_angular_material_form_field.MatFormFieldAppearance>;
+    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     readonly floatLabel: _angular_core.Signal<_angular_material_form_field.FloatLabelType>;
     // (undocumented)
@@ -535,11 +543,13 @@ export class MatTextareaFieldComponent {
     // (undocumented)
     protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
     // (undocumented)
+    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<_ng_forge_dynamic_forms.AnyAddon>;
+    // (undocumented)
     readonly props: _angular_core.InputSignal<MatTextareaProps | undefined>;
     // (undocumented)
     readonly subscriptSizing: _angular_core.Signal<_angular_material_form_field.SubscriptSizing>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatTextareaFieldComponent, "df-mat-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<MatTextareaFieldComponent, "df-mat-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<MatTextareaFieldComponent, never>;
 }

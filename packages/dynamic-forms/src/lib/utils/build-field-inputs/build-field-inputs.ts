@@ -18,6 +18,7 @@ export function buildFieldInputs(
   rawInputs: Record<string, unknown>,
   cache: WeakMap<FieldTree<unknown>, ReadonlyFieldTree<unknown>>,
   fieldType?: string,
+  validationMessages?: Record<string, unknown>,
 ): WrapperFieldInputs {
   const fieldTreeCandidate = rawInputs['field'];
   // FieldTree is callable: `(): FieldState`. Anything else (undefined,
@@ -38,5 +39,8 @@ export function buildFieldInputs(
     type: fieldType,
     field: readonlyField,
     setValue,
+    // Containers can't emit this as a mapper output (no such component input), so it rides
+    // the wrapper-facing bag only — where the error wrapper reads messages from.
+    ...(validationMessages !== undefined && { validationMessages }),
   } as WrapperFieldInputs;
 }

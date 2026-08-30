@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as _angular_forms from '@angular/forms';
 import * as _angular_forms_signals from '@angular/forms/signals';
 import { EnvironmentInjector } from '@angular/core';
 import { EnvironmentProviders } from '@angular/core';
@@ -32,6 +31,17 @@ import { Type } from '@angular/core';
 import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
+
+// @public
+export class ActivePageInitializedEvent implements FormEvent {
+    constructor(pageIndex: number, pageKey: string);
+    // (undocumented)
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly pageKey: string;
+    // (undocumented)
+    readonly type: "active-page-initialized";
+}
 
 // @public
 export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
@@ -132,7 +142,7 @@ export function arrayEvent(arrayKey: string): {
 };
 
 // @public
-export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never> {
+export interface ArrayField<TFields extends readonly ArrayItemDefinition[] = readonly ArrayItemDefinition[]> extends FieldDef<never>, ContainerValidation {
     readonly fields: TFields;
     readonly label?: never;
     readonly logic?: ContainerLogicConfig[];
@@ -366,6 +376,7 @@ export class DfTemplate {
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormModel<TFields>> {
     constructor();
     activeConfig: Signal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
+    activePageInitialized: _angular_core.OutputRef<ActivePageInitializedEvent>;
     cleared: _angular_core.OutputRef<FormClearEvent>;
     config: _angular_core.InputSignal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
     defaultValues: WritableSignal<TModel>;
@@ -378,10 +389,14 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         maxDerivationIterations?: number;
         submitButton?: _ng_forge_dynamic_forms.SubmitButtonOptions;
         nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
+        initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
         pagePreloadWindow?: number;
         fieldWindowing?: boolean | {
             eager?: number;
             placeholderHeight?: string;
+            park?: boolean | {
+                margin?: string;
+            };
         };
         excludeValueIfHidden?: boolean;
         excludeValueIfDisabled?: boolean;
@@ -400,15 +415,14 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     form: Signal<FieldTree<TModel, number | string, "writable">>;
     formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
     formOptions: _angular_core.InputSignal<FormOptions | undefined>;
-    formValue: Signal<(TModel extends infer T ? T extends TModel ? T extends _angular_forms.AbstractControl<unknown, infer TValue extends unknown, any> ? TValue : never : never : never) | TModel>;
+    formValue: Signal<TModel>;
     protected readonly idPrefix: Signal<string>;
-    // (undocumented)
     initialized$: rxjs.Observable<boolean>;
     initialized: _angular_core.OutputRef<boolean>;
     invalid: Signal<boolean>;
     protected onNativeSubmit(event: Event): void;
     onPageChange: _angular_core.OutputRef<PageChangeEvent>;
-    onPageNavigationStateChange: _angular_core.OutputRef<PageNavigationStateChangeEvent>;
+    onPageNavigationStateChange: _angular_core.OutputRef<PagerStateEvent>;
     pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
     protected placeholderGridClass(field: ResolvedField): string;
     renderPhase: Signal<"render" | "teardown">;
@@ -425,7 +439,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "activePageInitialized": "activePageInitialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }
@@ -569,6 +583,11 @@ export interface FieldOption<T = unknown> {
 }
 
 // @public
+export type FieldParkingOption = boolean | {
+    margin?: string;
+};
+
+// @public
 export type FieldPathAccess<TValue> = {
     [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };
@@ -597,6 +616,8 @@ export interface FieldRegistryLeaves {
 
 // @public
 export interface FieldRegistryWrappers {
+    // (undocumented)
+    'field-errors': FieldErrorsWrapper;
     // (undocumented)
     css: CssWrapper;
     // (undocumented)
@@ -684,8 +705,12 @@ export interface FormOptions {
     fieldWindowing?: boolean | {
         eager?: number;
         placeholderHeight?: string;
+        park?: boolean | {
+            margin?: string;
+        };
     };
     idPrefix?: string;
+    initialPage?: InitialPageConfig | number;
     maxDerivationIterations?: number;
     nextButton?: NextButtonOptions;
     pagePreloadWindow?: number;
@@ -712,10 +737,21 @@ export class FormSubmitEvent implements FormEvent {
 }
 
 // @public
+export class GoToPageEvent implements FormEvent {
+    constructor(
+    pageIndex: number,
+    options?: PageNavigationOptions | undefined);
+    readonly options?: PageNavigationOptions | undefined;
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly type: "go-to-page";
+}
+
+// @public
 export type GroupAllowedChildren = ArrayField | ContainerField | LeafFieldTypes | RowField | SimplifiedArrayField;
 
 // @public
-export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never> {
+export interface GroupField<TFields extends readonly GroupAllowedChildren[] = readonly GroupAllowedChildren[]> extends FieldDef<never>, ContainerValidation {
     // (undocumented)
     readonly fields: TFields;
     readonly label?: never;
@@ -789,6 +825,12 @@ export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
         readonly type: Reg['wrapperName'];
     };
 } : never;
+
+// @public
+export interface InitialPageConfig {
+    index: number;
+    validate?: boolean;
+}
 
 // @public
 export class InsertArrayItemEvent<TTemplate extends ArrayItemDefinitionTemplate = ArrayItemDefinitionTemplate> implements FormEvent {
@@ -943,6 +985,28 @@ export interface PageField<TFields extends readonly PageAllowedChildren[] = Page
 }
 
 // @public
+export interface PageNavigationOptions {
+    validate?: boolean;
+}
+
+// @public
+export interface PagerState {
+    currentPageIndex: number;
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    totalPages: number;
+}
+
+// @public
+export class PagerStateEvent implements FormEvent {
+    constructor(state: PagerState);
+    // (undocumented)
+    state: PagerState;
+    // (undocumented)
+    readonly type: "pager-state";
+}
+
+// @public
 export class PopArrayItemEvent implements FormEvent {
     constructor(
     arrayKey: string);
@@ -1001,6 +1065,17 @@ export function resolveDynamicValue<T>(value: DynamicValue<T> | undefined, fallb
 export type RowAllowedChildren = ContainerAllowedChildren;
 
 // @public
+export function rowError(ctx: FieldContext<unknown>, index: number, key: string, error: RowErrorSpec): ValidationError_2;
+
+// @public
+export interface RowErrorSpec {
+    // (undocumented)
+    readonly [param: string]: unknown;
+    readonly kind: string;
+    readonly message?: string;
+}
+
+// @public
 export interface RowField<TFields extends readonly RowAllowedChildren[] = readonly RowAllowedChildren[]> extends FieldDef<never> {
     readonly fields: TFields;
     readonly label?: never;
@@ -1052,7 +1127,7 @@ export class ShiftArrayItemEvent implements FormEvent {
 }
 
 // @public
-export interface SimplifiedArrayField extends FieldDef<never> {
+export interface SimplifiedArrayField extends FieldDef<never>, ContainerValidation {
     readonly addButton?: ArrayButtonConfig | false;
     readonly fields?: never;
     readonly label?: never;
@@ -1222,6 +1297,7 @@ export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;
 export function withFieldWindowing(config?: {
     eager?: number;
     placeholderHeight?: string;
+    park?: FieldParkingOption;
 }): DynamicFormFeature<'field-windowing'>;
 
 // @public (undocumented)
@@ -1276,6 +1352,7 @@ export interface WrappersBundle<T extends readonly WrapperRegistration[] = reado
 // @public
 export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
     loadComponent: LazyComponentLoader;
+    rendersFieldErrors?: boolean;
     types?: readonly string[];
     _wrapper?: T;
     wrapperName: string;

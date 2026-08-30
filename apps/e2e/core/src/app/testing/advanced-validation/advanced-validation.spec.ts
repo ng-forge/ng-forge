@@ -707,4 +707,176 @@ test.describe('Advanced Validation E2E Tests', () => {
       await expect(errorMessage).toHaveText('Please enter a valid email address');
     });
   });
+
+  test.describe('Container Validators (issue #568)', () => {
+    test('group validator surfaces its message and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-group-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-group-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const dateFrom = groupInputs.first();
+      const dateTo = groupInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This app registers withMaterialFields(), so the Material field-errors
+      // wrapper replaces the core default and renders a <mat-error>.
+      const containerError = scenario.locator('mat-error.df-mat-field-error');
+
+      // Nothing to complain about yet.
+      await expect(containerError).toHaveCount(0);
+
+      // End before start — the rule the group owns.
+      await helpers.fillInput(dateFrom, '2026-02-01');
+      await helpers.fillInput(dateTo, '2026-01-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toBeVisible();
+      await expect(containerError).toHaveText('The end must not be before the start.');
+      await expect(submitButton).toBeDisabled();
+
+      // Correcting the order clears it and re-enables submit.
+      await helpers.fillInput(dateTo, '2026-03-01');
+      await helpers.blurInput(dateTo);
+
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+
+    test('array validator targets the offending row and gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-array-validator');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-array-validator-test');
+      await expect(scenario).toBeVisible();
+
+      const rowInputs = scenario.locator(':is([id="soundPeriods"], [id$="_soundPeriods"]) input');
+      const from = rowInputs.first();
+      const to = rowInputs.nth(1);
+      const submitButton = helpers.getSubmitButton(scenario);
+      // This validator returns errors carrying a `fieldTree`, so they re-home onto the
+      // row's own input and render as an ordinary field error, not a container message.
+      const rowError = scenario.locator('mat-error');
+      const containerError = scenario.locator('mat-error.df-mat-field-error');
+
+      await expect(rowError).toHaveCount(0);
+
+      // A row whose end precedes its start — unreachable from a validator on
+      // either child, which is the whole point of the container-level rule.
+      await helpers.fillInput(from, '2026-01-02T10:00');
+      await helpers.fillInput(to, '2026-01-02T09:00');
+      await helpers.blurInput(to);
+
+      await expect(rowError).toBeVisible();
+      await expect(rowError).toHaveText('The end must not be before the start.');
+      await expect(containerError).toHaveCount(0);
+      await expect(submitButton).toBeDisabled();
+
+      await helpers.fillInput(to, '2026-01-02T11:00');
+      await helpers.blurInput(to);
+
+      await expect(rowError).toHaveCount(0);
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Delegated field errors (FIELD_ERROR_DISPLAY)', () => {
+    test('renders the message once, from the wrapper rather than the field', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/delegated-field-errors');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('delegated-field-errors-test');
+      await expect(scenario).toBeVisible();
+
+      const username = scenario.locator(':is([id="username"], [id$="_username"])');
+      const email = scenario.locator(':is([id="email"], [id$="_email"])');
+
+      await helpers.fillInput(username.locator('input'), 'x');
+      await helpers.clearAndFill(username.locator('input'), '');
+      await helpers.blurInput(username.locator('input'));
+      await helpers.fillInput(email.locator('input'), 'x');
+      await helpers.clearAndFill(email.locator('input'), '');
+      await helpers.blurInput(email.locator('input'));
+
+      // The wrapper is the field's PARENT, so its message is a sibling of the field
+      // host — count at scenario level rather than scoping inside either field.
+      const wrapperErrors = scenario.locator('mat-error.df-mat-field-error');
+      const allErrors = scenario.locator('mat-error');
+
+      // One delegated (wrapper) + one ordinary (email). Three would mean the delegated
+      // field rendered its own on top of the wrapper's.
+      await expect(allErrors).toHaveCount(2);
+      await expect(wrapperErrors).toHaveCount(1);
+      await expect(wrapperErrors).toHaveText('Username is required.');
+
+      // Styling parity: the wrapper's message must look like the field component's own.
+      // Text-only assertions let a wrapper render in body grey and still pass — that
+      // regression happened once already on PrimeNG.
+      const parity = await page.evaluate(
+        ({ errorSel, wrapperSel }) => {
+          const all = Array.from(document.querySelectorAll(errorSel));
+          const wrapped = document.querySelector(`${wrapperSel} ${errorSel}`);
+          const own = all.find((el) => el !== wrapped);
+          if (!wrapped || !own) return null;
+          const a = getComputedStyle(wrapped);
+          const b = getComputedStyle(own);
+          return {
+            color: [a.color, b.color],
+            fontSize: [a.fontSize, b.fontSize],
+            inheritsBody: a.color === getComputedStyle(document.body).color,
+          };
+        },
+        { errorSel: 'mat-error', wrapperSel: 'df-mat-field-errors' },
+      );
+
+      expect(parity).not.toBeNull();
+      expect(parity!.color[0]).toBe(parity!.color[1]);
+      expect(parity!.fontSize[0]).toBe(parity!.fontSize[1]);
+      expect(parity!.inheritsBody).toBe(false);
+    });
+  });
+
+  test.describe('Required cascade from a container', () => {
+    test('marks cascaded children required and honours a child opting out', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/required-cascade');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('required-cascade-test');
+      await expect(scenario).toBeVisible();
+
+      const street = scenario.locator(':is([id="street"], [id$="_street"]) input');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      // `street` inherits required from the group and is empty, so submit is gated.
+      await expect(submitButton).toBeDisabled();
+
+      // Filling only `street` satisfies the form: `apartment` opted out with
+      // `required: false`, so the cascade must not have forced it.
+      await helpers.fillInput(street, '1 Main St');
+      await expect(submitButton).toBeEnabled();
+    });
+  });
+
+  test.describe('Container errors opt-out (wrappers: null)', () => {
+    test('suppresses the message while the validator still gates submit', async ({ page, helpers }) => {
+      await page.goto('/#/test/advanced-validation/container-errors-opt-out');
+      await page.waitForLoadState('networkidle');
+
+      const scenario = helpers.getScenario('container-errors-opt-out-test');
+      await expect(scenario).toBeVisible();
+
+      const groupInputs = scenario.locator(':is([id="period"], [id$="_period"]) input');
+      const submitButton = helpers.getSubmitButton(scenario);
+
+      await helpers.fillInput(groupInputs.first(), '2026-02-01');
+      await helpers.fillInput(groupInputs.nth(1), '2026-01-01');
+      await helpers.blurInput(groupInputs.nth(1));
+
+      // No wrapper, so no message anywhere — but the rule still holds the form invalid.
+      await expect(scenario.locator('df-mat-field-errors')).toHaveCount(0);
+      await expect(scenario.locator('mat-error')).toHaveCount(0);
+      await expect(submitButton).toBeDisabled();
+    });
+  });
 });

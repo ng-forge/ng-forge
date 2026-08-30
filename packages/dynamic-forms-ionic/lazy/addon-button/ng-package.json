@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/addons/ion-button-addon.component.ts"
+  }
+}

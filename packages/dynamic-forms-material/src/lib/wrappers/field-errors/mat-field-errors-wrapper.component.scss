@@ -1,0 +1,19 @@
+// `mat-error` takes its colour and type scale from the enclosing `mat-form-field`
+// subscript. A container has no form field, so the same Material tokens are restated
+// here. Each declaration layers the shared `--df-*` override first, then Material's own
+// token, then Material's default — so a container message inherits the design system by
+// default and stays customizable through the documented variables.
+.df-mat-field-error {
+  display: block;
+  color: var(--df-error-color, var(--mat-form-field-error-text-color, #f44336));
+  font-family: var(--mat-form-field-subscript-text-font, inherit);
+  font-size: var(--df-error-font-size, var(--mat-form-field-subscript-text-size, 12px));
+  font-weight: var(--mat-form-field-subscript-text-weight, 400);
+  line-height: var(--mat-form-field-subscript-text-line-height, 20px);
+  letter-spacing: var(--mat-form-field-subscript-text-tracking, 0.0333333333em);
+  margin-top: var(--df-field-gap, 0.5rem);
+  // Material insets its subscript by the text field's horizontal padding — 16px, not
+  // exposed as a token — so a message rendered outside the form field would sit flush
+  // left and misalign with every field-level error above it.
+  padding-inline-start: var(--df-mat-error-inset, 16px);
+}

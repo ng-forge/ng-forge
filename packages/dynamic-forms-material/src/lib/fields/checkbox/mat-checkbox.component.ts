@@ -6,7 +6,7 @@ import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/
 import { MatCheckboxProps } from './mat-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
-import { MATERIAL_CONFIG } from '../../models/material-config.token';
+import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
 @Component({
   selector: 'df-mat-checkbox',

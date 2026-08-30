@@ -35,6 +35,12 @@ export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> 
   loadComponent: LazyComponentLoader;
   /** Field types this wrapper should auto-apply to. */
   types?: readonly string[];
+  /**
+   * Declares that this wrapper renders the wrapped field's errors, so the default
+   * `field-errors` wrapper is not appended next to it. Needed here as well as via
+   * `provideFieldErrorDisplay`: the chain resolves before any component exists to ask.
+   */
+  rendersFieldErrors?: boolean;
 }
 
 /** Type guard for WrapperTypeDefinition. */
@@ -75,6 +81,15 @@ export const WRAPPER_COMPONENT_CACHE = new InjectionToken<Map<string, Type<unkno
   providedIn: 'root',
   factory: () => new Map(),
 });
+
+/** Pending wrapper loads, shared by preloading and the normal render path. */
+export const WRAPPER_COMPONENT_LOAD_CACHE = new InjectionToken<Map<string, Promise<Type<unknown> | undefined>>>(
+  'WRAPPER_COMPONENT_LOAD_CACHE',
+  {
+    providedIn: 'root',
+    factory: () => new Map(),
+  },
+);
 
 /**
  * Pre-computed reverse index: `fieldType → WrapperConfig[]` for every

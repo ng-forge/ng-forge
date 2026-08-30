@@ -500,6 +500,68 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('container validator preservation', () => {
+    it('should preserve validators on the expanded array field', () => {
+      const input = fields({
+        key: 'periods',
+        type: 'array',
+        template: objectTemplate,
+        validators: [{ type: 'custom', functionName: 'periodOrder' }],
+      } as never);
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.validators).toEqual([{ type: 'custom', functionName: 'periodOrder' }]);
+    });
+
+    it('should preserve validationMessages on the expanded array field', () => {
+      const input = fields({
+        key: 'periods',
+        type: 'array',
+        template: objectTemplate,
+        validators: [{ type: 'custom', functionName: 'periodOrder' }],
+        validationMessages: { periodOrder: 'The end must not be before the start.' },
+      } as never);
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.validationMessages).toEqual({ periodOrder: 'The end must not be before the start.' });
+    });
+
+    it('should not include validators when not specified', () => {
+      const input = fields({
+        key: 'tags',
+        type: 'array',
+        template: primitiveTemplate,
+      });
+
+      const result = normalizeSimplifiedArrays(input);
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField).not.toHaveProperty('validators');
+      expect(arrayField).not.toHaveProperty('validationMessages');
+    });
+  });
+
+  it('should preserve validateWhenHidden on the expanded array field', () => {
+    const input = fields({
+      key: 'periods',
+      type: 'array',
+      template: objectTemplate,
+      validators: [{ type: 'custom', functionName: 'periodOrder' }],
+      validateWhenHidden: true,
+    } as never);
+
+    const result = normalizeSimplifiedArrays(input);
+
+    // Documented on the simplified-array surface, so dropping it here would make the
+    // option silently behave as `false`.
+    const arrayField = result[0] as Record<string, unknown>;
+    expect(arrayField.validateWhenHidden).toBe(true);
+  });
+
   describe('minLength/maxLength preservation', () => {
     it('should preserve minLength on the expanded array field', () => {
       const input = fields({

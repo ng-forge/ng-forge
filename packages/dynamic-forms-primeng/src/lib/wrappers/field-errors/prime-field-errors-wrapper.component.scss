@@ -1,0 +1,10 @@
+// `.p-error` carries no styling from PrimeNG itself — the field components style it
+// through their own component-scoped `_form-field.scss`, which does not reach this
+// wrapper. Restated here with the same tokens so a container message matches a
+// field-level one. Keep in lockstep with `styles/_form-field.scss`.
+.p-error {
+  color: var(--df-error-color, var(--p-red-500, #ef4444));
+  font-size: var(--df-error-font-size, 0.875rem);
+  display: block;
+  margin-top: var(--df-prime-error-margin-top, 0.25rem);
+}

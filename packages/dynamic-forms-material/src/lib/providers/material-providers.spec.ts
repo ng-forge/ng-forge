@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
-import { MATERIAL_CONFIG } from '../models/material-config.token';
-import type { MaterialConfig } from '../models/material-config';
+import { MATERIAL_CONFIG, type MaterialConfig } from '@ng-forge/dynamic-forms-material/shared';
 import { withMaterialFields } from './material-providers';
 
 describe('withMaterialFields', () => {
@@ -48,5 +47,29 @@ describe('withMaterialFields', () => {
     });
 
     expect(TestBed.inject(MATERIAL_CONFIG)).toEqual(config);
+  });
+
+  it('registers a field-errors wrapper that overrides the core default', () => {
+    const fields = withMaterialFields();
+
+    const wrapper = fields.find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
+
+    // Same name as the built-in, so the Material component replaces the neutral
+    // core default wherever a container declares validators.
+    expect(wrapper).toBeDefined();
+  });
+
+  it('loads the Material field-errors component', async () => {
+    const wrapper = withMaterialFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
+
+    const loaded = await wrapper.loadComponent();
+
+    expect(loaded.default ?? loaded).toBeDefined();
+  });
+
+  it('declares rendersFieldErrors so the built-in default is not appended alongside it', () => {
+    const wrapper = withMaterialFields().find((f) => 'wrapperName' in f && f.wrapperName === 'field-errors');
+
+    expect(wrapper.rendersFieldErrors).toBe(true);
   });
 });

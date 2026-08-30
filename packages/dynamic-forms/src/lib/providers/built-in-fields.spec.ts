@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { BUILT_IN_FIELDS } from './built-in-fields';
+import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './built-in-fields';
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { arrayFieldMapper, groupFieldMapper, rowFieldMapper, textFieldMapper } from '@ng-forge/dynamic-forms/internal';
 import { pageFieldMapper } from '@ng-forge/dynamic-forms/internal';
@@ -144,6 +144,20 @@ describe('BUILT_IN_FIELDS', () => {
       modules.forEach((module) => {
         expect(module).toBeDefined();
       });
+    });
+  });
+
+  describe('BUILT_IN_WRAPPERS', () => {
+    it('declares rendersFieldErrors on field-errors so it is not appended next to a custom one', () => {
+      const wrapper = BUILT_IN_WRAPPERS.find((w) => w.wrapperName === 'field-errors');
+
+      expect(wrapper?.rendersFieldErrors).toBe(true);
+    });
+
+    it('leaves layout wrappers without the error-rendering capability', () => {
+      const layout = BUILT_IN_WRAPPERS.filter((w) => w.wrapperName !== 'field-errors');
+
+      expect(layout.every((w) => w.rendersFieldErrors === undefined)).toBe(true);
     });
   });
 });

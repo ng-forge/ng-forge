@@ -1,10 +1,9 @@
+/* eslint-disable @nx/enforce-module-boundaries -- package self-imports preserve real lazy secondary entrypoints. */
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
-import { BootstrapConfig } from '../models/bootstrap-config';
-import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
-import type { BsButtonAddon, BsIconAddon } from '../types/addons';
+import { BOOTSTRAP_CONFIG, type BootstrapConfig, type BsButtonAddon, type BsIconAddon } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 /** Field type definitions for Bootstrap components. */
 export type BootstrapFieldTypes = FieldTypeDefinition[];
@@ -18,9 +17,20 @@ type BootstrapConfigFeature = {
  * Default `withBootstrapFields()` shape — field defs + the auto-included
  * addons feature so `bs-icon` / `bs-button` work out of the box.
  */
-type BootstrapFieldsWithAddons = [...BootstrapFieldTypes, BootstrapAddonsFeature];
+type BootstrapFieldsWithAddons = [...BootstrapFieldTypes, BootstrapAddonsFeature, WrapperTypeDefinition];
 
-type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature, BootstrapConfigFeature];
+type BootstrapFieldsWithConfig = [...BootstrapFieldTypes, BootstrapAddonsFeature, WrapperTypeDefinition, BootstrapConfigFeature];
+
+/**
+ * Replaces the neutral core `field-errors` wrapper with the Bootstrap one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const BOOTSTRAP_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/bs-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
+};
 
 /**
  * Provides Bootstrap field type definitions for the dynamic form system,
@@ -37,7 +47,7 @@ export function withBootstrapFields(config: BootstrapConfig | undefined): Bootst
 export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldsWithAddons | BootstrapFieldsWithConfig {
   // Always include the addons feature — bs-icon / bs-button are part of
   // the canonical Bootstrap surface.
-  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons()];
+  const base: unknown[] = [...BOOTSTRAP_FIELD_TYPES, withBootstrapAddons(), BOOTSTRAP_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({
@@ -54,7 +64,7 @@ export function withBootstrapFields(config?: BootstrapConfig): BootstrapFieldsWi
 
 const BS_ICON_KIND: AddonTypeDefinition<BsIconAddon> = {
   type: 'bs-icon',
-  loadComponent: () => import('../addons/bs-icon-addon.component').then((m) => m.BsIconAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-bootstrap/lazy/addon-icon').then((m) => m.BsIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'bs-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -64,7 +74,7 @@ const BS_ICON_KIND: AddonTypeDefinition<BsIconAddon> = {
 
 const BS_BUTTON_KIND: AddonTypeDefinition<BsButtonAddon> = {
   type: 'bs-button',
-  loadComponent: () => import('../addons/bs-button-addon.component').then((m) => m.BsButtonAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-bootstrap/lazy/addon-button').then((m) => m.BsButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

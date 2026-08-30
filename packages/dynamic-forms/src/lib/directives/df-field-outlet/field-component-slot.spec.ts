@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -189,5 +189,99 @@ describe('FieldComponentSlot', () => {
     expect(slot.snapshot()).toBe(mountedSnap);
     slot.pushInputs(bag);
     expect(slot.snapshot()).toBe(mountedSnap);
+  });
+
+  describe('parking', () => {
+    const renderedLabel = () => (fixture.nativeElement.querySelector('[data-testid="leaf-a"]') as HTMLInputElement).value;
+
+    const mounted = () => {
+      const slot = new FieldComponentSlot();
+      slot.mountOrReuse(host.vcr(), LeafAComponent, host.fieldInjector, envInjector, { label: 'one' });
+      fixture.detectChanges();
+      return slot;
+    };
+
+    it('starts unparked', () => {
+      expect(mounted().parked()).toBe(false);
+    });
+
+    it('park() stops the component view from refreshing', () => {
+      const slot = mounted();
+      expect(renderedLabel()).toBe('one');
+
+      slot.park();
+      slot.pushInputs({ label: 'two' });
+      fixture.detectChanges();
+
+      expect(slot.parked()).toBe(true);
+      expect(renderedLabel()).toBe('one');
+    });
+
+    it('unpark() resyncs the DOM with everything missed while parked', () => {
+      const slot = mounted();
+      slot.park();
+      slot.pushInputs({ label: 'two' });
+      fixture.detectChanges();
+
+      slot.unpark();
+      fixture.detectChanges();
+
+      expect(slot.parked()).toBe(false);
+      expect(renderedLabel()).toBe('two');
+    });
+
+    it('refresh() updates a parked view without reattaching it', () => {
+      const slot = mounted();
+      slot.park();
+      slot.pushInputs({ label: 'two' });
+
+      slot.refresh();
+
+      expect(slot.parked()).toBe(true);
+      expect(renderedLabel()).toBe('two');
+    });
+
+    it('unpark() is inert when the view is already live', () => {
+      const slot = mounted();
+      const snapshot = slot.snapshot();
+      if (snapshot.phase === 'empty') throw new Error('expected a mounted component');
+      const reattach = vi.spyOn(snapshot.ref.changeDetectorRef, 'reattach');
+      const markForCheck = vi.spyOn(snapshot.ref.changeDetectorRef, 'markForCheck');
+
+      slot.unpark();
+
+      expect(reattach).not.toHaveBeenCalled();
+      expect(markForCheck).not.toHaveBeenCalled();
+    });
+
+    it('park() is inert on an empty slot', () => {
+      const slot = new FieldComponentSlot();
+      expect(() => slot.park()).not.toThrow();
+      expect(slot.parked()).toBe(false);
+    });
+
+    it('keeps the field parked across a wrapper-chain rebuild that reuses the ref', () => {
+      const slot = mounted();
+      slot.park();
+
+      // Same component class — mountOrReuse takes the reuse path.
+      slot.detach();
+      slot.mountOrReuse(host.vcr(), LeafAComponent, host.fieldInjector, envInjector, { label: 'two' });
+      fixture.detectChanges();
+
+      expect(slot.parked()).toBe(true);
+      expect(renderedLabel()).toBe('one');
+    });
+
+    it('a fresh ref from a component-class swap starts unparked', () => {
+      const slot = mounted();
+      slot.park();
+
+      slot.mountOrReuse(host.vcr(), LeafBComponent, host.fieldInjector, envInjector, { label: 'b' });
+      fixture.detectChanges();
+
+      expect(slot.parked()).toBe(false);
+      expect((fixture.nativeElement.querySelector('[data-testid="leaf-b"]') as HTMLInputElement).value).toBe('b');
+    });
   });
 });

@@ -1,0 +1,9 @@
+// `ion-note[color=danger]` supplies the colour, but the block layout and font size
+// come from the field components' own component-scoped `_form-field.scss`, which does
+// not reach this wrapper. Restated so a container message matches a field-level one.
+// Keep in lockstep with `styles/_form-field.scss`.
+.df-ion-error {
+  display: block;
+  color: var(--df-error-color, var(--ion-color-danger, #eb445a));
+  font-size: var(--df-error-font-size, 0.875rem);
+}

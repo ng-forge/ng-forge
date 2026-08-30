@@ -1,7 +1,7 @@
 import { signal, type WritableSignal } from '@angular/core';
 import type { AddonActionContext, AddonActionPreset, Logger } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runPrimePresetAction } from './preset-actions';
+import { runPrimePresetAction } from '@ng-forge/dynamic-forms-primeng/shared';
 
 interface LoggerStub extends Logger {
   warn: ReturnType<typeof vi.fn>;

@@ -2,8 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   EnvironmentInjector,
   Injector,
+  inject,
   Type,
   ViewContainerRef,
   input,
@@ -34,9 +36,11 @@ import { createWrapperChainController } from './wrapper-chain-controller';
 })
 class TestLeafA {
   static instances = 0;
+  static destroyed = 0;
   readonly label = input<string>();
   constructor() {
     TestLeafA.instances++;
+    inject(DestroyRef).onDestroy(() => TestLeafA.destroyed++);
   }
 }
 
@@ -183,7 +187,29 @@ function setupController(
 describe('createWrapperChainController', () => {
   beforeEach(() => {
     TestLeafA.instances = 0;
+    TestLeafA.destroyed = 0;
     TestLeafB.instances = 0;
+  });
+
+  it('destroys a detached view when the chain is rebuilt instead of orphaning it', async () => {
+    const f = setupController();
+    await flush();
+    expect(TestLeafA.instances).toBe(1);
+
+    // Close the gate: the chain is detached, not destroyed, so focus survives a flicker.
+    f.gate.set(false);
+    await flush();
+    expect(TestLeafA.destroyed).toBe(0);
+
+    // Now force a structural rebuild while that view is still detached. vcr.clear() cannot
+    // reach it, so without an explicit destroy the handle is overwritten and the view leaks
+    // with its subscriptions still live.
+    f.rebuildKey.set(TestLeafB);
+    f.gate.set(true);
+    await flush();
+
+    expect(TestLeafA.destroyed).toBe(1);
+    f.destroy();
   });
 
   it('renders once on initial mount when gate=true and no wrappers', async () => {

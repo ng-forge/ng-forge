@@ -51,7 +51,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-form-mcp openapi-generator'
+  LIBRARY_PACKAGES: 'dynamic-forms dynamic-forms-material dynamic-forms-bootstrap dynamic-forms-ionic dynamic-forms-primeng dynamic-forms-cli dynamic-form-mcp openapi-generator'
 
 jobs:
   # Push to release-* branches just surfaces this workflow in the PR checks — the actual
@@ -226,7 +226,7 @@ jobs:
           # Path filter `-- packages/` further restricts to commits that actually touched
           # the published library sources. A `feat(docs): …` or `fix(examples): …` no
           # longer triggers a nightly because it doesn't change anything that ships to
-          # npm. Only changes under `packages/**` (the seven workspaces in
+          # npm. Only changes under `packages/**` (the workspaces in
           # LIBRARY_PACKAGES) qualify.
           #
           # Disable errexit + pipefail for this pipeline so we can distinguish grep's

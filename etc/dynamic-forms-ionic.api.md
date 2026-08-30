@@ -50,6 +50,7 @@ import { TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
+import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -85,7 +86,7 @@ export class IonicButtonAddonComponent {
     protected readonly addon: _angular_core.Signal<IonicButtonAddon>;
     // (undocumented)
     protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    protected readonly color: _angular_core.Signal<("danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning") | undefined>;
+    protected readonly color: _angular_core.Signal<"danger" | "dark" | "light" | "medium" | "primary" | "secondary" | "success" | "tertiary" | "warning" | undefined>;
     // (undocumented)
     protected readonly fill: _angular_core.Signal<"clear" | "default" | "outline" | "solid">;
     // (undocumented)

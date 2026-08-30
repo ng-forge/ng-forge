@@ -124,10 +124,10 @@ export interface AddonTypeSchema {
 export function applyMetaToElement(element: Element, meta: FieldMeta | undefined, previouslyApplied: Set<string>): Set<string>;
 
 // @public (undocumented)
-export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidator(config: ValidatorConfig, fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public (undocumented)
-export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>): void;
+export function applyValidators(configs: ValidatorConfig[], fieldPath: SchemaPath<any> | SchemaPathTree<any>, attachment?: ValidatorAttachment): void;
 
 // @public
 export const ARRAY_CONTEXT: InjectionToken<ArrayContext>;
@@ -308,7 +308,7 @@ export interface CreateNgForgeFieldFixtureOptions<TValue = unknown> {
 }
 
 // @public
-export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T>>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
+export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T> | undefined>, validationMessages: Signal<ValidationMessages | undefined>, defaultValidationMessages?: Signal<ValidationMessages | undefined>, injector?: Injector): Signal<ResolvedError[]>;
 
 // @public
 export function createWrappers<const T extends readonly WrapperRegistration[]>(...registrations: T): WrappersBundle<T>;
@@ -400,6 +400,9 @@ export class EventBus {
 }
 
 // @public
+export const FIELD_ERROR_DISPLAY: InjectionToken<FieldErrorDisplayClaim>;
+
+// @public
 export const FIELD_REGISTRY: InjectionToken<Map<string, FieldTypeDefinition<any>>>;
 
 // @public
@@ -419,6 +422,41 @@ export interface FieldAddonSupportEntry {
     readonly name: string;
     // (undocumented)
     readonly slots: FieldAddonSupport['slots'];
+}
+
+// @public
+export interface FieldErrorDisplayClaim {
+    readonly claimedKey: Signal<string | undefined>;
+}
+
+// @public
+export interface FieldErrors {
+    readonly errorId: Signal<string>;
+    readonly errors: Signal<ResolvedError[]>;
+    readonly errorsToDisplay: Signal<ResolvedError[]>;
+    readonly showErrors: Signal<boolean>;
+}
+
+// @public (undocumented)
+export interface FieldErrorsOptions {
+    readonly fieldInputs: Signal<WrapperFieldInputs | undefined>;
+    readonly injector?: Injector;
+    readonly validationMessages?: Signal<ValidationMessages | undefined>;
+}
+
+// @public
+export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
+    readonly claimedKey: i0.Signal<string | undefined>;
+    // (undocumented)
+    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    // (undocumented)
+    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
+    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
 }
 
 // @public
@@ -526,6 +564,9 @@ export const INITIALIZATION_TIMEOUT_MS: InjectionToken<number>;
 
 // @public
 export function injectAddonTypeRegistry(): AddonTypeRegistryRef;
+
+// @public
+export function injectFieldErrors(options: FieldErrorsOptions): FieldErrors;
 
 // @public
 export function injectFieldSignalContext<TModel extends Record<string, unknown> = Record<string, unknown>>(): FieldSignalContext<TModel>;
@@ -870,6 +911,9 @@ export interface PresetCollaborators {
 export function previousButtonFieldMapper<TProps>(fieldDef: BaseNavigationButtonField<TProps>): Signal<Record<string, unknown>>;
 
 // @public
+export function provideFieldErrorDisplay(wrapper: () => Type<FieldErrorDisplayClaim>): Provider;
+
+// @public
 export function provideTestValidationMessages(messages: ValidationMessages): Provider;
 
 // @public (undocumented)
@@ -967,7 +1011,7 @@ export function setupMetaTracking(elementRef: ElementRef<HTMLElement>, meta: Sig
 export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButtonField<TProps>): Signal<Record<string, unknown>>;
 
 // @public
-export function shouldShowErrors<T>(field: Signal<FieldTree<T>>): Signal<boolean>;
+export function shouldShowErrors<T>(field: Signal<FieldTree<T> | undefined>): Signal<boolean>;
 
 // @public (undocumented)
 export interface SliderField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, number, FieldMeta, TNullable> {
@@ -1112,6 +1156,7 @@ export interface WrappersBundle<T extends readonly WrapperRegistration[] = reado
 // @public
 export interface WrapperTypeDefinition<T extends WrapperConfig = WrapperConfig> {
     loadComponent: LazyComponentLoader;
+    rendersFieldErrors?: boolean;
     types?: readonly string[];
     _wrapper?: T;
     wrapperName: string;

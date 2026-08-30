@@ -2,11 +2,13 @@ import {
   computed,
   DestroyRef,
   inject,
+  injectAsync,
   Injectable,
   InjectionToken,
   Injector,
   linkedSignal,
   OnDestroy,
+  resource,
   runInInjectionContext,
   signal,
   Signal,
@@ -24,6 +26,7 @@ import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { isPageField, PageField } from '@ng-forge/dynamic-forms/internal';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
+import { GoToPageEvent, PageNavigationOptions } from '../events/constants/go-to-page.event';
 import { FormClearEvent } from '../events/constants/form-clear.event';
 import { FormResetEvent } from '../events/constants/form-reset.event';
 import { FormSubmitEvent } from '../events/constants/submit.event';
@@ -38,8 +41,6 @@ import { DynamicFormLogger } from '@ng-forge/dynamic-forms/internal';
 import { ArrayItemRegistryService } from '../core/registry/array-item-registry.service';
 import { FunctionRegistryService } from '@ng-forge/dynamic-forms/internal';
 import { SchemaRegistryService } from '../core/registry/schema-registry.service';
-import { createSchemaFromFields } from '../core/schema-builder';
-import { createFormLevelSchema } from '../core/form-schema-merger';
 import { deepMergeDefaults, isEqual } from '@ng-forge/dynamic-forms/internal';
 import { CONTAINER_FIELD_PROCESSORS } from '../utils/container-utils/container-field-processors';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -51,7 +52,7 @@ import { walkAndValidateAddons } from '../utils/validate-form-config/validate-fi
 import { addonWarningKey, formatAddonWarning } from '../utils/validate-form-config/addon-warning';
 import { ADDON_TYPE_REGISTRY } from '@ng-forge/dynamic-forms/internal';
 import { VALUE_EXCLUSION_DEFAULTS } from '../providers/features/value-exclusion/value-exclusion.token';
-import { filterFormValue } from '../utils/value-filter/value-filter';
+import { filterFormValue, hasEnabledValueExclusion } from '../utils/value-filter/value-filter';
 import { DEV_MODE } from '../utils/dev-mode';
 import { ValueExclusionConfig } from '@ng-forge/dynamic-forms/internal';
 
@@ -309,13 +310,6 @@ export class FormStateManager<
     return detectFormMode(config.fields || []);
   });
 
-  /** Validation result for the current form configuration. */
-  private readonly formConfigValidation = computed(() => {
-    const config = this.activeConfig();
-    if (!config) return { isValid: true, errors: [] as string[], warnings: [] as string[] };
-    return FormModeValidator.validateFormConfiguration(config.fields || []);
-  });
-
   /** Effective form options (merged from config and input). */
   readonly effectiveFormOptions = computed(() => {
     const config = this.activeConfig();
@@ -323,6 +317,14 @@ export class FormStateManager<
     const inputOptions = this.deps.formOptions() ?? undefined;
     return { ...configOptions, ...inputOptions };
   });
+
+  /**
+   * A page the form has been asked to navigate to but that no pager has applied yet.
+   * Held here because the orchestrator mounts behind the render gate: a request made on
+   * `initialized` reaches the bus before that subscription exists, and would otherwise be
+   * dropped. The orchestrator drains this once it can resolve visibility and validity.
+   */
+  readonly pendingPageRequest = signal<{ index: number; options?: PageNavigationOptions } | null>(null);
 
   /** Page field definitions (for paged forms). */
   readonly pageFieldDefinitions = computed(() => {
@@ -379,6 +381,35 @@ export class FormStateManager<
     return this.createEmptyFormSetup(registry);
   });
 
+  /** Config generation that owns the current form setup. */
+  private readonly formSetupConfig = computed(() => {
+    const state = this.machine.state();
+
+    if (isReadyState(state)) return state.config;
+    if (isTransitioningState(state)) {
+      if (state.phase === Phase.Restoring && state.pendingFormSetup) {
+        return state.pendingConfig;
+      }
+      return state.currentConfig;
+    }
+    if (state.type === LifecycleState.Initializing) return state.config;
+    if (state.type === LifecycleState.Uninitialized) return this.activeConfig();
+    return undefined;
+  });
+
+  /** Active page state, retained across pager remounts and scoped to its form config. */
+  readonly activePageState = linkedSignal<
+    object | undefined,
+    {
+      config: object | undefined;
+      initialized: boolean;
+      index: number;
+    }
+  >({
+    source: this.activeConfig,
+    computation: (config) => ({ config, initialized: false, index: 0 }),
+  });
+
   /** Default values computed from field definitions. */
   readonly defaultValues = linkedSignal(() => this.formSetup().defaultValues as TModel);
 
@@ -386,7 +417,39 @@ export class FormStateManager<
   private readonly validKeys = computed(() => {
     const schemaFields = this.formSetup().schemaFields;
     if (!schemaFields || schemaFields.length === 0) return undefined;
-    return new Set(schemaFields.map((f) => f.key).filter((key): key is string => key !== undefined));
+
+    const keys = new Set<string>();
+    for (const field of schemaFields) {
+      if (field.key === undefined) continue;
+      keys.add(field.key);
+    }
+    return keys;
+  });
+
+  /** Whether outward value binding needs the reactive exclusion pipeline. */
+  private readonly boundValueExclusionEnabled = computed(() => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return false;
+
+    const options = this.effectiveFormOptions();
+    return hasEnabledValueExclusion(setup.schemaFields, BOUND_VALUE_EXCLUSION_BASELINE, {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    });
+  });
+
+  /** Whether filtered values need reactive hidden/disabled/readonly state reads. */
+  private readonly valueExclusionEnabled = computed(() => {
+    const setup = this.formSetup();
+    if (!setup.schemaFields || setup.schemaFields.length === 0) return false;
+
+    const options = this.effectiveFormOptions();
+    return hasEnabledValueExclusion(setup.schemaFields, this.valueExclusionDefaults, {
+      excludeValueIfHidden: options.excludeValueIfHidden,
+      excludeValueIfDisabled: options.excludeValueIfDisabled,
+      excludeValueIfReadonly: options.excludeValueIfReadonly,
+    });
   });
 
   /**
@@ -395,11 +458,11 @@ export class FormStateManager<
    * transitions are captured. Arrays are treated as leaves (whole-array preservation only).
    */
   private readonly fieldStateSnapshot = computed((): Record<string, FieldExclusionAxes> => {
-    const setup = this.formSetup();
-    if (!setup.schemaFields || setup.schemaFields.length === 0) return {};
+    const schemaFields = this.formSetup().schemaFields;
+    if (!this.formSchemaReady() || !this.boundValueExclusionEnabled() || !schemaFields || schemaFields.length === 0) return {};
 
     const snapshot: Record<string, FieldExclusionAxes> = {};
-    collectFieldStateSnapshot(setup.schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
+    collectFieldStateSnapshot(schemaFields, asFieldTreeRecord(this.form()), [], snapshot);
     return snapshot;
   });
 
@@ -415,6 +478,28 @@ export class FormStateManager<
   /** Tracks per-path exclusion state across save-effect runs to detect newly-excluded fields. */
   private readonly prevFieldStateSnapshot = signal<Record<string, FieldExclusionAxes>>({});
 
+  /** Pending reference pushed to `deps.value` by the outward-sync effect. */
+  private readonly lastOutwardValue: { current: unknown; pending: boolean } = { current: undefined, pending: false };
+
+  /** Last `deps.value` accepted as a genuine host change (memo for {@link externalValue}). */
+  private readonly lastExternalValue: { current: unknown } = { current: undefined };
+
+  /**
+   * `deps.value` with our own outward sync filtered out. Without this the form reacts to the
+   * value it just published: `entity` re-derives, which moves `boundFormValue`, which writes
+   * `deps.value` again — a full whole-form merge per keystroke.
+   */
+  private readonly externalValue = computed<TModel>(() => {
+    const incoming = this.deps.value();
+    if (this.lastOutwardValue.pending && incoming === this.lastOutwardValue.current) {
+      this.lastOutwardValue.pending = false;
+      return this.lastExternalValue.current as TModel;
+    }
+    this.lastOutwardValue.pending = false;
+    this.lastExternalValue.current = incoming;
+    return incoming as TModel;
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────
   // Computed Signals - Entity & Form
   // ─────────────────────────────────────────────────────────────────────────────
@@ -422,11 +507,18 @@ export class FormStateManager<
   /** Entity (form value merged with defaults). */
   readonly entity = linkedSignal<TModel>(
     () => {
-      const inputValue = this.deps.value();
+      // Read for the dependency only: `externalValue` filters our own echo so this does not
+      // re-derive on the value it just published. Content comes from the live host signal,
+      // because the filter's memo is stale by exactly the amount it suppressed.
+      //
+      // The narrowing this buys: a host write that `isEqual` considers identical to our last
+      // outward push no longer re-derives the entity. That is correct here (the value is the
+      // same) but it does mean host writes are deduplicated by value, not by reference.
+      this.externalValue();
+      const inputValue = untracked(() => this.deps.value()) as TModel;
       const defaults = this.defaultValues();
       const keys = this.validKeys();
       const saved = this.excludedValueStore();
-
       // Deep-merge so a partial nested object in `inputValue` (e.g. a group
       // value missing one of its declared sub-field keys) does not orphan
       // the absent sub-field in the Signal Forms validation graph.
@@ -452,38 +544,87 @@ export class FormStateManager<
     },
   );
 
+  /** Loads once, on the first non-empty schema request. Angular memoizes the import promise. */
+  private readonly loadFormSchemaService = injectAsync(() => import('../core/form-schema.service'));
+
   /**
-   * Schema derived from the current form config and field setup.
-   * Separated from `form` so schema construction is memoized independently.
-   * Requires `runInInjectionContext` because `createSchemaFromFields` calls `inject()` internally.
-   *
-   * Readable so the WebMCP registrar can build a throwaway shadow form over the
-   * same schema to dry-run an agent's proposed values without touching the live
-   * form (which would fire derivations and mark fields dirty).
-   *
-   * @internal
+   * The actual schema request. There is deliberately no `requiresSchema` capability predicate:
+   * the first value-bearing field requests the lazy compiler, including a plain field with no
+   * optional rules. An empty form remains the only no-request case.
    */
-  readonly formSchema = computed((): Schema<TModel> | undefined =>
-    runInInjectionContext(this.injector, () => {
-      const setup = this.formSetup();
-      const config = this.activeConfig();
+  private readonly formSchemaRequest = computed(() => {
+    const setup = this.formSetup();
+    const config = this.activeConfig();
+    if (!config || (!(setup.schemaFields?.length > 0) && !config.schema)) return undefined;
 
-      if (!config) return undefined;
+    return {
+      fields: setup.schemaFields ?? [],
+      registry: setup.registry,
+      formLevelSchema: config.schema,
+      validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
+    };
+  });
 
-      if (setup.schemaFields?.length) {
-        return createSchemaFromFields(setup.schemaFields, setup.registry, {
-          formLevelSchema: config.schema,
-          validateWhenHidden: this.effectiveFormOptions().validateWhenHidden,
-        }) as Schema<TModel>;
-      }
+  /**
+   * Declarative async bridge between `injectAsync()` and Signal Forms' synchronous schema API.
+   * The service is resolved first; schema construction then runs synchronously in this form's
+   * injection context. `resource()` also participates in Angular application stability and SSR.
+   */
+  private readonly formSchemaResource = resource({
+    params: () => this.formSchemaRequest(),
+    loader: async ({ params }) => {
+      const schemaService = await this.loadFormSchemaService();
+      // FormConfig stores Standard Schema input as `unknown`; TModel is inferred independently
+      // from the same field definitions. The service stays model-agnostic and this boundary
+      // restores the state manager's inferred type after compilation.
+      return runInInjectionContext(this.injector, () => schemaService.create(params)) as Schema<TModel>;
+    },
+  });
 
-      if (config.schema) {
-        return createFormLevelSchema(config.schema) as Schema<TModel>;
-      }
+  /**
+   * Last schema the resource produced, with the request it was built from.
+   *
+   * A params change clears the resource's value, not just its status, so without this the form
+   * would rebuild schemaless and then rebuild again. Instance-scoped, never module-scoped, so it
+   * stays SSR-safe.
+   */
+  private readonly schemaCache: { current: { schema: Schema<TModel>; request: unknown } | undefined } = { current: undefined };
 
+  /** Keeps {@link schemaCache} in step with the resource, and drops it on failure. */
+  private readonly trackSchemaCache = computed(() => {
+    const request = this.formSchemaRequest();
+    if (!request) {
+      this.schemaCache.current = undefined;
       return undefined;
-    }),
-  );
+    }
+    if (this.formSchemaResource.status() === 'error') {
+      this.schemaCache.current = undefined;
+      return undefined;
+    }
+    if (this.formSchemaResource.hasValue()) {
+      this.schemaCache.current = { schema: this.formSchemaResource.value(), request };
+    }
+    return this.schemaCache.current;
+  });
+
+  /** Whether the schema in hand was built from the current request. */
+  readonly isSchemaCurrent = computed(() => {
+    if (this.formSetupConfig() !== this.activeConfig()) return false;
+    const request = this.formSchemaRequest();
+    if (!request) return true;
+    return this.trackSchemaCache()?.request === request;
+  });
+
+  /** True once a schema is in hand, or the compiler failed and the degraded path opened. */
+  readonly formSchemaReady = computed(() => {
+    if (this.formSetupConfig() !== this.activeConfig()) return false;
+    if (!this.formSchemaRequest()) return true;
+    if (this.formSchemaResource.status() === 'error') return true;
+    return this.trackSchemaCache() !== undefined;
+  });
+
+  /** Schema derived from the current form config and field setup. */
+  private readonly formSchema = computed((): Schema<TModel> | undefined => this.trackSchemaCache()?.schema);
 
   /** The Angular Signal Form instance. */
   readonly form = computed(() => {
@@ -531,16 +672,20 @@ export class FormStateManager<
   /** Intermediate computed that unwraps the double-signal (form()()) once. */
   private readonly formInstance = computed(() => this.form()());
 
+  /** Value of the model Signal Forms owns. */
+  private readonly modelValue = computed(() => this.formInstance().value());
+
   /** Current form values (reactive). */
-  readonly formValue = computed(() => this.formInstance().value());
+  readonly formValue = computed(() => this.modelValue() as TModel);
 
   /** Form values filtered by value exclusion rules. */
   readonly filteredFormValue = computed(() => {
-    const rawValue = this.formValue();
+    const rawValue = this.modelValue();
     const setup = this.formSetup();
+    const schemaFields = setup.schemaFields;
     const options = this.effectiveFormOptions();
 
-    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+    if (!this.formSchemaReady() || !schemaFields || schemaFields.length === 0) {
       return rawValue;
     }
 
@@ -562,21 +707,23 @@ export class FormStateManager<
 
     return filterFormValue(
       rawValue as Record<string, unknown>,
-      setup.schemaFields,
+      schemaFields,
       fieldTreeRecord,
       setup.registry,
       this.valueExclusionDefaults,
       formOptions,
+      this.valueExclusionEnabled(),
     );
   });
 
   /** Form value used for the outward two-way binding sync. */
   private readonly boundFormValue = computed(() => {
-    const rawValue = this.formValue();
+    const rawValue = this.modelValue();
     const setup = this.formSetup();
+    const schemaFields = setup.schemaFields;
     const options = this.effectiveFormOptions();
 
-    if (!setup.schemaFields || setup.schemaFields.length === 0) {
+    if (!this.formSchemaReady() || !schemaFields || schemaFields.length === 0) {
       return rawValue;
     }
 
@@ -590,38 +737,50 @@ export class FormStateManager<
 
     return filterFormValue(
       rawValue as Record<string, unknown>,
-      setup.schemaFields,
+      schemaFields,
       fieldTreeRecord,
       setup.registry,
       BOUND_VALUE_EXCLUSION_BASELINE,
       formOptions,
+      this.boundValueExclusionEnabled(),
     );
   });
 
   /** Whether the form is currently valid. */
-  readonly valid = computed(() => this.formInstance().valid());
+  /**
+   * Whether the form is currently valid.
+   *
+   * Schema compilation is lazy, so there is a window on first load, and after a config swap,
+   * where no schema is in hand yet. Validity is unknown then rather than true: this reports
+   * `false` and {@link invalid} reports `true` for that window, so a guard cannot let an
+   * unvalidated form through. {@link dirty}, {@link touched} and {@link submitting} likewise
+   * report `false` until the schema lands.
+   */
+  readonly valid = computed(() => this.formSchemaReady() && this.formSchemaResource.status() !== 'error' && this.formInstance().valid());
 
-  /** Whether the form is currently invalid. */
-  readonly invalid = computed(() => this.formInstance().invalid());
+  /** Whether the form is currently invalid. True while the schema loads — see {@link valid}. */
+  readonly invalid = computed(
+    () => !this.formSchemaReady() || this.formSchemaResource.status() === 'error' || this.formInstance().invalid(),
+  );
 
-  /** Whether any form field has been modified. */
-  readonly dirty = computed(() => this.formInstance().dirty());
+  /** Whether any form field has been modified. False while the schema loads — see {@link valid}. */
+  readonly dirty = computed(() => this.formSchemaReady() && this.formInstance().dirty());
 
   /** Whether any form field has been touched (blurred). */
-  readonly touched = computed(() => this.formInstance().touched());
+  readonly touched = computed(() => this.formSchemaReady() && this.formInstance().touched());
 
   /** Current validation errors from all fields. */
-  readonly errors = computed(() => this.formInstance().errors());
+  readonly errors = computed(() => (this.formSchemaReady() ? this.formInstance().errors() : []));
 
   /** Whether the form is disabled (from options or form state). */
   readonly disabled = computed(() => {
     const optionsDisabled = this.effectiveFormOptions().disabled;
-    const formDisabled = this.formInstance().disabled();
+    const formDisabled = this.formSchemaReady() && this.formInstance().disabled();
     return optionsDisabled ?? formDisabled;
   });
 
   /** Whether the form is currently submitting. */
-  readonly submitting = computed(() => this.formInstance().submitting());
+  readonly submitting = computed(() => this.formSchemaReady() && this.formInstance().submitting());
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Field Resolution
@@ -829,6 +988,13 @@ export class FormStateManager<
       takeUntilDestroyed(this.destroyRef),
     );
 
+    // Record page requests here rather than only in the pager, so one made before the
+    // orchestrator mounts survives until it can be applied.
+    this.eventBus
+      .on<GoToPageEvent>('go-to-page')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => this.pendingPageRequest.set({ index: event.pageIndex, options: event.options }));
+
     // Create the state machine eagerly
     this.machine = createFormStateMachine<TFields>({
       injector: this.injector,
@@ -919,6 +1085,15 @@ export class FormStateManager<
   // ─────────────────────────────────────────────────────────────────────────────
 
   private setupEffects(): void {
+    explicitEffect([this.formSchemaResource.error], ([error]) => {
+      if (error) {
+        this.logger.error(
+          '[Dynamic Forms] Failed to compile the form schema; rendering without validation and blocking submission.',
+          error,
+        );
+      }
+    });
+
     explicitEffect([this.deps.config], ([config]) => {
       this.fieldLoadingErrors.set([]);
 
@@ -989,18 +1164,30 @@ export class FormStateManager<
     explicitEffect([this.boundFormValue], ([currentBound]) => {
       const currentValue = this.deps.value();
       if (!isEqual(currentBound, currentValue)) {
+        // Record before writing so `externalValue` can recognise the echo. Only
+        // `lastOutwardValue` — writing `lastExternalValue` here turned its memo into a
+        // poisoned cache that returned a fresh object every keystroke, which notified
+        // `entity` anyway. It is now written solely inside `externalValue`.
+        this.lastOutwardValue.current = currentBound;
+        this.lastOutwardValue.pending = true;
         this.deps.value.set(currentBound as TModel);
       }
     });
 
-    explicitEffect([this.formConfigValidation], ([validation]) => {
-      if (!validation.isValid) {
-        this.logger.error('Invalid form configuration:', validation.errors);
-      }
-      if (validation.warnings.length > 0) {
-        this.logger.warn('Form configuration warnings:', validation.warnings);
-      }
-    });
+    // Reporting only — nothing downstream reads the result, so the whole validator
+    // (FormModeValidator + page-nesting checks) tree-shakes out of production.
+    if (DEV_MODE) {
+      explicitEffect([this.activeConfig], ([config]) => {
+        if (!config) return;
+        const validation = FormModeValidator.validateFormConfiguration(config.fields || []);
+        if (!validation.isValid) {
+          this.logger.error('Invalid form configuration:', validation.errors);
+        }
+        if (validation.warnings.length > 0) {
+          this.logger.warn('Form configuration warnings:', validation.warnings);
+        }
+      });
+    }
   }
 
   private setupEventHandlers(): void {
@@ -1070,18 +1257,22 @@ export class FormStateManager<
       this.addonKindRegistry,
       source,
     );
-    const nextKeys = new Set<string>();
-    for (const w of addonWarnings) {
-      // Dedup uses a structural fingerprint so different fields with the
-      // same warning category never collide; the rendered message is what
-      // we log.
-      const key = addonWarningKey(w);
-      nextKeys.add(key);
-      if (!this.lastAddonWarningKeys.has(key)) {
-        this.logger.warn(formatAddonWarning(w));
+    // Diagnostics only — the addon *filtering* above is what's load-bearing.
+    // Gated so `addonWarningKey`/`formatAddonWarning` tree-shake out of prod builds.
+    if (DEV_MODE) {
+      const nextKeys = new Set<string>();
+      for (const w of addonWarnings) {
+        // Dedup uses a structural fingerprint so different fields with the
+        // same warning category never collide; the rendered message is what
+        // we log.
+        const key = addonWarningKey(w);
+        nextKeys.add(key);
+        if (!this.lastAddonWarningKeys.has(key)) {
+          this.logger.warn(formatAddonWarning(w));
+        }
       }
+      this.lastAddonWarningKeys = nextKeys;
     }
-    this.lastAddonWarningKeys = nextKeys;
     const validatedFields = sanitizedFields as FieldDef<unknown>[];
 
     const flattenedFields = this.fieldProcessors.memoizedFlattenFields(validatedFields, registry);

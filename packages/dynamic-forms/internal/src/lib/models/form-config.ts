@@ -124,11 +124,29 @@ export interface FormOptions {
   nextButton?: NextButtonOptions;
 
   /**
-   * For paged forms: how many pages on each side of the current page are eagerly
-   * mounted (the "preload window"). Pages outside the window render a lightweight
-   * placeholder and mount when navigation brings them into range.
+   * For paged forms: which page to start on. Use for deep links and session restore.
    *
-   * `0` mounts only the current page; `1` mounts ±1 for flicker-free sequential
+   * Applied by the orchestrator as it initializes, so it is race-free even when the
+   * config arrives asynchronously. Out-of-range indices clamp to the last page;
+   * negative or non-finite values fall back to `0`. A hidden target resolves to the
+   * nearest visible page.
+   *
+   * The shorthand `initialPage: 4` lands on the page unconditionally, which is what
+   * restore usually wants. Pass `{ index, validate: true }` to run the same validity
+   * gate a forward `GoToPageEvent` uses, which stops on the first invalid page.
+   *
+   * A gated landing resolves once at mount, so supply restored values with the config.
+   *
+   * @default undefined (starts on page 0)
+   */
+  initialPage?: number | InitialPageConfig;
+
+  /**
+   * For paged forms: how many pages on each side of the current page are mounted
+   * during idle time (the "preload window"). The active page renders directly;
+   * pages outside the window remain lightweight placeholders.
+   *
+   * `0` mounts only the current page; `1` preloads ±1 on idle for flicker-free sequential
    * navigation; higher values pre-warm more pages for jump navigation at the cost
    * of more initial DOM + change detection.
    *
@@ -145,13 +163,22 @@ export interface FormOptions {
    *
    * `true` enables windowing using the global `withFieldWindowing()` defaults;
    * `false` force-disables it even if the global feature is enabled; an object
-   * enables it with per-form `eager` / `placeholderHeight` overrides.
+   * enables it with per-form `eager` / `placeholderHeight` / `park` overrides.
+   *
+   * `park` holds scrolled-away fields out of change detection while leaving
+   * their DOM in place, so they stay findable, autofillable and reachable by
+   * assistive tech. It is off unless `withFieldWindowing()` is used, because it
+   * suspends model → DOM updates for a scrolled-away field until it returns.
+   * Set `park: true` to opt in without deferred mounting, `park: false` to opt
+   * out, or `park: { margin }` to change how far outside the viewport stays live.
+   * The margin follows `IntersectionObserver.rootMargin` and accepts one to four
+   * pixel or percentage values; unsupported units fall back to the inherited margin.
    *
    * Overrides the global `withFieldWindowing(...)` default for this form.
    *
    * @default undefined (uses global setting, which defaults to disabled)
    */
-  fieldWindowing?: boolean | { eager?: number; placeholderHeight?: string };
+  fieldWindowing?: boolean | { eager?: number; placeholderHeight?: string; park?: boolean | { margin?: string } };
 
   /**
    * Whether to exclude values of hidden fields from submission output.
@@ -250,6 +277,20 @@ export interface SubmitButtonOptions {
    * @default true
    */
   disableWhileSubmitting?: boolean;
+}
+
+/** Which page a paged form starts on, for deep links and session restore. */
+export interface InitialPageConfig {
+  /** Target page index (0-based). */
+  index: number;
+
+  /**
+   * Whether to apply the forward-jump validity gate, stopping on the first
+   * invalid page instead of landing on the target.
+   *
+   * @default false
+   */
+  validate?: boolean;
 }
 
 /** Options for controlling next page button disabled behavior. */

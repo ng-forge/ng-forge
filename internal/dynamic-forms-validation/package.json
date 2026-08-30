@@ -1,0 +1,30 @@
+{
+  "name": "@ng-forge/dynamic-forms-validation",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Internal: Zod schemas, FormConfig validation, source discovery, and report formatting shared by the MCP server and the validation CLI.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "peerDependencies": {
+    "zod": "^3.24.0"
+  },
+  "dependencies": {
+    "ts-morph": "^28.0.0",
+    "tslib": "^2.3.0",
+    "zod-to-json-schema": "^3.23.0"
+  }
+}

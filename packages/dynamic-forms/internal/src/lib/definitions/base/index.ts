@@ -6,3 +6,4 @@ export type { BaseCheckedField, CheckedFieldComponent } from './base-checked-fie
 export { isCheckedField } from './base-checked-field';
 export type { FieldWithValidation } from './field-with-validation';
 export type { ContainerLogicConfig } from './container-logic-config';
+export type { ContainerValidation } from './container-validation';

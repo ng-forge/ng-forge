@@ -227,6 +227,21 @@ describe('condition-evaluator', () => {
         expect(result).toBe(true);
       });
 
+      it('should evaluate expressions referencing field keys with non-ASCII letters', () => {
+        const context: EvaluationContext = {
+          ...mockContext,
+          formValue: { bestellgröße: 'L' },
+          externalData: { isAuthenticated: true },
+        };
+        const expression: ConditionalExpression = {
+          type: 'javascript',
+          expression: '!!formValue.bestellgröße && externalData.isAuthenticated',
+        };
+
+        expect(evaluateCondition(expression, context)).toBe(true);
+        expect(mockLogger.error).not.toHaveBeenCalled();
+      });
+
       it('should convert result to boolean', () => {
         const testCases = [
           { expression: '1', expected: true },

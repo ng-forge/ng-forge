@@ -17,6 +17,7 @@ import {
   WrapperConfig,
 } from '@ng-forge/dynamic-forms/internal';
 import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
+import { DEV_MODE } from '../utils/dev-mode';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '@ng-forge/dynamic-forms/internal';
@@ -68,7 +69,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
   const features = items.filter(isDynamicFormFeature);
 
   const fields = [...BUILT_IN_FIELDS, ...fieldTypes];
-  const wrappers = [...BUILT_IN_WRAPPERS, ...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const customWrappers = [...wrapperTypes, ...wrapperBundles.flatMap((bundle) => bundle.ɵdefinitions)];
+  const wrappers = [...BUILT_IN_WRAPPERS, ...customWrappers];
 
   // Extract providers from features (includes config features like material-config, bootstrap-config, etc.)
   const featureProviders: Provider[] = [];
@@ -89,7 +91,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         const registry = new Map();
         // Add custom field types
         fields.forEach((fieldType) => {
-          if (registry.has(fieldType.name)) {
+          // Collision report only — last registration wins either way.
+          if (DEV_MODE && registry.has(fieldType.name)) {
             logger.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
@@ -118,12 +121,24 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
       useFactory: () => {
         const logger = inject(DynamicFormLogger);
         const registry = new Map();
-        // Add custom wrapper types
-        wrappers.forEach((wrapperType) => {
-          if (registry.has(wrapperType.wrapperName)) {
-            logger.warn(`Wrapper type "${wrapperType.wrapperName}" is already registered. Overwriting.`);
+        // Seed the built-ins, then let later registrations replace them. Overriding a
+        // built-in name is supported — an adapter restyles `field-errors` that way,
+        // and an app may then override the adapter's — so those never warn. Only two
+        // custom registrations colliding on a name of their own is a mistake.
+        const builtInNames = new Set(BUILT_IN_WRAPPERS.map((w) => w.wrapperName));
+        BUILT_IN_WRAPPERS.forEach((wrapperType) => registry.set(wrapperType.wrapperName, wrapperType));
+
+        // `seenCustom` exists only to report duplicates — last registration wins either way.
+        const seenCustom = DEV_MODE ? new Set<string>() : null;
+        customWrappers.forEach((wrapperType) => {
+          const name = wrapperType.wrapperName;
+          if (seenCustom) {
+            if (seenCustom.has(name) && !builtInNames.has(name)) {
+              logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
+            }
+            seenCustom.add(name);
           }
-          registry.set(wrapperType.wrapperName, wrapperType);
+          registry.set(name, wrapperType);
         });
         return registry;
       },
@@ -161,7 +176,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
           registry.set(def.type, def);
         }
         for (const def of contributed) {
-          if (registry.has(def.type)) {
+          // Collision report only — last registration wins either way.
+          if (DEV_MODE && registry.has(def.type)) {
             logger.warn(`Addon type "${def.type}" is already registered. Overwriting.`);
           }
           registry.set(def.type, def);

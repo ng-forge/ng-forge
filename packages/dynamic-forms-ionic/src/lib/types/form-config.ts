@@ -1,5 +1,5 @@
 import { FormConfig, InferFormValue, NarrowFields, RegisteredFieldTypes } from '@ng-forge/dynamic-forms';
-import { IonicConfig } from '../models/ionic-config';
+import type { IonicConfig } from '@ng-forge/dynamic-forms-ionic/shared';
 
 /** Ionic-specific props that can be set at form level and cascade to all fields. */
 export type IonicFormProps = IonicConfig;

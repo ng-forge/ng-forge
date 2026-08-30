@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { type WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { ADDON_ACTION_REGISTRY, type AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { describe, expect, it, vi } from 'vitest';
-import type { IonicButtonAddon } from '../types/addons';
-import { IonicInlineButtonAddonComponent } from './ion-inline-button-addon.component';
+import type { IonicButtonAddon } from '@ng-forge/dynamic-forms-ionic/shared';
+import { IonicInlineButtonAddonComponent } from '@ng-forge/dynamic-forms-ionic/shared';
 
 // The inline component uses an attribute selector on <ion-button>, so TestBed
 // can't instantiate it directly (the host tag falls back to <div>). A wrapper

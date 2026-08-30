@@ -1,5 +1,13 @@
 export type { WithInputSignals } from './component-type';
-export type { CustomFnConfig, FormConfig, FormOptions, SubmitButtonOptions, NextButtonOptions, WebMcpToolOptions } from './form-config';
+export type {
+  CustomFnConfig,
+  FormConfig,
+  FormOptions,
+  SubmitButtonOptions,
+  NextButtonOptions,
+  InitialPageConfig,
+  WebMcpToolOptions,
+} from './form-config';
 export type { SubmissionConfig, SubmissionActionResult } from './submission-config';
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';
@@ -21,7 +29,13 @@ export type { AddonTypeDefinition, AddonTypeSchema, AddonShapeValidator, FieldAd
 export { ADDON_TYPE_REGISTRY } from './addon/addon-type';
 export { DF_FIELD_TEMPLATES } from './addon/df-field-templates.token';
 export type { WrapperTypeDefinition, FieldWrapper, WrapperConfig } from './wrapper-type';
-export { isWrapperTypeDefinition, WRAPPER_REGISTRY, WRAPPER_COMPONENT_CACHE, WRAPPER_AUTO_ASSOCIATIONS } from './wrapper-type';
+export {
+  isWrapperTypeDefinition,
+  WRAPPER_REGISTRY,
+  WRAPPER_COMPONENT_CACHE,
+  WRAPPER_COMPONENT_LOAD_CACHE,
+  WRAPPER_AUTO_ASSOCIATIONS,
+} from './wrapper-type';
 export type { FieldOption } from './field-option';
 export {
   ARRAY_CONTEXT,

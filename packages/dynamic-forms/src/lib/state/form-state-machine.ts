@@ -25,6 +25,7 @@ import {
 } from './state-types';
 import { assertNever } from '@ng-forge/dynamic-forms/internal';
 import { SideEffectScheduler } from './side-effect-scheduler';
+import { DEV_MODE } from '../utils/dev-mode';
 
 /**
  * Configuration for the form state machine.
@@ -314,7 +315,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
       return { state, sideEffects: [] };
     }
 
-    if (!state.pendingFormSetup) {
+    // Diagnostic only — the `??` fallback below is what keeps the transition correct.
+    if (DEV_MODE && !state.pendingFormSetup) {
       this.config.logger.warn(
         'handleRestoreComplete: pendingFormSetup was not set — falling back to recomputing. ' +
           'This indicates a bug in the transition flow.',
@@ -399,7 +401,8 @@ export class FormStateMachine<TFields extends RegisteredFieldTypes[] = Registere
           const state = untracked(() => this._state());
           if (!isTransitioningState(state) || state.phase !== Phase.Restoring) return;
 
-          if (!state.pendingFormSetup) {
+          // Diagnostic only — the `??` fallback below is what keeps the transition correct.
+          if (DEV_MODE && !state.pendingFormSetup) {
             this.config.logger.warn('RestoreValues effect: pendingFormSetup was not set — falling back to recomputing.');
           }
           const formSetup = state.pendingFormSetup ?? this.config.createFormSetup(state.pendingConfig);

@@ -305,6 +305,66 @@ describe('ExpressionParser', () => {
       const scope4 = { formValue: { user: { profile: { firstName: 'John' } } } };
       expect(ExpressionParser.evaluate('formValue.user.profile.firstName', scope4)).toBe('John');
     });
+
+    it('should access properties whose keys contain non-ASCII letters', () => {
+      const scope = {
+        formValue: { bestellgröße: 'L' },
+        externalData: { isAuthenticated: true },
+      };
+
+      expect(ExpressionParser.evaluate('formValue.bestellgröße', scope)).toBe('L');
+      expect(ExpressionParser.evaluate('!!formValue.bestellgröße && externalData.isAuthenticated', scope)).toBe(true);
+    });
+
+    it('should access non-ASCII keys through optional chaining', () => {
+      const scope = { formValue: { lieferung: { bestellgröße: 'L' } } };
+
+      expect(ExpressionParser.evaluate('formValue.lieferung?.bestellgröße', scope)).toBe('L');
+      expect(ExpressionParser.evaluate('formValue.abholung?.bestellgröße', scope)).toBeUndefined();
+    });
+
+    it('should treat dot and bracket notation as equivalent for non-ASCII keys', () => {
+      const scope = { formValue: { bestellgröße: 'L' } };
+
+      expect(ExpressionParser.evaluate('formValue.bestellgröße', scope)).toBe(
+        ExpressionParser.evaluate('formValue["bestellgröße"]', scope),
+      );
+    });
+
+    describe.each([
+      ['Romanian', 'țaraDeȘedere'],
+      ['Romanian (cedilla variants)', 'ştiinţă'],
+      ['French', 'adresseÉlectronique'],
+      ['French (ligature)', 'cœurBattant'],
+      ['German', 'überprüfungsgröße'],
+      ['Spanish', 'añoDeNacimiento'],
+      ['Portuguese', 'endereçoIrmão'],
+      ['Polish', 'nazwiskoŻółć'],
+      ['Czech', 'příjmeníŘeka'],
+      ['Hungarian', 'születésiDátum'],
+      ['Turkish', 'kimlikNumarası'],
+      ['Nordic', 'blåbærFødt'],
+      ['Greek', 'διεύθυνση'],
+      ['Cyrillic', 'фамилия'],
+      ['Vietnamese', 'điệnThoại'],
+      ['Hebrew', 'כתובת'],
+      ['Arabic', 'العنوان'],
+      ['CJK', '住所'],
+    ])('key with %s characters', (_language, key) => {
+      it('should read the key by dot access, matching bracket access', () => {
+        const scope = { formValue: { [key]: 'value' } };
+
+        expect(ExpressionParser.evaluate(`formValue.${key}`, scope)).toBe('value');
+        expect(ExpressionParser.evaluate(`formValue.${key}`, scope)).toBe(ExpressionParser.evaluate(`formValue["${key}"]`, scope));
+      });
+
+      it('should read the key in decomposed (NFD) form', () => {
+        const decomposed = key.normalize('NFD');
+        const scope = { formValue: { [decomposed]: 'value' } };
+
+        expect(ExpressionParser.evaluate(`formValue.${decomposed}`, scope)).toBe('value');
+      });
+    });
   });
 
   describe('arithmetic operations', () => {

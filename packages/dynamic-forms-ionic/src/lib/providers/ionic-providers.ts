@@ -1,10 +1,9 @@
+/* eslint-disable @nx/enforce-module-boundaries -- Published secondary-entry imports must remain package specifiers for real lazy chunks. */
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
-import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { IONIC_CONFIG, type IonicButtonAddon, type IonicConfig, type IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
-import { IonicConfig } from '../models/ionic-config';
-import { IONIC_CONFIG } from '../models/ionic-config.token';
-import type { IonicButtonAddon, IonicIconAddon } from '../types/addons';
 
 /** Field type definitions for Ionic components. */
 export type IonicFieldTypes = FieldTypeDefinition[];
@@ -18,9 +17,20 @@ type IonicConfigFeature = {
  * Default `withIonicFields()` shape — field defs + the auto-included
  * addons feature so `ion-icon` / `ion-button` work out of the box.
  */
-type IonicFieldsWithAddons = [...IonicFieldTypes, IonicAddonsFeature];
+type IonicFieldsWithAddons = [...IonicFieldTypes, IonicAddonsFeature, WrapperTypeDefinition];
 
-type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, IonicConfigFeature];
+type IonicFieldsWithConfig = [...IonicFieldTypes, IonicAddonsFeature, WrapperTypeDefinition, IonicConfigFeature];
+
+/**
+ * Replaces the neutral core `field-errors` wrapper with the Ionic one, so
+ * a container-level validation message renders like a field-level one.
+ * Registered under the same name, so the later registration wins.
+ */
+const IONIC_FIELD_ERRORS_WRAPPER: WrapperTypeDefinition = {
+  wrapperName: 'field-errors',
+  loadComponent: () => import('../wrappers/field-errors/ionic-field-errors-wrapper.component'),
+  rendersFieldErrors: true,
+};
 
 /**
  * Provides Ionic field type definitions for the dynamic form system,
@@ -37,7 +47,7 @@ export function withIonicFields(config: IonicConfig | undefined): IonicFieldsWit
 export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | IonicFieldsWithConfig {
   // Always include the addons feature — ion-icon / ion-button are part of
   // the canonical Ionic surface.
-  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons()];
+  const base: unknown[] = [...IONIC_FIELD_TYPES, withIonicAddons(), IONIC_FIELD_ERRORS_WRAPPER];
 
   if (config) {
     base.push({
@@ -54,7 +64,7 @@ export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | I
 
 const ION_ICON_KIND: AddonTypeDefinition<IonicIconAddon> = {
   type: 'ion-icon',
-  loadComponent: () => import('../addons/ion-icon-addon.component').then((m) => m.IonicIconAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-ionic/lazy/addon-icon').then((m) => m.IonicIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'ion-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -64,7 +74,7 @@ const ION_ICON_KIND: AddonTypeDefinition<IonicIconAddon> = {
 
 const ION_BUTTON_KIND: AddonTypeDefinition<IonicButtonAddon> = {
   type: 'ion-button',
-  loadComponent: () => import('../addons/ion-button-addon.component').then((m) => m.IonicButtonAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-ionic/lazy/addon-button').then((m) => m.IonicButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.
