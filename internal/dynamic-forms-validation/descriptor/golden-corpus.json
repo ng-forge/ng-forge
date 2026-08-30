@@ -20,7 +20,13 @@
             "key": "chrome",
             "type": "container",
             "wrappers": [],
-            "fields": [{ "key": "email", "type": "input", "label": "Email" }]
+            "fields": [
+              {
+                "key": "email",
+                "type": "input",
+                "label": "Email"
+              }
+            ]
           }
         ]
       },
@@ -41,7 +47,13 @@
           {
             "key": "chrome",
             "type": "container",
-            "fields": [{ "key": "email", "type": "input", "label": "Email" }]
+            "fields": [
+              {
+                "key": "email",
+                "type": "input",
+                "label": "Email"
+              }
+            ]
           }
         ]
       },
@@ -212,6 +224,67 @@
       "currentVerdict": "valid",
       "v1Verdict": "valid",
       "rationale": "A hidden field carries a value and occupies no space, so forbidding it inside a row forced authors to hoist it out of the group it belongs to and lose that association for no layout benefit."
+    },
+    {
+      "id": "core-container-rejects-page",
+      "description": "A page nested inside a container",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "chrome",
+            "type": "container",
+            "wrappers": [],
+            "fields": [
+              {
+                "key": "step1",
+                "type": "page",
+                "fields": [
+                  {
+                    "key": "email",
+                    "type": "input",
+                    "label": "Email"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "`ContainerAllowedChildren` admits every field type except `page`, and pages are top-level only because multi-page mode reads them from the config root. Container was the one host with no nesting entry, so it was also the one host that accepted a page the type rejects. Row, group, array and page each forbade a nested page; container had no nesting entry at all."
+    },
+    {
+      "id": "core-container-holds-a-container",
+      "description": "A container nested inside a container",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "outer",
+            "type": "container",
+            "wrappers": [],
+            "fields": [
+              {
+                "key": "inner",
+                "type": "container",
+                "wrappers": [],
+                "fields": [
+                  {
+                    "key": "email",
+                    "type": "input",
+                    "label": "Email"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "The bound on the row above. Containers are layout primitives that flatten into the parent, and the type lists `ContainerField` among its own allowed children, so forbidding `page` must not spill into forbidding the nesting the type permits."
     }
   ]
 }

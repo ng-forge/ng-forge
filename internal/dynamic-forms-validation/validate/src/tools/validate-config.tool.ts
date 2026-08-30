@@ -406,6 +406,46 @@ const FIELDS_REQUIRING_OPTIONS = ['select', 'radio', 'multi-checkbox'];
 /**
  * Nesting rules - what can contain what.
  */
+/**
+ * What a container accepts, and what a row accepts with it.
+ *
+ * `ContainerAllowedChildren` admits every registered field type except `page`,
+ * and containers nest, so the one prohibition is the one the type states.
+ * Containers had no entry at all, which is why a page inside a container was the
+ * only nesting the validator let through while the type rejected it.
+ */
+const CONTAINER_NESTING = {
+  allowed: [
+    'container',
+    'row',
+    'group',
+    'array',
+    'hidden',
+    'input',
+    'textarea',
+    'select',
+    'checkbox',
+    'multi-checkbox',
+    'radio',
+    'datepicker',
+    'toggle',
+    'slider',
+    'text',
+    'button',
+    'submit',
+    'next',
+    'previous',
+    'add-array-item',
+    'prepend-array-item',
+    'insert-array-item',
+    'remove-array-item',
+    'pop-array-item',
+    'shift-array-item',
+  ],
+  forbidden: ['page'],
+  message: 'Containers and rows cannot contain pages. ALL top-level fields must be pages if using multi-page mode.',
+};
+
 const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; message: string }> = {
   page: {
     allowed: [
@@ -437,38 +477,12 @@ const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; me
     forbidden: ['page'],
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
   },
-  row: {
-    // A row resolves to a container at runtime, and RowAllowedChildren is an
-    // alias of ContainerAllowedChildren, so it takes rows and hidden fields too.
-    allowed: [
-      'row',
-      'group',
-      'array',
-      'hidden',
-      'input',
-      'textarea',
-      'select',
-      'checkbox',
-      'multi-checkbox',
-      'radio',
-      'datepicker',
-      'toggle',
-      'slider',
-      'text',
-      'button',
-      'submit',
-      'next',
-      'previous',
-      'add-array-item',
-      'prepend-array-item',
-      'insert-array-item',
-      'remove-array-item',
-      'pop-array-item',
-      'shift-array-item',
-    ],
-    forbidden: ['page'],
-    message: 'Rows cannot contain pages. ALL top-level fields must be pages if using multi-page mode.',
-  },
+  container: CONTAINER_NESTING,
+  // A row resolves to a container at runtime, and the types say so outright:
+  // `RowAllowedChildren` is an alias of `ContainerAllowedChildren`. Sharing the
+  // entry keeps that an alias here too, rather than a fifth copy of the list
+  // that can drift from the type it is derived from.
+  row: CONTAINER_NESTING,
   group: {
     allowed: [
       'row',

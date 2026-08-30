@@ -97,6 +97,47 @@ describe('container inherits the container base rules', () => {
   });
 });
 
+describe('container forbids a page child, like every other host', () => {
+  // Container was the only host with no nesting rule, so it was the only one
+  // that accepted a page. `ContainerAllowedChildren` excludes `PageField`, and
+  // multi-page mode reads pages from the config root, so a page nested here has
+  // no navigation path at runtime.
+  const withPage = {
+    fields: [
+      {
+        key: 'chrome',
+        type: 'container',
+        wrappers: [],
+        fields: [{ key: 'step1', type: 'page', fields: [child] }],
+      },
+    ],
+  };
+
+  it.each(ADAPTERS)('rejects a page inside a container (%s)', (ui) => {
+    const result = messagesFor(withPage, ui);
+
+    expect(result.valid, 'a page inside a container should be rejected').toBe(false);
+    expect(result.text).toContain('NOT allowed inside');
+  });
+
+  it.each(ADAPTERS)('still allows a container inside a container (%s)', (ui) => {
+    // The bound: the type lists ContainerField among its own allowed children,
+    // so forbidding `page` must not spill into forbidding that.
+    const nested = {
+      fields: [
+        {
+          key: 'outer',
+          type: 'container',
+          wrappers: [],
+          fields: [{ key: 'inner', type: 'container', wrappers: [], fields: [child] }],
+        },
+      ],
+    };
+
+    expect(messagesFor(nested, ui).valid, messagesFor(nested, ui).text).toBe(true);
+  });
+});
+
 describe('accepting container did not loosen anything else', () => {
   it('still rejects a genuinely unknown field type', () => {
     const result = messagesFor({ fields: [{ key: 'a', type: 'acme-currency', label: 'A' }] });

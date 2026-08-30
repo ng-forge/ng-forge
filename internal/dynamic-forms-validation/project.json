@@ -38,6 +38,7 @@
       "inputs": [
         "{workspaceRoot}/scripts/generate-descriptors.ts",
         "{workspaceRoot}/internal/dynamic-forms-validation/descriptor/**",
+        "{workspaceRoot}/internal/dynamic-forms-validation/tsconfig.json",
         "{workspaceRoot}/packages/dynamic-forms/**/*.ts",
         "{workspaceRoot}/packages/dynamic-forms-material/src/**/*.ts",
         "{workspaceRoot}/packages/dynamic-forms-bootstrap/src/**/*.ts",

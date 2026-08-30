@@ -686,7 +686,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     validationSupported: false,
     source: 'core',
     allowedIn: ['top-level'],
-    notAllowedIn: ['page', 'row', 'group', 'array'],
+    notAllowedIn: ['page', 'row', 'group', 'array', 'container'],
     canContain: [
       'row',
       'group',
