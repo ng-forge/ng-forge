@@ -14,7 +14,7 @@
  * parameter properties, decorators).
  */
 
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -382,6 +382,44 @@ export function generatedSkillDirs(): string[] {
 
 const rel = (path: string) => path.replace(`${ROOT}/`, '');
 
+/**
+ * Generated skill directories that exist on disk, found by their marker.
+ *
+ * Not by the adapter list: renaming or dropping an adapter takes its name out of
+ * `UI_ADAPTERS`, so a list built from that can never name the directory left
+ * behind, which is exactly the one that needs finding. The marker is also what
+ * keeps this away from the hand-written siblings — `eval`, `tests` — which have
+ * no SKILL.md at all.
+ */
+async function existingGeneratedSkillDirs(): Promise<string[]> {
+  const skillsRoot = join(ROOT, 'skills');
+  const entries = await readdir(skillsRoot, { withFileTypes: true }).catch(() => []);
+  const found: string[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+
+    const dir = join(skillsRoot, entry.name);
+    const skill = await readFile(join(dir, 'SKILL.md'), 'utf-8').catch(() => undefined);
+    if (skill?.includes(GENERATED_NOTE)) found.push(dir);
+  }
+
+  return found;
+}
+
+/**
+ * Generated skill directories the current adapter list no longer claims.
+ *
+ * An adapter skill left behind after a rename documents props for a package
+ * that is not there, which is worse than a missing one: an agent reads it as
+ * current.
+ */
+export async function findStaleSkillDirs(): Promise<string[]> {
+  const expected = new Set(generatedSkillDirs());
+
+  return (await existingGeneratedSkillDirs()).filter((dir) => !expected.has(dir)).map(rel);
+}
+
 /** Names of generated files whose on-disk contents differ from a fresh render. */
 export async function findStaleOutputs(): Promise<string[]> {
   const stale: string[] = [];
@@ -404,11 +442,15 @@ export async function findStaleOutputs(): Promise<string[]> {
 async function main(): Promise<void> {
   if (process.argv.includes('--check')) {
     const stale = await findStaleOutputs();
+    const orphaned = await findStaleSkillDirs();
 
-    if (stale.length > 0) {
-      console.error('[skills-check] FAIL: generated skill files are stale:');
+    if (stale.length > 0 || orphaned.length > 0) {
+      console.error('[skills-check] FAIL: generated skills do not match their sources:');
       for (const path of stale) {
-        console.error(`  - ${path}`);
+        console.error(`  - stale: ${path}`);
+      }
+      for (const dir of orphaned) {
+        console.error(`  - no longer generated, delete it: ${dir}`);
       }
       console.error('\nRegenerate with: nx run skills:update');
       process.exitCode = 1;
@@ -419,7 +461,10 @@ async function main(): Promise<void> {
     return;
   }
 
-  for (const dir of generatedSkillDirs()) {
+  // Everything the generator owns, including a directory the adapter list has
+  // stopped naming. Removing only the expected set left a renamed adapter's
+  // skill on disk forever.
+  for (const dir of new Set([...generatedSkillDirs(), ...(await existingGeneratedSkillDirs())])) {
     await rm(dir, { recursive: true, force: true });
   }
 

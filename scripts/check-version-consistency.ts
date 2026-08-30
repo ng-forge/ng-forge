@@ -109,7 +109,16 @@ export async function findViolations(): Promise<{ canonical: string; violations:
 
   for (const dir of skillDirs) {
     const skillPath = join('skills', dir, 'SKILL.md');
-    const skill = await readFile(join(ROOT, skillPath), 'utf-8');
+    // A missing skill is a violation, the same way a missing manifest is above.
+    // Letting the read throw made an absent adapter skill an ENOENT stack trace
+    // and stopped every skill after it from being checked at all.
+    const skill = await readFile(join(ROOT, skillPath), 'utf-8').catch(() => undefined);
+
+    if (skill === undefined) {
+      violations.push({ file: skillPath, detail: 'is missing; run nx run skills:update' });
+      continue;
+    }
+
     const stated = /documents version \*\*(\d+\.\d+\.\d+)\*\*/.exec(skill);
 
     if (!stated) {
