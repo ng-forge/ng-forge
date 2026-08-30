@@ -12,11 +12,16 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { resolveRegistry } from './extract-registry';
+import { belongsTo, resolveRegistry } from './extract-registry';
 
 const CORE = '@ngforge-test/core';
 const ADAPTER = '@ngforge-test/adapter';
 const OTHER_ADAPTER = '@ngforge-test/other-adapter';
+/**
+ * An adapter whose specifier extends core's, the way every real one does:
+ * `@ng-forge/dynamic-forms` against `@ng-forge/dynamic-forms-material`.
+ */
+const PREFIXED_ADAPTER = `${CORE}-extra`;
 
 /** Core package: declares the registries with one built-in type each. */
 const CORE_DTS = `
@@ -25,7 +30,10 @@ export interface BaseField { key: string; label?: string; }
 export interface TextField extends BaseField { type: 'text'; }
 export interface RowField extends BaseField { type: 'row'; }
 
-export interface FieldRegistryLeaves { text: TextField; }
+export interface SharedProps { base?: 'a' | 'b'; }
+export interface SharedField extends BaseField { type: 'shared'; props?: SharedProps; }
+
+export interface FieldRegistryLeaves { text: TextField; shared: SharedField; }
 export interface FieldRegistryContainers { row: RowField; }
 `;
 
@@ -69,6 +77,27 @@ declare module '${CORE}' {
 }
 `;
 
+/**
+ * A third adapter that re-declares a key core owns.
+ *
+ * Its specifier starts with core's, so a substring test reads its files as
+ * core's. `shared` is the fixture for the core fallback specifically: the
+ * requested adapter declares nothing for it, so resolution reaches the core
+ * branch, and a boundary-blind match answers with this package instead of core.
+ */
+const PREFIXED_ADAPTER_DTS = `
+import type { BaseField } from '${CORE}';
+
+export interface PrefixedSharedProps { tone?: 'warm' | 'cool'; }
+export interface PrefixedSharedField extends BaseField { type: 'shared'; props?: PrefixedSharedProps; }
+
+declare module '${CORE}' {
+  interface FieldRegistryLeaves {
+    shared: PrefixedSharedField;
+  }
+}
+`;
+
 let root: string;
 
 async function writePackage(dir: string, name: string, dts: string) {
@@ -83,7 +112,10 @@ async function writePackage(dir: string, name: string, dts: string) {
  * specifier that resolves to nothing reproduces the silent-partial failure:
  * the adapter loads, and merges nothing.
  */
-async function workspace(name: string, opts: { withAdapter?: boolean; augmentationTarget?: string; withSecondAdapter?: boolean } = {}) {
+async function workspace(
+  name: string,
+  opts: { withAdapter?: boolean; augmentationTarget?: string; withSecondAdapter?: boolean; withPrefixedAdapter?: boolean } = {},
+) {
   const dir = join(root, name);
   await mkdir(join(dir, 'src'), { recursive: true });
 
@@ -106,6 +138,10 @@ async function workspace(name: string, opts: { withAdapter?: boolean; augmentati
     // The consumer's own code pulls both in, which is what makes the merge
     // unavoidable: importing only the requested adapter in a probe is too late.
     await writeFile(join(dir, 'src', 'app.ts'), `import '${ADAPTER}';\nimport '${OTHER_ADAPTER}';\n`, 'utf-8');
+  }
+  if (opts.withPrefixedAdapter) {
+    await writePackage(dir, PREFIXED_ADAPTER, PREFIXED_ADAPTER_DTS);
+    await writeFile(join(dir, 'src', 'app.ts'), `import '${ADAPTER}';\nimport '${PREFIXED_ADAPTER}';\n`, 'utf-8');
   }
 
   return join(dir, 'tsconfig.json');
@@ -214,6 +250,77 @@ describe('adapter isolation when several adapters are installed', () => {
 
   it('does not return the same shape for two different adapters', () => {
     expect(propsOf(ADAPTER)).not.toEqual(propsOf(OTHER_ADAPTER));
+  });
+});
+
+describe('an adapter whose name extends core name', () => {
+  // The real packages are shaped exactly like this: `@ng-forge/dynamic-forms` is
+  // a strict prefix of `@ng-forge/dynamic-forms-material`. Matching a package by
+  // bare substring therefore reads every adapter file as core, and the core
+  // fallback hands back another adapter's declaration for any key the requested
+  // adapter does not declare. It bites where packages resolve from node_modules,
+  // which is the consumer path this feature exists for.
+  let tsConfigFilePath: string;
+
+  beforeAll(async () => {
+    tsConfigFilePath = await workspace('prefixed-adapter', { withPrefixedAdapter: true });
+  });
+
+  function sharedPropsFor(adapterPackage: string) {
+    const result = resolveRegistry({ tsConfigFilePath, adapterPackage, corePackage: CORE });
+    if (!result.ok) throw new Error(result.failure.detail);
+
+    const shared = result.entries.find((e) => e.canonical === 'shared');
+    const props = shared?.type.getProperty('props')?.getTypeAtLocation(shared.at)?.getNonNullableType();
+    return (props?.getProperties() ?? []).map((p) => p.getName());
+  }
+
+  it('falls back to core, not to the adapter that merely shares its prefix', () => {
+    // The requested adapter says nothing about `shared`, so this goes through the
+    // core branch. Unbounded, that branch matched the prefixed adapter and
+    // published its `tone` as core's shape for every adapter.
+    expect(sharedPropsFor(ADAPTER), 'a foreign adapter props were attributed to core').toEqual(['base']);
+  });
+
+  it('still resolves the requested adapter own types', () => {
+    const result = resolveRegistry({ tsConfigFilePath, adapterPackage: ADAPTER, corePackage: CORE });
+    if (!result.ok) throw new Error(result.failure.detail);
+
+    expect(result.entries.map((e) => e.canonical)).toContain('input');
+  });
+
+  it('describes the prefixed adapter own shape when it is the one requested', () => {
+    expect(sharedPropsFor(PREFIXED_ADAPTER)).toEqual(['tone']);
+  });
+});
+
+describe('belongsTo', () => {
+  // Tested directly. Whether the collision fires through resolveRegistry depends
+  // on the order the checker happens to return declarations in, which is not
+  // something a fixture can pin down; the predicate is, and it is the thing that
+  // was wrong.
+  const core = '@ng-forge/dynamic-forms';
+
+  it('does not read an adapter path as the core package', () => {
+    expect(belongsTo('/p/node_modules/@ng-forge/dynamic-forms-ionic/index.d.ts', core)).toBe(false);
+  });
+
+  it('still reads a real core path as core', () => {
+    expect(belongsTo('/p/node_modules/@ng-forge/dynamic-forms/index.d.ts', core)).toBe(true);
+  });
+
+  it('matches a package directory with nothing after it', () => {
+    expect(belongsTo('/p/node_modules/@ng-forge/dynamic-forms', core)).toBe(true);
+  });
+
+  it('matches the adapter itself by its own specifier', () => {
+    const ionic = '@ng-forge/dynamic-forms-ionic';
+    expect(belongsTo('/p/node_modules/@ng-forge/dynamic-forms-ionic/index.d.ts', ionic)).toBe(true);
+  });
+
+  it('applies the same boundary to a source root given without a trailing slash', () => {
+    expect(belongsTo('/p/packages/dynamic-forms-material/src/x.ts', '@acme/none', 'packages/dynamic-forms')).toBe(false);
+    expect(belongsTo('/p/packages/dynamic-forms/src/x.ts', '@acme/none', 'packages/dynamic-forms')).toBe(true);
   });
 });
 

@@ -123,9 +123,30 @@ function readRegistry(project: Project, dir: string, adapterPackage: string, cor
   return { file, decl, members: decl?.getType().getProperties() ?? [] };
 }
 
-/** True when a file belongs to a package, by specifier or by source root. */
-function belongsTo(filePath: string, specifier: string, sourceRoot?: string): boolean {
-  return filePath.includes(specifier) || (sourceRoot !== undefined && filePath.includes(sourceRoot));
+/**
+ * True when a path lies inside `needle` rather than merely starting with it.
+ *
+ * `@ng-forge/dynamic-forms` is a strict prefix of every adapter's specifier, so
+ * a bare `includes` reads a file under `@ng-forge/dynamic-forms-ionic` as one of
+ * core's. Requiring a separator after the name is what tells the two apart.
+ */
+function within(filePath: string, needle: string): boolean {
+  const bounded = needle.endsWith('/') ? needle : `${needle}/`;
+  return filePath.includes(bounded) || filePath.endsWith(needle);
+}
+
+/**
+ * True when a file belongs to a package, by specifier or by source root.
+ *
+ * Matched at a path boundary. Unbounded, the core branch of `declarationFor`
+ * answered with another adapter's declaration for any key the requested adapter
+ * does not declare, and the descriptor published that adapter's shape as
+ * everyone's. It only shows where packages resolve from node_modules, since the
+ * source roots already carry a trailing slash — which is the consumer path this
+ * resolves for, not ours.
+ */
+export function belongsTo(filePath: string, specifier: string, sourceRoot?: string): boolean {
+  return within(filePath, specifier) || (sourceRoot !== undefined && within(filePath, sourceRoot));
 }
 
 /** True when a symbol has at least one declaration inside the adapter package. */
