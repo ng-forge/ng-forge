@@ -17,7 +17,8 @@
     "ionic/src/**/*.ts",
     "validate/src/**/*.ts",
     "discovery/**/*.ts",
-    "reporting/**/*.ts"
+    "reporting/**/*.ts",
+    "descriptor/**/*.ts"
   ],
   // Test globs are NOT scoped to `src/`: several sibling directories carry
   // their own specs, and scoping the excludes to src/ let those specs through.

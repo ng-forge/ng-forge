@@ -105,7 +105,7 @@ export function compileFieldSchema(descriptor: Descriptor): z.ZodTypeAny {
     // A plain union tries all 26 variants for every field and measured 52ms per
     // parse; dispatching on the discriminant is what the hand-written schemas do
     // and is the difference between usable and not for a CLI over many files.
-    const variants = Object.values(descriptor.fieldTypes).flatMap((fieldType) => {
+    const variants: z.ZodDiscriminatedUnionOption<'type'>[] = Object.values(descriptor.fieldTypes).flatMap((fieldType) => {
       const shape: z.ZodRawShape = {};
 
       // Hoisted shared properties come first; a field type's own entry wins.
@@ -124,7 +124,10 @@ export function compileFieldSchema(descriptor: Descriptor): z.ZodTypeAny {
       return [fieldType.canonical, ...fieldType.aliases].map((name) => z.object({ ...shape, type: z.literal(name) }));
     });
 
-    return z.discriminatedUnion('type', variants as unknown as [z.ZodObject<z.ZodRawShape>, ...z.ZodObject<z.ZodRawShape>[]]);
+    // Zod wants a non-empty tuple. The generator fails rather than emitting a
+    // descriptor whose registry resolved nothing, so by the time one is loaded
+    // it declares at least one field type.
+    return z.discriminatedUnion('type', variants as [z.ZodDiscriminatedUnionOption<'type'>, ...z.ZodDiscriminatedUnionOption<'type'>[]]);
   }
 
   return fieldSchema;

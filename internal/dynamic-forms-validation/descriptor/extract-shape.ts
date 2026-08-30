@@ -52,6 +52,19 @@ export interface ShapeContext {
    * serializable arm is permanently opaque and needs no entry.
    */
   encountered: Set<string>;
+  /**
+   * Shared table of described config shapes, keyed by name and filled as a side
+   * effect. Optional: a caller that only wants field-level and props shapes
+   * omits it, and config unions then record as unresolved instead of being
+   * described, because there would be nowhere to put the arms.
+   */
+  objects?: Record<string, DescriptorObject>;
+  /**
+   * How many config-shape levels deep this context already is. Absent at the
+   * top level and incremented once per `describeConfigShape`, so the recursion
+   * stops at `MAX_CONFIG_DEPTH`.
+   */
+  configDepth?: number;
 }
 
 function record(context: ShapeContext, path: string, reason: string): DescriptorType {
@@ -285,7 +298,7 @@ function describeConfigShape(type: Type, at: Node, context: ShapeContext): Descr
     context.objects[name] = { policy: 'strip', keys: {} };
 
     const keys: Record<string, DescriptorProperty> = {};
-    const nested: ShapeContext = { ...context, shallow: true, path: name, configDepth: (context.configDepth ?? 0) + 1 };
+    const nested: ShapeContext = { ...context, path: name, configDepth: (context.configDepth ?? 0) + 1 };
     for (const prop of type.getProperties()) {
       keys[prop.getName()] = describeProperty(prop, at, nested, `${name}.${prop.getName()}`);
     }

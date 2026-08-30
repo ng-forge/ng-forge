@@ -145,7 +145,7 @@ describe('buildDescriptor', () => {
 
     expect(hint?.type).toEqual({ kind: 'string' });
     expect(hint?.narrowedFrom).toBe('DynamicText');
-    expect(result.descriptor.unresolved.map((u) => u.path)).not.toContain('input.props.hint');
+    expect(result.descriptor.unresolved.flatMap((u) => u.paths)).not.toContain('input.props.hint');
   });
 
   it('keeps wrappers required on container', () => {

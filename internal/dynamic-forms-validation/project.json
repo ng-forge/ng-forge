@@ -43,7 +43,14 @@
         "{workspaceRoot}/packages/dynamic-forms-bootstrap/src/**/*.ts",
         "{workspaceRoot}/packages/dynamic-forms-primeng/src/**/*.ts",
         "{workspaceRoot}/packages/dynamic-forms-ionic/src/**/*.ts",
-        "{workspaceRoot}/packages/dynamic-forms/package.json"
+        "{workspaceRoot}/packages/dynamic-forms/package.json",
+        "{workspaceRoot}/packages/dynamic-form-mcp/src/registry/ui-adapters.ts",
+        "{workspaceRoot}/packages/dynamic-forms/tsconfig*.json",
+        "{workspaceRoot}/packages/dynamic-forms-material/tsconfig*.json",
+        "{workspaceRoot}/packages/dynamic-forms-bootstrap/tsconfig*.json",
+        "{workspaceRoot}/packages/dynamic-forms-primeng/tsconfig*.json",
+        "{workspaceRoot}/packages/dynamic-forms-ionic/tsconfig*.json",
+        "{workspaceRoot}/tsconfig.base.json"
       ],
       "options": {
         "command": "SWC_NODE_PROJECT=./internal/dynamic-forms-validation/tsconfig.json node --import @swc-node/register/esm-register scripts/generate-descriptors.ts --check",
