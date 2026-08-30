@@ -18,14 +18,14 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileFormConfigSchema } from './compile-schema';
-import { parseDescriptor } from './serialize';
+import { parseAdapterDescriptor, parseCoreDescriptor } from './serialize';
 import { validateFormConfig, type UiIntegration } from '../validate/src';
-import type { AdapterDescriptor, CoreDescriptor } from './descriptor.types';
+import type { CoreDescriptor } from './descriptor.types';
 
 const GENERATED = join(__dirname, 'generated');
 const ADAPTERS: UiIntegration[] = ['material', 'bootstrap', 'primeng', 'ionic'];
 
-const read = (name: string) => parseDescriptor(readFileSync(join(GENERATED, `${name}.json`), 'utf-8'));
+const readFile = (name: string) => readFileSync(join(GENERATED, `${name}.json`), 'utf-8');
 
 const child = { key: 'email', type: 'input', label: 'Email' };
 
@@ -41,8 +41,8 @@ const ACCEPTED: Array<[string, unknown]> = [
   ['a page with nav buttons', { fields: [{ key: 'p', type: 'page', fields: [child, { key: 'n', type: 'next' }] }] }],
   ['an array with an item template', { fields: [{ key: 'items', type: 'array', fields: [child] }] }],
   // `template` is required on the array-action buttons: the type declares it so
-  // and the doc comment says REQUIRED. The hand-written schema omits it
-  // entirely, so it accepts an insert button with nothing to insert.
+  // and the doc comment says REQUIRED. Spelled out here because the schema that
+  // enforces it is newer than the rule.
   ['an array action with its index', { fields: [{ key: 'ins', type: 'insert-array-item', index: 0, template: child }] }],
   ['the camelCase spelling of an array action', { fields: [{ key: 'add', type: 'addArrayItem', template: child }] }],
   [
@@ -53,8 +53,9 @@ const ACCEPTED: Array<[string, unknown]> = [
 
 /** Configs the hand-written schemas reject, tracked as coverage rather than asserted. */
 const REJECTED: Array<[string, unknown]> = [
-  // The hand-written schema accepts this, wrongly: the type declares `template`
-  // required. Kept here as the record of a divergence the derived schema fixes.
+  // Both schemas reject this now. It stays as the record of a divergence that
+  // has closed: the type has always declared `template` required, and the
+  // hand-written schema was the half that did not enforce it.
   ['an insert button with no template', { fields: [{ key: 'ins', type: 'insert-array-item', index: 0 }] }],
   ['an unknown field type', { fields: [{ key: 'a', type: 'acme-currency', label: 'A' }] }],
   ['a label on a container', { fields: [{ key: 'k', type: 'container', wrappers: [], fields: [], label: 'no' }] }],
@@ -67,9 +68,9 @@ let core: CoreDescriptor;
 const derived = new Map<UiIntegration, ReturnType<typeof compileFormConfigSchema>>();
 
 beforeAll(() => {
-  core = read('core') as unknown as CoreDescriptor;
+  core = parseCoreDescriptor(readFile('core'));
   for (const adapter of ADAPTERS) {
-    derived.set(adapter, compileFormConfigSchema(core, read(adapter) as unknown as AdapterDescriptor));
+    derived.set(adapter, compileFormConfigSchema(core, parseAdapterDescriptor(readFile(adapter))));
   }
 });
 
@@ -86,7 +87,13 @@ describe('anything the hand-written schema accepts, the derived one accepts', ()
   for (const [name, config] of ACCEPTED) {
     it.each(ADAPTERS)(`${name} (%s)`, (adapter) => {
       const handWritten = validateFormConfig(adapter, config);
-      if (!handWritten.valid) return; // not part of this contract; see the report below
+      const rejected = (handWritten.errors ?? []).map((e) => `${e.path}: ${e.message}`).join('\n');
+
+      // The premise of the table, asserted rather than assumed. Returning early
+      // when the hand-written schema stopped accepting a row let the whole suite
+      // go green while comparing nothing: a row that has moved belongs in
+      // REJECTED, and moving it should be a decision someone made.
+      expect(handWritten.valid, `ACCEPTED lists a config the hand-written schema now rejects\n${rejected}`).toBe(true);
 
       const result = derived.get(adapter)!.safeParse(config);
       const detail = result.success ? '' : JSON.stringify(result.error.issues.slice(0, 3), null, 2);
@@ -123,14 +130,12 @@ describe('coverage report against the hand-written schema', () => {
     // removes an unexpected key rather than refusing it. Closing this is the
     // `.strict()` migration, not a defect in the derivation.
     expect(missing.every((entry) => entry.startsWith('validators on a row'))).toBe(true);
-    // Deliberately generous: the derived schema is a large lazy union and a
-    // single parse is slow. Measured below, and worth knowing before cutover.
   }, 30_000);
 
   it('parses fast enough to be worth measuring before cutover', () => {
-    // Not a budget, a datum. The hand-written schemas are flat discriminated
-    // unions; the derived one is a lazy union of every field type, and the
-    // difference shows. Recorded so the cutover is a decision with a number
+    // The number is the point as much as the assertion. The hand-written schemas
+    // are flat discriminated unions; the derived one is a lazy union of every
+    // field type, so the cutover should be a decision with a measurement
     // attached rather than a surprise.
     const config = { fields: [{ key: 'a', type: 'input', label: 'A' }] };
     const schema = derived.get('material')!;
@@ -140,6 +145,11 @@ describe('coverage report against the hand-written schema', () => {
     const perParse = (Date.now() - started) / 10;
 
     console.info(`[differential] derived schema: ${perParse.toFixed(0)}ms per parse`);
-    expect(perParse).toBeGreaterThanOrEqual(0);
+
+    // A ceiling, not a budget. `>= 0` held for any number a clock can produce,
+    // so deleting the memoization that took this from 52ms to under 1ms would
+    // not have gone red. Loose enough not to flake on a slow runner, tight
+    // enough that rebuilding the union per parse cannot pass.
+    expect(perParse, 'the field union is being rebuilt per parse').toBeLessThan(10);
   }, 30_000);
 });

@@ -17,6 +17,7 @@
 
 import type { Type } from 'ts-morph';
 import type { DescriptorProperty, DescriptorType } from './descriptor.types';
+import { sortEnumValues } from './serialize';
 
 /**
  * Type names whose non-serializable arms are dropped by design.
@@ -37,7 +38,19 @@ export const NARROWING_TABLE: Readonly<Record<string, DescriptorType>> = {
  * hand-written schemas already take this position — `pattern` is `z.string()` —
  * so recording it makes the derivation agree rather than diverge.
  */
-const NON_SERIALIZABLE = [/^Observable</, /^Signal</, /^WritableSignal</, /=>/, /^Promise</, /^RegExp$/, /^Date$/];
+const NON_SERIALIZABLE = [
+  /^Observable</,
+  /^Signal</,
+  /^WritableSignal</,
+  /^Promise</,
+  /^RegExp$/,
+  /^Date$/,
+  // A function type: text beginning with a parameter list, a type parameter list
+  // or `new`, and carrying an arrow. Anchoring matters — a bare `/=>/` matched an
+  // arrow anywhere in an arm's structural text, so an object shape with one
+  // callback key read as entirely unwritable.
+  /^(\(|<|new\b)[\s\S]*=>/,
+];
 
 /** True when an arm of a union cannot appear literally in a config file. */
 export function isNonSerializableArm(text: string): boolean {
@@ -119,7 +132,9 @@ function survivingType(kept: Type[]): DescriptorType {
   if (kept.every((a) => a.isNumber())) return { kind: 'number' };
   if (kept.every((a) => a.isBoolean() || a.isBooleanLiteral())) return { kind: 'boolean' };
   if (kept.every((a) => a.isStringLiteral())) {
-    return { kind: 'enum', values: kept.map((a) => String(a.getLiteralValue())).sort() };
+    // The same ordering extraction uses. Two comparators for one concept meant
+    // an enum's order depended on which path produced it.
+    return { kind: 'enum', values: sortEnumValues(kept.map((a) => String(a.getLiteralValue()))) };
   }
   return { kind: 'unknown' };
 }

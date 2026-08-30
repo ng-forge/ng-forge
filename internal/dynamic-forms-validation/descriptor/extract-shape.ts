@@ -22,21 +22,7 @@ export interface RawUnresolved {
   reason: string;
 }
 import { bareTypeName, isNarrowingCandidate, isNonSerializableArm, narrow, propertyFromNarrowing } from './narrowing';
-
-/**
- * Deterministic order for enum members.
- *
- * TypeScript returns union arms in its own order, which is stable for a given
- * compiler but is not something a committed artifact should depend on. Sorting
- * by kind then value keeps the diff meaningful across versions.
- */
-function sortEnumValues(values: (string | number | boolean)[]): (string | number | boolean)[] {
-  return [...values].sort((a, b) => {
-    if (typeof a !== typeof b) return typeof a < typeof b ? -1 : 1;
-    if (typeof a === 'number' && typeof b === 'number') return a - b;
-    return String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0;
-  });
-}
+import { sortEnumValues } from './serialize';
 
 /** Keys handled structurally elsewhere, or meaningless in a static config. */
 const SKIPPED_FIELD_KEYS = new Set(['props', 'fields', 'addons', 'wrappers']);
@@ -244,11 +230,17 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
  * key and again at every reference, which cost about a quarter of the artifact
  * and made it unreadable.
  *
- * Those get their base type plus a digest of the full text. The digest is
- * content-derived rather than positional, so it does not move when TypeScript
- * reorders union arms, and a changed variant shows up as a removal and an
- * addition rather than as an edit to a name that no longer describes it. The
- * full shape is right there under the name, so nothing is lost.
+ * Those get as much of their leading text as the budget allows plus a digest of
+ * the whole thing. The digest is content-derived rather than positional, so it
+ * does not move when TypeScript reorders union arms, and a changed variant shows
+ * up as a removal and an addition rather than as an edit to a name that no
+ * longer describes it. The full shape is right there under the name, so nothing
+ * is lost.
+ *
+ * The budget is what makes this a shortening. Taking only the text before ` & `
+ * shortened intersections and nothing else: a long single shape kept all of its
+ * text and gained the suffix, so the name came out longer than the name it
+ * replaced.
  */
 function shapeName(type: Type, at: Node): string {
   const alias = type.getAliasSymbol()?.getName();
@@ -257,7 +249,10 @@ function shapeName(type: Type, at: Node): string {
   const text = bareTypeName(type.getText(at));
   if (text.length <= MAX_INLINE_SHAPE_NAME) return text;
 
-  const base = text.split(' & ')[0].trim();
+  const base = text
+    .split(' & ')[0]
+    .trim()
+    .slice(0, MAX_INLINE_SHAPE_NAME - DIGEST_SUFFIX_LENGTH);
   return `${base}~${digest(text)}`;
 }
 
@@ -273,6 +268,9 @@ const MAX_CONFIG_DEPTH = 2;
 
 /** Longest structural text kept as a name before falling back to a digest. */
 const MAX_INLINE_SHAPE_NAME = 48;
+
+/** Length of `~` plus the digest, kept out of the name's character budget. */
+const DIGEST_SUFFIX_LENGTH = 7;
 
 /** FNV-1a, for a short stable suffix. Not security relevant. */
 function digest(value: string): string {

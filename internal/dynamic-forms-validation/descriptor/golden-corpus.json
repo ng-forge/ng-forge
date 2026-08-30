@@ -48,6 +48,170 @@
       "currentVerdict": "invalid",
       "v1Verdict": "invalid",
       "rationale": "`wrappers` is required on ContainerField. A container without it is a group spelled differently, so accepting it would erase the distinction that justifies the type. This row exists to stop a future derivation from relaxing the property to optional."
+    },
+    {
+      "id": "button-add-array-item-no-template",
+      "description": "An add-array-item button with nothing to add",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "items",
+            "type": "array",
+            "fields": [
+              {
+                "key": "tag",
+                "type": "input",
+                "label": "Tag"
+              }
+            ]
+          },
+          {
+            "key": "add",
+            "type": "add-array-item",
+            "label": "Add"
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "`template` says what the button adds, and the type has always declared it required. A button with no template renders a control that cannot do anything, so accepting it hands an agent a form that looks finished and is not. Tightening this rejects JSON configs that passed before, which is why the decision belongs in the corpus rather than only in a schema.",
+      "regression": {
+        "observedBefore": "8fda9ebfb",
+        "issue": "add, prepend and insert array-item buttons validated with no template, so the schema accepted a button with nothing to insert while TypeScript rejected the same config"
+      }
+    },
+    {
+      "id": "button-remove-array-item-no-template",
+      "description": "A remove-array-item button, which needs no template",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "items",
+            "type": "array",
+            "fields": [
+              {
+                "key": "tag",
+                "type": "input",
+                "label": "Tag"
+              }
+            ]
+          },
+          {
+            "key": "remove",
+            "type": "remove-array-item",
+            "label": "Remove"
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "The bound on the row above. Requiring `template` on the buttons that insert must not spread to the ones that do not: a remove button has nothing to build, and demanding a template from it would reject correct config to enforce a rule that does not apply to it."
+    },
+    {
+      "id": "value-select-options-at-field-level",
+      "description": "A select whose options sit on the field",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "status",
+            "type": "select",
+            "label": "Status",
+            "options": [
+              {
+                "label": "Active",
+                "value": "active"
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "Placement is the pitfall agents hit most often, and it is the payoff the derivation claims: SelectField declares `options` while SelectProps is empty, so field level is the only correct spelling. Pinned here so a derivation that started reading props as the home for options fails instead of quietly accepting both."
+    },
+    {
+      "id": "value-select-options-inside-props",
+      "description": "A select whose options were put inside props",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "status",
+            "type": "select",
+            "label": "Status",
+            "props": {
+              "options": [
+                {
+                  "label": "Active",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "The mirror of the row above, and the reason it is worth asserting: a schema that accepted both placements would teach the mistake rather than catch it, and the field would silently render with no options at runtime."
+    },
+    {
+      "id": "core-row-nested-row",
+      "description": "A row holding another row",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "outer",
+            "type": "row",
+            "fields": [
+              {
+                "key": "inner",
+                "type": "row",
+                "fields": [
+                  {
+                    "key": "email",
+                    "type": "input",
+                    "label": "Email"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "Rows nest at runtime, which is how a twelve-column grid is subdivided. Validation used to reject it, so a layout that rendered correctly could not be written down. Accepting it follows the runtime rather than the other way round.",
+      "regression": {
+        "observedBefore": "197318af8",
+        "issue": "a row listed as an allowed child of a row in the type registry was rejected by validation, so nested grid layouts that rendered correctly could not pass the CLI"
+      }
+    },
+    {
+      "id": "core-row-hidden-child",
+      "description": "A row holding a hidden field",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "r",
+            "type": "row",
+            "fields": [
+              {
+                "key": "id",
+                "type": "hidden",
+                "value": "abc123"
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "A hidden field carries a value and occupies no space, so forbidding it inside a row forced authors to hoist it out of the group it belongs to and lose that association for no layout benefit."
     }
   ]
 }

@@ -13,6 +13,7 @@
 
 import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
+import { ts } from 'ts-morph';
 
 /** Preferred order when a directory holds several. */
 const TSCONFIG_NAMES = ['tsconfig.json', 'tsconfig.app.json', 'tsconfig.lib.json', 'tsconfig.base.json'];
@@ -74,6 +75,64 @@ async function readJson(path: string): Promise<Record<string, unknown> | undefin
 }
 
 /**
+ * A tsconfig that compiles nothing itself and only points at others.
+ *
+ * Nx generates one per project, and `tsconfig.json` is the first name anyone
+ * would try, so preferring it by name landed on a config whose program has zero
+ * source files — and a program with no sources resolves no field types, which
+ * reads as a project that does not use the library rather than as the wrong
+ * config. This repository's own internal libraries are laid out exactly that
+ * way.
+ *
+ * Read through TypeScript's parser rather than `JSON.parse`: a tsconfig is
+ * JSONC, and the commented ones are precisely the hand-written ones worth
+ * reading carefully.
+ */
+async function isSolutionStyle(path: string): Promise<boolean> {
+  let text: string;
+  try {
+    text = await readFile(path, 'utf-8');
+  } catch {
+    return false;
+  }
+
+  const { config, error } = ts.parseConfigFileTextToJson(path, text);
+  if (error || config === null || typeof config !== 'object') return false;
+
+  const { files, include, references } = config as { files?: unknown; include?: unknown; references?: unknown };
+  const empty = (value: unknown) => value === undefined || (Array.isArray(value) && value.length === 0);
+
+  return Array.isArray(references) && references.length > 0 && empty(files) && empty(include);
+}
+
+/**
+ * The tsconfig to build a program from, preferring one that has sources.
+ *
+ * Order still decides between candidates that all compile something; the
+ * solution-style check only moves past the ones that cannot. When every
+ * candidate in the directory is solution-style the first is returned anyway, so
+ * the caller gets the same answer it used to and `--tsconfig` remains the way to
+ * say something discovery cannot work out.
+ */
+async function findTsconfig(dir: string): Promise<string | undefined> {
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch {
+    return undefined;
+  }
+
+  const present = new Set(entries);
+  const candidates = TSCONFIG_NAMES.filter((name) => present.has(name)).map((name) => join(dir, name));
+
+  for (const candidate of candidates) {
+    if (!(await isSolutionStyle(candidate))) return candidate;
+  }
+
+  return candidates[0];
+}
+
+/**
  * The installed version, not the declared range.
  *
  * A manifest says `^1.2.0`; what matters is what resolved. Reading the installed
@@ -110,7 +169,7 @@ export async function discoverProject(options: DiscoverOptions = {}): Promise<Di
 
   for (const dir of chain) {
     packageJsonPath ??= await firstExisting(dir, ['package.json']);
-    tsconfigPath ??= await firstExisting(dir, TSCONFIG_NAMES);
+    tsconfigPath ??= await findTsconfig(dir);
 
     // Stop at the first directory that has a manifest: that is the project, and
     // continuing would pick up an unrelated tsconfig from a parent.

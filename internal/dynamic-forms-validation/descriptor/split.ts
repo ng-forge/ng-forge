@@ -20,6 +20,7 @@ import type {
   DescriptorObject,
   UnresolvedEntry,
 } from './descriptor.types';
+import { majorOf } from './serialize';
 
 /**
  * Stable order for `unresolved`.
@@ -129,13 +130,18 @@ export class DescriptorMismatchError extends Error {
 /**
  * Rejoin the halves into a whole descriptor.
  *
- * Refuses a format mismatch rather than merging across versions: the halves are
- * shipped and installed separately, so nothing else guarantees they were
+ * Refuses an incompatible format rather than merging across versions: the halves
+ * are shipped and installed separately, so nothing else guarantees they were
  * generated together, and a silent merge would produce a descriptor that
  * describes neither release.
+ *
+ * Compatibility is the major only, matching what `parseDescriptor` accepts. Core
+ * ships in @ng-forge/dynamic-forms and props in the adapter package, so an exact
+ * comparison hard-failed a combination the format contract calls compatible as
+ * soon as one of the two took a minor bump.
  */
 export function joinDescriptor(core: CoreDescriptor, adapter: AdapterDescriptor): Descriptor {
-  if (core.formatVersion !== adapter.formatVersion) {
+  if (majorOf(core.formatVersion) !== majorOf(adapter.formatVersion)) {
     throw new DescriptorMismatchError(
       `core descriptor is format ${core.formatVersion} but the ${adapter.adapter.id} adapter descriptor is format ${adapter.formatVersion}. Regenerate both together.`,
     );

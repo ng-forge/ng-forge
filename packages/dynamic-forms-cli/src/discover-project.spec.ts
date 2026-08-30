@@ -88,6 +88,69 @@ describe('discoverProject', () => {
     expect(found.adapterPackages).not.toContain('@ng-forge/dynamic-forms-cli');
   });
 
+  it('skips a solution-style tsconfig for one that has sources', async () => {
+    // The Nx layout: tsconfig.json references the real configs and compiles
+    // nothing itself, so preferring it by name built a program with no source
+    // files and therefore found no field types.
+    const nx = await mkdtemp(join(tmpdir(), 'ng-forge-nx-'));
+
+    try {
+      await writeFile(join(nx, 'package.json'), JSON.stringify({ name: 'nx-project' }), 'utf-8');
+      await writeFile(
+        join(nx, 'tsconfig.json'),
+        '{\n  // references only, like every Nx project\n  "files": [],\n  "include": [],\n  "references": [{ "path": "./tsconfig.lib.json" }]\n}\n',
+        'utf-8',
+      );
+      await writeFile(join(nx, 'tsconfig.lib.json'), JSON.stringify({ include: ['src/**/*.ts'] }), 'utf-8');
+
+      const found = await discoverProject({ cwd: nx });
+
+      expect(found.tsconfigPath).toBe(join(nx, 'tsconfig.lib.json'));
+    } finally {
+      await rm(nx, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps a tsconfig that references others but compiles sources too', async () => {
+    // References alone are not the signal. A config that also declares its own
+    // include is a normal project config, and skipping it would be worse than
+    // the behaviour being fixed.
+    const mixed = await mkdtemp(join(tmpdir(), 'ng-forge-mixed-'));
+
+    try {
+      await writeFile(join(mixed, 'package.json'), JSON.stringify({ name: 'mixed' }), 'utf-8');
+      await writeFile(
+        join(mixed, 'tsconfig.json'),
+        JSON.stringify({ include: ['src/**/*.ts'], references: [{ path: './other' }] }),
+        'utf-8',
+      );
+      await writeFile(join(mixed, 'tsconfig.lib.json'), JSON.stringify({ include: ['lib/**/*.ts'] }), 'utf-8');
+
+      const found = await discoverProject({ cwd: mixed });
+
+      expect(found.tsconfigPath).toBe(join(mixed, 'tsconfig.json'));
+    } finally {
+      await rm(mixed, { recursive: true, force: true });
+    }
+  });
+
+  it('falls back to the first candidate when every one is solution-style', async () => {
+    const all = await mkdtemp(join(tmpdir(), 'ng-forge-all-'));
+
+    try {
+      const solution = '{ "files": [], "include": [], "references": [{ "path": "./elsewhere" }] }';
+      await writeFile(join(all, 'package.json'), JSON.stringify({ name: 'all' }), 'utf-8');
+      await writeFile(join(all, 'tsconfig.json'), solution, 'utf-8');
+      await writeFile(join(all, 'tsconfig.lib.json'), solution, 'utf-8');
+
+      const found = await discoverProject({ cwd: all });
+
+      expect(found.tsconfigPath).toBe(join(all, 'tsconfig.json'));
+    } finally {
+      await rm(all, { recursive: true, force: true });
+    }
+  });
+
   it('returns empty rather than throwing outside any project', async () => {
     const bare = await mkdtemp(join(tmpdir(), 'ng-forge-bare-'));
 
