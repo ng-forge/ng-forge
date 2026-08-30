@@ -540,6 +540,7 @@ const EXPECTED_STRUCTURE: Record<string, string> = {
   group: `{ key: 'groupKey', type: 'group', fields: [...childFields] }`,
   array: `Full API: { key: 'arrayKey', type: 'array', fields: [...itemDefs] } OR Simplified API: { key: 'arrayKey', type: 'array', template: { type: 'input', label: 'Item' }, value: [] }`,
   page: `{ key: 'pageKey', type: 'page', fields: [...childFields, { key: 'next', type: 'next', label: 'Next' }] }`,
+  container: `{ key: 'containerKey', type: 'container', wrappers: [{ type: 'css', cssClasses: 'card' }], fields: [...childFields] }`,
 };
 
 /**
@@ -798,7 +799,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
     }
 
     // Check for missing 'fields' on containers (array supports either 'fields' or 'template')
-    if (['row', 'group', 'page'].includes(fieldType || '')) {
+    if (['row', 'group', 'page', 'container'].includes(fieldType || '')) {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
@@ -808,6 +809,23 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         errors.push({
           path: `${path}.fields`,
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
+        });
+      }
+    }
+
+    // Container-specific: 'wrappers' is what makes a container a container.
+    // Without it the field is a group spelled differently, so name the missing
+    // property rather than letting Zod report a generic union failure.
+    if (fieldType === 'container') {
+      if (!('wrappers' in f)) {
+        errors.push({
+          path: `${path}.wrappers`,
+          message: `"container" container "${fieldKey || 'unknown'}" is MISSING required "wrappers" property. Containers must have a wrappers array naming the UI chrome to wrap their children in - that is the only thing a container adds over a "group". Expected structure: ${EXPECTED_STRUCTURE['container']}`,
+        });
+      } else if (!Array.isArray(f['wrappers'])) {
+        errors.push({
+          path: `${path}.wrappers`,
+          message: `"container" container "${fieldKey || 'unknown'}" has invalid "wrappers" - must be an array of wrapper objects, not ${typeof f['wrappers']}.`,
         });
       }
     }

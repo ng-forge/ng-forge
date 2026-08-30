@@ -59,6 +59,15 @@ describe('wrappers is required, which is what makes it a container', () => {
     expect(result.valid, 'a container without wrappers must not validate').toBe(false);
   });
 
+  it.each(ADAPTERS)('names the missing property, since a generic message sends an agent to delete the field (%s)', (ui) => {
+    // The reason this PR exists is an agent acting on an error it cannot fix.
+    // "has invalid properties" is that error; "is MISSING required wrappers" is not.
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', fields: [child] }] }, ui);
+
+    expect(result.text).toContain('MISSING required "wrappers" property');
+    expect(result.text).toContain('chrome');
+  });
+
   it('rejects a wrappers value that is not an array', () => {
     expect(messagesFor({ fields: [{ key: 'chrome', type: 'container', wrappers: 'css', fields: [] }] }).valid).toBe(false);
   });
@@ -76,6 +85,20 @@ describe('wrappers is required, which is what makes it a container', () => {
 });
 
 describe('container inherits the container base rules', () => {
+  it.each(ADAPTERS)('names a missing fields array the way every other container does (%s)', (ui) => {
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', wrappers: [] }] }, ui);
+
+    expect(result.valid).toBe(false);
+    expect(result.text).toContain('MISSING required "fields" property');
+  });
+
+  it('rejects a fields value that is not an array', () => {
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', wrappers: [], fields: 'nope' }] });
+
+    expect(result.valid).toBe(false);
+    expect(result.text).toContain('invalid "fields"');
+  });
+
   it('rejects a label, as on every other container', () => {
     const config = { fields: [{ key: 'chrome', type: 'container', wrappers: [], fields: [], label: 'Nope' }] };
 
