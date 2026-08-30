@@ -300,6 +300,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // - disabled, readonly, hidden, col, tabIndex, meta
 // - Validation shorthand: email, min, max, minLength, maxLength, pattern`,
     minimalExample: `{ key: 'id', type: 'hidden', value: 'abc123' }`,
+    illustrative: { example: 'several snippets and a forbidden-property list, not one expression' },
   },
   {
     type: 'text',
@@ -381,7 +382,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 }
 // NOT ALLOWED in rows:
 // - type: 'page' (pages are top-level only)`,
-    minimalExample: `{ key: 'row1', type: 'row', fields: [...] }`,
+    minimalExample: `{ key: 'row1', type: 'row', fields: [{ key: 'firstName', type: 'input', label: 'First Name', col: 6 }, { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }] }`,
+    illustrative: { example: 'ends with a not-allowed-in list, so it is not one expression' },
   },
   {
     type: 'group',
@@ -472,7 +474,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   validators: [{ type: 'custom', functionName: 'dateOrder' }],
   validationMessages: { dateOrder: 'The end must not be before the start.' }
 }`,
-    minimalExample: `{ key: 'address', type: 'group', fields: [...] }`,
+    minimalExample: `{ key: 'address', type: 'group', fields: [{ key: 'street', type: 'input', label: 'Street' }] }`,
+    illustrative: { example: 'two snippets: a plain group and one carrying a cross-field rule' },
   },
   {
     type: 'array',
@@ -595,7 +598,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // periodOrder receives the whole item list:
 //   (ctx) => (ctx.value() ?? []).some(r => r.from && r.to && r.to < r.from)
 //     ? { kind: 'periodOrder' } : null`,
-    minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
+    minimalExample: `{ key: 'items', type: 'array', fields: [{ key: 'tag', type: 'input', label: 'Tag' }] }`,
+    illustrative: { example: 'three snippets: flat, object-item and per-row-rule arrays' },
   },
   {
     type: 'container',
@@ -660,7 +664,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // Values flatten: { street: '', city: '' } \u2014 no 'billingChrome' key
 // NOT ALLOWED in containers:
 // - type: 'page' (pages are top-level only)`,
-    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [...] }`,
+    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [{ key: 'street', type: 'input', label: 'Street' }] }`,
+    illustrative: { example: 'ends with a not-allowed-in list, so it is not one expression' },
   },
   {
     type: 'page',
@@ -714,7 +719,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     { key: 'next', type: 'next', label: 'Next' }
   ]
 }`,
-    minimalExample: `{ key: 'step1', type: 'page', fields: [...] }`,
+    minimalExample: `{ key: 'step1', type: 'page', fields: [{ key: 'firstName', type: 'input', label: 'First Name' }] }`,
   },
   {
     type: 'next',
@@ -785,6 +790,10 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   event: MyCustomEvent  // Must be the class reference
 }`,
     minimalExample: `{ key: 'action', type: 'button', label: 'Action', event: MyEvent }`,
+    illustrative: {
+      minimalExample: 'names an event class only a real app defines and registers',
+      example: 'four snippets plus the registration steps they depend on',
+    },
   },
   {
     type: 'submit',

@@ -12,28 +12,25 @@
 import { describe, it, expect } from 'vitest';
 import { validateFormConfig } from '@ng-forge/dynamic-forms-validation';
 import { FIELD_TYPES } from './field-types';
+import type { FieldTypeInfo } from './index';
 
 /** Every place a field can sit. `top-level` is the config's own `fields`. */
 const HOSTS = ['top-level', 'page', 'row', 'group', 'array', 'container'] as const;
 
-/** A valid, minimal instance of each field type, so a failure can only mean the host rejected it. */
-const SAMPLES: Record<string, Record<string, unknown>> = {
-  row: { key: 'r', type: 'row', fields: [{ key: 'i', type: 'input', label: 'I' }] },
-  group: { key: 'g', type: 'group', fields: [{ key: 'i', type: 'input', label: 'I' }] },
-  container: { key: 'c', type: 'container', wrappers: [], fields: [{ key: 'i', type: 'input', label: 'I' }] },
-  array: { key: 'a', type: 'array', fields: [{ key: 'i', type: 'input', label: 'I' }] },
-  page: { key: 'p', type: 'page', fields: [{ key: 'i', type: 'input', label: 'I' }] },
-};
+/**
+ * A valid, minimal instance of the field type, so a failure here can only mean
+ * the host rejected it.
+ *
+ * The registry's own `minimalExample` is the sample. A hand-kept table beside it
+ * was a second thing to drift, and it hid the containers' ellipses instead of
+ * fixing them. `illustrative` is the one opt-out, and it is read rather than
+ * inferred: catching the throw skipped a broken example as quietly as an
+ * intentionally elided one.
+ */
+function sampleFor(fieldType: FieldTypeInfo): Record<string, unknown> | undefined {
+  if (fieldType.illustrative?.minimalExample || fieldType.minimalExample === undefined) return undefined;
 
-/** Field types whose own example is illustrative rather than runnable. */
-function sampleFor(type: string, minimalExample: string): Record<string, unknown> | undefined {
-  if (SAMPLES[type]) return SAMPLES[type];
-
-  try {
-    return new Function(`return (${minimalExample});`)() as Record<string, unknown>;
-  } catch {
-    return undefined;
-  }
+  return new Function(`return (${fieldType.minimalExample});`)() as Record<string, unknown>;
 }
 
 /** Build a config with the field sitting in the named host. */
@@ -57,7 +54,7 @@ function hostsNamedBy(allowedIn: readonly string[]): string[] {
 
 describe('every host allowedIn promises really accepts the field', () => {
   for (const fieldType of FIELD_TYPES) {
-    const sample = sampleFor(fieldType.type, fieldType.minimalExample);
+    const sample = sampleFor(fieldType);
 
     it.skipIf(sample === undefined)(`${fieldType.type}`, () => {
       const rejected = hostsNamedBy(fieldType.allowedIn).filter(
@@ -74,7 +71,7 @@ describe('every host notAllowedIn forbids really is rejected', () => {
   // accepts is a rule that exists only in the prose, and agents route around
   // it for no reason.
   for (const fieldType of FIELD_TYPES) {
-    const sample = sampleFor(fieldType.type, fieldType.minimalExample);
+    const sample = sampleFor(fieldType);
     const hosts = hostsNamedBy(fieldType.notAllowedIn ?? []).filter((host) => (HOSTS as readonly string[]).includes(host));
 
     it.skipIf(sample === undefined || hosts.length === 0)(`${fieldType.type}`, () => {

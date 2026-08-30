@@ -19,21 +19,6 @@ function parseExample(source: string): Record<string, unknown> {
   return new Function(`return (${source});`)() as Record<string, unknown>;
 }
 
-/**
- * Some examples are illustrative rather than complete: they reference symbols
- * that only exist in a real app (`button` calls a handler), or elide children
- * behind an ellipsis. Those cannot be evaluated, and demanding otherwise would
- * make the examples worse.
- */
-function isIllustrative(source: string): boolean {
-  try {
-    parseExample(source);
-    return false;
-  } catch {
-    return true;
-  }
-}
-
 /** The host each field type needs; array-item buttons must sit in an array. */
 function asConfig(field: Record<string, unknown>, type: string): unknown {
   if (type === 'page') return { fields: [field] };
@@ -52,25 +37,41 @@ function messagesFor(field: Record<string, unknown>, type: string): string {
   return (result.errors ?? []).map((e) => `${e.path}: ${e.message}`).join('\n');
 }
 
-describe('minimalExample', () => {
-  for (const fieldType of FIELD_TYPES) {
-    const source = fieldType.minimalExample;
+const SLOTS = ['minimalExample', 'example'] as const;
 
-    it.skipIf(isIllustrative(source))(`${fieldType.type} validates`, () => {
-      const field = parseExample(source);
-      expect(messagesFor(field, fieldType.type)).toBe('');
+describe.each(SLOTS)('%s', (slot) => {
+  for (const fieldType of FIELD_TYPES) {
+    // The skip is read off the registry, never off the throw. Deriving it from
+    // whether evaluation fails is the same signal a genuinely broken example
+    // gives, so a newly-broken one would join the skip list rather than fail
+    // the suite that exists to catch exactly that.
+    if (fieldType.illustrative?.[slot]) continue;
+
+    it(`${fieldType.type} validates`, () => {
+      const source = fieldType[slot];
+      if (source === undefined) throw new Error(`${fieldType.type} ships no ${slot}`);
+
+      expect(messagesFor(parseExample(source), fieldType.type)).toBe('');
     });
   }
 });
 
-describe('example', () => {
+describe('an example marked illustrative really cannot be evaluated', () => {
+  // The mirror claim, so the opt-out cannot outlive its reason. An example that
+  // has since been rewritten into a single expression should lose the flag and
+  // start being validated, rather than keep a permanent exemption.
   for (const fieldType of FIELD_TYPES) {
-    const source = fieldType.example;
+    for (const slot of SLOTS) {
+      const reason = fieldType.illustrative?.[slot];
+      if (!reason) continue;
 
-    it.skipIf(isIllustrative(source))(`${fieldType.type} validates`, () => {
-      const field = parseExample(source);
-      expect(messagesFor(field, fieldType.type)).toBe('');
-    });
+      it(`${fieldType.type} ${slot}: ${reason}`, () => {
+        const source = fieldType[slot];
+        if (source === undefined) throw new Error(`${fieldType.type} marks ${slot} illustrative but ships none`);
+
+        expect(() => parseExample(source), `${fieldType.type} ${slot} now evaluates; drop its illustrative entry`).toThrow();
+      });
+    }
   }
 });
 
