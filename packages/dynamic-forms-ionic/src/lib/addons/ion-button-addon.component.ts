@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
-import type { IonicButtonAddon } from '../types/addons';
+import type { IonicButtonAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 
 /** Renderer for the `ion-button` addon type. */
 @Component({

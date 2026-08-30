@@ -5,7 +5,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
-import type { MatButtonAddon } from '../types/addons';
+import type { MatButtonAddon } from '@ng-forge/dynamic-forms-material/shared';
 
 /** Renderer for the `mat-button` addon type. */
 @Component({

@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BOOTSTRAP_FIELD_TYPES } from '../config/bootstrap-field-config';
-import { BOOTSTRAP_CONFIG } from '../models/bootstrap-config.token';
-import type { BootstrapConfig } from '../models/bootstrap-config';
+import { BOOTSTRAP_CONFIG, type BootstrapConfig } from '@ng-forge/dynamic-forms-bootstrap/shared';
 import { withBootstrapFields } from './bootstrap-providers';
 
 describe('withBootstrapFields', () => {

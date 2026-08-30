@@ -45,8 +45,7 @@ export type {
 
 // Configuration
 export { MATERIAL_FIELD_TYPES } from './config/material-field-config';
-export { MATERIAL_CONFIG } from './models';
-export type { MaterialConfig } from './models';
+export { MATERIAL_CONFIG, MAT_INPUT_TYPE_OVERRIDE, type MaterialConfig } from '@ng-forge/dynamic-forms-material/shared';
 
 // Types and constants
 export { MatField, type MatFieldType } from './types/types';
@@ -57,7 +56,6 @@ export type { MatFormProps, MatFormConfig } from './types/form-config';
 // `type: 'mat-icon'`, and similar resolve at the call site. Without these,
 // consumer typechecks fall back to the empty base registries.
 import './types/registry-augmentation';
-import './types/addons';
 
 // Providers
 export { withMaterialFields, withMaterialAddons } from './providers/material-providers';
@@ -65,6 +63,5 @@ export { withMaterialFields, withMaterialAddons } from './providers/material-pro
 // Addon types
 export { MatIconAddonComponent } from './addons/mat-icon-addon.component';
 export { MatButtonAddonComponent } from './addons/mat-button-addon.component';
-export type { MatIconAddon, MatButtonAddon, MatAddon } from './types/addons';
+export type { MatIconAddon, MatButtonAddon, MatAddon } from '@ng-forge/dynamic-forms-material/shared';
 export type { MatInputAddon, MatAddonExtensions } from './fields/input/mat-input.type';
-export { MAT_INPUT_TYPE_OVERRIDE } from './tokens/input-type-override.token';

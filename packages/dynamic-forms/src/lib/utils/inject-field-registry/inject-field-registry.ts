@@ -14,6 +14,17 @@ export const COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('C
 });
 
 /**
+ * In-flight component loads, scoped through DI so concurrent fields share one
+ * dynamic import without introducing module-level mutable state.
+ *
+ * @internal
+ */
+export const COMPONENT_LOAD_CACHE = new InjectionToken<Map<string, Promise<Type<unknown> | undefined>>>('COMPONENT_LOAD_CACHE', {
+  providedIn: 'root',
+  factory: () => new Map(),
+});
+
+/**
  * Injection function for accessing the dynamic form field registry.
  *
  * @returns Object with methods for field registry interaction
@@ -42,6 +53,7 @@ export const COMPONENT_CACHE = new InjectionToken<Map<string, Type<unknown>>>('C
 export function injectFieldRegistry() {
   const registry = inject(FIELD_REGISTRY);
   const componentCache = inject(COMPONENT_CACHE);
+  const componentLoadCache = inject(COMPONENT_LOAD_CACHE);
 
   return {
     /**
@@ -89,14 +101,29 @@ export function injectFieldRegistry() {
         return cached;
       }
 
+      const pending = componentLoadCache.get(name);
+      if (pending) {
+        return pending;
+      }
+
       try {
-        const component = resolveDefaultExport(await fieldType.loadComponent());
+        const load = fieldType
+          .loadComponent()
+          .then(resolveDefaultExport)
+          .then((component) => {
+            if (component) {
+              componentCache.set(name, component);
+            }
 
-        if (component) {
-          componentCache.set(name, component);
-        }
+            return component;
+          })
+          .catch((error: unknown) => {
+            throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
+          })
+          .finally(() => componentLoadCache.delete(name));
 
-        return component;
+        componentLoadCache.set(name, load);
+        return load;
       } catch (error) {
         throw new DynamicFormError(`Failed to load component for field type "${name}": ${error}`);
       }

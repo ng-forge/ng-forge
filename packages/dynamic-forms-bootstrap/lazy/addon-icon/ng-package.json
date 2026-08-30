@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/addons/bs-icon-addon.component.ts"
+  }
+}

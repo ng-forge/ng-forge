@@ -4,7 +4,7 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { BsDatepickerProps } from './bs-datepicker.type';
 import { AsyncPipe } from '@angular/common';
-import { InputConstraintsDirective } from '../../directives/input-constraints.directive';
+import { InputConstraintsDirective } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 @Component({
   selector: 'df-bs-datepicker',

@@ -182,7 +182,7 @@ function ruleCatalogueMd(): string {
 }
 
 function rulesMd(): string {
-  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS}\n\n${ruleCatalogueMd()}\n`);
+  return withTableOfContents(`${GENERATED_NOTE}\n\n${INSTRUCTIONS.trimEnd()}\n\n${ruleCatalogueMd()}\n`);
 }
 
 /**

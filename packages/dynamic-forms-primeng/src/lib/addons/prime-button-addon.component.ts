@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { injectNgForgeAddonAction, NgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import { ButtonModule } from 'primeng/button';
-import type { PrimeButtonAddon } from '../types/addons';
+import type { PrimeButtonAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 
 /** Renderer for the `prime-button` addon type. */
 @Component({

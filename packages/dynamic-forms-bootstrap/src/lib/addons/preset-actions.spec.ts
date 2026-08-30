@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import type { AddonActionContext, Logger } from '@ng-forge/dynamic-forms';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runBsPresetAction, type PresetCollaborators } from './preset-actions';
+import { runBsPresetAction, type PresetCollaborators } from '@ng-forge/dynamic-forms-bootstrap/shared';
 
 function makeLogger(): Logger {
   return {

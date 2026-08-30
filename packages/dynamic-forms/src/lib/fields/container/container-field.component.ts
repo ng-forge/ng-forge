@@ -14,7 +14,11 @@ import {
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
 import { createFieldResolutionPipe, ResolvedField } from '../../utils/resolve-field/resolve-field';
-import { computeContainerHostClasses, setupContainerInitEffect } from '../../utils/container-utils/container-utils';
+import {
+  computeContainerHostClasses,
+  initializationComponentPath,
+  setupContainerInitEffect,
+} from '../../utils/container-utils/container-utils';
 import { ContainerField } from '@ng-forge/dynamic-forms/internal';
 import { injectFieldRegistry } from '../../utils/inject-field-registry/inject-field-registry';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
@@ -24,6 +28,7 @@ import { WRAPPER_AUTO_ASSOCIATIONS, WRAPPER_REGISTRY } from '@ng-forge/dynamic-f
 import { DEFAULT_WRAPPERS } from '@ng-forge/dynamic-forms/internal';
 import { isSameWrapperChain, resolveWrappers } from '../../utils/resolve-wrappers/resolve-wrappers';
 import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-chain-controller';
+import { GROUP_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 
 /** Layout container that wraps child fields with UI chrome. */
 @Component({
@@ -32,9 +37,7 @@ import { createWrapperChainController } from '../../utils/wrapper-chain/wrapper-
   template: `
     <ng-template #childrenTpl>
       @for (field of resolvedFields(); track field.key) {
-        @if (!field.hidden()) {
-          <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
-        }
+        <ng-container *dfFieldOutlet="field; environmentInjector: environmentInjector" />
       }
     </ng-template>
     <ng-container #wrapperContainer></ng-container>
@@ -60,6 +63,7 @@ export default class ContainerFieldComponent {
   private readonly wrapperAutoAssociations = inject(WRAPPER_AUTO_ASSOCIATIONS);
   private readonly wrapperRegistry = inject(WRAPPER_REGISTRY);
   private readonly defaultWrappersSignal = inject(DEFAULT_WRAPPERS, { optional: true });
+  private readonly groupContext = inject(GROUP_CONTEXT, { optional: true });
 
   private readonly childrenTpl = viewChild.required('childrenTpl', { read: TemplateRef });
   private readonly wrapperContainer = viewChild.required('wrapperContainer', { read: ViewContainerRef });
@@ -104,7 +108,13 @@ export default class ContainerFieldComponent {
   );
 
   constructor() {
-    setupContainerInitEffect(this.resolvedFields, this.eventBus, 'container', () => this.field().key, this.injector);
+    setupContainerInitEffect(
+      this.resolvedFields,
+      this.eventBus,
+      'container',
+      () => initializationComponentPath(this.field().key, this.groupContext?.groupPath()),
+      this.injector,
+    );
 
     createWrapperChainController({
       vcr: this.wrapperContainer,

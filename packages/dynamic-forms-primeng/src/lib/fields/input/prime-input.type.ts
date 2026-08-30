@@ -1,6 +1,6 @@
 import { DynamicText, TemplateAddon, TextAddon } from '@ng-forge/dynamic-forms';
 import { InputField, InputProps } from '@ng-forge/dynamic-forms/integration';
-import type { PrimeButtonAddon, PrimeIconAddon } from '../../types/addons';
+import type { PrimeButtonAddon, PrimeIconAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 
 export interface PrimeInputProps extends InputProps {
   /** CSS class to apply to the input element. */

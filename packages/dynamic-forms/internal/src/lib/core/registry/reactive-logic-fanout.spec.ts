@@ -18,6 +18,21 @@ import type { ConditionalExpression } from '../../models/expressions/conditional
 import type { LogicConfig } from '../../models/logic';
 
 /**
+ * Mirrors Signal Forms' real `FIELD_PROXY_HANDLER`: children are reachable through
+ * the `get` trap, and there is deliberately NO `has` trap, so `key in tree` is
+ * false for every real field. A plain-object mock would wrongly answer true and
+ * hide whole-form fallbacks that fire in production.
+ */
+function fieldTreeProxy(children: Record<string | number, unknown>, call?: () => unknown): Record<string, unknown> {
+  return new Proxy((call ?? (() => undefined)) as unknown as Record<string, unknown>, {
+    apply: (target, _this, args) => Reflect.apply(target as unknown as () => unknown, undefined, args),
+    get: (_target, prop) => (typeof prop === 'symbol' ? undefined : children[prop]),
+    ownKeys: () => Reflect.ownKeys(children),
+    getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true, value: undefined }),
+  });
+}
+
+/**
  * Performance regression benchmark: reactive logic fan-out.
  *
  * Each field carries a `hidden` condition that references ONLY its own control
@@ -56,7 +71,7 @@ describe('reactive logic fan-out (perf regression)', () => {
       const state = { value: fieldSignals[i] };
       tree[key(i)] = () => state;
     }
-    rootForm = signal(tree);
+    rootForm = signal(fieldTreeProxy(tree));
 
     TestBed.configureTestingModule({
       providers: [
@@ -209,14 +224,11 @@ describe('reactive logic fan-out (perf regression)', () => {
     for (let i = 0; i < ITEMS; i++) {
       const { a, b } = itemSignals[i];
       const itemCall = () => ({ value: computed(() => ({ a: a(), b: b() })) });
-      itemNodes[i] = Object.assign(itemCall, {
-        a: () => ({ value: a }),
-        b: () => ({ value: b }),
-      });
+      itemNodes[i] = fieldTreeProxy({ a: () => ({ value: a }), b: () => ({ value: b }) }, itemCall);
     }
     const itemsCall = () => ({ value: computed(() => itemSignals.map((item) => ({ a: item.a(), b: item.b() }))) });
-    const itemsNode = Object.assign(itemsCall, itemNodes);
-    const arrayRootForm = signal({ items: itemsNode });
+    const itemsNode = fieldTreeProxy(itemNodes, itemsCall);
+    const arrayRootForm = signal(fieldTreeProxy({ items: itemsNode }));
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({

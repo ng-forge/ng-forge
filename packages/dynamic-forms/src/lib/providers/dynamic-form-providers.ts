@@ -17,6 +17,7 @@ import {
   WrapperConfig,
 } from '@ng-forge/dynamic-forms/internal';
 import { isWrappersBundle, WrappersBundle } from '../wrappers/create-wrappers';
+import { DEV_MODE } from '../utils/dev-mode';
 
 // Re-export global types for module augmentation
 export type { DynamicFormFieldRegistry, AvailableFieldTypes } from '@ng-forge/dynamic-forms/internal';
@@ -90,7 +91,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         const registry = new Map();
         // Add custom field types
         fields.forEach((fieldType) => {
-          if (registry.has(fieldType.name)) {
+          // Collision report only — last registration wins either way.
+          if (DEV_MODE && registry.has(fieldType.name)) {
             logger.warn(`Field type "${fieldType.name}" is already registered. Overwriting.`);
           }
           registry.set(fieldType.name, fieldType);
@@ -126,13 +128,16 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
         const builtInNames = new Set(BUILT_IN_WRAPPERS.map((w) => w.wrapperName));
         BUILT_IN_WRAPPERS.forEach((wrapperType) => registry.set(wrapperType.wrapperName, wrapperType));
 
-        const seenCustom = new Set<string>();
+        // `seenCustom` exists only to report duplicates — last registration wins either way.
+        const seenCustom = DEV_MODE ? new Set<string>() : null;
         customWrappers.forEach((wrapperType) => {
           const name = wrapperType.wrapperName;
-          if (seenCustom.has(name) && !builtInNames.has(name)) {
-            logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
+          if (seenCustom) {
+            if (seenCustom.has(name) && !builtInNames.has(name)) {
+              logger.warn(`Wrapper type "${name}" is already registered. Overwriting.`);
+            }
+            seenCustom.add(name);
           }
-          seenCustom.add(name);
           registry.set(name, wrapperType);
         });
         return registry;
@@ -171,7 +176,8 @@ export function provideDynamicForm<const T extends FieldTypeOrFeature[]>(
           registry.set(def.type, def);
         }
         for (const def of contributed) {
-          if (registry.has(def.type)) {
+          // Collision report only — last registration wins either way.
+          if (DEV_MODE && registry.has(def.type)) {
             logger.warn(`Addon type "${def.type}" is already registered. Overwriting.`);
           }
           registry.set(def.type, def);

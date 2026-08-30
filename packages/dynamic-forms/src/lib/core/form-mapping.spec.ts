@@ -6,8 +6,46 @@ import { FieldDef } from '@ng-forge/dynamic-forms/internal';
 import { FieldWithValidation } from '@ng-forge/dynamic-forms/internal';
 import { RootFormRegistryService, FunctionRegistryService, FieldContextRegistryService, SchemaRegistryService } from './registry';
 import { FormStateManager } from '../state/form-state-manager';
-import { mapFieldToForm } from './form-mapping';
+import { hasValidationRules, mapFieldToForm } from './form-mapping';
 import { LogicFunctionCacheService } from '@ng-forge/dynamic-forms/internal';
+
+describe('hasValidationRules', () => {
+  const context = {
+    validateWhenHidden: false,
+    ancestorAlwaysHidden: false,
+    ancestorHiddenLogics: [],
+    ancestorRequired: false,
+  };
+
+  it('should report no validation work for a plain field', () => {
+    expect(hasValidationRules({ key: 'name', type: 'input' }, context)).toBe(false);
+  });
+
+  it('should detect every supported validation source', () => {
+    const cases = [
+      { required: true },
+      { email: true },
+      { minLength: 2 },
+      { maxLength: 20 },
+      { pattern: '[a-z]+' },
+      { min: 1 },
+      { max: 10 },
+      { validators: [{ type: 'required' }] },
+      { logic: [{ type: 'required', condition: true }] },
+    ] satisfies Partial<FieldWithValidation>[];
+
+    for (const validation of cases) {
+      expect(hasValidationRules({ key: 'value', type: 'input', ...validation }, context)).toBe(true);
+    }
+  });
+
+  it('should detect inherited required validation unless the field opts out', () => {
+    const inheritedRequired = { ...context, ancestorRequired: true };
+
+    expect(hasValidationRules({ key: 'name', type: 'input' }, inheritedRequired)).toBe(true);
+    expect(hasValidationRules({ key: 'name', type: 'input', required: false }, inheritedRequired)).toBe(false);
+  });
+});
 
 describe('form-mapping', () => {
   let injector: Injector;

@@ -49,3 +49,34 @@
   color: var(--df-error-color, #f44336);
   font-size: var(--df-error-font-size, 0.875rem);
 }
+
+/* Prefix/suffix addon spacing shared by every mat-form-field-based field
+   (input, select, textarea, datepicker). Selectors only match where a
+   <df-addon-slot> is projected, so standalone controls (checkbox, toggle,
+   radio, slider) are unaffected. */
+:host {
+  --df-mat-addon-prefix-outer-padding: 0.75em;
+  --df-mat-addon-prefix-inner-padding: 0.5em;
+  --df-mat-addon-suffix-inner-padding: 0.5em;
+  --df-mat-addon-suffix-outer-padding: 0.75em;
+  --df-mat-addon-prefix-text-outer-padding: 1em;
+  --df-mat-addon-prefix-text-inner-padding: 1em;
+  --df-mat-addon-suffix-text-inner-padding: 1em;
+  --df-mat-addon-suffix-text-outer-padding: 1em;
+}
+df-addon-slot[matprefix] {
+  padding-left: var(--df-mat-addon-prefix-outer-padding);
+  padding-right: var(--df-mat-addon-prefix-inner-padding);
+}
+df-addon-slot[matsuffix] {
+  padding-left: var(--df-mat-addon-suffix-inner-padding);
+  padding-right: var(--df-mat-addon-suffix-outer-padding);
+}
+df-addon-slot[matprefix].df-mat-addon-text {
+  padding-left: var(--df-mat-addon-prefix-text-outer-padding);
+  padding-right: var(--df-mat-addon-prefix-text-inner-padding);
+}
+df-addon-slot[matsuffix].df-mat-addon-text {
+  padding-left: var(--df-mat-addon-suffix-text-inner-padding);
+  padding-right: var(--df-mat-addon-suffix-text-outer-padding);
+}

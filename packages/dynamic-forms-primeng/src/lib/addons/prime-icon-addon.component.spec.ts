@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
-import type { PrimeIconAddon } from '../types/addons';
+import type { PrimeIconAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 import { PrimeIconAddonComponent } from './prime-icon-addon.component';
 
 function setup(addon: PrimeIconAddon) {

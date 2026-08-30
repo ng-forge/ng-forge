@@ -56,6 +56,7 @@ export { withPagePreload } from './providers/features/page-preload/with-page-pre
 
 // Field Windowing Feature (progressive field mounting for flat forms)
 export { withFieldWindowing } from './providers/features/field-windowing/with-field-windowing';
+export type { FieldParkingOption } from './providers/features/field-windowing/resolve-field-windowing';
 
 // Validation Execution Feature
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';
@@ -260,6 +261,7 @@ export {
 
 // Events
 export {
+  ActivePageInitializedEvent,
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,

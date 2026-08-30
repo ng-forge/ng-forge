@@ -1,10 +1,9 @@
+ 
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
 import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { IONIC_CONFIG, type IonicButtonAddon, type IonicConfig, type IonicIconAddon } from '@ng-forge/dynamic-forms-ionic/shared';
 import { IONIC_FIELD_TYPES } from '../config/ionic-field-config';
-import { IonicConfig } from '../models/ionic-config';
-import { IONIC_CONFIG } from '../models/ionic-config.token';
-import type { IonicButtonAddon, IonicIconAddon } from '../types/addons';
 
 /** Field type definitions for Ionic components. */
 export type IonicFieldTypes = FieldTypeDefinition[];
@@ -65,7 +64,7 @@ export function withIonicFields(config?: IonicConfig): IonicFieldsWithAddons | I
 
 const ION_ICON_KIND: AddonTypeDefinition<IonicIconAddon> = {
   type: 'ion-icon',
-  loadComponent: () => import('../addons/ion-icon-addon.component').then((m) => m.IonicIconAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-ionic/lazy/addon-icon').then((m) => m.IonicIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'ion-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -75,7 +74,7 @@ const ION_ICON_KIND: AddonTypeDefinition<IonicIconAddon> = {
 
 const ION_BUTTON_KIND: AddonTypeDefinition<IonicButtonAddon> = {
   type: 'ion-button',
-  loadComponent: () => import('../addons/ion-button-addon.component').then((m) => m.IonicButtonAddonComponent),
+  loadComponent: () => import('@ng-forge/dynamic-forms-ionic/lazy/addon-button').then((m) => m.IonicButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

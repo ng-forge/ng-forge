@@ -1,0 +1,5 @@
+{
+  "lib": {
+    "entryFile": "../../src/lib/fields/multi-checkbox/index.ts"
+  }
+}

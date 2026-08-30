@@ -1,10 +1,9 @@
+ 
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
 import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
+import { PRIMENG_CONFIG, type PrimeButtonAddon, type PrimeIconAddon, type PrimeNGConfig } from '@ng-forge/dynamic-forms-primeng/shared';
 import { PRIMENG_FIELD_TYPES } from '../config/primeng-field-config';
-import { PrimeNGConfig } from '../models/primeng-config';
-import { PRIMENG_CONFIG } from '../models/primeng-config.token';
-import type { PrimeButtonAddon, PrimeIconAddon } from '../types/addons';
 
 /** Field type definitions for PrimeNG components. */
 export type PrimeNGFieldTypes = FieldTypeDefinition[];
@@ -65,7 +64,8 @@ export function withPrimeNGFields(config?: PrimeNGConfig): PrimeNGFieldsWithAddo
 
 const PI_ICON_KIND: AddonTypeDefinition<PrimeIconAddon> = {
   type: 'prime-icon',
-  loadComponent: () => import('../addons/prime-icon-addon.component').then((m) => m.PrimeIconAddonComponent),
+  loadComponent: () =>
+    import('@ng-forge/dynamic-forms-primeng/lazy/addon-icon').then(({ PrimeIconAddonComponent }) => PrimeIconAddonComponent),
   validate: (addon, fieldKey) => {
     if (typeof addon.icon !== 'string' || addon.icon.length === 0) {
       throw new DynamicFormError(`Addon type 'prime-icon' requires a non-empty 'icon' string (field: '${fieldKey}').`);
@@ -75,7 +75,8 @@ const PI_ICON_KIND: AddonTypeDefinition<PrimeIconAddon> = {
 
 const PI_BUTTON_KIND: AddonTypeDefinition<PrimeButtonAddon> = {
   type: 'prime-button',
-  loadComponent: () => import('../addons/prime-button-addon.component').then((m) => m.PrimeButtonAddonComponent),
+  loadComponent: () =>
+    import('@ng-forge/dynamic-forms-primeng/lazy/addon-button').then(({ PrimeButtonAddonComponent }) => PrimeButtonAddonComponent),
   validate: (addon, fieldKey) => {
     // Exactly one of preset / actionRef / action — validator drops the addon
     // (with warning) if the rule is violated.

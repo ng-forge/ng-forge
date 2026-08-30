@@ -93,9 +93,10 @@ For observing events from a host component, use the output bindings exposed dire
 | `(cleared)`                     | When the form is cleared to empty state                                                                      |
 | `(onPageChange)`                | PageChangeEvent on each wizard page navigation                                                               |
 | `(onPageNavigationStateChange)` | PagerStateEvent whenever pager state changes (`currentPageIndex`, `totalPages`, `isFirstPage`, `isLastPage`) |
+| `(activePageInitialized)`       | **EXPERIMENTAL.** ActivePageInitializedEvent after the visible page and its fields render                    |
 | `(validityChange)`              | Boolean, whenever form validity changes                                                                      |
 | `(dirtyChange)`                 | Boolean, whenever form dirty state changes                                                                   |
-| `(initialized)`                 | Once all field components are rendered and ready                                                             |
+| `(initialized)`                 | Once a non-paged form, or the initially active page of a paged form, is ready for interaction                |
 
 ### Examples
 

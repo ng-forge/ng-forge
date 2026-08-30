@@ -137,6 +137,12 @@ describe('generated outputs', () => {
     }
   });
 
+  it('ends every file with exactly one newline', async () => {
+    for (const [path, contents] of await buildOutputs()) {
+      expect(contents, `${path} has unstable trailing whitespace`).toMatch(/[^\n]\n$/);
+    }
+  });
+
   it('escapes pipes so union types do not break tables', async () => {
     const outputs = await buildOutputs();
     const fieldTypes = outputs.find(([p]) => p.endsWith('field-types.md'))![1];

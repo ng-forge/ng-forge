@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { describe, expect, it } from 'vitest';
-import type { MatIconAddon } from '../types/addons';
+import type { MatIconAddon } from '@ng-forge/dynamic-forms-material/shared';
 import { MatIconAddonComponent } from './mat-icon-addon.component';
 
 function setup(addon: MatIconAddon) {

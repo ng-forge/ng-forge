@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
-import type { PrimeIconAddon } from '../types/addons';
+import type { PrimeIconAddon } from '@ng-forge/dynamic-forms-primeng/shared';
 
 /** Renderer for the `prime-icon` addon type. */
 @Component({

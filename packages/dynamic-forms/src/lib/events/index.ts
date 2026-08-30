@@ -1,5 +1,6 @@
 // Event classes (from constants)
 export {
+  ActivePageInitializedEvent,
   AppendArrayItemEvent,
   FormClearEvent,
   FormResetEvent,

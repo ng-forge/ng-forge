@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries -- package self-imports preserve real lazy secondary entrypoints. */
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import {
   addArrayItemButtonMapper,
@@ -24,10 +25,33 @@ const BUTTON_FIELD_TYPES_BASE = {
   valueHandling: 'exclude',
 } as const;
 
+const loadInputComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/input').then(({ BsInputFieldComponent }) => BsInputFieldComponent);
+const loadSelectComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/select').then(({ BsSelectFieldComponent }) => BsSelectFieldComponent);
+const loadCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/checkbox').then(({ BsCheckboxFieldComponent }) => BsCheckboxFieldComponent);
+const loadButtonComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/button').then(({ BsButtonFieldComponent }) => BsButtonFieldComponent);
+const loadTextareaComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/textarea').then(({ BsTextareaFieldComponent }) => BsTextareaFieldComponent);
+const loadRadioComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/radio').then(({ BsRadioFieldComponent }) => BsRadioFieldComponent);
+const loadMultiCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/multi-checkbox').then(
+    ({ BsMultiCheckboxFieldComponent }) => BsMultiCheckboxFieldComponent,
+  );
+const loadDatepickerComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/datepicker').then(({ BsDatepickerFieldComponent }) => BsDatepickerFieldComponent);
+const loadSliderComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/slider').then(({ BsSliderFieldComponent }) => BsSliderFieldComponent);
+const loadToggleComponent = () =>
+  import('@ng-forge/dynamic-forms-bootstrap/lazy/toggle').then(({ BsToggleFieldComponent }) => BsToggleFieldComponent);
+
 export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: BsField.Input,
-    loadComponent: () => import('../fields/input/bs-input.component'),
+    loadComponent: loadInputComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
@@ -38,81 +62,81 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   },
   {
     name: BsField.Select,
-    loadComponent: () => import('../fields/select/bs-select.component'),
+    loadComponent: loadSelectComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Checkbox,
-    loadComponent: () => import('../fields/checkbox/bs-checkbox.component'),
+    loadComponent: loadCheckboxComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Button,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: buttonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Submit,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: submitButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Next,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: nextButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Previous,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: previousButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.AddArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: addArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.PrependArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: prependArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.InsertArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: insertArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.RemoveArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: removeArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.PopArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: popArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.ShiftArrayItem,
-    loadComponent: () => import('../fields/button/bs-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: shiftArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Textarea,
-    loadComponent: () => import('../fields/textarea/bs-textarea.component'),
+    loadComponent: loadTextareaComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['rows'],
     scope: 'text-input',
@@ -120,35 +144,35 @@ export const BOOTSTRAP_FIELD_TYPES: FieldTypeDefinition[] = [
   },
   {
     name: BsField.Radio,
-    loadComponent: () => import('../fields/radio/bs-radio.component'),
+    loadComponent: loadRadioComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.MultiCheckbox,
-    loadComponent: () => import('../fields/multi-checkbox/bs-multi-checkbox.component'),
+    loadComponent: loadMultiCheckboxComponent,
     mapper: optionsFieldMapper,
     scope: 'multi-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Datepicker,
-    loadComponent: () => import('../fields/datepicker/bs-datepicker.component'),
+    loadComponent: loadDatepickerComponent,
     mapper: datepickerFieldMapper,
     scope: 'date',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Slider,
-    loadComponent: () => import('../fields/slider/bs-slider.component'),
+    loadComponent: loadSliderComponent,
     mapper: valueFieldMapper,
     scope: 'numeric',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: BsField.Toggle,
-    loadComponent: () => import('../fields/toggle/bs-toggle.component'),
+    loadComponent: loadToggleComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,

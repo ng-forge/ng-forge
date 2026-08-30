@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries -- Package self-imports preserve ng-packagr secondary entry points. */
 import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import {
   addArrayItemButtonMapper,
@@ -33,6 +34,29 @@ const BUTTON_FIELD_TYPES_BASE = {
   valueHandling: 'exclude',
 } as const;
 
+const loadInputComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/input').then(({ MatInputFieldComponent }) => MatInputFieldComponent);
+const loadSelectComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/select').then(({ MatSelectFieldComponent }) => MatSelectFieldComponent);
+const loadCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/checkbox').then(({ MatCheckboxFieldComponent }) => MatCheckboxFieldComponent);
+const loadButtonComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/button').then(({ MatButtonFieldComponent }) => MatButtonFieldComponent);
+const loadTextareaComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/textarea').then(({ MatTextareaFieldComponent }) => MatTextareaFieldComponent);
+const loadRadioComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/radio').then(({ MatRadioFieldComponent }) => MatRadioFieldComponent);
+const loadMultiCheckboxComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/multi-checkbox').then(
+    ({ MatMultiCheckboxFieldComponent }) => MatMultiCheckboxFieldComponent,
+  );
+const loadDatepickerComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/datepicker').then(({ MatDatepickerFieldComponent }) => MatDatepickerFieldComponent);
+const loadSliderComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/slider').then(({ MatSliderFieldComponent }) => MatSliderFieldComponent);
+const loadToggleComponent = () =>
+  import('@ng-forge/dynamic-forms-material/lazy/toggle').then(({ MatToggleFieldComponent }) => MatToggleFieldComponent);
+
 /**
  * Material Design field type definitions
  * Follows the FieldTypeDefinition interface for proper registry integration
@@ -40,7 +64,7 @@ const BUTTON_FIELD_TYPES_BASE = {
 export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   {
     name: MatField.Input,
-    loadComponent: () => import('../fields/input/mat-input.component'),
+    loadComponent: loadInputComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['type'],
     scope: ['text-input', 'numeric'],
@@ -51,117 +75,126 @@ export const MATERIAL_FIELD_TYPES: FieldTypeDefinition[] = [
   },
   {
     name: MatField.Select,
-    loadComponent: () => import('../fields/select/mat-select.component'),
+    loadComponent: loadSelectComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Checkbox,
-    loadComponent: () => import('../fields/checkbox/mat-checkbox.component'),
+    loadComponent: loadCheckboxComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Button,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: buttonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Submit,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: submitButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Next,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: nextButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Previous,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: previousButtonFieldMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.AddArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: addArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.PrependArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: prependArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.InsertArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: insertArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.RemoveArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: removeArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.PopArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: popArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.ShiftArrayItem,
-    loadComponent: () => import('../fields/button/mat-button.component'),
+    loadComponent: loadButtonComponent,
     mapper: shiftArrayItemButtonMapper,
     ...BUTTON_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Textarea,
-    loadComponent: () => import('../fields/textarea/mat-textarea.component'),
+    loadComponent: loadTextareaComponent,
     mapper: valueFieldMapper,
     propsToMeta: ['rows', 'cols'],
     scope: 'text-input',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Radio,
-    loadComponent: () => import('../fields/radio/mat-radio.component'),
+    loadComponent: loadRadioComponent,
     mapper: optionsFieldMapper,
     scope: 'single-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.MultiCheckbox,
-    loadComponent: () => import('../fields/multi-checkbox/mat-multi-checkbox.component'),
+    loadComponent: loadMultiCheckboxComponent,
     mapper: optionsFieldMapper,
     scope: 'multi-select',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Datepicker,
-    loadComponent: () => import('../fields/datepicker/mat-datepicker.component'),
+    loadComponent: loadDatepickerComponent,
     mapper: datepickerFieldMapper,
     scope: 'date',
+    addons: {
+      slots: ['prefix', 'suffix'],
+    },
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Slider,
-    loadComponent: () => import('../fields/slider/mat-slider.component'),
+    loadComponent: loadSliderComponent,
     mapper: valueFieldMapper,
     scope: 'numeric',
     ...VALUE_FIELD_TYPES_BASE,
   },
   {
     name: MatField.Toggle,
-    loadComponent: () => import('../fields/toggle/mat-toggle.component'),
+    loadComponent: loadToggleComponent,
     mapper: checkboxFieldMapper,
     scope: 'boolean',
     ...VALUE_FIELD_TYPES_BASE,

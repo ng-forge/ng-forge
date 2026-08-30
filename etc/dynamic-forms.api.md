@@ -5,7 +5,6 @@
 ```ts
 
 import * as _angular_core from '@angular/core';
-import * as _angular_forms from '@angular/forms';
 import * as _angular_forms_signals from '@angular/forms/signals';
 import { EnvironmentInjector } from '@angular/core';
 import { EnvironmentProviders } from '@angular/core';
@@ -32,6 +31,17 @@ import { Type } from '@angular/core';
 import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
 import { ViewContainerRef } from '@angular/core';
 import { WritableSignal } from '@angular/core';
+
+// @public
+export class ActivePageInitializedEvent implements FormEvent {
+    constructor(pageIndex: number, pageKey: string);
+    // (undocumented)
+    readonly pageIndex: number;
+    // (undocumented)
+    readonly pageKey: string;
+    // (undocumented)
+    readonly type: "active-page-initialized";
+}
 
 // @public
 export type AddonActionContext<TValue = unknown> = FieldBoundAddonActionContext<TValue> | OrphanAddonActionContext<TValue>;
@@ -366,6 +376,7 @@ export class DfTemplate {
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormModel<TFields>> {
     constructor();
     activeConfig: Signal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
+    activePageInitialized: _angular_core.OutputRef<ActivePageInitializedEvent>;
     cleared: _angular_core.OutputRef<FormClearEvent>;
     config: _angular_core.InputSignal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
     defaultValues: WritableSignal<TModel>;
@@ -383,6 +394,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         fieldWindowing?: boolean | {
             eager?: number;
             placeholderHeight?: string;
+            park?: boolean | {
+                margin?: string;
+            };
         };
         excludeValueIfHidden?: boolean;
         excludeValueIfDisabled?: boolean;
@@ -400,9 +414,8 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     form: Signal<FieldTree<TModel, number | string, "writable">>;
     formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
     formOptions: _angular_core.InputSignal<FormOptions | undefined>;
-    formValue: Signal<(TModel extends infer T ? T extends TModel ? T extends _angular_forms.AbstractControl<unknown, infer TValue extends unknown, any> ? TValue : never : never : never) | TModel>;
+    formValue: Signal<TModel>;
     protected readonly idPrefix: Signal<string>;
-    // (undocumented)
     initialized$: rxjs.Observable<boolean>;
     initialized: _angular_core.OutputRef<boolean>;
     invalid: Signal<boolean>;
@@ -425,7 +438,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
+    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "activePageInitialized": "activePageInitialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
     // (undocumented)
     static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }
@@ -569,6 +582,11 @@ export interface FieldOption<T = unknown> {
 }
 
 // @public
+export type FieldParkingOption = boolean | {
+    margin?: string;
+};
+
+// @public
 export type FieldPathAccess<TValue> = {
     [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
 };
@@ -686,6 +704,9 @@ export interface FormOptions {
     fieldWindowing?: boolean | {
         eager?: number;
         placeholderHeight?: string;
+        park?: boolean | {
+            margin?: string;
+        };
     };
     idPrefix?: string;
     initialPage?: InitialPageConfig | number;
@@ -1267,6 +1288,7 @@ export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;
 export function withFieldWindowing(config?: {
     eager?: number;
     placeholderHeight?: string;
+    park?: FieldParkingOption;
 }): DynamicFormFeature<'field-windowing'>;
 
 // @public (undocumented)

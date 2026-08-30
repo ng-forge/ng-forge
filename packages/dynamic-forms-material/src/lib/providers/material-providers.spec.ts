@@ -2,8 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { afterEach, describe, expect, it } from 'vitest';
 import { MATERIAL_FIELD_TYPES } from '../config/material-field-config';
-import { MATERIAL_CONFIG } from '../models/material-config.token';
-import type { MaterialConfig } from '../models/material-config';
+import { MATERIAL_CONFIG, type MaterialConfig } from '@ng-forge/dynamic-forms-material/shared';
 import { withMaterialFields } from './material-providers';
 
 describe('withMaterialFields', () => {
