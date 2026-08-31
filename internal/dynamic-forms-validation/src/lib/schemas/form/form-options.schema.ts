@@ -41,8 +41,19 @@ export const WebMcpToolOptionsSchema = z.object({
   /**
    * Base name for this form's tools, registered as `fill_{name}` and
    * `submit_{name}`. Must be unique across every form mounted on the page.
+   *
+   * The registered name has to satisfy the WebMCP draft's own rule — 1-128
+   * characters of `A-Z`, `a-z`, `0-9`, `_`, `-` or `.` — and `registerTool()`
+   * rejects anything else, so the same rule is enforced here (minus the room the
+   * `fill_` / `submit_` prefix takes).
+   *
+   * @see https://webmachinelearning.github.io/webmcp/
    */
-  name: z.string().min(1),
+  name: z
+    .string()
+    .min(1)
+    .max(121)
+    .regex(/^[A-Za-z0-9_.-]+$/, 'Only A-Z, a-z, 0-9, "_", "-" and "." are allowed in a WebMCP tool name'),
 
   /**
    * What this form is for, and when an agent should reach for it.
@@ -54,6 +65,12 @@ export const WebMcpToolOptionsSchema = z.object({
    * the agent can fill the form but a human presses the button.
    */
   allowSubmit: z.boolean().optional(),
+
+  /**
+   * How much of the form a tool response hands back. `'changed'` (the default)
+   * returns only what the call set; `'all'` returns the whole readable model.
+   */
+  readback: z.enum(['changed', 'all']).optional(),
 });
 
 /**
@@ -110,7 +127,7 @@ export const FormOptionsSchema = z.object({
 
   /**
    * Exposes this form to browser AI agents as WebMCP tools (experimental).
-   * Requires the `withWebMcp()` feature on `provideDynamicForm(...)`.
+   * Requires the `withExperimentalWebMcp()` feature on `provideDynamicForm(...)`.
    */
   webMcp: WebMcpToolOptionsSchema.optional(),
 });

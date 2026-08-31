@@ -437,6 +437,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     valid: Signal<boolean>;
     validityChange: _angular_core.OutputRef<boolean>;
     value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
+    readonly webMcpStatus: Signal<_ng_forge_dynamic_forms.WebMcpStatus>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
     static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "activePageInitialized": "activePageInitialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates"], never, true, never>;
@@ -560,6 +561,7 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
     tabIndex?: number | undefined;
     type: (string & {}) | RegisteredFieldTypes['type'];
     validateWhenHidden?: boolean;
+    webMcp?: FieldWebMcpConfig;
     wrappers?: null | readonly WrapperConfig[];
 }
 
@@ -732,6 +734,9 @@ export type FormStateCondition =
 
 // @public
 export class FormSubmitEvent implements FormEvent {
+    constructor(reply?: SubmissionReply | undefined);
+    // (undocumented)
+    readonly reply?: SubmissionReply | undefined;
     // (undocumented)
     readonly type: "submit";
 }
@@ -1154,6 +1159,32 @@ export interface SubmissionConfig<TValue = unknown> {
 }
 
 // @public
+export type SubmissionOutcome = {
+    readonly status: 'action-failed';
+    readonly error: unknown;
+} | {
+    readonly status: 'busy';
+} | {
+    readonly status: 'cancelled';
+} | {
+    readonly status: 'dispatched';
+} | {
+    readonly status: 'pending-validation';
+} | {
+    readonly status: 'server-errors';
+} | {
+    readonly status: 'success';
+} | {
+    readonly status: 'validation-failed';
+};
+
+// @public
+export interface SubmissionReply {
+    accept(): void;
+    settle(outcome: SubmissionOutcome): void;
+}
+
+// @public
 export interface SubmitButtonOptions {
     disableWhenInvalid?: boolean;
     disableWhileSubmitting?: boolean;
@@ -1278,10 +1309,16 @@ export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown>
 export type ValueType = Date | boolean | number | object | string | unknown[];
 
 // @public
+export type WebMcpStatus =
+/** `withExperimentalWebMcp()` is not provided, or this is the server. */
+'active' | 'disabled' | 'failed' | 'idle' | 'registering' | 'unsupported';
+
+// @public
 export interface WebMcpToolOptions {
     allowSubmit?: boolean;
     description: string;
     name: string;
+    readback?: 'all' | 'changed';
 }
 
 // @public
@@ -1292,6 +1329,9 @@ export function withCustomAddon<T extends BaseAddon>(definition: AddonTypeDefini
 
 // @public
 export function withEventFormValue(): DynamicFormFeature<'event-form-value'>;
+
+// @public
+export function withExperimentalWebMcp(): DynamicFormFeature<'web-mcp'>;
 
 // @public
 export function withFieldWindowing(config?: {
@@ -1319,9 +1359,6 @@ export function withValidationExecutionDefaults(config?: Partial<ValidationExecu
 
 // @public
 export function withValueExclusionDefaults(config?: Partial<ValueExclusionConfig>): DynamicFormFeature<'value-exclusion'>;
-
-// @public
-export function withWebMcp(): DynamicFormFeature<'web-mcp'>;
 
 // @public
 export type WrapperConfig<TWrappers extends RegisteredWrapperTypes = RegisteredWrapperTypes> = TWrappers extends keyof FieldRegistryWrappers ? FieldRegistryWrappers[TWrappers] : {

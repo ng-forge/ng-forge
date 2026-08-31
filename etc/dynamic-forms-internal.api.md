@@ -827,6 +827,7 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
     tabIndex?: number | undefined;
     type: (string & {}) | RegisteredFieldTypes['type'];
     validateWhenHidden?: boolean;
+    webMcp?: FieldWebMcpConfig;
     wrappers?: null | readonly WrapperConfig[];
 }
 
@@ -988,6 +989,15 @@ export interface FieldValueCondition {
     // (undocumented)
     type: 'fieldValue';
     value?: unknown;
+}
+
+// @public
+export type FieldWebMcpConfig = FieldWebMcpOptions | false;
+
+// @public
+export interface FieldWebMcpOptions {
+    readable?: boolean;
+    writable?: boolean;
 }
 
 // @public (undocumented)
@@ -2019,6 +2029,7 @@ export interface WebMcpToolOptions {
     allowSubmit?: boolean;
     description: string;
     name: string;
+    readback?: 'all' | 'changed';
 }
 
 // @public (undocumented)

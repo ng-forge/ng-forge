@@ -59,7 +59,9 @@ export { withFieldWindowing } from './providers/features/field-windowing/with-fi
 export type { FieldParkingOption } from './providers/features/field-windowing/resolve-field-windowing';
 
 // WebMCP Feature (expose forms to browser AI agents) — experimental
-export { withWebMcp } from './providers/features/web-mcp/with-web-mcp';
+export { withExperimentalWebMcp } from './providers/features/web-mcp/with-web-mcp';
+export type { WebMcpStatus } from './core/web-mcp/web-mcp-gate';
+export type { SubmissionOutcome, SubmissionReply } from './utils/submission-handler/submission-outcome';
 
 // Validation Execution Feature
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';

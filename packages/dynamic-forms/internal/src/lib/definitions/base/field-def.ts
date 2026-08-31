@@ -5,6 +5,7 @@ import { RegisteredFieldTypes } from '../../models/registry/field-registry';
 import { DynamicText } from '../../models/types/dynamic-text';
 import { WrapperConfig } from '../../models/wrapper-type';
 import { FieldMeta } from './field-meta';
+import { FieldWebMcpConfig } from './field-web-mcp';
 
 /**
  * Base interface for all dynamic form field definitions.
@@ -109,6 +110,18 @@ export interface FieldDef<TProps, TMeta extends FieldMeta = FieldMeta> {
 
   /** Addons rendered inside this field's slots (typically `prefix` / `suffix`). */
   addons?: ReadonlyArray<AnyAddon>;
+
+  /**
+   * What a browser AI agent may read and write on this field, when the form
+   * opts in through `options.webMcp`. Ignored otherwise.
+   *
+   * Defaults are derived from the field (a password input is not readable, a
+   * `readonly` or derived field is not writable, a `hidden` field type is
+   * neither); `false` hides the field from agents entirely.
+   *
+   * @experimental
+   */
+  webMcp?: FieldWebMcpConfig;
 }
 
 type IncludedKeys = 'label' | 'className' | 'hidden' | 'tabIndex';

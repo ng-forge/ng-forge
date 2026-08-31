@@ -260,10 +260,21 @@ export class DynamicForm<
   private derivationReady = inject(DERIVATION_RENDER_GATE);
   shouldRender = computed(() => this.stateManager.shouldRender() && this.stateManager.formSchemaReady() && this.derivationReady());
 
-  // Injected purely to instantiate the gate (component providers are lazy), which
-  // lazy-loads the WebMCP registrar when a config declares `options.webMcp`.
-  // Intentionally absent from `shouldRender`: agent visibility must never gate render.
-  private readonly webMcpGate = inject(WEB_MCP_GATE);
+  /**
+   * What the experimental WebMCP layer is doing for this form.
+   *
+   * Injecting it is also what instantiates the gate (component providers are
+   * lazy), which is what keeps the registrar lazily loaded. Intentionally absent
+   * from `shouldRender`: agent visibility must never gate render.
+   *
+   * `'disabled'` unless `withExperimentalWebMcp()` is provided; `'idle'` until a
+   * config declares `options.webMcp`; `'active'` once its tools are registered.
+   * `'failed'` and `'unsupported'` are the two ways registration does not
+   * happen, and are worth surfacing rather than guessing at.
+   *
+   * @experimental
+   */
+  readonly webMcpStatus = inject(WEB_MCP_GATE);
 
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;

@@ -218,7 +218,7 @@ export interface FormOptions {
   /**
    * Exposes this form to browser AI agents as WebMCP tools.
    *
-   * Requires the `withWebMcp()` feature on `provideDynamicForm(...)`. Registers
+   * Requires the `withExperimentalWebMcp()` feature on `provideDynamicForm(...)`. Registers
    * `fill_{name}`, which applies a partial patch of values and reports the
    * form's state back. Submission stays off unless `allowSubmit` is set.
    *
@@ -260,6 +260,26 @@ export interface WebMcpToolOptions {
    * @default false
    */
   allowSubmit?: boolean;
+
+  /**
+   * How much of the form a tool response hands back to the agent.
+   *
+   * `'changed'` (the default) returns only the values the call itself set, plus
+   * which fields apply, which are still empty, and any validation errors. That
+   * is enough for an agent to orient itself and correct its own work without
+   * being handed every value the form already held — prefilled personal data,
+   * identifiers, anything a user typed before the agent arrived.
+   *
+   * `'all'` returns the whole model, minus fields whose `webMcp.readable` is
+   * off. Choose it deliberately: every registered tool is callable by any agent
+   * that reaches the page, and Chrome's guidance is that even a read-only tool
+   * can reveal user information.
+   *
+   * @see https://developer.chrome.com/docs/ai/webmcp/secure-tools
+   *
+   * @default 'changed'
+   */
+  readback?: 'changed' | 'all';
 }
 
 /** Options for controlling submit button disabled behavior. */

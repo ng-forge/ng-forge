@@ -31,6 +31,17 @@ const config = {
       col: 12,
     },
     {
+      key: 'card',
+      type: 'group',
+      label: 'Card',
+      fields: [
+        // Writable so an agent can fill it in, never readable back.
+        { key: 'number', type: 'input', label: 'Card number', webMcp: { readable: false }, col: 12 },
+        { key: 'expiry', type: 'input', label: 'Expiry', value: '12/30', col: 12 },
+      ],
+      col: 12,
+    },
+    {
       key: 'submit',
       type: 'submit',
       label: 'Pay',

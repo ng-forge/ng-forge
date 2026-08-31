@@ -1,53 +1,79 @@
 import { expect, setupConsoleCheck, setupTestLogging, test } from '../shared/fixtures';
+import type { Page } from '@playwright/test';
 
 setupTestLogging();
 setupConsoleCheck();
 
 /**
- * Installs a fake `document.modelContext` before the app boots and records every
- * tool the app registers.
+ * Installs a stand-in for `document.modelContext` before the app boots.
  *
- * A recording fake is deliberate: the browser-side contract is a single
- * `registerTool(tool, { signal })` call, so faking it exercises the real
- * registration path while staying deterministic. Driving a real agent would make
- * these tests non-reproducible for no extra coverage.
+ * It enforces what the real one enforces rather than recording whatever it is
+ * handed: registration is asynchronous, a duplicate or malformed name rejects,
+ * the descriptor has to serialize, and an aborted signal unregisters the tool.
+ * Those are exactly the failures a fire-and-forget `registerTool()` cannot see,
+ * so a permissive spy would pass against broken code.
+ *
+ * Tools are then driven through `getTools()` / `executeTool()`, the agent-facing
+ * surface, rather than by reaching for a stored descriptor.
  */
-async function installModelContext(page: import('@playwright/test').Page): Promise<void> {
+async function installModelContext(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const tools: Record<string, unknown> = {};
-    (window as unknown as Record<string, unknown>)['__mcpTools'] = tools;
+    const tools = new Map<string, { name: string; execute: (a: unknown, c: unknown) => unknown }>();
+
+    (window as unknown as Record<string, unknown>)['__mcp'] = {
+      // Descriptors reach an agent without their implementations.
+      getTools: () => [...tools.values()].map((tool) => Object.fromEntries(Object.entries(tool).filter(([key]) => key !== 'execute'))),
+      executeTool: async (name: string, args: unknown) => {
+        const tool = tools.get(name);
+        if (!tool) throw new Error(`Tool "${name}" was never registered. Have: ${[...tools.keys()].join(', ')}`);
+        return String(await tool.execute(args, {}));
+      },
+    };
 
     // `document.modelContext` is the current surface; `navigator.modelContext`
     // is deprecated as of Chrome 150.
     (document as unknown as Record<string, unknown>)['modelContext'] = {
-      registerTool: (tool: { name: string }) => {
-        tools[tool.name] = tool;
+      registerTool: async (tool: { name: string; inputSchema: unknown }, options?: { signal?: AbortSignal }) => {
+        if (options?.signal?.aborted) throw new DOMException('Registration aborted', 'AbortError');
+        if (!/^[A-Za-z0-9_.-]{1,128}$/.test(tool.name)) throw new TypeError(`Invalid tool name "${tool.name}"`);
+        if (tools.has(tool.name)) throw new DOMException(`Tool "${tool.name}" is already registered`, 'InvalidStateError');
+        JSON.stringify(tool.inputSchema);
+
+        tools.set(tool.name, tool as never);
+        options?.signal?.addEventListener('abort', () => tools.delete(tool.name));
       },
     };
   });
 }
 
-/** Calls a registered tool from page context and returns its text result. */
-async function callTool(page: import('@playwright/test').Page, name: string, args: unknown): Promise<string> {
+interface ToolDescriptor {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+  annotations?: Record<string, unknown>;
+}
+
+interface McpHarness {
+  getTools(): ToolDescriptor[];
+  executeTool(name: string, args: unknown): Promise<string>;
+}
+
+/** Calls a registered tool the way an agent would, and returns its text result. */
+function callTool(page: Page, name: string, args: unknown): Promise<string> {
   return page.evaluate(
-    async ({ toolName, toolArgs }) => {
-      const tools = (window as unknown as Record<string, Record<string, unknown>>)['__mcpTools'];
-      const tool = tools[toolName] as { execute: (a: unknown, c: unknown) => unknown } | undefined;
-      if (!tool) throw new Error(`Tool "${toolName}" was never registered. Have: ${Object.keys(tools).join(', ')}`);
-      return String(await tool.execute(toolArgs, {}));
-    },
+    ({ toolName, toolArgs }) => (window as unknown as Record<string, McpHarness>)['__mcp'].executeTool(toolName, toolArgs),
     { toolName: name, toolArgs: args },
   );
 }
 
-const toolNames = (page: import('@playwright/test').Page) =>
-  page.evaluate(() => Object.keys((window as unknown as Record<string, object>)['__mcpTools']));
+const listTools = (page: Page) => page.evaluate(() => (window as unknown as Record<string, McpHarness>)['__mcp'].getTools());
+const toolNames = async (page: Page) => (await listTools(page)).map((tool) => tool.name);
+
+test.beforeEach(async ({ page }) => {
+  await installModelContext(page);
+});
 
 test.describe('WebMCP Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await installModelContext(page);
-  });
-
   test('registers a fill tool, and a submit tool only when the form allows it', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
 
@@ -63,33 +89,35 @@ test.describe('WebMCP Tests', () => {
     expect(names).not.toContain('submit_payment');
   });
 
-  test('exposes select options as an enum in the tool schema', async ({ page, helpers }) => {
+  test('exposes select options with their labels, and no required list', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
 
-    const schema = await page.evaluate(() => {
-      const tools = (window as unknown as Record<string, Record<string, { inputSchema: unknown }>>)['__mcpTools'];
-      return tools['fill_signup'].inputSchema;
-    });
+    const [schema] = (await listTools(page)).filter((tool) => tool.name === 'fill_signup').map((tool) => tool.inputSchema);
 
     expect(schema).toMatchObject({
       type: 'object',
       properties: {
-        username: { type: 'string', title: 'Username' },
-        plan: { type: 'string', enum: ['free', 'pro'] },
+        username: { type: 'string', title: 'Username', minLength: 3 },
+        plan: {
+          type: 'string',
+          enum: ['free', 'pro'],
+          anyOf: [
+            { const: 'free', title: 'Free' },
+            { const: 'pro', title: 'Pro' },
+          ],
+        },
         newsletter: { type: 'boolean' },
       },
     });
+    expect(schema).not.toHaveProperty('required');
   });
 
   test('flags returned values as untrusted content', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
 
-    const annotations = await page.evaluate(() => {
-      const tools = (window as unknown as Record<string, Record<string, { annotations: unknown }>>)['__mcpTools'];
-      return tools['fill_payment'].annotations;
-    });
+    const [tool] = (await listTools(page)).filter((candidate) => candidate.name === 'fill_payment');
 
-    expect(annotations).toEqual({ untrustedContentHint: true });
+    expect(tool.annotations).toEqual({ untrustedContentHint: true });
   });
 
   test('fill with no arguments reads state without changing it', async ({ page, helpers }) => {
@@ -98,6 +126,7 @@ test.describe('WebMCP Tests', () => {
     const report = await callTool(page, 'fill_signup', {});
 
     expect(report).toContain('No changes made.');
+    expect(report).toContain('Still empty: username');
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('');
@@ -108,10 +137,46 @@ test.describe('WebMCP Tests', () => {
 
     const report = await callTool(page, 'fill_signup', { username: 'ada-lovelace' });
 
-    expect(report).toContain('Values applied.');
+    expect(report).toContain('Applied: username.');
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('ada-lovelace');
+  });
+
+  test('fill rejects an argument the schema does not describe, leaving the form alone', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    const report = await callTool(page, 'fill_signup', { username: 'ada-lovelace', admin: true });
+
+    expect(report).toContain('Nothing was applied.');
+    expect(report).toContain('Unknown field "admin"');
+
+    const scenario = helpers.getScenario('agent-fill-submit-test');
+    await expect(helpers.getInput(scenario, 'username')).toHaveValue('');
+  });
+
+  test('fill rejects a value outside a select’s options', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-submit');
+
+    expect(await callTool(page, 'fill_signup', { plan: 'enterprise' })).toContain('not one of');
+  });
+
+  test('fill merges into a group instead of replacing it', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
+
+    await callTool(page, 'fill_payment', { card: { number: '4111111111111111' } });
+
+    const scenario = helpers.getScenario('agent-fill-only-test');
+    await expect(helpers.getInput(scenario, 'expiry')).toHaveValue('12/30');
+  });
+
+  test('fill never hands back a field marked unreadable', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
+
+    const report = await callTool(page, 'fill_payment', { card: { number: '4111111111111111' } });
+
+    expect(report).not.toContain('4111111111111111');
+    expect(report).toContain('not readable by agents');
   });
 
   test('fill re-derives applicability from the values it applied', async ({ page, helpers }) => {
@@ -152,7 +217,9 @@ test.describe('WebMCP Tests', () => {
     await callTool(page, 'fill_signup', { username: 'ada-lovelace', plan: 'pro' });
     const result = await callTool(page, 'submit_signup', {});
 
-    expect(result).toContain('Form submitted successfully.');
+    // No `submission.action` on this scenario, so the page's own `(submitted)`
+    // output takes it from here.
+    expect(result).toContain('The page handled the submission itself');
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('ada-lovelace');

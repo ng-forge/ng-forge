@@ -53,7 +53,9 @@ type ExcludedKeys =
   | 'skipAutoWrappers'
   | 'skipDefaultWrappers'
   // Addons are an opt-in input — checkbox/toggle-style fields are Tier 3 and don't render them
-  | 'addons';
+  | 'addons'
+  // Agent exposure policy (read by the WebMCP registrar, not a component input)
+  | 'webMcp';
 
 export type CheckedFieldComponent<T extends BaseCheckedField<Record<string, unknown> | unknown, FieldMeta, boolean>> = Prettify<
   WithInputSignals<Omit<T, ExcludedKeys>>

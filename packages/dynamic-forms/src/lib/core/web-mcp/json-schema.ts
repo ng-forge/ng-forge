@@ -6,9 +6,15 @@
  * its public API, so this declares the same shape rather than importing across
  * a private boundary. Types only — no runtime cost.
  *
- * Kept intentionally narrow: `prefixItems` and the other keywords the inference
- * layer accepts but ignores are omitted, because emitting them would imply
- * support that agents do not actually get.
+ * Kept intentionally narrow. `prefixItems` is omitted on purpose: JSON Schema
+ * 2020-12 can describe a positionally heterogeneous array with it, but the
+ * inference layer WebMCP vendors ignores the keyword, so emitting it would imply
+ * support agents do not actually get. ng-forge describes homogeneous arrays only.
+ *
+ * `required` is also absent by construction. Both tools take a *patch*: any
+ * subset of fields, with the rest left alone. A `required` array would tell an
+ * agent it must send a property on every call, which is the opposite of that
+ * contract. What is required *right now* is reported from live state instead.
  *
  * @internal
  */
@@ -31,7 +37,7 @@ export type JsonSchemaLiteral = string | number | boolean | null;
  * at this size.
  */
 export interface JsonSchema {
-  type: JsonSchemaType | readonly JsonSchemaType[];
+  type?: JsonSchemaType | readonly JsonSchemaType[];
 
   /** Human-readable name, sourced from the field's `label`. */
   title?: string;
@@ -41,6 +47,16 @@ export interface JsonSchema {
   default?: JsonSchemaLiteral;
   /** Allowed values, sourced from a select/radio field's `options`. */
   enum?: readonly JsonSchemaLiteral[];
+  /**
+   * One branch per allowed value, each carrying the option's human label as its
+   * `title`. Emitted alongside `enum` for option-bearing fields, mirroring how
+   * WebMCP's own declarative API describes a `<select>`: `enum` is what a strict
+   * validator checks, `anyOf` is what tells the agent that `"pro"` means
+   * "Pro (billed yearly)".
+   */
+  anyOf?: readonly JsonSchema[];
+  /** A single permitted value, used inside `anyOf` branches. */
+  const?: JsonSchemaLiteral;
   /** Semantic hint such as `date` or `email`. */
   format?: string;
 
@@ -60,7 +76,6 @@ export interface JsonSchema {
 
   // Object constraints
   properties?: Record<string, JsonSchema>;
-  required?: string[];
   additionalProperties?: boolean;
 }
 
@@ -68,6 +83,5 @@ export interface JsonSchema {
 export interface JsonSchemaObject extends JsonSchema {
   type: 'object';
   properties: Record<string, JsonSchema>;
-  required: string[];
   additionalProperties: boolean;
 }

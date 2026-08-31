@@ -1,4 +1,5 @@
 export type { FieldComponent, FieldDef } from './field-def';
+export type { FieldWebMcpConfig, FieldWebMcpOptions } from './field-web-mcp';
 export type { FieldMeta } from './field-meta';
 export type { BaseValueField, ValueFieldComponent, ValueType } from './base-value-field';
 export { isValueField } from './base-value-field';

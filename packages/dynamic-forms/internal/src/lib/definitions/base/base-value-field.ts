@@ -77,7 +77,9 @@ type ExcludedKeys =
   | 'skipDefaultWrappers'
   // Addons are an opt-in input — fields that render them declare `addons` themselves
   // (Tier 1/2). Tier 3 field components (toggle, checkbox, radio, slider) ignore them.
-  | 'addons';
+  | 'addons'
+  // Agent exposure policy (read by the WebMCP registrar, not a component input)
+  | 'webMcp';
 // Note: 'meta' is NOT excluded - components must handle meta attributes
 
 export type ValueFieldComponent<T extends BaseValueField<Record<string, unknown> | unknown, unknown, FieldMeta, boolean>> = Prettify<
