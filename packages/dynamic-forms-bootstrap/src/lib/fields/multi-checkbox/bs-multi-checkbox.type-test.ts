@@ -94,7 +94,8 @@ describe('BsMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From MultiCheckboxField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof BsMultiCheckboxField<string>;
 

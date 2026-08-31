@@ -109,7 +109,8 @@ describe('IonicInputField (String) - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // String input field (without props.type: 'number')
   type StringInputField = Extract<IonicInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' } }>;
@@ -261,7 +262,8 @@ describe('IonicInputField (Number) - Exhaustive Whitelist', () => {
     | 'schemas'
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // Number input field (with props.type: 'number')
   type NumberInputField = Extract<IonicInputField, { props: { type: 'number' } }>;

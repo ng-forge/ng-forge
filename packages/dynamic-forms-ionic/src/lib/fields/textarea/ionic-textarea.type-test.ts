@@ -107,7 +107,8 @@ describe('IonicTextareaField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   type ActualKeys = keyof IonicTextareaField;
 

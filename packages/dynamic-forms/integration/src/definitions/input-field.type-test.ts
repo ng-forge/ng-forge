@@ -178,6 +178,7 @@ describe('InputField - Keys Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     // Nullable opt-in
     | 'nullable';
 

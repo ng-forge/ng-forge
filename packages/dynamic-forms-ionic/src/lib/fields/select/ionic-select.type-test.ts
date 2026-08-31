@@ -133,7 +133,8 @@ describe('IonicSelectField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From SelectField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof IonicSelectField<string>;
 

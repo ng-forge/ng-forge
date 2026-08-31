@@ -49,6 +49,7 @@ describe('SelectField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     // Nullable opt-in
     | 'nullable'
     // SelectField-specific

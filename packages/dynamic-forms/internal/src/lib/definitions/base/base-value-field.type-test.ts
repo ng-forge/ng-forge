@@ -73,6 +73,7 @@ describe('BaseValueField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     // From FieldWithValidation
     | 'required'
     | 'email'

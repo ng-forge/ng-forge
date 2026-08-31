@@ -101,7 +101,8 @@ describe('BsSliderField - Exhaustive Whitelist', () => {
     // From SliderField
     | 'minValue'
     | 'maxValue'
-    | 'step';
+    | 'step'
+    | 'webMcp';
 
   type ActualKeys = keyof BsSliderField;
 

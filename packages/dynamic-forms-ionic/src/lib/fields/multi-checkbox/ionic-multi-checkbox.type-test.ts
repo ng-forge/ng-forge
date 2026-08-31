@@ -92,7 +92,8 @@ describe('IonicMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From MultiCheckboxField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof IonicMultiCheckboxField<string>;
 

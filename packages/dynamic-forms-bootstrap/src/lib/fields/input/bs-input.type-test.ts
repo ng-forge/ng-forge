@@ -97,7 +97,8 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // String input field (without props.type: 'number')
   type StringInputField = Extract<BsInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
@@ -249,7 +250,8 @@ describe('BsInputField (Number) - Exhaustive Whitelist', () => {
     | 'schemas'
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // Number input field (with props.type: 'number')
   type NumberInputField = Extract<BsInputField, { props: { type: 'number' } }>;

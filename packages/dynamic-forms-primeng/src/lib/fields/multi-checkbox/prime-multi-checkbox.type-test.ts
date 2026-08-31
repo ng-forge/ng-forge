@@ -86,7 +86,8 @@ describe('PrimeMultiCheckboxField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From MultiCheckboxField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof PrimeMultiCheckboxField<string>;
 

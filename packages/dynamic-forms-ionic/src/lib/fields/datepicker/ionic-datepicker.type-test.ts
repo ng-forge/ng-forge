@@ -133,7 +133,8 @@ describe('IonicDatepickerField - Exhaustive Whitelist', () => {
     // From DatepickerField
     | 'minDate'
     | 'maxDate'
-    | 'startAt';
+    | 'startAt'
+    | 'webMcp';
 
   type ActualKeys = keyof IonicDatepickerField;
 

@@ -77,6 +77,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'skipAutoWrappers'
         | 'skipDefaultWrappers'
         | 'addons'
+        | 'webMcp'
       >();
     });
 

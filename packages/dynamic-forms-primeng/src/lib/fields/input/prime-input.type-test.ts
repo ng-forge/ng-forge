@@ -89,7 +89,8 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // String input field (without props.type: 'number')
   type StringInputField = Extract<PrimeInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
@@ -241,7 +242,8 @@ describe('PrimeInputField (Number) - Exhaustive Whitelist', () => {
     | 'schemas'
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   // Number input field (with props.type: 'number')
   type NumberInputField = Extract<PrimeInputField, { props: { type: 'number' } }>;

@@ -102,7 +102,8 @@ describe('MatSliderField - Exhaustive Whitelist', () => {
     // From SliderField
     | 'minValue'
     | 'maxValue'
-    | 'step';
+    | 'step'
+    | 'webMcp';
 
   type ActualKeys = keyof MatSliderField;
 

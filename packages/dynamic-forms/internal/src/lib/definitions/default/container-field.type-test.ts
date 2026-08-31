@@ -39,6 +39,7 @@ describe('ContainerField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     | 'logic';
 
   type ActualKeys = keyof ContainerField;

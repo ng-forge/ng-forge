@@ -112,7 +112,8 @@ describe('BsSelectField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From SelectField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof BsSelectField<string>;
 

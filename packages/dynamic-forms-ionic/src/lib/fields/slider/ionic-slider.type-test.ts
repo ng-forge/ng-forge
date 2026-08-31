@@ -117,7 +117,8 @@ describe('IonicSliderField - Exhaustive Whitelist', () => {
     // From SliderField
     | 'minValue'
     | 'maxValue'
-    | 'step';
+    | 'step'
+    | 'webMcp';
 
   type ActualKeys = keyof IonicSliderField;
 

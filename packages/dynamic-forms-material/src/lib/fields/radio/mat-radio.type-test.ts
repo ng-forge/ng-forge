@@ -95,7 +95,8 @@ describe('MatRadioField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From RadioField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof MatRadioField<string>;
 

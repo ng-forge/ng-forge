@@ -69,7 +69,8 @@ describe('MatSubmitButtonField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
-    | 'logic';
+    | 'logic'
+    | 'webMcp';
 
   type ActualKeys = keyof MatSubmitButtonField;
 
@@ -128,7 +129,8 @@ describe('MatNextButtonField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
-    | 'logic';
+    | 'logic'
+    | 'webMcp';
 
   type ActualKeys = keyof MatNextButtonField;
 
@@ -183,7 +185,8 @@ describe('MatPreviousButtonField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
-    | 'logic';
+    | 'logic'
+    | 'webMcp';
 
   type ActualKeys = keyof MatPreviousButtonField;
 
@@ -240,7 +243,8 @@ describe('MatAddArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'addons'
     | 'logic'
     | 'arrayKey'
-    | 'template';
+    | 'template'
+    | 'webMcp';
 
   type ActualKeys = keyof MatAddArrayItemButtonField;
 
@@ -300,7 +304,8 @@ describe('MatRemoveArrayItemButtonField - Exhaustive Whitelist', () => {
     | 'skipDefaultWrappers'
     | 'addons'
     | 'logic'
-    | 'arrayKey';
+    | 'arrayKey'
+    | 'webMcp';
 
   type ActualKeys = keyof MatRemoveArrayItemButtonField;
 
