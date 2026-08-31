@@ -101,10 +101,15 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   /**
    * Container: wraps children in UI chrome.
    *
-   * `wrappers` is REQUIRED, and that is the whole point of the type. A container
-   * with no wrappers array is not a container, it is a group spelled
-   * differently, and treating the property as optional would erase the
-   * distinction that justifies the type existing.
+   * `wrappers` is REQUIRED, and that is the whole point of the type. Treating it
+   * as optional would erase the distinction that justifies the type existing.
+   *
+   * A container is NOT a group with chrome. `container` is registered with
+   * `valueHandling: 'flatten'` and `group` with `'include'`, so a container's
+   * children land directly in the parent value while a group's are nested under
+   * its own key, and only the group owns a schema path for container-level
+   * validators. Anything that reads as "just use a group instead" is wrong and
+   * changes the submitted data.
    *
    * Child placement and cardinality are deliberately not constrained here: the
    * schemas do not enforce nesting for any container (see the limitation noted

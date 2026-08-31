@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { TOPICS, TOPIC_ALIASES, TOPIC_DESCRIPTIONS } from './data/lookup-topics.js';
 import { PATTERNS } from './examples.tool.js';
-import { getAddonTypes, getWrappers } from '../registry/index.js';
+import { getAddonTypes, getFieldTypes, getFieldTypesByCategory, getWrappers } from '../registry/index.js';
 
 interface SearchEntry {
   id: string;
@@ -23,7 +23,7 @@ let searchIndex: SearchEntry[] | null = null;
 /** Categorize a topic key into a subcategory for display. */
 function getTopicSubcategory(key: string): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
-  const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
+  const containers = [...getFieldTypesByCategory('container').map((f) => f.type), 'simplified-array'];
   const concepts = [
     'validation',
     'validation-messages',
@@ -70,6 +70,28 @@ function buildIndex(): SearchEntry[] {
       aliases,
       content: `${description} ${topic.brief}`.toLowerCase(),
       toolCall: `ngforge_lookup topic="${key}"`,
+    });
+  }
+
+  // Index registry field types that have no curated TOPICS entry.
+  //
+  // The index used to be built from TOPICS alone, so a registered field type
+  // without one was unreachable by search: `container` could only be found by
+  // an agent that already knew to ask for it by name. Reading the remainder off
+  // the registry means a new field type is discoverable the day it is added.
+  for (const field of getFieldTypes()) {
+    if (TOPICS[field.type]) continue;
+
+    const description = TOPIC_DESCRIPTIONS[field.type] || field.description;
+
+    entries.push({
+      id: field.type,
+      category: 'topic',
+      subcategory: getTopicSubcategory(field.type),
+      description,
+      aliases: aliasMap[field.type] || [],
+      content: `${description} ${field.description}`.toLowerCase(),
+      toolCall: `ngforge_lookup topic="${field.type}"`,
     });
   }
 

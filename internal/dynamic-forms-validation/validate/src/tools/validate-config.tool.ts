@@ -693,13 +693,17 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
     }
 
     // Container-specific: 'wrappers' is what makes a container a container.
-    // Without it the field is a group spelled differently, so name the missing
-    // property rather than letting Zod report a generic union failure.
+    // Name the missing property rather than letting Zod report a generic union
+    // failure, and steer away from the obvious wrong fix. A container and a
+    // group are NOT interchangeable: `container` is registered with
+    // valueHandling 'flatten' and a `group` with 'include', so swapping one for
+    // the other silently reshapes the submitted value and moves the schema path
+    // that validators run against.
     if (fieldType === 'container') {
       if (!('wrappers' in f)) {
         errors.push({
           path: `${path}.wrappers`,
-          message: `"container" container "${fieldKey || 'unknown'}" is MISSING required "wrappers" property. Containers must have a wrappers array naming the UI chrome to wrap their children in - that is the only thing a container adds over a "group". Expected structure: ${EXPECTED_STRUCTURE['container']}`,
+          message: `"container" container "${fieldKey || 'unknown'}" is MISSING required "wrappers" property. Add a wrappers array naming the UI chrome to wrap the children in, or [] for no chrome. Do NOT switch to a "group" instead: a container flattens its children into the parent value, while a group nests them under its own key and owns a schema path, so the submitted value shape and validation behaviour both change. Expected structure: ${EXPECTED_STRUCTURE['container']}`,
         });
       } else if (!Array.isArray(f['wrappers'])) {
         errors.push({
