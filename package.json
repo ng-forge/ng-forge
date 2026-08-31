@@ -100,7 +100,7 @@
     "jiti": "2.7.0",
     "jsdom": "^27.4.0",
     "jsonc-eslint-parser": "^3.3.0",
-    "lefthook": "^2.1.10",
+    "lefthook": "^2.1.12",
     "magic-string": "^0.30.21",
     "ng-packagr": "~22.1.1",
     "nx": "22.7.8",
