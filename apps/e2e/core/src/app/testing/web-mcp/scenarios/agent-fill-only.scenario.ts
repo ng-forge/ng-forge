@@ -31,6 +31,18 @@ const config = {
       col: 12,
     },
     {
+      // Opaque option values: an agent can only pick the right one from the label.
+      key: 'country',
+      type: 'select',
+      label: 'Billing country',
+      options: [
+        { label: 'United Kingdom', value: 'GB' },
+        { label: 'Germany', value: 'DE' },
+        { label: 'Japan', value: 'JP' },
+      ],
+      col: 12,
+    },
+    {
       key: 'card',
       type: 'group',
       fields: [

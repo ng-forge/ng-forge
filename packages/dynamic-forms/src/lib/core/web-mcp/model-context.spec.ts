@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { isOverNameBudget, registerTool, validateToolName } from './model-context';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { findModelContext, isOverNameBudget, registerTool, validateToolName } from './model-context';
 import type { JsonSchemaObject } from './json-schema';
 
 const descriptor = (name: string) => ({
@@ -85,5 +85,46 @@ describe('registerTool', () => {
 
     expect(result).toMatchObject({ ok: false });
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('findModelContext', () => {
+  const hosts = globalThis as unknown as { document: Record<string, unknown>; navigator: Record<string, unknown> };
+  const originalDocument = hosts.document['modelContext'];
+  const originalNavigator = hosts.navigator['modelContext'];
+
+  afterEach(() => {
+    hosts.document['modelContext'] = originalDocument;
+    hosts.navigator['modelContext'] = originalNavigator;
+  });
+
+  it('finds nothing on a page without WebMCP', () => {
+    hosts.document['modelContext'] = undefined;
+    hosts.navigator['modelContext'] = undefined;
+
+    expect(findModelContext()).toBeUndefined();
+  });
+
+  it('prefers document.modelContext, the current surface', () => {
+    const fromDocument = { registerTool: vi.fn() };
+    hosts.document['modelContext'] = fromDocument;
+    hosts.navigator['modelContext'] = { registerTool: vi.fn() };
+
+    expect(findModelContext()).toBe(fromDocument);
+  });
+
+  it('falls back to navigator.modelContext, the deprecated one', () => {
+    const fromNavigator = { registerTool: vi.fn() };
+    hosts.document['modelContext'] = undefined;
+    hosts.navigator['modelContext'] = fromNavigator;
+
+    expect(findModelContext()).toBe(fromNavigator);
+  });
+
+  it('ignores a host property that is not a model context', () => {
+    hosts.document['modelContext'] = { somethingElse: true };
+    hosts.navigator['modelContext'] = undefined;
+
+    expect(findModelContext()).toBeUndefined();
   });
 });

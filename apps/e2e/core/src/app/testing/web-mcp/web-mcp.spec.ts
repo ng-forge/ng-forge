@@ -112,6 +112,27 @@ test.describe('WebMCP Tests', () => {
     expect(schema).not.toHaveProperty('required');
   });
 
+  test('carries option labels for values an agent could not otherwise read', async ({ page, helpers }) => {
+    await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
+
+    const [schema] = (await listTools(page)).filter((tool) => tool.name === 'fill_payment').map((tool) => tool.inputSchema);
+
+    // 'GB' means nothing on its own. The anyOf branches are what let an agent
+    // asked for the United Kingdom pick it.
+    expect(schema).toMatchObject({
+      properties: {
+        country: {
+          enum: ['GB', 'DE', 'JP'],
+          anyOf: [
+            { const: 'GB', title: 'United Kingdom' },
+            { const: 'DE', title: 'Germany' },
+            { const: 'JP', title: 'Japan' },
+          ],
+        },
+      },
+    });
+  });
+
   test('flags returned values as untrusted content', async ({ page, helpers }) => {
     await helpers.navigateToScenario('/test/web-mcp/agent-fill-only');
 

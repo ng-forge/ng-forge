@@ -220,4 +220,6 @@ await page.addInitScript(() => {
 });
 ```
 
-That gives deterministic coverage of the whole round trip. It does not cover whether a real agent picks the right tool or understands the schema, which is probabilistic and worth checking separately against the Tool Inspector or a live agent, as [Chrome recommends](https://developer.chrome.com/docs/ai/webmcp/best-practices).
+That gives deterministic coverage of the whole round trip. It does not cover whether a real agent picks the right tool or understands the schema, which is probabilistic and worth checking separately, as [Chrome recommends](https://developer.chrome.com/docs/ai/webmcp/best-practices).
+
+ng-forge keeps a small eval set for that second question, covering discovery, partial completion, correction after a validation error, conditional fields, opaque select values, and a negative control for a form that offers no submit tool. It lives in the repository under `packages/dynamic-forms/src/lib/core/web-mcp/eval`, with deterministic graders and a README describing how to run it. It has no CI target on purpose, since it needs an agent driving a browser.
