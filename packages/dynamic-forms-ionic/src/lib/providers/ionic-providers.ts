@@ -1,4 +1,4 @@
- 
+/* eslint-disable @nx/enforce-module-boundaries -- Published secondary-entry imports must remain package specifiers for real lazy chunks. */
 import type { Provider } from '@angular/core';
 import { DynamicFormError, type AddonTypeDefinition } from '@ng-forge/dynamic-forms';
 import { ADDON_TYPE_DEFINITIONS, type FieldTypeDefinition, type WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
