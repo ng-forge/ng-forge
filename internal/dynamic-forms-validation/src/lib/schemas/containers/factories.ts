@@ -59,17 +59,27 @@ const ContainerLogicSchema = z.object({
 export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerSchemaOptions<T>) {
   const { leafFieldSchema } = options;
 
-  // Create a recursive field schema that accepts any valid field structure
-  // The type annotation prevents TypeScript circular reference issues
+  // Recursive field schema, discriminated on `type`.
+  //
+  // This MUST stay a discriminated union. A plain `z.union` picks an option by
+  // trying each in turn, and a `z.object` option does not stop at a failed
+  // `type` literal — it goes on to parse `fields`, recursing through the whole
+  // subtree before reporting the failure it already knew about. Every nesting
+  // level then re-parses its subtree once per preceding option, so validation
+  // cost grows exponentially with depth: a config nested 7 deep took over five
+  // seconds, and one nested 10 deep took minutes. Discriminating on `type`
+  // selects the single matching option up front, which makes it linear.
+  //
+  // The type annotation prevents TypeScript circular reference issues.
   const AnyFieldSchema: z.ZodType<GenericField> = z.lazy(() =>
-    z.union([
-      leafFieldSchema as z.ZodType<GenericField>,
-      PageFieldSchema as z.ZodType<GenericField>,
-      RowFieldSchema as z.ZodType<GenericField>,
-      GroupFieldSchema as z.ZodType<GenericField>,
-      ArrayFieldSchema as z.ZodType<GenericField>,
+    z.discriminatedUnion('type', [
+      leafFieldSchema as unknown as z.core.$ZodTypeDiscriminable,
+      PageFieldSchema,
+      RowFieldSchema,
+      GroupFieldSchema,
+      ArrayFieldSchema,
     ]),
-  );
+  ) as z.ZodType<GenericField>;
 
   // Container base without fields - explicitly forbids label and meta
   const ContainerBaseSchema = BaseFieldDefSchema.omit({
@@ -116,18 +126,6 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     props: z.record(z.string(), z.unknown()).optional(),
   });
 
-  // Full Array API: uses `fields` to define item definitions directly
-  const FullArrayFieldSchema = ContainerBaseSchema.extend({
-    type: z.literal('array'),
-    fields: z.array(AnyFieldSchema),
-    logic: z.array(ContainerLogicSchema).optional(),
-    // Full API does not use template
-    template: z.never().optional(),
-    // Array length validation
-    minLength: z.number().int().min(0).optional(),
-    maxLength: z.number().int().min(0).optional(),
-  });
-
   // Schema for array-allowed children: excludes pages and nested arrays from templates.
   // Uses a refinement on AnyFieldSchema since the recursive structure makes static exclusion complex.
   const ArrayAllowedChildSchema: z.ZodType<GenericField> = z.lazy(() =>
@@ -136,12 +134,22 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     }),
   );
 
-  // Simplified Array API: uses `template` + `value` with auto-generated buttons
-  const SimplifiedArrayFieldSchema = ContainerBaseSchema.extend({
+  /**
+   * Array field: full API (`fields`) or simplified API (`template` + `value`).
+   *
+   * The two APIs are ONE schema with a refinement rather than a union of two,
+   * because a discriminated union cannot carry two options under the same
+   * `type` value. Expressing "exactly one of fields/template" as a refinement
+   * also reports the actual mistake, where a union could only say that neither
+   * option matched.
+   */
+  const ArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
-    // Template: single field (primitive array) or array of fields (object array)
+    // Full API: explicit item definitions.
+    fields: z.array(AnyFieldSchema).optional(),
+    // Simplified API: single field (primitive array) or array of fields (object array).
     // Only ArrayAllowedChildren (leaf fields, rows, groups) are valid — no pages or nested arrays.
-    template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]),
+    template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]).optional(),
     // Initial values for the array
     value: z.array(z.unknown()).optional(),
     // Button customization or opt-out (false to disable)
@@ -151,14 +159,28 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     // Array length validation
     minLength: z.number().int().min(0).optional(),
     maxLength: z.number().int().min(0).optional(),
-    // Simplified API does not use fields
-    fields: z.never().optional(),
+    // The array size properties are minLength/maxLength. These are the common
+    // wrong spelling, and naming them keeps the mistake from being silently
+    // stripped. Previously only the simplified API rejected them.
     minItems: z.never().optional(),
     maxItems: z.never().optional(),
-  });
+  }).superRefine((field, ctx) => {
+    const hasFields = field.fields !== undefined;
+    const hasTemplate = field.template !== undefined;
 
-  // Array field: either full API (fields) or simplified API (template + value)
-  const ArrayFieldSchema = z.union([FullArrayFieldSchema, SimplifiedArrayFieldSchema]);
+    if (hasFields && hasTemplate) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'Array has BOTH "fields" and "template". These are mutually exclusive: use "fields" for the full API, or "template" + "value" for the simplified API.',
+      });
+    } else if (!hasFields && !hasTemplate) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Array is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API).',
+      });
+    }
+  });
 
   // All fields union
   const AllFieldsSchema = AnyFieldSchema;

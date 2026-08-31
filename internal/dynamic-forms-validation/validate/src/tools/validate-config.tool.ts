@@ -168,8 +168,14 @@ function formatZodError(error: ZodError, uiIntegration: UiIntegration, config?: 
     if ('expected' in err) expected = String(err.expected);
     if ('received' in err) received = String(err.received);
 
-    // Enhance "Invalid input" with more context
-    if (message === 'Invalid input' || message === 'Invalid union') {
+    // Enhance a union failure with more context.
+    //
+    // Keyed off the issue CODE, not the message text. The field schema is a
+    // discriminated union, so zod reports a bad `type` as "Invalid discriminator
+    // value...", and matching on message strings meant this whole branch — the
+    // "Unknown field type" report and its list of valid types — silently stopped
+    // firing the moment zod reworded anything.
+    if (err.code === 'invalid_union') {
       // Try to figure out what field this is
       const fieldMatch = path.match(/fields\.(\d+)/);
       if (fieldMatch && config && typeof config === 'object' && 'fields' in config) {
