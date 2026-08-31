@@ -164,23 +164,39 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     // stripped. Previously only the simplified API rejected them.
     minItems: z.never().optional(),
     maxItems: z.never().optional(),
-  }).superRefine((field, ctx) => {
-    const hasFields = field.fields !== undefined;
-    const hasTemplate = field.template !== undefined;
+  })
+    .superRefine((field, ctx) => {
+      const hasFields = field.fields !== undefined;
+      const hasTemplate = field.template !== undefined;
 
-    if (hasFields && hasTemplate) {
-      ctx.addIssue({
-        code: 'custom',
-        message:
-          'Array has BOTH "fields" and "template". These are mutually exclusive: use "fields" for the full API, or "template" + "value" for the simplified API.',
-      });
-    } else if (!hasFields && !hasTemplate) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Array is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API).',
-      });
-    }
-  });
+      if (hasFields && hasTemplate) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Array has BOTH "fields" and "template". These are mutually exclusive: use "fields" for the full API, or "template" + "value" for the simplified API.',
+        });
+      } else if (!hasFields && !hasTemplate) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Array is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API).',
+        });
+      }
+    })
+    .meta({
+      // The refinement above is invisible to JSON Schema generation, and the
+      // generated schema is authoring guidance for a model. Two optional
+      // properties with no stated relationship reads as "pass either, both or
+      // neither", which is exactly the mistake the refinement rejects at
+      // runtime. Restating the rule as `oneOf` keeps the published schema
+      // saying what the validator enforces — the union of two array schemas
+      // used to express this, and collapsing them to one schema lost it.
+      description:
+        'Array field. Use EXACTLY ONE of "fields" (full API: explicit item definitions) or "template" (simplified API: one field, or an array of fields, repeated per item). Never both, never neither.',
+      oneOf: [
+        { required: ['fields'], not: { required: ['template'] } },
+        { required: ['template'], not: { required: ['fields'] } },
+      ],
+    });
 
   // All fields union
   const AllFieldsSchema = AnyFieldSchema;

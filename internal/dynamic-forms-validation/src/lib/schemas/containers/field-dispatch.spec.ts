@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { validateFormConfig, type UiIntegration } from '../../../../validate/src';
+import { getFormConfigJsonSchema, validateFormConfig, type UiIntegration } from '../../../../validate/src';
 
 const ADAPTERS: UiIntegration[] = ['material', 'bootstrap', 'primeng', 'ionic'];
 const leaf = { key: 'email', type: 'input', label: 'Email' };
@@ -139,6 +139,32 @@ describe('array keeps both APIs under one schema', () => {
   // but pre-validation still forbids them on every container including `array`,
   // which is a separate pre-existing bug being fixed elsewhere. Asserting either
   // verdict here would collide with that fix.
+
+  it('publishes the fields/template rule in the generated JSON Schema', () => {
+    // The refinement is runtime-only and invisible to JSON Schema generation.
+    // That schema is authoring guidance for a model, so the constraint has to be
+    // restated there or the published contract is looser than the validator.
+    const schema = getFormConfigJsonSchema('material');
+    const arrays: Record<string, unknown>[] = [];
+
+    const walk = (node: unknown, depth = 0): void => {
+      if (depth > 14 || !node || typeof node !== 'object') return;
+      if (Array.isArray(node)) return node.forEach((n) => walk(n, depth + 1));
+      const o = node as Record<string, unknown>;
+      const typeProp = (o['properties'] as Record<string, unknown> | undefined)?.['type'] as Record<string, unknown> | undefined;
+      if (typeProp?.['const'] === 'array') arrays.push(o);
+      Object.values(o).forEach((v) => walk(v, depth + 1));
+    };
+    walk(schema);
+
+    expect(arrays.length, 'expected an array field schema in the output').toBeGreaterThan(0);
+    for (const node of arrays) {
+      expect(node['oneOf'], 'array schema must state that fields and template are exclusive').toEqual([
+        { required: ['fields'], not: { required: ['template'] } },
+        { required: ['template'], not: { required: ['fields'] } },
+      ]);
+    }
+  });
 
   it('rejects a page inside an array template', () => {
     const result = check({ fields: [{ key: 'a', type: 'array', template: { key: 'p', type: 'page', fields: [] } }] });
