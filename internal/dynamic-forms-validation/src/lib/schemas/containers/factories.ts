@@ -113,7 +113,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   // Array button config for simplified API
   const ArrayButtonConfigSchema = z.object({
     label: z.string().optional(),
-    props: z.record(z.unknown()).optional(),
+    props: z.record(z.string(), z.unknown()).optional(),
   });
 
   // Full Array API: uses `fields` to define item definitions directly

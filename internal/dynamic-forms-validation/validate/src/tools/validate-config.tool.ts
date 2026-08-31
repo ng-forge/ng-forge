@@ -158,7 +158,7 @@ const DID_YOU_MEAN: Record<string, string> = {
  * Format a Zod error into user-friendly validation errors.
  */
 function formatZodError(error: ZodError, uiIntegration: UiIntegration, config?: unknown): FormattedValidationError[] {
-  const errors = error.errors.map((err) => {
+  const errors = error.issues.map((err) => {
     const path = err.path.join('.') || 'root';
     let message = err.message;
     let expected: string | undefined;

@@ -20,7 +20,7 @@ const SKILL_SOURCE = join(ROOT, 'skills', 'dynamic-forms');
 const CLI_DIST = join(ROOT, 'dist', 'packages', 'dynamic-forms-cli');
 
 /** Runtime dependencies the bundled CLI expects to resolve from node_modules. */
-const CLI_RUNTIME_DEPS = ['commander', 'ts-morph', 'zod', 'zod-to-json-schema'];
+const CLI_RUNTIME_DEPS = ['commander', 'ts-morph', 'zod'];
 
 /** Package that provides each adapter's fields, as a real project would depend on it. */
 const ADAPTER_PACKAGE: Record<UiIntegration, string> = {
