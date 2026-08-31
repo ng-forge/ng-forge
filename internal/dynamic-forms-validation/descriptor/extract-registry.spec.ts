@@ -149,6 +149,34 @@ async function workspace(
 
 const resolve = (tsConfigFilePath: string) => resolveRegistry({ tsConfigFilePath, adapterPackage: ADAPTER, corePackage: CORE });
 
+/**
+ * Resolve one adapter's registry, failing with the reason rather than a bare
+ * undefined further down.
+ */
+function resolveOrThrow(tsConfigFilePath: string, adapterPackage: string) {
+  const result = resolveRegistry({ tsConfigFilePath, adapterPackage, corePackage: CORE });
+  if (!result.ok) throw new Error(result.failure.detail);
+  return result;
+}
+
+/** Sorted prop names of one entry, so a shape can be compared by value. */
+function propNames(result: ReturnType<typeof resolveOrThrow>, canonical: string): string[] {
+  const entry = result.entries.find((e) => e.canonical === canonical);
+  const props = entry?.type.getProperty('props')?.getTypeAtLocation(entry.at)?.getNonNullableType();
+  return (props?.getProperties() ?? []).map((p) => p.getName()).sort();
+}
+
+/**
+ * Building a TypeScript program takes seconds, so every describe below resolves
+ * once per adapter in `beforeAll` and asserts against the result.
+ *
+ * This is not only about speed. Three tests asking the same two questions ran
+ * four programs, and the one that asked twice in a single test took 7972ms on a
+ * CI runner against vitest's 5000ms default and timed out. The work belongs in
+ * the hook, where the budget is stated rather than inherited.
+ */
+const PROGRAM_BUDGET_MS = 30_000;
+
 beforeAll(async () => {
   root = await mkdtemp(join(tmpdir(), 'ngforge-registry-'));
 });
@@ -224,32 +252,27 @@ describe('adapter isolation when several adapters are installed', () => {
   // Installing more than one adapter is normal: demos, an in-progress migration,
   // a shared library supporting several. The descriptor must describe the one
   // that was asked for, not whichever declaration the checker happened to merge.
-  let tsConfigFilePath: string;
+  let requested: string[];
+  let other: string[];
 
   beforeAll(async () => {
-    tsConfigFilePath = await workspace('two-adapters', { withSecondAdapter: true });
-  });
+    const tsConfigFilePath = await workspace('two-adapters', { withSecondAdapter: true });
 
-  function propsOf(adapterPackage: string) {
-    const result = resolveRegistry({ tsConfigFilePath, adapterPackage, corePackage: CORE });
-    if (!result.ok) throw new Error(result.failure.detail);
-
-    const input = result.entries.find((e) => e.canonical === 'input');
-    const props = input?.type.getProperty('props')?.getTypeAtLocation(input.at)?.getNonNullableType();
-    return (props?.getProperties() ?? []).map((p) => p.getName()).sort();
-  }
+    requested = propNames(resolveOrThrow(tsConfigFilePath, ADAPTER), 'input');
+    other = propNames(resolveOrThrow(tsConfigFilePath, OTHER_ADAPTER), 'input');
+  }, PROGRAM_BUDGET_MS);
 
   it('returns the requested adapter own props', () => {
     // `appearance` is its own; `placeholder` is inherited from InputProps.
-    expect(propsOf(ADAPTER)).toEqual(['appearance', 'placeholder']);
+    expect(requested).toEqual(['appearance', 'placeholder']);
   });
 
   it('returns the other adapter own props when that one is requested', () => {
-    expect(propsOf(OTHER_ADAPTER)).toEqual(['spacing']);
+    expect(other).toEqual(['spacing']);
   });
 
   it('does not return the same shape for two different adapters', () => {
-    expect(propsOf(ADAPTER)).not.toEqual(propsOf(OTHER_ADAPTER));
+    expect(requested).not.toEqual(other);
   });
 });
 
@@ -260,37 +283,34 @@ describe('an adapter whose name extends core name', () => {
   // fallback hands back another adapter's declaration for any key the requested
   // adapter does not declare. It bites where packages resolve from node_modules,
   // which is the consumer path this feature exists for.
-  let tsConfigFilePath: string;
+  let sharedForRequested: string[];
+  let sharedForPrefixed: string[];
+  let canonicalForRequested: string[];
 
   beforeAll(async () => {
-    tsConfigFilePath = await workspace('prefixed-adapter', { withPrefixedAdapter: true });
-  });
+    const tsConfigFilePath = await workspace('prefixed-adapter', { withPrefixedAdapter: true });
 
-  function sharedPropsFor(adapterPackage: string) {
-    const result = resolveRegistry({ tsConfigFilePath, adapterPackage, corePackage: CORE });
-    if (!result.ok) throw new Error(result.failure.detail);
+    const forRequested = resolveOrThrow(tsConfigFilePath, ADAPTER);
+    const forPrefixed = resolveOrThrow(tsConfigFilePath, PREFIXED_ADAPTER);
 
-    const shared = result.entries.find((e) => e.canonical === 'shared');
-    const props = shared?.type.getProperty('props')?.getTypeAtLocation(shared.at)?.getNonNullableType();
-    return (props?.getProperties() ?? []).map((p) => p.getName());
-  }
+    sharedForRequested = propNames(forRequested, 'shared');
+    sharedForPrefixed = propNames(forPrefixed, 'shared');
+    canonicalForRequested = forRequested.entries.map((e) => e.canonical);
+  }, PROGRAM_BUDGET_MS);
 
   it('falls back to core, not to the adapter that merely shares its prefix', () => {
     // The requested adapter says nothing about `shared`, so this goes through the
     // core branch. Unbounded, that branch matched the prefixed adapter and
     // published its `tone` as core's shape for every adapter.
-    expect(sharedPropsFor(ADAPTER), 'a foreign adapter props were attributed to core').toEqual(['base']);
+    expect(sharedForRequested, 'a foreign adapter props were attributed to core').toEqual(['base']);
   });
 
   it('still resolves the requested adapter own types', () => {
-    const result = resolveRegistry({ tsConfigFilePath, adapterPackage: ADAPTER, corePackage: CORE });
-    if (!result.ok) throw new Error(result.failure.detail);
-
-    expect(result.entries.map((e) => e.canonical)).toContain('input');
+    expect(canonicalForRequested).toContain('input');
   });
 
   it('describes the prefixed adapter own shape when it is the one requested', () => {
-    expect(sharedPropsFor(PREFIXED_ADAPTER)).toEqual(['tone']);
+    expect(sharedForPrefixed).toEqual(['tone']);
   });
 });
 
@@ -325,29 +345,44 @@ describe('belongsTo', () => {
 });
 
 describe('resolveRegistry, failure modes', () => {
-  it('fails clearly when the adapter is not installed', async () => {
-    const result = resolve(await workspace('no-adapter', { withAdapter: false }));
+  // Each of these builds its own workspace and program, so they carry the same
+  // stated budget as the hooks above. The slowest measured 4370ms on CI against
+  // vitest's 5000ms default, which is not headroom worth relying on.
+  it(
+    'fails clearly when the adapter is not installed',
+    async () => {
+      const result = resolve(await workspace('no-adapter', { withAdapter: false }));
 
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.failure.kind).toBe('adapter-not-resolved');
-    expect(result.failure.detail).toContain('Is it installed?');
-  });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.failure.kind).toBe('adapter-not-resolved');
+      expect(result.failure.detail).toContain('Is it installed?');
+    },
+    PROGRAM_BUDGET_MS,
+  );
 
-  it('fails when the adapter loads but its augmentation merges nothing', async () => {
-    // The trap found in the phase 1a spike: everything resolves, no error is
-    // raised anywhere, and only core types come back. Returning that as success
-    // would ship a descriptor that validates almost nothing while looking clean.
-    const result = resolve(await workspace('bad-augment', { augmentationTarget: '@ngforge-test/core-typo' }));
+  it(
+    'fails when the adapter loads but its augmentation merges nothing',
+    async () => {
+      // The trap found in the phase 1a spike: everything resolves, no error is
+      // raised anywhere, and only core types come back. Returning that as success
+      // would ship a descriptor that validates almost nothing while looking clean.
+      const result = resolve(await workspace('bad-augment', { augmentationTarget: '@ngforge-test/core-typo' }));
 
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.failure.kind).toBe('adapter-contributed-nothing');
-    expect(result.failure.detail).toContain('did not merge');
-  });
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.failure.kind).toBe('adapter-contributed-nothing');
+      expect(result.failure.detail).toContain('did not merge');
+    },
+    PROGRAM_BUDGET_MS,
+  );
 
-  it('does not mistake a working adapter for a non-contributing one', async () => {
-    const result = resolve(await workspace('control'));
-    expect(result.ok).toBe(true);
-  });
+  it(
+    'does not mistake a working adapter for a non-contributing one',
+    async () => {
+      const result = resolve(await workspace('control'));
+      expect(result.ok).toBe(true);
+    },
+    PROGRAM_BUDGET_MS,
+  );
 });
