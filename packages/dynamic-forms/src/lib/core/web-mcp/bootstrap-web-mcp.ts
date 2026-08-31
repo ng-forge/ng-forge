@@ -170,7 +170,23 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
       return renderSubmitResult({ status: report.validationPending ? 'pending-validation' : 'validation-failed' }, report);
     }
 
-    return renderSubmitResult(await dispatchSubmit(), report);
+    const outcome = await dispatchSubmit();
+
+    // Re-read after the submission settled. Server errors are applied to the
+    // fields by `submit()` once the action resolves, so the report taken before
+    // dispatch would name the failure without saying what it was.
+    return renderSubmitResult(outcome, reportNow(tree, report.changed));
+  }
+
+  /** Rebuilds the report from the form's current state. */
+  function reportNow(tree: FieldTree<unknown>, changed: readonly string[]): FormReport {
+    const walk = untracked(() => collectFieldReports(plan, tree));
+    return buildReport(
+      tree,
+      walk,
+      changed,
+      untracked(() => tree().pending()),
+    );
   }
 
   /** Dispatches a submit and resolves with what the pipeline actually did. */

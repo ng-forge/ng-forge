@@ -835,6 +835,7 @@ describe('WebMCP integration', () => {
       const result = await call('submit_profile', { name: 'Ada' });
 
       expect(result).toContain('Submitted, but it came back with errors.');
+      expect(result).toContain('That name is taken');
     });
 
     it('reports a dropped concurrent submission as busy', async () => {
