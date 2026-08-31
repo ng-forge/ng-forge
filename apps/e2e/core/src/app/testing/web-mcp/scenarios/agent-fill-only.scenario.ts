@@ -33,7 +33,6 @@ const config = {
     {
       key: 'card',
       type: 'group',
-      label: 'Card',
       fields: [
         // Writable so an agent can fill it in, never readable back.
         { key: 'number', type: 'input', label: 'Card number', webMcp: { readable: false }, col: 12 },
