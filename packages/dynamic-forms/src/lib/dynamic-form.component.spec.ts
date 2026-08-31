@@ -100,20 +100,39 @@ describe('DynamicFormComponent', () => {
     return SimpleTestUtils.createComponent(config, initialValue);
   };
 
+  /** One flush pass: how long each settle step waits before re-rendering. */
+  const SETTLE_STEP_MS = 10;
+  /** Upper bound on settling, kept well inside the 1000ms testTimeout. */
+  const SETTLE_BUDGET_MS = 300;
+
   /**
    * Waits for dynamic components to finish loading and rendering.
    * Call this after createComponent() and before querying for test harness components.
+   *
+   * Settles on a condition rather than on a fixed number of passes. Field
+   * components load lazily, so how many passes it takes depends on nesting
+   * depth and on how loaded the machine is. Two fixed 10ms passes were enough
+   * locally and not on a CI runner, where the deepest case in this file
+   * (page > group > row) still had not rendered when the assertions ran, so
+   * `querySelector` returned null and the test failed rather than timed out.
+   *
+   * Two identical passes in a row means rendering has stopped, which is the
+   * thing being waited for. That is reached on the second pass when everything
+   * is already there, so the fast path costs exactly what it did before.
    */
   const waitForDynamicComponents = async (fixture: any) => {
-    // Two-pass approach balances reliability with performance
-    // Use small delay (10ms) to allow async component loading to complete
-    await delay(10);
-    fixture.detectChanges();
-    TestBed.flushEffects();
+    const deadline = Date.now() + SETTLE_BUDGET_MS;
+    let previous: string | undefined;
 
-    await delay(10);
-    fixture.detectChanges();
-    TestBed.flushEffects();
+    for (;;) {
+      await delay(SETTLE_STEP_MS);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      const current = fixture.nativeElement.innerHTML;
+      if (previous === current || Date.now() >= deadline) return;
+      previous = current;
+    }
   };
 
   beforeEach(async () => {
