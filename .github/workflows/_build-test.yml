@@ -294,21 +294,20 @@ jobs:
             pnpm nx run-many -t lint --parallel=3
           fi
 
-      # dynamic-forms runs 3534 browser tests across 177 files under istanbul
-      # instrumentation, three projects at a time. Its vitest process was exiting
-      # non-zero having printed its RUN header and per-test stdout but no reporter
-      # output at all: no per-file results, no summary, no failing test. That is a
-      # killed process rather than a failing assertion, and the default heap is
-      # the thing this job does not raise. Build Apps already carries the same
-      # setting for the same reason.
+      # Streamed rather than grouped. Nx buffers each task's output and prints it
+      # per task, and for a failing browser-mode project that grouping has been
+      # swallowing the verdict: dynamic-forms:test exits non-zero having printed
+      # its RUN header and per-test stdout with no reporter output at all, while
+      # the other nine projects each print a summary. No failing test, no
+      # assertion, no threshold and no OOM message, so the cause is not in the
+      # log to read. Streaming interleaves output as it happens, which is noisier
+      # but keeps the error attached to the run that produced it.
       - name: Test
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
+            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage --output-style=stream
           else
-            pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
+            pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage --output-style=stream
           fi
 
       - name: Test schematics
