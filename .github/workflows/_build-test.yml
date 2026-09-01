@@ -294,7 +294,16 @@ jobs:
             pnpm nx run-many -t lint --parallel=3
           fi
 
+      # dynamic-forms runs 3534 browser tests across 177 files under istanbul
+      # instrumentation, three projects at a time. Its vitest process was exiting
+      # non-zero having printed its RUN header and per-test stdout but no reporter
+      # output at all: no per-file results, no summary, no failing test. That is a
+      # killed process rather than a failing assertion, and the default heap is
+      # the thing this job does not raise. Build Apps already carries the same
+      # setting for the same reason.
       - name: Test
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
             pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
