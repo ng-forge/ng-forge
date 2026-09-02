@@ -7,6 +7,7 @@ import {
   getAddonTypes,
   getFieldType,
   getFieldTypes,
+  getFieldTypesByCategory,
   getUIAdapter,
   getWrapper,
   getWrappers,
@@ -47,7 +48,11 @@ function formatTopicItem(key: string): string {
 
 function getTopicList(): string {
   const fieldTypes = ['input', 'select', 'slider', 'radio', 'checkbox', 'textarea', 'datepicker', 'toggle', 'text', 'hidden'];
-  const containers = ['group', 'row', 'array', 'simplified-array', 'page'];
+  // Derived from the registry, not hand-listed: `container` was a registered
+  // field type that never appeared here, so agents only found it by already
+  // knowing the name. `simplified-array` is appended because it is a topic
+  // about the array API rather than a field type of its own.
+  const containers = [...getFieldTypesByCategory('container').map((f) => f.type), 'simplified-array'];
   const wrappers = ['wrappers', ...getWrappers().map((w) => w.type)];
   const addons = ['addons', ...getAddonTypes().map((k) => k.type)];
   const concepts = [
@@ -106,7 +111,7 @@ ${patterns.map(formatTopicItem).join('\n')}
 /** Format field info with placement rules (from get-field-info.tool.ts). */
 function formatFieldInfoFull(field: FieldTypeInfo, uiFieldType?: UIAdapterFieldType): string {
   const lines: string[] = [];
-  const isContainer = ['row', 'group', 'array', 'page'].includes(field.type);
+  const isContainer = field.category === 'container';
   const isHidden = field.type === 'hidden';
 
   lines.push(`## ${field.type} field`);
@@ -640,7 +645,7 @@ Use ngforge_search query="your question" to find topics by keyword.`,
       topic: z
         .string()
         .describe(
-          'Topic to look up: field types (input, select, hidden, group, row, array, page), wrappers (wrappers, css, section, arraySection), concepts (validation, conditional, derivation, property-derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
+          'Topic to look up: field types (input, select, hidden, group, row, array, container, page), wrappers (wrappers, css, section, arraySection), concepts (validation, conditional, derivation, property-derivation, options-format), patterns (golden-path, pitfalls, multi-page-gotchas), or "list" to see all topics',
         ),
       depth: z
         .enum(['brief', 'full', 'schema'])

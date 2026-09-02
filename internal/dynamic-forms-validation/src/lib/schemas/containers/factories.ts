@@ -1,6 +1,8 @@
 import { z, ZodTypeAny } from 'zod';
 import { BaseFieldDefSchema } from '../field/field-def.schema';
 import { ConditionalExpressionSchema } from '../logic/conditional-expression.schema';
+import { ValidatorsArraySchema } from '../validation/validator-config.schema';
+import { ValidationMessagesSchema } from '../validation/validation-messages.schema';
 
 /**
  * Options for creating container schemas.
@@ -68,6 +70,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
       RowFieldSchema as z.ZodType<GenericField>,
       GroupFieldSchema as z.ZodType<GenericField>,
       ArrayFieldSchema as z.ZodType<GenericField>,
+      ContainerFieldSchema as z.ZodType<GenericField>,
     ]),
   );
 
@@ -80,6 +83,44 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     // This makes Zod reject any value for these properties
     label: z.never().optional(),
     meta: z.never().optional(),
+  });
+
+  const ContainerValidationShape = {
+    required: z.boolean().optional(),
+    validators: ValidatorsArraySchema.optional(),
+    validationMessages: ValidationMessagesSchema.optional(),
+  };
+
+  /**
+   * Wrapper reference. Wrapper types are extensible through registry
+   * augmentation, so the set cannot be enumerated here; accept any `type` with
+   * its own configuration rather than rejecting wrappers we have not heard of.
+   */
+  const WrapperConfigSchema = z.object({ type: z.string() }).passthrough();
+
+  /**
+   * Container: wraps children in UI chrome.
+   *
+   * `wrappers` is REQUIRED, and that is the whole point of the type. Treating it
+   * as optional would erase the distinction that justifies the type existing.
+   *
+   * A container is NOT a group with chrome. `container` is registered with
+   * `valueHandling: 'flatten'` and `group` with `'include'`, so a container's
+   * children land directly in the parent value while a group's are nested under
+   * its own key, and only the group owns a schema path for container-level
+   * validators. Anything that reads as "just use a group instead" is wrong and
+   * changes the submitted data.
+   *
+   * Child placement and cardinality are deliberately not constrained here: the
+   * schemas do not enforce nesting for any container (see the limitation noted
+   * on this factory), and adding it for `container` alone would be inconsistent
+   * as well as out of scope.
+   */
+  const ContainerFieldSchema = ContainerBaseSchema.extend({
+    type: z.literal('container'),
+    fields: z.array(AnyFieldSchema),
+    wrappers: z.array(WrapperConfigSchema),
+    logic: z.array(ContainerLogicSchema).optional(),
   });
 
   // Page can contain: rows, groups, arrays, leaves (no pages)
@@ -106,6 +147,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const GroupFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('group'),
     fields: z.array(AnyFieldSchema),
+    ...ContainerValidationShape,
     // Container logic - only 'hidden' type allowed (same as pages)
     logic: z.array(ContainerLogicSchema).optional(),
   });
@@ -120,6 +162,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   const FullArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
     fields: z.array(AnyFieldSchema),
+    ...ContainerValidationShape,
     logic: z.array(ContainerLogicSchema).optional(),
     // Full API does not use template
     template: z.never().optional(),
@@ -139,6 +182,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
   // Simplified Array API: uses `template` + `value` with auto-generated buttons
   const SimplifiedArrayFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('array'),
+    ...ContainerValidationShape,
     // Template: single field (primitive array) or array of fields (object array)
     // Only ArrayAllowedChildren (leaf fields, rows, groups) are valid — no pages or nested arrays.
     template: z.union([ArrayAllowedChildSchema, z.array(ArrayAllowedChildSchema)]),
@@ -168,6 +212,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     RowFieldSchema,
     GroupFieldSchema,
     ArrayFieldSchema,
+    ContainerFieldSchema,
     AllFieldsSchema,
   };
 }
