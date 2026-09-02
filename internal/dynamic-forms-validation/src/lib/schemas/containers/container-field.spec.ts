@@ -51,12 +51,36 @@ describe('container is accepted by every adapter', () => {
 });
 
 describe('wrappers is required, which is what makes it a container', () => {
-  // A container without a wrappers array is a group spelled differently. Making
-  // the property optional would erase the distinction that justifies the type.
+  // Making the property optional would erase the distinction that justifies the
+  // type. Note this is NOT the same as saying a container is a group: a
+  // container flattens its children into the parent value, a group nests them
+  // under its own key, so they are not substitutable.
   it.each(ADAPTERS)('rejects a container with no wrappers property (%s)', (ui) => {
     const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', fields: [child] }] }, ui);
 
     expect(result.valid, 'a container without wrappers must not validate').toBe(false);
+  });
+
+  it('does not tell an agent to swap the container for a group', () => {
+    // "a container without wrappers is just a group" invites exactly the wrong
+    // fix. `container` is registered valueHandling 'flatten' and `group`
+    // 'include', so the swap silently reshapes the submitted value and moves the
+    // schema path validators run against.
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', fields: [child] }] });
+
+    expect(result.text).not.toMatch(/only thing a container adds/i);
+    expect(result.text).not.toMatch(/just a group|group spelled differently/i);
+    expect(result.text, 'the remediation should name the real difference').toMatch(/flatten/i);
+    expect(result.text).toMatch(/schema path|value shape/i);
+  });
+
+  it.each(ADAPTERS)('names the missing property, since a generic message sends an agent to delete the field (%s)', (ui) => {
+    // The reason this PR exists is an agent acting on an error it cannot fix.
+    // "has invalid properties" is that error; "is MISSING required wrappers" is not.
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', fields: [child] }] }, ui);
+
+    expect(result.text).toContain('MISSING required "wrappers" property');
+    expect(result.text).toContain('chrome');
   });
 
   it('rejects a wrappers value that is not an array', () => {
@@ -76,6 +100,20 @@ describe('wrappers is required, which is what makes it a container', () => {
 });
 
 describe('container inherits the container base rules', () => {
+  it.each(ADAPTERS)('names a missing fields array the way every other container does (%s)', (ui) => {
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', wrappers: [] }] }, ui);
+
+    expect(result.valid).toBe(false);
+    expect(result.text).toContain('MISSING required "fields" property');
+  });
+
+  it('rejects a fields value that is not an array', () => {
+    const result = messagesFor({ fields: [{ key: 'chrome', type: 'container', wrappers: [], fields: 'nope' }] });
+
+    expect(result.valid).toBe(false);
+    expect(result.text).toContain('invalid "fields"');
+  });
+
   it('rejects a label, as on every other container', () => {
     const config = { fields: [{ key: 'chrome', type: 'container', wrappers: [], fields: [], label: 'Nope' }] };
 
@@ -95,46 +133,20 @@ describe('container inherits the container base rules', () => {
 
     expect(messagesFor(config).valid).toBe(true);
   });
-});
 
-describe('container forbids a page child, like every other host', () => {
-  // Container was the only host with no nesting rule, so it was the only one
-  // that accepted a page. `ContainerAllowedChildren` excludes `PageField`, and
-  // multi-page mode reads pages from the config root, so a page nested here has
-  // no navigation path at runtime.
-  const withPage = {
-    fields: [
-      {
-        key: 'chrome',
-        type: 'container',
-        wrappers: [],
-        fields: [{ key: 'step1', type: 'page', fields: [child] }],
-      },
-    ],
-  };
-
-  it.each(ADAPTERS)('rejects a page inside a container (%s)', (ui) => {
-    const result = messagesFor(withPage, ui);
-
-    expect(result.valid, 'a page inside a container should be rejected').toBe(false);
-    expect(result.text).toContain('NOT allowed inside');
-  });
-
-  it.each(ADAPTERS)('still allows a container inside a container (%s)', (ui) => {
-    // The bound: the type lists ContainerField among its own allowed children,
-    // so forbidding `page` must not spill into forbidding that.
-    const nested = {
+  it('rejects a page nested inside a container', () => {
+    const config = {
       fields: [
         {
-          key: 'outer',
+          key: 'chrome',
           type: 'container',
           wrappers: [],
-          fields: [{ key: 'inner', type: 'container', wrappers: [], fields: [child] }],
+          fields: [{ key: 'nested-page', type: 'page', fields: [] }],
         },
       ],
     };
 
-    expect(messagesFor(nested, ui).valid, messagesFor(nested, ui).text).toBe(true);
+    expect(messagesFor(config).valid).toBe(false);
   });
 });
 

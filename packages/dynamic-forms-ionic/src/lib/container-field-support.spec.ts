@@ -1,10 +1,9 @@
 /**
  * ContainerField reconciliation gate, Ionic.
  *
- * `container` is registered in `FieldRegistryContainers` and in core's
- * `BUILT_IN_FIELDS`, but the Zod validation schemas reject it as an unknown
- * field type. Before that divergence can be resolved in either direction, the
- * runtime behaviour has to be established rather than assumed.
+ * `container` is a recognized field type across the core runtime and
+ * validation schemas. These tests keep the adapter rendering contract aligned
+ * with that shared definition.
  *
  * Scope is deliberately narrow: a bare container, its children, its wrappers,
  * and whether adapter-native fields render inside it. Nesting and cardinality

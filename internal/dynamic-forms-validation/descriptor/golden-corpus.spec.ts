@@ -92,15 +92,14 @@ describe('the live hand-written validator matches currentVerdict', () => {
 describe('reviewed targets', () => {
   const pending = corpus.rows.filter((r) => r.v1Verdict !== undefined && r.v1Verdict !== r.currentVerdict);
 
-  it('reports rows whose target differs from current behaviour', () => {
-    // Not a failure. These are intended changes awaiting the derived validator,
-    // and naming them here keeps them from being mistaken for regressions later.
-    for (const row of pending) {
-      console.info(`[golden] pending intended change: ${row.id} current=${row.currentVerdict} v1=${row.v1Verdict}`);
-    }
-
-    expect(pending.every((r) => r.rationale.length > 20)).toBe(true);
-  });
+  // Reported, deliberately not asserted. These are intended changes awaiting the
+  // derived validator, and naming them keeps them from being mistaken for
+  // regressions later. This is a report, so it is not dressed up as a test: an
+  // `it` whose only assertion is vacuous while `pending` is empty would read as
+  // coverage the corpus does not have.
+  for (const row of pending) {
+    console.info(`[golden] pending intended change: ${row.id} current=${row.currentVerdict} v1=${row.v1Verdict}`);
+  }
 
   it('agrees with currentVerdict wherever no change is intended', () => {
     // While the hand-written validator is authoritative, an unchanged row's two

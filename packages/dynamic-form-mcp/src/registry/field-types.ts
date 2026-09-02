@@ -20,7 +20,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'email',
   type: 'input',
@@ -55,7 +55,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'description',
   type: 'textarea',
@@ -89,7 +89,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'country',
   type: 'select',
@@ -111,7 +111,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'acceptTerms',
   type: 'checkbox',
@@ -136,7 +136,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'interests',
   type: 'multi-checkbox',
@@ -166,7 +166,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'gender',
   type: 'radio',
@@ -201,7 +201,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'birthDate',
   type: 'datepicker',
@@ -220,7 +220,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'notifications',
   type: 'toggle',
@@ -259,7 +259,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'volume',
   type: 'slider',
@@ -281,7 +281,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'row.fields', 'container.fields'],
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'row', 'container'],
     notAllowedIn: ['top-level when using pages'],
     example: `// Hidden field - value is REQUIRED!
 {
@@ -319,7 +319,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'sectionTitle',
   type: 'text',
@@ -430,11 +430,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'array', 'container'],
     notAllowedIn: ['group'],
     canContain: [
       'row',
       'array',
+      'container',
       'input',
       'textarea',
       'select',
@@ -534,11 +535,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: true,
     source: 'core',
-    allowedIn: ['top-level', 'page', 'row', 'group'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'container'],
     notAllowedIn: ['array'],
     canContain: [
       'row',
       'group',
+      'container',
       'input',
       'textarea',
       'select',
@@ -605,7 +607,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     type: 'container',
     category: 'container',
     description:
-      "Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values \u2014 child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.",
+      "Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values \u2014 child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED (use [] for no chrome). A container is NOT a group with chrome and the two are not substitutable: a container flattens child values into the parent (like a row), while a group nests them under its own key and owns a schema path, so swapping one for the other changes the submitted value shape and which validators can run. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.",
     valueType: undefined,
     baseInterface: 'FieldDef',
     props: {
@@ -648,6 +650,12 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'submit',
       'next',
       'previous',
+      'add-array-item',
+      'prepend-array-item',
+      'insert-array-item',
+      'remove-array-item',
+      'pop-array-item',
+      'shift-array-item',
     ],
     cannotContain: ['page'],
     example: `{
@@ -691,6 +699,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'row',
       'group',
       'array',
+      'container',
       'input',
       'textarea',
       'select',
@@ -730,7 +739,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'next',
   type: 'next',
@@ -747,7 +756,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'back',
   type: 'previous',
@@ -773,7 +782,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `// RECOMMENDED: Use pre-defined button types for common actions
 { key: 'submit', type: 'submit', label: 'Submit Form' }
 { key: 'next', type: 'next', label: 'Next' }
@@ -804,7 +813,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['top-level', 'page', 'row', 'group', 'array'],
+    allowedIn: ['top-level', 'page', 'row', 'group', 'array', 'container'],
     example: `{
   key: 'submit',
   type: 'submit',
@@ -836,7 +845,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'addContact',
   type: 'add-array-item',
@@ -872,7 +881,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'prependContact',
   type: 'prepend-array-item',
@@ -915,7 +924,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     },
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'insertContact',
   type: 'insert-array-item',
@@ -939,7 +948,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'removeContact',
   type: 'remove-array-item',
@@ -956,7 +965,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'popContact',
   type: 'pop-array-item',
@@ -974,7 +983,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'adapter',
-    allowedIn: ['array', 'row', 'group'],
+    allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'shiftContact',
   type: 'shift-array-item',

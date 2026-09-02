@@ -23,11 +23,18 @@ const validators = [{ type: 'custom', functionName: 'dateOrder' }];
 
 function check(config: unknown, ui: UiIntegration = 'material') {
   const result = validateFormConfig(ui, config);
-  return { valid: result.valid, text: (result.errors ?? []).map((e) => `${e.path}: ${e.message}`).join('\n') };
+  return {
+    valid: result.valid,
+    data: result.data,
+    text: (result.errors ?? []).map((e) => `${e.path}: ${e.message}`).join('\n'),
+  };
 }
 
 const group = (extra: Record<string, unknown>) => ({ fields: [{ key: 'g', type: 'group', fields: [child], ...extra }] });
 const array = (extra: Record<string, unknown>) => ({ fields: [{ key: 'a', type: 'array', fields: [child], ...extra }] });
+const simplifiedArray = (extra: Record<string, unknown>) => ({
+  fields: [{ key: 'a', type: 'array', template: child, value: [], ...extra }],
+});
 const row = (extra: Record<string, unknown>) => ({ fields: [{ key: 'r', type: 'row', fields: [child], ...extra }] });
 const container = (extra: Record<string, unknown>) => ({
   fields: [{ key: 'c', type: 'container', wrappers: [], fields: [child], ...extra }],
@@ -54,6 +61,26 @@ describe('containers that own a schema path accept validation', () => {
 
   it('accepts validationMessages alongside validators', () => {
     expect(check(group({ validators, validationMessages: { custom: 'Dates are out of order' } })).valid).toBe(true);
+  });
+
+  it.each([
+    ['group', group],
+    ['array', array],
+    ['simplified array', simplifiedArray],
+  ] as const)('preserves validation properties in parsed %s data', (_name, make) => {
+    const result = check(
+      make({
+        required: true,
+        validators,
+        validationMessages: { custom: 'Dates are out of order' },
+      }),
+    );
+
+    expect(result.data?.fields[0]).toMatchObject({
+      required: true,
+      validators,
+      validationMessages: { custom: 'Dates are out of order' },
+    });
   });
 
   it('accepts validateWhenHidden, which gates the container own validators', () => {
@@ -83,6 +110,19 @@ describe('layout containers do not', () => {
 
   it('rejects required on a container', () => {
     expect(check(container({ required: true })).valid).toBe(false);
+  });
+
+  it.each(['validators', 'required', 'validationMessages', 'minLength', 'maxLength'])('rejects %s on a page', (prop) => {
+    const values: Record<string, unknown> = {
+      validators,
+      required: true,
+      validationMessages: { custom: 'Nope' },
+      minLength: 1,
+      maxLength: 1,
+    };
+    const config = { fields: [{ key: 'p', type: 'page', fields: [child], [prop]: values[prop] }] };
+
+    expect(check(config).valid).toBe(false);
   });
 
   it('explains why rather than only refusing', () => {

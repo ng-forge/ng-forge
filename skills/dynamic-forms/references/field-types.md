@@ -16,7 +16,7 @@
 Text-based input field with HTML5 type support (text, email, password, number, tel, url)
 
 - Value type: `string | number`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -40,7 +40,7 @@ Text-based input field with HTML5 type support (text, email, password, number, t
 Multi-line text input field for longer content
 
 - Value type: `string`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -64,7 +64,7 @@ Multi-line text input field for longer content
 Dropdown selection field with single or multiple selection
 
 - Value type: `T | T[]`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -90,7 +90,7 @@ Dropdown selection field with single or multiple selection
 Boolean toggle checkbox field
 
 - Value type: `boolean`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 ```typescript
@@ -107,7 +107,7 @@ Boolean toggle checkbox field
 Multiple checkbox group for selecting multiple values from options
 
 - Value type: `T[]`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -133,7 +133,7 @@ Multiple checkbox group for selecting multiple values from options
 Radio button group for single selection from options
 
 - Value type: `T`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -158,7 +158,7 @@ Radio button group for single selection from options
 Date selection field with calendar picker
 
 - Value type: `Date | string`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -181,7 +181,7 @@ Date selection field with calendar picker
 Switch/toggle control for boolean values
 
 - Value type: `boolean`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 ```typescript
@@ -197,7 +197,7 @@ Switch/toggle control for boolean values
 Numeric range slider for value selection
 
 - Value type: `number`
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -223,7 +223,7 @@ Numeric range slider for value selection
 Hidden field that participates in form values without rendering. REQUIRED: The "value" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.
 
 - Value type: `string | number | boolean | (string | number | boolean)[]`
-- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `row.fields`, `container.fields`
+- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `row`, `container`
 - Validators supported: no
 
 ```typescript
@@ -278,7 +278,7 @@ Horizontal layout container for grouping fields in columns. Rows do NOT have a l
 Nested form group container creating a sub-object in form values. Groups are logical containers only and do NOT have a label property. Supports only 'hidden' logic type for conditional visibility. Supports `required` (cascades to every descendant; a descendant's own `required` wins) and container-level `validators` + `validationMessages` for cross-field rules over the group's children — `ctx.value()` resolves to the group's object.
 
 - Value type: `object`
-- Allowed in: `top-level`, `page`, `row`, `array`
+- Allowed in: `top-level`, `page`, `row`, `array`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -319,7 +319,7 @@ Nested form group container creating a sub-object in form values. Groups are log
 Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label property. Use "fields" (not "template") to define the item template. Supports only 'hidden' logic type for conditional visibility. Supports minLength/maxLength for array size validation, `required` (cascades to every field in each item), and container-level `validators` + `validationMessages` for rules over the item list — `ctx.value()` resolves to the array of items. Full-API arrays are positional — each item must have its own entry in `fields`. For homogeneous arrays driven by a value (e.g., tags, contacts), use the simplified array API (`template` + `value`) instead. Each array item is rendered inside a `<div class="df-array-item">` wrapper with `role="group"`, `aria-label="Item N"` (1-based), `data-array-item-id`, and `data-array-item-index` attributes for styling, accessibility, and testing.
 
 - Value type: `T[]`
-- Allowed in: `top-level`, `page`, `row`, `group`
+- Allowed in: `top-level`, `page`, `row`, `group`, `container`
 - Validators supported: yes
 
 | Prop | Type | Required | Default | Description |
@@ -379,7 +379,7 @@ Repeatable field group for dynamic lists/arrays. Arrays do NOT have a label prop
 
 ### `container`
 
-Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values — child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED: a container without it is just a group. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.
+Wraps its children in UI chrome via a chain of wrapper components. Containers do NOT have a label property and do NOT create a nesting level in form values — child values are flattened into the parent, exactly like rows. The 'wrappers' property is REQUIRED (use [] for no chrome). A container is NOT a group with chrome and the two are not substitutable: a container flattens child values into the parent (like a row), while a group nests them under its own key and owns a schema path, so swapping one for the other changes the submitted value shape and which validators can run. Wrappers are applied outermost-first, so the first entry in the array is the outermost element. Supports only 'hidden' logic type for conditional visibility. Like `row` and `page`, a container flattens into its parent and has no schema path of its own, so it does NOT support container-level `validators`, `required` or `validationMessages` — use `group` or `array` for cross-field rules.
 
 - Allowed in: `top-level`, `page`, `group`, `array`, `row`, `container`
 - Validators supported: no
@@ -437,7 +437,7 @@ Multi-step form page container for wizard-style forms. Pages do NOT have label o
 
 Navigation button to go to next page in multi-step forms. Must be placed INSIDE a page's fields array.
 
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: no
 
 ```typescript
@@ -452,7 +452,7 @@ Navigation button to go to next page in multi-step forms. Must be placed INSIDE 
 
 Navigation button to go to previous page in multi-step forms. Must be placed INSIDE a page's fields array.
 
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: no
 
 ```typescript
@@ -467,7 +467,7 @@ Navigation button to go to previous page in multi-step forms. Must be placed INS
 
 Generic button for custom actions. IMPORTANT: The generic 'button' type REQUIRES the 'event' property with a FormEventConstructor. For simple use cases, prefer 'submit', 'next', or 'previous' which don't require event configuration.
 
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: no
 
 | Prop | Type | Required | Default | Description |
@@ -496,7 +496,7 @@ Generic button for custom actions. IMPORTANT: The generic 'button' type REQUIRES
 
 Form submit button
 
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: no
 
 ```typescript
@@ -511,7 +511,7 @@ Form submit button
 
 Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 | Prop | Type | Required | Default | Description |
@@ -536,7 +536,7 @@ Button to append a new item to the end of an array field. Must be placed within 
 
 Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 | Prop | Type | Required | Default | Description |
@@ -561,7 +561,7 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 
 Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 | Prop | Type | Required | Default | Description |
@@ -588,7 +588,7 @@ Button to insert a new item at a specific index in an array field (set via the i
 
 Button to remove the current item from an array field. Typically placed within each array item template. (Legacy alias: removeArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -603,7 +603,7 @@ Button to remove the current item from an array field. Typically placed within e
 
 Button to remove the last item from an array field. (Legacy alias: popArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -619,7 +619,7 @@ Button to remove the last item from an array field. (Legacy alias: popArrayItem.
 
 Button to remove the first item from an array field. (Legacy alias: shiftArrayItem.)
 
-- Allowed in: `array`, `row`, `group`
+- Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
 ```typescript
@@ -637,7 +637,7 @@ Button to remove the first item from an array field. (Legacy alias: shiftArrayIt
 
 Static text display element (headings, paragraphs, spans). The text content comes from the label property.
 
-- Allowed in: `top-level`, `page`, `row`, `group`, `array`
+- Allowed in: `top-level`, `page`, `row`, `group`, `array`, `container`
 - Validators supported: no
 
 | Prop | Type | Required | Default | Description |

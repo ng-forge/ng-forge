@@ -62,6 +62,61 @@
       "rationale": "`wrappers` is required on ContainerField. A container without it is a group spelled differently, so accepting it would erase the distinction that justifies the type. This row exists to stop a future derivation from relaxing the property to optional."
     },
     {
+      "id": "core-page-container-validation",
+      "description": "A page cannot declare container-level validators",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "step",
+            "type": "page",
+            "fields": [],
+            "validators": [
+              {
+                "type": "custom",
+                "functionName": "pageRule"
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "Pages flatten into the form and have no schema path of their own, so container-level validation has no value to run against. Use a group or array for cross-field validation.",
+      "regression": {
+        "observedBefore": "639b67b8f",
+        "issue": "Moving container validation properties out of the shared forbidden list caused pages to accept validators that Zod then stripped"
+      }
+    },
+    {
+      "id": "core-container-nested-page",
+      "description": "A container cannot contain a page",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "chrome",
+            "type": "container",
+            "wrappers": [],
+            "fields": [
+              {
+                "key": "nested-step",
+                "type": "page",
+                "fields": []
+              }
+            ]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "ContainerAllowedChildren excludes pages because pages are top-level navigation boundaries. The runtime validator and MCP guidance must enforce the same placement rule.",
+      "regression": {
+        "observedBefore": "639b67b8f",
+        "issue": "The newly accepted container schema used the unrestricted recursive field schema without a matching pre-validation nesting rule"
+      }
+    },
+    {
       "id": "button-add-array-item-no-template",
       "description": "An add-array-item button with nothing to add",
       "adapters": ["material", "bootstrap", "primeng", "ionic"],
@@ -224,36 +279,6 @@
       "currentVerdict": "valid",
       "v1Verdict": "valid",
       "rationale": "A hidden field carries a value and occupies no space, so forbidding it inside a row forced authors to hoist it out of the group it belongs to and lose that association for no layout benefit."
-    },
-    {
-      "id": "core-container-rejects-page",
-      "description": "A page nested inside a container",
-      "adapters": ["material", "bootstrap", "primeng", "ionic"],
-      "config": {
-        "fields": [
-          {
-            "key": "chrome",
-            "type": "container",
-            "wrappers": [],
-            "fields": [
-              {
-                "key": "step1",
-                "type": "page",
-                "fields": [
-                  {
-                    "key": "email",
-                    "type": "input",
-                    "label": "Email"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      "currentVerdict": "invalid",
-      "v1Verdict": "invalid",
-      "rationale": "`ContainerAllowedChildren` admits every field type except `page`, and pages are top-level only because multi-page mode reads them from the config root. Container was the one host with no nesting entry, so it was also the one host that accepted a page the type rejects. Row, group, array and page each forbade a nested page; container had no nesting entry at all."
     },
     {
       "id": "core-container-holds-a-container",
