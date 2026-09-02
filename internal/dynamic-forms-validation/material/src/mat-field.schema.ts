@@ -56,6 +56,7 @@ export const MatFieldTypes = [
   'row',
   'group',
   'array',
+  'container',
 
   // Leaf types
   'text',

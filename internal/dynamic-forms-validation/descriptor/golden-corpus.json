@@ -1,0 +1,97 @@
+{
+  "$comment": [
+    "Golden corpus: reviewed expectations for what validates, independent of any one implementation.",
+    "currentVerdict is what the live hand-written Zod schemas do NOW. It is asserted on every run,",
+    "which is what makes Tier B a differential oracle rather than a record of history.",
+    "v1Verdict is the reviewed target contract, asserted against the derived validator once it exists.",
+    "A row may omit v1Verdict while a divergence is still an unreviewed candidate.",
+    "Resolved divergences keep their history in `regression`, which is documentation and never asserted.",
+    "Rows are added when a decision is made, not scraped from current behaviour, so the file records",
+    "contract rather than whatever the schemas happened to do."
+  ],
+  "rows": [
+    {
+      "id": "core-container-bare",
+      "description": "A container with required wrappers and a child field",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "chrome",
+            "type": "container",
+            "wrappers": [],
+            "fields": [{ "key": "email", "type": "input", "label": "Email" }]
+          }
+        ]
+      },
+      "currentVerdict": "valid",
+      "v1Verdict": "valid",
+      "rationale": "ContainerField reconciliation gate. Runtime support was proven across all four adapters before the schema changed, so accepting it is an evidence-backed contract expansion rather than an inference from the type registry.",
+      "regression": {
+        "observedBefore": "14610fc3c",
+        "issue": "ContainerField was registered in FieldRegistryContainers and rendered by core BUILT_IN_FIELDS, but validation rejected it as an unknown field type"
+      }
+    },
+    {
+      "id": "core-container-missing-wrappers",
+      "description": "A container with no wrappers property",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "chrome",
+            "type": "container",
+            "fields": [{ "key": "email", "type": "input", "label": "Email" }]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "`wrappers` is required on ContainerField. A container without it is a group spelled differently, so accepting it would erase the distinction that justifies the type. This row exists to stop a future derivation from relaxing the property to optional."
+    },
+    {
+      "id": "core-page-container-validation",
+      "description": "A page cannot declare container-level validators",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "step",
+            "type": "page",
+            "fields": [],
+            "validators": [{ "type": "custom", "functionName": "pageRule" }]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "Pages flatten into the form and have no schema path of their own, so container-level validation has no value to run against. Use a group or array for cross-field validation.",
+      "regression": {
+        "observedBefore": "639b67b8f",
+        "issue": "Moving container validation properties out of the shared forbidden list caused pages to accept validators that Zod then stripped"
+      }
+    },
+    {
+      "id": "core-container-nested-page",
+      "description": "A container cannot contain a page",
+      "adapters": ["material", "bootstrap", "primeng", "ionic"],
+      "config": {
+        "fields": [
+          {
+            "key": "chrome",
+            "type": "container",
+            "wrappers": [],
+            "fields": [{ "key": "nested-step", "type": "page", "fields": [] }]
+          }
+        ]
+      },
+      "currentVerdict": "invalid",
+      "v1Verdict": "invalid",
+      "rationale": "ContainerAllowedChildren excludes pages because pages are top-level navigation boundaries. The runtime validator and MCP guidance must enforce the same placement rule.",
+      "regression": {
+        "observedBefore": "639b67b8f",
+        "issue": "The newly accepted container schema used the unrestricted recursive field schema without a matching pre-validation nesting rule"
+      }
+    }
+  ]
+}

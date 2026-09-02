@@ -357,7 +357,24 @@ const FORBIDDEN_HIDDEN_PROPS = [
  * Properties that are FORBIDDEN on container fields (row, group, array).
  * Note: page supports logic (hidden only).
  */
-const CONTAINER_FORBIDDEN_PROPS = ['validators', 'required', 'email', 'min', 'max', 'minLength', 'maxLength', 'pattern', 'value'];
+const CONTAINER_FORBIDDEN_PROPS = ['email', 'min', 'max', 'pattern', 'value'];
+
+/**
+ * Containers that own a schema path and therefore support container-level
+ * validation, mirroring which interfaces extend `ContainerValidation`.
+ *
+ * The type system states the rule: a validator on a container runs against its
+ * own subtree, so `ctx.value()` needs something to resolve to. `group` gives an
+ * object and `array` gives the item list; `page`, `row` and `container` flatten
+ * into their parent and have no path of their own.
+ */
+const VALIDATING_CONTAINERS = ['group', 'array'];
+
+/** Container-level validation keys, accepted only by {@link VALIDATING_CONTAINERS}. */
+const CONTAINER_VALIDATION_PROPS = ['validators', 'required', 'validationMessages'];
+
+/** Array size constraints. Valid on `array`, meaningless elsewhere. */
+const ARRAY_SIZE_PROPS = ['minLength', 'maxLength'];
 
 /**
  * Field types that require the 'options' property.
@@ -365,123 +382,33 @@ const CONTAINER_FORBIDDEN_PROPS = ['validators', 'required', 'email', 'min', 'ma
 const FIELDS_REQUIRING_OPTIONS = ['select', 'radio', 'multi-checkbox'];
 
 /**
- * Nesting rules - what can contain what.
+ * Nesting rules - what a container may NOT contain.
+ *
+ * Only `forbidden` is recorded, because only `forbidden` is enforced. An
+ * `allowed` list nobody reads drifts away from the rules that actually run the
+ * moment a field type is added, which is exactly the failure this file exists
+ * to catch.
  */
-const NESTING_RULES: Record<string, { allowed: string[]; forbidden: string[]; message: string }> = {
+const NESTING_RULES: Record<string, { forbidden: string[]; message: string }> = {
   page: {
-    allowed: [
-      'row',
-      'group',
-      'array',
-      'input',
-      'textarea',
-      'select',
-      'checkbox',
-      'multi-checkbox',
-      'radio',
-      'datepicker',
-      'toggle',
-      'slider',
-      'hidden',
-      'text',
-      'button',
-      'submit',
-      'next',
-      'previous',
-      'add-array-item',
-      'prepend-array-item',
-      'insert-array-item',
-      'remove-array-item',
-      'pop-array-item',
-      'shift-array-item',
-    ],
     forbidden: ['page'],
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
   },
   row: {
-    allowed: [
-      'group',
-      'array',
-      'input',
-      'textarea',
-      'select',
-      'checkbox',
-      'multi-checkbox',
-      'radio',
-      'datepicker',
-      'toggle',
-      'slider',
-      'text',
-      'button',
-      'submit',
-      'next',
-      'previous',
-      'add-array-item',
-      'prepend-array-item',
-      'insert-array-item',
-      'remove-array-item',
-      'pop-array-item',
-      'shift-array-item',
-    ],
     forbidden: ['page', 'row', 'hidden'],
     message: 'Rows cannot contain pages, other rows, or hidden fields. Hidden fields should be at page or form level.',
   },
   group: {
-    allowed: [
-      'row',
-      'input',
-      'textarea',
-      'select',
-      'checkbox',
-      'multi-checkbox',
-      'radio',
-      'datepicker',
-      'toggle',
-      'slider',
-      'hidden',
-      'text',
-      'button',
-      'submit',
-      'next',
-      'previous',
-      'add-array-item',
-      'prepend-array-item',
-      'insert-array-item',
-      'remove-array-item',
-      'pop-array-item',
-      'shift-array-item',
-    ],
     forbidden: ['page', 'group'],
     message: 'Groups cannot contain pages or other groups (no nested groups).',
   },
   array: {
-    allowed: [
-      'row',
-      'group',
-      'input',
-      'textarea',
-      'select',
-      'checkbox',
-      'multi-checkbox',
-      'radio',
-      'datepicker',
-      'toggle',
-      'slider',
-      'hidden',
-      'text',
-      'button',
-      'submit',
-      'next',
-      'previous',
-      'add-array-item',
-      'prepend-array-item',
-      'insert-array-item',
-      'remove-array-item',
-      'pop-array-item',
-      'shift-array-item',
-    ],
     forbidden: ['page', 'array'],
     message: 'Arrays cannot contain pages or other arrays (no nested arrays).',
+  },
+  container: {
+    forbidden: ['page'],
+    message: 'Containers cannot contain pages. Pages are top-level fields only.',
   },
 };
 
@@ -498,6 +425,7 @@ const EXPECTED_STRUCTURE: Record<string, string> = {
   group: `{ key: 'groupKey', type: 'group', fields: [...childFields] }`,
   array: `Full API: { key: 'arrayKey', type: 'array', fields: [...itemDefs] } OR Simplified API: { key: 'arrayKey', type: 'array', template: { type: 'input', label: 'Item' }, value: [] }`,
   page: `{ key: 'pageKey', type: 'page', fields: [...childFields, { key: 'next', type: 'next', label: 'Next' }] }`,
+  container: `{ key: 'containerKey', type: 'container', wrappers: [{ type: 'css', cssClasses: 'card' }], fields: [...childFields] }`,
 };
 
 /**
@@ -567,8 +495,8 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       });
     }
 
-    // Check for invalid properties on containers (row, group, array - NOT page)
-    if (['row', 'group', 'array'].includes(fieldType || '')) {
+    // Check for invalid properties on containers (row, group, array, container - NOT page)
+    if (['row', 'group', 'array', 'container'].includes(fieldType || '')) {
       for (const prop of INVALID_CONTAINER_PROPS) {
         if (prop in f) {
           errors.push({
@@ -578,7 +506,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         }
       }
 
-      // Check for forbidden validation-related properties
+      // Value-level properties, which no container holds.
       // Note: 'value' is allowed on array fields using the simplified API (template + value)
       for (const prop of CONTAINER_FORBIDDEN_PROPS) {
         if (prop in f) {
@@ -589,8 +517,32 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const expected = EXPECTED_STRUCTURE[fieldType || ''] || '';
           errors.push({
             path: `${path}.${prop}`,
-            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values or validate - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
+            message: `"${fieldType}" containers do NOT support "${prop}". Containers don't hold values - they are purely for layout/grouping.${expected ? ` Expected structure: ${expected}` : ''}`,
           });
+        }
+      }
+
+      // Container-level validation, which only containers with a schema path own.
+      if (!VALIDATING_CONTAINERS.includes(fieldType || '')) {
+        for (const prop of CONTAINER_VALIDATION_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". They flatten into their parent and have no schema path, so a container-level validator would have no value to run against. Use "group" or "array" for cross-field rules, or move the rule onto a child field.`,
+            });
+          }
+        }
+      }
+
+      // Array size constraints are meaningless on anything that is not an array.
+      if (fieldType !== 'array') {
+        for (const prop of ARRAY_SIZE_PROPS) {
+          if (prop in f) {
+            errors.push({
+              path: `${path}.${prop}`,
+              message: `"${fieldType}" containers do NOT support "${prop}". Array size constraints apply to "array" fields only.`,
+            });
+          }
         }
       }
 
@@ -624,6 +576,14 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           errors.push({
             path: `${path}.${prop}`,
             message: `"page" containers do NOT support "${prop}". Pages are purely for multi-step form layout.`,
+          });
+        }
+      }
+      for (const prop of [...CONTAINER_VALIDATION_PROPS, ...ARRAY_SIZE_PROPS]) {
+        if (prop in f) {
+          errors.push({
+            path: `${path}.${prop}`,
+            message: `"page" containers do NOT support "${prop}". Pages flatten into the form and have no schema path of their own.`,
           });
         }
       }
@@ -724,7 +684,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
     }
 
     // Check for missing 'fields' on containers (array supports either 'fields' or 'template')
-    if (['row', 'group', 'page'].includes(fieldType || '')) {
+    if (['row', 'group', 'page', 'container'].includes(fieldType || '')) {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
@@ -734,6 +694,27 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         errors.push({
           path: `${path}.fields`,
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
+        });
+      }
+    }
+
+    // Container-specific: 'wrappers' is what makes a container a container.
+    // Name the missing property rather than letting Zod report a generic union
+    // failure, and steer away from the obvious wrong fix. A container and a
+    // group are NOT interchangeable: `container` is registered with
+    // valueHandling 'flatten' and a `group` with 'include', so swapping one for
+    // the other silently reshapes the submitted value and moves the schema path
+    // that validators run against.
+    if (fieldType === 'container') {
+      if (!('wrappers' in f)) {
+        errors.push({
+          path: `${path}.wrappers`,
+          message: `"container" container "${fieldKey || 'unknown'}" is MISSING required "wrappers" property. Add a wrappers array naming the UI chrome to wrap the children in, or [] for no chrome. Do NOT switch to a "group" instead: a container flattens its children into the parent value, while a group nests them under its own key and owns a schema path, so the submitted value shape and validation behaviour both change. Expected structure: ${EXPECTED_STRUCTURE['container']}`,
+        });
+      } else if (!Array.isArray(f['wrappers'])) {
+        errors.push({
+          path: `${path}.wrappers`,
+          message: `"container" container "${fieldKey || 'unknown'}" has invalid "wrappers" - must be an array of wrapper objects, not ${typeof f['wrappers']}.`,
         });
       }
     }
