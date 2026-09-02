@@ -125,6 +125,39 @@ describe('array keeps both APIs under one schema', () => {
     expect(result.text).toMatch(/MISSING both|MISSING/);
   });
 
+  it('rejects the simplified-API properties on the full API', () => {
+    // `value`, `addButton` and `removeButton` only exist on the simplified API.
+    // One schema for both APIs makes them structurally reachable from `fields`,
+    // where the runtime ignores them, so the refinement has to reject them.
+    const value = check({ fields: [{ key: 'a', type: 'array', fields: [leaf], value: ['x'] }] });
+    const addButton = check({ fields: [{ key: 'a', type: 'array', fields: [leaf], addButton: { label: 'Add' } }] });
+    const removeButton = check({ fields: [{ key: 'a', type: 'array', fields: [leaf], removeButton: false }] });
+
+    expect(value.valid, 'full API should reject value').toBe(false);
+    expect(value.text).toContain('"value" is not allowed');
+    expect(addButton.valid, 'full API should reject addButton').toBe(false);
+    expect(addButton.text).toContain('"addButton" is not allowed');
+    expect(removeButton.valid, 'full API should reject removeButton').toBe(false);
+    expect(removeButton.text).toContain('"removeButton" is not allowed');
+  });
+
+  it('keeps those properties valid on the simplified API', () => {
+    const config = {
+      fields: [
+        {
+          key: 'a',
+          type: 'array',
+          template: leaf,
+          value: ['x'],
+          addButton: { label: 'Add' },
+          removeButton: false,
+        },
+      ],
+    };
+
+    expect(check(config).valid, check(config).text).toBe(true);
+  });
+
   it('rejects minItems on both APIs, not just the simplified one', () => {
     // minItems/maxItems are the common wrong spelling of minLength/maxLength.
     // The full API used to strip them silently; one schema means one rule.
@@ -159,8 +192,13 @@ describe('array keeps both APIs under one schema', () => {
 
     expect(arrays.length, 'expected an array field schema in the output').toBeGreaterThan(0);
     for (const node of arrays) {
-      expect(node['oneOf'], 'array schema must state that fields and template are exclusive').toEqual([
-        { required: ['fields'], not: { required: ['template'] } },
+      expect(node['oneOf'], 'array schema must publish the same restrictions the refinement enforces').toEqual([
+        {
+          required: ['fields'],
+          not: {
+            anyOf: [{ required: ['template'] }, { required: ['value'] }, { required: ['addButton'] }, { required: ['removeButton'] }],
+          },
+        },
         { required: ['template'], not: { required: ['fields'] } },
       ]);
     }

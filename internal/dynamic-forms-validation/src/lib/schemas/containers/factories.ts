@@ -35,6 +35,25 @@ const ContainerLogicSchema = z.object({
 });
 
 /**
+ * Properties that only the simplified array API accepts.
+ *
+ * The full API (`fields`) rejects all of them. `template` is in the list so the
+ * generated JSON Schema can forbid it alongside the rest, but the refinement
+ * reports it separately: "both APIs at once" is a clearer message than one
+ * stray property.
+ */
+const SIMPLIFIED_ONLY_PROPS = ['template', 'value', 'addButton', 'removeButton'] as const;
+
+type SimplifiedOnlyProp = (typeof SIMPLIFIED_ONLY_PROPS)[number];
+
+const SIMPLIFIED_ONLY_HINTS: Record<SimplifiedOnlyProp, string> = {
+  template: 'Use "fields" for the full API, or "template" for the simplified one.',
+  value: 'Set initial values on the field definitions inside "fields".',
+  addButton: 'Add an "add-array-item" or "insert-array-item" button as a field.',
+  removeButton: 'Add a "remove-array-item" button to the item definition.',
+};
+
+/**
  * Creates all container field schemas with proper recursive definitions.
  *
  * This factory creates container schemas that can nest other containers
@@ -218,11 +237,31 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
           message:
             'Array has BOTH "fields" and "template". These are mutually exclusive: use "fields" for the full API, or "template" + "value" for the simplified API.',
         });
-      } else if (!hasFields && !hasTemplate) {
+        return;
+      }
+
+      if (!hasFields && !hasTemplate) {
         ctx.addIssue({
           code: 'custom',
           message: 'Array is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API).',
         });
+        return;
+      }
+
+      // `value`, `addButton` and `removeButton` exist only on the simplified
+      // API. The full API carries initial values on the item definitions inside
+      // `fields`, and renders add/remove buttons as fields. Merging the two APIs
+      // into one schema made these reachable from `fields`, where the runtime
+      // ignores them.
+      if (hasFields) {
+        for (const prop of SIMPLIFIED_ONLY_PROPS) {
+          if (prop === 'template' || field[prop] === undefined) continue;
+          ctx.addIssue({
+            code: 'custom',
+            path: [prop],
+            message: `Array uses the full API ("fields"), so "${prop}" is not allowed: it belongs to the simplified API. ${SIMPLIFIED_ONLY_HINTS[prop]}`,
+          });
+        }
       }
     })
     .meta({
@@ -234,9 +273,14 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
       // saying what the validator enforces — the union of two array schemas
       // used to express this, and collapsing them to one schema lost it.
       description:
-        'Array field. Use EXACTLY ONE of "fields" (full API: explicit item definitions) or "template" (simplified API: one field, or an array of fields, repeated per item). Never both, never neither.',
+        'Array field. Use EXACTLY ONE of "fields" (full API: explicit item definitions) or "template" (simplified API: one field, or an array of fields, repeated per item). Never both, never neither. "value", "addButton" and "removeButton" belong to the simplified API only: with "fields", put initial values on the item definitions and add buttons as fields.',
       oneOf: [
-        { required: ['fields'], not: { required: ['template'] } },
+        {
+          required: ['fields'],
+          // `not` wraps an `anyOf`, not one multi-name `required`: the latter
+          // would only forbid all of them being present at once.
+          not: { anyOf: SIMPLIFIED_ONLY_PROPS.map((prop) => ({ required: [prop] })) },
+        },
         { required: ['template'], not: { required: ['fields'] } },
       ],
     });
