@@ -23,6 +23,14 @@ import type {
 } from './descriptor.types';
 import { joinDescriptor } from './split';
 
+/**
+ * A shape under construction.
+ *
+ * Zod's own `ZodRawShape` is readonly, and these are built key by key, so the
+ * mutable spelling is written out here rather than cast away at each write.
+ */
+type Shape = Record<string, z.ZodTypeAny>;
+
 /** Everything one compilation pass shares, so a `ref` can reach it from anywhere. */
 interface Ctx {
   objects: Readonly<Record<string, DescriptorObject>>;
@@ -94,7 +102,7 @@ function compileObject(object: DescriptorObject | undefined, ctx: Ctx): z.ZodTyp
   // a descriptor gap degrades the same way an opaque does.
   if (!object) return z.unknown();
 
-  const shape: z.ZodRawShape = {};
+  const shape: Shape = {};
   for (const [key, property] of Object.entries(object.keys)) {
     shape[key] = compileProperty(property, ctx);
   }
@@ -126,8 +134,8 @@ export function compileFieldSchema(descriptor: Descriptor): z.ZodTypeAny {
     // A plain union tries all 26 variants for every field and measured 52ms per
     // parse; dispatching on the discriminant is what the hand-written schemas do
     // and is the difference between usable and not for a CLI over many files.
-    const variants: z.ZodDiscriminatedUnionOption<'type'>[] = Object.values(descriptor.fieldTypes).flatMap((fieldType) => {
-      const shape: z.ZodRawShape = {};
+    const variants: z.core.$ZodTypeDiscriminable[] = Object.values(descriptor.fieldTypes).flatMap((fieldType) => {
+      const shape: Shape = {};
 
       // Hoisted shared properties come first; a field type's own entry wins.
       for (const [key, property] of Object.entries(fieldType.extends ? (base?.keys ?? {}) : {})) {
@@ -148,7 +156,7 @@ export function compileFieldSchema(descriptor: Descriptor): z.ZodTypeAny {
     // Zod wants a non-empty tuple. The generator fails rather than emitting a
     // descriptor whose registry resolved nothing, so by the time one is loaded
     // it declares at least one field type.
-    return z.discriminatedUnion('type', variants as [z.ZodDiscriminatedUnionOption<'type'>, ...z.ZodDiscriminatedUnionOption<'type'>[]]);
+    return z.discriminatedUnion('type', variants as [z.core.$ZodTypeDiscriminable, ...z.core.$ZodTypeDiscriminable[]]);
   }
 
   return fieldSchema;
