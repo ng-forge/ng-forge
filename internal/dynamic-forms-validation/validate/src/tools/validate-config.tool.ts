@@ -589,7 +589,6 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
           const invalidTypes = nonHiddenLogic.map((l) => `"${l['type']}"`).join(', ');
           errors.push({
             path: `${path}.logic`,
-            ruleId: 'core/container-logic-hidden-only',
             message: `"${fieldType}" containers only support 'hidden' logic type. Found unsupported logic types: ${invalidTypes}. For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.`,
           });
         }
@@ -645,13 +644,11 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!hasOptionsAtFieldLevel && hasOptionsInProps) {
         errors.push({
           path: `${path}.props.options`,
-          ruleId: 'core/options-at-field-level',
           message: `"options" MUST be at FIELD level, NOT inside props! Move it from props.options to the field's root level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (!hasOptionsAtFieldLevel && !hasOptionsInProps) {
         errors.push({
           path: `${path}.options`,
-          ruleId: 'core/options-required',
           message: `"${fieldType}" field "${fieldKey || 'unknown'}" is MISSING required "options" property. Options must be an array of { label: string, value: T } objects at FIELD level. Expected structure: ${EXPECTED_STRUCTURE[fieldType]}`,
         });
       } else if (hasOptionsAtFieldLevel) {
@@ -663,14 +660,12 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (!('label' in firstOption) || !('value' in firstOption)) {
               errors.push({
                 path: `${path}.options[0]`,
-                ruleId: 'core/options-shape',
                 message: `Invalid options format. Each option MUST have { label: string, value: T }. Found: ${JSON.stringify(firstOption)}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
               });
             }
           } else if (typeof firstOption !== 'object') {
             errors.push({
               path: `${path}.options`,
-              ruleId: 'core/options-shape',
               message: `Invalid options format. Options must be objects with { label, value }, not primitives. Found: ${JSON.stringify(options.slice(0, 3))}. Correct format: [{ label: 'Display Text', value: 'actualValue' }, ...]`,
             });
           }
@@ -703,7 +698,6 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('value' in f)) {
         errors.push({
           path: `${path}.value`,
-          ruleId: 'core/hidden-requires-value',
           message: `Hidden field "${fieldKey || 'unknown'}" is MISSING REQUIRED "value" property. Hidden fields MUST have a value - they exist only to pass values through the form. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -731,13 +725,11 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (!('fields' in f)) {
         errors.push({
           path: `${path}.fields`,
-          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" is MISSING required "fields" property. Containers must have a fields array containing child fields. Expected structure: ${EXPECTED_STRUCTURE[fieldType || '']}`,
         });
       } else if (!Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
-          ruleId: 'core/container-requires-fields',
           message: `"${fieldType}" container "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }
@@ -772,19 +764,16 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (hasFields && hasTemplate) {
         errors.push({
           path: path,
-          ruleId: 'core/array-api-exclusive',
           message: `Array "${fieldKey || 'unknown'}" has BOTH "fields" and "template". These are mutually exclusive. Use "fields" for the full API or "template" + "value" for the simplified API. ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (!hasFields && !hasTemplate) {
         errors.push({
           path: path,
-          ruleId: 'core/array-api-required',
           message: `Array "${fieldKey || 'unknown'}" is MISSING both "fields" and "template". Use "fields" (full API) or "template" + "value" (simplified API). ${EXPECTED_STRUCTURE['array']}`,
         });
       } else if (hasFields && !Array.isArray(f['fields'])) {
         errors.push({
           path: `${path}.fields`,
-          ruleId: 'core/container-requires-fields',
           message: `Array "${fieldKey || 'unknown'}" has invalid "fields" - must be an array of field objects, not ${typeof f['fields']}.`,
         });
       }

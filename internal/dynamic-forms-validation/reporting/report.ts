@@ -85,6 +85,24 @@ export function formatFileReport(result: FileValidationResult, options?: ReportO
     for (const entry of result.results) {
       lines.push(`- **${entry.name}** (line ${entry.line}): Valid`);
     }
+
+    // A disabled rule downgrades rather than silences, so the finding still has
+    // to reach the reader. Printing "All Configs Valid" and stopping hid the
+    // one thing the project asked to be told about quietly.
+    const warnings = result.results.flatMap((entry) =>
+      (entry.validation.errors ?? []).filter((error) => error.severity === 'warning').map((error) => ({ entry, error })),
+    );
+
+    if (warnings.length > 0) {
+      lines.push('');
+      lines.push(`### ${warnings.length} Warning(s)`);
+      lines.push('');
+      for (const { entry, error } of warnings) {
+        const rule = error.ruleId ? ` (${error.ruleId}, disabled)` : '';
+        lines.push(`- **${entry.name}** \`${error.path}\`${rule}: ${error.message}`);
+      }
+    }
+
     return lines.join('\n');
   }
 

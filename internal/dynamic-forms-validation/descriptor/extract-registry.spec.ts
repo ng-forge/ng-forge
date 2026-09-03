@@ -69,10 +69,12 @@ import type { BaseField } from '${CORE}';
 
 export interface OtherInputProps { spacing?: 'tight' | 'loose'; }
 export interface OtherInputField extends BaseField { type: 'input'; props?: OtherInputProps; }
+export interface OtherOnlyField extends BaseField { type: 'other-input'; props?: OtherInputProps; }
 
 declare module '${CORE}' {
   interface FieldRegistryLeaves {
     input: OtherInputField;
+    'other-input': OtherOnlyField;
   }
 }
 `;
@@ -311,6 +313,29 @@ describe('an adapter whose name extends core name', () => {
 
   it('describes the prefixed adapter own shape when it is the one requested', () => {
     expect(sharedForPrefixed).toEqual(['tone']);
+  });
+});
+
+describe('a field type only another adapter declares', () => {
+  // `declare module` merges globally, so a consumer with two adapters installed
+  // has both adapters' keys in one registry. Answering for a key the requested
+  // adapter never declared published the other adapter's field as this one's.
+  let names: string[];
+
+  beforeAll(async () => {
+    const tsConfigFilePath = await workspace('foreign-key', { withSecondAdapter: true });
+    names = resolveOrThrow(tsConfigFilePath, ADAPTER).entries.map((e) => e.canonical);
+  }, PROGRAM_BUDGET_MS);
+
+  it('is left out of the requested adapter registry', () => {
+    // `other-input` is declared by the other adapter alone. Core does not know
+    // it and neither does the adapter being described, so it is not ours.
+    expect(names, 'a foreign adapter field type leaked into the registry').not.toContain('other-input');
+  });
+
+  it('still carries core and the requested adapter own types', () => {
+    expect(names).toContain('text');
+    expect(names).toContain('input');
   });
 });
 

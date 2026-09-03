@@ -51,7 +51,7 @@ describe('rule identifiers', () => {
 
 describe('resolveDisabledRules', () => {
   it('accepts ids that exist', () => {
-    expect(resolveDisabledRules(['core/options-shape'])).toEqual(new Set(['core/options-shape']));
+    expect(resolveDisabledRules(['core/nesting'])).toEqual(new Set(['core/nesting']));
   });
 
   it('accepts an empty list', () => {
@@ -77,16 +77,16 @@ describe('resolveDisabledRules', () => {
 
 describe('severityFor', () => {
   it('is an error by default', () => {
-    expect(severityFor('core/options-required', new Set())).toBe('error');
+    expect(severityFor('core/hidden-minimal', new Set())).toBe('error');
   });
 
   it('downgrades a disabled rule to a warning rather than silencing it', () => {
     // The consumer is usually an agent. A rule that vanishes teaches it
     // nothing; "this is off in your project" is something it can act on.
-    expect(severityFor('core/options-required', new Set(['core/options-required']))).toBe('warning');
+    expect(severityFor('core/hidden-minimal', new Set(['core/hidden-minimal']))).toBe('warning');
   });
 
   it('leaves other rules alone', () => {
-    expect(severityFor('core/options-shape', new Set(['core/options-required']))).toBe('error');
+    expect(severityFor('core/nesting', new Set(['core/hidden-minimal']))).toBe('error');
   });
 });

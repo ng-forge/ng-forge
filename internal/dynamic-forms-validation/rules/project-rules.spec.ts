@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadProjectRules, RulesConfigError } from './project-rules.js';
+import { loadProjectRules, RulesConfigError } from './project-rules';
 
 let root: string;
 
@@ -25,10 +25,10 @@ afterAll(async () => {
 
 describe('loadProjectRules', () => {
   it('disables the rules the project names', async () => {
-    const manifest = await project('ok', JSON.stringify({ disabled: ['core/options-shape'] }));
+    const manifest = await project('ok', JSON.stringify({ disabled: ['core/nesting'] }));
     const rules = await loadProjectRules(manifest);
 
-    expect(rules.disabled.has('core/options-shape')).toBe(true);
+    expect(rules.disabled.has('core/nesting')).toBe(true);
     expect(rules.source).toContain('rules.json');
   });
 
@@ -73,7 +73,7 @@ describe('a rules file that cannot be honoured fails loudly', () => {
   });
 
   it('rejects a disabled list that is not an array of ids', async () => {
-    const manifest = await project('wrong-shape', JSON.stringify({ disabled: 'core/options-shape' }));
+    const manifest = await project('wrong-shape', JSON.stringify({ disabled: 'core/nesting' }));
 
     await expect(loadProjectRules(manifest)).rejects.toThrow(/must be an array of rule ids/);
   });

@@ -624,8 +624,7 @@ carrying properties they cannot have.
 It does NOT mean every property you wrote is real. The schemas strip unknown keys
 rather than rejecting them, so an invented or misplaced property passes
 validation and is silently dropped at runtime. Measured examples that pass today:
-\`hideWhen\` on a field, \`targetProperty\` inside a derivation, and \`initialPage\`
-under \`options\`.
+\`hideWhen\` on a field and \`targetProperty\` inside a derivation.
 
 \`as const satisfies FormConfig\` is what catches those, because TypeScript checks
 the property names. Use both: the type annotation for what exists, the validator

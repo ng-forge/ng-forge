@@ -106,6 +106,29 @@ describe('DynamicFormComponent', () => {
   const SETTLE_BUDGET_MS = 300;
 
   /**
+   * Resolves every lazy loader in the registries, so no field or wrapper module
+   * is still in flight once rendering is being observed. Module resolution is
+   * the only asynchronous step the settle loop below cannot see: an unchanged
+   * DOM is indistinguishable from a DOM whose next mutation is waiting on an
+   * import. Awaiting the loaders directly removes that case instead of
+   * guessing at a delay long enough to cover it.
+   */
+  const loadRegisteredComponents = async (deadline: number) => {
+    const fields = TestBed.inject(FIELD_REGISTRY);
+    const wrappers = TestBed.inject(WRAPPER_REGISTRY);
+
+    const loaded = Promise.allSettled([
+      ...[...fields.values()].map((definition) => definition.loadComponent?.()),
+      ...[...wrappers.values()].map((definition) => definition.loadComponent()),
+    ]);
+
+    // Bounded by the settle budget: the initialization tests register a loader
+    // they resolve by hand, so as to observe the form before it is ready.
+    // Waiting on that one unconditionally would hang instead.
+    await Promise.race([loaded, delay(Math.max(0, deadline - Date.now()))]);
+  };
+
+  /**
    * Waits for dynamic components to finish loading and rendering.
    * Call this after createComponent() and before querying for test harness components.
    *
@@ -116,12 +139,14 @@ describe('DynamicFormComponent', () => {
    * (page > group > row) still had not rendered when the assertions ran, so
    * `querySelector` returned null and the test failed rather than timed out.
    *
-   * Two identical passes in a row means rendering has stopped, which is the
-   * thing being waited for. That is reached on the second pass when everything
-   * is already there, so the fast path costs exactly what it did before.
+   * With every module already resolved, each settle step drains the microtasks
+   * that mount whatever the previous step revealed, so two identical passes in
+   * a row means rendering has stopped rather than that it has not started.
    */
   const waitForDynamicComponents = async (fixture: any) => {
     const deadline = Date.now() + SETTLE_BUDGET_MS;
+    await loadRegisteredComponents(deadline);
+
     let previous: string | undefined;
 
     for (;;) {

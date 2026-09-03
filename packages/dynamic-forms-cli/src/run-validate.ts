@@ -4,7 +4,7 @@ import { glob } from 'node:fs/promises';
 import { relative } from 'node:path';
 import { markFail, markOk, bad, bold, cyan, dim, plural, rule, startSpinner, warn } from './terminal.js';
 import { discoverProject, versionMismatch } from './discover-project.js';
-import { loadProjectRules } from './project-rules.js';
+import { loadProjectRules } from '@ng-forge/dynamic-forms-validation';
 import {
   formatFileReport,
   UI_INTEGRATIONS,

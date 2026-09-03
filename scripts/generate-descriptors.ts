@@ -29,8 +29,16 @@ const CORE_SOURCE_ROOT = 'packages/dynamic-forms/';
 
 const rel = (path: string) => path.replace(`${ROOT}/`, '');
 
-async function libraryVersion(): Promise<string> {
-  const pkg = JSON.parse(await readFile(join(ROOT, 'packages', 'dynamic-forms', 'package.json'), 'utf-8'));
+/**
+ * The published version of one workspace package.
+ *
+ * Each adapter is read from its own manifest rather than from core's. They are
+ * released together today, so the two agree, but a descriptor that says
+ * `@ng-forge/dynamic-forms-material` and carries core's version would be wrong
+ * the first time that stops being true.
+ */
+async function packageVersion(packageDir: string): Promise<string> {
+  const pkg = JSON.parse(await readFile(join(ROOT, 'packages', packageDir, 'package.json'), 'utf-8'));
   return pkg.version;
 }
 
@@ -43,8 +51,7 @@ async function libraryVersion(): Promise<string> {
  * is meant to remove.
  */
 export async function buildOutputs(): Promise<Array<[string, string]>> {
-  const version = await libraryVersion();
-  const generator = { name: '@ng-forge/dynamic-forms-validation', version };
+  const generator = { name: '@ng-forge/dynamic-forms-validation', version: await packageVersion('dynamic-forms') };
   const outputs: Array<[string, string]> = [];
   const cores = new Map<string, string>();
 
@@ -57,7 +64,7 @@ export async function buildOutputs(): Promise<Array<[string, string]>> {
       corePackage: CORE_PACKAGE,
       coreSourceRoot: CORE_SOURCE_ROOT,
       adapterId: adapter.library,
-      adapterVersion: version,
+      adapterVersion: await packageVersion(`dynamic-forms-${adapter.library}`),
       generator,
       // Ours to know: an unmapped narrowable type here is a regression in an
       // artifact we ship, not something to degrade past.

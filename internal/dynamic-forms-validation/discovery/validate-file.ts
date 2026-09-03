@@ -37,8 +37,10 @@ export interface FileValidationResult {
   noConfigsFound: boolean;
   /** True when every config found is valid. Vacuously true for a file with none. */
   valid: boolean;
-  /** Total error count across every config in the file. */
+  /** Total blocking error count across every config in the file. */
   errorCount: number;
+  /** Findings downgraded to warnings because the project disabled their rule. */
+  warningCount: number;
 }
 
 /**
@@ -73,7 +75,11 @@ export function validateSource(
     results,
     noConfigsFound: results.length === 0,
     valid: results.every((r) => r.validation.valid),
-    errorCount: results.reduce((sum, r) => sum + (r.validation.errors?.length ?? 0), 0),
+    // Errors only. A finding downgraded to a warning by a disabled rule does
+    // not block, so counting it here reported "1 error" on a file the same run
+    // called valid.
+    errorCount: results.reduce((sum, r) => sum + (r.validation.errors ?? []).filter((e) => e.severity !== 'warning').length, 0),
+    warningCount: results.reduce((sum, r) => sum + (r.validation.errors ?? []).filter((e) => e.severity === 'warning').length, 0),
   };
 }
 

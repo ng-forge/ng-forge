@@ -16,6 +16,15 @@
  * be turned off. What is here is convention layered on top: things that are
  * legal TypeScript and still wrong.
  *
+ * The test for membership is whether the config would compile with the check
+ * switched off. A select with no `options`, a hidden field with no `value`, a
+ * group with no `fields`, an array with both `fields` and `template`, a
+ * container carrying `disabled` logic and an option written as a bare string
+ * are all rejected by the schema because they are rejected by the compiler, so
+ * an id for any of them would name a switch that cannot change the outcome.
+ * The validator still reports every one of them, by the same message as before;
+ * it just does not offer to turn them off.
+ *
  * ## Identifiers are API
  *
  * An id appears in a consumer's config file, so renaming one breaks their
@@ -52,45 +61,9 @@ export const RULES: Readonly<Record<string, Rule>> = Object.freeze(
   Object.fromEntries(
     [
       rule(
-        'core/options-at-field-level',
-        'Put `options` on the field, not inside `props`',
-        'Inside props it is silently ignored and the field renders with no choices. This is the single most common mistake.',
-      ),
-      rule(
-        'core/options-required',
-        'Give select, radio and multi-checkbox their `options`',
-        'Without them the field renders empty and cannot be used.',
-      ),
-      rule(
-        'core/options-shape',
-        'Write each option as `{ label, value }`',
-        'Primitives and other shapes are dropped, leaving a field with fewer choices than intended.',
-      ),
-      rule(
-        'core/hidden-requires-value',
-        'Give a hidden field a `value`',
-        'A hidden field exists to carry a value through the form; without one it contributes nothing.',
-      ),
-      rule(
         'core/hidden-minimal',
         'Keep hidden fields to `key`, `type`, `value` and `className`',
         'Hidden fields render nothing, so labels, validation and layout properties on them have no effect and mislead the next reader.',
-      ),
-      rule(
-        'core/container-requires-fields',
-        'Give every container a `fields` array',
-        'A container with no children renders nothing and is almost always a mistake rather than an intent.',
-      ),
-      rule(
-        'core/array-api-exclusive',
-        'Use `fields` or `template`, not both',
-        'They are two different array APIs; supplying both leaves the intent ambiguous.',
-      ),
-      rule('core/array-api-required', 'Give an array either `fields` or `template`', 'Without one there is nothing to render for an item.'),
-      rule(
-        'core/container-logic-hidden-only',
-        'Use only `hidden` logic on a container',
-        'Containers have no value of their own, so disabled, required and derivation logic have nothing to act on. Put them on the children.',
       ),
       rule(
         'core/nesting',

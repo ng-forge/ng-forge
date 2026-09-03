@@ -177,9 +177,26 @@ function declarationFor(
 
   return (
     declarations.find((d) => belongsTo(d.getSourceFile().getFilePath(), options.adapterPackage, options.adapterSourceRoot)) ??
-    declarations.find((d) => belongsTo(d.getSourceFile().getFilePath(), core, options.coreSourceRoot)) ??
-    declarations[0]
+    declarations.find((d) => belongsTo(d.getSourceFile().getFilePath(), core, options.coreSourceRoot))
   );
+}
+
+/**
+ * True when a registry key belongs to this descriptor at all.
+ *
+ * `declare module` merges globally, so with a second adapter installed the
+ * merged registry carries its keys too. Falling back to the first declaration
+ * for a key neither the requested adapter nor core declares published that
+ * other adapter's field as this one's: a consumer asking about Material would
+ * be told `ion-toggle` is a Material field type, with its props attached.
+ *
+ * A key nobody we describe declares is not ours to describe.
+ */
+function declaredHere(
+  symbol: TsSymbol,
+  options: Required<Pick<ResolveRegistryOptions, 'adapterPackage'>> & ResolveRegistryOptions,
+): boolean {
+  return declarationFor(symbol, options) !== undefined;
 }
 
 /**
@@ -251,6 +268,10 @@ export function resolveRegistry(options: ResolveRegistryOptions): RegistryResult
 
   for (const { symbol, kind, at } of all) {
     if (!at) continue;
+
+    // Another adapter's field type, merged into the same registry. Skipping it
+    // is the whole point: the descriptor describes one adapter.
+    if (!declaredHere(symbol, options)) continue;
 
     // Resolve at the declaration belonging to the requested adapter, not at the
     // merged symbol, or every adapter would describe the same shape.

@@ -11,7 +11,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { resolveDisabledRules } from '@ng-forge/dynamic-forms-validation';
+import { resolveDisabledRules } from './catalogue';
 
 export const RULES_FILE = join('.ng-forge', 'rules.json');
 

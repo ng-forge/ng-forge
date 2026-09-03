@@ -639,8 +639,7 @@ carrying properties they cannot have.
 It does NOT mean every property you wrote is real. The schemas strip unknown keys
 rather than rejecting them, so an invented or misplaced property passes
 validation and is silently dropped at runtime. Measured examples that pass today:
-`hideWhen` on a field, `targetProperty` inside a derivation, and `initialPage`
-under `options`.
+`hideWhen` on a field and `targetProperty` inside a derivation.
 
 `as const satisfies FormConfig` is what catches those, because TypeScript checks
 the property names. Use both: the type annotation for what exists, the validator
@@ -655,21 +654,16 @@ These are conventions checked on top of the schema. A project may switch one
 off in `.ng-forge/rules.json`, in which case it reports as a warning rather
 than an error, and the identifier below is what appears there.
 
-Constraints that come from the types — a container having no `label`, an
-array-add button needing a `template` — are not in this list and cannot be
-disabled: the config would not compile either way.
+Constraints that come from the types are not in this list and cannot be
+disabled: the config would not compile either way. A container carrying a
+`label`, a select with no `options`, a hidden field with no `value`, a group
+with no `fields` and an option written as a bare string are all in that
+group. They are still reported, by the same message; there is just no
+identifier to switch off.
 
 | Rule | What it asks | Why |
 | ---- | ------------ | --- |
-| `core/array-api-exclusive` | Use `fields` or `template`, not both | They are two different array APIs; supplying both leaves the intent ambiguous. |
-| `core/array-api-required` | Give an array either `fields` or `template` | Without one there is nothing to render for an item. |
-| `core/container-logic-hidden-only` | Use only `hidden` logic on a container | Containers have no value of their own, so disabled, required and derivation logic have nothing to act on. Put them on the children. |
-| `core/container-requires-fields` | Give every container a `fields` array | A container with no children renders nothing and is almost always a mistake rather than an intent. |
 | `core/hidden-minimal` | Keep hidden fields to `key`, `type`, `value` and `className` | Hidden fields render nothing, so labels, validation and layout properties on them have no effect and mislead the next reader. |
-| `core/hidden-requires-value` | Give a hidden field a `value` | A hidden field exists to carry a value through the form; without one it contributes nothing. |
 | `core/nesting` | Respect which field types may nest inside which | A page inside a row, or an array inside an array, has no rendering path and fails at runtime rather than at build time. |
-| `core/options-at-field-level` | Put `options` on the field, not inside `props` | Inside props it is silently ignored and the field renders with no choices. This is the single most common mistake. |
-| `core/options-required` | Give select, radio and multi-checkbox their `options` | Without them the field renders empty and cannot be used. |
-| `core/options-shape` | Write each option as `{ label, value }` | Primitives and other shapes are dropped, leaving a field with fewer choices than intended. |
 | `core/slider-range-properties` | Use `minValue`, `maxValue` and `step` for a slider range | `min` and `max` are validation shorthands. They typecheck and validate clean, and the slider still renders its default range, so nothing catches the mistake. |
 | `core/validation-messages-location` | Put error text in `validationMessages`, not on the validator | A message on the validator object is dropped and the field falls back to the default text. |
