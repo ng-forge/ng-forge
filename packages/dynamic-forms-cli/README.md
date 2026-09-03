@@ -11,10 +11,10 @@ Validates `@ng-forge/dynamic-forms` FormConfig objects from the command line.
 ## Quick start
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli@next "src/**/*.form.ts" --ui material
 ```
 
-Requires **Node 24 or newer**. Pass `--yes` when a script or an agent runs it, so npx does not stop at its first-install prompt.
+Requires **Node 24 or newer**. Pass `--yes` when a script or an agent runs it, so npx does not stop at its first-install prompt. The `@next` tag is where the executable is published; `latest` still points at a placeholder release that ships no binary.
 
 It finds every FormConfig in the matched files, validates each against the schema for your UI integration, and prints the errors with a suggested fix.
 
@@ -94,7 +94,7 @@ Code `2` is kept separate from `1` so a typo in your glob does not read as a pas
 
 ```yaml
 - name: Validate form configs
-  run: npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet --require-config
+  run: npx --yes @ng-forge/dynamic-forms-cli@next "src/**/*.form.ts" --ui material --quiet --require-config
 ```
 
 `--require-config` is what makes this a real gate. Without it, a refactor that moves configs somewhere the extractor cannot see reports success rather than failure.

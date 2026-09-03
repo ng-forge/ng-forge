@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { discoverProject, versionMismatch } from './discover-project.js';
+import { discoverProject, versionMismatch, TsconfigNotFoundError } from './discover-project.js';
 
 let root: string;
 
@@ -66,6 +66,45 @@ describe('discoverProject', () => {
     const found = await discoverProject({ cwd: join(root, 'app'), tsconfig: join(root, 'tsconfig.json') });
 
     expect(found.tsconfigPath).toBe(join(root, 'tsconfig.json'));
+  });
+
+  it('discovers the project beside an explicit tsconfig, not beside the cwd', async () => {
+    // The flag names the project. Reading the manifest, the rules file and the
+    // installed version from the working directory instead would report on
+    // whichever project the command happened to be typed in.
+    const other = await mkdtemp(join(tmpdir(), 'ng-forge-other-'));
+    await mkdir(join(other, 'node_modules', '@ng-forge', 'dynamic-forms'), { recursive: true });
+    await writeFile(
+      join(other, 'package.json'),
+      JSON.stringify({ name: 'other', dependencies: { '@ng-forge/dynamic-forms-ionic': '^1.1.0' } }),
+      'utf-8',
+    );
+    await writeFile(join(other, 'tsconfig.json'), '{}', 'utf-8');
+    await writeFile(
+      join(other, 'node_modules', '@ng-forge', 'dynamic-forms', 'package.json'),
+      JSON.stringify({ version: '2.3.4' }),
+      'utf-8',
+    );
+
+    const found = await discoverProject({ cwd: join(root, 'app', 'src', 'forms'), tsconfig: join(other, 'tsconfig.json') });
+
+    expect(found.packageJsonPath).toBe(join(other, 'package.json'));
+    expect(found.libraryVersion).toBe('2.3.4');
+    expect(found.adapterPackages).toEqual(['@ng-forge/dynamic-forms-ionic']);
+
+    await rm(other, { recursive: true, force: true });
+  });
+
+  it('refuses a tsconfig that does not exist', async () => {
+    // Silently validating the working directory instead answers a question
+    // nobody asked, and exits 0 doing it.
+    await expect(discoverProject({ cwd: join(root, 'app'), tsconfig: join(root, 'app', 'nope.json') })).rejects.toThrow(
+      TsconfigNotFoundError,
+    );
+  });
+
+  it('refuses a directory passed as a tsconfig', async () => {
+    await expect(discoverProject({ cwd: join(root, 'app'), tsconfig: join(root, 'app') })).rejects.toThrow(TsconfigNotFoundError);
   });
 
   it('reports the installed version rather than the declared range', async () => {

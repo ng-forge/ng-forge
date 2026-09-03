@@ -32,11 +32,13 @@ Fields are registered with `withIonicFields()`.
 ## Validate against this adapter
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui ionic
+npx --yes @ng-forge/dynamic-forms-cli@next "path/to/your.form.ts" --ui ionic
 ```
 
 Passing the wrong `--ui` validates against a different adapter's properties, which
-can accept a config this project will not render. Requires Node 24 or newer.
+can accept a config this project will not render. `@next` is where the published
+executable is; the `latest` tag is still a placeholder with no binary. Requires
+Node 24 or newer.
 
 ## Reference
 

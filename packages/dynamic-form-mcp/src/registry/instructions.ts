@@ -611,7 +611,7 @@ Never hand back a config you have not checked. Two routes, depending on what is
 available:
 
 - With the MCP server: \`ngforge_validate({ uiIntegration: 'material', config })\`
-- Without it: \`npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material\`
+- Without it: \`npx --yes @ng-forge/dynamic-forms-cli@next "path/to/your.form.ts" --ui material\`
 
 Both run the same schemas, so they agree.
 

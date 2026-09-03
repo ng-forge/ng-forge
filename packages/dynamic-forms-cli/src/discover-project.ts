@@ -9,9 +9,12 @@
  * every other Node tool does, it handles being run from a subdirectory, and it
  * terminates. Searching down a monorepo finds twelve tsconfigs and has no
  * principled way to choose, which is worse than asking.
+ *
+ * `--tsconfig` moves that starting point: it names the project, so the walk
+ * begins beside the config rather than wherever the command was typed.
  */
 
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { ts } from 'ts-morph';
 
@@ -34,8 +37,22 @@ export interface DiscoveredProject {
 export interface DiscoverOptions {
   /** Where to start. Defaults to the working directory. */
   cwd?: string;
-  /** Explicit tsconfig, used as-is and never searched for. */
+  /**
+   * Explicit tsconfig. Used as-is, never searched for, and it also says which
+   * project this is: discovery starts beside it rather than at `cwd`.
+   */
   tsconfig?: string;
+}
+
+/** Thrown when `--tsconfig` names something that is not a readable file. */
+export class TsconfigNotFoundError extends Error {
+  constructor(path: string) {
+    super(
+      `[Dynamic Forms] no tsconfig at ${path}. ` +
+        `Passing one that does not exist and validating against the working directory instead would report on a project you did not ask about.`,
+    );
+    this.name = 'TsconfigNotFoundError';
+  }
 }
 
 /** Directories from `start` up to the filesystem root. */
@@ -64,6 +81,14 @@ async function firstExisting(dir: string, names: string[]): Promise<string | und
     if (present.has(name)) return join(dir, name);
   }
   return undefined;
+}
+
+async function isFile(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
+  } catch {
+    return false;
+  }
 }
 
 async function readJson(path: string): Promise<Record<string, unknown> | undefined> {
@@ -161,11 +186,23 @@ function adaptersFrom(manifest: Record<string, unknown> | undefined): string[] {
 }
 
 export async function discoverProject(options: DiscoverOptions = {}): Promise<DiscoveredProject> {
-  const cwd = resolve(options.cwd ?? process.cwd());
-  const chain = ancestors(cwd);
+  const explicit = options.tsconfig ? resolve(options.tsconfig) : undefined;
+
+  // Checked rather than trusted. A typo used to be silent: the flag set a field
+  // nobody could act on, and everything that decides what is validated still
+  // came from the working directory, so a wrong path exited 0 having reported
+  // on some other project.
+  if (explicit && !(await isFile(explicit))) throw new TsconfigNotFoundError(explicit);
+
+  // A tsconfig names a project, so it anchors the rest of discovery: the
+  // manifest beside it carries the rules file and the adapters, and the library
+  // version is the one installed for it. Anything else makes `--tsconfig` mean
+  // "this config, but that project".
+  const from = explicit ? dirname(explicit) : resolve(options.cwd ?? process.cwd());
+  const chain = ancestors(from);
 
   let packageJsonPath: string | undefined;
-  let tsconfigPath = options.tsconfig ? resolve(options.tsconfig) : undefined;
+  let tsconfigPath = explicit;
 
   for (const dir of chain) {
     packageJsonPath ??= await firstExisting(dir, ['package.json']);
@@ -179,7 +216,7 @@ export async function discoverProject(options: DiscoverOptions = {}): Promise<Di
   return {
     packageJsonPath,
     tsconfigPath,
-    libraryVersion: await installedVersion(cwd, CORE_PACKAGE),
+    libraryVersion: await installedVersion(from, CORE_PACKAGE),
     adapterPackages: adaptersFrom(packageJsonPath ? await readJson(packageJsonPath) : undefined),
   };
 }

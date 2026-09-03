@@ -110,7 +110,15 @@ export async function runValidate(patterns: string[], options: ValidateOptions):
 
   // Discovered rather than asked for: an agent runs this wherever the file it is
   // editing happens to live, and has no way to know where the tsconfig is.
-  const project = await discoverProject({ tsconfig: options.tsconfig });
+  // A `--tsconfig` that does not exist stops the run instead of quietly falling
+  // back to the working directory.
+  let project;
+  try {
+    project = await discoverProject({ tsconfig: options.tsconfig });
+  } catch (cause) {
+    console.error(`${markFail()} ${(cause as Error).message}`);
+    return EXIT_USAGE;
+  }
 
   if (!options.json) {
     const mismatch = options.cliVersion ? versionMismatch(options.cliVersion, project.libraryVersion) : undefined;
