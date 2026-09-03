@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import zodToJsonSchema from 'zod-to-json-schema';
 
 // Import form config schemas from each UI integration
 import { MatFormConfigSchema } from '../../../material/src';
@@ -21,6 +20,32 @@ const formConfigSchemas: Record<UiIntegration, z.ZodType> = {
   primeng: PrimeFormConfigSchema,
   ionic: IonicFormConfigSchema,
 };
+
+/**
+ * Render a zod schema as JSON Schema.
+ *
+ * `draft-7` is deliberate: it names the shared subschema bucket `definitions`,
+ * which is the key the previous generator emitted, so consumers reading that
+ * bucket keep working. The field schemas are recursive (a container holds an
+ * array of the same field schema), so the recursive part is necessarily emitted
+ * as a `$ref` into that bucket. Nothing can inline a cycle.
+ *
+ * `io: 'input'` because these schemas answer "what may I write?" — an agent
+ * authoring a config — rather than describing post-parse output.
+ *
+ * `unrepresentable: 'any'` keeps the previous generator's leniency. A few types
+ * have no JSON Schema equivalent — `FieldMeta` permits an explicit `undefined`
+ * value — and zod would otherwise refuse to emit anything at all. The purpose
+ * of this output is to describe the config shape to a model, so rendering those
+ * few spots as unconstrained beats emitting no schema.
+ */
+export function toJsonSchema(schema: z.ZodType, name: string, basePath?: string): JsonSchemaType {
+  const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', io: 'input', unrepresentable: 'any' }) as JsonSchemaType;
+
+  jsonSchema['$id'] = basePath ? `${basePath.replace(/\/$/, '')}/${name}` : name;
+
+  return jsonSchema;
+}
 
 /**
  * Options for JSON Schema generation.
@@ -62,17 +87,7 @@ export function getFormConfigJsonSchema(uiIntegration: UiIntegration, options: J
     throw new Error(`Unknown UI integration: ${uiIntegration}. Valid options: material, bootstrap, primeng, ionic`);
   }
 
-  const { name, basePath } = options;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonSchema = (zodToJsonSchema as any)(schema, {
-    name: name ?? `${uiIntegration}FormConfig`,
-    basePath: basePath ? basePath.split('/') : undefined,
-    $refStrategy: 'none', // Inline all definitions for MCP compatibility
-    errorMessages: true,
-  });
-
-  return jsonSchema as JsonSchemaType;
+  return toJsonSchema(schema, options.name ?? `${uiIntegration}FormConfig`, options.basePath);
 }
 
 /**

@@ -22,9 +22,12 @@ import { z } from 'zod';
 const MAX_DEPTH = 20;
 
 /** Record a discriminator value, which is a literal in every current schema. */
-function collectDiscriminator(schema: z.ZodTypeAny | undefined, into: Set<string>): void {
+function collectDiscriminator(schema: z.ZodType | undefined, into: Set<string>): void {
   if (schema instanceof z.ZodLiteral) {
-    if (typeof schema.value === 'string') into.add(schema.value);
+    // zod 4 literals hold a value set, since a literal may accept several values.
+    for (const value of schema.def.values) {
+      if (typeof value === 'string') into.add(value);
+    }
     return;
   }
 
@@ -35,27 +38,23 @@ function collectDiscriminator(schema: z.ZodTypeAny | undefined, into: Set<string
   }
 }
 
-function visit(schema: z.ZodTypeAny, into: Set<string>, depth: number): void {
+function visit(schema: z.ZodType, into: Set<string>, depth: number): void {
   if (depth > MAX_DEPTH) return;
 
   if (schema instanceof z.ZodLazy) {
-    visit(schema.schema, into, depth + 1);
+    visit(schema.unwrap() as z.ZodType, into, depth + 1);
     return;
   }
 
-  // `.superRefine(...)` wraps the leaf union in a ZodEffects.
-  if (schema instanceof z.ZodEffects) {
-    visit(schema.innerType(), into, depth + 1);
-    return;
-  }
-
-  if (schema instanceof z.ZodDiscriminatedUnion || schema instanceof z.ZodUnion) {
-    for (const option of schema.options as z.ZodTypeAny[]) visit(option, into, depth + 1);
+  // Covers z.ZodDiscriminatedUnion too, which extends z.ZodUnion in zod 4.
+  // Refinements no longer wrap the schema, so there is no effects layer to peel.
+  if (schema instanceof z.ZodUnion) {
+    for (const option of schema.options as z.ZodType[]) visit(option, into, depth + 1);
     return;
   }
 
   if (schema instanceof z.ZodObject) {
-    collectDiscriminator((schema.shape as z.ZodRawShape)['type'], into);
+    collectDiscriminator((schema.shape as Record<string, z.ZodType>)['type'], into);
     // Deliberately does not descend into other properties. Containers hold a
     // `fields` array of this same schema, so descending would recurse forever.
     return;
@@ -67,7 +66,7 @@ function visit(schema: z.ZodTypeAny, into: Set<string>, depth: number): void {
  *
  * Pass an adapter's all-fields schema (`MatFieldSchema`, `BsFieldSchema`, ...).
  */
-export function collectFieldTypeNames(schema: z.ZodTypeAny): string[] {
+export function collectFieldTypeNames(schema: z.ZodType): string[] {
   const names = new Set<string>();
   visit(schema, names, 0);
   return [...names];
