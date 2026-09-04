@@ -1,4 +1,7 @@
 {
   "extends": "../../tsconfig.typecheck-base.json",
-  "include": ["src/**/*.type-test.ts"]
+  "include": ["src/**/*.type-test.ts"],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0"
+  }
 }

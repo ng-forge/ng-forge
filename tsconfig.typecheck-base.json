@@ -68,7 +68,8 @@
       "@ng-forge/dynamic-forms-validation": ["./internal/dynamic-forms-validation/index.ts"],
       "@ng-forge/dynamic-forms-validation/schema-only": ["./internal/dynamic-forms-validation/validate/src/index.ts"],
       "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

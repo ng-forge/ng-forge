@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": ["ES2022"],
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "vite.config.ts"]
 }

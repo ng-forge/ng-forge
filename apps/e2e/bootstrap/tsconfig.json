@@ -14,7 +14,8 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "emitDecoratorMetadata": false,
-    "lib": ["ES2022", "dom"]
+    "lib": ["ES2022", "dom"],
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

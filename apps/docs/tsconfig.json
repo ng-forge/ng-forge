@@ -41,7 +41,8 @@
       "@ng-forge/sandbox-adapter-bootstrap": ["../../dist/internal/sandbox-adapter-bootstrap"],
       "@ng-forge/sandbox-adapter-primeng": ["../../dist/internal/sandbox-adapter-primeng"],
       "@ng-forge/sandbox-adapter-ionic": ["../../dist/internal/sandbox-adapter-ionic"]
-    }
+    },
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

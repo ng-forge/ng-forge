@@ -9,7 +9,8 @@
     "strict": true,
     "esModuleInterop": true,
     "lib": ["ES2022"],
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["tests/**/*.ts", "../scripts/generate-skills.ts", "vitest.config.mts"]
 }

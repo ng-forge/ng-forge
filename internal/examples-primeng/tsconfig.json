@@ -12,7 +12,8 @@
     "emitDecoratorMetadata": false,
     "module": "preserve",
     "lib": ["dom", "es2022"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "compilationMode": "partial",
