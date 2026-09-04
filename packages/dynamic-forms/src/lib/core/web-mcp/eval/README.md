@@ -25,59 +25,39 @@ running for an internal refactor that leaves all three alone.
 ## Running it
 
 ```bash
-# 1. Serve the example app the tasks point at.
+# 1. Build and serve the example app the tasks point at.
 nx run core-examples:build
 nx run core-examples:serve-static --port 4205
+
+# 2. Start the bridge. It holds one browser page and exposes the tools over HTTP.
+#    CHROMIUM_PATH is only needed where Playwright's own download is unavailable.
+node packages/dynamic-forms/src/lib/core/web-mcp/eval/bridge.mjs
 ```
 
-2. Open the task's scenario in a browser with WebMCP available (Chrome 149+
-   with the origin trial or `chrome://flags/#web-machine-learning-model-context`,
-   on a cross-origin isolated document). Routes are
-   `http://localhost:4205/#/test/web-mcp/{scenario}`, with `scenario` taken from
-   the task.
+3. Give the agent under test the bridge's three endpoints and the task's
+   `prompt`, verbatim, and nothing else. Do not tell it which tool to call:
+   whether it finds one is what `discovery` measures.
 
-3. Install the recorder before the page registers anything, so every call is
-   captured. It wraps `registerTool` rather than replacing the model context, so
-   the real agent still sees real tools:
-
-   ```js
-   (() => {
-     const calls = [];
-     window.__mcpEval = { calls, export: () => JSON.stringify(calls) };
-     const context = document.modelContext;
-     const original = context.registerTool.bind(context);
-     context.registerTool = (tool, options) =>
-       original(
-         {
-           ...tool,
-           execute: async (args, client) => {
-             const result = await tool.execute(args, client);
-             calls.push({ tool: tool.name, args, result: String(result), at: Date.now() });
-             return result;
-           },
-         },
-         options,
-       );
-   })();
+   ```bash
+   curl -s -X POST localhost:4310/reset -d '{"scenario":"agent-fill-submit","taskId":"discovery"}'
+   curl -s localhost:4310/tools
+   curl -s -X POST localhost:4310/call -d '{"name":"fill_signup","args":{"username":"ada"}}'
    ```
 
-4. Give the agent the task's `prompt`, verbatim, and nothing else. Do not tell
-   it which tool to use: whether it finds one is what `discovery` measures.
+   The agent must not be allowed to read this repository. Its only view of the
+   form is the tool descriptions, the schemas, and the text calls return. An
+   agent that greps the config is not being evaluated on the tool surface, and
+   the run is worthless.
 
-5. When it stops, collect the transcript and the form's final value, then grade:
-
-   ```js
-   const transcript = {
-     taskId: 'discovery',
-     calls: window.__mcpEval.calls,
-     finalValue: /* the form value, read from the page */,
-   };
-   ```
+4. Grade. `/transcripts` returns one entry per task in the shape `gradeTask`
+   takes, read from the recorder rather than from anything the agent said about
+   itself:
 
    ```ts
    import { EVAL_TASKS } from './tasks';
    import { gradeTask, summarise } from './grade';
 
+   const transcripts = await (await fetch('http://localhost:4310/transcripts')).json();
    const results = transcripts.map((t) =>
      gradeTask(
        EVAL_TASKS.find((task) => task.id === t.taskId)!,
@@ -119,11 +99,12 @@ times in five is not one that works, and only the every-trial figure shows that.
 
 Worth reading before believing a number from this harness.
 
-- **The recorder sits between the agent and the tool.** It wraps `execute`,
-  so a bug in the wrapper looks like a bug in the tool. It is small and it does
-  not touch arguments, but it is not nothing.
-- **`finalValue` is collected by hand.** Nothing checks that the value pasted
-  into the transcript is the value the form actually held.
+- **The bridge sits between the agent and the tool.** It records around
+  `execute`, so a bug in the bridge looks like a bug in the tool. It is small
+  and it does not touch arguments, but it is not nothing.
+- **`finalValue` is read from the page's debug output.** That element is part of
+  the example app rather than the library, so a change to it would quietly
+  change what the graders see.
 - **Discovery is measured weakly.** `tools-used` shows that a tool was called,
   not that the agent chose it over an alternative it also considered. An agent
   told to use WebMCP scores the same as one that found the tools itself.

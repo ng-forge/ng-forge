@@ -885,6 +885,32 @@ describe('WebMCP integration', () => {
       expect(action).toHaveBeenCalledOnce();
     });
 
+    it('warns up front when it will not be able to report the outcome', async () => {
+      // No `submission.action`, so the page takes over at dispatch. An agent
+      // needs that before it acts, not in the response after it has.
+      await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        fields: [{ key: 'name', type: 'input', required: true }],
+      } as unknown as FormConfig);
+
+      const [submitTool] = context.getTools().filter((tool) => tool.name === 'submit_profile');
+
+      expect(submitTool.description).toContain('cannot report what came of it');
+    });
+
+    it('promises an outcome when the form configures a submission action', async () => {
+      await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        submission: { action: vi.fn() },
+        fields: [{ key: 'name', type: 'input', required: true }],
+      } as unknown as FormConfig);
+
+      const [submitTool] = context.getTools().filter((tool) => tool.name === 'submit_profile');
+
+      expect(submitTool.description).toContain('Reports whether the submission succeeded');
+      expect(submitTool.description).not.toContain('cannot report');
+    });
+
     it('says so plainly when the page handles submission itself', async () => {
       await mount({
         options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },

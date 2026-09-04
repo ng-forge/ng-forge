@@ -96,12 +96,21 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
   // `toolautosubmit` to opt in). Without this flag the agent can stage values and
   // a human presses the button.
   if (options.allowSubmit) {
+    // Without a `submission.action` the page takes over at dispatch and the tool
+    // cannot see what happened next. That is worth saying in the description
+    // rather than only in the response: an agent that learns it after submitting
+    // has already acted, and can only report the uncertainty after the fact.
+    const reportsOutcome = untracked(() => stateManager.activeConfig()?.submission?.action) !== undefined;
+
     descriptors.push({
       name: `submit_${options.name}`,
       description:
         `Submit the "${options.name}" form: ${options.description} ` +
         `Applies any fields given, then submits and waits for the result. If validation fails nothing is submitted and the errors are ` +
-        `returned; the values still remain in the form for correction.`,
+        `returned; the values still remain in the form for correction. ` +
+        (reportsOutcome
+          ? `Reports whether the submission succeeded, was rejected by the server, or failed.`
+          : `This page handles submission itself, so a successful call confirms the form was submitted but cannot report what came of it.`),
       inputSchema,
       annotations,
       execute: (args) => submitForm(args),
