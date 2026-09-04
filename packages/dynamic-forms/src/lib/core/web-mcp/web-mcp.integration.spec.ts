@@ -618,7 +618,7 @@ describe('WebMCP integration', () => {
 
       const result = await call('fill_profile', {});
 
-      expect(result).toContain('Required right now: name');
+      expect(result).toContain('Required (given the current values): name');
       expect(result).toContain('name: This field is required');
     });
 
@@ -662,6 +662,29 @@ describe('WebMCP integration', () => {
       const result = await call('fill_profile', {});
 
       expect(result).toContain('Not currently applicable (do not send these): detail');
+    });
+
+    it('accepts a field in the same call that makes it applicable', async () => {
+      // An agent under a call budget will try to do this in one call rather
+      // than two. `detail` is hidden until `kind` changes, so the patch has to
+      // be judged against the state it produces, not the state it started in.
+      const fixture = await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.' } },
+        fields: [
+          { key: 'kind', type: 'input', label: 'Kind', value: 'basic' },
+          {
+            key: 'detail',
+            type: 'input',
+            label: 'Detail',
+            logic: [{ type: 'hidden', condition: { type: 'fieldValue', fieldPath: 'kind', operator: 'equals', value: 'basic' } }],
+          },
+        ],
+      } as unknown as FormConfig);
+
+      const result = await call('fill_profile', { kind: 'advanced', detail: 'set in the same call' });
+
+      expect(result).toContain('Applied: kind, detail.');
+      expect(fixture.componentInstance.formValue()).toEqual({ kind: 'advanced', detail: 'set in the same call' });
     });
 
     it('re-derives applicability from the values it applied', async () => {

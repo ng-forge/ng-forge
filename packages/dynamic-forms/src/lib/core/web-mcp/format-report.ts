@@ -114,10 +114,14 @@ function appendFieldSections(lines: string[], fields: readonly FieldReport[]): v
     lines.push(`Not currently applicable (do not send these): ${paths(inapplicable)}`);
   }
 
+  // Qualified rather than bare, because this is the set of fields the form's
+  // rules currently demand, not the set that is still missing. Unqualified, it
+  // reads as an unmet-state list like "Still empty" below it, and does not
+  // change when a field is filled, which looks like a write that did not land.
   const required = fields.filter((field) => field.applicable && field.required);
   if (required.length) {
     lines.push('');
-    lines.push(`Required right now: ${paths(required)}`);
+    lines.push(`Required (given the current values): ${paths(required)}`);
   }
 
   // The orientation half of the report. Naming the blanks is what a whole-model

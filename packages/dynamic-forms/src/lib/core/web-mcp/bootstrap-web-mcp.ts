@@ -83,7 +83,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
         `Fill the "${options.name}" form: ${options.description} ` +
         `Accepts any subset of fields and leaves the rest untouched; a nested group is merged key by key, a list is replaced whole. ` +
         `Does not submit. Returns the values it set, which fields currently apply, which are still empty, and any validation errors. ` +
-        `Call with no fields to read the form's current state without changing it.`,
+        `Call with no fields to see which apply, which are required and which are still empty, without changing anything.`,
       inputSchema,
       annotations,
       execute: (args) => fill(args),

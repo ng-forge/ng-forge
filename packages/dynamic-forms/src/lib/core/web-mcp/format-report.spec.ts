@@ -67,7 +67,7 @@ describe('renderFormReport', () => {
   it('names what is required right now', () => {
     const text = renderFormReport(report({ fields: [field({ required: true })] }));
 
-    expect(text).toContain('Required right now: name');
+    expect(text).toContain('Required (given the current values): name');
   });
 
   it('names what is still empty, which is how an agent orients without the values', () => {
