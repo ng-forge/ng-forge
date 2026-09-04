@@ -7,6 +7,10 @@ import { DynamicForm } from '../../dynamic-form.component';
 import { BUILT_IN_FIELDS } from '../../providers/built-in-fields';
 import { WEB_MCP_ENABLED } from '../../providers/features/web-mcp/web-mcp.token';
 
+// Configs are cast because `input`, `checkbox` and `select` are registered at
+// runtime below, not in the compile-time registry. Real configs use
+// `as const satisfies FormConfig`, which is what the E2E scenarios do.
+
 /** Shape of the tool descriptors the model context receives. */
 interface RegisteredTool {
   name: string;

@@ -37,10 +37,10 @@ import { WEB_MCP_ENABLED } from './web-mcp.token';
  * ```typescript
  * provideDynamicForm(...withMaterialFields(), withExperimentalWebMcp());
  *
- * const config: FormConfig = {
+ * const config = {
  *   options: { webMcp: { name: 'signup', description: 'Sign a new user up.' } },
  *   fields: [...],
- * };
+ * } as const satisfies FormConfig;
  * ```
  */
 export function withExperimentalWebMcp(): DynamicFormFeature<'web-mcp'> {

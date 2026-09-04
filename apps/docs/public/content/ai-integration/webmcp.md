@@ -40,7 +40,7 @@ export const appConfig: ApplicationConfig = {
 ```
 
 ```typescript
-const config: FormConfig = {
+const config = {
   options: {
     webMcp: {
       name: 'signup',
@@ -59,7 +59,7 @@ const config: FormConfig = {
       ],
     },
   ],
-};
+} as const satisfies FormConfig;
 ```
 
 `webMcp` is part of `FormOptions`, so it can also come from the `[formOptions]` input instead of the config.
