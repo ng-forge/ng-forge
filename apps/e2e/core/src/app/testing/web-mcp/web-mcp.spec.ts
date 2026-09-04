@@ -19,8 +19,12 @@ setupConsoleCheck();
 async function installModelContext(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const tools = new Map<string, { name: string; execute: (a: unknown, c: unknown) => unknown }>();
+    // Every register/unregister in order, so a config swap can be checked for
+    // the thing that matters: the old tools go before the new ones arrive.
+    const lifecycle: string[] = [];
 
     (window as unknown as Record<string, unknown>)['__mcp'] = {
+      lifecycle: () => lifecycle.slice(),
       // Descriptors reach an agent without their implementations.
       getTools: () => [...tools.values()].map((tool) => Object.fromEntries(Object.entries(tool).filter(([key]) => key !== 'execute'))),
       executeTool: async (name: string, args: unknown) => {
@@ -40,7 +44,11 @@ async function installModelContext(page: Page): Promise<void> {
         JSON.stringify(tool.inputSchema);
 
         tools.set(tool.name, tool as never);
-        options?.signal?.addEventListener('abort', () => tools.delete(tool.name));
+        lifecycle.push(`register ${tool.name}`);
+        options?.signal?.addEventListener('abort', () => {
+          tools.delete(tool.name);
+          lifecycle.push(`unregister ${tool.name}`);
+        });
       },
     };
   });
@@ -56,6 +64,7 @@ interface ToolDescriptor {
 interface McpHarness {
   getTools(): ToolDescriptor[];
   executeTool(name: string, args: unknown): Promise<string>;
+  lifecycle(): string[];
 }
 
 /** Calls a registered tool the way an agent would, and returns its text result. */
@@ -68,6 +77,29 @@ function callTool(page: Page, name: string, args: unknown): Promise<string> {
 
 const listTools = (page: Page) => page.evaluate(() => (window as unknown as Record<string, McpHarness>)['__mcp'].getTools());
 const toolNames = async (page: Page) => (await listTools(page)).map((tool) => tool.name);
+const lifecycle = (page: Page) => page.evaluate(() => (window as unknown as Record<string, McpHarness>)['__mcp'].lifecycle());
+
+/**
+ * Clicks a config-swap button and waits for the registry to reach `expected`.
+ *
+ * Waits on the tool set itself rather than a delay: registration is a lazy
+ * import followed by an awaited `registerTool`, so how long it takes is not
+ * something a fixed timeout should be guessing at.
+ */
+async function switchConfig(page: Page, key: string, expected: string[]): Promise<void> {
+  await page.getByTestId(`switch-to-${key}`).click();
+  await page.waitForFunction(
+    (want) => {
+      const names = (window as unknown as Record<string, McpHarness>)['__mcp']
+        .getTools()
+        .map((tool) => tool.name)
+        .sort();
+      return JSON.stringify(names) === JSON.stringify([...want].sort());
+    },
+    expected,
+    { timeout: 5000 },
+  );
+}
 
 test.beforeEach(async ({ page }) => {
   await installModelContext(page);
@@ -244,5 +276,108 @@ test.describe('WebMCP Tests', () => {
 
     const scenario = helpers.getScenario('agent-fill-submit-test');
     await expect(helpers.getInput(scenario, 'username')).toHaveValue('ada-lovelace');
+  });
+
+  test.describe('config swaps', () => {
+    const swapUrl = '/test/web-mcp/agent-config-swap';
+
+    test('replaces the tools when the config is renamed', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+      expect(await toolNames(page)).toEqual(['fill_swap', 'submit_swap']);
+
+      await switchConfig(page, 'renamed', ['fill_renamed']);
+
+      expect(await toolNames(page)).toEqual(['fill_renamed']);
+    });
+
+    test('unregisters the old tools before registering the new ones', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      await switchConfig(page, 'renamed', ['fill_renamed']);
+
+      // Ordering is the whole point: registering first would collide on a
+      // reused name, and unregistering late would leave a window where an
+      // agent can drive the previous config's tools against the new form.
+      expect(await lifecycle(page)).toEqual([
+        'register fill_swap',
+        'register submit_swap',
+        'unregister fill_swap',
+        'unregister submit_swap',
+        'register fill_renamed',
+      ]);
+    });
+
+    test('rebuilds the schema for the new config', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      await switchConfig(page, 'renamed', ['fill_renamed']);
+
+      const [schema] = (await listTools(page)).map((tool) => tool.inputSchema);
+      expect(Object.keys((schema as { properties: object }).properties)).toEqual(['beta']);
+    });
+
+    test('rejects the previous config’s field after a swap', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      await switchConfig(page, 'renamed', ['fill_renamed']);
+      const result = await callTool(page, 'fill_renamed', { alpha: 'from the old config' });
+
+      expect(result).toContain('Nothing was applied.');
+      expect(result).toContain('Unknown field "alpha"');
+    });
+
+    test('writes into the form the new config actually rendered', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      await switchConfig(page, 'renamed', ['fill_renamed']);
+      await callTool(page, 'fill_renamed', { beta: 'written by an agent' });
+
+      const scenario = helpers.getScenario('agent-config-swap');
+      await expect(helpers.getInput(scenario, 'beta')).toHaveValue('written by an agent');
+    });
+
+    test('revokes the submit tool when allowSubmit is turned off', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+      expect(await toolNames(page)).toContain('submit_swap');
+
+      // Same tool name, submission turned off. Turning it off has to revoke the
+      // agent's authority, not merely stop advertising it.
+      await switchConfig(page, 'revoked', ['fill_swap']);
+
+      expect(await toolNames(page)).toEqual(['fill_swap']);
+    });
+
+    test('leaves an agent holding a stale submit reference unable to use it', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      const outcome = await page.evaluate(async () => {
+        const mcp = (window as unknown as Record<string, McpHarness>)['__mcp'];
+        // An agent that already discovered the tool holds a reference to it.
+        const stashed = () => mcp.executeTool('submit_swap', {});
+        (window as unknown as Record<string, unknown>)['__stashed'] = stashed;
+        return typeof stashed;
+      });
+      expect(outcome).toBe('function');
+
+      await switchConfig(page, 'revoked', ['fill_swap']);
+
+      const afterRevoke = await page.evaluate(async () => {
+        try {
+          await (window as unknown as Record<string, () => Promise<string>>)['__stashed']();
+          return 'submitted';
+        } catch (error) {
+          return `refused: ${(error as Error).message}`;
+        }
+      });
+      expect(afterRevoke).toContain('refused');
+    });
+
+    test('unregisters everything when the form opts out', async ({ page, helpers }) => {
+      await helpers.navigateToScenario(swapUrl);
+
+      await switchConfig(page, 'none', []);
+
+      expect(await toolNames(page)).toEqual([]);
+    });
   });
 });

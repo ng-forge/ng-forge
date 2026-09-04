@@ -13,6 +13,10 @@ const routes: Routes = [
     data: { scenario: getWebMcpScenario('agent-fill-submit-test') },
   },
   {
+    path: 'agent-config-swap',
+    loadComponent: () => import('./scenarios/agent-config-swap.component').then((m) => m.AgentConfigSwapComponent),
+  },
+  {
     path: 'agent-fill-only',
     loadComponent: () => import('../shared/test-scenario.component').then((m) => m.TestScenarioComponent),
     data: { scenario: getWebMcpScenario('agent-fill-only-test') },
