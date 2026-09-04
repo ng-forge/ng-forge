@@ -258,8 +258,8 @@ importers:
         specifier: 23.2.0
         version: 23.2.0(@swc-node/register@1.12.1(@swc/core@1.16.2(@swc/helpers@0.5.23))(@swc/types@0.1.28)(typescript@6.0.3))(@swc/core@1.16.2(@swc/helpers@0.5.23))
       '@oxc-project/runtime':
-        specifier: ^0.147.0
-        version: 0.147.0
+        specifier: ^0.148.0
+        version: 0.148.0
       '@playwright/test':
         specifier: 1.62.1
         version: 1.62.1
@@ -3623,8 +3623,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxc-project/runtime@0.147.0':
-    resolution: {integrity: sha512-vAYDOvumvPwsx0GSoHj+h1qCarq2f9RmfGk3deWBJTtRUDSqvvja5x+q5bUbs7a7CgVPiQDEIx+a5fBtVIQNdA==}
+  '@oxc-project/runtime@0.148.0':
+    resolution: {integrity: sha512-0ExYgJZv8+nFuoV0T/xzX5ZyXFXwkHJFJg9LWTwhqgRLpe+IzBLirvyYKSdS8mPofTBKAjDYIA2o84xh5BHXew==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   '@oxc-project/types@0.121.0':
@@ -13386,7 +13386,7 @@ snapshots:
   '@oxc-parser/binding-win32-x64-msvc@0.142.0':
     optional: true
 
-  '@oxc-project/runtime@0.147.0': {}
+  '@oxc-project/runtime@0.148.0': {}
 
   '@oxc-project/types@0.121.0': {}
 
