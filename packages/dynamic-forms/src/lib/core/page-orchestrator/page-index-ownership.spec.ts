@@ -39,6 +39,26 @@ async function settle(fixture: ComponentFixture<DynamicForm>, timeoutMs = 200): 
   fixture.detectChanges();
 }
 
+/**
+ * Waits for the pager to reach `expected`, flushing as it goes.
+ *
+ * A config swap re-lands on `initialPage` only once the lifecycle has run
+ * teardown, applying and restoring, and teardown deliberately crosses a frame
+ * boundary (`requestAnimationFrame`) that `settle`'s fixed cycle count does not
+ * reliably span. Measured over eight runs, the index was still 2 at the old
+ * assertion point six times, and converged to 1 every single time. So the
+ * condition worth waiting on is the index itself; a longer fixed wait would
+ * only move the flake somewhere else.
+ */
+async function waitForPage(fixture: ComponentFixture<DynamicForm>, expected: number, timeoutMs = 2000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (activePage(fixture) !== expected && Date.now() < deadline) {
+    await delay(10);
+    TestBed.flushEffects();
+    fixture.detectChanges();
+  }
+}
+
 function pagedConfig(label: string, initialPage?: number | { index: number; validate?: boolean }): FormConfig {
   return {
     ...(initialPage !== undefined ? { options: { initialPage } } : {}),
@@ -123,6 +143,7 @@ describe('active page index ownership', () => {
 
     fixture.componentRef.setInput('dynamic-form', pagedConfig('v2', 1));
     await settle(fixture, 600);
+    await waitForPage(fixture, 1);
     expect(activePage(fixture)).toBe(1);
   });
 
