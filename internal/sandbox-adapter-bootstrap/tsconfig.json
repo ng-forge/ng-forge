@@ -9,8 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
-    "lib": ["dom", "es2022"],
-    "ignoreDeprecations": "6.0"
+    "lib": ["dom", "es2022"]
   },
   "angularCompilerOptions": {
     "compilationMode": "partial",

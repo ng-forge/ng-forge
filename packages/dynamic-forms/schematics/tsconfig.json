@@ -15,9 +15,7 @@
     "strict": true,
     "target": "es2022",
     "declaration": false,
-    "types": ["node"],
-    "noUncheckedSideEffectImports": false,
-    "esModuleInterop": false
+    "types": ["node"]
   },
   "include": ["**/*.ts"],
   "exclude": ["**/*.spec.ts", "vitest.config.ts"]

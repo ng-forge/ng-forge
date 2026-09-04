@@ -32,8 +32,7 @@
       "@ng-forge/utils": ["../../../internal/utils/src/index.ts"],
       "@ng-forge/examples-shared-testing": ["../../../internal/examples-shared-testing/src/index.ts"]
     },
-    "skipLibCheck": true,
-    "ignoreDeprecations": "6.0"
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

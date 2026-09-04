@@ -11,8 +11,7 @@
     "isolatedModules": true,
     "emitDecoratorMetadata": false,
     "module": "preserve",
-    "lib": ["dom", "es2022"],
-    "ignoreDeprecations": "6.0"
+    "lib": ["dom", "es2022"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

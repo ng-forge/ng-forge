@@ -1,8 +1,5 @@
 {
   "extends": "../../tsconfig.typecheck-base.json",
   "include": ["src/**/*.type-test.ts"],
-  "exclude": ["src/lib/form-value-inference.type-test.ts", "src/lib/form-value-inference.test-registry.type-test.ts"],
-  "compilerOptions": {
-    "ignoreDeprecations": "6.0"
-  }
+  "exclude": ["src/lib/form-value-inference.type-test.ts", "src/lib/form-value-inference.test-registry.type-test.ts"]
 }
