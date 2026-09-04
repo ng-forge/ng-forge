@@ -156,3 +156,100 @@ describe('parseAgentInput', () => {
     });
   });
 });
+
+describe('parseAgentInput edge cases', () => {
+  const errorsOf = (defs: unknown[], input: unknown) => {
+    const result = parse(defs, input);
+    if (result.ok) throw new Error('expected a rejection');
+    return result.errors;
+  };
+
+  it('treats an explicit null argument object as an empty call', () => {
+    expect(parse(fields, null)).toEqual({ ok: true, patch: {}, paths: [] });
+  });
+
+  it('rejects an array where an argument object is expected', () => {
+    expect(errorsOf(fields, [{ name: 'Ada' }])[0]).toContain('must be an object');
+  });
+
+  it('rejects a number where an argument object is expected', () => {
+    expect(errorsOf(fields, 42)[0]).toContain('must be an object');
+  });
+
+  it('names the object it got rather than echoing it back', () => {
+    expect(errorsOf(fields, { name: { nested: true } })[0]).toContain('an object');
+  });
+
+  it('names an array it got rather than echoing it back', () => {
+    expect(errorsOf(fields, { name: [1, 2, 3] })[0]).toContain('an array');
+  });
+
+  it('does not echo a long string back in the error', () => {
+    const long = 'x'.repeat(200);
+    const [error] = errorsOf(fields, { age: long });
+
+    expect(error).toContain('a long string');
+    expect(error).not.toContain(long);
+  });
+
+  it('reports undefined as undefined rather than as a missing key', () => {
+    expect(errorsOf(fields, { name: undefined })[0]).toContain('undefined');
+  });
+
+  it('rejects a non-object item inside an object array', () => {
+    expect(errorsOf(fields, { lines: ['not an object'] })[0]).toContain('expects an object');
+  });
+
+  it('refuses a list whose item shape could not be derived', () => {
+    // A heterogeneous array has no describable item, so there is nothing to
+    // validate a write against.
+    const mixed = [
+      {
+        key: 'mixed',
+        type: 'array',
+        fields: [
+          { key: 'a', type: 'input' },
+          { key: 'b', type: 'checkbox' },
+        ],
+      },
+    ];
+
+    expect(errorsOf(mixed, { mixed: [] })[0]).toContain('cannot be set');
+  });
+
+  it('keeps a group out of the patch entirely when one of its leaves fails', () => {
+    const result = parse(fields, { address: { city: 'London', zip: 7 } });
+
+    expect(result).toMatchObject({ ok: false });
+    expect(result).not.toHaveProperty('patch');
+  });
+
+  it('reports a nested group failure with its full path', () => {
+    expect(errorsOf(fields, { address: { zip: 7 } })[0]).toContain('"address.zip"');
+  });
+
+  it('accepts a group patch that names no keys', () => {
+    expect(parse(fields, { address: {} })).toEqual({ ok: true, patch: { address: {} }, paths: [] });
+  });
+
+  it('lists the writable siblings when a group gets an unknown key', () => {
+    const [error] = errorsOf(fields, { address: { nope: 1 } });
+
+    expect(error).toContain('city');
+    expect(error).toContain('zip');
+  });
+
+  it('says a form accepts nothing when every field is closed to agents', () => {
+    const closed = [{ key: 'secret', type: 'input', webMcp: false }];
+
+    expect(errorsOf(closed, { anything: 1 })[0]).toContain('no writable fields');
+  });
+
+  it('accepts an empty multi-select selection', () => {
+    expect(parse(fields, { tags: [] })).toMatchObject({ ok: true, patch: { tags: [] } });
+  });
+
+  it('reports the first bad entry in a multi-select rather than all of them', () => {
+    expect(errorsOf(fields, { tags: ['z', 'y'] })).toHaveLength(1);
+  });
+});
