@@ -74,11 +74,15 @@ function toJsonSummary(results: FileValidationResult[], uiIntegration: UiIntegra
     filesChecked: results.length,
     valid: results.every((r) => r.valid),
     errorCount: results.reduce((sum, r) => sum + r.errorCount, 0),
+    // Separate from the errors, so a consumer reading `valid: true` can still
+    // see that a disabled rule fired rather than inferring nothing happened.
+    warningCount: results.reduce((sum, r) => sum + r.warningCount, 0),
     files: results.map((r) => ({
       filePath: r.filePath,
       valid: r.valid,
       configsFound: r.results.length,
       errorCount: r.errorCount,
+      warningCount: r.warningCount,
       configs: r.results.map((c) => ({
         name: c.name,
         line: c.line,

@@ -72,6 +72,18 @@ describe('a rules file that cannot be honoured fails loudly', () => {
     await expect(loadProjectRules(manifest)).rejects.toThrow(/not valid JSON/);
   });
 
+  it('rejects a file it cannot read rather than treating it as absent', async () => {
+    // A directory under the file's name, standing in for any read failure that
+    // is not "missing". Treating it as absent turns every rule back on while
+    // the user believes their file is being honoured.
+    const dir = join(root, 'unreadable');
+    await mkdir(join(dir, '.ng-forge', 'rules.json'), { recursive: true });
+    await writeFile(join(dir, 'package.json'), '{"name":"consumer"}', 'utf-8');
+
+    await expect(loadProjectRules(join(dir, 'package.json'))).rejects.toThrow(RulesConfigError);
+    await expect(loadProjectRules(join(dir, 'package.json'))).rejects.toThrow(/cannot be read/);
+  });
+
   it('rejects a disabled list that is not an array of ids', async () => {
     const manifest = await project('wrong-shape', JSON.stringify({ disabled: 'core/nesting' }));
 

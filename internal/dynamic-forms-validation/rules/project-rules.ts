@@ -30,6 +30,11 @@ export class RulesConfigError extends Error {
   }
 }
 
+/** The `errno` code of a filesystem failure, when it carries one. */
+function errorCode(cause: unknown): string | undefined {
+  return typeof cause === 'object' && cause !== null && 'code' in cause ? String((cause as { code: unknown }).code) : undefined;
+}
+
 /**
  * Load the rules file sitting beside the project's manifest.
  *
@@ -45,8 +50,15 @@ export async function loadProjectRules(packageJsonPath: string | undefined): Pro
   let raw: string;
   try {
     raw = await readFile(path, 'utf-8');
-  } catch {
-    return { disabled: new Set() };
+  } catch (cause) {
+    // Not there is the only failure that means "nothing is disabled". A file
+    // that exists and cannot be read - no permission, a directory under that
+    // name - is a configuration the user wrote, and treating it as absent
+    // turns every rule back on without saying so.
+    const code = errorCode(cause);
+    if (code === 'ENOENT') return { disabled: new Set() };
+
+    throw new RulesConfigError(path, `cannot be read (${code ?? (cause as Error).message})`);
   }
 
   let parsed: unknown;

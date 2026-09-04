@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { parseConfigInput, validateSource } from './validate-file';
 import { getFixSuggestion, FIX_SUGGESTIONS } from '../reporting/fix-suggestions';
 import { formatConfigReport, formatFileReport } from '../reporting/report';
+import { resolveDisabledRules } from '../rules/catalogue';
 
 const VALID_SOURCE = `
 import { FormConfig } from '@ng-forge/dynamic-forms';
@@ -21,6 +22,22 @@ const brokenForm = {
   fields: [
     { key: 'token', type: 'hidden' },
   ],
+} as const satisfies FormConfig;
+`;
+
+/**
+ * Two configs in one file: the first only trips a rule the project disabled,
+ * the second is broken outright and also trips that rule.
+ */
+const MIXED_SOURCE = `
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+const passing = {
+  fields: [{ key: 'ref', type: 'hidden', value: 'web', label: 'nope' }],
+} as const satisfies FormConfig;
+
+const failing = {
+  fields: [{ key: 'token', type: 'hidden', label: 'nope' }],
 } as const satisfies FormConfig;
 `;
 
@@ -143,6 +160,47 @@ describe('report formatting', () => {
     expect(report).toContain('Error(s) Found');
     expect(report).toContain('brokenForm');
     expect(report).toContain('Related documentation');
+  });
+
+  it('keeps the warnings of a passing config in a file that also fails', () => {
+    // The file is invalid because of `failing`, but `passing` still carries a
+    // finding the project asked to be told about quietly. Reporting only the
+    // invalid entries dropped it.
+    const result = validateSource(MIXED_SOURCE, '/tmp/mixed.form.ts', 'material', {
+      disabledRules: resolveDisabledRules(['core/hidden-minimal']),
+    });
+    const report = formatFileReport(result);
+
+    expect(result.valid).toBe(false);
+    expect(report).toContain('Warning(s)');
+    expect(report).toContain('**passing**');
+    expect(report).toMatch(/core\/hidden-minimal, disabled/);
+  });
+
+  it('does not print a warning as an error under the config that failed', () => {
+    const result = validateSource(MIXED_SOURCE, '/tmp/mixed.form.ts', 'material', {
+      disabledRules: resolveDisabledRules(['core/hidden-minimal']),
+    });
+    const report = formatFileReport(result);
+
+    const errorSection = report.slice(report.indexOf('Error(s) Found'), report.indexOf('Warning(s)'));
+
+    // The disabled rule's message must not appear among the errors of the
+    // config that failed for an unrelated reason.
+    expect(errorSection).not.toContain('FORBIDDEN properties');
+    expect(errorSection).toContain('MISSING REQUIRED "value"');
+    expect(report).toContain('FORBIDDEN properties');
+  });
+
+  it('counts the disabled-rule findings as warnings, not errors', () => {
+    const result = validateSource(MIXED_SOURCE, '/tmp/mixed.form.ts', 'material', {
+      disabledRules: resolveDisabledRules(['core/hidden-minimal']),
+    });
+
+    // One warning per config, since both carry the label the rule forbids, and
+    // neither is counted among the errors that make the file invalid.
+    expect(result.warningCount).toBe(2);
+    expect(result.errorCount).toBe(2);
   });
 
   it('explains how detection works when no config is found', () => {
