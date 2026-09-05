@@ -31,6 +31,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { injectFormComponentPreloader } from './utils/preload-form-components/preload-form-components';
 import { PageOrchestratorComponent } from './core/page-orchestrator/page-orchestrator.component';
 import { DERIVATION_RENDER_GATE } from './core/derivation/derivation-render-gate';
+import { WEB_MCP_GATE } from './core/web-mcp/web-mcp-gate';
 import { FORM_INITIALIZER } from './providers/form-initializer.token';
 import { FormClearEvent } from './events/constants/form-clear.event';
 import { FormResetEvent } from './events/constants/form-reset.event';
@@ -258,6 +259,22 @@ export class DynamicForm<
   // the lazily-loaded engine to wire, so fields render already-derived (no flash).
   private derivationReady = inject(DERIVATION_RENDER_GATE);
   shouldRender = computed(() => this.stateManager.shouldRender() && this.stateManager.formSchemaReady() && this.derivationReady());
+
+  /**
+   * What the experimental WebMCP layer is doing for this form.
+   *
+   * Injecting it is also what instantiates the gate (component providers are
+   * lazy), which is what keeps the registrar lazily loaded. Intentionally absent
+   * from `shouldRender`: agent visibility must never gate render.
+   *
+   * `'disabled'` unless `withExperimentalWebMcp()` is provided; `'idle'` until a
+   * config declares `options.webMcp`; `'active'` once its tools are registered.
+   * `'failed'` and `'unsupported'` are the two ways registration does not
+   * happen, and are worth surfacing rather than guessing at.
+   *
+   * @experimental
+   */
+  readonly webMcpStatus = inject(WEB_MCP_GATE);
 
   /** Resolved fields ready for rendering */
   protected resolvedFields = this.stateManager.resolvedFields;

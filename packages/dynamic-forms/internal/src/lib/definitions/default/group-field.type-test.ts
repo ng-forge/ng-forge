@@ -38,6 +38,7 @@ describe('GroupField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     | 'fields'
     | 'logic'
     | 'validators'

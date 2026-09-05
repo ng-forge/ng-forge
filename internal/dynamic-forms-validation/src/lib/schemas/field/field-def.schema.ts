@@ -1,6 +1,7 @@
 import { z, ZodTypeAny } from 'zod';
 import { DynamicTextSchema } from '../common/dynamic-text.schema';
 import { FieldMetaSchema } from './field-meta.schema';
+import { FieldWebMcpConfigSchema } from './field-web-mcp.schema';
 
 /**
  * Schema for base FieldDef properties shared by all field types.
@@ -99,6 +100,17 @@ export const BaseFieldDefSchema = z.object({
    * Inherited from the parent field (and form/global defaults). Defaults to false.
    */
   validateWhenHidden: z.boolean().optional(),
+
+  /**
+   * What a browser AI agent may do with this field, when the form opts in to
+   * WebMCP through `options.webMcp`.
+   *
+   * Overrides either axis of the conservative default, or `false` to hide the
+   * field from agents entirely. Without this key on the schema a parsed config
+   * silently loses the policy, so a generated or round-tripped config would
+   * quietly widen what an agent can see and write.
+   */
+  webMcp: FieldWebMcpConfigSchema.optional(),
 });
 
 /**

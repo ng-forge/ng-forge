@@ -107,7 +107,8 @@ describe('MatInputField (String) - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   type ActualKeys = keyof StringInputField;
 
@@ -261,7 +262,8 @@ describe('MatInputField (Number) - Exhaustive Whitelist', () => {
     | 'schemas'
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   type ActualKeys = keyof NumberInputField;
 

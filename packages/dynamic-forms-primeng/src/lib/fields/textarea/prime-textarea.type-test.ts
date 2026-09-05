@@ -85,7 +85,8 @@ describe('PrimeTextareaField - Exhaustive Whitelist', () => {
     // From BaseValueField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   type ActualKeys = keyof PrimeTextareaField;
 

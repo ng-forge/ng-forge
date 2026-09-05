@@ -1087,10 +1087,7 @@ export class FormStateManager<
   private setupEffects(): void {
     explicitEffect([this.formSchemaResource.error], ([error]) => {
       if (error) {
-        this.logger.error(
-          '[Dynamic Forms] Failed to compile the form schema; rendering without validation and blocking submission.',
-          error,
-        );
+        this.logger.error('Failed to compile the form schema; rendering without validation and blocking submission.', error);
       }
     });
 

@@ -37,6 +37,7 @@ describe('ArrayField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     | 'fields'
     | 'logic'
     | 'minLength'

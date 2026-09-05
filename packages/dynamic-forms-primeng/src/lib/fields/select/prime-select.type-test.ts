@@ -104,7 +104,8 @@ describe('PrimeSelectField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From SelectField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof PrimeSelectField<string>;
 

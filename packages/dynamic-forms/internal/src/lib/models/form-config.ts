@@ -214,6 +214,72 @@ export interface FormOptions {
    * @default undefined (uses global setting)
    */
   emitFormValueOnEvents?: boolean;
+
+  /**
+   * Exposes this form to browser AI agents as WebMCP tools.
+   *
+   * Requires the `withExperimentalWebMcp()` feature on `provideDynamicForm(...)`. Registers
+   * `fill_{name}`, which applies a partial patch of values and reports the
+   * form's state back. Submission stays off unless `allowSubmit` is set.
+   *
+   * Experimental: WebMCP is an emerging standard and Angular's underlying APIs
+   * are marked experimental, so this may change outside a major version.
+   *
+   * @example
+   * ```typescript
+   * options: { webMcp: { name: 'invoice', description: 'Create an invoice for a customer.' } }
+   * ```
+   *
+   * @default undefined (form is not exposed to agents)
+   */
+  webMcp?: WebMcpToolOptions;
+}
+
+/** Identifies a form's WebMCP tools to connected AI agents. */
+export interface WebMcpToolOptions {
+  /**
+   * Base name for this form's tools, used as `fill_{name}` and (when submission
+   * is allowed) `submit_{name}`. Must be unique across every form on the page.
+   */
+  name: string;
+
+  /** What this form is for, and when an agent should reach for it. */
+  description: string;
+
+  /**
+   * Whether an agent may submit this form directly.
+   *
+   * Off by default. Every registered tool is callable by any agent that reaches
+   * the page, including one acting on injected instructions from elsewhere, so
+   * submission is treated as the consequential step and kept opt-in. With it
+   * off, an agent can still fill the form and a human presses the button.
+   *
+   * Leave it off for anything that spends money, sends a message, or cannot be
+   * undone.
+   *
+   * @default false
+   */
+  allowSubmit?: boolean;
+
+  /**
+   * How much of the form a tool response hands back to the agent.
+   *
+   * `'changed'` (the default) returns only the values the call itself set, plus
+   * which fields apply, which are still empty, and any validation errors. That
+   * is enough for an agent to orient itself and correct its own work without
+   * being handed every value the form already held — prefilled personal data,
+   * identifiers, anything a user typed before the agent arrived.
+   *
+   * `'all'` returns the whole model, minus fields whose `webMcp.readable` is
+   * off. Choose it deliberately: every registered tool is callable by any agent
+   * that reaches the page, and Chrome's guidance is that even a read-only tool
+   * can reveal user information.
+   *
+   * @see https://developer.chrome.com/docs/ai/webmcp/secure-tools
+   *
+   * @default 'changed'
+   */
+  readback?: 'changed' | 'all';
 }
 
 /** Options for controlling submit button disabled behavior. */

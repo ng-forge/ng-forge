@@ -61,6 +61,7 @@ describe('DatepickerField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     // Nullable opt-in
     | 'nullable'
     // DatepickerField-specific

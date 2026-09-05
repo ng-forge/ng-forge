@@ -52,6 +52,7 @@ export * from './lib/definitions/base/container-logic-config';
 export * from './lib/definitions/base/container-validation';
 export * from './lib/definitions/base/field-def';
 export * from './lib/definitions/base/field-meta';
+export * from './lib/definitions/base/field-web-mcp';
 export * from './lib/definitions/base/field-with-validation';
 export * from './lib/definitions/base/index';
 export * from './lib/definitions/default/array-field';

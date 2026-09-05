@@ -95,7 +95,8 @@ describe('MatToggleField - Exhaustive Whitelist', () => {
     // From BaseCheckedField
     | 'value'
     | 'placeholder'
-    | 'nullable';
+    | 'nullable'
+    | 'webMcp';
 
   type ActualKeys = keyof MatToggleField;
 

@@ -9,6 +9,7 @@ import { FormSubmitEvent } from '../../events/constants/submit.event';
 import type { FormConfig } from '@ng-forge/dynamic-forms/internal';
 import type { Logger } from '@ng-forge/dynamic-forms/internal';
 import { createSubmissionHandler } from './submission-handler';
+import { createPendingSubmission } from './submission-outcome';
 
 // The submission handler had no dedicated coverage. These tests pin its guard contract:
 // the configured submission.action runs only when the form is valid. Angular Signal Forms
@@ -307,5 +308,107 @@ describe('createSubmissionHandler', () => {
     expect(formInstance.username().errors()).toEqual([]);
     expect(formInstance().valid()).toBe(true);
     sub.unsubscribe();
+  });
+
+  describe('outcome reporting', () => {
+    // A caller that has to report back — an agent tool call above all — cannot
+    // use fire-and-forget dispatch: the pipeline drops, skips and swallows in
+    // ways that are invisible from the outside. These pin what the reply says.
+    const dispatchAndWait = () => {
+      const pending = createPendingSubmission();
+      runInInjectionContext(injector, () => eventBus.dispatch(new FormSubmitEvent(pending.reply)));
+      return pending;
+    };
+
+    it('reports success once a resolved action has finished', async () => {
+      const { sub } = start(true, () => timer(20));
+
+      const pending = dispatchAndWait();
+      await tick(40);
+
+      await expect(pending.outcome).resolves.toEqual({ status: 'success' });
+      sub.unsubscribe();
+    });
+
+    it('does not resolve before the action does', async () => {
+      const { sub } = start(true, () => timer(40));
+      const settled = vi.fn();
+
+      const pending = dispatchAndWait();
+      void pending.outcome.then(settled);
+      await tick(15);
+
+      expect(settled).not.toHaveBeenCalled();
+      sub.unsubscribe();
+    });
+
+    it('reports a rejected action as a failure rather than a success', async () => {
+      const error = new Error('gateway exploded');
+      const { sub } = start(true, () => Promise.reject(error));
+
+      const pending = dispatchAndWait();
+      await tick(25);
+
+      await expect(pending.outcome).resolves.toEqual({ status: 'action-failed', error });
+      sub.unsubscribe();
+    });
+
+    it('reports server errors returned by the action', async () => {
+      type Account = { username: string };
+      const { sub } = start<Account>(true, (f) => of([{ kind: 'server', message: 'Username taken', fieldTree: f.username }]), {
+        username: 'takenname',
+      });
+
+      const pending = dispatchAndWait();
+      await tick(25);
+
+      await expect(pending.outcome).resolves.toEqual({ status: 'server-errors' });
+      sub.unsubscribe();
+    });
+
+    it('reports a skipped submission on an invalid form', async () => {
+      const { sub } = start(false, vi.fn());
+
+      const pending = dispatchAndWait();
+      await tick(15);
+
+      await expect(pending.outcome).resolves.toEqual({ status: 'validation-failed' });
+      sub.unsubscribe();
+    });
+
+    it('reports a dispatch that the page handles itself', async () => {
+      const { sub } = start(true);
+
+      const pending = dispatchAndWait();
+      await tick(15);
+
+      await expect(pending.outcome).resolves.toEqual({ status: 'dispatched' });
+      sub.unsubscribe();
+    });
+
+    it('leaves a dropped second submission unaccepted, so the caller can call it busy', async () => {
+      const { sub } = start(true, () => timer(40));
+
+      const first = dispatchAndWait();
+      const second = dispatchAndWait();
+
+      expect(first.accepted()).toBe(true);
+      expect(second.accepted()).toBe(false);
+
+      await tick(60);
+      await expect(first.outcome).resolves.toEqual({ status: 'success' });
+      sub.unsubscribe();
+    });
+
+    it('leaves a plain button submit unaffected', async () => {
+      const action = vi.fn().mockResolvedValue(undefined);
+      const { sub } = start(true, action);
+
+      expect(() => dispatchSubmit()).not.toThrow();
+      await tick(25);
+
+      expect(action).toHaveBeenCalledOnce();
+      sub.unsubscribe();
+    });
   });
 });

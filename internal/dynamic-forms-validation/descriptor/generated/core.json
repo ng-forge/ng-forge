@@ -277,13 +277,13 @@
                 {
                   "kind": "enum",
                   "values": [
-                    null
+                    false
                   ]
                 },
                 {
                   "kind": "enum",
                   "values": [
-                    null
+                    true
                   ]
                 }
               ]
@@ -1160,13 +1160,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -1183,13 +1183,13 @@
                     {
                       "kind": "enum",
                       "values": [
-                        null
+                        false
                       ]
                     },
                     {
                       "kind": "enum",
                       "values": [
-                        null
+                        true
                       ]
                     }
                   ]
@@ -4172,13 +4172,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -4347,13 +4347,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -4522,13 +4522,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -4697,13 +4697,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -5084,6 +5084,24 @@
           "type": {
             "kind": "boolean"
           }
+        },
+        "webMcp": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  false
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldWebMcpOptions"
+              }
+            ]
+          }
         }
       },
       "policy": "strip"
@@ -5311,13 +5329,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -5483,13 +5501,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -5647,13 +5665,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -5765,13 +5783,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -6054,6 +6072,23 @@
       },
       "policy": "strip"
     },
+    "FieldWebMcpOptions": {
+      "keys": {
+        "readable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "writable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        }
+      },
+      "policy": "strip"
+    },
     "FunctionDerivationShared~0e36ce": {
       "keys": {
         "asyncFn": {
@@ -6076,13 +6111,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -6248,13 +6283,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -6420,13 +6455,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -6592,13 +6627,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -6952,13 +6987,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -7090,13 +7125,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -7262,13 +7297,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {
@@ -7438,13 +7473,13 @@
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  false
                 ]
               },
               {
                 "kind": "enum",
                 "values": [
-                  null
+                  true
                 ]
               },
               {

@@ -58,6 +58,11 @@ export { withPagePreload } from './providers/features/page-preload/with-page-pre
 export { withFieldWindowing } from './providers/features/field-windowing/with-field-windowing';
 export type { FieldParkingOption } from './providers/features/field-windowing/resolve-field-windowing';
 
+// WebMCP Feature (expose forms to browser AI agents) — experimental
+export { withExperimentalWebMcp } from './providers/features/web-mcp/with-web-mcp';
+export type { WebMcpStatus } from './core/web-mcp/web-mcp-gate';
+export type { SubmissionOutcome, SubmissionReply } from './utils/submission-handler/submission-outcome';
+
 // Validation Execution Feature
 export { withValidationExecutionDefaults } from './providers/features/validation-execution';
 export type { ValidationExecutionConfig, ResolvedValidationExecutionConfig } from '@ng-forge/dynamic-forms/internal';
@@ -121,7 +126,7 @@ export { sanitizeFormConfig } from './utils/validate-form-config/validate-form-c
 export type { AddonWarning, SanitizedFormConfig, SanitizeFormConfigOptions } from './utils/validate-form-config/validate-form-config';
 
 // Configuration Types
-export type { CustomFnConfig, FormConfig, FormOptions } from '@ng-forge/dynamic-forms/internal';
+export type { CustomFnConfig, FormConfig, FormOptions, WebMcpToolOptions } from '@ng-forge/dynamic-forms/internal';
 export type {
   DynamicText,
   FieldOption,

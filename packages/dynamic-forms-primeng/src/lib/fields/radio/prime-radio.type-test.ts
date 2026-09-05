@@ -90,7 +90,8 @@ describe('PrimeRadioField - Exhaustive Whitelist', () => {
     | 'placeholder'
     | 'nullable'
     // From RadioField
-    | 'options';
+    | 'options'
+    | 'webMcp';
 
   type ActualKeys = keyof PrimeRadioField<string>;
 

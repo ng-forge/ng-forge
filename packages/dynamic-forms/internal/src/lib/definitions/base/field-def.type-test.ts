@@ -33,7 +33,8 @@ describe('FieldDef - Exhaustive Whitelist', () => {
     | 'wrappers'
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
-    | 'addons';
+    | 'addons'
+    | 'webMcp';
   type ActualKeys = keyof FieldDef<TestProps>;
 
   it('should have exactly the expected keys', () => {
@@ -76,6 +77,7 @@ describe('FieldDef - Exhaustive Whitelist', () => {
         | 'skipAutoWrappers'
         | 'skipDefaultWrappers'
         | 'addons'
+        | 'webMcp'
       >();
     });
 

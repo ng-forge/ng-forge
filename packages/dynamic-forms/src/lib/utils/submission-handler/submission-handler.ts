@@ -1,6 +1,6 @@
 import { Signal } from '@angular/core';
 import { FieldTree, submit, TreeValidationResult } from '@angular/forms/signals';
-import { catchError, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable } from 'rxjs';
+import { catchError, defer, EMPTY, exhaustMap, firstValueFrom, from, isObservable, Observable, tap } from 'rxjs';
 import { EventBus } from '@ng-forge/dynamic-forms/internal';
 import { FormSubmitEvent } from '../../events/constants/submit.event';
 import { FormConfig } from '@ng-forge/dynamic-forms/internal';
@@ -28,6 +28,15 @@ export interface SubmissionHandlerOptions<
   validSignal: Signal<boolean>;
   /** Logger instance for consistent error reporting */
   logger: Logger;
+}
+
+/**
+ * Reads whether async validators are still resolving, so a skipped submission
+ * can say *why* it was skipped rather than reporting a validation failure that
+ * has not actually happened yet.
+ */
+function isPending<TModel extends Record<string, unknown>>(formSignal: Signal<FieldTree<TModel>>): boolean {
+  return formSignal()().pending();
 }
 
 /**
@@ -82,12 +91,19 @@ export function createSubmissionHandler<
   // switchMap would unsubscribe the Observable wrapper but cannot cancel the
   // underlying Promise, causing both side effects to execute.
   return eventBus.on<FormSubmitEvent>('submit').pipe(
-    exhaustMap(() => {
+    exhaustMap((event) => {
+      // Taking the event is reported before anything else: a caller waiting on a
+      // reply distinguishes "dropped by exhaustMap" from "running" by whether
+      // this ran during its synchronous dispatch.
+      const reply = event.reply;
+      reply?.accept();
+
       const submissionConfig = configSignal().submission;
 
       // If no submission action is configured, let the submitted output handle it
       // This maintains backward compatibility for users handling submission manually
       if (!submissionConfig?.action) {
+        reply?.settle(validSignal() ? { status: 'dispatched' } : { status: 'validation-failed' });
         return EMPTY;
       }
 
@@ -95,6 +111,7 @@ export function createSubmissionHandler<
       // when the form is invalid or has pending async validators.
       if (!validSignal()) {
         logger.debug('Submission action skipped: form is not valid (invalid or pending async validators)');
+        reply?.settle(isPending(formSignal) ? { status: 'pending-validation' } : { status: 'validation-failed' });
         return EMPTY;
       }
 
@@ -109,12 +126,27 @@ export function createSubmissionHandler<
       // - Sets form.submitting() to false when done
       // catchError keeps the exhaustMap stream alive after action failure —
       // without it, an unhandled error would terminate all future submissions.
-      return from(submit(formSignal(), wrappedAction)).pipe(
-        catchError((error: unknown) => {
-          logger.error('Submission action failed:', error);
-          return EMPTY;
-        }),
-      );
+      // `defer` so the form tree is read when the inner observable is subscribed,
+      // keeping the post-submit error read on the same tree the action ran against.
+      return defer(() => {
+        const formTree = formSignal();
+
+        return from(submit(formTree, wrappedAction)).pipe(
+          // `submit()` resolves the same way whether the action succeeded or came
+          // back with server errors — it applies them to the form rather than
+          // rejecting — so the form's own errors are what separate the two.
+          tap(() => {
+            // Server errors land on the fields they belong to, so the whole-tree
+            // summary is what distinguishes a rejected submission from a clean one.
+            reply?.settle(formTree().errorSummary().length ? { status: 'server-errors' } : { status: 'success' });
+          }),
+          catchError((error: unknown) => {
+            logger.error('Submission action failed:', error);
+            reply?.settle({ status: 'action-failed', error });
+            return EMPTY;
+          }),
+        );
+      });
     }),
   );
 }

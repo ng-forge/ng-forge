@@ -157,6 +157,12 @@ export default [
     loadChildren: () => import('./user-workflows/user-workflows.routes'),
   },
 
+  // WebMCP Tests
+  {
+    path: 'web-mcp',
+    loadChildren: () => import('./web-mcp/web-mcp.routes'),
+  },
+
   // Zod Schema Validation Tests
   {
     path: 'zod-schema-validation',

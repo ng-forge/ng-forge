@@ -1,5 +1,13 @@
 export type { WithInputSignals } from './component-type';
-export type { CustomFnConfig, FormConfig, FormOptions, SubmitButtonOptions, NextButtonOptions, InitialPageConfig } from './form-config';
+export type {
+  CustomFnConfig,
+  FormConfig,
+  FormOptions,
+  SubmitButtonOptions,
+  NextButtonOptions,
+  InitialPageConfig,
+  WebMcpToolOptions,
+} from './form-config';
 export type { SubmissionConfig, SubmissionActionResult } from './submission-config';
 export type { FieldScope, FieldTypeDefinition, ValueHandlingMode } from './field-type';
 export { FIELD_REGISTRY, getFieldValueHandling } from './field-type';

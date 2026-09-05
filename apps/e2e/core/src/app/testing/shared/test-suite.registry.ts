@@ -24,6 +24,7 @@ import { userJourneyFlowsSuite } from '../user-journey-flows/user-journey-flows.
 import { userWorkflowsSuite } from '../user-workflows/user-workflows.suite';
 import { zodSchemaValidationSuite } from '../zod-schema-validation/zod-schema-validation.suite';
 import { asyncConditionsSuite } from '../async-conditions/async-conditions.suite';
+import { webMcpSuite } from '../web-mcp/web-mcp.suite';
 
 /**
  * Registry of all core (functional/logic) test suites.
@@ -51,6 +52,7 @@ export const TEST_SUITE_REGISTRY: TestSuite[] = [
   schemaSystemSuite,
   userJourneyFlowsSuite,
   userWorkflowsSuite,
+  webMcpSuite,
   zodSchemaValidationSuite,
   asyncConditionsSuite,
 ];

@@ -64,6 +64,7 @@ describe('PageField - Exhaustive Whitelist', () => {
     | 'skipAutoWrappers'
     | 'skipDefaultWrappers'
     | 'addons'
+    | 'webMcp'
     | 'fields'
     | 'logic';
 
