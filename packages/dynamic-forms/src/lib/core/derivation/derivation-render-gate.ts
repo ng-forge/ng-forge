@@ -66,7 +66,7 @@ export function createDerivationRenderGate(): Signal<boolean> {
           // A failed chunk load must not lock the form shut — render it degraded
           // (derivations won't apply) and surface the failure.
           engine.set('failed');
-          logger.error('[Dynamic Forms] Failed to load the derivation engine; derivations will not apply.', error);
+          logger.error('Failed to load the derivation engine; derivations will not apply.', error);
         }),
     );
   });
