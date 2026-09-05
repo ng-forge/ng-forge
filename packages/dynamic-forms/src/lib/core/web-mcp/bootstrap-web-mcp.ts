@@ -17,6 +17,15 @@ import type { WebMcpStatus } from './web-mcp-gate';
 const NOT_READY = 'The form is not ready yet. Try again shortly.';
 
 /**
+ * Text returned when the call was already over before it began.
+ *
+ * Said plainly because the agent has to be able to tell this apart from a
+ * refusal it could fix: nothing was read, nothing was written, and retrying is a
+ * reasonable next move.
+ */
+const CANCELLED = 'The call was cancelled before it ran, so the form is unchanged and nothing was submitted.';
+
+/**
  * How long to wait for async validators before reporting on a form anyway.
  *
  * A tool call has to answer eventually, and an agent left holding an open call
@@ -217,8 +226,8 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
   async function dispatchSubmit(invocation: AbortSignal | undefined): Promise<SubmissionOutcome> {
     const pending = createPendingSubmission();
 
-    // A signal already aborted never fires `abort` again, so it is checked
-    // rather than merely listened to.
+    // An abort between applying and dispatching. A signal already aborted never
+    // fires `abort` again, so it is checked rather than merely listened to.
     if (signal.aborted || invocation?.aborted) return { status: 'cancelled' };
 
     const cancel = (): void => pending.cancel();
@@ -249,6 +258,12 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
     tree: FieldTree<unknown>,
     invocation: AbortSignal | undefined,
   ): Promise<{ rejection: string } | { report: FormReport }> {
+    // Before anything is read or written. A call whose signal is already aborted
+    // is one the agent has abandoned or the browser has withdrawn, and it is told
+    // so; leaving its values behind anyway would be a change nobody asked for and
+    // nobody is watching for, since the response says nothing happened.
+    if (signal.aborted || invocation?.aborted) return { rejection: CANCELLED };
+
     // Live state first: a field the form has disabled or made readonly right now
     // is not writable, whatever the config said when the schema was built. The
     // current value goes in too, so the parser can see which lists hold values an

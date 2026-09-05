@@ -996,8 +996,41 @@ describe('WebMCP integration', () => {
       const controller = new AbortController();
       controller.abort();
 
-      expect(await call('submit_profile', { name: 'Ada' }, controller.signal)).toContain('Not submitted');
+      expect(await call('submit_profile', { name: 'Ada' }, controller.signal)).toContain('cancelled');
       expect(action).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Not submitting is only half of it. A cancelled call must not leave its
+     * values behind either: the agent is told nothing happened, so anything
+     * written is a change nobody can see or account for.
+     */
+    it('writes nothing when the call was cancelled before it ran', async () => {
+      const fixture = await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        submission: { action: vi.fn() },
+        fields: [{ key: 'name', type: 'input', value: 'Grace', required: true }],
+      } as unknown as FormConfig);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      await call('submit_profile', { name: 'Ada' }, controller.signal);
+
+      expect(fixture.componentInstance.formValue()).toEqual({ name: 'Grace' });
+    });
+
+    it('writes nothing when a cancelled call reaches the fill tool', async () => {
+      const fixture = await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.' } },
+        fields: [{ key: 'name', type: 'input', value: 'Grace' }],
+      } as unknown as FormConfig);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      expect(await call('fill_profile', { name: 'Ada' }, controller.signal)).toContain('cancelled');
+      expect(fixture.componentInstance.formValue()).toEqual({ name: 'Grace' });
     });
   });
 

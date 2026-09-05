@@ -348,6 +348,74 @@ describe('parseAgentInput protects values inside list items', () => {
     expect((result as { errors: string[] }).errors[0]).toContain('"audit.ref"');
   });
 
+  it('protects a value inside a list nested in an item', () => {
+    const nested = [
+      {
+        key: 'lines',
+        type: 'array',
+        fields: [
+          [
+            { key: 'sku', type: 'input' },
+            {
+              key: 'splits',
+              type: 'array',
+              fields: [
+                [
+                  { key: 'ref', type: 'hidden' },
+                  { key: 'share', type: 'input' },
+                ],
+              ],
+            },
+          ],
+        ],
+      },
+    ];
+
+    const result = parse(nested, { lines: [{ sku: 'b', splits: [{ share: '50' }] }] }, undefined, {
+      lines: [{ sku: 'a', splits: [{ ref: 'server-ref', share: '50' }] }],
+    });
+
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors[0]).toContain('"splits[].ref"');
+  });
+
+  it('protects a non-writable bare list nested in an item', () => {
+    const nested = [
+      {
+        key: 'lines',
+        type: 'array',
+        fields: [
+          [
+            { key: 'sku', type: 'input' },
+            { key: 'codes', type: 'array', readonly: true, fields: [{ key: 'code', type: 'input' }] },
+          ],
+        ],
+      },
+    ];
+
+    const result = parse(nested, { lines: [{ sku: 'b' }] }, undefined, { lines: [{ sku: 'a', codes: ['x'] }] });
+
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors[0]).toContain('"codes"');
+  });
+
+  it('allows the write when a non-writable nested list is empty', () => {
+    const nested = [
+      {
+        key: 'lines',
+        type: 'array',
+        fields: [
+          [
+            { key: 'sku', type: 'input' },
+            { key: 'codes', type: 'array', readonly: true, fields: [{ key: 'code', type: 'input' }] },
+          ],
+        ],
+      },
+    ];
+
+    expect(parse(nested, { lines: [{ sku: 'b' }] }, undefined, { lines: [{ sku: 'a', codes: [] }] }).ok).toBe(true);
+  });
+
   it('leaves a list alone when the call does not mention it', () => {
     expect(parse(lineFields, {}, undefined, { lines: [{ id: 'server-id', sku: 'a' }] })).toEqual({
       ok: true,

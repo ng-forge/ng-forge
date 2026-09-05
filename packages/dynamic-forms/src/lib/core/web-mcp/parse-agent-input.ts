@@ -281,13 +281,43 @@ function collectProtected(nodes: readonly PlanNode[], value: unknown, prefix: st
       continue;
     }
 
-    // A field the agent may write can be resent, so it is never at stake. An
-    // unset one has nothing to lose; `null` counts as unset here because it is
-    // the default ng-forge gives a nullable field that was never filled in.
-    if (node.policy.writable || held === undefined || held === null || held === '') continue;
+    // A field the agent may write can be resent, so it is never at stake.
+    if (!node.policy.writable && holdsValue(held)) {
+      into.add(`"${name}"`);
+      continue;
+    }
 
-    into.add(`"${name}"`);
+    // A list the agent *may* write is not itself at stake, but its own items can
+    // still hold values it cannot resend, and replacing the outer list replaces
+    // those too. The loss is the same at any depth, so the walk follows it down.
+    if (node.kind === 'array' && node.item && Array.isArray(held)) {
+      collectProtectedInItems(node.item, held, `${name}[]`, into);
+    }
   }
+}
+
+function collectProtectedInItems(item: ItemPlan, items: readonly unknown[], prefix: string, into: Set<string>): void {
+  for (const entry of items) {
+    if (item.kind === 'value') {
+      if (!item.value.policy.writable && holdsValue(entry)) into.add(`"${prefix}"`);
+      continue;
+    }
+
+    collectProtected(item.children, entry, prefix, into);
+  }
+}
+
+/**
+ * Whether a field currently holds something a rewrite would destroy.
+ *
+ * `null` counts as unset because it is the default ng-forge gives a nullable
+ * field nobody filled in, and an empty list counts as unset for the same
+ * reason: there is nothing in it to lose.
+ */
+function holdsValue(value: unknown): boolean {
+  if (value === undefined || value === null || value === '') return false;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
