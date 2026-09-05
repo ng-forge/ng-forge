@@ -154,6 +154,9 @@ createServer(async (req, res) => {
     }
     send(404, { error: 'use /reset, /tools, /call or /transcripts' });
   } catch (error) {
-    send(500, { error: String(error?.message ?? error) });
+    // Details go to the operator's console, not into the response: the agent
+    // under test reads these bodies and must not learn about the harness.
+    console.error('bridge request failed', error);
+    send(500, { error: 'bridge request failed, see the bridge console' });
   }
 }).listen(PORT, () => console.log(`WebMCP eval bridge on ${PORT}, driving ${APP}`));
