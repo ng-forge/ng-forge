@@ -1,42 +1,3 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
-
-## [1.2.0](https://github.com/ng-forge/ng-forge/compare/v1.1.0...v1.2.0) (2026-09-05)
-
-### Features
-
-- **dynamic-forms:** expose forms to browser AI agents through opt-in WebMCP integration ([#573](https://github.com/ng-forge/ng-forge/pull/573)).
-- **dynamic-forms:** support validators on group and array containers ([#577](https://github.com/ng-forge/ng-forge/pull/577)).
-- **dynamic-forms:** add programmatic page navigation, deep links, and session resume for paged forms ([#574](https://github.com/ng-forge/ng-forge/pull/574), [#578](https://github.com/ng-forge/ng-forge/pull/578)).
-- **dynamic-forms:** apply server validation errors returned by submission actions ([#571](https://github.com/ng-forge/ng-forge/pull/571)).
-- **material:** support prefix and suffix addons on select, textarea, and datepicker fields ([#592](https://github.com/ng-forge/ng-forge/pull/592)).
-
-### Performance
-
-- **dynamic-forms:** add configurable page preloading, fine-grained subscriptions, and opt-in field windowing for large forms ([#541](https://github.com/ng-forge/ng-forge/pull/541)).
-- **dynamic-forms:** lazy-load adapter fields and preserve hidden views ([#591](https://github.com/ng-forge/ng-forge/pull/591)).
-- **dynamic-forms:** suspend change detection for offscreen fields when parking is enabled, and preload field and wrapper chunks in parallel ([#593](https://github.com/ng-forge/ng-forge/pull/593)).
-- **dynamic-forms:** discriminate the recursive field union by field type to improve TypeScript performance ([#594](https://github.com/ng-forge/ng-forge/pull/594)).
-
-### Fixes
-
-- **dynamic-forms:** include nested container children when checking page validity ([#569](https://github.com/ng-forge/ng-forge/pull/569)).
-- **dynamic-forms:** align container configuration validation with the TypeScript contracts ([#584](https://github.com/ng-forge/ng-forge/pull/584)).
-- **dynamic-forms:** accept Unicode identifiers in expressions and treat validation message placeholder names literally ([#566](https://github.com/ng-forge/ng-forge/pull/566), [#572](https://github.com/ng-forge/ng-forge/pull/572)).
-- **openapi-generator:** preserve non-ASCII letters in generated names ([#570](https://github.com/ng-forge/ng-forge/pull/570)).
-- **docs:** correct package homepage and README documentation links ([#501](https://github.com/ng-forge/ng-forge/pull/501)).
-
-### Tooling and Maintenance
-
-- **cli:** add a standalone form validation CLI and generated agent skills for use without an MCP server ([#583](https://github.com/ng-forge/ng-forge/pull/583)).
-- **mcp:** derive configuration validation and adapter-specific agent references from the type system ([#585](https://github.com/ng-forge/ng-forge/pull/585)).
-- **config:** fix the core package exemption in the internal import guard across ESLint base paths ([#604](https://github.com/ng-forge/ng-forge/pull/604)).
-- **deps:** update dependencies, including Nx 23, Vite 8, and ESLint 10, and raise Undici overrides to address security advisories ([#603](https://github.com/ng-forge/ng-forge/pull/603), [#567](https://github.com/ng-forge/ng-forge/pull/567)).
-- **tests:** add performance regression gates for field windowing and page preloading ([#542](https://github.com/ng-forge/ng-forge/pull/542)).
-
 ## [1.1.0](https://github.com/ng-forge/ng-forge/compare/v1.0.0...v1.1.0) (2026-07-22)
 
 ### 🚀 Features
@@ -69,6 +30,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### ❤️ Thank You
 
 - Antim Prisacaru @antimprisacaru
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## [1.0.0](https://github.com/ng-forge/ng-forge/compare/v0.9.0...v1.0.0) (2026-06-17)
 
