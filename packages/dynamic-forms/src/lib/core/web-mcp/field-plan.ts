@@ -244,7 +244,7 @@ function buildItemPlan(field: FieldLike, path: string, registry: Map<string, Fie
   // and drop the item shape rather than describing only the first item.
   if (!template && !itemsAreHomogeneous(field, path, registry, itemPlan, warn)) {
     warn?.(
-      `[Dynamic Forms] WebMCP: array field "${field.key}" declares items with different shapes. ` +
+      `WebMCP: array field "${field.key}" declares items with different shapes. ` +
         `Only homogeneous arrays can be described to an agent, so its items are left unspecified.`,
     );
     return undefined;

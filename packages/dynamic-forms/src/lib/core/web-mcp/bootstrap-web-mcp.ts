@@ -68,7 +68,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
 
   const context = findModelContext();
   if (!context) {
-    logger.debug('[Dynamic Forms] No WebMCP model context on this page; the form is not exposed to agents.');
+    logger.debug('No WebMCP model context on this page; the form is not exposed to agents.');
     return 'unsupported';
   }
 
@@ -137,7 +137,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
   for (const descriptor of descriptors) {
     if (isOverNameBudget(descriptor.name)) {
       logger.warn(
-        `[Dynamic Forms] WebMCP tool name "${descriptor.name}" is longer than the ~30 characters agents can comfortably scan. ` +
+        `WebMCP tool name "${descriptor.name}" is longer than the ~30 characters agents can comfortably scan. ` +
           `A shorter \`webMcp.name\` reads better in a tool list.`,
       );
     }
@@ -149,7 +149,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
   if (signal.aborted) return 'idle';
 
   if (failures.length) {
-    logger.error(`[Dynamic Forms] WebMCP tool registration failed. ${failures.join(' ')}`);
+    logger.error(`WebMCP tool registration failed. ${failures.join(' ')}`);
     return 'failed';
   }
 

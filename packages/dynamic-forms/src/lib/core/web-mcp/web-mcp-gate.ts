@@ -135,7 +135,7 @@ export function createWebMcpGate(): Signal<WebMcpStatus> {
         // A failed chunk load must not break the form — it just stays invisible
         // to agents.
         status.set('failed');
-        logger.error('[Dynamic Forms] Failed to load the WebMCP registrar; this form will not be exposed to agents.', error);
+        logger.error('Failed to load the WebMCP registrar; this form will not be exposed to agents.', error);
       });
   });
 
