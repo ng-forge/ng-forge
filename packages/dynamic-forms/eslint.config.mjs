@@ -9,7 +9,12 @@ export default [
       '@nx/dependency-checks': [
         'error',
         {
-          ignoredFiles: ['{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}', '{projectRoot}/schematics/**/*'],
+          ignoredFiles: [
+            '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
+            '{projectRoot}/schematics/**/*',
+            // Local-only agent-eval harness, never shipped in the package.
+            '{projectRoot}/src/lib/core/web-mcp/eval/**/*',
+          ],
           ignoredDependencies: [
             'vite',
             '@analogjs/vite-plugin-angular',
