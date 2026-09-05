@@ -18,6 +18,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { UI_ADAPTERS } from '../packages/dynamic-form-mcp/src/registry/ui-adapters.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -101,14 +102,30 @@ export async function findViolations(): Promise<{ canonical: string; violations:
   // failed the build with "states 22.0.0, expected 1.1.0". The generator injects
   // this version everywhere it appears, so the other mentions cannot drift from
   // this one independently.
-  const skillPath = join('skills', 'dynamic-forms', 'SKILL.md');
-  const skill = await readFile(join(ROOT, skillPath), 'utf-8');
-  const stated = /documents version \*\*(\d+\.\d+\.\d+)\*\*/.exec(skill);
+  // Every skill, core and per-adapter. An adapter skill left behind on an older
+  // release would send agents adapter properties from a version the project does
+  // not have, which is exactly what the version anchor exists to prevent.
+  const skillDirs = ['dynamic-forms', ...UI_ADAPTERS.map((a) => `dynamic-forms-${a.library}`)];
 
-  if (!stated) {
-    violations.push({ file: skillPath, detail: 'does not state which release it documents' });
-  } else if (stated[1] !== canonical) {
-    violations.push({ file: skillPath, detail: `states ${stated[1]}, expected ${canonical}` });
+  for (const dir of skillDirs) {
+    const skillPath = join('skills', dir, 'SKILL.md');
+    // A missing skill is a violation, the same way a missing manifest is above.
+    // Letting the read throw made an absent adapter skill an ENOENT stack trace
+    // and stopped every skill after it from being checked at all.
+    const skill = await readFile(join(ROOT, skillPath), 'utf-8').catch(() => undefined);
+
+    if (skill === undefined) {
+      violations.push({ file: skillPath, detail: 'is missing; run nx run skills:update' });
+      continue;
+    }
+
+    const stated = /documents version \*\*(\d+\.\d+\.\d+)\*\*/.exec(skill);
+
+    if (!stated) {
+      violations.push({ file: skillPath, detail: 'does not state which release it documents' });
+    } else if (stated[1] !== canonical) {
+      violations.push({ file: skillPath, detail: `states ${stated[1]}, expected ${canonical}` });
+    }
   }
 
   return { canonical, violations };

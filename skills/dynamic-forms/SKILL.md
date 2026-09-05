@@ -32,11 +32,13 @@ below track 1.1.0 and some of them have changed between releases.
 Do not hand back a config you have not checked. The library ships a validator:
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli "path/to/your.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli@next "path/to/your.form.ts" --ui material
 ```
 
 `--yes` matters: without it npx prompts before its first install and waits for
-an answer that will never come. Requires Node 24 or newer.
+an answer that will never come. `@next` matters too: the `latest` tag is still a
+placeholder release with no executable, so the unpinned command fails with
+"could not determine executable to run". Requires Node 24 or newer.
 
 It reports the exact property that is wrong and how to fix it. Exit code 1
 means a config failed, 2 means the invocation was wrong. Run it after writing
@@ -84,4 +86,16 @@ Read these on demand rather than up front:
 
 A config is validated against one adapter: `material`, `bootstrap`,
 `primeng`, or `ionic`. Field types are shared, but `props` differ per
-adapter. Check which adapter the project provides before writing `props`.
+adapter, and this skill documents none of them.
+
+Install the skill for the adapter the project uses, which carries its `props`:
+
+| Adapter | Skill |
+| ------- | ----- |
+| `material` | `ng-forge-dynamic-forms-material` |
+| `bootstrap` | `ng-forge-dynamic-forms-bootstrap` |
+| `primeng` | `ng-forge-dynamic-forms-primeng` |
+| `ionic` | `ng-forge-dynamic-forms-ionic` |
+
+Two adapters cannot both provide the same field type, so a project has one
+adapter per field type. Check which one it provides before writing `props`.

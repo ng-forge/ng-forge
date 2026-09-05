@@ -281,8 +281,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {},
     validationSupported: false,
     source: 'core',
-    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'container'],
-    notAllowedIn: ['row', 'top-level when using pages'],
+    allowedIn: ['top-level (single-page forms only)', 'page.fields', 'group.fields', 'array.fields', 'row', 'container'],
+    notAllowedIn: ['top-level when using pages'],
     example: `// Hidden field - value is REQUIRED!
 {
   key: 'userId',
@@ -300,6 +300,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // - disabled, readonly, hidden, col, tabIndex, meta
 // - Validation shorthand: email, min, max, minLength, maxLength, pattern`,
     minimalExample: `{ key: 'id', type: 'hidden', value: 'abc123' }`,
+    illustrative: { example: 'several snippets and a forbidden-property list, not one expression' },
   },
   {
     type: 'text',
@@ -381,7 +382,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 }
 // NOT ALLOWED in rows:
 // - type: 'page' (pages are top-level only)`,
-    minimalExample: `{ key: 'row1', type: 'row', fields: [...] }`,
+    minimalExample: `{ key: 'row1', type: 'row', fields: [{ key: 'firstName', type: 'input', label: 'First Name', col: 6 }, { key: 'lastName', type: 'input', label: 'Last Name', col: 6 }] }`,
+    illustrative: { example: 'ends with a not-allowed-in list, so it is not one expression' },
   },
   {
     type: 'group',
@@ -473,7 +475,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   validators: [{ type: 'custom', functionName: 'dateOrder' }],
   validationMessages: { dateOrder: 'The end must not be before the start.' }
 }`,
-    minimalExample: `{ key: 'address', type: 'group', fields: [...] }`,
+    minimalExample: `{ key: 'address', type: 'group', fields: [{ key: 'street', type: 'input', label: 'Street' }] }`,
+    illustrative: { example: 'two snippets: a plain group and one carrying a cross-field rule' },
   },
   {
     type: 'array',
@@ -597,7 +600,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // periodOrder receives the whole item list:
 //   (ctx) => (ctx.value() ?? []).some(r => r.from && r.to && r.to < r.from)
 //     ? { kind: 'periodOrder' } : null`,
-    minimalExample: `{ key: 'items', type: 'array', fields: [...] }`,
+    minimalExample: `{ key: 'items', type: 'array', fields: [{ key: 'tag', type: 'input', label: 'Tag' }] }`,
+    illustrative: { example: 'three snippets: flat, object-item and per-row-rule arrays' },
   },
   {
     type: 'container',
@@ -668,7 +672,8 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
 // Values flatten: { street: '', city: '' } \u2014 no 'billingChrome' key
 // NOT ALLOWED in containers:
 // - type: 'page' (pages are top-level only)`,
-    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [...] }`,
+    minimalExample: `{ key: 'chrome', type: 'container', wrappers: [], fields: [{ key: 'street', type: 'input', label: 'Street' }] }`,
+    illustrative: { example: 'ends with a not-allowed-in list, so it is not one expression' },
   },
   {
     type: 'page',
@@ -723,7 +728,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     { key: 'next', type: 'next', label: 'Next' }
   ]
 }`,
-    minimalExample: `{ key: 'step1', type: 'page', fields: [...] }`,
+    minimalExample: `{ key: 'step1', type: 'page', fields: [{ key: 'firstName', type: 'input', label: 'First Name' }] }`,
   },
   {
     type: 'next',
@@ -794,6 +799,10 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   event: MyCustomEvent  // Must be the class reference
 }`,
     minimalExample: `{ key: 'action', type: 'button', label: 'Action', event: MyEvent }`,
+    illustrative: {
+      minimalExample: 'names an event class only a real app defines and registers',
+      example: 'four snippets plus the registration steps they depend on',
+    },
   },
   {
     type: 'submit',
@@ -819,16 +828,35 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to append a new item to the end of an array field. Must be placed within or near the array container. (Legacy alias: addArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item' }`,
+    minimalExample: `{ key: 'add', type: 'add-array-item', label: 'Add Item', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'prepend-array-item',
@@ -836,16 +864,35 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     description: 'Button to add a new item to the beginning of an array field. (Legacy alias: prependArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group', 'container'],
     example: `{
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First' }`,
+    minimalExample: `{ key: 'prepend', type: 'prepend-array-item', label: 'Add First', template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'insert-array-item',
@@ -854,7 +901,27 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       'Button to insert a new item at a specific index in an array field (set via the index property). (Legacy alias: insertArrayItem.)',
     valueType: undefined,
     baseInterface: 'FieldDef',
-    props: {},
+    props: {
+      index: {
+        name: 'index',
+        type: 'number',
+        description: 'REQUIRED. The position to insert at.',
+        required: true,
+      },
+      template: {
+        name: 'template',
+        type: 'ArrayAllowedChildren | readonly ArrayAllowedChildren[]',
+        description:
+          'REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile.',
+        required: true,
+      },
+      arrayKey: {
+        name: 'arrayKey',
+        type: 'string',
+        description: 'Key of the array to act on. Optional when the button sits inside that array, which supplies it from context.',
+        required: false,
+      },
+    },
     validationSupported: false,
     source: 'adapter',
     allowedIn: ['array', 'row', 'group', 'container'],
@@ -862,9 +929,14 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }`,
-    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0 }`,
+    minimalExample: `{ key: 'insert', type: 'insert-array-item', label: 'Insert', index: 0, template: { key: 'tag', type: 'input', label: 'Tag' } }`,
   },
   {
     type: 'remove-array-item',

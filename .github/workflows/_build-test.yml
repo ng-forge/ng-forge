@@ -216,6 +216,12 @@ jobs:
         if: inputs.affected
         run: pnpm nx affected -t smoke --base=origin/main
 
+      # The type descriptors are derived from the FieldRegistryLeaves augmentation.
+      # Fails when a field type or prop changed without regenerating, which would
+      # leave the artifact describing an API the library no longer has.
+      - name: Check generated descriptors are current
+        run: pnpm nx run dynamic-forms-validation:descriptors-check
+
       # The agent skill under skills/ is generated from the MCP registries and the
       # validation library's fix table. Fails when the committed output is stale.
       - name: Check generated skill is current
@@ -288,12 +294,20 @@ jobs:
             pnpm nx run-many -t lint --parallel=3
           fi
 
+      # Streamed rather than grouped. Nx buffers each task's output and prints it
+      # per task, and for a failing browser-mode project that grouping has been
+      # swallowing the verdict: dynamic-forms:test exits non-zero having printed
+      # its RUN header and per-test stdout with no reporter output at all, while
+      # the other nine projects each print a summary. No failing test, no
+      # assertion, no threshold and no OOM message, so the cause is not in the
+      # log to read. Streaming interleaves output as it happens, which is noisier
+      # but keeps the error attached to the run that produced it.
       - name: Test
         run: |
           if [ "${{ inputs.affected }}" = "true" ]; then
-            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage
+            pnpm nx affected -t test --base=origin/main --configuration=ci --coverage --output-style=stream
           else
-            pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage
+            pnpm nx run-many -t test --parallel=3 --configuration=ci --coverage --output-style=stream
           fi
 
       - name: Test schematics

@@ -99,9 +99,11 @@ export { validateFormConfig }
 
 // @public (undocumented)
 export interface ValidateOptions {
+    cliVersion?: string;
     json: boolean;
     quiet: boolean;
     requireConfig?: boolean;
+    tsconfig?: string;
     ui: string;
 }
 

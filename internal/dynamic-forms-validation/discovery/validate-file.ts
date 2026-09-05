@@ -1,7 +1,7 @@
 /** FormConfig discovery and validation over source files. */
 
 import { readFile } from 'node:fs/promises';
-import { validateFormConfig, type UiIntegration, type ValidationResult } from '../validate/src';
+import { validateFormConfig, type UiIntegration, type ValidateConfigOptions, type ValidationResult } from '../validate/src';
 import {
   createSourceFile,
   findFormConfigCandidates,
@@ -37,8 +37,10 @@ export interface FileValidationResult {
   noConfigsFound: boolean;
   /** True when every config found is valid. Vacuously true for a file with none. */
   valid: boolean;
-  /** Total error count across every config in the file. */
+  /** Total blocking error count across every config in the file. */
   errorCount: number;
+  /** Findings downgraded to warnings because the project disabled their rule. */
+  warningCount: number;
 }
 
 /**
@@ -47,7 +49,12 @@ export interface FileValidationResult {
  * Kept separate from {@link validateFile} so callers that already hold the
  * source (an editor buffer, an MCP tool argument) do not have to touch disk.
  */
-export function validateSource(source: string, filePath: string, uiIntegration: UiIntegration): FileValidationResult {
+export function validateSource(
+  source: string,
+  filePath: string,
+  uiIntegration: UiIntegration,
+  options?: ValidateConfigOptions,
+): FileValidationResult {
   const sourceFile = createSourceFile(source, filePath);
   const candidates = findFormConfigCandidates(sourceFile);
 
@@ -58,7 +65,7 @@ export function validateSource(source: string, filePath: string, uiIntegration: 
       line: candidate.startLine,
       matchReason: candidate.matchReason,
       extraction,
-      validation: validateFormConfig(uiIntegration, extraction.value),
+      validation: validateFormConfig(uiIntegration, extraction.value, options),
     };
   });
 
@@ -68,14 +75,22 @@ export function validateSource(source: string, filePath: string, uiIntegration: 
     results,
     noConfigsFound: results.length === 0,
     valid: results.every((r) => r.validation.valid),
-    errorCount: results.reduce((sum, r) => sum + (r.validation.errors?.length ?? 0), 0),
+    // Errors only. A finding downgraded to a warning by a disabled rule does
+    // not block, so counting it here reported "1 error" on a file the same run
+    // called valid.
+    errorCount: results.reduce((sum, r) => sum + (r.validation.errors ?? []).filter((e) => e.severity !== 'warning').length, 0),
+    warningCount: results.reduce((sum, r) => sum + (r.validation.errors ?? []).filter((e) => e.severity === 'warning').length, 0),
   };
 }
 
 /** Read a source file from disk and validate every FormConfig it declares. */
-export async function validateFile(filePath: string, uiIntegration: UiIntegration): Promise<FileValidationResult> {
+export async function validateFile(
+  filePath: string,
+  uiIntegration: UiIntegration,
+  options?: ValidateConfigOptions,
+): Promise<FileValidationResult> {
   const source = await readFile(filePath, 'utf-8');
-  return validateSource(source, filePath, uiIntegration);
+  return validateSource(source, filePath, uiIntegration, options);
 }
 
 /** Validate an already-parsed config object. */

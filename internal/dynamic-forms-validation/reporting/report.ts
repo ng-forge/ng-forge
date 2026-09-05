@@ -24,6 +24,32 @@ function pushErrors(lines: string[], errors: FormattedValidationError[]): void {
   }
 }
 
+/** A finding the project downgraded by disabling its rule. */
+function isWarning(error: FormattedValidationError): boolean {
+  return error.severity === 'warning';
+}
+
+/**
+ * Render every warning in the file, whichever config it came from.
+ *
+ * Warnings belong to the file rather than to a config's verdict. Collecting
+ * them per-verdict lost the ones on a config that passed, and printed the ones
+ * on a config that failed as though they were errors.
+ */
+function pushWarnings(lines: string[], warnings: Array<{ name: string; error: FormattedValidationError }>): void {
+  if (warnings.length === 0) {
+    return;
+  }
+
+  lines.push(`### ${warnings.length} Warning(s)`);
+  lines.push('');
+  for (const { name, error } of warnings) {
+    const rule = error.ruleId ? ` (${error.ruleId}, disabled)` : '';
+    lines.push(`- **${name}** \`${error.path}\`${rule}: ${error.message}`);
+  }
+  lines.push('');
+}
+
 /** Append the related-documentation section when the hook yields anything. */
 function pushRelatedDocs(lines: string[], errors: FormattedValidationError[], options?: ReportOptions): void {
   const hints = options?.relatedDocs?.(errors) ?? [];
@@ -79,13 +105,23 @@ export function formatFileReport(result: FileValidationResult, options?: ReportO
     lines.push('');
   }
 
+  // A disabled rule downgrades rather than silences, so the finding still has to
+  // reach the reader, whether or not the config carrying it also failed.
+  const warnings = result.results.flatMap((entry) =>
+    (entry.validation.errors ?? []).filter(isWarning).map((error) => ({ name: entry.name, error })),
+  );
+
   if (result.valid) {
     lines.push('### All Configs Valid');
     lines.push('');
     for (const entry of result.results) {
       lines.push(`- **${entry.name}** (line ${entry.line}): Valid`);
     }
-    return lines.join('\n');
+    lines.push('');
+
+    pushWarnings(lines, warnings);
+
+    return lines.join('\n').trimEnd();
   }
 
   lines.push(`### ${result.errorCount} Error(s) Found`);
@@ -94,19 +130,23 @@ export function formatFileReport(result: FileValidationResult, options?: ReportO
   const allErrors: FormattedValidationError[] = [];
 
   for (const entry of result.results) {
-    if (entry.validation.valid) {
+    // Warnings are reported once, below, rather than per config: listing one
+    // here would read as an error, which is the opposite of what disabling a
+    // rule asked for.
+    const blocking = (entry.validation.errors ?? []).filter((error) => !isWarning(error));
+
+    if (blocking.length === 0) {
       lines.push(`#### ${entry.name} (line ${entry.line}): Valid`);
     } else {
       lines.push(`#### ${entry.name} (line ${entry.line}): Invalid`);
       lines.push('');
-      if (entry.validation.errors) {
-        pushErrors(lines, entry.validation.errors);
-        allErrors.push(...entry.validation.errors);
-      }
+      pushErrors(lines, blocking);
+      allErrors.push(...blocking);
     }
     lines.push('');
   }
 
+  pushWarnings(lines, warnings);
   pushRelatedDocs(lines, allErrors, options);
 
   return lines.join('\n');

@@ -1,10 +1,13 @@
 /** Unified Validation Tool */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { access } from 'node:fs/promises';
+import { dirname, join, parse, resolve } from 'node:path';
 import { z } from 'zod';
 import {
   formatConfigReport,
   formatFileReport,
+  loadProjectRules,
   parseConfigInput,
   validateFile,
   validateFormConfig,
@@ -13,6 +16,47 @@ import {
 } from '@ng-forge/dynamic-forms-validation';
 
 const UI_INTEGRATIONS = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
+
+/**
+ * The project's disabled rules for a file being validated.
+ *
+ * Discovery walks up from the file rather than the working directory: an MCP
+ * server is long-lived and its cwd has nothing to do with the file an agent
+ * just asked about. A malformed rules file is reported rather than ignored,
+ * matching the CLI.
+ */
+async function projectDisabledRules(filePath: string): Promise<ReadonlySet<string>> {
+  return (await loadProjectRules(await nearestManifest(dirname(filePath)))).disabled;
+}
+
+/**
+ * Findings of one severity.
+ *
+ * A finding with no severity is an error: only the disabled-rule path sets one,
+ * and it sets `warning`.
+ */
+function countBySeverity(errors: FormattedValidationError[] | undefined, severity: 'error' | 'warning'): number {
+  return (errors ?? []).filter((error) => (error.severity ?? 'error') === severity).length;
+}
+
+/** The closest `package.json` at or above `from`, which is where the rules file sits. */
+async function nearestManifest(start: string): Promise<string | undefined> {
+  // Absolute first. `dirname('.')` is `'.'` and `parse('.').root` is empty, so
+  // walking a relative path never reaches the root and never terminates.
+  const from = resolve(start);
+  const { root } = parse(from);
+
+  for (let dir = from; ; dir = dirname(dir)) {
+    const candidate = join(dir, 'package.json');
+    try {
+      await access(candidate);
+      return candidate;
+    } catch {
+      // Keep walking.
+    }
+    if (dir === root) return undefined;
+  }
+}
 
 /**
  * Error-to-topic hints for contextual documentation references.
@@ -98,20 +142,30 @@ Example errors you'll see:
 
         // File validation
         if (parsed.type === 'file') {
-          const result = await validateFile(parsed.path, uiIntegration as UiIntegration);
+          // The same `.ng-forge/rules.json` the CLI honours. Without this the
+          // two disagreed on the same file, while the generated guidance told
+          // agents they run the same rules.
+          const disabledRules = await projectDisabledRules(parsed.path);
+          const result = await validateFile(parsed.path, uiIntegration as UiIntegration, { disabledRules });
           const report = formatFileReport(result, { relatedDocs: collectErrorTopicHints });
 
+          // Counted by severity, as `validateSource` does. A finding downgraded
+          // to a warning by a disabled rule does not block, so counting it as an
+          // error reported `valid: true` beside `errorCount: 1`.
           const structured = {
             type: 'file',
             filePath: result.filePath,
             uiIntegration,
             configsFound: result.results.length,
             allValid: result.valid,
+            errorCount: result.errorCount,
+            warningCount: result.warningCount,
             results: result.results.map((r) => ({
               name: r.name,
               line: r.line,
               valid: r.validation.valid,
-              errorCount: r.validation.errors?.length || 0,
+              errorCount: countBySeverity(r.validation.errors, 'error'),
+              warningCount: countBySeverity(r.validation.errors, 'warning'),
             })),
           };
 
@@ -133,7 +187,8 @@ Example errors you'll see:
           type: parsed.type,
           uiIntegration,
           valid: result.valid,
-          errorCount: result.errors?.length || 0,
+          errorCount: countBySeverity(result.errors, 'error'),
+          warningCount: countBySeverity(result.errors, 'warning'),
           errors: result.errors,
         };
 

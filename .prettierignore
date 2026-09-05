@@ -18,3 +18,8 @@ skills/**/*.md
 # Prettier reflows the embedded ```ts block and fights API Extractor's own output,
 # which would make the api-check target permanently drift. See etc/README.md.
 etc/*.api.md
+# Generated type descriptors — written verbatim by scripts/generate-descriptors.ts
+# and compared byte for byte by descriptors-check. Prettier collapses their arrays,
+# which would make that target permanently drift. Regenerate with
+# `nx run dynamic-forms-validation:descriptors-update`.
+internal/dynamic-forms-validation/descriptor/generated/*.json

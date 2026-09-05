@@ -12,13 +12,18 @@ It is plain markdown. No process runs, no port opens, and nothing needs approval
 
 ## Install
 
+Two skills: the core one, and one for the UI adapter your project uses.
+
 ```bash
 npx skills add ng-forge/ng-forge --skill ng-forge-dynamic-forms
+npx skills add ng-forge/ng-forge --skill ng-forge-dynamic-forms-material
 ```
+
+Swap `material` for `bootstrap`, `primeng` or `ionic`. The split follows the packages you already depend on: field types, validation and the authoring rules are identical across adapters and live in the core skill, while each adapter skill carries only the `props` that adapter adds. Installing all four would describe three sets of properties your project does not have.
 
 The [installer](https://github.com/vercel-labs/skills) supports Claude Code, Cursor, Codex, OpenCode and others, and can install per project or globally. There is no registry involved: it reads this repository directly over git.
 
-If you would rather not use the installer, copy `skills/dynamic-forms/` out of the repository by hand.
+If you would rather not use the installer, copy `skills/dynamic-forms/` and `skills/dynamic-forms-<adapter>/` out of the repository by hand.
 
 ## What it contains
 
@@ -39,10 +44,10 @@ All of it is generated from the same registries that back the [MCP server](/ai-i
 An assistant's confidence in its own output is not evidence. The skill's central instruction is to run a validator, which ships as a command:
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli@next "src/**/*.form.ts" --ui material
 ```
 
-Requires Node 24 or newer. `--yes` keeps npx from pausing on its first-install prompt, which matters when an agent runs the command.
+Requires Node 24 or newer. `--yes` keeps npx from pausing on its first-install prompt, which matters when an agent runs the command. `@next` is where the executable is published; `latest` still points at a placeholder release that ships no binary.
 
 It finds every FormConfig in the matched files, validates it against the schema for your adapter, and reports the exact property that is wrong along with the fix. This is the same validation the MCP server performs, because both call the same package.
 
@@ -66,12 +71,14 @@ It finds every FormConfig in the matched files, validates it against the schema 
 
 ### Options
 
-| Flag                     | Default    | Description                                        |
-| ------------------------ | ---------- | -------------------------------------------------- |
-| `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic` |
-| `--json`                 | off        | Emit machine-readable JSON instead of the report   |
-| `-q, --quiet`            | off        | Only print failures                                |
-| `--require-config`       | off        | Fail when the matched files contain no FormConfig  |
+| Flag                     | Default    | Description                                                                   |
+| ------------------------ | ---------- | ----------------------------------------------------------------------------- |
+| `-u, --ui <integration>` | `material` | One of `material`, `bootstrap`, `primeng`, `ionic`                            |
+| `--json`                 | off        | Emit machine-readable JSON instead of the report                              |
+| `-q, --quiet`            | off        | Only print failures                                                           |
+| `--require-config`       | off        | Fail when the matched files contain no FormConfig                             |
+| `--tsconfig <path>`      | discovered | tsconfig used to resolve types; found from the working directory when omitted |
+| `-v, --version`          | —          | Print this CLI's version                                                      |
 
 ### Exit codes
 
@@ -87,7 +94,7 @@ One case to know about before relying on this as a gate: if files match but none
 
 ```yaml
 - name: Validate form configs
-  run: npx --yes @ng-forge/dynamic-forms-cli "src/**/*.form.ts" --ui material --quiet --require-config
+  run: npx --yes @ng-forge/dynamic-forms-cli@next "src/**/*.form.ts" --ui material --quiet --require-config
 ```
 
 ## What the compiler already covers
@@ -131,13 +138,13 @@ The whole documentation site is published in a form assistants can read without 
 
 ## Compared to the MCP server
 
-| MCP tool           | Equivalent with the skill                                                 |
-| ------------------ | ------------------------------------------------------------------------- |
-| `ngforge_validate` | `npx --yes @ng-forge/dynamic-forms-cli`, or its `/validate` entry point   |
-| `ngforge_lookup`   | `references/rules.md` and `references/field-types.md`, or `llms-full.txt` |
-| `ngforge_examples` | `references/patterns.md`                                                  |
-| `ngforge_scaffold` | The patterns, adapted by the assistant                                    |
-| `ngforge_search`   | No direct equivalent. Use the docs site search                            |
+| MCP tool           | Equivalent with the skill                                                    |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `ngforge_validate` | `npx --yes @ng-forge/dynamic-forms-cli@next`, or its `/validate` entry point |
+| `ngforge_lookup`   | `references/rules.md` and `references/field-types.md`, or `llms-full.txt`    |
+| `ngforge_examples` | `references/patterns.md`                                                     |
+| `ngforge_scaffold` | The patterns, adapted by the assistant                                       |
+| `ngforge_search`   | No direct equivalent. Use the docs site search                               |
 
 The skill loses interactive lookup: the assistant reads whole reference files rather than querying for one topic. In exchange it needs no server, works across assistants, and its validation runs in CI.
 

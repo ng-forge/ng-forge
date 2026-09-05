@@ -13,6 +13,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { UI_ADAPTERS } from '../../packages/dynamic-form-mcp/src/registry/ui-adapters.ts';
 
 const SKILL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'dynamic-forms');
 const REFERENCES_DIR = join(SKILL_DIR, 'references');
@@ -146,5 +147,65 @@ describe('references', () => {
 
   it('uses forward slashes in every path it mentions', () => {
     expect(skillMd).not.toMatch(/[\w-]+\\[\w-]+\.md/);
+  });
+});
+
+/**
+ * The adapter skills get the same structural treatment as the core one.
+ *
+ * They were added by the package-boundary split and had no structural coverage
+ * at all: four SKILL.md files shipping to agents with nothing checking the
+ * platform's own limits. The name and description caps are validated by the
+ * platform and a violation makes a skill fail to load, so a test is cheaper than
+ * finding out at install time.
+ */
+describe('adapter skills', () => {
+  const adapterDirs = UI_ADAPTERS.map((a) => join(dirname(fileURLToPath(import.meta.url)), '..', `dynamic-forms-${a.library}`));
+
+  it.each(UI_ADAPTERS.map((a) => a.library))('keeps %s within the platform name and description caps', async (library) => {
+    const dir = join(dirname(fileURLToPath(import.meta.url)), '..', `dynamic-forms-${library}`);
+    const { frontmatter } = parseFrontmatter(await readFile(join(dir, 'SKILL.md'), 'utf-8'));
+
+    expect(frontmatter['name']?.length, 'name cap is enforced by the platform').toBeLessThanOrEqual(MAX_NAME_LENGTH);
+    expect(frontmatter['description']?.length, 'description cap is enforced by the platform').toBeLessThanOrEqual(MAX_DESCRIPTION_LENGTH);
+  });
+
+  it.each(UI_ADAPTERS.map((a) => a.library))('keeps the %s body well inside the line budget', async (library) => {
+    const dir = join(dirname(fileURLToPath(import.meta.url)), '..', `dynamic-forms-${library}`);
+    const { body } = parseFrontmatter(await readFile(join(dir, 'SKILL.md'), 'utf-8'));
+
+    expect(body.split('\n').length).toBeLessThanOrEqual(MAX_SKILL_BODY_LINES);
+  });
+
+  it.each(UI_ADAPTERS.map((a) => a.library))('points %s at the core skill rather than repeating it', async (library) => {
+    // Field types, rules and pitfalls are identical whichever adapter is
+    // installed. An adapter skill that restated them would be a second copy to
+    // keep in step, and would describe rules it does not own.
+    const dir = join(dirname(fileURLToPath(import.meta.url)), '..', `dynamic-forms-${library}`);
+    const { body } = parseFrontmatter(await readFile(join(dir, 'SKILL.md'), 'utf-8'));
+
+    expect(body).toContain('ng-forge-dynamic-forms');
+  });
+
+  it('keeps every adapter reference one level deep', async () => {
+    // Nested references are previewed with head rather than read whole, which
+    // returns incomplete information.
+    for (const dir of adapterDirs) {
+      const entries = await readdir(join(dir, 'references'), { withFileTypes: true });
+      for (const entry of entries) {
+        expect(entry.isDirectory(), `${entry.name} nests references`).toBe(false);
+      }
+    }
+  });
+
+  it('gives every long adapter reference a contents index', async () => {
+    for (const dir of adapterDirs) {
+      for (const name of await readdir(join(dir, 'references'))) {
+        const contents = await readFile(join(dir, 'references', name), 'utf-8');
+        if (contents.split('\n').length <= TOC_LINE_THRESHOLD) continue;
+
+        expect(contents, `${name} is long but has no contents index`).toContain('## Contents');
+      }
+    }
   });
 });

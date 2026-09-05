@@ -1,0 +1,1194 @@
+{
+  "adapter": {
+    "id": "primeng",
+    "package": "@ng-forge/dynamic-forms-primeng",
+    "version": "1.1.0"
+  },
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "@ng-forge/dynamic-forms-validation",
+    "version": "1.1.0"
+  },
+  "props": {
+    "add-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "array": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "button": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "checkbox": {
+      "keys": {
+        "binary": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "falseValue": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        },
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trueValue": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "container": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "datepicker": {
+      "keys": {
+        "dateFormat": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "inline": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "selectionMode": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "multiple",
+              "range",
+              "single"
+            ]
+          }
+        },
+        "showButtonBar": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "showIcon": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "touchUI": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "view": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "date",
+              "month",
+              "year"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "group": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "hidden": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "input": {
+      "keys": {
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "size": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "large",
+              "small"
+            ]
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "email",
+              "number",
+              "password",
+              "tel",
+              "text",
+              "url"
+            ]
+          }
+        },
+        "variant": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "filled",
+              "outlined"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "insert-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "multi-checkbox": {
+      "keys": {
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "next": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "page": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "pop-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "prepend-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "previous": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "radio": {
+      "keys": {
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "name": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "remove-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "row": {
+      "keys": {},
+      "policy": "strip"
+    },
+    "select": {
+      "keys": {
+        "compareWith": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "filter": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "multiple": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "showClear": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "shift-array-item": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "slider": {
+      "keys": {
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "orientation": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "horizontal",
+              "vertical"
+            ]
+          }
+        },
+        "range": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "step": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "submit": {
+      "keys": {
+        "icon": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "iconPos": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "bottom",
+              "left",
+              "right",
+              "top"
+            ]
+          }
+        },
+        "outlined": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "raised": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "rounded": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "severity": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contrast",
+              "danger",
+              "help",
+              "info",
+              "primary",
+              "secondary",
+              "success",
+              "warn"
+            ]
+          }
+        },
+        "text": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button",
+              "reset",
+              "submit"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "text": {
+      "keys": {
+        "elementType": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "h1",
+              "h2",
+              "h3",
+              "h4",
+              "h5",
+              "h6",
+              "p",
+              "span"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "textarea": {
+      "keys": {
+        "autoResize": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "cols": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "rows": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "toggle": {
+      "keys": {
+        "hint": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "styleClass": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        }
+      },
+      "policy": "strip"
+    }
+  },
+  "unresolved": [
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "select.props.compareWith"
+      ],
+      "reason": "callable (o1: ValueType, o2: ValueType) => boolean"
+    }
+  ]
+}

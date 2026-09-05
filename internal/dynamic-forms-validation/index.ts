@@ -23,3 +23,10 @@ export * from './discovery/validate-file';
 // Report formatting and the error-to-fix table.
 export * from './reporting/fix-suggestions';
 export * from './reporting/report';
+
+// The named semantic rules, and resolving a project's opt-outs.
+export * from './rules/catalogue';
+
+// Reading a project's `.ng-forge/rules.json`. Shared so the CLI and the MCP
+// server honour the same opt-outs; the MCP used to ignore the file entirely.
+export * from './rules/project-rules';
