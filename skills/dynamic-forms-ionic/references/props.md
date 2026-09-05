@@ -30,7 +30,7 @@ These keys go inside `props`. Everything else about a field — its `key`,
 `type`, `label`, validation and logic — is adapter independent and documented
 in the core skill.
 
-Derived from `@ng-forge/dynamic-forms-ionic` 1.1.0, so this list is
+Derived from `@ng-forge/dynamic-forms-ionic` 1.2.0, so this list is
 what the types actually declare rather than a copy maintained beside them.
 
 ## `add-array-item`

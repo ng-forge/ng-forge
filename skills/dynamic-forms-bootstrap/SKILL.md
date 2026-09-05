@@ -9,7 +9,7 @@ description: Bootstrap specific field properties for @ng-forge/dynamic-forms. Us
 
 Adapter specific `props` for `@ng-forge/dynamic-forms-bootstrap`.
 
-This skill documents version **1.1.0**.
+This skill documents version **1.2.0**.
 
 ## Use with the core skill
 
