@@ -37,6 +37,14 @@ export default [
     },
   },
   {
+    // This package owns `@ng-forge/dynamic-forms/internal`, so the base config's
+    // deep-import guard does not apply to its own sources.
+    files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
+  {
     files: ['**/*.html'],
     // Override or add rules here
     rules: {},
