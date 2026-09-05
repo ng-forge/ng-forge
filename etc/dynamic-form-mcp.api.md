@@ -43,6 +43,7 @@ export interface FieldTypeInfo {
     description: string;
     // (undocumented)
     example: string;
+    illustrative?: Partial<Record<'example' | 'minimalExample', string>>;
     minimalExample?: string;
     notAllowedIn?: string[];
     // (undocumented)
@@ -62,6 +63,8 @@ export interface FormattedValidationError {
     message: string;
     path: string;
     received?: string;
+    ruleId?: string;
+    severity?: 'error' | 'warning';
 }
 
 // @public
@@ -161,7 +164,7 @@ export interface UIAdapterInfo {
 export type UiIntegration = 'bootstrap' | 'ionic' | 'material' | 'primeng';
 
 // @public (undocumented)
-export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult;
+export function validateFormConfig(uiIntegration: UiIntegration, config: unknown, options?: ValidateConfigOptions): ValidationResult;
 
 // @public
 export interface ValidationResult {

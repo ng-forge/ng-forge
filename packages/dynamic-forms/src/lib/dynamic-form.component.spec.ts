@@ -100,20 +100,64 @@ describe('DynamicFormComponent', () => {
     return SimpleTestUtils.createComponent(config, initialValue);
   };
 
+  /** One flush pass: how long each settle step waits before re-rendering. */
+  const SETTLE_STEP_MS = 10;
+  /** Upper bound on settling, kept well inside the 1000ms testTimeout. */
+  const SETTLE_BUDGET_MS = 300;
+
+  /**
+   * Resolves every lazy loader in the registries, so no field or wrapper module
+   * is still in flight once rendering is being observed. Module resolution is
+   * the only asynchronous step the settle loop below cannot see: an unchanged
+   * DOM is indistinguishable from a DOM whose next mutation is waiting on an
+   * import. Awaiting the loaders directly removes that case instead of
+   * guessing at a delay long enough to cover it.
+   */
+  const loadRegisteredComponents = async (deadline: number) => {
+    const fields = TestBed.inject(FIELD_REGISTRY);
+    const wrappers = TestBed.inject(WRAPPER_REGISTRY);
+
+    const loaded = Promise.allSettled([
+      ...[...fields.values()].map((definition) => definition.loadComponent?.()),
+      ...[...wrappers.values()].map((definition) => definition.loadComponent()),
+    ]);
+
+    // Bounded by the settle budget: the initialization tests register a loader
+    // they resolve by hand, so as to observe the form before it is ready.
+    // Waiting on that one unconditionally would hang instead.
+    await Promise.race([loaded, delay(Math.max(0, deadline - Date.now()))]);
+  };
+
   /**
    * Waits for dynamic components to finish loading and rendering.
    * Call this after createComponent() and before querying for test harness components.
+   *
+   * Settles on a condition rather than on a fixed number of passes. Field
+   * components load lazily, so how many passes it takes depends on nesting
+   * depth and on how loaded the machine is. Two fixed 10ms passes were enough
+   * locally and not on a CI runner, where the deepest case in this file
+   * (page > group > row) still had not rendered when the assertions ran, so
+   * `querySelector` returned null and the test failed rather than timed out.
+   *
+   * With every module already resolved, each settle step drains the microtasks
+   * that mount whatever the previous step revealed, so two identical passes in
+   * a row means rendering has stopped rather than that it has not started.
    */
   const waitForDynamicComponents = async (fixture: any) => {
-    // Two-pass approach balances reliability with performance
-    // Use small delay (10ms) to allow async component loading to complete
-    await delay(10);
-    fixture.detectChanges();
-    TestBed.flushEffects();
+    const deadline = Date.now() + SETTLE_BUDGET_MS;
+    await loadRegisteredComponents(deadline);
 
-    await delay(10);
-    fixture.detectChanges();
-    TestBed.flushEffects();
+    let previous: string | undefined;
+
+    for (;;) {
+      await delay(SETTLE_STEP_MS);
+      fixture.detectChanges();
+      TestBed.flushEffects();
+
+      const current = fixture.nativeElement.innerHTML;
+      if (previous === current || Date.now() >= deadline) return;
+      previous = current;
+    }
   };
 
   beforeEach(async () => {
@@ -3047,6 +3091,27 @@ describe('DynamicFormComponent', () => {
         middleSibling: 'm',
         outerSibling: 'o',
       });
+    });
+
+    it('should carry a hidden field inside a row', async () => {
+      const config = {
+        fields: [
+          {
+            key: 'row',
+            type: 'row',
+            fields: [
+              { key: 'firstName', type: 'input', label: 'First', value: 'Ada' },
+              { key: 'source', type: 'hidden', value: 'web' },
+            ],
+          },
+        ],
+      } as TestFormConfig;
+
+      const { component, fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+
+      // The hidden value survives the row's flattening like any other child.
+      expect(component.formValue()).toEqual({ firstName: 'Ada', source: 'web' });
     });
 
     it('should flatten nested rows (row inside row)', async () => {

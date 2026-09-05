@@ -62,7 +62,7 @@ const SIMPLIFIED_ONLY_HINTS: Record<SimplifiedOnlyProp, string> = {
  * | Container | Allowed Children                      | NOT Allowed |
  * |-----------|---------------------------------------|-------------|
  * | Page      | rows, groups, arrays, leaves          | pages       |
- * | Row       | groups, arrays, leaves (except hidden)| pages, rows |
+ * | Row       | same as Container                     | pages       |
  * | Group     | rows, leaves                          | pages, groups|
  * | Array     | rows, groups, leaves                  | pages, arrays|
  *
@@ -162,7 +162,7 @@ export function createContainerSchemas<T extends ZodTypeAny>(options: ContainerS
     title: z.never().optional(),
   });
 
-  // Row can contain: groups, arrays, leaves (no pages, rows)
+  // Row can contain whatever a container can (it resolves to one): no pages.
   // Rows support only 'hidden' logic type for conditional visibility
   const RowFieldSchema = ContainerBaseSchema.extend({
     type: z.literal('row'),

@@ -48,6 +48,10 @@ afterEach(() => {
   process.exitCode = undefined;
 });
 
+/** ANSI escapes, so assertions read the words rather than the paint. */
+// eslint-disable-next-line no-control-regex -- stripping ANSI is the point
+const plain = (text: string) => text.replace(/\u001b\[[0-9;]*m/g, '');
+
 /** Invoke the program the way the bin script does. */
 async function invoke(...args: string[]): Promise<number | undefined> {
   await run(['node', 'ng-forge-validate', ...args]);
@@ -64,7 +68,7 @@ describe('createProgram', () => {
       .options.map((o) => o.long)
       .sort();
 
-    expect(flags).toEqual(['--json', '--quiet', '--require-config', '--ui']);
+    expect(flags).toEqual(['--json', '--quiet', '--require-config', '--tsconfig', '--ui', '--version']);
   });
 
   it('defaults the UI integration to material', () => {
@@ -118,7 +122,7 @@ describe('argv handling', () => {
 
   it('accepts the short -q alias', async () => {
     await invoke(join(dir, 'valid.form.ts'), '-q');
-    expect(logs.join('\n')).not.toContain('config(s) valid');
+    expect(plain(logs.join('\n'))).not.toContain('valid across');
   });
 
   it('accepts several patterns at once', async () => {

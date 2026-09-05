@@ -32,6 +32,17 @@ const fieldSchemas: Record<UiIntegration, z.ZodTypeAny> = {
   ionic: IonicFieldSchema,
 };
 
+/** Options for one validation run. */
+export interface ValidateConfigOptions {
+  /**
+   * Rule ids the project has switched off, already resolved.
+   *
+   * Resolved by the caller so an unknown id fails once, where the config is
+   * read, rather than silently doing nothing on every run.
+   */
+  disabledRules?: ReadonlySet<string>;
+}
+
 /**
  * Validation result for form configuration.
  */
@@ -65,6 +76,23 @@ export interface FormattedValidationError {
    * Path to the invalid field (e.g., 'fields[0].props.type').
    */
   path: string;
+
+  /**
+   * The named rule this violates, when it is a semantic one.
+   *
+   * Absent for anything the type system enforces on its own. Those carry no
+   * identifier by design: they cannot be switched off, because a config that
+   * breaks them does not compile whatever the validator says.
+   */
+  ruleId?: string;
+
+  /**
+   * `warning` when the project has disabled this rule.
+   *
+   * Disabling downgrades rather than silences, so an agent still sees the
+   * finding and can tell it was a deliberate choice.
+   */
+  severity?: 'error' | 'warning';
 
   /**
    * Error message.
@@ -389,15 +417,30 @@ const FIELDS_REQUIRING_OPTIONS = ['select', 'radio', 'multi-checkbox'];
  * moment a field type is added, which is exactly the failure this file exists
  * to catch.
  */
+/**
+ * What a container accepts, and what a row accepts with it.
+ *
+ * `ContainerAllowedChildren` admits every registered field type except `page`,
+ * and containers nest, so the one prohibition is the one the type states.
+ * Containers had no entry at all, which is why a page inside a container was the
+ * only nesting the validator let through while the type rejected it.
+ */
+const CONTAINER_NESTING = {
+  forbidden: ['page'],
+  message: 'Containers and rows cannot contain pages. ALL top-level fields must be pages if using multi-page mode.',
+};
+
 const NESTING_RULES: Record<string, { forbidden: string[]; message: string }> = {
   page: {
     forbidden: ['page'],
     message: 'Pages cannot be nested inside other containers. ALL top-level fields must be pages if using multi-page mode.',
   },
-  row: {
-    forbidden: ['page', 'row', 'hidden'],
-    message: 'Rows cannot contain pages, other rows, or hidden fields. Hidden fields should be at page or form level.',
-  },
+  container: CONTAINER_NESTING,
+  // A row resolves to a container at runtime, and the types say so outright:
+  // `RowAllowedChildren` is an alias of `ContainerAllowedChildren`. Sharing the
+  // entry keeps that an alias here too, rather than a fifth copy of the list
+  // that can drift from the type it is derived from.
+  row: CONTAINER_NESTING,
   group: {
     forbidden: ['page', 'group'],
     message: 'Groups cannot contain pages or other groups (no nested groups).',
@@ -405,10 +448,6 @@ const NESTING_RULES: Record<string, { forbidden: string[]; message: string }> = 
   array: {
     forbidden: ['page', 'array'],
     message: 'Arrays cannot contain pages or other arrays (no nested arrays).',
-  },
-  container: {
-    forbidden: ['page'],
-    message: 'Containers cannot contain pages. Pages are top-level fields only.',
   },
 };
 
@@ -421,11 +460,11 @@ const EXPECTED_STRUCTURE: Record<string, string> = {
   radio: `{ key: 'fieldKey', type: 'radio', label: 'Label', options: [{ label: 'Option', value: 'value' }] }`,
   'multi-checkbox': `{ key: 'fieldKey', type: 'multi-checkbox', label: 'Label', options: [{ label: 'Option', value: 'value' }] }`,
   slider: `{ key: 'fieldKey', type: 'slider', label: 'Label', minValue: 0, maxValue: 100, step: 1 }`,
+  container: `{ key: 'containerKey', type: 'container', wrappers: [{ type: 'css', cssClasses: 'card' }], fields: [...childFields] }`,
   row: `{ key: 'rowKey', type: 'row', fields: [...childFields] }`,
   group: `{ key: 'groupKey', type: 'group', fields: [...childFields] }`,
   array: `Full API: { key: 'arrayKey', type: 'array', fields: [...itemDefs] } OR Simplified API: { key: 'arrayKey', type: 'array', template: { type: 'input', label: 'Item' }, value: [] }`,
   page: `{ key: 'pageKey', type: 'page', fields: [...childFields, { key: 'next', type: 'next', label: 'Next' }] }`,
-  container: `{ key: 'containerKey', type: 'container', wrappers: [{ type: 'css', cssClasses: 'card' }], fields: [...childFields] }`,
 };
 
 /**
@@ -487,6 +526,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
             if (prop in v) {
               errors.push({
                 path: `${path}.validators[${vIdx}].${prop}`,
+                ruleId: 'core/validation-messages-location',
                 message: `"${prop}" is NOT a valid validator property. Error messages go in "validationMessages" at the FIELD level, not on the validator config. Use "kind" to specify an error key, then define the message in the field's validationMessages.`,
               });
             }
@@ -595,6 +635,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
       if (fieldType && rules.forbidden.includes(fieldType)) {
         errors.push({
           path: path,
+          ruleId: 'core/nesting',
           message: `"${fieldType}" is NOT allowed inside "${parentType}". ${rules.message}`,
         });
       }
@@ -650,6 +691,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         if (wrongProps.length > 0) {
           errors.push({
             path: `${path}.props`,
+            ruleId: 'core/slider-range-properties',
             message: `Slider has properties in wrong location: ${wrongProps.join(', ')}. For sliders, use minValue, maxValue, and step at FIELD level, not inside props. Expected structure: ${EXPECTED_STRUCTURE['slider']}`,
           });
         }
@@ -678,6 +720,7 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
         const propList = foundForbidden.map((p) => `"${p}"`).join(', ');
         errors.push({
           path: path,
+          ruleId: 'core/hidden-minimal',
           message: `Hidden field "${fieldKey || 'unknown'}" has FORBIDDEN properties: ${propList}. Hidden fields ONLY support: key, type, value, className. They do not render and cannot be validated. Expected structure: ${EXPECTED_STRUCTURE['hidden']}`,
         });
       }
@@ -829,7 +872,26 @@ function normalizeLegacyArrayActionTypes(value: unknown): unknown {
   return value;
 }
 
-export function validateFormConfig(uiIntegration: UiIntegration, config: unknown): ValidationResult {
+/**
+ * Apply the project's disabled rules.
+ *
+ * A disabled rule becomes a warning and stops counting towards validity, rather
+ * than disappearing. The consumer is usually an agent, and a finding that
+ * vanishes teaches it nothing, where one marked as deliberately off is
+ * information it can act on and a reviewer can question.
+ *
+ * Only findings that carry a rule id can be downgraded. Everything else comes
+ * from the types and is not something a project may switch off.
+ */
+function applyDisabledRules(errors: FormattedValidationError[], disabled: ReadonlySet<string>): FormattedValidationError[] {
+  if (disabled.size === 0) return errors;
+
+  return errors.map((error) =>
+    error.ruleId && disabled.has(error.ruleId) ? { ...error, severity: 'warning' as const } : { ...error, severity: 'error' as const },
+  );
+}
+
+export function validateFormConfig(uiIntegration: UiIntegration, config: unknown, options?: ValidateConfigOptions): ValidationResult {
   const schema = formConfigSchemas[uiIntegration];
 
   if (!schema) {
@@ -864,12 +926,19 @@ export function validateFormConfig(uiIntegration: UiIntegration, config: unknown
 
   // Combine pre-validation errors with Zod errors
   const zodErrors = result.success ? [] : formatZodError(result.error, uiIntegration, normalizedConfig);
-  const allErrors = [...preErrors, ...zodErrors];
+  const allErrors = applyDisabledRules([...preErrors, ...zodErrors], options?.disabledRules ?? new Set());
+
+  // A config whose only findings are disabled rules is valid: that is what
+  // disabling one means.
+  const blocking = allErrors.filter((error) => error.severity !== 'warning');
+  if (blocking.length === 0) {
+    return { valid: true, data: result.success ? result.data : undefined, errors: allErrors };
+  }
 
   return {
     valid: false,
     errors: allErrors,
-    errorSummary: generateErrorSummary(allErrors),
+    errorSummary: generateErrorSummary(blocking),
   };
 }
 

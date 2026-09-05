@@ -12,6 +12,9 @@ import * as fsPromises from 'fs/promises';
 // Mock fs/promises
 vi.mock('fs/promises', () => ({
   readFile: vi.fn(),
+  // Rejects by default, so rules-file discovery finds nothing and every test
+  // that does not care about `.ng-forge/rules.json` behaves as before.
+  access: vi.fn().mockRejectedValue(new Error('ENOENT')),
 }));
 
 describe('Validate Tool', () => {
@@ -1157,6 +1160,44 @@ export const formConfig = {
       expect(content.type).toBe('file');
       expect(content.filePath).toBe('/path/to/form-config.ts');
       expect(content.configsFound).toBeGreaterThan(0);
+    });
+
+    it('reports a disabled-rule finding as a warning, not an error', async () => {
+      // Counting it as an error produced `valid: true` beside `errorCount: 1`,
+      // which is the tool contradicting itself in the same object.
+      const tsSource = `
+import { FormConfig } from '@ng-forge/dynamic-forms';
+
+export const formConfig = {
+  fields: [{ key: 'ref', type: 'hidden', value: 'web', label: 'nope' }]
+} satisfies FormConfig;
+`;
+      (fsPromises.access as Mock).mockResolvedValueOnce(undefined);
+      (fsPromises.readFile as Mock).mockImplementation((path: string) =>
+        Promise.resolve(String(path).endsWith('rules.json') ? JSON.stringify({ disabled: ['core/hidden-minimal'] }) : tsSource),
+      );
+
+      const result = await registeredTool.handler({
+        uiIntegration: 'material',
+        config: '/path/to/hidden.form.ts',
+      });
+
+      const jsonText = (result as { content: [{ text: string }, { text: string }] }).content[1].text;
+      const content = JSON.parse(
+        jsonText
+          .trim()
+          .replace(/^```json\n/, '')
+          .replace(/\n```$/, ''),
+      );
+
+      expect(content.allValid).toBe(true);
+      expect(content.errorCount).toBe(0);
+      expect(content.warningCount).toBe(1);
+      expect(content.results[0].valid).toBe(true);
+      expect(content.results[0].errorCount).toBe(0);
+      expect(content.results[0].warningCount).toBe(1);
+
+      (fsPromises.readFile as Mock).mockReset();
     });
 
     it('formats file report with no FormConfig found', async () => {

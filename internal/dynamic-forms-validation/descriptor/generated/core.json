@@ -1,0 +1,7737 @@
+{
+  "fieldTypes": {
+    "add-array-item": {
+      "aliases": [
+        "addArrayItem"
+      ],
+      "canonical": "add-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "add-array-item",
+              "addArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "array": {
+      "aliases": [],
+      "canonical": "array",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "field"
+                },
+                {
+                  "kind": "array",
+                  "of": {
+                    "kind": "field"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "array"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "button": {
+      "aliases": [],
+      "canonical": "button",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "event": {
+          "required": true,
+          "type": {
+            "as": "FormEventConstructor<FormEvent>",
+            "kind": "opaque"
+          }
+        },
+        "eventArgs": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "string"
+                },
+                {
+                  "kind": "number"
+                },
+                {
+                  "kind": "enum",
+                  "values": [
+                    null
+                  ]
+                },
+                {
+                  "kind": "enum",
+                  "values": [
+                    null
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "button"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "checkbox": {
+      "aliases": [],
+      "canonical": "checkbox",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "checkbox"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "container": {
+      "aliases": [],
+      "canonical": "container",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "container"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "datepicker": {
+      "aliases": [],
+      "canonical": "datepicker",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxDate": {
+          "droppedArms": [
+            "Date"
+          ],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minDate": {
+          "droppedArms": [
+            "Date"
+          ],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "startAt": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "datepicker"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "droppedArms": [
+            "Date"
+          ],
+          "narrowedFrom": "string | Date | null | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "group": {
+      "aliases": [],
+      "canonical": "group",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "group"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "hidden": {
+      "aliases": [],
+      "canonical": "hidden",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "hidden"
+            ]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "string"
+              },
+              {
+                "kind": "number"
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "union",
+                  "of": [
+                    {
+                      "kind": "string"
+                    },
+                    {
+                      "kind": "number"
+                    },
+                    {
+                      "kind": "enum",
+                      "values": [
+                        null
+                      ]
+                    },
+                    {
+                      "kind": "enum",
+                      "values": [
+                        null
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "input": {
+      "aliases": [],
+      "canonical": "input",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "InputMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "input"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "string"
+              },
+              {
+                "kind": "number"
+              }
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "insert-array-item": {
+      "aliases": [
+        "insertArrayItem"
+      ],
+      "canonical": "insert-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "index": {
+          "required": true,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "insert-array-item",
+              "insertArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "multi-checkbox": {
+      "aliases": [],
+      "canonical": "multi-checkbox",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "multi-checkbox"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "{}",
+              "kind": "opaque"
+            }
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "next": {
+      "aliases": [],
+      "canonical": "next",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "next"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "page": {
+      "aliases": [],
+      "canonical": "page",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "page"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "pop-array-item": {
+      "aliases": [
+        "popArrayItem"
+      ],
+      "canonical": "pop-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "pop-array-item",
+              "popArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "prepend-array-item": {
+      "aliases": [
+        "prependArrayItem"
+      ],
+      "canonical": "prepend-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "template": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "field"
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "field"
+                }
+              }
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "prepend-array-item",
+              "prependArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "previous": {
+      "aliases": [],
+      "canonical": "previous",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "previous"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "radio": {
+      "aliases": [],
+      "canonical": "radio",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "radio"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "remove-array-item": {
+      "aliases": [
+        "removeArrayItem"
+      ],
+      "canonical": "remove-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "remove-array-item",
+              "removeArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "row": {
+      "aliases": [],
+      "canonical": "row",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "fields": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "field"
+            }
+          }
+        },
+        "label": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "ContainerLogicConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "row"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "container"
+    },
+    "select": {
+      "aliases": [],
+      "canonical": "select",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "options": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "FieldOption<unknown>",
+              "kind": "opaque"
+            }
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "select"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "shift-array-item": {
+      "aliases": [
+        "shiftArrayItem"
+      ],
+      "canonical": "shift-array-item",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "arrayKey": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "shift-array-item",
+              "shiftArrayItem"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "slider": {
+      "aliases": [],
+      "canonical": "slider",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxValue": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minValue": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "step": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "slider"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "submit": {
+      "aliases": [],
+      "canonical": "submit",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                }
+              ]
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "submit"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "text": {
+      "aliases": [],
+      "canonical": "text",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "text"
+            ]
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "textarea": {
+      "aliases": [],
+      "canonical": "textarea",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "TextareaMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "textarea"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    },
+    "toggle": {
+      "aliases": [],
+      "canonical": "toggle",
+      "extends": "BaseFieldProperties",
+      "fieldLevel": {
+        "derivation": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "email": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "label": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "logic": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "ImmediateStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedStateLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedHttpDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~806a82"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~2786f9"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~8b3ac2"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncFunctionDerivationShared~6ab423"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedExpressionDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "OnChangeValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DebouncedValueDerivationLogicConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~dee103"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~5204ab"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~0e36ce"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionDerivationShared~8b26a1"
+                }
+              ]
+            }
+          }
+        },
+        "max": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "maxLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "meta": {
+          "required": false,
+          "type": {
+            "as": "FieldMeta",
+            "kind": "opaque"
+          }
+        },
+        "min": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "minLength": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "nullable": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "pattern": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "placeholder": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "required": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "schemas": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "as": "SchemaApplicationConfig",
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "toggle"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        },
+        "validators": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "BuiltInValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "CustomValidatorConfig"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~ebb855"
+                },
+                {
+                  "kind": "ref",
+                  "name": "AsyncValidatorConfigShared~3e5579"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~4faf65"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FunctionHttpValidatorConfigShared~6064b3"
+                },
+                {
+                  "kind": "ref",
+                  "name": "DeclarativeHttpValidatorConfig"
+                }
+              ]
+            }
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "wrappers": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "union",
+              "of": [
+                {
+                  "kind": "ref",
+                  "name": "CssWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "RowWrapper"
+                },
+                {
+                  "kind": "ref",
+                  "name": "FieldErrorsWrapper"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "kind": "leaf"
+    }
+  },
+  "formatVersion": "1.0",
+  "generator": {
+    "name": "@ng-forge/dynamic-forms-validation",
+    "version": "1.1.0"
+  },
+  "objects": {
+    "AndCondition": {
+      "keys": {
+        "conditions": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "and"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncConditionBase~0e2545": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "async"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncConditionBase~3185d5": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "async"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~2786f9": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "asyncFunction"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~6ab423": {
+      "keys": {
+        "asyncFn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "asyncFunction"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~806a82": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "asyncFunction"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncFunctionDerivationShared~8b3ac2": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "asyncFunction"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncValidatorConfigShared~3e5579": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "as": "AsyncCustomValidator<unknown, unknown, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "async"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "AsyncValidatorConfigShared~ebb855": {
+      "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "async"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "BaseFieldProperties": {
+      "keys": {
+        "className": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "col": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "disabled": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfDisabled": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfHidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "excludeValueIfReadonly": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "hidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "key": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "readonly": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "skipAutoWrappers": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "skipDefaultWrappers": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "tabIndex": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "validateWhenHidden": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "BuiltInValidatorConfig": {
+      "keys": {
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "email",
+              "max",
+              "maxLength",
+              "min",
+              "minLength",
+              "pattern",
+              "required"
+            ]
+          }
+        },
+        "value": {
+          "droppedArms": [
+            "RegExp"
+          ],
+          "narrowedFrom": "string | number | RegExp | undefined",
+          "required": false,
+          "type": {
+            "kind": "unknown"
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "CssWrapper": {
+      "keys": {
+        "cssClasses": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "css"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "CustomValidatorConfig": {
+      "keys": {
+        "errorParams": {
+          "required": false,
+          "type": {
+            "as": "Record<string, string>",
+            "kind": "opaque"
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "kind": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "custom"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedExpressionDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedHttpDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedStateLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "formInvalid"
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "formSubmitting"
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "pageInvalid"
+                ]
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "disabled",
+              "hidden",
+              "readonly",
+              "required"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DebouncedValueDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "DeclarativeHttpValidatorConfig": {
+      "keys": {
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "responseMapping": {
+          "required": true,
+          "type": {
+            "as": "HttpValidationResponseMapping",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FieldErrorsWrapper": {
+      "keys": {
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "field-errors"
+            ]
+          }
+        },
+        "validationMessages": {
+          "required": false,
+          "type": {
+            "as": "ValidationMessages",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FieldValueCondition": {
+      "keys": {
+        "fieldPath": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "operator": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "contains",
+              "endsWith",
+              "equals",
+              "greater",
+              "greaterOrEqual",
+              "less",
+              "lessOrEqual",
+              "matches",
+              "notEquals",
+              "startsWith"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "fieldValue"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~0e36ce": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~5204ab": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~8b26a1": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "debounced"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionDerivationShared~dee103": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionHttpValidatorConfigShared~4faf65": {
+      "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "FunctionHttpValidatorConfigShared~6064b3": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "as": "HttpCustomValidator<unknown, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "params": {
+          "required": false,
+          "type": {
+            "as": "Record<string, unknown>",
+            "kind": "opaque"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        },
+        "when": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "HttpCondition": {
+      "keys": {
+        "cacheDurationMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "pendingValue": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "ImmediateStateLogicConfig": {
+      "keys": {
+        "condition": {
+          "required": true,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "formInvalid"
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "formSubmitting"
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  "pageInvalid"
+                ]
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "disabled",
+              "hidden",
+              "readonly",
+              "required"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "JavascriptCondition": {
+      "keys": {
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "javascript"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeExpressionDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeHttpDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": true,
+          "type": {
+            "as": "HttpRequestConfig",
+            "kind": "opaque"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "source": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "http"
+            ]
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OnChangeValueDerivationLogicConfig": {
+      "keys": {
+        "asyncFn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "asyncFunctionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "condition": {
+          "required": false,
+          "type": {
+            "kind": "union",
+            "of": [
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "enum",
+                "values": [
+                  null
+                ]
+              },
+              {
+                "kind": "ref",
+                "name": "FieldValueCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; functionName: string; f~edf1b2"
+              },
+              {
+                "kind": "ref",
+                "name": "{ type: \"custom\"; fn: CustomFunction; fun~682550"
+              },
+              {
+                "kind": "ref",
+                "name": "JavascriptCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "HttpCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~3185d5"
+              },
+              {
+                "kind": "ref",
+                "name": "AsyncConditionBase~0e2545"
+              },
+              {
+                "kind": "ref",
+                "name": "AndCondition"
+              },
+              {
+                "kind": "ref",
+                "name": "OrCondition"
+              }
+            ]
+          }
+        },
+        "debounceMs": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "debugName": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "dependsOn": {
+          "required": false,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "string"
+            }
+          }
+        },
+        "expression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "http": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "reEngageOnDependencyChange": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "responseExpression": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "source": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "stopOnUserOverride": {
+          "required": false,
+          "type": {
+            "kind": "boolean"
+          }
+        },
+        "targetProperty": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "trigger": {
+          "required": false,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "onChange"
+            ]
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "derivation"
+            ]
+          }
+        },
+        "value": {
+          "required": true,
+          "type": {
+            "as": "{}",
+            "kind": "opaque"
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "OrCondition": {
+      "keys": {
+        "conditions": {
+          "required": true,
+          "type": {
+            "kind": "array",
+            "of": {
+              "kind": "opaque"
+            }
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "or"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "RowWrapper": {
+      "keys": {
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "row"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "{ type: \"custom\"; fn: CustomFunction; fun~682550": {
+      "keys": {
+        "fn": {
+          "required": true,
+          "type": {
+            "kind": "opaque"
+          }
+        },
+        "functionName": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "custom"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "{ type: \"custom\"; functionName: string; f~edf1b2": {
+      "keys": {
+        "fn": {
+          "required": false,
+          "type": {
+            "kind": "never"
+          }
+        },
+        "functionName": {
+          "required": true,
+          "type": {
+            "kind": "string"
+          }
+        },
+        "type": {
+          "required": true,
+          "type": {
+            "kind": "enum",
+            "values": [
+              "custom"
+            ]
+          }
+        }
+      },
+      "policy": "strip"
+    }
+  },
+  "unresolved": [
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "AsyncConditionBase~0e2545.asyncFn"
+      ],
+      "reason": "callable AsyncConditionFunction"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "AsyncFunctionDerivationShared~2786f9.asyncFn",
+        "AsyncFunctionDerivationShared~6ab423.asyncFn"
+      ],
+      "reason": "callable AsyncDerivationFunction"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "FunctionDerivationShared~5204ab.fn",
+        "FunctionDerivationShared~8b26a1.fn",
+        "{ type: \"custom\"; fn: CustomFunction; fun~682550.fn"
+      ],
+      "reason": "callable CustomFunction"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "CustomValidatorConfig.fn"
+      ],
+      "reason": "callable CustomValidator"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "datepicker.startAt"
+      ],
+      "reason": "not expressible in a static config: Date"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "AndCondition.conditions[]",
+        "OrCondition.conditions[]"
+      ],
+      "reason": "union of FieldValueCondition | { type: \"custom\"; functionName: string; fn?: never; } | { type: \"custom\"; fn: CustomFunction; functionName?: never; } | JavascriptCondition | HttpCondition | AsyncConditionBase & { asyncFunctionName: string; asyncFn?: never; } | AsyncConditionBase & { asyncFn: AsyncConditionFunction; asyncFunctionName?: never; } | AndCondition | OrCondition"
+    },
+    {
+      "fallback": "passthrough",
+      "paths": [
+        "text.logic[]"
+      ],
+      "reason": "union of ImmediateStateLogicConfig & { type: NonFieldLogicType; } | DebouncedStateLogicConfig & { type: NonFieldLogicType; } | never | never | never | never | never | never | never | never | never | never | never | never | never | never"
+    }
+  ]
+}

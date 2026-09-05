@@ -31,6 +31,16 @@ export interface FieldTypeInfo {
   source: 'core' | 'adapter';
   /** Minimal valid example (just required properties) */
   minimalExample?: string;
+  /**
+   * Examples that cannot be evaluated as a single expression, and why.
+   *
+   * Some ship several snippets separated by prose, and one names a class only a
+   * real app defines. Those are worth keeping as they are, but the reason has to
+   * be written down: deriving the skip from whether evaluation throws is the same
+   * signal a genuinely broken example gives, so a newly-broken one would join the
+   * skip list instead of failing the suite that exists to catch it.
+   */
+  illustrative?: Partial<Record<'minimalExample' | 'example', string>>;
 }
 
 export interface ValidatorInfo {

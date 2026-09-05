@@ -28,10 +28,11 @@ export default [
   {
     // Guard the unsupported `/internal` deep-import. It ships at runtime for single
     // compiled identity, but it is not part of the public API. Adapter-tier code must
-    // import from `/integration`. The `dynamic-forms` package owns `/internal`, so it
-    // is exempt.
+    // import from `/integration`. The `dynamic-forms` package owns `/internal` and turns
+    // this rule off in its own `eslint.config.mjs` -- a path-based `ignores` here would
+    // only work when eslint runs with the workspace root as its base path, so it silently
+    // stopped applying whenever eslint resolved the per-project config instead.
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
-    ignores: ['packages/dynamic-forms/**'],
     rules: {
       'no-restricted-imports': [
         'error',

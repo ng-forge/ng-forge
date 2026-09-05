@@ -223,7 +223,7 @@ Numeric range slider for value selection
 Hidden field that participates in form values without rendering. REQUIRED: The "value" property MUST be provided (string, number, boolean, or array). FORBIDDEN: label, logic, validators, required, props, disabled, readonly, hidden, col, tabIndex, meta - hidden fields are purely for passing values through the form. IMPORTANT: In multi-page forms, hidden fields must go INSIDE a page, not at the root level.
 
 - Value type: `string | number | boolean | (string | number | boolean)[]`
-- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `container`
+- Allowed in: `top-level (single-page forms only)`, `page.fields`, `group.fields`, `array.fields`, `row`, `container`
 - Validators supported: no
 
 ```typescript
@@ -514,11 +514,21 @@ Button to append a new item to the end of an array field. Must be placed within 
 - Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'addContact',
   type: 'add-array-item',
-  label: 'Add Contact'
+  label: 'Add Contact',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -529,11 +539,21 @@ Button to add a new item to the beginning of an array field. (Legacy alias: prep
 - Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'prependContact',
   type: 'prepend-array-item',
-  label: 'Add to Top'
+  label: 'Add to Top',
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 
@@ -544,12 +564,23 @@ Button to insert a new item at a specific index in an array field (set via the i
 - Allowed in: `array`, `row`, `group`, `container`
 - Validators supported: no
 
+| Prop | Type | Required | Default | Description |
+| ---- | ---- | -------- | ------- | ----------- |
+| `index` | `number` | yes |  | REQUIRED. The position to insert at. |
+| `template` | `ArrayAllowedChildren \| readonly ArrayAllowedChildren[]` | yes |  | REQUIRED. The item this button adds. A single field creates a primitive item (its value is used directly); an array of fields creates an object item (the fields are merged into an object). Without it the config does not compile. |
+| `arrayKey` | `string` | no |  | Key of the array to act on. Optional when the button sits inside that array, which supplies it from context. |
+
 ```typescript
 {
   key: 'insertContact',
   type: 'insert-array-item',
   label: 'Insert',
-  index: 1
+  index: 1,
+  // REQUIRED: what one new item looks like.
+  template: [
+    { key: 'name', type: 'input', label: 'Name' },
+    { key: 'email', type: 'input', label: 'Email' }
+  ]
 }
 ```
 

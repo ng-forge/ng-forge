@@ -17,7 +17,8 @@ import { ContainerLogicConfigSchema } from './page-field.schema';
  * ```
  *
  * RowFields create horizontal layouts for grouping fields.
- * Allowed children: groups, array, leaf fields except hidden (but NOT pages, rows, or hidden fields).
+ * Allowed children: the same as a container — groups, arrays, nested rows, hidden
+ * fields and leaf fields (but NOT pages), since a row resolves to a container.
  *
  * @param childFieldSchema - Schema for allowed child fields
  * @returns RowField schema
