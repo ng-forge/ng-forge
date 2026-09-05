@@ -122,11 +122,15 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
           : `This page handles submission itself, so a successful call confirms the form was submitted but cannot report what came of it.`),
       inputSchema,
       // Submitting is the consequential half of this pair: it can place an
-      // order, send a message or create an account, and the draft defaults
-      // `consequentialHint` to false. Flagging it lets the user agent ask the
-      // person before an agent acts. `allowSubmit` is the application's
-      // authorization; this is the user's, and one does not stand in for the
-      // other.
+      // order, send a message or create an account.
+      //
+      // Chrome 150 drops this. Registering a tool with every hint the draft
+      // mentions and reading the descriptor back shows the browser keeps
+      // `readOnly` and `untrustedContent` and nothing else, so this asks for a
+      // confirmation prompt that no shipping browser gives yet. It stays
+      // because it costs one key and becomes real the day Chrome honours it;
+      // what it must not do is stand in for `allowSubmit`, which is the gate
+      // that actually decides whether this tool exists at all.
       annotations: { ...annotations, consequentialHint: true },
       execute: (args, execution) => submitForm(args, invocationSignal(execution)),
     });
@@ -345,8 +349,11 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
 /**
  * Reads the per-invocation `AbortSignal` off whatever the browser passed.
  *
- * The execution context is platform-owned and still moving, so this takes the
- * signal when there is one and shrugs otherwise rather than trusting the shape.
+ * Chrome 150 passes no second argument, so today this returns `undefined` every
+ * time and the per-invocation half of cancellation is dormant; the registration
+ * signal still settles a submission when the form goes away. The check is on the
+ * value rather than on the shape because the context is platform-owned and still
+ * moving, and guessing wrong should read as "no signal", never as a crash.
  */
 function invocationSignal(execution: ToolExecutionContext | undefined): AbortSignal | undefined {
   return execution?.signal instanceof AbortSignal ? execution.signal : undefined;

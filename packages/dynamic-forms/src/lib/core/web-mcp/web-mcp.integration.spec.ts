@@ -70,6 +70,19 @@ class FakeModelContext {
     if (!tool) throw new Error(`No tool registered as "${name}". Registered: ${[...this.tools.keys()].join(', ') || '(none)'}`);
     return Promise.resolve(tool.execute(args, { signal: signal ?? new AbortController().signal }));
   }
+
+  /**
+   * Invokes a tool the way Chrome 150 actually does: with the arguments alone.
+   *
+   * Driving the real `document.modelContext` shows `execute` receives a single
+   * argument there, so the context every other path in this fake supplies is the
+   * forward-looking case and this is the one that runs today.
+   */
+  executeToolWithoutContext(name: string, args: unknown): Promise<string> {
+    const tool = this.tools.get(name);
+    if (!tool) throw new Error(`No tool registered as "${name}".`);
+    return Promise.resolve((tool.execute as (a: unknown) => Promise<string>)(args));
+  }
 }
 
 const TEST_FIELD_TYPES: FieldTypeDefinition[] = [
@@ -1051,6 +1064,21 @@ describe('WebMCP integration', () => {
       await mount(config);
 
       expect(annotationsOf('fill_profile')?.['consequentialHint']).toBeUndefined();
+    });
+
+    it('fills normally when the browser passes no execution context at all', async () => {
+      const fixture = await mount(config);
+
+      const result = await context.executeToolWithoutContext('fill_profile', { name: 'Ada' });
+
+      expect(result).toContain('Applied: name.');
+      expect(fixture.componentInstance.formValue()).toEqual({ name: 'Ada' });
+    });
+
+    it('submits normally when the browser passes no execution context at all', async () => {
+      await mount(config);
+
+      expect(await context.executeToolWithoutContext('submit_profile', { name: 'Ada' })).toContain('submitted');
     });
 
     it('flags both tools as returning untrusted content', async () => {

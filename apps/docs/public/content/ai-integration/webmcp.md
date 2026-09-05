@@ -15,12 +15,12 @@ ng-forge can generate those tools from a form config. Because the config already
 
 ## Browser support and page requirements
 
-| Requirement                                                            | Why                                                                            |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Chrome 149 or later                                                    | The API is in origin trial. Earlier versions expose no model context at all.   |
-| Origin trial token, or `chrome://flags/#enable-webmcp-testing` locally | Without one, `document.modelContext` is undefined.                             |
-| A cross-origin isolated document                                       | The API is gated on origin isolation (`COOP` plus `COEP` response headers).    |
-| The `tools` Permissions Policy                                         | Allowed on the top-level document by default. An iframe needs `allow="tools"`. |
+| Requirement                                                            | Why                                                                                                                         |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Chrome 149 or later                                                    | The API is in origin trial. Earlier versions expose no model context at all. Verified against Chrome 150.                   |
+| Origin trial token, or `chrome://flags/#enable-webmcp-testing` locally | Without one, `document.modelContext` is undefined.                                                                          |
+| A secure context                                                       | `https`, or `localhost` during development. Cross-origin isolation is not required, so no `COOP`/`COEP` headers are needed. |
+| The `tools` Permissions Policy                                         | Allowed on the top-level document by default. An iframe needs `allow="tools"`.                                              |
 
 Where any of these is missing, nothing is registered and nothing breaks. The form renders and behaves exactly as it would without the feature, and `webMcpStatus()` on the component reports `unsupported`.
 
@@ -112,7 +112,9 @@ Without `allowSubmit`, no submit tool is registered at all and the agent simply 
 
 This mirrors the platform's own posture. WebMCP's declarative forms API also defaults to manual submission and requires an explicit `toolautosubmit` to let an agent submit.
 
-The submit tool is also annotated `consequentialHint: true`, which the draft defaults to false. That is a separate gate from `allowSubmit`: the flag is the application authorizing a tool to exist, the hint is what lets the browser ask the person before an agent actually calls it. One does not stand in for the other.
+The submit tool is also annotated `consequentialHint: true`. Treat that as a marker for later rather than a protection you have today: Chrome 150 keeps only `readOnly` and `untrustedContent` on a registered tool and drops every other hint, so no browser currently turns it into a confirmation prompt.
+
+So `allowSubmit` is the gate. It decides whether a submit tool exists at all, and nothing downstream of it asks the person to confirm the call.
 
 `submit` waits for the submission to finish before answering, and reports what actually happened:
 

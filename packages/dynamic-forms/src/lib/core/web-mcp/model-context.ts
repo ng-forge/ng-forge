@@ -5,13 +5,18 @@ import type { JsonSchemaObject } from './json-schema';
  *
  * The draft passes a per-invocation `AbortSignal` here and asks implementations
  * to carry it into whatever asynchronous work the call starts. It is separate
- * from the registration signal on purpose: Chrome's guidance is that
- * unregistering a tool no longer cancels an execution already in flight, so an
- * epoch abort cannot stand in for this.
+ * from the registration signal on purpose: unregistering a tool does not cancel
+ * an execution already in flight, so an epoch abort cannot stand in for this.
  *
- * Every member is optional because this is read off an object the platform owns
- * and the shape is still in flux — a missing signal degrades to the old
- * behaviour rather than throwing.
+ * Chrome 150 passes nothing at all. Logging what a real `execute` receives
+ * shows a single argument, so `context` is `undefined` there and the
+ * cancellation it would carry never arrives. Everything downstream treats a
+ * missing signal as "no per-invocation cancellation" rather than an error, so
+ * the form still settles its submissions through the registration signal, which
+ * a real browser does honour.
+ *
+ * Hence every member optional: this is read off an object the platform owns,
+ * the shape is still moving, and the absent case is the current one.
  */
 export interface ToolExecutionContext {
   signal?: AbortSignal;
