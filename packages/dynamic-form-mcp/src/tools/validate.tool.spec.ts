@@ -162,8 +162,12 @@ describe('Validate Tool', () => {
 
       expect(content.valid).toBe(false);
       expect(content.errors.length).toBeGreaterThan(0);
-      // Zod will report "Required" for missing required fields
-      expect(content.errors.some((e: { message: string }) => e.message.toLowerCase().includes('required'))).toBe(true);
+      // Asserted on substance rather than on zod's wording: the error must point
+      // at `fields` and say an array was expected. Matching the literal word
+      // "required" pinned a zod 3 phrase that zod 4 no longer uses, which said
+      // nothing about whether the report was actually useful.
+      expect(content.errors.some((e: { path: string }) => e.path === 'fields')).toBe(true);
+      expect(content.errors.some((e: { message: string }) => e.message.toLowerCase().includes('expected array'))).toBe(true);
     });
 
     it('reports error for field missing key', async () => {

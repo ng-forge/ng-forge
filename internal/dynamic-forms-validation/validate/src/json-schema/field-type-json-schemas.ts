@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import zodToJsonSchema from 'zod-to-json-schema';
+
+import { toJsonSchema } from './form-config-json-schema';
 
 // Import leaf field schemas from each UI integration
 import { MatLeafFieldSchema } from '../../../material/src';
@@ -218,14 +219,7 @@ export function getFieldTypeJsonSchema(uiIntegration: UiIntegration, fieldType: 
     throw new Error(`Unknown field type: ${fieldType}. Valid: ${getSupportedFieldTypes().join(', ')}`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonSchema = (zodToJsonSchema as any)(schema, {
-    name: `${uiIntegration}${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)}Field`,
-    $refStrategy: 'none',
-    errorMessages: true,
-  });
-
-  return jsonSchema as JsonSchemaType;
+  return toJsonSchema(schema, `${uiIntegration}${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)}Field`);
 }
 
 /**
@@ -244,14 +238,7 @@ export function getLeafFieldJsonSchema(uiIntegration: UiIntegration): JsonSchema
     throw new Error(`Unknown UI integration: ${uiIntegration}`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonSchema = (zodToJsonSchema as any)(schema, {
-    name: `${uiIntegration}LeafField`,
-    $refStrategy: 'none',
-    errorMessages: true,
-  });
-
-  return jsonSchema as JsonSchemaType;
+  return toJsonSchema(schema, `${uiIntegration}LeafField`);
 }
 
 /**

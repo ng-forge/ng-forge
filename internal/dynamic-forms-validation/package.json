@@ -20,11 +20,10 @@
     }
   },
   "peerDependencies": {
-    "zod": "^3.24.0"
+    "zod": "^4.5.4"
   },
   "dependencies": {
     "ts-morph": "^28.0.0",
-    "tslib": "^2.3.0",
-    "zod-to-json-schema": "^3.23.0"
+    "tslib": "^2.3.0"
   }
 }

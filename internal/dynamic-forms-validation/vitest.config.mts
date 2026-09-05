@@ -3,7 +3,7 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 export default defineConfig(() => ({
-  root: __dirname,
+  root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/internal/dynamic-forms-validation',
   plugins: [nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
   test: {
@@ -11,7 +11,9 @@ export default defineConfig(() => ({
     watch: false,
     globals: true,
     environment: 'node',
-    include: ['{src,tests,material,bootstrap,primeng,ionic,validate,discovery,reporting}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    // No `include` override: vitest's default picks up every `*.{test,spec}.*`
+    // under the project root. An enumerated directory list silently drops specs
+    // added in a directory nobody remembered to list here.
     reporters: ['default'],
     coverage: {
       enabled: true,

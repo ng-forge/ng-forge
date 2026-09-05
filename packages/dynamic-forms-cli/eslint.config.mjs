@@ -20,7 +20,6 @@ export default [
             'vitest',
             'zod',
             'ts-morph',
-            'zod-to-json-schema',
             '@ng-forge/dynamic-forms-validation', // Internal library, bundled by esbuild
           ],
         },

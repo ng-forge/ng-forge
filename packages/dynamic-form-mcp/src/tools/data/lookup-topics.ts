@@ -1787,26 +1787,43 @@ provideDynamicForm({
   },
 
   containers: {
-    brief: `| Container | Label? | Logic? | Notes |
-|-----------|--------|--------|-------|
-| page | NO | hidden only | Nav buttons INSIDE |
-| group | NO | hidden only | Creates nested object |
-| array | NO | hidden only | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
-| row | NO | hidden only | Layout only |`,
+    brief: `| Container | Label? | Logic? | Value | Notes |
+|-----------|--------|--------|-------|-------|
+| page | NO | hidden only | flattened | Nav buttons INSIDE |
+| group | NO | hidden only | nested under its key | Creates nested object |
+| array | NO | hidden only | nested under its key | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
+| row | NO | hidden only | flattened | Layout only |
+| container | NO | hidden only | flattened | Layout + REQUIRED \`wrappers\` chain |`,
 
     full: `# Container Rules
 
-| Container | Label? | Logic? | Allowed Children | Notes |
-|-----------|--------|--------|------------------|-------|
-| page | NO | YES (hidden only) | rows, groups, arrays, leaf fields, buttons | Nav buttons go INSIDE |
-| group | NO | YES (hidden only) | rows, arrays, leaf fields (NOT pages, groups) | Creates nested object |
-| array | NO | YES (hidden only) | rows, groups, leaf fields (NOT pages, arrays) | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
-| row | NO | YES (hidden only) | groups, arrays, containers, nested rows, hidden fields, leaf fields (NOT pages) | Layout only |
+| Container | Label? | Logic? | Value Handling | Allowed Children | Notes |
+|-----------|--------|--------|----------------|------------------|-------|
+| page | NO | YES (hidden only) | flattened | rows, groups, arrays, containers, hidden, leaf fields, buttons (NOT pages) | Nav buttons go INSIDE |
+| group | NO | YES (hidden only) | nested under its key | rows, arrays, containers, hidden, leaf fields, buttons (NOT pages, groups) | Creates nested object |
+| array | NO | YES (hidden only) | nested under its key | rows, groups, containers, hidden, leaf fields, buttons (NOT pages, arrays) | Two APIs: \`template\`+\`value\` (simplified) or \`fields\` (full) |
+| row | NO | YES (hidden only) | flattened | groups, arrays, containers, leaf fields, buttons (NOT pages, nested rows, hidden) | Layout only |
+| container | NO | YES (hidden only) | flattened | rows, groups, arrays, nested containers, hidden, leaf fields, buttons (NOT pages) | \`wrappers\` is REQUIRED (use [] for none) |
+
+**Value handling decides which container you want.** \`page\`, \`row\` and \`container\` flatten: their children land directly in the parent value, and the container key never appears in the submitted data. \`group\` and \`array\` nest their children under their own key.
+
+That difference is not cosmetic, so these are not interchangeable:
+
+\`\`\`typescript
+// container → { street: '', city: '' }        (chrome only, key not in the value)
+{ key: 'billing', type: 'container', wrappers: [{ type: 'css', cssClasses: 'card' }], fields: [street, city] }
+
+// group     → { billing: { street: '', city: '' } }   (adds a level to the value)
+{ key: 'billing', type: 'group', fields: [street, city] }
+\`\`\`
+
+Only \`group\` and \`array\` own a schema path, so only they take container-level \`validators\`, \`required\` and \`validationMessages\`. Reach for \`container\` when you want chrome around fields without changing the data shape, and for \`group\` when you want the nesting or the cross-field validation.
 
 **CRITICAL:**
-- All containers (page, group, row, array) support only the \`hidden\` logic type for conditional visibility.
+- All containers (page, group, row, array, container) support only the \`hidden\` logic type for conditional visibility.
 - For other logic types (disabled, required, readonly, derivation), apply them to child fields instead.
-- Pages cannot be nested - ALL top-level fields must be pages if using multi-page mode.`,
+- Pages cannot be nested - ALL top-level fields must be pages if using multi-page mode.
+- Rows reject nested rows and hidden fields; put hidden fields at page or form level.`,
   },
 
   'field-placement': {
@@ -2625,7 +2642,8 @@ export const TOPIC_DESCRIPTIONS: Record<string, string> = {
   'field-placement': 'Which fields can go where — nesting and placement rules',
   'logic-matrix': 'Which logic types are supported on which field types',
   'context-api': 'FieldContext API — valueOf(), formValue, parent, arrayIndex',
-  containers: 'Overview of all container types (group, row, array, page)',
+  containers: 'Overview of all container types (group, row, array, container, page) and what each may hold',
+  container: 'Wraps children in a wrapper chain; flattens their values into the parent like a row',
   'array-buttons': 'Add/remove array item button configuration',
   'custom-validators': 'Custom validator functions via validators array',
   conditions: 'Condition operators and types for logic rules',

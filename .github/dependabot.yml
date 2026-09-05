@@ -88,3 +88,10 @@ updates:
       - 'dependencies'
       - 'ci'
       - 'automated'
+    groups:
+      # github/codeql-action/init and /analyze must stay on the same version.
+      # Separate PRs bump only one of them and always fail with
+      # "Loaded a configuration file for version 'X', but running version 'Y'".
+      codeql:
+        patterns:
+          - 'github/codeql-action*'
