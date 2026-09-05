@@ -59,13 +59,13 @@ function contentFile(slug: string): string {
   return resolve(CONTENT_DIR, `${slug}.md`);
 }
 
-interface SitemapEntry {
+export interface SitemapEntry {
   slug: string;
   /** Absolute path used to resolve `lastmod` via git. Empty string omits lastmod. */
   filePath: string;
 }
 
-function collectEntries(): SitemapEntry[] {
+export function collectEntries(): SitemapEntry[] {
   const entries: SitemapEntry[] = [];
 
   // Landing page
@@ -136,8 +136,18 @@ function collectEntries(): SitemapEntry[] {
     entries.push({ slug: `material/recipes/${page}`, filePath: contentFile(`recipes/${page}`) });
   }
 
-  // AI integration / OpenAPI generator
-  entries.push({ slug: 'material/ai-integration', filePath: contentFile('ai-integration') });
+  // AI integration — discover from directory. These pages were split out of a
+  // single ai-integration.md and get added per feature, so a hand-kept list
+  // drifts: a stale entry points at a file git has no history for, and its
+  // lastmod silently falls back to build time (non-deterministic output).
+  for (const file of readdirSync(resolve(CONTENT_DIR, 'ai-integration'))
+    .filter((f) => f.endsWith('.md'))
+    .sort()) {
+    const name = file.replace('.md', '');
+    entries.push({ slug: `material/ai-integration/${name}`, filePath: resolve(CONTENT_DIR, 'ai-integration', file) });
+  }
+
+  // OpenAPI generator
   entries.push({ slug: 'material/openapi-generator', filePath: contentFile('openapi-generator') });
 
   // API reference — content is generated at build time from packages/* sources,
