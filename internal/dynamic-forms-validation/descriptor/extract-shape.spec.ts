@@ -40,10 +40,15 @@ export interface AcmeInputProps extends InputProps {
 
 export interface AcmeInputField extends BaseField { type: 'input'; props?: AcmeInputProps; }
 
+export interface AcmeGateOptions { readable?: boolean; }
+
 /** options is FIELD level; props is empty. The pitfall, expressed as a type. */
 export interface AcmeSelectField extends BaseField {
   type: 'select';
   readonly options: readonly FieldOption<unknown>[];
+  /** An opt-out expressed as the literal false, not as a null. */
+  gate?: AcmeGateOptions | false;
+  enabledGate?: AcmeGateOptions | true;
   props?: object;
 }
 
@@ -150,6 +155,19 @@ describe('field-level properties', () => {
     const fieldLevel = describeFieldLevel(members.get('select')!, at, context('select'));
 
     expect(fieldLevel['options'].type.kind).toBe('array');
+  });
+
+  it.each([
+    ['gate', false],
+    ['enabledGate', true],
+  ] as const)('preserves the boolean literal in %s', (key, value) => {
+    // A `T | false` opt-out must describe `false`, not a null. A descriptor
+    // that loses the literal makes a schema derived from it reject the very
+    // value the types accept.
+    const fieldLevel = describeFieldLevel(members.get('select')!, at, { ...context('select'), objects: {} });
+    const arms = fieldLevel[key].type.kind === 'union' ? fieldLevel[key].type.of : [];
+
+    expect(arms).toContainEqual({ kind: 'enum', values: [value] });
   });
 
   it('records a never key as forbidden rather than dropping it', () => {

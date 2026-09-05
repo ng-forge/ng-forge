@@ -119,8 +119,11 @@ export function describeType(type: Type, at: Node, context: ShapeContext, path: 
   if (nonNullable.isBoolean()) return { kind: 'boolean' };
   if (nonNullable.isUnknown() || nonNullable.isAny()) return { kind: 'unknown' };
 
-  if (nonNullable.isStringLiteral() || nonNullable.isNumberLiteral() || nonNullable.isBooleanLiteral()) {
-    return { kind: 'enum', values: [nonNullable.getLiteralValue() as string | number | boolean] };
+  // ts-morph's getLiteralValue() does not return boolean literal values.
+  if (nonNullable.isBooleanLiteral()) return { kind: 'enum', values: [nonNullable.getText() === 'true'] };
+
+  if (nonNullable.isStringLiteral() || nonNullable.isNumberLiteral()) {
+    return { kind: 'enum', values: [nonNullable.getLiteralValue() as string | number] };
   }
 
   if (nonNullable.isArray()) {
