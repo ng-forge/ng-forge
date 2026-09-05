@@ -17,7 +17,7 @@ interface RegisteredTool {
   description: string;
   inputSchema: Record<string, unknown>;
   annotations?: Record<string, unknown>;
-  execute: (args: unknown, client: unknown) => Promise<string>;
+  execute: (args: unknown, execution: { signal?: AbortSignal }) => Promise<string>;
 }
 
 const NAME_PATTERN = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -61,10 +61,14 @@ class FakeModelContext {
     }));
   }
 
-  executeTool(name: string, args: unknown): Promise<string> {
+  /**
+   * Invokes a tool the way the browser does: with a per-invocation `AbortSignal`
+   * the implementation is expected to carry into its asynchronous work.
+   */
+  executeTool(name: string, args: unknown, signal?: AbortSignal): Promise<string> {
     const tool = this.tools.get(name);
     if (!tool) throw new Error(`No tool registered as "${name}". Registered: ${[...this.tools.keys()].join(', ') || '(none)'}`);
-    return Promise.resolve(tool.execute(args, {}));
+    return Promise.resolve(tool.execute(args, { signal: signal ?? new AbortController().signal }));
   }
 }
 
@@ -95,7 +99,8 @@ describe('WebMCP integration', () => {
 
   const toolNames = () => context.getTools().map((tool) => tool.name);
   const schemaOf = (name: string) => context.getTools().find((tool) => tool.name === name)?.inputSchema;
-  const call = (name: string, args: unknown) => context.executeTool(name, args);
+  const call = (name: string, args: unknown, signal?: AbortSignal) => context.executeTool(name, args, signal);
+  const annotationsOf = (name: string) => context.getTools().find((tool) => tool.name === name)?.annotations;
 
   /**
    * Strips the identity symbols the array field attaches to its items, which are
@@ -222,7 +227,10 @@ describe('WebMCP integration', () => {
         fields: [{ key: 'name', type: 'input', label: 'Name' }],
       } as unknown as FormConfig);
 
-      expect(context.getTools().map((tool) => tool.annotations)).toEqual([{ untrustedContentHint: true }, { untrustedContentHint: true }]);
+      expect(context.getTools().map((tool) => tool.annotations)).toEqual([
+        { untrustedContentHint: true },
+        { untrustedContentHint: true, consequentialHint: true },
+      ]);
     });
 
     it('builds the tool schema from the config, with titles and option labels', async () => {
@@ -933,6 +941,90 @@ describe('WebMCP integration', () => {
 
       expect(result).toBe('Form submitted successfully.');
       expect(action).toHaveBeenCalledOnce();
+    });
+  });
+
+  /**
+   * A tool call has to answer. The submission reply channel is settled by the
+   * pipeline in the happy path, but nothing else was settling it when the form
+   * or the call went away first, so the promise simply stayed pending and the
+   * agent waited forever.
+   */
+  describe('lifecycle', () => {
+    /** Never resolves, standing in for a request still in flight. */
+    const neverSettles = () => new Promise<void>(() => undefined);
+
+    it('settles a submission the agent abandoned mid-flight', async () => {
+      await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        submission: { action: vi.fn(neverSettles) },
+        fields: [{ key: 'name', type: 'input', required: true }],
+      } as unknown as FormConfig);
+
+      const controller = new AbortController();
+      const pending = call('submit_profile', { name: 'Ada' }, controller.signal);
+
+      await delay(20);
+      controller.abort();
+
+      await expect(Promise.race([pending, delay(200).then(() => 'still pending')])).resolves.toContain('Not submitted');
+    });
+
+    it('settles a submission left in flight when the form is destroyed', async () => {
+      const fixture = await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        submission: { action: vi.fn(neverSettles) },
+        fields: [{ key: 'name', type: 'input', required: true }],
+      } as unknown as FormConfig);
+
+      const pending = call('submit_profile', { name: 'Ada' });
+
+      await delay(20);
+      fixture.destroy();
+
+      await expect(Promise.race([pending, delay(200).then(() => 'still pending')])).resolves.toContain('Not submitted');
+    });
+
+    it('reports a call made against an already-aborted signal rather than submitting', async () => {
+      const action = vi.fn();
+      await mount({
+        options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+        submission: { action },
+        fields: [{ key: 'name', type: 'input', required: true }],
+      } as unknown as FormConfig);
+
+      const controller = new AbortController();
+      controller.abort();
+
+      expect(await call('submit_profile', { name: 'Ada' }, controller.signal)).toContain('Not submitted');
+      expect(action).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('annotations', () => {
+    const config = {
+      options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+      submission: { action: vi.fn() },
+      fields: [{ key: 'name', type: 'input' }],
+    } as unknown as FormConfig;
+
+    it('marks the submit tool consequential so the user agent can confirm it', async () => {
+      await mount(config);
+
+      expect(annotationsOf('submit_profile')).toMatchObject({ consequentialHint: true });
+    });
+
+    it('leaves the fill tool non-consequential, since it only stages values', async () => {
+      await mount(config);
+
+      expect(annotationsOf('fill_profile')?.['consequentialHint']).toBeUndefined();
+    });
+
+    it('flags both tools as returning untrusted content', async () => {
+      await mount(config);
+
+      expect(annotationsOf('fill_profile')).toMatchObject({ untrustedContentHint: true });
+      expect(annotationsOf('submit_profile')).toMatchObject({ untrustedContentHint: true });
     });
   });
 });

@@ -15,12 +15,12 @@ ng-forge can generate those tools from a form config. Because the config already
 
 ## Browser support and page requirements
 
-| Requirement                                                                         | Why                                                                            |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Chrome 149 or later                                                                 | The API is in origin trial. Earlier versions expose no model context at all.   |
-| Origin trial token, or `chrome://flags/#web-machine-learning-model-context` locally | Without one, `document.modelContext` is undefined.                             |
-| A cross-origin isolated document                                                    | The API is gated on origin isolation (`COOP` plus `COEP` response headers).    |
-| The `tools` Permissions Policy                                                      | Allowed on the top-level document by default. An iframe needs `allow="tools"`. |
+| Requirement                                                            | Why                                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Chrome 149 or later                                                    | The API is in origin trial. Earlier versions expose no model context at all.   |
+| Origin trial token, or `chrome://flags/#enable-webmcp-testing` locally | Without one, `document.modelContext` is undefined.                             |
+| A cross-origin isolated document                                       | The API is gated on origin isolation (`COOP` plus `COEP` response headers).    |
+| The `tools` Permissions Policy                                         | Allowed on the top-level document by default. An iframe needs `allow="tools"`. |
 
 Where any of these is missing, nothing is registered and nothing breaks. The form renders and behaves exactly as it would without the feature, and `webMcpStatus()` on the component reports `unsupported`.
 
@@ -83,6 +83,10 @@ Tool names must satisfy the WebMCP draft's own rule: 1 to 128 characters of `A-Z
 - A **group** is merged key by key, all the way down. Sending `{ person: { first: 'Grace' } }` changes `person.first` and leaves `person.last` where it was.
 - A **list** is replaced whole. There is no positional patch an agent could express unambiguously, since index 1 of a five-item list means nothing once the list is reordered.
 
+Replacing a list whole has a consequence worth stating: anything in an item that the agent is not allowed to write cannot survive the rewrite. The agent never sees those fields in the item schema, so it cannot send them back, and pinning them to their old positions would attach a server id to whichever item happened to land there.
+
+So a list whose items already hold such a value is refused rather than rewritten, and the response names the fields at stake. A list that is empty, or whose protected fields are all still unset, has nothing to lose and is written normally, which keeps the usual "add the first few items" case working. To let an agent edit a list like that, mark the field it needs to preserve `webMcp: { writable: true }` so it can send it back, or keep the identifying data outside the array.
+
 Calling it with no fields changes nothing and reports the current state, which is the natural way for an agent to orient itself before it starts.
 
 Because it applies to the live form, everything it reports back is the genuine answer. Cross-field validators, conditional visibility, and derivations all evaluate exactly as they would for a human typing.
@@ -107,6 +111,8 @@ Without `allowSubmit`, no submit tool is registered at all and the agent simply 
 > Leave `allowSubmit` off for anything that spends money, sends a message, or cannot be undone. Every registered tool is callable by any agent that reaches the page, including one following instructions injected somewhere else entirely. See [Chrome's agent security guidance](https://developer.chrome.com/docs/agents/security).
 
 This mirrors the platform's own posture. WebMCP's declarative forms API also defaults to manual submission and requires an explicit `toolautosubmit` to let an agent submit.
+
+The submit tool is also annotated `consequentialHint: true`, which the draft defaults to false. That is a separate gate from `allowSubmit`: the flag is the application authorizing a tool to exist, the hint is what lets the browser ask the person before an agent actually calls it. One does not stand in for the other.
 
 `submit` waits for the submission to finish before answering, and reports what actually happened:
 

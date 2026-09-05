@@ -36,7 +36,7 @@ const SKIP = Symbol('skip');
  *
  * @internal
  */
-export function parseAgentInput(plan: readonly PlanNode[], input: unknown, liveBlock?: LiveWriteBlock): ParseResult {
+export function parseAgentInput(plan: readonly PlanNode[], input: unknown, liveBlock?: LiveWriteBlock, current?: unknown): ParseResult {
   if (input === undefined || input === null) {
     return { ok: true, patch: {}, paths: [] };
   }
@@ -47,7 +47,7 @@ export function parseAgentInput(plan: readonly PlanNode[], input: unknown, liveB
 
   const errors: string[] = [];
   const paths: string[] = [];
-  const patch = parseLevel(plan, input, '', errors, paths, liveBlock);
+  const patch = parseLevel(plan, input, '', errors, paths, liveBlock, isPlainObject(current) ? current : undefined);
 
   return errors.length ? { ok: false, errors } : { ok: true, patch, paths };
 }
@@ -59,6 +59,7 @@ function parseLevel(
   errors: string[],
   paths: string[],
   liveBlock: LiveWriteBlock | undefined,
+  current: Record<string, unknown> | undefined,
 ): Record<string, unknown> {
   const byKey = new Map(nodes.map((node) => [node.key, node]));
   const patch: Record<string, unknown> = {};
@@ -84,7 +85,7 @@ function parseLevel(
       continue;
     }
 
-    const parsed = parseNode(node, value, label, errors, paths, liveBlock);
+    const parsed = parseNode(node, value, label, errors, paths, liveBlock, current?.[key]);
     if (parsed !== SKIP) {
       patch[key] = parsed;
       // A group contributes its leaves, not itself: reporting the group as
@@ -105,6 +106,7 @@ function parseNode(
   errors: string[],
   paths: string[],
   liveBlock: LiveWriteBlock | undefined,
+  current: unknown,
 ): unknown {
   switch (node.kind) {
     case 'scalar':
@@ -116,7 +118,7 @@ function parseNode(
         return SKIP;
       }
       const before = errors.length;
-      const nested = parseLevel(node.children, value, label, errors, paths, liveBlock);
+      const nested = parseLevel(node.children, value, label, errors, paths, liveBlock, isPlainObject(current) ? current : undefined);
       return errors.length === before ? nested : SKIP;
     }
 
@@ -129,6 +131,15 @@ function parseNode(
         errors.push(`Field "${label}" has an item shape that cannot be described to an agent, so it cannot be set.`);
         return SKIP;
       }
+      const protectedKeys = protectedValuesInUse(node.item, current);
+      if (protectedKeys.length) {
+        errors.push(
+          `Field "${label}" cannot be replaced: its items carry ${protectedKeys.join(', ')}, which an agent cannot set, ` +
+            `and a list is replaced whole rather than merged item by item. Sending it would discard those values.`,
+        );
+        return SKIP;
+      }
+
       const before = errors.length;
       // Item paths are template paths (`lines[].sku`), not something an agent
       // could send back, so they are collected and discarded.
@@ -157,8 +168,10 @@ function parseItem(
   }
 
   // Items are replaced whole, so an item is parsed against its full template
-  // rather than merged into whatever sat at that index before.
-  return parseLevel(item.children, value, label, errors, paths, liveBlock);
+  // rather than merged into whatever sat at that index before. There is no
+  // "current item" to carry forward: `protectedValuesInUse` has already refused
+  // any list whose items hold values the agent could not resend.
+  return parseLevel(item.children, value, label, errors, paths, liveBlock, undefined);
 }
 
 function parseScalar(plan: ScalarPlan, value: unknown, label: string, errors: string[]): unknown {
@@ -222,6 +235,59 @@ function describe(value: unknown): string {
   if (typeof value === 'object') return 'an object';
   if (typeof value === 'string') return value.length > 40 ? 'a long string' : JSON.stringify(value);
   return JSON.stringify(value);
+}
+
+/**
+ * Names the non-writable item fields that currently hold a value, so replacing
+ * the list would silently drop them.
+ *
+ * A list is replaced whole, and the agent only ever sees its items' writable
+ * fields. So an item holding anything else — a server-assigned id, a hidden
+ * correlation token, a price the application controls — cannot survive a
+ * rewrite: the agent has no way to send those values back, and nothing else
+ * could put them back afterwards.
+ *
+ * Carrying them forward by position instead is worse, not better. The agent is
+ * sending the list it wants, reordering included, and index 2 of the new list is
+ * not index 2 of the old one. Pinning an id to a position quietly attaches it to
+ * a different item, which is corruption where a rejection is merely a refusal.
+ *
+ * So the write is refused while any protected value is actually at stake. An
+ * empty list, or one whose protected fields are all still unset, has nothing to
+ * lose and is written normally — which keeps the common "add the first few
+ * items" case working.
+ */
+function protectedValuesInUse(item: ItemPlan, current: unknown): readonly string[] {
+  if (item.kind !== 'object' || !Array.isArray(current) || !current.length) return [];
+
+  const names = new Set<string>();
+
+  for (const existing of current) {
+    collectProtected(item.children, existing, '', names);
+  }
+
+  return [...names];
+}
+
+function collectProtected(nodes: readonly PlanNode[], value: unknown, prefix: string, into: Set<string>): void {
+  if (!isPlainObject(value)) return;
+
+  for (const node of nodes) {
+    const name = prefix ? `${prefix}.${node.key}` : node.key;
+    const held = value[node.key];
+
+    if (node.kind === 'group') {
+      collectProtected(node.children, held, name, into);
+      continue;
+    }
+
+    // A field the agent may write can be resent, so it is never at stake. An
+    // unset one has nothing to lose; `null` counts as unset here because it is
+    // the default ng-forge gives a nullable field that was never filled in.
+    if (node.policy.writable || held === undefined || held === null || held === '') continue;
+
+    into.add(`"${name}"`);
+  }
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

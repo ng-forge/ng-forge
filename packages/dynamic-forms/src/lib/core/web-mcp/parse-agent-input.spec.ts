@@ -12,8 +12,8 @@ const registry = new Map<string, FieldTypeDefinition>([
   ['array', { name: 'array', valueHandling: 'include' }],
 ]);
 
-const parse = (fields: unknown[], input: unknown, liveBlock?: (path: string) => string | undefined) =>
-  parseAgentInput(buildFieldPlan(fields as FieldDef<unknown>[], registry), input, liveBlock);
+const parse = (fields: unknown[], input: unknown, liveBlock?: (path: string) => string | undefined, current?: unknown) =>
+  parseAgentInput(buildFieldPlan(fields as FieldDef<unknown>[], registry), input, liveBlock, current);
 
 const fields = [
   { key: 'name', type: 'input' },
@@ -251,5 +251,108 @@ describe('parseAgentInput edge cases', () => {
 
   it('reports the first bad entry in a multi-select rather than all of them', () => {
     expect(errorsOf(fields, { tags: ['z', 'y'] })).toHaveLength(1);
+  });
+});
+
+/**
+ * A list is replaced whole, so anything in an item the agent cannot resend is
+ * gone the moment it sends the list. The schema only shows it the writable
+ * fields, so it cannot even see what it is about to erase.
+ */
+describe('parseAgentInput protects values inside list items', () => {
+  const lineFields = [
+    {
+      key: 'lines',
+      type: 'array',
+      fields: [
+        [
+          { key: 'id', type: 'hidden' },
+          { key: 'sku', type: 'input' },
+        ],
+      ],
+    },
+  ];
+
+  it('refuses to replace a list whose items hold a value the agent cannot set', () => {
+    const result = parse(lineFields, { lines: [{ sku: 'b' }] }, undefined, { lines: [{ id: 'server-id', sku: 'a' }] });
+
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors[0]).toContain('"id"');
+  });
+
+  it('names every protected field at stake, across all items', () => {
+    const fieldsWithPrice = [
+      {
+        key: 'lines',
+        type: 'array',
+        fields: [
+          [
+            { key: 'id', type: 'hidden' },
+            { key: 'price', type: 'input', readonly: true },
+            { key: 'sku', type: 'input' },
+          ],
+        ],
+      },
+    ];
+
+    const result = parse(fieldsWithPrice, { lines: [{ sku: 'b' }] }, undefined, {
+      lines: [
+        { sku: 'a', price: 10 },
+        { id: 'server-id', sku: 'c' },
+      ],
+    });
+
+    expect(result.ok).toBe(false);
+    const message = (result as { errors: string[] }).errors[0];
+    expect(message).toContain('"price"');
+    expect(message).toContain('"id"');
+  });
+
+  it('allows the write when the list is empty, so a first item can still be added', () => {
+    expect(parse(lineFields, { lines: [{ sku: 'a' }] }, undefined, { lines: [] })).toEqual({
+      ok: true,
+      patch: { lines: [{ sku: 'a' }] },
+      paths: ['lines'],
+    });
+  });
+
+  it('allows the write when the protected fields are all still unset', () => {
+    const result = parse(lineFields, { lines: [{ sku: 'b' }] }, undefined, { lines: [{ id: null, sku: 'a' }] });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('still allows a list of bare values, which has nothing to protect', () => {
+    const bare = [{ key: 'tags', type: 'array', fields: [{ key: 'tag', type: 'input' }] }];
+
+    expect(parse(bare, { tags: ['x'] }, undefined, { tags: ['a', 'b'] }).ok).toBe(true);
+  });
+
+  it('protects a value nested in a group inside an item', () => {
+    const nested = [
+      {
+        key: 'lines',
+        type: 'array',
+        fields: [
+          [
+            { key: 'sku', type: 'input' },
+            { key: 'audit', type: 'group', fields: [{ key: 'ref', type: 'hidden' }] },
+          ],
+        ],
+      },
+    ];
+
+    const result = parse(nested, { lines: [{ sku: 'b' }] }, undefined, { lines: [{ sku: 'a', audit: { ref: 'r-1' } }] });
+
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors[0]).toContain('"audit.ref"');
+  });
+
+  it('leaves a list alone when the call does not mention it', () => {
+    expect(parse(lineFields, {}, undefined, { lines: [{ id: 'server-id', sku: 'a' }] })).toEqual({
+      ok: true,
+      patch: {},
+      paths: [],
+    });
   });
 });

@@ -1,12 +1,29 @@
 import type { JsonSchemaObject } from './json-schema';
 
+/**
+ * What the browser hands `execute` alongside the arguments.
+ *
+ * The draft passes a per-invocation `AbortSignal` here and asks implementations
+ * to carry it into whatever asynchronous work the call starts. It is separate
+ * from the registration signal on purpose: Chrome's guidance is that
+ * unregistering a tool no longer cancels an execution already in flight, so an
+ * epoch abort cannot stand in for this.
+ *
+ * Every member is optional because this is read off an object the platform owns
+ * and the shape is still in flux — a missing signal degrades to the old
+ * behaviour rather than throwing.
+ */
+export interface ToolExecutionContext {
+  signal?: AbortSignal;
+}
+
 /** A tool descriptor, as the browser's model context expects it. */
 export interface ToolDescriptor {
   name: string;
   description: string;
   inputSchema: JsonSchemaObject;
   annotations?: Record<string, unknown>;
-  execute: (args: Record<string, unknown>, client?: unknown) => Promise<string>;
+  execute: (args: Record<string, unknown>, context?: ToolExecutionContext) => Promise<string>;
 }
 
 /** The slice of the browser's model context this library uses. */

@@ -8,7 +8,7 @@ import { buildToolSchema } from './build-tool-schema';
 import { collectFieldReports, FieldWalk } from './collect-field-reports';
 import { buildFieldPlan } from './field-plan';
 import { FormReport, renderFormReport, renderRejection, renderSubmitResult, toErrorReports } from './format-report';
-import { findModelContext, isOverNameBudget, registerTool, ToolDescriptor } from './model-context';
+import { findModelContext, isOverNameBudget, registerTool, ToolDescriptor, ToolExecutionContext } from './model-context';
 import { parseAgentInput } from './parse-agent-input';
 import { mergePatch, pickPaths, redactValues } from './patch-values';
 import type { WebMcpStatus } from './web-mcp-gate';
@@ -86,7 +86,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
         `Call with no fields to see which apply, which are required and which are still empty, without changing anything.`,
       inputSchema,
       annotations,
-      execute: (args) => fill(args),
+      execute: (args, execution) => fill(args, invocationSignal(execution)),
     },
   ];
 
@@ -112,8 +112,14 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
           ? `Reports whether the submission succeeded, was rejected by the server, or failed.`
           : `This page handles submission itself, so a successful call confirms the form was submitted but cannot report what came of it.`),
       inputSchema,
-      annotations,
-      execute: (args) => submitForm(args),
+      // Submitting is the consequential half of this pair: it can place an
+      // order, send a message or create an account, and the draft defaults
+      // `consequentialHint` to false. Flagging it lets the user agent ask the
+      // person before an agent acts. `allowSubmit` is the application's
+      // authorization; this is the user's, and one does not stand in for the
+      // other.
+      annotations: { ...annotations, consequentialHint: true },
+      execute: (args, execution) => submitForm(args, invocationSignal(execution)),
     });
   }
 
@@ -149,11 +155,11 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
    * what the user should see — an agent filling a form on their behalf is visible
    * work, not a side effect to hide.
    */
-  async function fill(args: Record<string, unknown>): Promise<string> {
+  async function fill(args: Record<string, unknown>, invocation: AbortSignal | undefined): Promise<string> {
     const tree = untracked(() => stateManager.form());
     if (!tree) return NOT_READY;
 
-    const applied = await apply(args, tree);
+    const applied = await apply(args, tree, invocation);
     if ('rejection' in applied) return applied.rejection;
 
     return renderFormReport(applied.report);
@@ -167,11 +173,11 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
    * on the bus, long before an HTTP action resolves, so returning there reported
    * success for submissions that were about to fail, be skipped, or be dropped.
    */
-  async function submitForm(args: Record<string, unknown>): Promise<string> {
+  async function submitForm(args: Record<string, unknown>, invocation: AbortSignal | undefined): Promise<string> {
     const tree = untracked(() => stateManager.form());
     if (!tree) return NOT_READY;
 
-    const applied = await apply(args, tree);
+    const applied = await apply(args, tree, invocation);
     if ('rejection' in applied) return applied.rejection;
 
     const report = applied.report;
@@ -179,7 +185,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
       return renderSubmitResult({ status: report.validationPending ? 'pending-validation' : 'validation-failed' }, report);
     }
 
-    const outcome = await dispatchSubmit();
+    const outcome = await dispatchSubmit(invocation);
 
     // Re-read after the submission settled. Server errors are applied to the
     // fields by `submit()` once the action resolves, so the report taken before
@@ -198,29 +204,62 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
     );
   }
 
-  /** Dispatches a submit and resolves with what the pipeline actually did. */
-  async function dispatchSubmit(): Promise<SubmissionOutcome> {
+  /**
+   * Dispatches a submit and resolves with what the pipeline actually did.
+   *
+   * The reply channel is settled by whichever comes first: the submission
+   * pipeline, the form going away, or the agent abandoning the call. Without
+   * that last part the promise simply never settles — destroy the form mid-flight
+   * and the agent is left holding an open tool call forever, with the form and
+   * the submission it referenced pinned behind it. `cancel()` is a no-op once the
+   * pipeline has already reported, so the real outcome always wins the race.
+   */
+  async function dispatchSubmit(invocation: AbortSignal | undefined): Promise<SubmissionOutcome> {
     const pending = createPendingSubmission();
 
-    eventBus.dispatch(new FormSubmitEvent(pending.reply));
+    // A signal already aborted never fires `abort` again, so it is checked
+    // rather than merely listened to.
+    if (signal.aborted || invocation?.aborted) return { status: 'cancelled' };
 
-    // The bus is synchronous, so a reply still unclaimed here was dropped by the
-    // pipeline's `exhaustMap` rather than merely not finished — the one way to
-    // tell "already submitting" apart from "still running".
-    if (!pending.accepted()) return { status: 'busy' };
+    const cancel = (): void => pending.cancel();
+    signal.addEventListener('abort', cancel, { once: true });
+    invocation?.addEventListener('abort', cancel, { once: true });
 
-    return pending.outcome;
+    try {
+      eventBus.dispatch(new FormSubmitEvent(pending.reply));
+
+      // The bus is synchronous, so a reply still unclaimed here was dropped by
+      // the pipeline's `exhaustMap` rather than merely not finished — the one way
+      // to tell "already submitting" apart from "still running".
+      if (!pending.accepted()) return { status: 'busy' };
+
+      return await pending.outcome;
+    } finally {
+      signal.removeEventListener('abort', cancel);
+      invocation?.removeEventListener('abort', cancel);
+    }
   }
 
   /**
    * Validates, applies and reports in one place, since `fill` and `submit` need
    * exactly the same thing before they diverge.
    */
-  async function apply(args: Record<string, unknown>, tree: FieldTree<unknown>): Promise<{ rejection: string } | { report: FormReport }> {
+  async function apply(
+    args: Record<string, unknown>,
+    tree: FieldTree<unknown>,
+    invocation: AbortSignal | undefined,
+  ): Promise<{ rejection: string } | { report: FormReport }> {
     // Live state first: a field the form has disabled or made readonly right now
-    // is not writable, whatever the config said when the schema was built.
+    // is not writable, whatever the config said when the schema was built. The
+    // current value goes in too, so the parser can see which lists hold values an
+    // agent could not resend.
     const before = untracked(() => collectFieldReports(plan, tree));
-    const parsed = parseAgentInput(plan, args, (path) => liveBlock(before, path));
+    const parsed = parseAgentInput(
+      plan,
+      args,
+      (path) => liveBlock(before, path),
+      untracked(() => stateManager.formValue()),
+    );
 
     if (!parsed.ok) return { rejection: renderRejection(parsed.errors) };
 
@@ -229,7 +268,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
       stateManager.entity.update((current) => mergePatch((current ?? {}) as Record<string, unknown>, parsed.patch, plan) as never);
     }
 
-    const validationPending = changed.length ? await settle(tree) : untracked(() => tree().pending());
+    const validationPending = changed.length ? await settle(tree, invocation) : untracked(() => tree().pending());
     const walk = untracked(() => collectFieldReports(plan, tree));
 
     return { report: buildReport(tree, walk, changed, validationPending) };
@@ -274,18 +313,28 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
    *
    * @returns Whether validation was *still* pending when the wait gave up.
    */
-  async function settle(tree: FieldTree<unknown>): Promise<boolean> {
+  async function settle(tree: FieldTree<unknown>, invocation: AbortSignal | undefined): Promise<boolean> {
     const deadline = Date.now() + SETTLE_TIMEOUT_MS;
 
     await nextTask();
 
     while (untracked(() => tree().pending())) {
-      if (Date.now() >= deadline || signal.aborted) return true;
+      if (Date.now() >= deadline || signal.aborted || invocation?.aborted) return true;
       await nextTask(SETTLE_POLL_MS);
     }
 
     return false;
   }
+}
+
+/**
+ * Reads the per-invocation `AbortSignal` off whatever the browser passed.
+ *
+ * The execution context is platform-owned and still moving, so this takes the
+ * signal when there is one and shrugs otherwise rather than trusting the shape.
+ */
+function invocationSignal(execution: ToolExecutionContext | undefined): AbortSignal | undefined {
+  return execution?.signal instanceof AbortSignal ? execution.signal : undefined;
 }
 
 function nextTask(delayMs = 0): Promise<void> {

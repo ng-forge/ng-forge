@@ -106,7 +106,7 @@ const callTool = (name, args) =>
 const state = () =>
   page.evaluate(() => {
     const pre = document.querySelector('[data-testid^="form-value-"]');
-    let formValue = {};
+    let formValue;
     try {
       formValue = JSON.parse(pre?.textContent ?? '{}');
     } catch {
