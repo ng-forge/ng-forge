@@ -9,7 +9,7 @@ description: Angular Material specific field properties for @ng-forge/dynamic-fo
 
 Adapter specific `props` for `@ng-forge/dynamic-forms-material`.
 
-This skill documents version **1.1.0**.
+This skill documents version **1.2.0**.
 
 ## Use with the core skill
 
