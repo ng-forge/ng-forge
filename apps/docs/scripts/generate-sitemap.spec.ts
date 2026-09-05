@@ -1,5 +1,6 @@
+import { existsSync } from 'node:fs';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { generateSitemap, getGitLastmod } from './generate-sitemap';
+import { collectEntries, generateSitemap, getGitLastmod } from './generate-sitemap';
 
 // generateSitemap() shells out to `git log` once per content file (60+ calls),
 // so a full run is several seconds of real subprocess I/O and scales with the
@@ -31,6 +32,25 @@ describe('generateSitemap', () => {
 
   it('includes the migration guide under /material/', () => {
     expect(xml).toContain('<loc>https://ng-forge.com/dynamic-forms/material/migrating-from-ngx-formly</loc>');
+  });
+
+  // A slug whose content file has been renamed or removed still emits a <url>,
+  // but its lastmod falls back to build time — which makes the sitemap
+  // non-deterministic (and, on a shallow CI clone, differ between two calls in
+  // the same run). Catch the drift here instead of in the stability test.
+  it('points every entry at a content file that exists on disk', () => {
+    const missing = collectEntries()
+      .filter(({ filePath }) => filePath && !existsSync(filePath))
+      .map(({ slug, filePath }) => `${slug} -> ${filePath}`);
+    expect(missing).toEqual([]);
+  });
+
+  it('includes the AI integration pages', () => {
+    for (const page of ['mcp-server', 'skills', 'webmcp']) {
+      expect(xml).toContain(`<loc>https://ng-forge.com/dynamic-forms/material/ai-integration/${page}</loc>`);
+    }
+    // The section index is a nav grouping, not a rendered page — same as recipes/validation.
+    expect(xml).not.toContain('<loc>https://ng-forge.com/dynamic-forms/material/ai-integration</loc>');
   });
 
   it('includes the addons pages', () => {
