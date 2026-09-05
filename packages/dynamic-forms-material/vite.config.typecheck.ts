@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     include: ['src/**/*.type-test.ts'],
-    reporters: ['verbose'],
+    reporters: ['tree'],
     passWithNoTests: false,
     typecheck: {
       enabled: true,

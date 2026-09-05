@@ -532,7 +532,7 @@ export class DocsCodeCompareComponent {
     const currentIndex = buttons.findIndex((btn) => btn === target);
     if (currentIndex === -1) return;
 
-    let nextIndex = currentIndex;
+    let nextIndex: number;
     switch (event.key) {
       case 'ArrowRight':
         nextIndex = (currentIndex + 1) % buttons.length;

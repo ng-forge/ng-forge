@@ -16,7 +16,7 @@ export default defineConfig({
   test: {
     globals: true,
     include: INFERENCE,
-    reporters: ['verbose'],
+    reporters: ['tree'],
     passWithNoTests: false,
     typecheck: {
       enabled: true,
