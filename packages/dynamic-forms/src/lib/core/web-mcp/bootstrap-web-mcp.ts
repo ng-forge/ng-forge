@@ -8,7 +8,7 @@ import { buildToolSchema } from './build-tool-schema';
 import { collectFieldReports, FieldWalk } from './collect-field-reports';
 import { buildFieldPlan } from './field-plan';
 import { FormReport, renderFormReport, renderRejection, renderSubmitResult, toErrorReports } from './format-report';
-import { findModelContext, isOverNameBudget, registerTool, ToolDescriptor, ToolExecutionContext } from './model-context';
+import { findModelContext, isOverNameBudget, registerTool, ToolDescriptor, ToolExecutionContext, toolText } from './model-context';
 import { parseAgentInput } from './parse-agent-input';
 import { mergePatch, pickPaths, redactValues } from './patch-values';
 import type { WebMcpStatus } from './web-mcp-gate';
@@ -95,7 +95,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
         `Call with no fields to see which apply, which are required and which are still empty, without changing anything.`,
       inputSchema,
       annotations,
-      execute: (args, execution) => fill(args, invocationSignal(execution)),
+      execute: async (args, execution) => toolText(await fill(args, invocationSignal(execution))),
     },
   ];
 
@@ -132,7 +132,7 @@ export async function bootstrapWebMcp(options: WebMcpToolOptions, signal: AbortS
       // what it must not do is stand in for `allowSubmit`, which is the gate
       // that actually decides whether this tool exists at all.
       annotations: { ...annotations, consequentialHint: true },
-      execute: (args, execution) => submitForm(args, invocationSignal(execution)),
+      execute: async (args, execution) => toolText(await submitForm(args, invocationSignal(execution))),
     });
   }
 

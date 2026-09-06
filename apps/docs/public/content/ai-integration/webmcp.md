@@ -158,6 +158,16 @@ Override either axis per field, or hide a field from agents entirely:
 
 A field that is not readable still appears in the report by name, along with whether it currently holds a value. Only the value itself is withheld.
 
+### What a call answers with
+
+Every call, including a rejected one, answers with an MCP content-block envelope carrying the rendered report as text:
+
+```json
+{ "content": [{ "type": "text", "text": "Applied: name.\n..." }] }
+```
+
+That is the shape an agent expects from a tool result, and the same one Angular's `provideExperimentalWebMcpForms()` returns. The report itself is plain text rather than JSON, because it is read by a model.
+
 ### Readback
 
 By default a tool response returns only the values the call itself set, plus which fields apply, which are still empty, and any validation errors. That is enough for an agent to orient itself and correct its own work.

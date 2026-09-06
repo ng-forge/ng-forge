@@ -22,13 +22,37 @@ export interface ToolExecutionContext {
   signal?: AbortSignal;
 }
 
+/**
+ * What a tool call answers with.
+ *
+ * MCP results are content blocks rather than a bare string, and Angular's own
+ * `provideExperimentalWebMcpForms()` returns this shape from `execute`, so it is
+ * what an agent reading a WebMCP tool result expects to find. The library
+ * renders its reports as text and wraps them here, at the boundary, so nothing
+ * upstream has to know about the envelope.
+ */
+export interface ToolResult {
+  content: readonly ToolTextContent[];
+}
+
+/** The only block kind this library produces: its rendered report. */
+export interface ToolTextContent {
+  type: 'text';
+  text: string;
+}
+
+/** Wraps a rendered report in the envelope a tool result carries. */
+export function toolText(text: string): ToolResult {
+  return { content: [{ type: 'text', text }] };
+}
+
 /** A tool descriptor, as the browser's model context expects it. */
 export interface ToolDescriptor {
   name: string;
   description: string;
   inputSchema: JsonSchemaObject;
   annotations?: Record<string, unknown>;
-  execute: (args: Record<string, unknown>, context?: ToolExecutionContext) => Promise<string>;
+  execute: (args: Record<string, unknown>, context?: ToolExecutionContext) => Promise<ToolResult>;
 }
 
 /** The slice of the browser's model context this library uses. */

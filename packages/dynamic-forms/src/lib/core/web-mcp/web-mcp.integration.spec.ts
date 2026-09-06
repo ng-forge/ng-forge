@@ -17,7 +17,7 @@ interface RegisteredTool {
   description: string;
   inputSchema: Record<string, unknown>;
   annotations?: Record<string, unknown>;
-  execute: (args: unknown, execution: { signal?: AbortSignal }) => Promise<string>;
+  execute: (args: unknown, execution: { signal?: AbortSignal }) => Promise<{ content: { type: string; text: string }[] }>;
 }
 
 const NAME_PATTERN = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -65,7 +65,7 @@ class FakeModelContext {
    * Invokes a tool the way the browser does: with a per-invocation `AbortSignal`
    * the implementation is expected to carry into its asynchronous work.
    */
-  executeTool(name: string, args: unknown, signal?: AbortSignal): Promise<string> {
+  executeTool(name: string, args: unknown, signal?: AbortSignal): Promise<{ content: { type: string; text: string }[] }> {
     const tool = this.tools.get(name);
     if (!tool) throw new Error(`No tool registered as "${name}". Registered: ${[...this.tools.keys()].join(', ') || '(none)'}`);
     return Promise.resolve(tool.execute(args, { signal: signal ?? new AbortController().signal }));
@@ -78,10 +78,10 @@ class FakeModelContext {
    * argument there, so the context every other path in this fake supplies is the
    * forward-looking case and this is the one that runs today.
    */
-  executeToolWithoutContext(name: string, args: unknown): Promise<string> {
+  executeToolWithoutContext(name: string, args: unknown): Promise<{ content: { type: string; text: string }[] }> {
     const tool = this.tools.get(name);
     if (!tool) throw new Error(`No tool registered as "${name}".`);
-    return Promise.resolve((tool.execute as (a: unknown) => Promise<string>)(args));
+    return Promise.resolve((tool.execute as (a: unknown) => Promise<{ content: { type: string; text: string }[] }>)(args));
   }
 }
 
@@ -112,7 +112,15 @@ describe('WebMCP integration', () => {
 
   const toolNames = () => context.getTools().map((tool) => tool.name);
   const schemaOf = (name: string) => context.getTools().find((tool) => tool.name === name)?.inputSchema;
-  const call = (name: string, args: unknown, signal?: AbortSignal) => context.executeTool(name, args, signal);
+  /**
+   * Calls a tool and returns the report text.
+   *
+   * A result is a content-block envelope, but nearly every test here is about
+   * what the report says, so the text is unwrapped once here rather than in each
+   * assertion. The envelope itself is covered separately, under `results`.
+   */
+  const call = async (name: string, args: unknown, signal?: AbortSignal) => textOf(await context.executeTool(name, args, signal));
+  const textOf = (result: { content: { type: string; text: string }[] }) => result.content.map((block) => block.text).join('');
   const annotationsOf = (name: string) => context.getTools().find((tool) => tool.name === name)?.annotations;
 
   /**
@@ -1069,7 +1077,7 @@ describe('WebMCP integration', () => {
     it('fills normally when the browser passes no execution context at all', async () => {
       const fixture = await mount(config);
 
-      const result = await context.executeToolWithoutContext('fill_profile', { name: 'Ada' });
+      const result = textOf(await context.executeToolWithoutContext('fill_profile', { name: 'Ada' }));
 
       expect(result).toContain('Applied: name.');
       expect(fixture.componentInstance.formValue()).toEqual({ name: 'Ada' });
@@ -1078,7 +1086,7 @@ describe('WebMCP integration', () => {
     it('submits normally when the browser passes no execution context at all', async () => {
       await mount(config);
 
-      expect(await context.executeToolWithoutContext('submit_profile', { name: 'Ada' })).toContain('submitted');
+      expect(textOf(await context.executeToolWithoutContext('submit_profile', { name: 'Ada' }))).toContain('submitted');
     });
 
     it('flags both tools as returning untrusted content', async () => {
@@ -1086,6 +1094,48 @@ describe('WebMCP integration', () => {
 
       expect(annotationsOf('fill_profile')).toMatchObject({ untrustedContentHint: true });
       expect(annotationsOf('submit_profile')).toMatchObject({ untrustedContentHint: true });
+    });
+  });
+
+  /**
+   * A tool answers with MCP content blocks, not a bare string. Angular's own
+   * `provideExperimentalWebMcpForms()` returns the same envelope, so this is what
+   * an agent reading a WebMCP result expects to find; returning the report text
+   * unwrapped would hand it something it has no contract for.
+   */
+  describe('results', () => {
+    const config = {
+      options: { webMcp: { name: 'profile', description: 'Profile form.', allowSubmit: true } },
+      submission: { action: vi.fn() },
+      fields: [{ key: 'name', type: 'input' }],
+    } as unknown as FormConfig;
+
+    it('wraps a fill report in a text content block', async () => {
+      await mount(config);
+
+      const result = await context.executeTool('fill_profile', { name: 'Ada' });
+
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('Applied: name.');
+    });
+
+    it('wraps a submit result the same way', async () => {
+      await mount(config);
+
+      const result = await context.executeTool('submit_profile', { name: 'Ada' });
+
+      expect(result.content[0]).toMatchObject({ type: 'text' });
+      expect(result.content[0].text).toContain('submitted');
+    });
+
+    it('wraps a rejection too, so a refused call is still a readable result', async () => {
+      await mount(config);
+
+      const result = await context.executeTool('fill_profile', { nope: 'x' });
+
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('Unknown field');
     });
   });
 });

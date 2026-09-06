@@ -96,7 +96,11 @@ const callTool = (name, args) =>
     async ({ name, args }) => {
       const tool = window.__mcp.tools.get(name);
       if (!tool) return { error: `No tool named "${name}". Available: ${[...window.__mcp.tools.keys()].join(', ')}` };
-      const result = String(await tool.execute(args, {}));
+      // A result is an MCP content-block envelope; the graders read the report
+      // text, and `String(result)` would have recorded "[object Object]" for
+      // every call in every transcript.
+      const raw = await tool.execute(args, {});
+      const result = (raw?.content ?? []).map((block) => block?.text ?? '').join('');
       window.__mcp.calls.push({ tool: name, args, result, at: Date.now() });
       return { result };
     },

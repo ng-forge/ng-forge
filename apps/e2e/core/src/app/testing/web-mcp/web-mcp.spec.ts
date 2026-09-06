@@ -30,7 +30,12 @@ async function installModelContext(page: Page): Promise<void> {
       executeTool: async (name: string, args: unknown) => {
         const tool = tools.get(name);
         if (!tool) throw new Error(`Tool "${name}" was never registered. Have: ${[...tools.keys()].join(', ')}`);
-        return String(await tool.execute(args, {}));
+
+        // A result is an MCP content-block envelope, so the report text is
+        // pulled out of it here. `String(result)` would have quietly handed
+        // every assertion "[object Object]".
+        const result = (await tool.execute(args, {})) as { content?: { text?: string }[] };
+        return (result?.content ?? []).map((block) => block?.text ?? '').join('');
       },
     };
 

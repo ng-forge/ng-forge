@@ -6,7 +6,7 @@ const descriptor = (name: string) => ({
   name,
   description: 'A tool.',
   inputSchema: { type: 'object', properties: {}, additionalProperties: false } as JsonSchemaObject,
-  execute: async () => 'ok',
+  execute: async () => ({ content: [{ type: 'text' as const, text: 'ok' }] }),
 });
 
 describe('validateToolName', () => {
