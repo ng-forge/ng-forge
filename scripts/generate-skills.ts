@@ -83,13 +83,13 @@ below track ${version} and some of them have changed between releases.
 Do not hand back a config you have not checked. The library ships a validator:
 
 \`\`\`bash
-npx --yes @ng-forge/dynamic-forms-cli@next "path/to/your.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli@${version} "path/to/your.form.ts" --ui material
 \`\`\`
 
 \`--yes\` matters: without it npx prompts before its first install and waits for
-an answer that will never come. \`@next\` matters too: the \`latest\` tag is still a
-placeholder release with no executable, so the unpinned command fails with
-"could not determine executable to run". Requires Node 24 or newer.
+an answer that will never come. The pinned \`@${version}\` matters too: it is the
+validator built from the rules below, and unlike a floating tag it cannot change
+under you between runs. Requires Node 24 or newer.
 
 It reports the exact property that is wrong and how to fix it. Exit code 1
 means a config failed, 2 means the invocation was wrong. Run it after writing
