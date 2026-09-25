@@ -154,9 +154,15 @@ jobs:
         run: |
           set -euo pipefail
 
-          # True stable only: `*-*` excludes every prerelease (-next, -nightly, -rc, …),
-          # so an in-flight RC tag (v1.0.0-rc.1) is NOT mistaken for the last stable.
-          LAST_STABLE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || echo "")
+          # Highest stable tag by VERSION, not by reachability. A stable release is cut on a
+          # release-* branch and the release PR is squash-merged, so the vX.Y.Z tag sits on
+          # a commit that is never an ancestor of main. `git describe` only walks reachable
+          # tags, so the night after 1.2.0 shipped it still reported v1.1.0: the nightly
+          # targeted 1.2.0 again and published 1.2.0-next.10, a version sorting BELOW the
+          # release it was supposed to follow.
+          # Excluding every tag containing `-` keeps this stable-only, so an in-flight RC
+          # tag (v1.0.0-rc.1) is NOT mistaken for the last stable.
+          LAST_STABLE=$(git tag --list 'v[0-9]*' | grep -v -- '-' | sort -V | tail -1 || true)
 
           if [ -z "$LAST_STABLE" ]; then
             echo "::warning::No prior stable tag found — skipping next release"
@@ -209,10 +215,13 @@ jobs:
           # the relevant-commit window below spans only what landed since the last release.
           # Replaces the prior commits-since-stable + SHA-idempotency checks: when nothing
           # relevant landed since the most recent release, RELEVANT=0 and we skip.
+          # $LAST_STABLE is eligible even when it is not an ancestor of HEAD (see above):
+          # `git log <stable>..HEAD` is still the right window, because it subtracts
+          # everything the release contained and leaves only what landed after it.
           BASE=""
           while read -r t; do
             [ -z "$t" ] && continue
-            if git merge-base --is-ancestor "$t" HEAD 2>/dev/null; then BASE="$t"; break; fi
+            if [ "$t" = "$LAST_STABLE" ] || git merge-base --is-ancestor "$t" HEAD 2>/dev/null; then BASE="$t"; break; fi
           done < <(git for-each-ref --sort=-creatordate --format='%(refname:short)' \
                      'refs/tags/v[0-9]*' 'refs/tags/next/*' 'refs/tags/rc/*')
           [ -z "$BASE" ] && BASE="$LAST_STABLE"
@@ -509,10 +518,14 @@ jobs:
         # runner, so ordering before publish is fine. Earlier placement also means
         # `RELEASE_NOTES.md` is ready when the GitHub Release step runs below.
         run: |
-          # `*-*` excludes every prerelease (matches the gate's LAST_STABLE), so a stable
-          # changelog spans since the last STABLE — never truncated to since-last-rc even
-          # if a v…-rc.… tag was ever cut via the prerelease safety-net path.
-          PREV_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || echo "")
+          # Version-sorted rather than `git describe`, for the same reason as the gate's
+          # LAST_STABLE: the previous release's tag is on a squash-merged release branch and
+          # is not reachable from here, which would silently widen the changelog to span two
+          # releases. Excluding tags containing `-` keeps this stable-only, so the changelog
+          # spans since the last STABLE and is never truncated to since-last-rc. `v$VERSION`
+          # is excluded so a re-run after the tag exists still diffs against the release
+          # before it rather than against itself.
+          PREV_TAG=$(git tag --list 'v[0-9]*' | grep -v -- '-' | grep -vFx "v${VERSION}" | sort -V | tail -1 || true)
 
           if [ -z "$PREV_TAG" ]; then
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
