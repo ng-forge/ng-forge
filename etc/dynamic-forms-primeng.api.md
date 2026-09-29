@@ -74,13 +74,13 @@ export interface PrimeAddonExtensions {
 // @public
 export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
-// @public (undocumented)
+// @public
 export type PrimeButtonAddonComponent = PrimeButtonAddonComponent_2;
 
 // @public (undocumented)
 export type PrimeButtonField<TEvent extends FormEvent = FormEvent> = ButtonField<PrimeButtonProps, TEvent>;
 
-// @public (undocumented)
+// @public
 export type PrimeButtonFieldComponent<TEvent extends FormEvent> = PrimeButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
@@ -106,7 +106,7 @@ export interface PrimeButtonProps {
 // @public (undocumented)
 export type PrimeCheckboxField = CheckboxField<PrimeCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeCheckboxFieldComponent = PrimeCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -121,7 +121,7 @@ export interface PrimeCheckboxProps {
 // @public (undocumented)
 export type PrimeDatepickerField = DatepickerField<PrimeDatepickerProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeDatepickerFieldComponent = PrimeDatepickerFieldComponent_2;
 
 // @public (undocumented)
@@ -177,7 +177,7 @@ export interface PrimeIconAddon extends BaseAddon {
     readonly type: 'prime-icon';
 }
 
-// @public (undocumented)
+// @public
 export type PrimeIconAddonComponent = PrimeIconAddonComponent_2;
 
 // @public
@@ -188,7 +188,7 @@ export type PrimeInputField = InputField<PrimeInputProps> & {
     addons?: ReadonlyArray<PrimeInputAddon>;
 };
 
-// @public (undocumented)
+// @public
 export type PrimeInputFieldComponent = PrimeInputFieldComponent_2;
 
 // @public (undocumented)
@@ -211,7 +211,7 @@ export type PrimeInsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayI
 // @public (undocumented)
 export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeMultiCheckboxFieldComponent = PrimeMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -263,7 +263,7 @@ export type PrimePreviousButtonField = Omit<PrimeButtonField<PreviousPageEvent>,
 // @public (undocumented)
 export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeRadioFieldComponent = PrimeRadioFieldComponent_2;
 
 // @public (undocumented)
@@ -282,7 +282,7 @@ export type PrimeRemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtInde
 // @public (undocumented)
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeSelectFieldComponent = PrimeSelectFieldComponent_2;
 
 // @public
@@ -304,7 +304,7 @@ export type PrimeShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayIte
 // @public (undocumented)
 export type PrimeSliderField = SliderField<PrimeSliderProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeSliderFieldComponent = PrimeSliderFieldComponent_2;
 
 // @public (undocumented)
@@ -326,7 +326,7 @@ export type PrimeSubmitButtonField = Omit<PrimeButtonField<FormSubmitEvent>, 'ev
 // @public
 export type PrimeTextareaField = TextareaField<PrimeTextareaProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeTextareaFieldComponent = PrimeTextareaFieldComponent_2;
 
 // @public
@@ -339,7 +339,7 @@ export interface PrimeTextareaProps extends TextareaProps {
 // @public (undocumented)
 export type PrimeToggleField = ToggleField<PrimeToggleProps>;
 
-// @public (undocumented)
+// @public
 export type PrimeToggleFieldComponent = PrimeToggleFieldComponent_2;
 
 // @public (undocumented)

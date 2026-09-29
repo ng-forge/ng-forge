@@ -82,13 +82,13 @@ export interface IonicAddonExtensions {
 // @public
 export type IonicButtonAddon = IonicButtonBase & IonicButtonContent & IonicButtonClick;
 
-// @public (undocumented)
+// @public
 export type IonicButtonAddonComponent = IonicButtonAddonComponent_2;
 
 // @public (undocumented)
 export type IonicButtonField<TEvent extends FormEvent> = ButtonField<IonicButtonProps, TEvent>;
 
-// @public (undocumented)
+// @public
 export type IonicButtonFieldComponent<TEvent extends FormEvent> = IonicButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
@@ -112,7 +112,7 @@ export interface IonicButtonProps {
 // @public (undocumented)
 export type IonicCheckboxField = CheckboxField<IonicCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type IonicCheckboxFieldComponent = IonicCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -144,7 +144,7 @@ export interface IonicConfig {
 // @public (undocumented)
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;
 
-// @public (undocumented)
+// @public
 export type IonicDatepickerFieldComponent = IonicDatepickerFieldComponent_2;
 
 // @public (undocumented)
@@ -215,7 +215,7 @@ export interface IonicIconAddon extends BaseAddon {
     readonly type: 'ion-icon';
 }
 
-// @public (undocumented)
+// @public
 export type IonicIconAddonComponent = IonicIconAddonComponent_2;
 
 // @public
@@ -226,7 +226,7 @@ export type IonicInputField = InputField<IonicInputProps> & {
     addons?: ReadonlyArray<IonicInputAddon>;
 };
 
-// @public (undocumented)
+// @public
 export type IonicInputFieldComponent = IonicInputFieldComponent_2;
 
 // @public (undocumented)
@@ -260,7 +260,7 @@ export type IonicInsertArrayItemButtonField = Omit<IonicButtonField<InsertArrayI
 // @public (undocumented)
 export type IonicMultiCheckboxField<T> = MultiCheckboxField<T, IonicMultiCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type IonicMultiCheckboxFieldComponent = IonicMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -301,7 +301,7 @@ export type IonicPreviousButtonField = Omit<IonicButtonField<PreviousPageEvent>,
 // @public (undocumented)
 export type IonicRadioField<T> = RadioField<T, IonicRadioProps>;
 
-// @public (undocumented)
+// @public
 export type IonicRadioFieldComponent = IonicRadioFieldComponent_2;
 
 // @public (undocumented)
@@ -327,7 +327,7 @@ export type IonicRemoveArrayItemButtonField = Omit<IonicButtonField<RemoveAtInde
 // @public (undocumented)
 export type IonicSelectField<T> = SelectField<T, IonicSelectProps>;
 
-// @public (undocumented)
+// @public
 export type IonicSelectFieldComponent = IonicSelectFieldComponent_2;
 
 // @public (undocumented)
@@ -365,7 +365,7 @@ export type IonicShiftArrayItemButtonField = Omit<IonicButtonField<ShiftArrayIte
 // @public (undocumented)
 export type IonicSliderField = SliderField<IonicSliderProps>;
 
-// @public (undocumented)
+// @public
 export type IonicSliderFieldComponent = IonicSliderFieldComponent_2;
 
 // @public (undocumented)
@@ -399,7 +399,7 @@ export type IonicSubmitButtonField = Omit<IonicButtonField<FormSubmitEvent>, 'ev
 // @public (undocumented)
 export type IonicTextareaField = TextareaField<IonicTextareaProps>;
 
-// @public (undocumented)
+// @public
 export type IonicTextareaFieldComponent = IonicTextareaFieldComponent_2;
 
 // @public (undocumented)
@@ -425,7 +425,7 @@ export interface IonicTextareaProps extends TextareaProps {
 // @public (undocumented)
 export type IonicToggleField = ToggleField<IonicToggleProps>;
 
-// @public (undocumented)
+// @public
 export type IonicToggleFieldComponent = IonicToggleFieldComponent_2;
 
 // @public (undocumented)

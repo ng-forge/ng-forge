@@ -54,15 +54,27 @@ import type { BsToggleFieldComponent as BsToggleFieldComponentClass } from '@ng-
 import type { BsIconAddonComponent as BsIconAddonComponentClass } from '@ng-forge/dynamic-forms-bootstrap/lazy/addon-icon';
 import type { BsButtonAddonComponent as BsButtonAddonComponentClass } from '@ng-forge/dynamic-forms-bootstrap/lazy/addon-button';
 
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/button`. Import it from there to use the class as a value. */
 export type BsButtonFieldComponent<TEvent extends FormEvent> = BsButtonFieldComponentClass<TEvent>;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/checkbox`. Import it from there to use the class as a value. */
 export type BsCheckboxFieldComponent = BsCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/datepicker`. Import it from there to use the class as a value. */
 export type BsDatepickerFieldComponent = BsDatepickerFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/input`. Import it from there to use the class as a value. */
 export type BsInputFieldComponent = BsInputFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/multi-checkbox`. Import it from there to use the class as a value. */
 export type BsMultiCheckboxFieldComponent = BsMultiCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/radio`. Import it from there to use the class as a value. */
 export type BsRadioFieldComponent = BsRadioFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/select`. Import it from there to use the class as a value. */
 export type BsSelectFieldComponent = BsSelectFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/slider`. Import it from there to use the class as a value. */
 export type BsSliderFieldComponent = BsSliderFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/textarea`. Import it from there to use the class as a value. */
 export type BsTextareaFieldComponent = BsTextareaFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/toggle`. Import it from there to use the class as a value. */
 export type BsToggleFieldComponent = BsToggleFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/addon-icon`. Import it from there to use the class as a value. */
 export type BsIconAddonComponent = BsIconAddonComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-bootstrap/lazy/addon-button`. Import it from there to use the class as a value. */
 export type BsButtonAddonComponent = BsButtonAddonComponentClass;

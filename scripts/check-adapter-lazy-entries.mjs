@@ -34,7 +34,14 @@ if (JSON.stringify(exportedEntries) !== JSON.stringify(expectedEntries)) {
   );
 }
 
-const componentDeclaration = /ɵɵngDeclareComponent\(\{[^}]*?type: (\w+), isStandalone: true, selector: "[^"]+"/g;
+// A component's own type and selector sit before its first nested object, in any order. Selectors
+// are what NG0912 compares, and they survive rollup renaming a duplicate class to `Foo$1`.
+const declaredComponents = (source) =>
+  [...source.matchAll(/ɵɵngDeclareComponent\(\{(?=[^}]*?\btype: ([\w$]+))(?=[^}]*?\bselector: "([^"]+)")/g)].map(([, name, selector]) => ({
+    name,
+    selector,
+  }));
+const primarySelectors = new Set(declaredComponents(primaryModule).map(({ selector }) => selector));
 for (const entry of expectedEntries) {
   const specifier = `${manifest.name}/lazy/${entry}`;
   if (!primaryModule.includes(`import('${specifier}')`) && !primaryModule.includes(`import("${specifier}")`)) {
@@ -45,26 +52,26 @@ for (const entry of expectedEntries) {
   }
   // A second copy of a lazy component is a distinct class with the same component ID (NG0912, #625).
   const lazyModule = await readFile(resolve(packageRoot, manifest.exports[`./lazy/${entry}`].default), 'utf8');
-  const lazyDeclarations = [...lazyModule.matchAll(componentDeclaration)];
+  const lazyComponents = declaredComponents(lazyModule);
   // Every lazy entry renders a component, so zero matches means the partial-compilation format changed.
-  if (lazyDeclarations.length === 0) {
-    failures.push(`found no component declarations in ${specifier}; update the componentDeclaration pattern`);
+  if (lazyComponents.length === 0) {
+    failures.push(`found no component declarations in ${specifier}; update the declaredComponents pattern`);
   }
-  for (const [declaration, name] of lazyDeclarations) {
-    if (primaryModule.includes(declaration.slice(declaration.indexOf('type: ')))) {
-      failures.push(`primary entry point redeclares ${name} from ${specifier}`);
+  for (const { name, selector } of lazyComponents) {
+    if (primarySelectors.has(selector)) {
+      failures.push(`primary entry point redeclares ${name} ('${selector}') from ${specifier}`);
     }
   }
 }
 
-// Bundle a consumer that only registers the adapter, then walk the static import graph from its
-// entry chunk. No lazy entry module may be reachable without a dynamic import.
-const fieldsProvider = primaryModule.match(/^export \{[^}]*\b(with\w+Fields)\b/m)?.[1];
+// Bundle a consumer that keeps every root export, then walk the static import graph from its entry
+// chunk. No lazy entry module may be reachable without a dynamic import, including through another
+// entry point such as /shared, which the string check above cannot see.
 const lazyInputs = new Set(
   expectedEntries.map((entry) => relative(process.cwd(), resolve(packageRoot, manifest.exports[`./lazy/${entry}`].default))),
 );
 const { metafile } = await build({
-  stdin: { contents: `import { ${fieldsProvider} } from '${manifest.name}';\nconsole.log(${fieldsProvider});`, resolveDir: packageRoot },
+  stdin: { contents: `import * as adapter from '${manifest.name}';\nconsole.log(adapter);`, resolveDir: packageRoot },
   bundle: true,
   splitting: true,
   format: 'esm',
@@ -89,6 +96,9 @@ const { metafile } = await build({
   ],
 });
 const entryOutput = Object.keys(metafile.outputs).find((output) => metafile.outputs[output].entryPoint === '<stdin>');
+if (!entryOutput) {
+  throw new Error(`Eager bundle check for ${manifest.name} found no entry chunk in the esbuild metafile.`);
+}
 const eagerOutputs = new Set([entryOutput]);
 for (const output of eagerOutputs) {
   for (const { path, kind } of metafile.outputs[output].imports) {
@@ -97,11 +107,8 @@ for (const output of eagerOutputs) {
 }
 for (const output of eagerOutputs) {
   for (const input of Object.keys(metafile.outputs[output].inputs)) {
-    if (lazyInputs.has(input)) failures.push(`${fieldsProvider}() eagerly bundles ${input}`);
+    if (lazyInputs.has(input)) failures.push(`primary entry point eagerly bundles ${input}`);
   }
-}
-if (!fieldsProvider || lazyInputs.size === 0 || eagerOutputs.size === 0) {
-  failures.push('eager bundle check could not locate the fields provider or lazy entry modules');
 }
 
 const declarationPath = resolve(packageRoot, manifest.exports['.'].types);

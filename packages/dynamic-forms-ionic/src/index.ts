@@ -57,15 +57,27 @@ import type { IonicToggleFieldComponent as IonicToggleFieldComponentClass } from
 import type { IonicIconAddonComponent as IonicIconAddonComponentClass } from '@ng-forge/dynamic-forms-ionic/lazy/addon-icon';
 import type { IonicButtonAddonComponent as IonicButtonAddonComponentClass } from '@ng-forge/dynamic-forms-ionic/lazy/addon-button';
 
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/button`. Import it from there to use the class as a value. */
 export type IonicButtonFieldComponent<TEvent extends FormEvent> = IonicButtonFieldComponentClass<TEvent>;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/checkbox`. Import it from there to use the class as a value. */
 export type IonicCheckboxFieldComponent = IonicCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/datepicker`. Import it from there to use the class as a value. */
 export type IonicDatepickerFieldComponent = IonicDatepickerFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/input`. Import it from there to use the class as a value. */
 export type IonicInputFieldComponent = IonicInputFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/multi-checkbox`. Import it from there to use the class as a value. */
 export type IonicMultiCheckboxFieldComponent = IonicMultiCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/radio`. Import it from there to use the class as a value. */
 export type IonicRadioFieldComponent = IonicRadioFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/select`. Import it from there to use the class as a value. */
 export type IonicSelectFieldComponent = IonicSelectFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/slider`. Import it from there to use the class as a value. */
 export type IonicSliderFieldComponent = IonicSliderFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/textarea`. Import it from there to use the class as a value. */
 export type IonicTextareaFieldComponent = IonicTextareaFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/toggle`. Import it from there to use the class as a value. */
 export type IonicToggleFieldComponent = IonicToggleFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/addon-icon`. Import it from there to use the class as a value. */
 export type IonicIconAddonComponent = IonicIconAddonComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-ionic/lazy/addon-button`. Import it from there to use the class as a value. */
 export type IonicButtonAddonComponent = IonicButtonAddonComponentClass;

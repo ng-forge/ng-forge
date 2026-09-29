@@ -55,15 +55,27 @@ import type { MatToggleFieldComponent as MatToggleFieldComponentClass } from '@n
 import type { MatIconAddonComponent as MatIconAddonComponentClass } from '@ng-forge/dynamic-forms-material/lazy/addon-icon';
 import type { MatButtonAddonComponent as MatButtonAddonComponentClass } from '@ng-forge/dynamic-forms-material/lazy/addon-button';
 
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/button`. Import it from there to use the class as a value. */
 export type MatButtonFieldComponent<TEvent extends FormEvent> = MatButtonFieldComponentClass<TEvent>;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/checkbox`. Import it from there to use the class as a value. */
 export type MatCheckboxFieldComponent = MatCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/datepicker`. Import it from there to use the class as a value. */
 export type MatDatepickerFieldComponent = MatDatepickerFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/input`. Import it from there to use the class as a value. */
 export type MatInputFieldComponent = MatInputFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/multi-checkbox`. Import it from there to use the class as a value. */
 export type MatMultiCheckboxFieldComponent = MatMultiCheckboxFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/radio`. Import it from there to use the class as a value. */
 export type MatRadioFieldComponent = MatRadioFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/select`. Import it from there to use the class as a value. */
 export type MatSelectFieldComponent = MatSelectFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/slider`. Import it from there to use the class as a value. */
 export type MatSliderFieldComponent = MatSliderFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/textarea`. Import it from there to use the class as a value. */
 export type MatTextareaFieldComponent = MatTextareaFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/toggle`. Import it from there to use the class as a value. */
 export type MatToggleFieldComponent = MatToggleFieldComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/addon-icon`. Import it from there to use the class as a value. */
 export type MatIconAddonComponent = MatIconAddonComponentClass;
+/** Class type of the component in `@ng-forge/dynamic-forms-material/lazy/addon-button`. Import it from there to use the class as a value. */
 export type MatButtonAddonComponent = MatButtonAddonComponentClass;

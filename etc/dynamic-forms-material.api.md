@@ -78,13 +78,13 @@ export interface MatAddonExtensions {
 // @public
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
 
-// @public (undocumented)
+// @public
 export type MatButtonAddonComponent = MatButtonAddonComponent_2;
 
 // @public (undocumented)
 export type MatButtonField<TEvent extends FormEvent> = ButtonField<MatButtonProps, TEvent>;
 
-// @public (undocumented)
+// @public
 export type MatButtonFieldComponent<TEvent extends FormEvent> = MatButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
@@ -98,7 +98,7 @@ export interface MatButtonProps {
 // @public (undocumented)
 export type MatCheckboxField = CheckboxField<MatCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type MatCheckboxFieldComponent = MatCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -118,7 +118,7 @@ export interface MatCheckboxProps {
 // @public (undocumented)
 export type MatDatepickerField = DatepickerField<MatDatepickerProps>;
 
-// @public (undocumented)
+// @public
 export type MatDatepickerFieldComponent = MatDatepickerFieldComponent_2;
 
 // @public (undocumented)
@@ -200,7 +200,7 @@ export interface MatIconAddon extends BaseAddon {
     readonly type: 'mat-icon';
 }
 
-// @public (undocumented)
+// @public
 export type MatIconAddonComponent = MatIconAddonComponent_2;
 
 // @public
@@ -211,7 +211,7 @@ export type MatInputField = InputField<MatInputProps> & {
     addons?: ReadonlyArray<MatInputAddon>;
 };
 
-// @public (undocumented)
+// @public
 export type MatInputFieldComponent = MatInputFieldComponent_2;
 
 // @public (undocumented)
@@ -243,7 +243,7 @@ export type MatInsertArrayItemButtonField = Omit<MatButtonField<InsertArrayItemE
 // @public (undocumented)
 export type MatMultiCheckboxField<T> = MultiCheckboxField<T, MatMultiCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type MatMultiCheckboxFieldComponent = MatMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -284,7 +284,7 @@ export type MatPreviousButtonField = Omit<MatButtonField<PreviousPageEvent>, 'ev
 // @public (undocumented)
 export type MatRadioField<T> = RadioField<T, MatRadioProps>;
 
-// @public (undocumented)
+// @public
 export type MatRadioFieldComponent = MatRadioFieldComponent_2;
 
 // @public (undocumented)
@@ -308,7 +308,7 @@ export type MatRemoveArrayItemButtonField = Omit<MatButtonField<RemoveAtIndexEve
 // @public (undocumented)
 export type MatSelectField<T> = SelectField<T, MatSelectProps>;
 
-// @public (undocumented)
+// @public
 export type MatSelectFieldComponent = MatSelectFieldComponent_2;
 
 // @public (undocumented)
@@ -340,7 +340,7 @@ export type MatShiftArrayItemButtonField = Omit<MatButtonField<ShiftArrayItemEve
 // @public (undocumented)
 export type MatSliderField = SliderField<MatSliderProps>;
 
-// @public (undocumented)
+// @public
 export type MatSliderFieldComponent = MatSliderFieldComponent_2;
 
 // @public (undocumented)
@@ -369,7 +369,7 @@ export type MatSubmitButtonField = Omit<MatButtonField<FormSubmitEvent>, 'event'
 // @public (undocumented)
 export type MatTextareaField = TextareaField<MatTextareaProps>;
 
-// @public (undocumented)
+// @public
 export type MatTextareaFieldComponent = MatTextareaFieldComponent_2;
 
 // @public (undocumented)
@@ -391,7 +391,7 @@ export interface MatTextareaProps extends TextareaProps {
 // @public (undocumented)
 export type MatToggleField = ToggleField<MatToggleProps>;
 
-// @public (undocumented)
+// @public
 export type MatToggleFieldComponent = MatToggleFieldComponent_2;
 
 // @public (undocumented)

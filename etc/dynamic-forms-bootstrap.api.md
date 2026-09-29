@@ -88,13 +88,13 @@ export interface BsAddonExtensions {
 // @public
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
-// @public (undocumented)
+// @public
 export type BsButtonAddonComponent = BsButtonAddonComponent_2;
 
 // @public (undocumented)
 export type BsButtonField<TEvent extends FormEvent> = ButtonField<BsButtonProps, TEvent>;
 
-// @public (undocumented)
+// @public
 export type BsButtonFieldComponent<TEvent extends FormEvent> = BsButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
@@ -116,7 +116,7 @@ export interface BsButtonProps {
 // @public (undocumented)
 export type BsCheckboxField = CheckboxField<BsCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type BsCheckboxFieldComponent = BsCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -136,7 +136,7 @@ export interface BsCheckboxProps {
 // @public (undocumented)
 export type BsDatepickerField = DatepickerField<BsDatepickerProps>;
 
-// @public (undocumented)
+// @public
 export type BsDatepickerFieldComponent = BsDatepickerFieldComponent_2;
 
 // @public (undocumented)
@@ -203,7 +203,7 @@ export interface BsIconAddon extends BaseAddon {
     readonly type: 'bs-icon';
 }
 
-// @public (undocumented)
+// @public
 export type BsIconAddonComponent = BsIconAddonComponent_2;
 
 // @public
@@ -214,7 +214,7 @@ export type BsInputField = InputField<BsInputProps> & {
     addons?: ReadonlyArray<BsInputAddon>;
 };
 
-// @public (undocumented)
+// @public
 export type BsInputFieldComponent = BsInputFieldComponent_2;
 
 // @public (undocumented)
@@ -246,7 +246,7 @@ export type BsInsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEve
 // @public (undocumented)
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
 
-// @public (undocumented)
+// @public
 export type BsMultiCheckboxFieldComponent = BsMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
@@ -287,7 +287,7 @@ export type BsPreviousButtonField = Omit<BsButtonField<PreviousPageEvent>, 'even
 // @public (undocumented)
 export type BsRadioField<T> = RadioField<T, BsRadioProps>;
 
-// @public (undocumented)
+// @public
 export type BsRadioFieldComponent = BsRadioFieldComponent_2;
 
 // @public (undocumented)
@@ -313,7 +313,7 @@ export type BsRemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent
 // @public (undocumented)
 export type BsSelectField<T> = SelectField<T, BsSelectProps>;
 
-// @public (undocumented)
+// @public
 export type BsSelectFieldComponent = BsSelectFieldComponent_2;
 
 // @public
@@ -345,7 +345,7 @@ export type BsShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent
 // @public (undocumented)
 export type BsSliderField = SliderField<BsSliderProps>;
 
-// @public (undocumented)
+// @public
 export type BsSliderFieldComponent = BsSliderFieldComponent_2;
 
 // @public (undocumented)
@@ -371,7 +371,7 @@ export type BsSubmitButtonField = Omit<BsButtonField<FormSubmitEvent>, 'event' |
 // @public (undocumented)
 export type BsTextareaField = TextareaField<BsTextareaProps>;
 
-// @public (undocumented)
+// @public
 export type BsTextareaFieldComponent = BsTextareaFieldComponent_2;
 
 // @public (undocumented)
@@ -391,7 +391,7 @@ export interface BsTextareaProps extends TextareaProps {
 // @public (undocumented)
 export type BsToggleField = ToggleField<BsToggleProps>;
 
-// @public (undocumented)
+// @public
 export type BsToggleFieldComponent = BsToggleFieldComponent_2;
 
 // @public (undocumented)
