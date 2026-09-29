@@ -134,6 +134,7 @@ jobs:
       version: ${{ steps.gate.outputs.version }}
       sha: ${{ steps.gate.outputs.sha }}
       base: ${{ steps.gate.outputs.base }}
+      last_stable: ${{ steps.gate.outputs.last_stable }}
       # 'next' normally, 'rc' during an active RC cycle. Drives the npm dist-tag and the
       # git tag namespace (next/… vs rc/…) for the nightly publish.
       dist_tag: ${{ steps.gate.outputs.dist_tag }}
@@ -304,6 +305,7 @@ jobs:
           echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
           echo "sha=${FULL_SHA}" >> "$GITHUB_OUTPUT"
           echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+          echo "last_stable=${LAST_STABLE}" >> "$GITHUB_OUTPUT"
           echo "dist_tag=${DIST_TAG}" >> "$GITHUB_OUTPUT"
           echo "tag_ns=${TAG_NS}" >> "$GITHUB_OUTPUT"
 
@@ -582,22 +584,26 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Generate Nightly Release Notes
-        # Body for the @next GitHub prerelease. Reuses the gate's BASE (most recent of
-        # last stable / last nightly) so the changelog spans only commits added since
-        # the previous release of any kind — no duplicated detection logic.
+        # Body for the @next GitHub prerelease. Uses the gate's exact window: everything
+        # since BASE (newest release tag reachable from main) minus what LAST_STABLE
+        # shipped. LAST_STABLE is usually not an ancestor of main (release PRs are
+        # squash-merged), so BASE alone would repeat the last stable release's commits.
         if: github.event_name == 'schedule' || inputs.mode == 'next'
         env:
           NEXT_SHA: ${{ needs.next-gate.outputs.sha }}
           BASE: ${{ needs.next-gate.outputs.base }}
+          LAST_STABLE: ${{ needs.next-gate.outputs.last_stable }}
         run: |
           set -euo pipefail
 
-          CHANGELOG=$(git log "${BASE}..${NEXT_SHA}" --pretty=format:"- %s (%h)" --no-merges)
+          CHANGELOG=$(git log "${NEXT_SHA}" ^"${LAST_STABLE}" ^"${BASE}" --pretty=format:"- %s (%h)" --no-merges)
+          SINCE="$BASE"
+          if [ "$BASE" != "$LAST_STABLE" ]; then SINCE="${BASE}, excluding ${LAST_STABLE}"; fi
 
           cat > NEXT_RELEASE_NOTES.md <<EOF
           Nightly @${DIST_TAG} prerelease — published from \`main\`.
 
-          ## Changes since ${BASE}
+          ## Changes since ${SINCE}
 
           ${CHANGELOG:-_No new commits._}
           EOF
