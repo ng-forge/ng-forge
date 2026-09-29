@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
+import { build } from 'esbuild';
 
 const adapter = process.argv[2];
 if (!adapter || !/^[a-z0-9-]+$/.test(adapter)) {
@@ -33,6 +34,7 @@ if (JSON.stringify(exportedEntries) !== JSON.stringify(expectedEntries)) {
   );
 }
 
+const componentDeclaration = /ɵɵngDeclareComponent\(\{[^}]*?type: (\w+), isStandalone: true, selector: "[^"]+"/g;
 for (const entry of expectedEntries) {
   const specifier = `${manifest.name}/lazy/${entry}`;
   if (!primaryModule.includes(`import('${specifier}')`) && !primaryModule.includes(`import("${specifier}")`)) {
@@ -41,12 +43,75 @@ for (const entry of expectedEntries) {
   if (primaryModule.includes(`from '${specifier}'`) || primaryModule.includes(`from "${specifier}"`)) {
     failures.push(`primary entry point statically re-exports ${specifier}`);
   }
+  // A second copy of a lazy component is a distinct class with the same component ID (NG0912, #625).
+  const lazyModule = await readFile(resolve(packageRoot, manifest.exports[`./lazy/${entry}`].default), 'utf8');
+  const lazyDeclarations = [...lazyModule.matchAll(componentDeclaration)];
+  // Every lazy entry renders a component, so zero matches means the partial-compilation format changed.
+  if (lazyDeclarations.length === 0) {
+    failures.push(`found no component declarations in ${specifier}; update the componentDeclaration pattern`);
+  }
+  for (const [declaration, name] of lazyDeclarations) {
+    if (primaryModule.includes(declaration.slice(declaration.indexOf('type: ')))) {
+      failures.push(`primary entry point redeclares ${name} from ${specifier}`);
+    }
+  }
+}
+
+// Bundle a consumer that only registers the adapter, then walk the static import graph from its
+// entry chunk. No lazy entry module may be reachable without a dynamic import.
+const fieldsProvider = primaryModule.match(/^export \{[^}]*\b(with\w+Fields)\b/m)?.[1];
+const lazyInputs = new Set(
+  expectedEntries.map((entry) => relative(process.cwd(), resolve(packageRoot, manifest.exports[`./lazy/${entry}`].default))),
+);
+const { metafile } = await build({
+  stdin: { contents: `import { ${fieldsProvider} } from '${manifest.name}';\nconsole.log(${fieldsProvider});`, resolveDir: packageRoot },
+  bundle: true,
+  splitting: true,
+  format: 'esm',
+  outdir: 'out',
+  write: false,
+  metafile: true,
+  logLevel: 'silent',
+  plugins: [
+    {
+      name: 'resolve-adapter',
+      setup(pluginBuild) {
+        pluginBuild.onResolve({ filter: /^[^./]/ }, ({ path }) => {
+          if (path !== manifest.name && !path.startsWith(`${manifest.name}/`)) return { path, external: true };
+          // Plugin-resolved paths skip package.json lookup, so pass sideEffects through like a real install.
+          return {
+            path: resolve(packageRoot, manifest.exports[`.${path.slice(manifest.name.length)}`].default),
+            sideEffects: manifest.sideEffects !== false,
+          };
+        });
+      },
+    },
+  ],
+});
+const entryOutput = Object.keys(metafile.outputs).find((output) => metafile.outputs[output].entryPoint === '<stdin>');
+const eagerOutputs = new Set([entryOutput]);
+for (const output of eagerOutputs) {
+  for (const { path, kind } of metafile.outputs[output].imports) {
+    if (kind === 'import-statement' && metafile.outputs[path]) eagerOutputs.add(path);
+  }
+}
+for (const output of eagerOutputs) {
+  for (const input of Object.keys(metafile.outputs[output].inputs)) {
+    if (lazyInputs.has(input)) failures.push(`${fieldsProvider}() eagerly bundles ${input}`);
+  }
+}
+if (!fieldsProvider || lazyInputs.size === 0 || eagerOutputs.size === 0) {
+  failures.push('eager bundle check could not locate the fields provider or lazy entry modules');
 }
 
 const declarationPath = resolve(packageRoot, manifest.exports['.'].types);
 const declarations = await readFile(declarationPath, 'utf8');
 if (!declarations.includes('interface FieldRegistryLeaves')) {
   failures.push('rolled declarations do not contain the FieldRegistryLeaves module augmentation');
+}
+// The bundle has no value exports from lazy entries, so the typings must not promise any.
+for (const [statement] of declarations.matchAll(new RegExp(`^export \\{[^}]*\\} from '${manifest.name}/lazy/[^']+';$`, 'gm'))) {
+  failures.push(`rolled declarations value-export a lazy entry: ${statement}`);
 }
 
 const sharedDeclarationPath = resolve(packageRoot, manifest.exports['./shared'].types);

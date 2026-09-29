@@ -74,45 +74,14 @@ export interface PrimeAddonExtensions {
 // @public
 export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
 
-// @public
-export class PrimeButtonAddonComponent {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.TypedNgForgeAddonAction<PrimeButtonAddon>;
-    protected readonly addon: _angular_core.Signal<PrimeButtonAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    protected readonly iconClass: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly isIconOnly: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly label: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeButtonAddonComponent, "df-prime-button-addon", never, {}, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddonAction; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeButtonAddonComponent, never>;
-}
+// @public (undocumented)
+export type PrimeButtonAddonComponent = PrimeButtonAddonComponent_2;
 
 // @public (undocumented)
 export type PrimeButtonField<TEvent extends FormEvent = FormEvent> = ButtonField<PrimeButtonProps, TEvent>;
 
 // @public (undocumented)
-export class PrimeButtonFieldComponent<TEvent extends FormEvent> {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.NgForgeAction<TEvent>;
-    // (undocumented)
-    readonly buttonTestId: _angular_core.Signal<string>;
-    // (undocumented)
-    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
-    // (undocumented)
-    onClick(): void;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeButtonProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeButtonFieldComponent<any>, "df-prime-button", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeActionHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeButtonFieldComponent<any>, never>;
-}
+export type PrimeButtonFieldComponent<TEvent extends FormEvent> = PrimeButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
 export interface PrimeButtonProps {
@@ -138,18 +107,7 @@ export interface PrimeButtonProps {
 export type PrimeCheckboxField = CheckboxField<PrimeCheckboxProps>;
 
 // @public (undocumented)
-export class PrimeCheckboxFieldComponent {
-    // (undocumented)
-    protected readonly checkboxClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeCheckboxProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeCheckboxFieldComponent, "df-prime-checkbox", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeCheckboxFieldComponent, never>;
-}
+export type PrimeCheckboxFieldComponent = PrimeCheckboxFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeCheckboxProps {
@@ -164,24 +122,7 @@ export interface PrimeCheckboxProps {
 export type PrimeDatepickerField = DatepickerField<PrimeDatepickerProps>;
 
 // @public (undocumented)
-export class PrimeDatepickerFieldComponent {
-    // (undocumented)
-    protected readonly datepickerClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    readonly maxDate: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    readonly minDate: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeDatepickerProps | undefined>;
-    // (undocumented)
-    readonly startAt: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeDatepickerFieldComponent, "df-prime-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeDatepickerFieldComponent, never>;
-}
+export type PrimeDatepickerFieldComponent = PrimeDatepickerFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeDatepickerProps extends DatepickerProps {
@@ -236,22 +177,8 @@ export interface PrimeIconAddon extends BaseAddon {
     readonly type: 'prime-icon';
 }
 
-// @public
-export class PrimeIconAddonComponent {
-    // (undocumented)
-    readonly addon: _angular_core.InputSignal<PrimeIconAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    protected readonly hasAriaLabel: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly iconClass: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeIconAddonComponent, "df-prime-icon-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeIconAddonComponent, never>;
-}
+// @public (undocumented)
+export type PrimeIconAddonComponent = PrimeIconAddonComponent_2;
 
 // @public
 export type PrimeInputAddon = PrimeAddonExtension | PrimeButtonAddon | PrimeIconAddon | TemplateAddon | TextAddon;
@@ -262,28 +189,7 @@ export type PrimeInputField = InputField<PrimeInputProps> & {
 };
 
 // @public (undocumented)
-export class PrimeInputFieldComponent {
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    protected readonly inputClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly inputId: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<PrimeInputAddon>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeInputProps | undefined>;
-    // (undocumented)
-    protected readonly size: _angular_core.Signal<"large" | "small" | undefined>;
-    protected readonly type: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly variant: _angular_core.Signal<"filled" | "outlined" | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeInputFieldComponent, "df-prime-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeInputFieldComponent, never>;
-}
+export type PrimeInputFieldComponent = PrimeInputFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeInputProps extends InputProps {
@@ -306,24 +212,7 @@ export type PrimeInsertArrayItemButtonField = Omit<PrimeButtonField<InsertArrayI
 export type PrimeMultiCheckboxField<T> = MultiCheckboxField<T, PrimeMultiCheckboxProps>;
 
 // @public (undocumented)
-export class PrimeMultiCheckboxFieldComponent {
-    constructor();
-    protected readonly checkedValuesMap: _angular_core.Signal<Record<string, boolean>>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType[]>;
-    // (undocumented)
-    protected onCheckboxChange(option: FieldOption<ValueType>, event: CheckboxChangeEvent): void;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeMultiCheckboxProps | undefined>;
-    // (undocumented)
-    protected valueViewModel: _angular_core.WritableSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeMultiCheckboxFieldComponent, "df-prime-multi-checkbox", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeMultiCheckboxFieldComponent, never>;
-}
+export type PrimeMultiCheckboxFieldComponent = PrimeMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeMultiCheckboxProps {
@@ -375,18 +264,7 @@ export type PrimePreviousButtonField = Omit<PrimeButtonField<PreviousPageEvent>,
 export type PrimeRadioField<T> = RadioField<T, PrimeRadioProps>;
 
 // @public (undocumented)
-export class PrimeRadioFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeRadioProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeRadioFieldComponent, "df-prime-radio", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeRadioFieldComponent, never>;
-}
+export type PrimeRadioFieldComponent = PrimeRadioFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeRadioProps {
@@ -405,22 +283,7 @@ export type PrimeRemoveArrayItemButtonField = Omit<PrimeButtonField<RemoveAtInde
 export type PrimeSelectField<T> = SelectField<T, PrimeSelectProps>;
 
 // @public (undocumented)
-export class PrimeSelectFieldComponent {
-    // (undocumented)
-    protected readonly isMultiple: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeSelectProps | undefined>;
-    // (undocumented)
-    protected readonly selectClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeSelectFieldComponent, "df-prime-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeSelectFieldComponent, never>;
-}
+export type PrimeSelectFieldComponent = PrimeSelectFieldComponent_2;
 
 // @public
 export interface PrimeSelectProps extends SelectProps {
@@ -442,18 +305,7 @@ export type PrimeShiftArrayItemButtonField = Omit<PrimeButtonField<ShiftArrayIte
 export type PrimeSliderField = SliderField<PrimeSliderProps>;
 
 // @public (undocumented)
-export class PrimeSliderFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<number>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeSliderProps | undefined>;
-    // (undocumented)
-    readonly step: _angular_core.InputSignal<number | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeSliderFieldComponent, "df-prime-slider", never, { "step": { "alias": "step"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeSliderFieldComponent, never>;
-}
+export type PrimeSliderFieldComponent = PrimeSliderFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeSliderProps {
@@ -475,20 +327,7 @@ export type PrimeSubmitButtonField = Omit<PrimeButtonField<FormSubmitEvent>, 'ev
 export type PrimeTextareaField = TextareaField<PrimeTextareaProps>;
 
 // @public (undocumented)
-export class PrimeTextareaFieldComponent {
-    // (undocumented)
-    protected readonly inputId: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeTextareaProps | undefined>;
-    // (undocumented)
-    protected readonly textareaClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeTextareaFieldComponent, "df-prime-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeTextareaFieldComponent, never>;
-}
+export type PrimeTextareaFieldComponent = PrimeTextareaFieldComponent_2;
 
 // @public
 export interface PrimeTextareaProps extends TextareaProps {
@@ -501,18 +340,7 @@ export interface PrimeTextareaProps extends TextareaProps {
 export type PrimeToggleField = ToggleField<PrimeToggleProps>;
 
 // @public (undocumented)
-export class PrimeToggleFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<PrimeToggleProps | undefined>;
-    // (undocumented)
-    protected readonly toggleClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<PrimeToggleFieldComponent, "df-prime-toggle", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<PrimeToggleFieldComponent, never>;
-}
+export type PrimeToggleFieldComponent = PrimeToggleFieldComponent_2;
 
 // @public (undocumented)
 export interface PrimeToggleProps {

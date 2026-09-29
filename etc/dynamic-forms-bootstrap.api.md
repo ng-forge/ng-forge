@@ -88,45 +88,14 @@ export interface BsAddonExtensions {
 // @public
 export type BsButtonAddon = BsButtonBase & BsButtonContent & BsButtonClick;
 
-// @public
-export class BsButtonAddonComponent {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.TypedNgForgeAddonAction<BsButtonAddon>;
-    protected readonly addon: _angular_core.Signal<BsButtonAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    protected readonly buttonClass: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly iconClass: _angular_core.Signal<string>;
-    // (undocumented)
-    protected readonly label: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsButtonAddonComponent, "df-bs-button-addon", never, {}, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddonAction; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsButtonAddonComponent, never>;
-}
+// @public (undocumented)
+export type BsButtonAddonComponent = BsButtonAddonComponent_2;
 
 // @public (undocumented)
 export type BsButtonField<TEvent extends FormEvent> = ButtonField<BsButtonProps, TEvent>;
 
 // @public (undocumented)
-export class BsButtonFieldComponent<TEvent extends FormEvent> {
-    // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.NgForgeAction<TEvent>;
-    // (undocumented)
-    readonly buttonClasses: _angular_core.Signal<string>;
-    // (undocumented)
-    readonly buttonTestId: _angular_core.Signal<string>;
-    readonly buttonType: _angular_core.Signal<"button" | "reset" | "submit">;
-    onClick(): void;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsButtonProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsButtonFieldComponent<any>, "df-bs-button", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeActionHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsButtonFieldComponent<any>, never>;
-}
+export type BsButtonFieldComponent<TEvent extends FormEvent> = BsButtonFieldComponent_2<TEvent>;
 
 // @public (undocumented)
 export interface BsButtonProps {
@@ -148,16 +117,7 @@ export interface BsButtonProps {
 export type BsCheckboxField = CheckboxField<BsCheckboxProps>;
 
 // @public (undocumented)
-export class BsCheckboxFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsCheckboxProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsCheckboxFieldComponent, "df-bs-checkbox", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsCheckboxFieldComponent, never>;
-}
+export type BsCheckboxFieldComponent = BsCheckboxFieldComponent_2;
 
 // @public (undocumented)
 export interface BsCheckboxProps {
@@ -177,26 +137,7 @@ export interface BsCheckboxProps {
 export type BsDatepickerField = DatepickerField<BsDatepickerProps>;
 
 // @public (undocumented)
-export class BsDatepickerFieldComponent {
-    // (undocumented)
-    readonly maxAsString: _angular_core.Signal<null | string>;
-    // (undocumented)
-    readonly maxDate: _angular_core.InputSignal<Date | null | string>;
-    // (undocumented)
-    readonly minAsString: _angular_core.Signal<null | string>;
-    // (undocumented)
-    readonly minDate: _angular_core.InputSignal<Date | null | string>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsDatepickerProps | undefined>;
-    // (undocumented)
-    readonly startAt: _angular_core.InputSignal<Date | null>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsDatepickerFieldComponent, "df-bs-datepicker", never, { "minDate": { "alias": "minDate"; "required": false; "isSignal": true; }; "maxDate": { "alias": "maxDate"; "required": false; "isSignal": true; }; "startAt": { "alias": "startAt"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsDatepickerFieldComponent, never>;
-}
+export type BsDatepickerFieldComponent = BsDatepickerFieldComponent_2;
 
 // @public (undocumented)
 export interface BsDatepickerProps extends DatepickerProps {
@@ -262,22 +203,8 @@ export interface BsIconAddon extends BaseAddon {
     readonly type: 'bs-icon';
 }
 
-// @public
-export class BsIconAddonComponent {
-    // (undocumented)
-    readonly addon: _angular_core.InputSignal<BsIconAddon>;
-    // (undocumented)
-    protected readonly ariaLabel: _angular_core.Signal<_ng_forge_dynamic_forms.DynamicText | undefined>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    protected readonly hasAriaLabel: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly iconClass: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsIconAddonComponent, "df-bs-icon-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsIconAddonComponent, never>;
-}
+// @public (undocumented)
+export type BsIconAddonComponent = BsIconAddonComponent_2;
 
 // @public
 export type BsInputAddon = BsAddonExtension | BsButtonAddon | BsIconAddon | TemplateAddon | TextAddon;
@@ -288,24 +215,7 @@ export type BsInputField = InputField<BsInputProps> & {
 };
 
 // @public (undocumented)
-export class BsInputFieldComponent {
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    // (undocumented)
-    readonly floatingLabel: _angular_core.Signal<boolean>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    protected readonly ngfa: _ng_forge_dynamic_forms_integration.TypedNgForgeAddons<BsInputAddon>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsInputProps | undefined>;
-    // (undocumented)
-    readonly size: _angular_core.Signal<"lg" | "sm" | undefined>;
-    protected readonly type: _angular_core.Signal<string>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsInputFieldComponent, "df-bs-input", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }, { directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddons; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsInputFieldComponent, never>;
-}
+export type BsInputFieldComponent = BsInputFieldComponent_2;
 
 // @public (undocumented)
 export interface BsInputProps extends InputProps {
@@ -337,24 +247,7 @@ export type BsInsertArrayItemButtonField = Omit<BsButtonField<InsertArrayItemEve
 export type BsMultiCheckboxField<T> = MultiCheckboxField<T, BsMultiCheckboxProps>;
 
 // @public (undocumented)
-export class BsMultiCheckboxFieldComponent {
-    constructor();
-    readonly checkedValuesMap: _angular_core.Signal<Record<string, boolean>>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType[]>;
-    // (undocumented)
-    onCheckboxChange(option: FieldOption<ValueType>, event: Event): void;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsMultiCheckboxProps | undefined>;
-    // (undocumented)
-    valueViewModel: _angular_core.WritableSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsMultiCheckboxFieldComponent, "df-bs-multi-checkbox", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsMultiCheckboxFieldComponent, never>;
-}
+export type BsMultiCheckboxFieldComponent = BsMultiCheckboxFieldComponent_2;
 
 // @public (undocumented)
 export interface BsMultiCheckboxProps {
@@ -395,18 +288,7 @@ export type BsPreviousButtonField = Omit<BsButtonField<PreviousPageEvent>, 'even
 export type BsRadioField<T> = RadioField<T, BsRadioProps>;
 
 // @public (undocumented)
-export class BsRadioFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<ValueType>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<ValueType>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsRadioProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsRadioFieldComponent, "df-bs-radio", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsRadioFieldComponent, never>;
-}
+export type BsRadioFieldComponent = BsRadioFieldComponent_2;
 
 // @public (undocumented)
 export interface BsRadioProps {
@@ -432,22 +314,7 @@ export type BsRemoveArrayItemButtonField = Omit<BsButtonField<RemoveAtIndexEvent
 export type BsSelectField<T> = SelectField<T, BsSelectProps>;
 
 // @public (undocumented)
-export class BsSelectFieldComponent {
-    // (undocumented)
-    defaultCompare: (value1: any, value2: any) => boolean;
-    // (undocumented)
-    protected isSelected(optionValue: string, fieldValue: null | string | string[]): boolean;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly options: _angular_core.InputSignal<FieldOption<string>[]>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsSelectProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsSelectFieldComponent, "df-bs-select", never, { "options": { "alias": "options"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsSelectFieldComponent, never>;
-}
+export type BsSelectFieldComponent = BsSelectFieldComponent_2;
 
 // @public
 export interface BsSelectProps extends SelectProps {
@@ -479,22 +346,7 @@ export type BsShiftArrayItemButtonField = Omit<BsButtonField<ShiftArrayItemEvent
 export type BsSliderField = SliderField<BsSliderProps>;
 
 // @public (undocumented)
-export class BsSliderFieldComponent {
-    // (undocumented)
-    readonly max: _angular_core.InputSignal<number>;
-    // (undocumented)
-    readonly min: _angular_core.InputSignal<number>;
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<number>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsSliderProps | undefined>;
-    // (undocumented)
-    readonly step: _angular_core.InputSignal<number | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsSliderFieldComponent, "df-bs-slider", never, { "min": { "alias": "min"; "required": false; "isSignal": true; }; "max": { "alias": "max"; "required": false; "isSignal": true; }; "step": { "alias": "step"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsSliderFieldComponent, never>;
-}
+export type BsSliderFieldComponent = BsSliderFieldComponent_2;
 
 // @public (undocumented)
 export interface BsSliderProps {
@@ -520,16 +372,7 @@ export type BsSubmitButtonField = Omit<BsButtonField<FormSubmitEvent>, 'event' |
 export type BsTextareaField = TextareaField<BsTextareaProps>;
 
 // @public (undocumented)
-export class BsTextareaFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<string>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsTextareaProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsTextareaFieldComponent, "df-bs-textarea", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsTextareaFieldComponent, never>;
-}
+export type BsTextareaFieldComponent = BsTextareaFieldComponent_2;
 
 // @public (undocumented)
 export interface BsTextareaProps extends TextareaProps {
@@ -549,16 +392,7 @@ export interface BsTextareaProps extends TextareaProps {
 export type BsToggleField = ToggleField<BsToggleProps>;
 
 // @public (undocumented)
-export class BsToggleFieldComponent {
-    // (undocumented)
-    protected readonly ngf: _ng_forge_dynamic_forms_integration.TypedNgForgeField<boolean>;
-    // (undocumented)
-    readonly props: _angular_core.InputSignal<BsToggleProps | undefined>;
-    // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<BsToggleFieldComponent, "df-bs-toggle", never, { "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeFieldHost; inputs: {}; outputs: {}; }]>;
-    // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<BsToggleFieldComponent, never>;
-}
+export type BsToggleFieldComponent = BsToggleFieldComponent_2;
 
 // @public (undocumented)
 export interface BsToggleProps {
