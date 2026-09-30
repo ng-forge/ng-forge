@@ -1,0 +1,9 @@
+# Opens one scenario by deep link, the native counterpart of the web suites' hash routes.
+# Params: SUITE, SCENARIO
+appId: com.ngforge.e2e
+---
+- openLink: ngforge-e2e://test/${SUITE}/${SCENARIO}
+- extendedWaitUntil:
+    visible:
+      id: ${SCENARIO}
+    timeout: 20000

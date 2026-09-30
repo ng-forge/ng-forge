@@ -34,7 +34,7 @@
     }
   },
   "release": {
-    "projects": ["packages/*"],
+    "projects": ["packages/*", "!packages/dynamic-forms-native"],
     "version": {
       "preVersionCommand": "nx run-many -t build --projects 'packages/*'",
       "preserveMatchingDependencyRanges": false,

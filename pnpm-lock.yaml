@@ -226,6 +226,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.30.0
         version: 1.30.0(zod@4.6.5)
+      '@ng-native/components':
+        specifier: 0.1.2
+        version: 0.1.2(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
       '@nx/angular':
         specifier: 23.2.1
         version: 23.2.1(dd2da5929a66801316b0400103b5d069)
@@ -3136,6 +3139,39 @@ packages:
   '@napi-rs/nice@1.1.1':
     resolution: {integrity: sha512-xJIPs+bYuc9ASBl+cvGsKbGrJmS6fAKaSZCnT0lhahT5rhA2VVy9/EcIgd2JhtEuFOJNx7UHNn/qiTPTY4nrQw==}
     engines: {node: '>= 10'}
+  '@ng-native/components@0.1.2':
+    resolution: {integrity: sha512-UiGXtc3mGqc8w7gtLNuh5yyL84IkRI/HzJx0DQ798ZEMCsSjC210EuW/AoEtgHWx9cOKV/ibcqjuMi1FKXNQAg==}
+    peerDependencies:
+      '@angular/core': ^22.0.0
+      react-native: '>=0.86.0'
+      react-native-gesture-handler: ^2.32.0
+      react-native-keyboard-controller: ^1.21.9
+      react-native-reanimated: ^4.5.1
+      react-native-safe-area-context: ^5.7.0
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-gesture-handler:
+        optional: true
+      react-native-keyboard-controller:
+        optional: true
+      react-native-reanimated:
+        optional: true
+      react-native-safe-area-context:
+        optional: true
+
+  '@ng-native/device@0.1.2':
+    resolution: {integrity: sha512-7+7eCsSrnkmLqKdmfIYoddJD8DIQytAraGOa8Ow92RR3N2K1QtBu+lkp6qIakb7mXfrFcDdIMdOv+rlEq0cU8Q==}
+    peerDependencies:
+      '@angular/core': ^22.0.0
+      react-native: '>=0.86.0'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+
+  '@ng-native/fabric@0.1.2':
+    resolution: {integrity: sha512-1SFAUJs6G9rEOYUK9OMvAZ0s/uK5rUmIWwm2NAIWzvJQiuyZlwDTLfarzxA0lcb63GhllgGEsC4v52et9Vw6ZA==}
+
 
   '@napi-rs/wasm-runtime@0.2.4':
     resolution: {integrity: sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ==}
@@ -13035,6 +13071,19 @@ snapshots:
 
   '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
     optional: true
+
+  '@ng-native/components@0.1.2(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))':
+    dependencies:
+      '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@ng-native/device': 0.1.2(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
+      '@ng-native/fabric': 0.1.2
+
+  '@ng-native/device@0.1.2(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))':
+    dependencies:
+      '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@ng-native/fabric': 0.1.2
+
+  '@ng-native/fabric@0.1.2': {}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true

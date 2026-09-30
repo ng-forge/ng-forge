@@ -1,0 +1,43 @@
+{
+  "name": "ng-forge-native-e2e",
+  "private": true,
+  "main": "src/main.ts",
+  "nx": {
+    "includedScripts": []
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "bundle:android": "expo export --platform android --output-dir build/export",
+    "prebuild:android": "expo prebuild --platform android --no-install",
+    "typecheck": "ngc -p tsconfig.json --noEmit",
+    "e2e": "maestro test e2e --format junit --output build/maestro/report.xml --test-output-dir build/maestro"
+  },
+  "dependencies": {
+    "@angular/common": "22.1.5",
+    "@angular/core": "22.1.5",
+    "@angular/forms": "22.1.5",
+    "@ng-native/components": "0.1.2",
+    "@ng-native/device": "0.1.2",
+    "@ng-native/fabric": "0.1.2",
+    "@ng-native/metro": "0.1.2",
+    "@ng-native/platform": "0.1.2",
+    "@standard-schema/spec": "^1.0.0",
+    "expo": "~57.0.26",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.4",
+    "ngxtension": "^7.3.0",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "rxjs": "~7.8.2",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/compiler": "22.1.5",
+    "@angular/compiler-cli": "22.1.5",
+    "@babel/core": "^7.29.7",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

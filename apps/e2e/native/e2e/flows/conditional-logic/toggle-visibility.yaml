@@ -1,0 +1,18 @@
+appId: com.ngforge.e2e
+name: Toggle visibility
+tags: [conditional-logic]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: conditional-logic, SCENARIO: toggle-visibility }
+- assertNotVisible: { id: email-input }
+- assertNotVisible: { id: preferences_frequency-input }
+- tapOn: { id: subscribe-toggle }
+- assertVisible: { id: email-input }
+- assertVisible: { id: preferences_frequency-input }
+- takeScreenshot: toggle-visibility-on
+- tapOn: { id: subscribe-toggle }
+- assertNotVisible: { id: email-input }
+- assertNotVisible: { id: preferences_frequency-input }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).subscribe == false}

@@ -1,0 +1,16 @@
+appId: com.ngforge.e2e
+name: Hidden fields are submitted
+tags: [submission-behavior]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: submission-behavior, SCENARIO: hidden-field }
+- tapOn: { id: name-input }
+- inputText: Jane
+- hideKeyboard
+- tapOn: { id: submitHidden-button }
+- runFlow: ../../common/read-submission.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).id == 'uuid-550e8400'}
+- assertTrue: ${JSON.parse(maestro.copiedText).version == 42}
+- assertTrue: ${JSON.parse(maestro.copiedText).metadata.source == 'mobile-form'}
+- assertTrue: ${JSON.parse(maestro.copiedText).name == 'Jane'}

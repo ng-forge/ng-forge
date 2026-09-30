@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "ng-forge e2e",
+    "slug": "ng-forge-native-e2e",
+    "version": "1.0.0",
+    "platforms": ["android", "ios"],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "ngforge-e2e",
+    "android": {
+      "package": "com.ngforge.e2e",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "ios": {
+      "bundleIdentifier": "com.ngforge.e2e"
+    },
+    "plugins": ["@ng-native/metro"]
+  }
+}

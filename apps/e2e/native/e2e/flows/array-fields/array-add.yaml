@@ -1,0 +1,17 @@
+appId: com.ngforge.e2e
+name: Add array items
+tags: [array-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: array-fields, SCENARIO: array-add }
+- assertVisible: { id: email_0-input }
+- assertNotVisible: { id: email_1-input }
+- tapOn: { id: addEmailButton-button }
+- assertVisible: { id: email_1-input }
+- tapOn: { id: email_1-input }
+- inputText: second@example.com
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).emails.length == 2}
+- assertTrue: ${JSON.parse(maestro.copiedText).emails[1].email == 'second@example.com'}
+- takeScreenshot: array-add
