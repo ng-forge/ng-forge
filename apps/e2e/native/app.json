@@ -21,6 +21,9 @@
     "ios": {
       "bundleIdentifier": "com.ngforge.e2e"
     },
-    "plugins": ["@ng-native/metro"]
+    "plugins": ["@ng-native/metro"],
+    "experiments": {
+      "tsconfigPaths": false
+    }
   }
 }
