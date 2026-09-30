@@ -1,1 +1,4 @@
 .claude/worktrees
+
+# Standalone experiment with its own deps (react-native, vitest 5); keep it out of the Nx graph
+experiments/
