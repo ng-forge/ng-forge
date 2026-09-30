@@ -1,16 +1,3 @@
-// Field components
-export {
-  MatCheckboxFieldComponent,
-  MatDatepickerFieldComponent,
-  MatInputFieldComponent,
-  MatMultiCheckboxFieldComponent,
-  MatRadioFieldComponent,
-  MatSelectFieldComponent,
-  MatSliderFieldComponent,
-  MatButtonFieldComponent,
-  MatTextareaFieldComponent,
-  MatToggleFieldComponent,
-} from './fields';
 export type {
   MatCheckboxProps,
   MatCheckboxField,
@@ -61,7 +48,5 @@ import './types/registry-augmentation';
 export { withMaterialFields, withMaterialAddons } from './providers/material-providers';
 
 // Addon types
-export { MatIconAddonComponent } from './addons/mat-icon-addon.component';
-export { MatButtonAddonComponent } from './addons/mat-button-addon.component';
 export type { MatIconAddon, MatButtonAddon, MatAddon } from '@ng-forge/dynamic-forms-material/shared';
 export type { MatInputAddon, MatAddonExtensions } from './fields/input/mat-input.type';
