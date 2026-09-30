@@ -1,0 +1,7 @@
+node_modules/
+.expo/
+build/
+android/
+ios/
+# The root ignores lockfiles; this app is installed on its own and needs one.
+!package-lock.json

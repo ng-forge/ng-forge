@@ -1,0 +1,9 @@
+# Copies the last submitted value (compact JSON, or null) into maestro.copiedText.
+appId: com.ngforge.e2e
+---
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: last-submission
+- copyTextFrom:
+    id: last-submission

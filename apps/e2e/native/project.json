@@ -1,0 +1,34 @@
+{
+  "name": "native-e2e",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/e2e/native/src",
+  "implicitDependencies": ["dynamic-forms", "dynamic-forms-native"],
+  "tags": [],
+  "//": "An Expo app with its own npm install (React Native and Expo stay out of the root install). Run `npm ci` in this directory first.",
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": [{ "projects": ["dynamic-forms"], "target": "build" }],
+      "options": {
+        "command": "npx ngc -p tsconfig.json --noEmit",
+        "cwd": "apps/e2e/native"
+      }
+    },
+    "bundle-android": {
+      "executor": "nx:run-commands",
+      "dependsOn": [{ "projects": ["dynamic-forms"], "target": "build" }],
+      "options": {
+        "command": "npm run bundle:android",
+        "cwd": "apps/e2e/native"
+      }
+    },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run e2e",
+        "cwd": "apps/e2e/native"
+      }
+    }
+  }
+}

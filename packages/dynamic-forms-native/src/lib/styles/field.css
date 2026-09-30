@@ -1,0 +1,90 @@
+/* Compiled by @ng-native/metro into native styles. Flexbox only: no grid, no ::before. */
+.field {
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.row {
+  flex-direction: row;
+  align-items: center;
+}
+.grow {
+  flex: 1;
+}
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+}
+.control {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-width: 1px;
+  border-color: #8c959f;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #1f2328;
+  background-color: #ffffff;
+}
+.control[data-invalid][data-touched] {
+  border-color: #cf222e;
+}
+.multiline {
+  min-height: 96px;
+  text-align-vertical: top;
+}
+.error {
+  font-size: 13px;
+  color: #cf222e;
+}
+.hint {
+  font-size: 13px;
+  color: #59636e;
+}
+.button {
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background-color: #0969da;
+}
+.button.secondary {
+  background-color: #eaeef2;
+}
+.button.disabled {
+  opacity: 0.5;
+}
+.button-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+.button.secondary .button-label {
+  color: #1f2328;
+}
+.h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2328;
+}
+.h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2328;
+}
+.h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2328;
+}
+.h4,
+.h5,
+.h6 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2328;
+}
+.p,
+.span {
+  font-size: 16px;
+  color: #1f2328;
+}
