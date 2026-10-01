@@ -1,0 +1,19 @@
+appId: com.ngforge.e2e
+name: Required checkbox
+tags: [selection-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: selection-fields, SCENARIO: checkbox-required }
+- assertVisible: { id: submitTerms-button, enabled: false }
+# Checking and unchecking touches the field, so the required error shows.
+- tapOn: { id: terms-checkbox }
+- tapOn: { id: terms-checkbox }
+- assertVisible: { id: terms-error, text: You must accept the terms }
+- takeScreenshot: checkbox-required-error
+- tapOn: { id: terms-checkbox }
+- assertNotVisible: { id: terms-error }
+- assertVisible: { id: submitTerms-button, enabled: true }
+- tapOn: { id: submitTerms-button }
+- runFlow: ../../common/read-submission.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).terms == true}

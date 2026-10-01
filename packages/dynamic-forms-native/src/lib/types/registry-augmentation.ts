@@ -5,6 +5,9 @@ import type { FormEvent } from '@ng-forge/dynamic-forms';
 import type { NativeInputField } from '../fields/input/native-input.type';
 import type { NativeTextareaField } from '../fields/textarea/native-textarea.type';
 import type { NativeToggleField } from '../fields/toggle/native-toggle.type';
+import type { NativeCheckboxField } from '../fields/checkbox/native-checkbox.type';
+import type { NativeRadioField } from '../fields/radio/native-radio.type';
+import type { NativeMultiCheckboxField } from '../fields/multi-checkbox/native-multi-checkbox.type';
 import type {
   NativeAddArrayItemButtonField,
   NativeButtonField,
@@ -23,6 +26,9 @@ declare module '@ng-forge/dynamic-forms' {
     input: NativeInputField;
     textarea: NativeTextareaField;
     toggle: NativeToggleField;
+    checkbox: NativeCheckboxField;
+    radio: NativeRadioField<unknown>;
+    'multi-checkbox': NativeMultiCheckboxField<unknown>;
     button: NativeButtonField<FormEvent>;
     submit: NativeSubmitButtonField;
     next: NativeNextButtonField;

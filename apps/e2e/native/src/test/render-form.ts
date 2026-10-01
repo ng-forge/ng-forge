@@ -1,18 +1,24 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withNativeFields } from './adapter/providers';
+import { withNativeFields } from '@ng-forge/dynamic-forms-native';
+import { render } from '@ng-native/testing';
 
 @Component({
-  selector: 'app-host',
+  selector: 'app-test-host',
   imports: [DynamicForm],
   template: `<form [dynamic-form]="config()" [(value)]="value" (submitted)="submissions.push($event)"></form>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Host {
+export class TestHost {
   readonly config = input.required<FormConfig>();
   readonly value = signal<Record<string, unknown> | undefined>(undefined);
   readonly submissions: unknown[] = [];
 }
 
-/** `render(...host(config))`: the host component plus the options that mount it. */
-export const host = (config: unknown) => [Host, { inputs: { config }, providers: [provideDynamicForm(...withNativeFields())] }] as const;
+/** Renders a form with the native fields, the way the e2e app mounts one. */
+export function renderForm(config: FormConfig) {
+  return render(TestHost, { inputs: { config }, providers: [provideDynamicForm(...withNativeFields())] });
+}
+
+/** The form value without Signal Forms' symbol keys. */
+export const plain = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));
