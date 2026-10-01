@@ -57,13 +57,16 @@ export class SignUp {
 | `input`                                | `<text-input>`           | `props.type` picks the keyboard (`email`, `number`, `tel`, `url`) and `password` hides the text |
 | `textarea`                             | `<text-input multiline>` | `props.rows` sets the height on Android                                                         |
 | `toggle`                               | `<switch>`               |                                                                                                 |
+| `checkbox`                             | `<pressable>`            | Announced as a checkbox                                                                         |
+| `radio`                                | `<pressable>` per option | Announced as radio buttons; disabled options ignore taps                                        |
+| `multi-checkbox`                       | `<pressable>` per option | Announced as checkboxes; the value is an array                                                  |
 | `button`, `submit`, `next`, `previous` | `<pressable>`            |                                                                                                 |
 | array buttons                          | `<pressable>`            | `add-array-item`, `remove-array-item` and the rest                                              |
 | `text`                                 | `<text>`                 | Headings (`h1` to `h6`) are announced as headers                                                |
 
-ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueControl` and `FormCheckboxControl`, so each field binds `[formField]` directly. Validation, `disabled`, `readonly` and touched state work the same way as on the web.
+ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueControl` and `FormCheckboxControl`, so those fields bind `[formField]` directly. React Native has no checkbox or radio view, so the adapter builds them from pressable rows that implement the same contracts. Validation, `disabled`, `readonly` and touched state work the same way as on the web. Checkboxes and options mark the field touched when tapped.
 
-Not available yet: `select`, `radio`, `checkbox`, `multi-checkbox`, `slider` and `datepicker`.
+Not available yet: `select` and `datepicker` (they need a native picker or modal) and `slider`.
 
 ## Differences from the web adapters
 
@@ -71,7 +74,7 @@ Not available yet: `select`, `radio`, `checkbox`, `multi-checkbox`, `slider` and
 - **Text fields.** Core's `text` field renders HTML elements, which have no native counterpart, so the adapter registers its own `text` field. In dev mode, core logs that `text` was overwritten. That is expected.
 - **Layout.** `row` and `col` use CSS grid on the web. React Native only has flexbox, so the fields of a `row` currently stack vertically.
 - **Meta attributes.** `meta` forwards HTML attributes on the web. The native fields set accessibility props (`accessibilityLabel`, `role`) themselves and do not forward `meta`.
-- **Element ids.** Each control sets a `testID` for testing tools: `<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-button` and `<key>-error`. Group children use `<group>_<child>` as their key, and array items use `<child>_<index>`.
+- **Element ids.** Each control sets a `testID` for testing tools: `<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-checkbox`, `<key>-button`, `<key>-error`, and `<key>-<value>` for each radio or multi-checkbox option. Group children use `<group>_<child>` as their key, and array items use `<child>_<index>`.
 
 ## Styling
 

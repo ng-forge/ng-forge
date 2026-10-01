@@ -18,14 +18,16 @@ A scenario opens with `ngforge-e2e://test/<suite>/<testId>`. Without a link the 
 
 Maestro's `id` matches React Native's `testID`. The adapter sets:
 
-| Field type | `testID`         |
-| ---------- | ---------------- |
-| input      | `<key>-input`    |
-| textarea   | `<key>-textarea` |
-| toggle     | `<key>-toggle`   |
-| buttons    | `<key>-button`   |
-| text       | `<key>`          |
-| errors     | `<key>-error`    |
+| Field type                   | `testID`         |
+| ---------------------------- | ---------------- |
+| input                        | `<key>-input`    |
+| textarea                     | `<key>-textarea` |
+| toggle                       | `<key>-toggle`   |
+| checkbox                     | `<key>-checkbox` |
+| radio, multi-checkbox option | `<key>-<value>`  |
+| buttons                      | `<key>-button`   |
+| text                         | `<key>`          |
+| errors                       | `<key>-error`    |
 
 Keys are the ones ng-forge resolves: group children are `<group>_<child>`, array items are `<child>_<index>`.
 
@@ -38,6 +40,7 @@ pnpm nx build dynamic-forms          # core is bundled from its build output
 cd apps/e2e/native
 npm ci
 npm run typecheck                    # strict templates, no device needed
+npm test                             # component tests in Node with @ng-native/testing
 npm run bundle:android               # Metro bundle, no device needed
 
 # With an Android emulator running and Maestro installed:
@@ -57,5 +60,5 @@ npm run e2e
 
 - Screenshot baselines. Flows take screenshots but do not compare them yet.
 - iOS. It needs a macOS runner and a simulator.
-- Field types the adapter does not have yet: select, radio, multi-checkbox, slider, datepicker.
+- Field types the adapter does not have yet: select, slider, datepicker.
 - Row and column layout. Core's grid is CSS grid, which React Native does not support.

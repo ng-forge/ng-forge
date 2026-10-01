@@ -9,15 +9,38 @@
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": [{ "projects": ["dynamic-forms"], "target": "build" }],
+      "dependsOn": [
+        {
+          "projects": ["dynamic-forms"],
+          "target": "build"
+        }
+      ],
       "options": {
         "command": "npx ngc -p tsconfig.json --noEmit",
         "cwd": "apps/e2e/native"
       }
     },
+    "component-test": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": ["dynamic-forms"],
+          "target": "build"
+        }
+      ],
+      "options": {
+        "command": "npm test",
+        "cwd": "apps/e2e/native"
+      }
+    },
     "bundle-android": {
       "executor": "nx:run-commands",
-      "dependsOn": [{ "projects": ["dynamic-forms"], "target": "build" }],
+      "dependsOn": [
+        {
+          "projects": ["dynamic-forms"],
+          "target": "build"
+        }
+      ],
       "options": {
         "command": "npm run bundle:android",
         "cwd": "apps/e2e/native"
