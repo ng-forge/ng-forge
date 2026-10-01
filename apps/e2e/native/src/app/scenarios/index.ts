@@ -12,4 +12,5 @@ export const SUITES: TestSuite[] = [
   submissionBehaviorSuite,
   conditionalLogicSuite,
   selectionFieldsSuite,
+  layoutSuite,
 ];
