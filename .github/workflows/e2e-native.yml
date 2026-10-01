@@ -116,7 +116,8 @@ jobs:
           working-directory: ${{ env.APP_DIR }}
           script: |
             adb install -r android/app/build/outputs/apk/release/app-release.apk
-            npm run e2e
+            adb logcat -c
+            npm run e2e || (adb logcat -d -s ReactNativeJS:V ReactNative:V AndroidRuntime:E | tail -n 300; exit 1)
 
       - name: Upload Maestro results
         if: always()
