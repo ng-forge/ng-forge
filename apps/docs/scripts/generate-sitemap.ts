@@ -78,6 +78,7 @@ export function collectEntries(): SitemapEntry[] {
   entries.push({ slug: 'material/migrating-from-ngx-formly', filePath: contentFile('migrating-from-ngx-formly') });
   entries.push({ slug: 'material/api-driven-forms', filePath: contentFile('api-driven-forms') });
   entries.push({ slug: 'custom/building-an-adapter', filePath: contentFile('building-an-adapter') });
+  entries.push({ slug: 'material/native-adapter', filePath: contentFile('native-adapter') });
 
   // Examples — discover from directory
   for (const file of readdirSync(resolve(CONTENT_DIR, 'examples'))
