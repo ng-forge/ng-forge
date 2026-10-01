@@ -10,31 +10,31 @@ A migration reference for moving an Angular dynamic-forms app from **ngx-formly*
 
 ## Should you migrate?
 
-| Your situation                                                          | What to do                                                                  |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Standardising on Angular Signal Forms as the form substrate             | Migrate: formly is Reactive Forms, ng-forge is Signal Forms                |
-| Want schema-validation-first design (Zod, Valibot, ArkType)             | Migrate: built in via Standard Schema                                      |
-| Hitting performance limits on large forms or array sections             | Migrate: see [Performance](#performance) below for the substrate reasons   |
-| Heavy reliance on community formly extensions or custom field types     | Evaluate: the porting cost may outweigh the substrate benefits             |
-| Need a stable, low-churn API today                                      | Stay: ng-forge is younger; formly is mature                                |
-| Use a UI library ng-forge does not ship (Kendo, NG-ZORRO, NativeScript) | Build an adapter; see [Building an Adapter](/building-an-adapter)          |
+| Your situation                                                          | What to do                                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Standardising on Angular Signal Forms as the form substrate             | Migrate: formly is Reactive Forms, ng-forge is Signal Forms              |
+| Want schema-validation-first design (Zod, Valibot, ArkType)             | Migrate: built in via Standard Schema                                    |
+| Hitting performance limits on large forms or array sections             | Migrate: see [Performance](#performance) below for the substrate reasons |
+| Heavy reliance on community formly extensions or custom field types     | Evaluate: the porting cost may outweigh the substrate benefits           |
+| Need a stable, low-churn API today                                      | Stay: ng-forge is younger; formly is mature                              |
+| Use a UI library ng-forge does not ship (Kendo, NG-ZORRO, NativeScript) | Build an adapter; see [Building an Adapter](/building-an-adapter)        |
 
 ## At a glance
 
-| ngx-formly                                | ng-forge                                                                |
-| ----------------------------------------- | ----------------------------------------------------------------------- |
-| `FormlyFieldConfig`                       | `FieldDef` (base interface; each registered field type narrows it)      |
-| `props` (was `templateOptions`)           | UI-adapter-specific keys live in `props`; validation and labelling (`label`, `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`, `placeholder`) live at the top level |
-| `expressions: { hide: '!model.x' }`       | `logic: [{ type: 'hidden', condition: { … } }]` (structured)            |
-| `expressionProperties` (deprecated v6)    | `logic` array + `derivation` for values                                 |
-| `validators` / `asyncValidators`          | `validators[]` on the field + `customFnConfig.{validators,asyncValidators,httpValidators}` on the form |
-| `wrappers: ['form-field']`                | `wrappers: [{ type: 'card', … }]` (config objects)                      |
-| `props.addonLeft` / `props.addonRight` (Bootstrap; demo-only on Material) | `addons: [{ slot, type, … }]` (universal across all 4 adapters, JSON-safe, preset actions) |
-| `fieldGroup` (object)                     | `type: 'group'` with `fields: [...]`                                    |
-| `fieldArray` (custom `repeat` type)       | `type: 'array'` (built in; verbose form with explicit add/remove fields, or simplified form with `template` + auto-buttons) |
-| `hooks: { onInit, onChanges, … }`         | Angular component lifecycle inside custom field components, plus `EventBus` / `EventDispatcher` for cross-field events |
-| `FormlyJsonschema.toFieldConfig(schema)`  | `standardSchema(zodSchema)` (different paradigm; see below)            |
-| `[model]` two-way binding                 | `[(value)]` two-way binding (Angular `model()` signal)                   |
+| ngx-formly                                                                | ng-forge                                                                                                                                                                                  |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FormlyFieldConfig`                                                       | `FieldDef` (base interface; each registered field type narrows it)                                                                                                                        |
+| `props` (was `templateOptions`)                                           | UI-adapter-specific keys live in `props`; validation and labelling (`label`, `required`, `email`, `min`, `max`, `minLength`, `maxLength`, `pattern`, `placeholder`) live at the top level |
+| `expressions: { hide: '!model.x' }`                                       | `logic: [{ type: 'hidden', condition: { … } }]` (structured)                                                                                                                              |
+| `expressionProperties` (deprecated v6)                                    | `logic` array + `derivation` for values                                                                                                                                                   |
+| `validators` / `asyncValidators`                                          | `validators[]` on the field + `customFnConfig.{validators,asyncValidators,httpValidators}` on the form                                                                                    |
+| `wrappers: ['form-field']`                                                | `wrappers: [{ type: 'card', … }]` (config objects)                                                                                                                                        |
+| `props.addonLeft` / `props.addonRight` (Bootstrap; demo-only on Material) | `addons: [{ slot, type, … }]` (universal across all 4 adapters, JSON-safe, preset actions)                                                                                                |
+| `fieldGroup` (object)                                                     | `type: 'group'` with `fields: [...]`                                                                                                                                                      |
+| `fieldArray` (custom `repeat` type)                                       | `type: 'array'` (built in; verbose form with explicit add/remove fields, or simplified form with `template` + auto-buttons)                                                               |
+| `hooks: { onInit, onChanges, … }`                                         | Angular component lifecycle inside custom field components, plus `EventBus` / `EventDispatcher` for cross-field events                                                                    |
+| `FormlyJsonschema.toFieldConfig(schema)`                                  | `standardSchema(zodSchema)` (different paradigm; see below)                                                                                                                               |
+| `[model]` two-way binding                                                 | `[(value)]` two-way binding (Angular `model()` signal)                                                                                                                                    |
 
 The default shifts from **string-first** (formly's `expressions` DSL, template options) to **structured-config-first**. Strings still exist in ng-forge as shorthand (`derivation: 'formValue.x * formValue.y'`) and escape hatches (the `javascript` condition), but the typical condition or derivation is now a typed object the engine can analyse for dependencies, refactor safely, and run under strict CSP.
 
@@ -43,25 +43,25 @@ The default shifts from **string-first** (formly's `expressions` DSL, template o
 Install core + a UI theme, register them once at the application root.
 
 <docs-code-compare
-  title="Application bootstrap"
-  formly="// ngx-formly v7 (current standalone API)
+title="Application bootstrap"
+formly="// ngx-formly v7 (current standalone API)
 import { ApplicationConfig } from '@angular/core';
 import { provideFormlyCore } from '@ngx-formly/core';
 import { withFormlyMaterial } from '@ngx-formly/material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideFormlyCore(withFormlyMaterial()),
-  ],
+providers: [
+provideFormlyCore(withFormlyMaterial()),
+],
 };"
-  ngforge="import { ApplicationConfig } from '@angular/core';
+ngforge="import { ApplicationConfig } from '@angular/core';
 import { provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withMaterialFields } from '@ng-forge/dynamic-forms-material';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideDynamicForm(...withMaterialFields()),
-  ],
+providers: [
+provideDynamicForm(...withMaterialFields()),
+],
 };">
 </docs-code-compare>
 
@@ -72,65 +72,63 @@ The package layout matches one-for-one: `@ngx-formly/material` maps to `@ng-forg
 The component-side change is small: bind a config to a form directive instead of three inputs (`form`, `fields`, `model`).
 
 <docs-code-compare
-  title="Minimal working form"
-  formly="@Component({
-  selector: 'app-contact',
-  template: `
-    <form [formGroup]='form' (ngSubmit)='onSubmit()'>
+title="Minimal working form"
+formly="@Component({
+selector: 'app-contact',
+template: `     <form [formGroup]='form' (ngSubmit)='onSubmit()'>
       <formly-form [form]='form' [fields]='fields' [model]='model'></formly-form>
       <button type='submit'>Submit</button>
     </form>
   `,
 })
 export class ContactComponent {
-  form = new FormGroup({});
-  model: { email?: string } = {};
+form = new FormGroup({});
+model: { email?: string } = {};
 
-  fields: FormlyFieldConfig[] = [
-    {
-      key: 'email',
-      type: 'input',
-      props: {
-        label: 'Email',
-        required: true,
-        type: 'email',
-      },
-    },
-  ];
+fields: FormlyFieldConfig[] = [
+{
+key: 'email',
+type: 'input',
+props: {
+label: 'Email',
+required: true,
+type: 'email',
+},
+},
+];
 
-  onSubmit() {
-    if (this.form.valid) console.log(this.model);
-  }
+onSubmit() {
+if (this.form.valid) console.log(this.model);
+}
 }"
-  ngforge="import { Component } from '@angular/core';
+ngforge="import { Component } from '@angular/core';
 import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
 
 @Component({
-  selector: 'app-contact',
-  imports: [DynamicForm],
-  template: `
-    <form [dynamic-form]='config' (submitted)='onSubmit($event)'></form>
+selector: 'app-contact',
+imports: [DynamicForm],
+template: `     <form [dynamic-form]='config' (submitted)='onSubmit($event)'></form>
   `,
 })
 export class ContactComponent {
-  config = {
-    fields: [
-      {
-        key: 'email',
-        type: 'input',
-        value: '',
-        label: 'Email',
-        required: true,
-        email: true,
-        props: { type: 'email' },
-      },
-      { key: 'submit', type: 'submit', label: 'Submit' },
-    ],
-  } as const satisfies FormConfig;
+config = {
+fields: [
+{
+key: 'email',
+type: 'input',
+value: '',
+label: 'Email',
+required: true,
+email: true,
+props: { type: 'email' },
+},
+{ key: 'submit', type: 'submit', label: 'Submit' },
+],
+} as const satisfies FormConfig;
 
-  onSubmit(value: { email: string }) {
-    console.log(value);
-  }
+onSubmit(value: { email: string }) {
+console.log(value);
+}
 }">
 </docs-code-compare>
 
@@ -146,21 +144,21 @@ Two-way binding is `[(value)]` (Angular `model()` signal); read-only access is `
 
 The names line up directly except for a few cases.
 
-| ngx-formly type     | ng-forge type           | Notes                                                              |
-| ------------------- | ----------------------- | ------------------------------------------------------------------ |
-| `input`             | `input`                 | HTML input type goes in `props.type` in both                       |
-| `textarea`          | `textarea`              | `props.rows` in both                                               |
-| `checkbox`          | `checkbox`              | Single boolean                                                     |
-| `multicheckbox`     | `multi-checkbox`        | Hyphenated in ng-forge                                             |
-| `radio`             | `radio`                 |                                                                    |
-| `select`            | `select`                | `options` is **top-level** on the field in ng-forge                |
-| `datepicker` (Material) | `datepicker`        |                                                                    |
-| `slider` / `toggle` (Material) | `slider` / `toggle` |                                                              |
-| `repeat` (custom)   | `array` (built-in)      | Verbose (explicit `fields[][]` + button fields) or simplified (`template` + auto-buttons) |
-| _none_              | `page`                  | Multi-step container                                               |
-| _none_              | `row`                   | Horizontal flex layout                                             |
-| _none_              | `text`                  | Display-only label / heading                                       |
-| _none_              | `submit` / `next` / `previous` / `add-array-item` / `remove-array-item` | Built-in action buttons; `submit` auto-disables while the form is invalid, `next` while the current page is invalid |
+| ngx-formly type                | ng-forge type                                                           | Notes                                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `input`                        | `input`                                                                 | HTML input type goes in `props.type` in both                                                                        |
+| `textarea`                     | `textarea`                                                              | `props.rows` in both                                                                                                |
+| `checkbox`                     | `checkbox`                                                              | Single boolean                                                                                                      |
+| `multicheckbox`                | `multi-checkbox`                                                        | Hyphenated in ng-forge                                                                                              |
+| `radio`                        | `radio`                                                                 |                                                                                                                     |
+| `select`                       | `select`                                                                | `options` is **top-level** on the field in ng-forge                                                                 |
+| `datepicker` (Material)        | `datepicker`                                                            |                                                                                                                     |
+| `slider` / `toggle` (Material) | `slider` / `toggle`                                                     |                                                                                                                     |
+| `repeat` (custom)              | `array` (built-in)                                                      | Verbose (explicit `fields[][]` + button fields) or simplified (`template` + auto-buttons)                           |
+| _none_                         | `page`                                                                  | Multi-step container                                                                                                |
+| _none_                         | `row`                                                                   | Horizontal flex layout                                                                                              |
+| _none_                         | `text`                                                                  | Display-only label / heading                                                                                        |
+| _none_                         | `submit` / `next` / `previous` / `add-array-item` / `remove-array-item` | Built-in action buttons; `submit` auto-disables while the form is invalid, `next` while the current page is invalid |
 
 **Selects.** Formly takes `options` inside `props`; ng-forge takes `options` at the top level. The `FieldOption` shape is fixed at `{ value, label, disabled? }`. If your data has custom keys, remap once at the source (`data.map(d => ({ value: d.id, label: d.name }))`) or use a `targetProperty: 'options'` derivation (see [Async data](#async-data-and-dynamic-options)).
 
@@ -193,7 +191,7 @@ The names line up directly except for a few cases.
 
 ## Validators
 
-Both libraries support shorthand validators (`required`, `min`, `max`, `minLength`, `maxLength`, `pattern`) and a registry for custom validators. In formly, field-level validator config is *keyed by validator name* with an `expression` function inside; in ng-forge it's an *array* of validator objects with a `type` discriminator. Custom validator functions live on the form config under `customFnConfig`, split into three pillars by execution model:
+Both libraries support shorthand validators (`required`, `min`, `max`, `minLength`, `maxLength`, `pattern`) and a registry for custom validators. In formly, field-level validator config is _keyed by validator name_ with an `expression` function inside; in ng-forge it's an _array_ of validator objects with a `type` discriminator. Custom validator functions live on the form config under `customFnConfig`, split into three pillars by execution model:
 
 <docs-validator-pillars></docs-validator-pillars>
 
@@ -289,7 +287,7 @@ Formly's `expressions` DSL (string-evaluated functions like `'!model.country'`) 
 
 For genuinely complex expressions, ng-forge has an opt-in `javascript` condition (a string evaluated against `formValue`); see [Conditional logic](/dynamic-behavior/conditional-logic).
 
-**Hidden field values work differently.** Formly defaults to actively *resetting* a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value in form state but excludes it from the submitted output by default (`excludeValueIfHidden` defaults to true; override it per field, per form, or globally). If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls](/feature-overview#common-pitfalls).
+**Hidden field values work differently.** Formly defaults to actively _resetting_ a field's value when it becomes hidden (via `resetOnHide`). ng-forge keeps the value in form state but excludes it from the submitted output by default (`excludeValueIfHidden` defaults to true; override it per field, per form, or globally). If your code relied on the formly reset, port it as an explicit derivation that clears the value when the hide condition is true. See [Hidden fields](/prebuilt/hidden-fields) and the [common pitfalls](/feature-overview#common-pitfalls).
 
 ## Cross-field validation
 
@@ -326,7 +324,7 @@ See [Adding custom fields](/recipes/custom-fields) for the full walkthrough.
 
 ## Wrappers
 
-Formly wrappers are components that include a `<ng-container #fieldComponent>` template marker. ng-forge wrappers do the same, but use `viewChild.required('fieldComponent', { read: ViewContainerRef })` to expose the slot. Wrapper *configuration* is also more explicit: ng-forge wrappers are config objects (`{ type: 'panel', title: 'Address' }`) that carry their own props, so the wrapped field doesn't need to know it's wrapped.
+Formly wrappers are components that include a `<ng-container #fieldComponent>` template marker. ng-forge wrappers do the same, but use `viewChild.required('fieldComponent', { read: ViewContainerRef })` to expose the slot. Wrapper _configuration_ is also more explicit: ng-forge wrappers are config objects (`{ type: 'panel', title: 'Address' }`) that carry their own props, so the wrapped field doesn't need to know it's wrapped.
 
 See [Writing a wrapper](/wrappers/writing-a-wrapper) and [Registering and applying](/wrappers/registering-and-applying).
 
@@ -400,12 +398,11 @@ See [Addons / Overview](/addons/overview) and [Presets and Actions](/addons/pres
 **Formly has no built-in `repeat` type**: apps register a custom `FieldArrayType` with `add()` / `remove()` handlers and a template. ng-forge ships `type: 'array'` directly.
 
 <docs-code-compare
-  title="Repeating array of items"
-  formly="// 1. Custom repeat type (every formly app needs this)
+title="Repeating array of items"
+formly="// 1. Custom repeat type (every formly app needs this)
 @Component({
-  selector: 'formly-repeat',
-  template: `
-    <div *ngFor='let f of field.fieldGroup; let i = index'>
+selector: 'formly-repeat',
+template: `     <div *ngFor='let f of field.fieldGroup; let i = index'>
       <formly-field [field]='f'></formly-field>
       <button type='button' (click)='remove(i)'>Remove</button>
     </div>
@@ -416,46 +413,46 @@ export class RepeatType extends FieldArrayType {}
 
 // 2. Register
 provideFormlyCore({
-  types: [{ name: 'repeat', component: RepeatType }],
+types: [{ name: 'repeat', component: RepeatType }],
 });
 
 // 3. Use
 {
-  key: 'tasks',
-  type: 'repeat',
-  props: { addText: 'Add Task' },
-  fieldArray: {
-    fieldGroup: [
-      { key: 'name', type: 'input', props: { label: 'Task name', required: true } },
-    ],
-  },
+key: 'tasks',
+type: 'repeat',
+props: { addText: 'Add Task' },
+fieldArray: {
+fieldGroup: [
+{ key: 'name', type: 'input', props: { label: 'Task name', required: true } },
+],
+},
 }"
-  ngforge="// Simplified form: pass a template, ng-forge auto-generates buttons
+ngforge="// Simplified form: pass a template, ng-forge auto-generates buttons
 {
-  key: 'tags',
-  type: 'array',
-  template: { key: 'value', type: 'input', label: 'Tag' },
-  value: ['angular', 'typescript'],
-  addButton: { label: 'Add Tag' },
-  removeButton: { label: 'Remove' },
+key: 'tags',
+type: 'array',
+template: { key: 'value', type: 'input', label: 'Tag' },
+value: ['angular', 'typescript'],
+addButton: { label: 'Add Tag' },
+removeButton: { label: 'Remove' },
 }
 
 // Verbose form: full control over per-item layout and button placement
 {
-  key: 'tasks',
-  type: 'array',
-  fields: [
-    [
-      {
-        key: 'task',
-        type: 'row',
-        fields: [
-          { key: 'name', type: 'input', value: '', label: 'Task name', required: true },
-          { key: 'remove', type: 'remove-array-item', label: 'Remove' },
-        ],
-      },
-    ],
-  ],
+key: 'tasks',
+type: 'array',
+fields: [
+[
+{
+key: 'task',
+type: 'row',
+fields: [
+{ key: 'name', type: 'input', value: '', label: 'Task name', required: true },
+{ key: 'remove', type: 'remove-array-item', label: 'Remove' },
+],
+},
+],
+],
 }">
 </docs-code-compare>
 
@@ -579,37 +576,37 @@ Two related concerns: **schema-driven validation** (a schema enforces correctnes
 3. **Run a one-time JSON Schema to `FormConfig` conversion** during your migration. The two formats are structurally similar; a small adapter (~200 LOC) covers most apps.
 
 <docs-code-compare
-  title="Schema-driven validation"
-  formly="// JSON Schema to FormlyFieldConfig
+title="Schema-driven validation"
+formly="// JSON Schema to FormlyFieldConfig
 import { FormlyJsonschema } from '@ngx-formly/core/json-schema';
 
 const schema = {
-  type: 'object',
-  required: ['email'],
-  properties: {
-    email: { type: 'string', format: 'email' },
-    age: { type: 'integer', minimum: 18, maximum: 120 },
-  },
+type: 'object',
+required: ['email'],
+properties: {
+email: { type: 'string', format: 'email' },
+age: { type: 'integer', minimum: 18, maximum: 120 },
+},
 };
 
 constructor(private formlyJsonschema: FormlyJsonschema) {
-  this.fields = [this.formlyJsonschema.toFieldConfig(schema)];
+this.fields = [this.formlyJsonschema.toFieldConfig(schema)];
 }"
-  ngforge="// Zod schema attached to a hand-authored field config
+ngforge="// Zod schema attached to a hand-authored field config
 import { z } from 'zod';
 import { standardSchema } from '@ng-forge/dynamic-forms/schema';
 
 const schema = z.object({
-  email: z.string().email(),
-  age: z.number().int().min(18).max(120),
+email: z.string().email(),
+age: z.number().int().min(18).max(120),
 });
 
 const config = {
-  schema: standardSchema(schema),
-  fields: [
-    { key: 'email', type: 'input', value: '', label: 'Email', email: true },
-    { key: 'age', type: 'input', value: 0, label: 'Age', props: { type: 'number' } },
-  ],
+schema: standardSchema(schema),
+fields: [
+{ key: 'email', type: 'input', value: '', label: 'Email', email: true },
+{ key: 'age', type: 'input', value: 0, label: 'Age', props: { type: 'number' } },
+],
 } as const satisfies FormConfig;">
 </docs-code-compare>
 
@@ -636,7 +633,7 @@ If any of these are blockers, decide upfront before starting the migration.
 
 ## OpenAPI generator
 
-If your formly forms are driven by an OpenAPI 3.x spec, `@ng-forge/openapi-generator` is the closest analogue to formly's `FormlyJsonschema` pattern. It generates a `FormConfig` *and* the inferred form-value TypeScript type from the spec at build time, so submission handlers end up typed end-to-end. See the [OpenAPI generator guide](/openapi-generator).
+If your formly forms are driven by an OpenAPI 3.x spec, `@ng-forge/openapi-generator` is the closest analogue to formly's `FormlyJsonschema` pattern. It generates a `FormConfig` _and_ the inferred form-value TypeScript type from the spec at build time, so submission handlers end up typed end-to-end. See the [OpenAPI generator guide](/openapi-generator).
 
 ## Performance
 

@@ -28,6 +28,7 @@ export const NAV_ITEMS: NavItem[] = [
     /** Visible only when adapter === 'custom' — concrete adapters hide this entry. */
     cssClass: 'sidebar-link--custom-only',
   },
+  { label: 'Native Mobile', path: 'native-adapter', badge: 'EXPERIMENTAL' },
   {
     label: 'Field Types',
     path: 'field-types',
