@@ -1,0 +1,15 @@
+appId: com.ngforge.e2e
+name: Multi-checkbox
+tags: [selection-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: selection-fields, SCENARIO: multi-checkbox-tags }
+- tapOn: { id: interests-angular }
+- tapOn: { id: interests-forms }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.stringify(JSON.parse(maestro.copiedText).interests) == '["angular","forms"]'}
+- tapOn: { id: interests-angular }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.stringify(JSON.parse(maestro.copiedText).interests) == '["forms"]'}
+- takeScreenshot: multi-checkbox-tags

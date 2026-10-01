@@ -1,0 +1,15 @@
+appId: com.ngforge.e2e
+name: Array container validator
+tags: [layout]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: layout, SCENARIO: array-container-validator }
+- tapOn: { id: from_0-input }
+- inputText: '2026'
+- tapOn: { id: to_0-input }
+- inputText: '2025'
+- hideKeyboard
+- tapOn: { id: submitPeriods-button }
+- assertVisible: The end must not be before the start.
+- takeScreenshot: array-container-validator

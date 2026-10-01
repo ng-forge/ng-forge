@@ -1,0 +1,14 @@
+appId: com.ngforge.e2e
+name: Multiple groups
+tags: [group-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: group-fields, SCENARIO: group-nested }
+- tapOn: { id: personal_firstName-input }
+- inputText: Jane
+- tapOn: { id: work_company-input }
+- inputText: Acme
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).personal.firstName == 'Jane'}
+- assertTrue: ${JSON.parse(maestro.copiedText).work.company == 'Acme'}

@@ -1,0 +1,14 @@
+appId: com.ngforge.e2e
+name: Remove array items
+tags: [array-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: array-fields, SCENARIO: array-remove }
+- assertVisible: { id: phone_0-input }
+- assertVisible: { id: phone_1-input }
+- tapOn: { id: removePhoneButton-button }
+- assertNotVisible: { id: phone_1-input }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).phones.length == 1}
+- assertTrue: ${JSON.parse(maestro.copiedText).phones[0].phone == '555-0001'}

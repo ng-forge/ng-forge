@@ -67,7 +67,8 @@
       "@ng-forge/utils": ["./internal/utils/src/index.ts"],
       "@ng-forge/dynamic-forms-validation": ["./internal/dynamic-forms-validation/index.ts"],
       "@ng-forge/dynamic-forms-validation/schema-only": ["./internal/dynamic-forms-validation/validate/src/index.ts"],
-      "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"]
+      "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"],
+      "@ng-forge/dynamic-forms-native": ["./packages/dynamic-forms-native/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

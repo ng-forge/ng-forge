@@ -1,0 +1,15 @@
+/*
+ * Core's web rows stack every field below 577px and use columns above it. Same here: a wrapping
+ * flex row from 577px, with the negative margin that the fields' 6px side padding needs.
+ * Column widths live in field.css, because ng-native applies a component's rules only to its own
+ * nodes, and the fields' hosts belong to the fields.
+ */
+@media (min-width: 577px) {
+  :host {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin-left: -6px;
+    margin-right: -6px;
+  }
+}

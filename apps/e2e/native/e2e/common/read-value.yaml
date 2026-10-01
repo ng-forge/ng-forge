@@ -1,0 +1,9 @@
+# Copies the scenario's form value (compact JSON) into maestro.copiedText.
+appId: com.ngforge.e2e
+---
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: form-value
+- copyTextFrom:
+    id: form-value

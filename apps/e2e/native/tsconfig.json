@@ -1,0 +1,20 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@ng-forge/dynamic-forms": ["../../../dist/packages/dynamic-forms"],
+      "@ng-forge/dynamic-forms/*": ["../../../dist/packages/dynamic-forms/*"],
+      "@ng-forge/dynamic-forms-native": ["../../../packages/dynamic-forms-native/src/index.ts"],
+      "@angular/*": ["./node_modules/@angular/*"],
+      "@ng-native/*": ["./node_modules/@ng-native/*"],
+      "rxjs": ["./node_modules/rxjs"]
+    }
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "typeCheckHostBindings": false,
+    "strictDomEventTypes": false
+  }
+}

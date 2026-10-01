@@ -1,0 +1,23 @@
+appId: com.ngforge.e2e
+name: Submit disabled while invalid
+tags: [submission-behavior]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: submission-behavior, SCENARIO: button-disabled-invalid }
+- assertVisible: { id: submitInvalid-button, enabled: false }
+# Leaving a required field empty shows its error once touched.
+- tapOn: { id: email-input }
+- tapOn: { id: name-input }
+- assertVisible: { id: email-error, text: This field is required }
+- takeScreenshot: button-disabled-invalid-error
+- tapOn: { id: email-input }
+- inputText: user@example.com
+- tapOn: { id: name-input }
+- inputText: Jane Doe
+- hideKeyboard
+- assertNotVisible: { id: email-error }
+- assertVisible: { id: submitInvalid-button, enabled: true }
+- tapOn: { id: submitInvalid-button }
+- copyTextFrom: { id: submission-count }
+- assertTrue: ${maestro.copiedText == '1'}
