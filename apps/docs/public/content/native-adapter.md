@@ -72,7 +72,8 @@ Not available yet: `select` and `datepicker` (they need a native picker or modal
 
 - **Submit.** On the web, a submit button relies on the browser's `<form>` submit event. Native has no such event, so the native `submit` button dispatches `FormSubmitEvent` itself. Nothing changes in your config.
 - **Text fields.** Core's `text` field renders HTML elements, which have no native counterpart, so the adapter registers its own `text` field. In dev mode, core logs that `text` was overwritten. That is expected.
-- **Layout.** `row` and `col` use CSS grid on the web. React Native only has flexbox, so the fields of a `row` currently stack vertically.
+- **Layout.** `row` and `col` use CSS grid on the web. React Native only has flexbox, so the adapter replaces the `row` wrapper with a wrapping flex row, and `col` becomes a percentage width. As on the web, rows stack their fields below 577px wide, so phones show one field per line and tablets show columns. `col` outside a `row` sets the field's width but does not place fields side by side.
+- **Container errors.** The adapter also replaces the `field-errors` wrapper, so validation messages on groups and arrays render as native text.
 - **Meta attributes.** `meta` forwards HTML attributes on the web. The native fields set accessibility props (`accessibilityLabel`, `role`) themselves and do not forward `meta`.
 - **Element ids.** Each control sets a `testID` for testing tools: `<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-checkbox`, `<key>-button`, `<key>-error`, and `<key>-<value>` for each radio or multi-checkbox option. Group children use `<group>_<child>` as their key, and array items use `<child>_<index>`.
 

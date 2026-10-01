@@ -34,12 +34,12 @@ ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueCont
 - **Submit dispatches an event.** Core's submit mapper relies on a DOM `<form>` submit event, which does not exist here, so `submit` uses `nativeSubmitButtonFieldMapper` to dispatch `FormSubmitEvent` itself.
 - **`text` is overridden.** Core's text field renders `<p>`, `<h1>`-`<h6>` and `<span>`, which render as empty views on ng-native. Core logs `Field type "text" is already registered. Overwriting.` in dev mode.
 - **No meta forwarding.** `NgForgeControl` works on DOM attributes. Accessibility comes from `accessibilityLabel` and `role` set by each field.
+- **Wrappers.** `withNativeFields()` also replaces two core wrappers. `row` becomes a wrapping flex row, with each `df-col-N` as a percentage width from 577px up; below that fields stack, as core's web rows do. `field-errors` renders container-level messages as `<text>`.
 - **Element ids.** Fields set `testID` (`<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-checkbox`, `<key>-button`, `<key>-error`, and `<key>-<value>` per radio or multi-checkbox option) for Maestro and the testing library.
 
 ## Known gaps
 
 - **Styles are stripped from a built package in release builds.** `@ng-native/metro` removes component CSS from partially compiled libraries in release builds, because library CSS is usually written for browsers. Consumed from source, as `apps/e2e/native` does, the CSS is compiled to native styles. Publishing this package would need styles that survive linking, for example inline style objects, or an opt-in from ng-native.
-- **No row or column layout.** Core's grid is CSS grid, and React Native only has flexbox. Rows render with their fields stacked.
 - **Missing field types:** select and datepicker need a modal or picker, which ng-native does not have yet. slider needs a native slider component.
 
 ## Tests

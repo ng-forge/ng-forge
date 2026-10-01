@@ -67,6 +67,10 @@ jobs:
         run: npm ci
 
       # Seconds, in Node against a fake of the native side, so a broken field fails before the APK build.
+      - name: Typecheck
+        working-directory: ${{ env.APP_DIR }}
+        run: npm run typecheck
+
       - name: Component tests
         working-directory: ${{ env.APP_DIR }}
         run: npm test

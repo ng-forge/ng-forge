@@ -1,7 +1,7 @@
 import './lib/types/registry-augmentation';
 
 export { NATIVE_FIELD_TYPES } from './lib/config/native-field-config';
-export { withNativeFields } from './lib/providers/native-providers';
+export { NATIVE_WRAPPERS, withNativeFields } from './lib/providers/native-providers';
 export { nativeSubmitButtonFieldMapper } from './lib/fields/button/native-submit-button.mapper';
 export { default as NativeInputFieldComponent } from './lib/fields/input/native-input.component';
 export { default as NativeTextareaFieldComponent } from './lib/fields/textarea/native-textarea.component';
@@ -12,6 +12,8 @@ export { default as NativeMultiCheckboxFieldComponent } from './lib/fields/multi
 export { NativeCheckboxControlComponent } from './lib/controls/native-checkbox-control.component';
 export { NativeChoiceGroupComponent } from './lib/controls/native-choice-group.component';
 export { default as NativeButtonFieldComponent } from './lib/fields/button/native-button.component';
+export { default as NativeRowWrapperComponent } from './lib/wrappers/native-row-wrapper.component';
+export { NativeFieldErrorsWrapperComponent } from './lib/wrappers/native-field-errors-wrapper.component';
 export { default as NativeTextFieldComponent } from './lib/fields/text/native-text.component';
 
 export type { NativeInputField, NativeInputProps } from './lib/fields/input/native-input.type';

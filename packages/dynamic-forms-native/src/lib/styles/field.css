@@ -137,3 +137,71 @@
   border-radius: 5px;
   background-color: #0969da;
 }
+
+/*
+ * Columns. Core puts `df-col-N` on a field's host; inside a native row (see the row wrapper) it
+ * becomes a percentage width with a 6px gutter on each side. Below 577px fields stack at full
+ * width, as core's web rows do.
+ */
+@media (min-width: 577px) {
+  :host(.df-col-1) {
+    width: 8.3333%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-2) {
+    width: 16.6667%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-3) {
+    width: 25%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-4) {
+    width: 33.3333%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-5) {
+    width: 41.6667%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-6) {
+    width: 50%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-7) {
+    width: 58.3333%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-8) {
+    width: 66.6667%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-9) {
+    width: 75%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-10) {
+    width: 83.3333%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-11) {
+    width: 91.6667%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  :host(.df-col-12) {
+    width: 100%;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}

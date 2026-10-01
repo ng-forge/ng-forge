@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { DynamicForm, type FormConfig, provideDynamicForm } from '@ng-forge/dynamic-forms';
 import { withNativeFields } from '@ng-forge/dynamic-forms-native';
-import { render } from '@ng-native/testing';
+import { render, type RenderOptions } from '@ng-native/testing';
 
 @Component({
   selector: 'app-test-host',
@@ -16,8 +16,8 @@ export class TestHost {
 }
 
 /** Renders a form with the native fields, the way the e2e app mounts one. */
-export function renderForm(config: FormConfig) {
-  return render(TestHost, { inputs: { config }, providers: [provideDynamicForm(...withNativeFields())] });
+export function renderForm(config: FormConfig, options: Omit<RenderOptions<TestHost>, 'inputs' | 'providers'> = {}) {
+  return render(TestHost, { ...options, inputs: { config }, providers: [provideDynamicForm(...withNativeFields())] });
 }
 
 /** The form value without Signal Forms' symbol keys. */
