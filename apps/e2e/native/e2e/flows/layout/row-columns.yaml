@@ -1,0 +1,22 @@
+appId: com.ngforge.e2e
+name: Row columns
+tags: [layout]
+---
+# A phone-width emulator: rows stack, as core's web rows do below 577px. Column widths on wider
+# screens are covered by the component tests.
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: layout, SCENARIO: row-columns }
+- tapOn: { id: firstName-input }
+- inputText: Ada
+- tapOn: { id: lastName-input }
+- inputText: Lovelace
+- tapOn: { id: city-input }
+- inputText: London
+- tapOn: { id: zip-input }
+- inputText: N1
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).firstName == 'Ada'}
+- assertTrue: ${JSON.parse(maestro.copiedText).lastName == 'Lovelace'}
+- assertTrue: ${JSON.parse(maestro.copiedText).zip == 'N1'}
+- takeScreenshot: row-columns

@@ -61,4 +61,4 @@ npm run e2e
 - Screenshot baselines. Flows take screenshots but do not compare them yet.
 - iOS. It needs a macOS runner and a simulator.
 - Field types the adapter does not have yet: select, slider, datepicker.
-- Row and column layout. Core's grid is CSS grid, which React Native does not support.
+- Column widths on a wide screen. The emulator is phone-sized, where rows stack; the component tests cover columns at tablet width.
