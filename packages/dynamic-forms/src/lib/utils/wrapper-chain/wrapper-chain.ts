@@ -5,6 +5,7 @@ import {
   Injector,
   ProviderToken,
   reflectComponentType,
+  Renderer2,
   Type,
   ViewContainerRef,
 } from '@angular/core';
@@ -157,7 +158,9 @@ export function renderWrapperChain(options: RenderWrapperChainOptions): Componen
   if (options.outermostHostClasses && refs.length > 0) {
     const tokens = options.outermostHostClasses.split(/\s+/).filter(Boolean);
     if (tokens.length > 0) {
-      (refs[0].location.nativeElement as HTMLElement).classList.add(...tokens);
+      // Through the renderer, not `classList`, so a non-DOM renderer (e.g. ng-native) gets the classes too.
+      const renderer = refs[0].injector.get(Renderer2);
+      for (const token of tokens) renderer.addClass(refs[0].location.nativeElement, token);
     }
   }
   return refs;

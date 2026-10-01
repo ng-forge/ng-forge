@@ -50,4 +50,21 @@ describe('row layout', () => {
     expect(find(r, (n) => n.props.flexDirection === 'row')).toBeUndefined();
     expect(hostOf(r, 'first')?.width).toBeUndefined();
   });
+
+  test('a wrapped field in a row still gets its column (core adds the class through the renderer)', async () => {
+    const r = await renderForm(
+      {
+        fields: [
+          {
+            key: 'wrappedRow',
+            type: 'row',
+            fields: [{ key: 'title', type: 'input', label: 'Title', col: 6, wrappers: [{ type: 'css', cssClass: 'highlight' }] }],
+          },
+        ],
+      } as never,
+      screenOf(800),
+    );
+    await screen.findByTestId('title-input');
+    expect(find(r, (n) => n.props.width === '50%')).toBeDefined();
+  });
 });
