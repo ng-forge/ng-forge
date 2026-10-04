@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
-import { Linking } from 'react-native';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Pressable, SafeAreaView, ScrollView, Text, View } from '@ng-native/components';
-import { injectScenarioRoute } from './deep-link';
+import { injectScenarioRoute, SCENARIO_LINK_SOURCE } from './deep-link';
 import { ScenarioComponent } from './scenario.component';
 import { SUITES } from './scenarios';
 
@@ -71,6 +70,7 @@ import { SUITES } from './scenarios';
 })
 export class App {
   protected readonly suites = SUITES;
+  private readonly links = inject(SCENARIO_LINK_SOURCE);
   private readonly route = injectScenarioRoute();
 
   protected readonly scenario = computed(() => {
@@ -79,6 +79,6 @@ export class App {
   });
 
   protected open(suiteId: string, testId: string): void {
-    void Linking.openURL(`ngforge-e2e://test/${suiteId}/${testId}`);
+    this.links.open(this.links.linkTo(suiteId, testId));
   }
 }

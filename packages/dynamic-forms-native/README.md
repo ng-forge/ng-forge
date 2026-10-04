@@ -13,6 +13,16 @@ mount(rootTag, App, getFabricUIManager(), {
 });
 ```
 
+On the web, the same fields render into the DOM through [`@ng-native/web`](https://ng-native.com/packages/web), so one adapter covers iOS, Android and the browser:
+
+```ts
+import { mount } from '@ng-native/web';
+
+mount(document.getElementById('root')!, App, {
+  providers: [provideDynamicForm(...withNativeFields())],
+});
+```
+
 ## Field types
 
 | Type                                   | Native element                                    |
@@ -40,11 +50,12 @@ ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueCont
 ## Known gaps
 
 - **Styles of a built package.** `@ng-native/metro` compiles component CSS for the app's own components and for the packages an app lists in `withAngularNative(config, { libraryStyles: ['@ng-forge/dynamic-forms-native'] })`. `apps/e2e/native` consumes the adapter from source, so a built package with `libraryStyles` is not tested yet.
-- **Missing field types:** select and datepicker need a modal or picker, which ng-native does not have yet. slider needs a native slider component.
+- **Missing field types:** select, datepicker and slider.
 
 ## Tests
 
-Both live in [`apps/e2e/native`](../../apps/e2e/native/README.md), which has its own install:
+All live in [`apps/e2e/native`](../../apps/e2e/native/README.md), which has its own install:
 
-- Component tests in Node with `@ng-native/testing` (`npm test`), no emulator needed. They need Vitest 5, so they stay out of the workspace's Vitest 4 setup.
+- Component tests in Node with `@ng-native/testing` (`npm test`), no emulator needed.
+- End to end in a browser with Playwright (`npm run e2e:web`), through `@ng-native/web`.
 - End to end on an Android emulator with Maestro (`npm run e2e`).

@@ -12,7 +12,10 @@
     "prebuild:android": "expo prebuild --platform android --no-install",
     "typecheck": "ngc -p tsconfig.json --noEmit",
     "e2e": "maestro test e2e --format junit --output build/maestro/report.xml --test-output-dir build/maestro",
-    "test": "vitest run --config vitest.native.config.mts"
+    "test": "vitest run --config vitest.native.config.mts",
+    "serve:web": "vite --config vite.web.config.mts",
+    "build:web": "vite build --config vite.web.config.mts --outDir build/web",
+    "e2e:web": "playwright test"
   },
   "dependencies": {
     "@angular/common": "22.1.5",
@@ -23,6 +26,7 @@
     "@ng-native/fabric": "0.4.0",
     "@ng-native/metro": "0.4.0",
     "@ng-native/platform": "0.4.0",
+    "@ng-native/web": "0.4.0",
     "@standard-schema/spec": "^1.0.0",
     "expo": "~57.0.26",
     "expo-status-bar": "~57.0.1",
@@ -39,6 +43,8 @@
     "@angular/compiler-cli": "22.1.5",
     "@babel/core": "^7.29.7",
     "@ng-native/testing": "0.4.0",
+    "@oxc-angular/vite": "0.0.38",
+    "@playwright/test": "1.63.0",
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3",
     "vite": "^8.3.2",

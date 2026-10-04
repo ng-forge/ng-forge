@@ -52,6 +52,32 @@
         "command": "npm run e2e",
         "cwd": "apps/e2e/native"
       }
+    },
+    "serve-web": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": ["dynamic-forms"],
+          "target": "build"
+        }
+      ],
+      "options": {
+        "command": "npm run serve:web",
+        "cwd": "apps/e2e/native"
+      }
+    },
+    "e2e-web": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": ["dynamic-forms"],
+          "target": "build"
+        }
+      ],
+      "options": {
+        "command": "npm run e2e:web",
+        "cwd": "apps/e2e/native"
+      }
     }
   }
 }
