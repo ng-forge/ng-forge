@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Router, Scroll } from '@angular/router';
 import { filter, take } from 'rxjs';
 import { AdapterName } from '@ng-forge/sandbox-harness';
-import { CUSTOM_ONLY_ROUTES, NATIVE_ONLY_ROUTES } from '../guards/content-redirect.guard';
+import { CUSTOM_ONLY_ROUTES } from '../guards/content-redirect.guard';
 
 const DOCS_ADAPTERS = new Set<AdapterName>(['material', 'bootstrap', 'primeng', 'ionic', 'native', 'custom']);
 
@@ -23,12 +23,12 @@ export class ActiveAdapterService {
     return isDocsAdapter(seg) ? seg : 'material';
   });
 
-  readonly adapters: { name: AdapterName; label: string; icon: string }[] = [
+  readonly adapters: { name: AdapterName; label: string; icon: string; experimental?: boolean }[] = [
     { name: 'material', label: 'Material', icon: 'assets/icons/material.svg' },
     { name: 'bootstrap', label: 'Bootstrap', icon: 'assets/icons/bootstrap.svg' },
     { name: 'primeng', label: 'PrimeNG', icon: 'assets/icons/primeng.webp' },
     { name: 'ionic', label: 'Ionic', icon: 'assets/icons/ionic.svg' },
-    { name: 'native', label: 'Native', icon: 'assets/icons/native.svg' },
+    { name: 'native', label: 'ng-native', icon: 'assets/icons/native.svg', experimental: true },
     { name: 'custom', label: 'Custom', icon: 'assets/icons/custom.svg' },
   ];
 
@@ -48,12 +48,7 @@ export class ActiveAdapterService {
     // back to /custom/<page>. Land on a sensible page on the target adapter
     // instead. The custom-fields recipe is the closest analogue when the
     // origin was the building-an-adapter guide.
-    const path =
-      name !== 'custom' && CUSTOM_ONLY_ROUTES.includes(currentPath)
-        ? 'recipes/custom-fields'
-        : name !== 'native' && NATIVE_ONLY_ROUTES.includes(currentPath)
-          ? 'getting-started'
-          : currentPath;
+    const path = name !== 'custom' && CUSTOM_ONLY_ROUTES.includes(currentPath) ? 'recipes/custom-fields' : currentPath;
 
     if (!this.isBrowser) {
       void this.router.navigateByUrl(`/${name}/${path}`);

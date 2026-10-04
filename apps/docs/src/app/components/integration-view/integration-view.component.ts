@@ -15,6 +15,8 @@ interface IntegrationData {
   setupCode: string;
   featuresTitle: string;
   features: { name: string; description: string }[];
+  /** How the adapter behaves differently from the web adapters, for one that is not a web UI library. */
+  differences?: { topic: string; description: string }[];
 }
 
 const INTEGRATION_DATA: Record<AdapterName, IntegrationData> = {
@@ -171,6 +173,40 @@ module.exports = withAngularNative(getDefaultConfig(__dirname), {
       { name: 'rows', description: 'Visible lines on textarea, which set its height' },
       { name: 'variant', description: "'primary' or 'secondary' on buttons" },
       { name: 'hint', description: 'Helper text below any field' },
+    ],
+    differences: [
+      {
+        topic: 'Native views',
+        description:
+          'input and textarea render a <text-input>, toggle a <switch>. checkbox, radio, multi-checkbox and buttons are pressable rows announced with the matching role.',
+      },
+      { topic: 'Not available yet', description: 'select, datepicker, slider and addons. A live example that needs one says so.' },
+      {
+        topic: 'Submit',
+        description: 'Native has no form submit event, so the submit button dispatches FormSubmitEvent itself. Your config stays the same.',
+      },
+      {
+        topic: 'Text fields',
+        description:
+          "Core's text field renders HTML elements, so the adapter registers its own. Core logs that text was overwritten in dev mode.",
+      },
+      {
+        topic: 'Rows and columns',
+        description:
+          'React Native has flexbox only: row is a wrapping flex row and col a percentage width. Rows stack below 577px wide, as on the web.',
+      },
+      { topic: 'Container errors', description: 'Group and array validation messages render as native text.' },
+      { topic: 'Meta attributes', description: 'Not forwarded. The fields set accessibilityLabel and role themselves.' },
+      {
+        topic: 'Styling',
+        description:
+          'On a device, component CSS compiles to native styles: flexbox only, without grid, ::before/::after or :hover. Metro needs the adapter in libraryStyles, as in Setup.',
+      },
+      {
+        topic: 'Testing',
+        description:
+          'Each control sets a testID for Maestro, Detox or Playwright: <key>-input, -textarea, -toggle, -checkbox, -button, -error, and <key>-<value> per option. In the browser it renders as data-testid.',
+      },
     ],
   },
   custom: {

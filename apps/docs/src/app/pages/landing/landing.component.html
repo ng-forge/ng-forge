@@ -414,12 +414,18 @@
     <div class="section-container">
       <div class="integrations-header reveal">
         <h2 class="section-title">Works with your stack</h2>
-        <p class="section-desc">Swap one import. The same config renders in Material, PrimeNG, Ionic, or Bootstrap.</p>
+        <p class="section-desc">
+          Swap one import. The same config renders in Material, PrimeNG, Ionic, or Bootstrap, and as native iOS and Android views with
+          ng-native.
+        </p>
       </div>
 
       <div class="adapter-row reveal">
         @for (integration of integrations; track integration.name) {
           <a [routerLink]="integration.route" class="adapter-logo" [attr.title]="integration.title">
+            @if (integration.experimental) {
+              <span class="adapter-ribbon">Experimental</span>
+            }
             <img [src]="integration.icon" [alt]="integration.name" loading="lazy" />
             <span>{{ integration.name }}</span>
           </a>

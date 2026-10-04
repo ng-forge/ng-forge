@@ -22,7 +22,7 @@ const NATIVE_STYLE = 'style[data-ng-native-component], style#angular-native-web-
   template: `
     @if (unsupported().length) {
       <p class="unsupported" role="note">
-        Not available on native yet. This example uses
+        Not available on ng-native yet. This example uses
         @for (type of unsupported(); track type; let last = $last) {
           <code>{{ type }}</code
           >{{ last ? '.' : ', ' }}

@@ -244,7 +244,7 @@ const config = {
     providerExample: `provideDynamicForm(...withNativeFields())`,
     formLevelExample: '',
     options: [],
-    noOptionsNote: 'The native adapter has no config options or form-level defaults yet. Set props per field.',
+    noOptionsNote: 'The ng-native adapter has no config options or form-level defaults yet. Set props per field.',
   },
   custom: {
     providerFunction: 'withCustomFields',

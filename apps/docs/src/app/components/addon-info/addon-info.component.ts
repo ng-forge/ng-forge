@@ -125,7 +125,7 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
       </div>
     } @else if (isNativeAdapter()) {
       <div class="addon-info-empty">
-        <p>The native adapter does not support addons yet.</p>
+        <p>The ng-native adapter does not support addons yet.</p>
       </div>
     } @else {
       @let d = data();

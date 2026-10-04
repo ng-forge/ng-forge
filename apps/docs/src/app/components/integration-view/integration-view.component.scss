@@ -79,6 +79,12 @@
     }
   }
 
+  &__topic {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--forge-text);
+  }
+
   &__feature-desc {
     color: var(--forge-text-muted, #{$steel-mid});
   }

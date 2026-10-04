@@ -61,7 +61,6 @@ export class DocsLayoutComponent {
     const isCustom = adapter === 'custom';
     return NAV_ITEMS.filter((item) => {
       if (item.cssClass === 'sidebar-link--custom-only') return isCustom;
-      if (item.cssClass === 'sidebar-link--native-only') return adapter === 'native';
       if (item.cssClass === 'sidebar-link--not-custom') return !isCustom;
       return true;
     });

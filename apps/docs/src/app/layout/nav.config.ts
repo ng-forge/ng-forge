@@ -29,12 +29,6 @@ export const NAV_ITEMS: NavItem[] = [
     cssClass: 'sidebar-link--custom-only',
   },
   {
-    label: 'Native Platform',
-    path: 'native-adapter',
-    /** Visible only when adapter === 'native'. */
-    cssClass: 'sidebar-link--native-only',
-  },
-  {
     label: 'Field Types',
     path: 'field-types',
     children: [
