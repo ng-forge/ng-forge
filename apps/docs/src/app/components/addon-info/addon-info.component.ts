@@ -3,7 +3,7 @@ import type { AdapterName } from '@ng-forge/sandbox-harness';
 import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 
-type UiAdapterName = Exclude<AdapterName, 'custom'>;
+type UiAdapterName = Exclude<AdapterName, 'custom' | 'native'>;
 
 type AddonInfoField =
   | 'quickstart'
@@ -123,6 +123,10 @@ const ADAPTER_DATA: Record<UiAdapterName, AddonAdapterData> = {
           is layered on top of.
         </p>
       </div>
+    } @else if (isNativeAdapter()) {
+      <div class="addon-info-empty">
+        <p>The native adapter does not support addons yet.</p>
+      </div>
     } @else {
       @let d = data();
       @switch (field()) {
@@ -220,10 +224,11 @@ export class DocsAddonInfoComponent {
   private readonly activeAdapter = inject(ActiveAdapterService);
 
   protected readonly isCustomAdapter = computed(() => this.activeAdapter.adapter() === 'custom');
+  protected readonly isNativeAdapter = computed(() => this.activeAdapter.adapter() === 'native');
 
   protected readonly data = computed<AddonAdapterData>(() => {
     const name = this.activeAdapter.adapter();
-    return name === 'custom' ? ADAPTER_DATA.material : ADAPTER_DATA[name as UiAdapterName];
+    return name === 'custom' || name === 'native' ? ADAPTER_DATA.material : ADAPTER_DATA[name];
   });
 
   protected readonly buttonRender = computed(() => {

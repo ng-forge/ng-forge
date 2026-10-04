@@ -1,6 +1,9 @@
 <div class="integration-view">
   <section class="integration-view__install">
     <h2 class="integration-view__heading">Installation</h2>
+    @if (data().notice; as notice) {
+      <p class="integration-view__notice" role="note">{{ notice }}</p>
+    }
     <docs-install-command [packages]="data().packages" />
   </section>
 

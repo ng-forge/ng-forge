@@ -4,7 +4,7 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import type { AdapterName } from '@ng-forge/sandbox-harness';
 
-type UiAdapterName = Exclude<AdapterName, 'custom'>;
+type UiAdapterName = Exclude<AdapterName, 'custom' | 'native'>;
 type FieldType =
   | 'input'
   | 'textarea'
@@ -68,6 +68,39 @@ const BUTTON_PROPS: Record<UiAdapterName, AdapterProp[]> = {
     { prop: 'strong', type: 'boolean', description: 'Use stronger font weight' },
   ],
 };
+
+const HINT: AdapterProp = { prop: 'hint', type: 'string', description: 'Helper text below the field' };
+const NATIVE_BUTTON: AdapterProp[] = [{ prop: 'variant', type: "'primary' | 'secondary'", description: 'Filled or outlined button' }];
+
+/** The native adapter's props. Its fields are fewer than the web adapters', so a map of its own. */
+const NATIVE_PROPS: Partial<Record<FieldType, AdapterProp[]>> = {
+  input: [
+    {
+      prop: 'type',
+      type: "'text' | 'email' | 'password' | 'number' | 'tel' | 'url'",
+      description: 'Picks the keyboard; password hides the text',
+    },
+    HINT,
+  ],
+  textarea: [{ prop: 'rows', type: 'number', description: 'Visible lines, which set the height' }, HINT],
+  toggle: [HINT],
+  checkbox: [HINT],
+  radio: [HINT],
+  'multi-checkbox': [HINT],
+  submit: NATIVE_BUTTON,
+  button: NATIVE_BUTTON,
+  next: NATIVE_BUTTON,
+  previous: NATIVE_BUTTON,
+  'add-array-item': NATIVE_BUTTON,
+  'prepend-array-item': NATIVE_BUTTON,
+  'insert-array-item': NATIVE_BUTTON,
+  'remove-array-item': NATIVE_BUTTON,
+  'pop-array-item': NATIVE_BUTTON,
+  'shift-array-item': NATIVE_BUTTON,
+};
+
+/** Field types the native adapter does not have yet. */
+const NOT_ON_NATIVE: ReadonlySet<string> = new Set<FieldType>(['select', 'slider', 'datepicker']);
 
 const ADAPTER_PROPS_DATA = {
   input: {
@@ -385,11 +418,14 @@ export class DocsAdapterPropsComponent {
 
   readonly isCustomAdapter = computed(() => this.activeAdapter.adapter() === 'custom');
 
+  readonly notOnNative = computed(() => this.activeAdapter.adapter() === 'native' && NOT_ON_NATIVE.has(this.field()));
+
   readonly props = computed(() => {
     if (this.isCustomAdapter()) return [];
     const fieldType = this.field() as FieldType;
-    const adapter = this.activeAdapter.adapter() as UiAdapterName;
-    return ADAPTER_PROPS_DATA[fieldType]?.[adapter] ?? [];
+    const adapter = this.activeAdapter.adapter();
+    if (adapter === 'native') return NATIVE_PROPS[fieldType] ?? [];
+    return ADAPTER_PROPS_DATA[fieldType]?.[adapter as UiAdapterName] ?? [];
   });
 
   readonly customGuide = computed(() => (this.isCustomAdapter() ? (CUSTOM_FIELD_GUIDES[this.field()] ?? null) : null));

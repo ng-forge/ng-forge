@@ -62,6 +62,9 @@ function extractSlug(route: Parameters<CanActivateFn>[0]): string {
 /** Routes that are only meaningful under the "custom" adapter. */
 export const CUSTOM_ONLY_ROUTES: readonly string[] = ['building-an-adapter'];
 
+/** Routes that are only meaningful under the "native" adapter. */
+export const NATIVE_ONLY_ROUTES: readonly string[] = ['native-adapter'];
+
 export const contentRedirectGuard: CanActivateFn = (route) => {
   const slug = extractSlug(route);
   const adapter = route.pathFromRoot[1]?.paramMap.get('adapter') ?? 'material';
@@ -78,6 +81,10 @@ export const contentRedirectGuard: CanActivateFn = (route) => {
 
   if (adapter !== 'custom' && CUSTOM_ONLY_ROUTES.includes(slug)) {
     return inject(Router).parseUrl(`/custom/${slug}`);
+  }
+
+  if (adapter !== 'native' && NATIVE_ONLY_ROUTES.includes(slug)) {
+    return inject(Router).parseUrl(`/native/${slug}`);
   }
 
   return true;

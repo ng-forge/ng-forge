@@ -75,4 +75,15 @@ export const DOCS_ADAPTERS: AdapterRegistration[] = [
       return lib.createIonicSandboxApp(routes);
     },
   },
+  {
+    name: 'native',
+    stylesheetUrl: 'native.css',
+    defaultRoute: 'examples/demo',
+    // Only the `demo` route: native examples render configs from the docs glossary.
+    loadRoutes: async () => (await import('@ng-forge/sandbox-adapter-native')).NATIVE_EXAMPLE_ROUTES,
+    factory: async (routes) => {
+      const lib = await import('@ng-forge/sandbox-adapter-native');
+      return lib.createNativeSandboxApp(routes);
+    },
+  },
 ];

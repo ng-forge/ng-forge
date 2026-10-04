@@ -70,10 +70,10 @@ export { zodSchemaValidationConfig } from './zod-schema-validation.config';
 
 /**
  * Concrete adapter identifiers accepted by per-adapter config factories.
- * Mirrors the four shipped UI adapters; the docs live-example component
+ * Mirrors the UI adapters; the docs live-example component
  * resolves `'custom'` to `'material'` before calling a factory.
  */
-export type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+export type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native';
 
 /**
  * Per-scenario config — either a static `FormConfig` (adapter-agnostic) or a

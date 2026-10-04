@@ -1,4 +1,7 @@
-/* Compiled by @ng-native/metro into native styles. Flexbox only: no grid, no ::before. */
+/*
+ * Compiled by @ng-native/metro into native styles. Flexbox only: no grid, no ::before.
+ * Colors use light-dark(): the device's color scheme on native, `color-scheme` in a browser.
+ */
 .field {
   gap: 4px;
   margin-bottom: 12px;
@@ -13,20 +16,20 @@
 .label {
   font-size: 14px;
   font-weight: 600;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .control {
   min-height: 44px;
   padding: 8px 12px;
   border-width: 1px;
-  border-color: #8c959f;
+  border-color: light-dark(#8c959f, #656c76);
   border-radius: 6px;
   font-size: 16px;
-  color: #1f2328;
-  background-color: #ffffff;
+  color: light-dark(#1f2328, #e6edf3);
+  background-color: light-dark(#ffffff, #0d1117);
 }
 .control[data-invalid][data-touched] {
-  border-color: #cf222e;
+  border-color: light-dark(#cf222e, #f85149);
 }
 .multiline {
   min-height: 96px;
@@ -34,21 +37,21 @@
 }
 .error {
   font-size: 13px;
-  color: #cf222e;
+  color: light-dark(#cf222e, #f85149);
 }
 .hint {
   font-size: 13px;
-  color: #59636e;
+  color: light-dark(#59636e, #9198a1);
 }
 .button {
   align-items: center;
   padding: 12px 16px;
   margin-bottom: 12px;
   border-radius: 6px;
-  background-color: #0969da;
+  background-color: light-dark(#0969da, #4493f8);
 }
 .button.secondary {
-  background-color: #eaeef2;
+  background-color: light-dark(#eaeef2, #262c36);
 }
 .button.disabled {
   opacity: 0.5;
@@ -59,34 +62,34 @@
   color: #ffffff;
 }
 .button.secondary .button-label {
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .h4,
 .h5,
 .h6 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .p,
 .span {
   font-size: 16px;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .choice {
   flex-direction: row;
@@ -97,7 +100,7 @@
 .choice-label {
   flex: 1;
   font-size: 16px;
-  color: #1f2328;
+  color: light-dark(#1f2328, #e6edf3);
 }
 .box,
 .radio {
@@ -106,8 +109,8 @@
   align-items: center;
   justify-content: center;
   border-width: 2px;
-  border-color: #8c959f;
-  background-color: #ffffff;
+  border-color: light-dark(#8c959f, #656c76);
+  background-color: light-dark(#ffffff, #0d1117);
 }
 .box {
   border-radius: 4px;
@@ -116,11 +119,11 @@
   border-radius: 11px;
 }
 .box.on {
-  border-color: #0969da;
-  background-color: #0969da;
+  border-color: light-dark(#0969da, #4493f8);
+  background-color: light-dark(#0969da, #4493f8);
 }
 .radio.on {
-  border-color: #0969da;
+  border-color: light-dark(#0969da, #4493f8);
 }
 .box.disabled,
 .radio.disabled {
@@ -135,7 +138,7 @@
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  background-color: #0969da;
+  background-color: light-dark(#0969da, #4493f8);
 }
 
 /*

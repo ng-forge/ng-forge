@@ -1,61 +1,22 @@
 ---
-title: Native Mobile (ng-native)
+title: Native Platform
 slug: native-adapter
-description: 'Experimental ng-forge adapter for ng-native, which renders Angular as real iOS and Android views. Setup, supported field types, differences from the web adapters, and end-to-end testing on an Android emulator.'
+description: 'How the experimental ng-native adapter renders ng-forge forms as real iOS and Android views, and in the browser through @ng-native/web. Field types, differences from the web adapters, styling and testing.'
 ---
 
 > [!WARNING]
 > **Experimental.** `@ng-forge/dynamic-forms-native` is not published yet and its API may change. [ng-native](https://ng-native.com) itself is in alpha.
 
-[ng-native](https://ng-native.com) renders Angular components as real native views on React Native's Fabric renderer, so the same `FormConfig` you use on the web can drive a native iOS or Android form. ng-forge's core (state, validation, conditional logic, groups and arrays) runs unchanged. The adapter supplies the field components.
+[ng-native](https://ng-native.com) renders Angular components as real native views on React Native's Fabric renderer, so the same `FormConfig` you use on the web drives a native iOS or Android form. [`@ng-native/web`](https://ng-native.com/packages/web) renders the same components into the DOM, so one adapter covers phones and the browser. The live examples on these pages run on it.
 
-## Setup
-
-Register the native fields when you mount the app, the same way the web adapters are registered:
-
-```typescript
-import { provideDynamicForm } from '@ng-forge/dynamic-forms';
-import { withNativeFields } from '@ng-forge/dynamic-forms-native';
-import { mount } from '@ng-native/platform';
-
-mount(rootTag, App, getFabricUIManager(), {
-  providers: [provideDynamicForm(...withNativeFields())],
-});
-```
-
-Then render a form. The host element is still `<form dynamic-form>`. On ng-native it becomes a plain native view:
-
-```typescript
-import { Component, signal } from '@angular/core';
-import { DynamicForm, FormConfig } from '@ng-forge/dynamic-forms';
-
-@Component({
-  selector: 'app-sign-up',
-  imports: [DynamicForm],
-  template: `<form [dynamic-form]="config" [(value)]="value" (submitted)="save($event)"></form>`,
-})
-export class SignUp {
-  readonly value = signal({});
-  readonly config = {
-    fields: [
-      { key: 'email', type: 'input', label: 'Email', required: true, email: true, props: { type: 'email' } },
-      { key: 'newsletter', type: 'toggle', label: 'Newsletter' },
-      { key: 'submit', type: 'submit', label: 'Sign up' },
-    ],
-  } as const satisfies FormConfig;
-
-  save(value: unknown) {
-    console.log(value);
-  }
-}
-```
+ng-forge's core (state, validation, conditional logic, groups and arrays) runs unchanged. The adapter supplies the field components. Setup is on [Getting Started](/getting-started).
 
 ## Field types
 
 | Type                                   | Native element           | Notes                                                                                           |
 | -------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | `input`                                | `<text-input>`           | `props.type` picks the keyboard (`email`, `number`, `tel`, `url`) and `password` hides the text |
-| `textarea`                             | `<text-input multiline>` | `props.rows` sets the height on Android                                                         |
+| `textarea`                             | `<text-input multiline>` | `props.rows` sets the height                                                                    |
 | `toggle`                               | `<switch>`               |                                                                                                 |
 | `checkbox`                             | `<pressable>`            | Announced as a checkbox                                                                         |
 | `radio`                                | `<pressable>` per option | Announced as radio buttons; disabled options ignore taps                                        |
@@ -66,7 +27,7 @@ export class SignUp {
 
 ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueControl` and `FormCheckboxControl`, so those fields bind `[formField]` directly. React Native has no checkbox or radio view, so the adapter builds them from pressable rows that implement the same contracts. Validation, `disabled`, `readonly` and touched state work the same way as on the web. Checkboxes and options mark the field touched when tapped.
 
-Not available yet: `select` and `datepicker` (they need a native picker or modal) and `slider`.
+Not available yet: `select`, `datepicker`, `slider` and addons. A live example that needs one says so instead of rendering.
 
 ## Differences from the web adapters
 
@@ -75,18 +36,18 @@ Not available yet: `select` and `datepicker` (they need a native picker or modal
 - **Layout.** `row` and `col` use CSS grid on the web. React Native only has flexbox, so the adapter replaces the `row` wrapper with a wrapping flex row, and `col` becomes a percentage width. As on the web, rows stack their fields below 577px wide, so phones show one field per line and tablets show columns. `col` outside a `row` sets the field's width but does not place fields side by side.
 - **Container errors.** The adapter also replaces the `field-errors` wrapper, so validation messages on groups and arrays render as native text.
 - **Meta attributes.** `meta` forwards HTML attributes on the web. The native fields set accessibility props (`accessibilityLabel`, `role`) themselves and do not forward `meta`.
-- **Element ids.** Each control sets a `testID` for testing tools: `<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-checkbox`, `<key>-button`, `<key>-error`, and `<key>-<value>` for each radio or multi-checkbox option. Group children use `<group>_<child>` as their key, and array items use `<child>_<index>`.
+- **Element ids.** Each control sets a `testID` for testing tools: `<key>-input`, `<key>-textarea`, `<key>-toggle`, `<key>-checkbox`, `<key>-button`, `<key>-error`, and `<key>-<value>` for each radio or multi-checkbox option. Group children use `<group>_<child>` as their key, and array items use `<child>_<index>`. In the browser, `@ng-native/web` renders `testID` as `data-testid`.
 
 ## Styling
 
-The fields use component stylesheets, which ng-native's Metro plugin compiles to native styles. Only flexbox layout is available: grid, `::before`/`::after` and `:hover` are dropped at build time.
+The fields use component stylesheets. On a device, ng-native's Metro plugin compiles them to native styles, and only flexbox layout is available: grid, `::before`/`::after` and `:hover` are dropped at build time. In the browser the same CSS applies as written.
 
 > [!NOTE]
 > Metro compiles the CSS of a pre-built library only when your app lists it: `withAngularNative(config, { libraryStyles: ['@ng-forge/dynamic-forms-native'] })`.
 
 ## Testing
 
-The adapter has an end-to-end suite that runs [Maestro](https://maestro.dev) flows against a release build on an Android emulator in CI. Each scenario opens by deep link, and flows find fields by the `testID` values listed above:
+The adapter's end-to-end suite runs the same scenarios on two hosts in CI: [Maestro](https://maestro.dev) flows against a release build on an Android emulator, and Playwright specs in Chromium through `@ng-native/web`. Each scenario opens by deep link on the device and by hash route in the browser, and both find fields by the `testID` values listed above:
 
 ```yaml
 appId: com.ngforge.e2e
@@ -98,7 +59,12 @@ appId: com.ngforge.e2e
 - assertTrue: ${JSON.parse(maestro.copiedText).name == 'Test User'}
 ```
 
-For component tests without a device, `@ng-native/testing` renders ng-native components in Node against a fake of the native side.
+```typescript
+await page.goto('/#/test/group-fields/group-value-propagation');
+await page.getByTestId('name-input').fill('Test User');
+```
+
+For component tests without a device or a browser, `@ng-native/testing` renders ng-native components in Node against a fake of the native side.
 
 ## Related
 

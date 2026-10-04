@@ -38,7 +38,11 @@
   <div class="tab-content">
     @if (activeTab() === 'demo') {
       <div #formContainer class="form-container">
-        <form [dynamic-form]="scenario().config" [(value)]="formValue" [class]="scenario().formClassName"></form>
+        @if (formHost; as host) {
+          <ng-container *ngComponentOutlet="host; inputs: { config: scenario().config, theme: currentTheme() }" />
+        } @else {
+          <form [dynamic-form]="scenario().config" [(value)]="formValue" [class]="scenario().formClassName"></form>
+        }
       </div>
       @if (!hideFormOutput()) {
         <div class="example-result">

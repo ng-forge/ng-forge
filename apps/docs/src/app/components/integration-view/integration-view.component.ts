@@ -5,9 +5,11 @@ import { CodeHighlightDirective } from '../../directives/code-highlight.directiv
 import { DocsInstallCommandComponent } from '../install-command/install-command.component';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
-type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
+type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native' | 'custom';
 
 interface IntegrationData {
+  /** Shown above the install command. */
+  notice?: string;
   packages: string;
   stylesCode?: string;
   setupCode: string;
@@ -137,6 +139,38 @@ export const appConfig: ApplicationConfig = {
       { name: 'interface', description: "Select picker: 'action-sheet', 'popover', or 'alert'" },
       { name: 'presentation', description: "Datepicker format: 'date', 'date-time', 'time', 'month-year', 'year'" },
       { name: 'dualKnobs', description: 'Two-handle range mode on slider' },
+    ],
+  },
+  native: {
+    notice: 'Experimental and not published yet. The adapter lives in the ng-forge repository, and ng-native itself is in alpha.',
+    packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-native @ng-native/components',
+    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withNativeFields } from '@ng-forge/dynamic-forms-native';
+
+// iOS and Android
+import { mount } from '@ng-native/platform';
+
+mount(rootTag, App, getFabricUIManager(), {
+  providers: [provideDynamicForm(...withNativeFields())],
+});
+
+// The web, with the same fields rendered into the DOM
+import { mount } from '@ng-native/web';
+
+mount(document.getElementById('root')!, App, {
+  providers: [provideDynamicForm(...withNativeFields())],
+});
+
+// metro.config.js: compile the adapter's component CSS into native styles
+module.exports = withAngularNative(getDefaultConfig(__dirname), {
+  libraryStyles: ['@ng-forge/dynamic-forms-native'],
+});`,
+    featuresTitle: 'Notable Adapter Props',
+    features: [
+      { name: 'type', description: "Picks the keyboard on inputs ('email', 'number', 'tel', 'url'); 'password' hides the text" },
+      { name: 'rows', description: 'Visible lines on textarea, which set its height' },
+      { name: 'variant', description: "'primary' or 'secondary' on buttons" },
+      { name: 'hint', description: 'Helper text below any field' },
     ],
   },
   custom: {

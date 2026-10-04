@@ -3,7 +3,7 @@ import { DOCUMENT } from '@angular/common';
 import { DefaultUrlSerializer, UrlTree } from '@angular/router';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 
-const DOCS_ADAPTER_NAMES = new Set<string>(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
+const DOCS_ADAPTER_NAMES = new Set<string>(['material', 'bootstrap', 'primeng', 'ionic', 'native', 'custom']);
 const isDocsAdapter = (v: string): v is AdapterName => DOCS_ADAPTER_NAMES.has(v);
 
 /**

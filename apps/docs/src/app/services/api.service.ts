@@ -126,6 +126,7 @@ const ADAPTER_PACKAGE_MAP: Record<string, string> = {
   bootstrap: 'bootstrap',
   primeng: 'primeng',
   ionic: 'ionic',
+  native: 'native',
 };
 
 @Injectable({ providedIn: 'root' })

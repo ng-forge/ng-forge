@@ -14,7 +14,8 @@
     "sandbox-adapter-material",
     "sandbox-adapter-bootstrap",
     "sandbox-adapter-primeng",
-    "sandbox-adapter-ionic"
+    "sandbox-adapter-ionic",
+    "sandbox-adapter-native"
   ],
   "targets": {
     "build": {

@@ -22,6 +22,13 @@
     }
   }
 
+  &__notice {
+    margin: 0 0 $space-4;
+    padding: $space-3 $space-4;
+    border-left: 3px solid var(--forge-accent, #{$ember-glow});
+    color: var(--text-secondary);
+  }
+
   &__table {
     // !important overrides global .doc-page-content table { display: block }
     display: table !important;
