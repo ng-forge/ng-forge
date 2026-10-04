@@ -32,6 +32,11 @@ overrides:
   fflate@<0.7.5: ^0.7.5
   ws@>=8.0.0 <8.21.0: ^8.21.0
 
+patchedDependencies:
+  '@ng-native/web@0.4.0':
+    hash: 48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174
+    path: patches/@ng-native__web@0.4.0.patch
+
 importers:
 
   .:
@@ -231,7 +236,7 @@ importers:
         version: 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
       '@ng-native/web':
         specifier: 0.4.0
-        version: 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))
+        version: 0.4.0(patch_hash=48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174)(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))
       '@nx/angular':
         specifier: 23.2.1
         version: 23.2.1(dd2da5929a66801316b0400103b5d069)
@@ -13261,7 +13266,7 @@ snapshots:
 
   '@ng-native/fabric@0.4.0': {}
 
-  '@ng-native/web@0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))':
+  '@ng-native/web@0.4.0(patch_hash=48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174)(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))':
     dependencies:
       '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
       '@ng-native/device': 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))

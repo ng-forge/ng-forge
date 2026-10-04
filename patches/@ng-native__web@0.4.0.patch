@@ -1,0 +1,90 @@
+diff --git a/dist/browser-engine.js b/dist/browser-engine.js
+index 0cbfa15b3dc6ba1d19c964434f89d043336bfdb8..0f1fe1d90d8ca1b214840a6652d000f6be7cabd4 100644
+--- a/dist/browser-engine.js
++++ b/dist/browser-engine.js
+@@ -25,6 +25,10 @@ const TOUCH_EVENT_NAMES = {
+     pointerup: 'topTouchEnd',
+     pointercancel: 'topTouchCancel',
+ };
++/** The element an event started on. Inside a shadow root, `event.target` at `document` is the host. */
++function originOf(event) {
++    return event.composedPath?.()[0] ?? event.target;
++}
+ function scrollToEnd(el, args) {
+     const [animated = true] = args;
+     const horizontal = el.scrollWidth > el.clientWidth && el.scrollHeight <= el.clientHeight;
+@@ -139,9 +143,15 @@ export class BrowserEngine extends HostEngine {
+     owned = new WeakSet();
+     /** Removes the document listeners, once the app they served is gone; see `dispose`. */
+     listening;
+-    constructor(document) {
++    /**
++     * Where the shared listeners go: `document`, or the shadow root an island lives in. A focus
++     * move between two elements of one shadow tree never reaches `document`.
++     */
++    listenRoot;
++    constructor(document, listenRoot = document) {
+         super();
+         this.document = document;
++        this.listenRoot = listenRoot;
+         // The document's own, so the signal is one its `addEventListener` recognises.
+         this.listening = new (document.defaultView?.AbortController ?? AbortController)();
+         this.installGlobalListeners();
+@@ -535,7 +545,7 @@ export class BrowserEngine extends HostEngine {
+     }
+     // --- document-level listeners, shared by the whole tree ------------------------------------
+     installGlobalListeners() {
+-        const on = (type, listener) => this.document.addEventListener(type, listener, { signal: this.listening.signal });
++        const on = (type, listener) => this.listenRoot.addEventListener(type, listener, { signal: this.listening.signal });
+         for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+             on(type, (event) => this.onPointer(event, type));
+         }
+@@ -586,7 +596,7 @@ export class BrowserEngine extends HostEngine {
+     keyTarget(event) {
+         if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey)
+             return null;
+-        const node = nodeOf(event.target);
++        const node = nodeOf(originOf(event));
+         if (!node || node.name === 'text-input' || node.name === 'switch')
+             return null;
+         return this.responders.responds(node) ? node : null;
+@@ -602,14 +612,14 @@ export class BrowserEngine extends HostEngine {
+             // A right or middle click opens a menu or a tab; only the primary button presses.
+             if (event.button > 0)
+                 return;
+-            target = nearestNodeOf(event.target) ?? undefined;
++            target = nearestNodeOf(originOf(event)) ?? undefined;
+             if (!target || !this.owned.has(target))
+                 return;
+             this.activeTouches.set(event.pointerId, target);
+             // Pins every later event in this gesture to the element the finger actually landed on,
+             // regardless of where it wanders - what makes the negotiation's `target` mean the same
+             // thing `topTouchMove`/`topTouchEnd` that Fabric's continuous per-finger delivery does.
+-            event.target.setPointerCapture?.(event.pointerId);
++            originOf(event).setPointerCapture?.(event.pointerId);
+         }
+         else {
+             target = this.activeTouches.get(event.pointerId);
+@@ -625,7 +635,7 @@ export class BrowserEngine extends HostEngine {
+         });
+     }
+     onFocusChange(event, focused) {
+-        const node = nearestNodeOf(event.target);
++        const node = nearestNodeOf(originOf(event));
+         if (!node || !this.owned.has(node))
+             return;
+         if (focused)
+diff --git a/dist/mount.js b/dist/mount.js
+index dc7a8eea2f98137983b61b82abf380e498493de9..43b78044a0ee4bde3e694a971fa7652f92e4ba94 100644
+--- a/dist/mount.js
++++ b/dist/mount.js
+@@ -86,7 +86,8 @@ export function mount(rootElement, component, options = {}) {
+     rootElement.setAttribute('data-rn-root', '');
+     // What `@ng-native/tailwind`'s `web:` variant matches beneath, as `platform-ios` does on a phone.
+     rootElement.classList.add('platform-web');
+-    const engine = new BrowserEngine(document);
++    const root = rootElement.getRootNode();
++    const engine = new BrowserEngine(document, document.defaultView && root instanceof document.defaultView.ShadowRoot ? root : document);
+     const factory = new BrowserRendererFactory(engine, document);
+     // `wrapRoot` marks the element `ngSkipHydration`; an island gives back what it had on unmount.
+     const skipHydration = rootElement.getAttribute('ngSkipHydration');
