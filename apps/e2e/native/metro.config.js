@@ -6,8 +6,8 @@ const repoRoot = path.resolve(__dirname, '../../..');
 
 // ng-forge comes from the monorepo, not npm:
 // - core from its build output (`nx build dynamic-forms`), linked like any partial-compiled library;
-// - the adapter from source, so its component CSS is compiled to native styles. A release build
-//   strips component CSS from linked libraries, which would leave the fields unstyled.
+// - the adapter from source, compiled with the app like its own components. A pre-built adapter
+//   would need `libraryStyles` instead, or Metro leaves its component CSS uncompiled.
 const ngForge = {
   '@ng-forge/dynamic-forms': path.join(repoRoot, 'dist/packages/dynamic-forms'),
   '@ng-forge/dynamic-forms-native': path.join(repoRoot, 'packages/dynamic-forms-native'),

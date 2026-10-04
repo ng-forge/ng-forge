@@ -82,7 +82,7 @@ Not available yet: `select` and `datepicker` (they need a native picker or modal
 The fields use component stylesheets, which ng-native's Metro plugin compiles to native styles. Only flexbox layout is available: grid, `::before`/`::after` and `:hover` are dropped at build time.
 
 > [!NOTE]
-> In release builds, ng-native removes component CSS from pre-compiled Angular libraries. Until that is resolved, consume the adapter from source so its styles are compiled with your app.
+> Metro compiles the CSS of a pre-built library only when your app lists it: `withAngularNative(config, { libraryStyles: ['@ng-forge/dynamic-forms-native'] })`.
 
 ## Testing
 

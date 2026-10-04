@@ -39,7 +39,7 @@ ng-native's `<text-input>` and `<switch>` implement Signal Forms' `FormValueCont
 
 ## Known gaps
 
-- **Styles are stripped from a built package in release builds.** `@ng-native/metro` removes component CSS from partially compiled libraries in release builds, because library CSS is usually written for browsers. Consumed from source, as `apps/e2e/native` does, the CSS is compiled to native styles. Publishing this package would need styles that survive linking, for example inline style objects, or an opt-in from ng-native.
+- **Styles of a built package.** `@ng-native/metro` compiles component CSS for the app's own components and for the packages an app lists in `withAngularNative(config, { libraryStyles: ['@ng-forge/dynamic-forms-native'] })`. `apps/e2e/native` consumes the adapter from source, so a built package with `libraryStyles` is not tested yet.
 - **Missing field types:** select and datepicker need a modal or picker, which ng-native does not have yet. slider needs a native slider component.
 
 ## Tests
