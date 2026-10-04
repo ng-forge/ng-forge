@@ -167,8 +167,11 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           working-directory: ${{ env.APP_DIR }}
+          # On a cold boot the launcher can stall, and its "isn't responding" dialog then covers
+          # the app so no flow can see it. hide_error_dialogs stops Android showing that dialog.
           script: |
             adb install -r android/app/build/outputs/apk/release/app-release.apk
+            adb shell settings put global hide_error_dialogs 1
             npm run e2e || (sh e2e/diagnose.sh; exit 1)
 
       - name: Upload Maestro results
