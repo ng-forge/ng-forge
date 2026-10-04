@@ -29,7 +29,8 @@ export class FieldViewportObserver {
   }
 
   observe(el: Element, rootMargin: string): Observable<boolean> {
-    if (!this.isBrowser) return ALWAYS_VISIBLE;
+    // A non-DOM renderer (ng-native) hands us its own node, which nothing can observe.
+    if (!this.isBrowser || !(el instanceof Element)) return ALWAYS_VISIBLE;
     rootMargin = normalizeFieldParkingMargin(rootMargin);
 
     return new Observable<boolean>((subscriber) => {

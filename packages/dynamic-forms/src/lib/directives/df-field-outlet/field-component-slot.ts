@@ -217,9 +217,9 @@ export class FieldComponentSlot {
   }
 
   private captureFocus(ref: ComponentRef<unknown>): FocusSnapshot | null {
-    // Only a browser has DOM focus to keep; a non-DOM renderer (e.g. ng-native) has no `document`.
-    if (typeof document === 'undefined') return null;
-    const hostEl = ref.location.nativeElement as HTMLElement;
+    // Only a DOM host has focus to keep; a non-DOM renderer (e.g. ng-native) hands us its own node.
+    const hostEl: unknown = ref.location.nativeElement;
+    if (typeof Element === 'undefined' || !(hostEl instanceof Element)) return null;
     const active = document.activeElement;
     if (!(active instanceof HTMLElement) || !hostEl.contains(active)) return null;
     const sel = active as HTMLInputElement & HTMLTextAreaElement;

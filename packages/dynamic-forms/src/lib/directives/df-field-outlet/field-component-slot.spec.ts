@@ -126,6 +126,18 @@ describe('FieldComponentSlot', () => {
     expect(fixture.nativeElement.querySelector('leaf-a')).toBeFalsy();
   });
 
+  it('detach skips focus capture when the host is not a DOM element, as on a non-DOM renderer', () => {
+    const slot = new FieldComponentSlot();
+    slot.mountOrReuse(host.vcr(), LeafAComponent, host.fieldInjector, envInjector, {});
+    fixture.detectChanges();
+    const state = slot.snapshot();
+    if (state.phase !== 'mounted') throw new Error('expected a mounted slot');
+    (state.ref.location as { nativeElement: unknown }).nativeElement = { tag: 'view' };
+
+    expect(() => slot.detach()).not.toThrow();
+    expect(slot.phase()).toBe('detached');
+  });
+
   it('detach from empty is a no-op', () => {
     const slot = new FieldComponentSlot();
     expect(() => slot.detach()).not.toThrow();
