@@ -63,6 +63,8 @@
     "@ionic/angular": "8.8.19",
     "@microsoft/api-extractor": "^7.59.1",
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@ng-native/components": "0.4.0",
+    "@ng-native/web": "0.4.0",
     "@nx/angular": "23.2.1",
     "@nx/devkit": "23.2.1",
     "@nx/esbuild": "23.2.1",
@@ -241,6 +243,9 @@
       "qs@<6.16.0": "^6.16.0",
       "fflate@<0.7.5": "^0.7.5",
       "ws@>=8.0.0 <8.21.0": "^8.21.0"
+    },
+    "patchedDependencies": {
+      "@ng-native/web@0.4.0": "patches/@ng-native__web@0.4.0.patch"
     }
   }
 }

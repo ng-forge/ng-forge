@@ -1,0 +1,14 @@
+appId: com.ngforge.e2e
+name: Group initial values
+tags: [group-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: group-fields, SCENARIO: group-initial-values }
+- copyTextFrom: { id: profile_firstName-input }
+- assertTrue: ${maestro.copiedText == 'John'}
+- copyTextFrom: { id: profile_lastName-input }
+- assertTrue: ${maestro.copiedText == 'Doe'}
+- copyTextFrom: { id: profile_email-input }
+- assertTrue: ${maestro.copiedText == 'john.doe@example.com'}
+- takeScreenshot: group-initial-values

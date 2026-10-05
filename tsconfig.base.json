@@ -56,6 +56,7 @@
       "@ng-forge/sandbox-adapter-bootstrap": ["./internal/sandbox-adapter-bootstrap/src/index.ts"],
       "@ng-forge/sandbox-adapter-primeng": ["./internal/sandbox-adapter-primeng/src/index.ts"],
       "@ng-forge/sandbox-adapter-ionic": ["./internal/sandbox-adapter-ionic/src/index.ts"],
+      "@ng-forge/sandbox-adapter-native": ["./internal/sandbox-adapter-native/src/index.ts"],
       "@ng-forge/examples-shared-testing/playwright-config": ["./internal/examples-shared-testing/src/lib/playwright-config.ts"],
       "@ng-forge/examples-shared-testing/perf": ["./internal/examples-shared-testing/src/lib/perf/index.ts"],
       "@ng-forge/examples-shared-testing/perf-spec": ["./internal/examples-shared-testing/src/lib/perf-spec.ts"],
@@ -67,7 +68,8 @@
       "@ng-forge/utils": ["./internal/utils/src/index.ts"],
       "@ng-forge/dynamic-forms-validation": ["./internal/dynamic-forms-validation/index.ts"],
       "@ng-forge/dynamic-forms-validation/schema-only": ["./internal/dynamic-forms-validation/validate/src/index.ts"],
-      "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"]
+      "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"],
+      "@ng-forge/dynamic-forms-native": ["./packages/dynamic-forms-native/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

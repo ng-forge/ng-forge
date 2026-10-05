@@ -129,6 +129,7 @@ $steel-dark: #2a2824;
   // Text
   --forge-text: #1a1a1a;
   --forge-text-muted: #666666;
+  --forge-experimental: #9a6700;
 
   // Borders
   --forge-border-color: #e0e0e0;
@@ -166,6 +167,7 @@ $steel-dark: #2a2824;
 
     --forge-text: #{$steel};
     --forge-text-muted: #{$steel-mid};
+    --forge-experimental: #{$molten};
     --forge-border-color: #{$steel-dark};
     --forge-code-bg: #{$bg-surface};
     --forge-sidebar-bg: #{$bg-deep};
@@ -195,6 +197,7 @@ html[data-theme='dark'] {
 
   --forge-text: #{$steel};
   --forge-text-muted: #{$steel-mid};
+  --forge-experimental: #{$molten};
   --forge-border-color: #{$steel-dark};
   --forge-code-bg: #{$bg-surface};
   --forge-sidebar-bg: #{$bg-deep};

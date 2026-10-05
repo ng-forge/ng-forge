@@ -1,0 +1,8 @@
+// ============================================
+// NATIVE ADAPTER STYLES (for sandbox app)
+// ============================================
+// The native fields bring their own component styles, rendered by @ng-native/web.
+
+:host {
+  display: block;
+}

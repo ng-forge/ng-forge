@@ -1,7 +1,9 @@
 import type { Project } from '@stackblitz/sdk';
 import type { AdapterName } from '@ng-forge/sandbox-harness';
 
-type SupportedAdapter = Exclude<AdapterName, 'custom'>;
+/** ng-native apps build with Vite or Expo, which the StackBlitz template does not cover. */
+export type StackBlitzAdapter = Exclude<AdapterName, 'custom' | 'native'>;
+type SupportedAdapter = StackBlitzAdapter;
 
 interface AdapterMeta {
   pkg: string;
@@ -128,14 +130,14 @@ export function toJsObjectNotation(value: unknown, indent = 0): string {
 }
 
 /** Opens a StackBlitz project with the given config. SDK is lazy-loaded on first call. */
-export async function openInStackBlitz(adapter: AdapterName, config: unknown, title: string): Promise<void> {
+export async function openInStackBlitz(adapter: StackBlitzAdapter | 'custom', config: unknown, title: string): Promise<void> {
   const configJson = toJsObjectNotation(config);
   const project = createStackBlitzProject(adapter, configJson, title);
   const sdk = await import('@stackblitz/sdk');
   sdk.default.openProject(project, { openFile: 'src/app/app.component.ts' });
 }
 
-function createStackBlitzProject(adapter: AdapterName, configJson: string, title: string): Project {
+function createStackBlitzProject(adapter: StackBlitzAdapter | 'custom', configJson: string, title: string): Project {
   const resolved: SupportedAdapter = adapter === 'custom' ? 'material' : adapter;
   const meta = ADAPTER_META[resolved];
   const safeTitle = escapeHtml(title);

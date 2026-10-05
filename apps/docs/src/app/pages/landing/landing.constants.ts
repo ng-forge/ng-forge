@@ -9,6 +9,7 @@ export interface Integration {
   title: string;
   package: string;
   importLine: string;
+  experimental?: boolean;
 }
 
 export interface PackageManager {
@@ -71,6 +72,15 @@ export const INTEGRATIONS: Integration[] = [
     title: 'Bootstrap integration documentation',
     package: '@ng-forge/dynamic-forms-bootstrap',
     importLine: "import { withBootstrapFields } from '@ng-forge/dynamic-forms-bootstrap';",
+  },
+  {
+    name: 'ng-native',
+    route: '/native',
+    icon: 'assets/icons/native.svg',
+    title: 'ng-native integration documentation (experimental)',
+    package: '@ng-forge/dynamic-forms-native',
+    importLine: "import { withNativeFields } from '@ng-forge/dynamic-forms-native';",
+    experimental: true,
   },
 ];
 

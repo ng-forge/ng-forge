@@ -82,6 +82,7 @@ const PACKAGES: PackageDef[] = [
   { name: '@ng-forge/dynamic-forms-bootstrap', slug: 'bootstrap', entryPoints: ['packages/dynamic-forms-bootstrap/src/index.ts'] },
   { name: '@ng-forge/dynamic-forms-primeng', slug: 'primeng', entryPoints: ['packages/dynamic-forms-primeng/src/index.ts'] },
   { name: '@ng-forge/dynamic-forms-ionic', slug: 'ionic', entryPoints: ['packages/dynamic-forms-ionic/src/index.ts'] },
+  { name: '@ng-forge/dynamic-forms-native', slug: 'native', entryPoints: ['packages/dynamic-forms-native/src/index.ts'] },
 ];
 
 const VALID_SLUGS = new Set(PACKAGES.map((p) => p.slug));

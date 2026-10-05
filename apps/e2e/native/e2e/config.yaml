@@ -1,0 +1,5 @@
+# Maestro workspace config: `maestro test e2e` runs every flow below.
+flows:
+  - 'flows/**'
+executionOrder:
+  continueOnFailure: true

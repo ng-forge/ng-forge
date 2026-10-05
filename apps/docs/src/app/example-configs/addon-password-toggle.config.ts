@@ -1,12 +1,13 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
-type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native';
 
 const ICON_NAME: Record<ConcreteAdapter, string> = {
   material: 'visibility',
   bootstrap: 'eye',
   primeng: 'eye',
   ionic: 'eye-outline',
+  native: 'eye',
 };
 
 const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
@@ -14,6 +15,8 @@ const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
   bootstrap: 'bs-button',
   primeng: 'prime-button',
   ionic: 'ion-button',
+  // The native fields have no addons yet; the docs show that instead of the form.
+  native: 'button',
 };
 
 export function addonPasswordToggleConfig(adapter: ConcreteAdapter): FormConfig {

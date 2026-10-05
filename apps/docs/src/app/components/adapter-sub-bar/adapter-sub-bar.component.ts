@@ -18,6 +18,9 @@ import { AdapterName } from '@ng-forge/sandbox-harness';
           <span class="trigger-divider"></span>
           <img [src]="currentAdapter().icon" [alt]="currentAdapter().label" class="trigger-icon" />
           <span class="trigger-name">{{ currentAdapter().label }}</span>
+          @if (currentAdapter().experimental) {
+            <span class="experimental-badge">Experimental</span>
+          }
           <span class="trigger-chevron"></span>
         </button>
 
@@ -35,6 +38,9 @@ import { AdapterName } from '@ng-forge/sandbox-harness';
               >
                 <img [src]="adapter.icon" [alt]="adapter.label" class="option-icon" />
                 <span class="option-name">{{ adapter.label }}</span>
+                @if (adapter.experimental) {
+                  <span class="experimental-badge">Experimental</span>
+                }
                 <span class="option-check" [style.visibility]="activeAdapter.adapter() === adapter.name ? 'visible' : 'hidden'"></span>
               </button>
             }

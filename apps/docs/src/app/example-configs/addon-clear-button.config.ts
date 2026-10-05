@@ -1,12 +1,13 @@
 import { FormConfig } from '@ng-forge/dynamic-forms';
 
-type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic';
+type ConcreteAdapter = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native';
 
 const ICON_NAME: Record<ConcreteAdapter, { search: string; clear: string }> = {
   material: { search: 'search', clear: 'close' },
   bootstrap: { search: 'search', clear: 'x' },
   primeng: { search: 'search', clear: 'times' },
   ionic: { search: 'search-outline', clear: 'close-outline' },
+  native: { search: 'search', clear: 'close' },
 };
 
 const ICON_TYPE: Record<ConcreteAdapter, string> = {
@@ -14,6 +15,8 @@ const ICON_TYPE: Record<ConcreteAdapter, string> = {
   bootstrap: 'bs-icon',
   primeng: 'prime-icon',
   ionic: 'ion-icon',
+  // The native fields have no addons yet; the docs show that instead of the form.
+  native: 'icon',
 };
 
 const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
@@ -21,6 +24,7 @@ const BUTTON_TYPE: Record<ConcreteAdapter, string> = {
   bootstrap: 'bs-button',
   primeng: 'prime-button',
   ionic: 'ion-button',
+  native: 'button',
 };
 
 export function addonClearButtonConfig(adapter: ConcreteAdapter): FormConfig {

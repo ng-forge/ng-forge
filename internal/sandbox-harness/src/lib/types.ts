@@ -20,7 +20,7 @@ export type SandboxAppFactory = (routes: Route[]) => { config: ApplicationConfig
  * factory. It has no URL-navigable registration and is intentionally excluded from
  * isAdapterName() — bootstrap('custom') without a registration will throw.
  */
-export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
+export type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native' | 'custom';
 
 /**
  * Registration for a UI adapter in the sandbox harness.

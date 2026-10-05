@@ -4,7 +4,7 @@ import { ActiveAdapterService } from '../../services/active-adapter.service';
 import { CodeHighlightDirective } from '../../directives/code-highlight.directive';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
-type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
+type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native' | 'custom';
 
 interface ConfigOption {
   name: string;
@@ -19,8 +19,11 @@ interface AdapterConfigData {
   typeAlias: string;
   typeAliasImport: string;
   providerExample: string;
+  /** Empty when the adapter has no form-level defaults. */
   formLevelExample: string;
   options: ConfigOption[];
+  /** Replaces the custom-adapter note when an adapter has no options. */
+  noOptionsNote?: string;
 }
 
 const ADAPTER_CONFIG_DATA: Record<AdapterName, AdapterConfigData> = {
@@ -233,6 +236,16 @@ const config = {
       { name: 'strong', type: 'boolean', default: 'false', description: 'Render buttons in bold (strong) by default' },
     ],
   },
+  native: {
+    providerFunction: 'withNativeFields',
+    configInterface: '',
+    typeAlias: '',
+    typeAliasImport: '',
+    providerExample: `provideDynamicForm(...withNativeFields())`,
+    formLevelExample: '',
+    options: [],
+    noOptionsNote: 'The ng-native adapter has no config options or form-level defaults yet. Set props per field.',
+  },
   custom: {
     providerFunction: 'withCustomFields',
     configInterface: '(your config interface)',
@@ -308,6 +321,10 @@ const config = {
             </table>
           </div>
         </section>
+      } @else if (data().noOptionsNote; as note) {
+        <section class="config-view__section">
+          <p class="config-view__desc">{{ note }}</p>
+        </section>
       } @else {
         <section class="config-view__section">
           <h3 class="config-view__heading">Custom Adapter Config</h3>
@@ -327,17 +344,19 @@ const config = {
         </div>
       </section>
 
-      <section class="config-view__section">
-        <h3 class="config-view__heading">Form-level (defaultProps)</h3>
-        <p class="config-view__desc">
-          Use <code>{{ data().typeAlias }}</code> from <code>{{ data().typeAliasImport }}</code> for type-safe
-          <code>defaultProps</code> with autocomplete.
-        </p>
-        <div class="config-view__code">
-          <docs-copy-button [code]="data().formLevelExample" />
-          <div [codeHighlight]="data().formLevelExample"></div>
-        </div>
-      </section>
+      @if (data().formLevelExample) {
+        <section class="config-view__section">
+          <h3 class="config-view__heading">Form-level (defaultProps)</h3>
+          <p class="config-view__desc">
+            Use <code>{{ data().typeAlias }}</code> from <code>{{ data().typeAliasImport }}</code> for type-safe
+            <code>defaultProps</code> with autocomplete.
+          </p>
+          <div class="config-view__code">
+            <docs-copy-button [code]="data().formLevelExample" />
+            <div [codeHighlight]="data().formLevelExample"></div>
+          </div>
+        </section>
+      }
     </div>
   `,
   styleUrl: './configuration-view.component.scss',

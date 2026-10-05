@@ -1,0 +1,16 @@
+appId: com.ngforge.e2e
+name: Radio group
+tags: [selection-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: selection-fields, SCENARIO: radio-plan }
+- tapOn: { id: plan-free }
+- tapOn: { id: plan-pro }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).plan == 'pro'}
+# The disabled option ignores taps.
+- tapOn: { id: plan-team }
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).plan == 'pro'}
+- takeScreenshot: radio-plan

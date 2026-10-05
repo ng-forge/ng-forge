@@ -1,0 +1,17 @@
+{
+  "name": "@ng-forge/sandbox-adapter-native",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "peerDependencies": {
+    "@angular/common": ">=22.0.0",
+    "@angular/core": ">=22.0.0",
+    "@angular/router": ">=22.0.0",
+    "@ng-forge/dynamic-forms": "*",
+    "@ng-forge/dynamic-forms-native": "*",
+    "@ng-forge/examples-shared-ui": "*",
+    "@ng-forge/sandbox-harness": "*",
+    "@ng-native/components": "*",
+    "@ng-native/web": "*"
+  }
+}

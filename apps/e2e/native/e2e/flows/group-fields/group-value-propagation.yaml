@@ -1,0 +1,22 @@
+appId: com.ngforge.e2e
+name: Group value propagation
+tags: [group-fields]
+---
+- runFlow:
+    file: ../../common/open-scenario.yaml
+    env: { SUITE: group-fields, SCENARIO: group-value-propagation }
+- takeScreenshot: group-value-propagation-empty
+- tapOn: { id: name-input }
+- inputText: Test User
+- tapOn: { id: address_street-input }
+- inputText: 123 Main St
+- tapOn: { id: address_city-input }
+- inputText: Springfield
+- tapOn: { id: address_zip-input }
+- inputText: '12345'
+- runFlow: ../../common/read-value.yaml
+- assertTrue: ${JSON.parse(maestro.copiedText).name == 'Test User'}
+- assertTrue: ${JSON.parse(maestro.copiedText).address.street == '123 Main St'}
+- assertTrue: ${JSON.parse(maestro.copiedText).address.city == 'Springfield'}
+- assertTrue: ${JSON.parse(maestro.copiedText).address.zip == '12345'}
+- takeScreenshot: group-value-propagation-filled

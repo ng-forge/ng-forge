@@ -1572,6 +1572,27 @@ section {
     color: $steel;
   }
 
+  &:has(.adapter-ribbon) {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .adapter-ribbon {
+    position: absolute;
+    top: 22px;
+    right: -30px;
+    width: 130px;
+    padding: 2px 0;
+    transform: rotate(45deg);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    color: $bg-deep;
+    background: $molten;
+  }
+
   &:hover {
     transform: translateY(-4px);
     border-color: rgba($ember-glow, 0.4);

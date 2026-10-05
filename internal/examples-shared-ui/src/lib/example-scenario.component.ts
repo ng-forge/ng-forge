@@ -10,13 +10,14 @@ import {
   resource,
   signal,
 } from '@angular/core';
-import { isPlatformBrowser, JsonPipe } from '@angular/common';
+import { isPlatformBrowser, JsonPipe, NgComponentOutlet } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DynamicForm } from '@ng-forge/dynamic-forms';
 import { SANDBOX_THEME } from '@ng-forge/sandbox-harness';
 import type { HighlighterCore } from 'shiki/core';
 import { ExampleScenario } from './types';
+import { EXAMPLE_FORM_HOST } from './example-form-host';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { injectRouteData } from 'ngxtension/inject-route-data';
 
@@ -52,7 +53,7 @@ class ExampleShikiService {
  */
 @Component({
   selector: 'example-scenario',
-  imports: [DynamicForm, JsonPipe],
+  imports: [DynamicForm, JsonPipe, NgComponentOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './example-scenario.component.html',
   styleUrl: './example-scenario.component.scss',
@@ -74,6 +75,9 @@ export class ExampleScenarioComponent {
    * Null in standalone mode (new tab, SSR, unit tests).
    */
   private readonly sandboxTheme = inject(SANDBOX_THEME, { optional: true });
+
+  /** Renders the form instead of `<form dynamic-form>` when an adapter provides one. */
+  protected readonly formHost = inject(EXAMPLE_FORM_HOST, { optional: true });
 
   /** True when running inside a docs sandbox embed. */
   readonly isInSandbox = this.sandboxTheme !== null;

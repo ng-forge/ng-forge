@@ -60,6 +60,16 @@ describe('FieldViewportObserver', () => {
       subscription.unsubscribe();
     });
 
+    it('reports a host that is not a DOM element as visible without observing it', () => {
+      const values: boolean[] = [];
+      const node = { tag: 'view' } as unknown as Element;
+      const subscription = observer.observe(node, margin).subscribe((visible) => values.push(visible));
+
+      expect(values).toEqual([true]);
+      expect(instances).toHaveLength(0);
+      subscription.unsubscribe();
+    });
+
     it('shares one native observer for elements using the same margin', () => {
       const first = makeElement();
       const second = makeElement();

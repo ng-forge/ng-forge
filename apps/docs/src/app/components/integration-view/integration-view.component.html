@@ -1,6 +1,9 @@
 <div class="integration-view">
   <section class="integration-view__install">
     <h2 class="integration-view__heading">Installation</h2>
+    @if (data().notice; as notice) {
+      <p class="integration-view__notice" role="note">{{ notice }}</p>
+    }
     <docs-install-command [packages]="data().packages" />
   </section>
 
@@ -45,4 +48,28 @@
       </table>
     </div>
   </section>
+
+  @if (data().differences; as differences) {
+    <section class="integration-view__features">
+      <h2 class="integration-view__heading">Differences from the Web Adapters</h2>
+      <div class="table-scroll">
+        <table class="integration-view__table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (difference of differences; track difference.topic) {
+              <tr>
+                <td class="integration-view__topic">{{ difference.topic }}</td>
+                <td class="integration-view__feature-desc">{{ difference.description }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
 </div>

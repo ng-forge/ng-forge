@@ -93,4 +93,12 @@ describe('FormIdPrefixService', () => {
     sibling.style.display = 'none';
     await vi.waitFor(() => expect(a.svc.prefix()).toBe(''));
   });
+
+  it('counts a host that is not a DOM element as visible, for non-DOM renderers', () => {
+    const node = { tag: 'view' } as unknown as HTMLElement;
+    const { svc } = mountForm(undefined, node);
+    mountForm();
+
+    expect(svc.prefix()).toMatch(/^df-\d+$/);
+  });
 });

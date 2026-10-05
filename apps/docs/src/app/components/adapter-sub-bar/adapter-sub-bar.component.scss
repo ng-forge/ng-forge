@@ -242,6 +242,19 @@
   flex: 1;
 }
 
+.experimental-badge {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 16px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  color: var(--forge-experimental);
+  background: color-mix(in srgb, var(--forge-experimental) 14%, transparent);
+  flex-shrink: 0;
+}
+
 .option-check {
   display: inline-block;
   width: 13px;

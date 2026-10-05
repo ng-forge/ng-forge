@@ -1,0 +1,184 @@
+name: E2E Native
+
+# Runs the ng-native adapter's scenarios with Playwright in a browser (@ng-native/web) and with
+# Maestro on an Android emulator. Separate from _build-test.yml while the adapter is experimental,
+# so it never blocks the required PR checks.
+
+on:
+  pull_request:
+    paths:
+      - 'packages/dynamic-forms/**'
+      - 'packages/dynamic-forms-native/**'
+      - 'apps/e2e/native/**'
+      - '.github/workflows/e2e-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/dynamic-forms/**'
+      - 'packages/dynamic-forms-native/**'
+      - 'apps/e2e/native/**'
+      - '.github/workflows/e2e-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_DIR: apps/e2e/native
+
+jobs:
+  web:
+    name: Playwright on @ng-native/web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10.28.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build @ng-forge/dynamic-forms
+        run: pnpm nx build dynamic-forms
+
+      - name: Cache app npm downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
+        with:
+          path: ~/.npm
+          key: native-e2e-npm-${{ hashFiles('apps/e2e/native/package-lock.json') }}
+
+      - name: Install app dependencies
+        working-directory: ${{ env.APP_DIR }}
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: ${{ env.APP_DIR }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: ${{ env.APP_DIR }}
+        run: npm run e2e:web
+
+      - name: Upload Playwright results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: playwright-web
+          path: ${{ env.APP_DIR }}/build/playwright/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  android:
+    name: Maestro on Android emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10.28.0
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The app bundles core from its build output and the adapter from source (see metro.config.js).
+      - name: Build @ng-forge/dynamic-forms
+        run: pnpm nx build dynamic-forms
+
+      - name: Cache app npm downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
+        with:
+          path: ~/.npm
+          key: native-e2e-npm-${{ hashFiles('apps/e2e/native/package-lock.json') }}
+
+      - name: Install app dependencies
+        working-directory: ${{ env.APP_DIR }}
+        run: npm ci
+
+      # Seconds, in Node against a fake of the native side, so a broken field fails before the APK build.
+      - name: Typecheck
+        working-directory: ${{ env.APP_DIR }}
+        run: npm run typecheck
+
+      - name: Component tests
+        working-directory: ${{ env.APP_DIR }}
+        run: npm test
+
+      - name: Setup Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Generate the Android project
+        working-directory: ${{ env.APP_DIR }}
+        run: npx expo prebuild --platform android --no-install
+
+      # Release build: the JS bundle is embedded, so no Metro server runs during the tests.
+      # Signed with the debug keystore the Expo template configures. x86_64 only, for the emulator.
+      - name: Build release APK
+        working-directory: ${{ env.APP_DIR }}/android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # A pinned image and device profile, so screenshots are comparable run to run.
+      - name: Run Maestro flows on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          working-directory: ${{ env.APP_DIR }}
+          # On a cold boot the launcher can stall, and its "isn't responding" dialog then covers
+          # the app so no flow can see it. hide_error_dialogs stops Android showing that dialog.
+          script: |
+            adb install -r android/app/build/outputs/apk/release/app-release.apk
+            adb shell settings put global hide_error_dialogs 1
+            npm run e2e || (sh e2e/diagnose.sh; exit 1)
+
+      - name: Upload Maestro results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: maestro-android
+          path: ${{ env.APP_DIR }}/build/maestro/
+          retention-days: 7
+          if-no-files-found: ignore

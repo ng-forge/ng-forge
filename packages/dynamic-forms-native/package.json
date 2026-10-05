@@ -1,0 +1,27 @@
+{
+  "name": "@ng-forge/dynamic-forms-native",
+  "version": "1.2.0",
+  "private": true,
+  "description": "ng-native (Angular on React Native Fabric) integration for @ng-forge/dynamic-forms. Experimental.",
+  "type": "module",
+  "license": "MIT",
+  "author": "ng-forge",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ng-forge/ng-forge.git",
+    "directory": "packages/dynamic-forms-native"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "@ng-forge/dynamic-forms": "~1.2.0",
+    "@ng-native/components": "~0.4.0"
+  }
+}

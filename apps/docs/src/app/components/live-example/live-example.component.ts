@@ -16,7 +16,7 @@ import { openInStackBlitz } from './stackblitz-project';
       }
       <div class="live-example-wrapper">
         <div class="overlay-actions">
-          @if (resolvedConfig()) {
+          @if (resolvedConfig() && stackBlitzAdapter()) {
             <button class="stackblitz-btn" type="button" (click)="openInStackBlitz()">
               <img src="assets/icons/stackblitz.svg" alt="" class="stackblitz-icon" />
               StackBlitz
@@ -120,12 +120,18 @@ export class LiveExampleComponent {
     () => this.activeAdapter.adapters.find((a) => a.name === this.resolvedAdapter()) ?? this.activeAdapter.adapters[0],
   );
 
+  protected readonly stackBlitzAdapter = computed(() => {
+    const adapter = this.resolvedAdapter();
+    return adapter === 'native' ? null : adapter;
+  });
+
   openInStackBlitz(): void {
     if (!this.isBrowser) return;
     const config = this.resolvedConfig();
-    if (!config) return;
+    const adapter = this.stackBlitzAdapter();
+    if (!config || !adapter) return;
 
     const title = this.exampleTitle() || this.scenarioKey();
-    openInStackBlitz(this.resolvedAdapter(), config, title);
+    openInStackBlitz(adapter, config, title);
   }
 }

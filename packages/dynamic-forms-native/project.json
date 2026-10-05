@@ -1,0 +1,44 @@
+{
+  "name": "dynamic-forms-native",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynamic-forms-native/src",
+  "prefix": "df-native",
+  "projectType": "library",
+  "implicitDependencies": ["dynamic-forms"],
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "inputs": ["production", "^production"],
+      "dependsOn": ["compile"],
+      "options": {
+        "command": "node scripts/strip-fesm-comments.mjs dist/packages/dynamic-forms-native",
+        "cwd": "{workspaceRoot}"
+      },
+      "configurations": {
+        "production": {},
+        "development": {}
+      },
+      "defaultConfiguration": "production"
+    },
+    "compile": {
+      "executor": "@nx/angular:package",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "project": "packages/dynamic-forms-native/ng-package.json",
+        "tsConfig": "packages/dynamic-forms-native/tsconfig.lib.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "packages/dynamic-forms-native/tsconfig.lib.prod.json"
+        },
+        "development": {}
+      },
+      "defaultConfiguration": "production"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

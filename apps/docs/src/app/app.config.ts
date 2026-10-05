@@ -41,6 +41,7 @@ export const appConfig: ApplicationConfig = {
         { path: 'bootstrap', redirectTo: '/bootstrap/getting-started', pathMatch: 'full' },
         { path: 'primeng', redirectTo: '/primeng/getting-started', pathMatch: 'full' },
         { path: 'ionic', redirectTo: '/ionic/getting-started', pathMatch: 'full' },
+        { path: 'native', redirectTo: '/native/getting-started', pathMatch: 'full' },
         { path: 'custom', redirectTo: '/custom/getting-started', pathMatch: 'full' },
       ]),
     ),

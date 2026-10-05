@@ -57,7 +57,8 @@ export class FormIdPrefixService {
 
     // A host's box collapses to 0 on display:none and restores when shown. set() is
     // a no-op when the value is unchanged, so plain resizes don't churn field inputs.
-    if (isPlatformBrowser(inject(PLATFORM_ID)) && typeof ResizeObserver !== 'undefined') {
+    // A non-DOM renderer (ng-native) hands us its own node, which stays optimistically visible.
+    if (isPlatformBrowser(inject(PLATFORM_ID)) && typeof ResizeObserver !== 'undefined' && this.host instanceof Element) {
       const ro = new ResizeObserver(() => this.visible.set(isRendered(this.host)));
       ro.observe(this.host);
       destroyRef.onDestroy(() => ro.disconnect());

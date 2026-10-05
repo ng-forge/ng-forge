@@ -5,14 +5,18 @@ import { CodeHighlightDirective } from '../../directives/code-highlight.directiv
 import { DocsInstallCommandComponent } from '../install-command/install-command.component';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
-type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'custom';
+type AdapterName = 'material' | 'bootstrap' | 'primeng' | 'ionic' | 'native' | 'custom';
 
 interface IntegrationData {
+  /** Shown above the install command. */
+  notice?: string;
   packages: string;
   stylesCode?: string;
   setupCode: string;
   featuresTitle: string;
   features: { name: string; description: string }[];
+  /** How the adapter behaves differently from the web adapters, for one that is not a web UI library. */
+  differences?: { topic: string; description: string }[];
 }
 
 const INTEGRATION_DATA: Record<AdapterName, IntegrationData> = {
@@ -137,6 +141,72 @@ export const appConfig: ApplicationConfig = {
       { name: 'interface', description: "Select picker: 'action-sheet', 'popover', or 'alert'" },
       { name: 'presentation', description: "Datepicker format: 'date', 'date-time', 'time', 'month-year', 'year'" },
       { name: 'dualKnobs', description: 'Two-handle range mode on slider' },
+    ],
+  },
+  native: {
+    notice: 'Experimental and not published yet. The adapter lives in the ng-forge repository, and ng-native itself is in alpha.',
+    packages: '@ng-forge/dynamic-forms @ng-forge/dynamic-forms-native @ng-native/components',
+    setupCode: `import { provideDynamicForm } from '@ng-forge/dynamic-forms';
+import { withNativeFields } from '@ng-forge/dynamic-forms-native';
+
+// iOS and Android
+import { mount } from '@ng-native/platform';
+
+mount(rootTag, App, getFabricUIManager(), {
+  providers: [provideDynamicForm(...withNativeFields())],
+});
+
+// The web, with the same fields rendered into the DOM
+import { mount } from '@ng-native/web';
+
+mount(document.getElementById('root')!, App, {
+  providers: [provideDynamicForm(...withNativeFields())],
+});
+
+// metro.config.js: compile the adapter's component CSS into native styles
+module.exports = withAngularNative(getDefaultConfig(__dirname), {
+  libraryStyles: ['@ng-forge/dynamic-forms-native'],
+});`,
+    featuresTitle: 'Notable Adapter Props',
+    features: [
+      { name: 'type', description: "Picks the keyboard on inputs ('email', 'number', 'tel', 'url'); 'password' hides the text" },
+      { name: 'rows', description: 'Visible lines on textarea, which set its height' },
+      { name: 'variant', description: "'primary' or 'secondary' on buttons" },
+      { name: 'hint', description: 'Helper text below any field' },
+    ],
+    differences: [
+      {
+        topic: 'Native views',
+        description:
+          'input and textarea render a <text-input>, toggle a <switch>. checkbox, radio, multi-checkbox and buttons are pressable rows announced with the matching role.',
+      },
+      { topic: 'Not available yet', description: 'select, datepicker, slider and addons. A live example that needs one says so.' },
+      {
+        topic: 'Submit',
+        description: 'Native has no form submit event, so the submit button dispatches FormSubmitEvent itself. Your config stays the same.',
+      },
+      {
+        topic: 'Text fields',
+        description:
+          "Core's text field renders HTML elements, so the adapter registers its own. Core logs that text was overwritten in dev mode.",
+      },
+      {
+        topic: 'Rows and columns',
+        description:
+          'React Native has flexbox only: row is a wrapping flex row and col a percentage width. Rows stack below 577px wide, as on the web.',
+      },
+      { topic: 'Container errors', description: 'Group and array validation messages render as native text.' },
+      { topic: 'Meta attributes', description: 'Not forwarded. The fields set accessibilityLabel and role themselves.' },
+      {
+        topic: 'Styling',
+        description:
+          'On a device, component CSS compiles to native styles: flexbox only, without grid, ::before/::after or :hover. Metro needs the adapter in libraryStyles, as in Setup.',
+      },
+      {
+        topic: 'Testing',
+        description:
+          'Each control sets a testID for Maestro, Detox or Playwright: <key>-input, -textarea, -toggle, -checkbox, -button, -error, and <key>-<value> per option. In the browser it renders as data-testid.',
+      },
     ],
   },
   custom: {

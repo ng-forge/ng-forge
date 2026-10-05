@@ -10,8 +10,9 @@ import { apiDocsPlugin } from './plugins/vite-plugin-api-docs';
 import { searchIndexPlugin } from './plugins/vite-plugin-search-index';
 import { ogImagePlugin } from './plugins/vite-plugin-og-images';
 import { docsMetaPlugin } from './plugins/vite-plugin-docs-meta';
+import { ngNativeWebLink } from '@ng-native/web/vite';
 
-const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic'] as const;
+const ADAPTER_NAMES = ['material', 'bootstrap', 'primeng', 'ionic', 'native'] as const;
 
 /**
  * Shared SCSS compilation helpers used by both the global styles
@@ -115,7 +116,7 @@ function adapterCssPlugin(): Plugin {
     // Dev: serve compiled CSS via middleware
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const match = req.url?.match(/^\/(material|bootstrap|primeng|ionic)\.css$/);
+        const match = req.url?.match(/^\/(material|bootstrap|primeng|ionic|native)\.css$/);
         if (!match) return next();
 
         const adapterName = match[1];
@@ -246,7 +247,7 @@ function collectContentSlugs(dir: string, base: string = dir): string[] {
   return slugs;
 }
 
-const PRERENDER_ADAPTERS = ['material', 'bootstrap', 'primeng', 'ionic', 'custom'];
+const PRERENDER_ADAPTERS = ['material', 'bootstrap', 'primeng', 'ionic', 'native', 'custom'];
 const contentSlugs = collectContentSlugs(resolve(__dirname, 'public/content'));
 
 /**
@@ -376,6 +377,9 @@ export default defineConfig(({ mode }) => {
       }),
 
       nxViteTsPaths(),
+      // The native adapter's live examples render through @ng-native/web: resolve React Native away
+      // and link the @ng-native/* packages, which Analog's linker skips (it only links /fesm20 paths).
+      ...ngNativeWebLink(),
     ],
     optimizeDeps: {
       include: ['front-matter'],
@@ -395,6 +399,7 @@ export default defineConfig(({ mode }) => {
         '@ng-forge/sandbox-adapter-bootstrap',
         '@ng-forge/sandbox-adapter-primeng',
         '@ng-forge/sandbox-adapter-ionic',
+        '@ng-forge/sandbox-adapter-native',
         '@ng-forge/dynamic-forms-primeng',
         '@ng-forge/dynamic-forms-ionic',
         '@ng-forge/dynamic-forms-bootstrap',

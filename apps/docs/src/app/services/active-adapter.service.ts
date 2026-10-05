@@ -5,7 +5,7 @@ import { filter, take } from 'rxjs';
 import { AdapterName } from '@ng-forge/sandbox-harness';
 import { CUSTOM_ONLY_ROUTES } from '../guards/content-redirect.guard';
 
-const DOCS_ADAPTERS = new Set<AdapterName>(['material', 'bootstrap', 'primeng', 'ionic', 'custom']);
+const DOCS_ADAPTERS = new Set<AdapterName>(['material', 'bootstrap', 'primeng', 'ionic', 'native', 'custom']);
 
 function isDocsAdapter(value: string): value is AdapterName {
   return DOCS_ADAPTERS.has(value as AdapterName);
@@ -23,11 +23,12 @@ export class ActiveAdapterService {
     return isDocsAdapter(seg) ? seg : 'material';
   });
 
-  readonly adapters: { name: AdapterName; label: string; icon: string }[] = [
+  readonly adapters: { name: AdapterName; label: string; icon: string; experimental?: boolean }[] = [
     { name: 'material', label: 'Material', icon: 'assets/icons/material.svg' },
     { name: 'bootstrap', label: 'Bootstrap', icon: 'assets/icons/bootstrap.svg' },
     { name: 'primeng', label: 'PrimeNG', icon: 'assets/icons/primeng.webp' },
     { name: 'ionic', label: 'Ionic', icon: 'assets/icons/ionic.svg' },
+    { name: 'native', label: 'ng-native', icon: 'assets/icons/native.svg', experimental: true },
     { name: 'custom', label: 'Custom', icon: 'assets/icons/custom.svg' },
   ];
 

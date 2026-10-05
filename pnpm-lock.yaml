@@ -32,6 +32,11 @@ overrides:
   fflate@<0.7.5: ^0.7.5
   ws@>=8.0.0 <8.21.0: ^8.21.0
 
+patchedDependencies:
+  '@ng-native/web@0.4.0':
+    hash: 48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174
+    path: patches/@ng-native__web@0.4.0.patch
+
 importers:
 
   .:
@@ -226,6 +231,12 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.30.0
         version: 1.30.0(zod@4.6.5)
+      '@ng-native/components':
+        specifier: 0.4.0
+        version: 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
+      '@ng-native/web':
+        specifier: 0.4.0
+        version: 0.4.0(patch_hash=48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174)(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))
       '@nx/angular':
         specifier: 23.2.1
         version: 23.2.1(dd2da5929a66801316b0400103b5d069)
@@ -3160,6 +3171,48 @@ packages:
       '@popperjs/core': ^2.11.8
       rxjs: ^6.5.3 || ^7.4.0
 
+  '@ng-native/components@0.4.0':
+    resolution: {integrity: sha512-NNdFYTTfyWyzUNXuE2Y2iU/Uhns1/DiVdy+DWPGD2mQ2gdTgkC9zmB+Liew8C4jEaBl6w86bjVmWWxHLiXv6Jw==}
+    peerDependencies:
+      '@angular/core': ^22.0.0
+      react-native: '>=0.86.0'
+      react-native-gesture-handler: ^2.32.0
+      react-native-keyboard-controller: ^1.21.9
+      react-native-reanimated: ^4.5.1
+      react-native-safe-area-context: ^5.7.0
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-gesture-handler:
+        optional: true
+      react-native-keyboard-controller:
+        optional: true
+      react-native-reanimated:
+        optional: true
+      react-native-safe-area-context:
+        optional: true
+
+  '@ng-native/device@0.4.0':
+    resolution: {integrity: sha512-rQuYR1cXYPM/B50rEmILkiZi9V7c6b+7DCOhfvhoDbSYq8sJpCOZB6hPrDkCO8y0g0oXf2g3xe93k4ZjKd0W+A==}
+    peerDependencies:
+      '@angular/core': ^22.0.0
+      react-native: '>=0.86.0'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+
+  '@ng-native/fabric@0.4.0':
+    resolution: {integrity: sha512-fm2SBXPDRLbv87s+UzjtqVd4O9YNVRlWMMY2yWOKT2IDyYg2IC88wN6nk/bMuraoGmvZu+qdBHZcYZPbKd2A6w==}
+
+  '@ng-native/web@0.4.0':
+    resolution: {integrity: sha512-yy3q2qvY0EWTeA+CPY/QKlFczl4xs4c7I2t3agLduLA8kbot+7v0ZTwqQ5P7GJNxbrxVNwtNl/Hue+l+JXGvmA==}
+    peerDependencies:
+      '@angular/core': ^22.0.0
+      vite: '>=8.0.0'
+    peerDependenciesMeta:
+      vite:
+        optional: true
+
   '@ngtools/webpack@22.1.7':
     resolution: {integrity: sha512-1cqXgu5DnINuZ1pJ4ZsiyLOFDXzEGkKNdMcBuQ73WVXRhE8CwN0bdHyjEW+gOff2QXAsB2uulk7e3XO52QCA3w==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
@@ -3476,6 +3529,51 @@ packages:
   '@oozcitak/util@10.0.0':
     resolution: {integrity: sha512-hAX0pT/73190NLqBPPWSdBVGtbY6VOhWYK3qqHqtXQ1gK7kS2yz4+ivsN07hpJ6I3aeMtKP6J6npsEKOAzuTLA==}
     engines: {node: '>=20.0'}
+
+  '@oxc-angular/binding-darwin-arm64@0.0.38':
+    resolution: {integrity: sha512-cThJX0un3k26MWAncsrEZdyZMBpP73HJax6VdN9Ghw43Og/Ymin0ln2+M35HMsdLRIPka15o6DbawmnkMVuMMg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxc-angular/binding-darwin-x64@0.0.38':
+    resolution: {integrity: sha512-zjqw8GyfWQVnNcLhro3wv4/l28RYVFlNzsap6F1shrDYkdXF5omSae3KvhEqG/uxNVmQq0C+iMng2GHraLIiYg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxc-angular/binding-linux-arm64-gnu@0.0.38':
+    resolution: {integrity: sha512-BHXPDZUHgG3bsOOz2ZXZdLgmJalRFdUI2afva/cx72Q+GZnM2TWOegIuxLR1n1wKaVC5fSBd7QCgotsgd6IGXg==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-angular/binding-linux-arm64-musl@0.0.38':
+    resolution: {integrity: sha512-zVAP5lhaGrRCHj8UmbAY00YDmG93PeZmJHOhFGoJ9h/UmqYtIy32ICUR30G+J+FW2bzf+lnXP7jBZz8Rqy1OWQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-angular/binding-linux-x64-gnu@0.0.38':
+    resolution: {integrity: sha512-CAr1SPQv9go3lhJ/NzjKWDjm3UL5T/YdhCd7drkxzi+RMRhFLqB4PFFD6JAfcDYDn2pXpi2IMN2ngsWPVMFHlA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-angular/binding-linux-x64-musl@0.0.38':
+    resolution: {integrity: sha512-dFfbllANkvRLUUW4x035OyDssJZ6J8uMke93dunqO5Nth9pkpl6L+dObm1J+JzxIFA3zYuh5w+kv8I1Iyb585w==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-angular/binding-win32-arm64-msvc@0.0.38':
+    resolution: {integrity: sha512-NHf/5kPJFEToxdna/xo1KKPcgYsjkGZhFXyL7gg/bbBV32vVdCsSCVoASQZNC90Q5hGyOahhkONAjNdo20fvlw==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxc-angular/binding-win32-x64-msvc@0.0.38':
+    resolution: {integrity: sha512-CJzolJla8PpVSei6BoH4FAId8GtUEHakIfNK/5vLuJofKCqpwVXNqGKOLOzjPOqamtMwyvF6MT+U6Jo694okQA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@oxc-angular/vite@0.0.38':
+    resolution: {integrity: sha512-FjFA/zXIO6OHiMABvdtJCKLWSwx/kx4LGyo45p9Ak83zdObgNUQqJYt5gPDXzpGA8fR0Ni61HGY63w8msEIF6g==}
+    peerDependencies:
+      vite: '>=8.0.0'
 
   '@oxc-parser/binding-android-arm-eabi@0.121.0':
     resolution: {integrity: sha512-n07FQcySwOlzap424/PLMtOkbS7xOu8nsJduKL8P3COGHKgKoDYXwoAHCbChfgFpHnviehrLWIPX0lKGtbEk/A==}
@@ -13203,6 +13301,30 @@ snapshots:
       rxjs: 7.8.2
       tslib: 2.8.1
 
+  '@ng-native/components@0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))':
+    dependencies:
+      '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@ng-native/device': 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
+      '@ng-native/fabric': 0.4.0
+
+  '@ng-native/device@0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))':
+    dependencies:
+      '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@ng-native/fabric': 0.4.0
+
+  '@ng-native/fabric@0.4.0': {}
+
+  '@ng-native/web@0.4.0(patch_hash=48811f66a8126e327b37a3745f0ab286aafe1876e1ee6473b6386524a7a42174)(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))':
+    dependencies:
+      '@angular/core': 22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1)
+      '@ng-native/device': 0.4.0(@angular/core@22.1.5(@angular/compiler@22.1.5)(rxjs@7.8.2)(zone.js@0.16.1))
+      '@ng-native/fabric': 0.4.0
+      '@oxc-angular/vite': 0.0.38(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))
+    optionalDependencies:
+      vite: 8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1)
+    transitivePeerDependencies:
+      - react-native
+
   '@ngtools/webpack@22.1.7(@angular/compiler-cli@22.1.5(@angular/compiler@22.1.5)(typescript@6.0.3))(typescript@6.0.3)(webpack@5.109.2(@swc/core@1.16.2(@swc/helpers@0.5.23))(esbuild@0.28.2)(postcss@8.5.25)(sharp@0.35.4(@types/node@26.6.1)))':
     dependencies:
       '@angular/compiler-cli': 22.1.5(@angular/compiler@22.1.5)(typescript@6.0.3)
@@ -13579,6 +13701,44 @@ snapshots:
       '@oozcitak/util': 10.0.0
 
   '@oozcitak/util@10.0.0': {}
+
+  '@oxc-angular/binding-darwin-arm64@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-darwin-x64@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-linux-arm64-gnu@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-linux-arm64-musl@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-linux-x64-gnu@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-linux-x64-musl@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-win32-arm64-msvc@0.0.38':
+    optional: true
+
+  '@oxc-angular/binding-win32-x64-msvc@0.0.38':
+    optional: true
+
+  '@oxc-angular/vite@0.0.38(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1))':
+    dependencies:
+      obug: 2.2.1
+      vite: 8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0)(sass-embedded@1.104.0)(sass@1.104.1)(terser@5.51.2)(yaml@2.9.1)
+    optionalDependencies:
+      '@oxc-angular/binding-darwin-arm64': 0.0.38
+      '@oxc-angular/binding-darwin-x64': 0.0.38
+      '@oxc-angular/binding-linux-arm64-gnu': 0.0.38
+      '@oxc-angular/binding-linux-arm64-musl': 0.0.38
+      '@oxc-angular/binding-linux-x64-gnu': 0.0.38
+      '@oxc-angular/binding-linux-x64-musl': 0.0.38
+      '@oxc-angular/binding-win32-arm64-msvc': 0.0.38
+      '@oxc-angular/binding-win32-x64-msvc': 0.0.38
 
   '@oxc-parser/binding-android-arm-eabi@0.121.0':
     optional: true
