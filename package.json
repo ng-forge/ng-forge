@@ -112,7 +112,7 @@
     "prettier": "^3.9.9",
     "sass": "^1.104.1",
     "satori": "^0.33.4",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "shiki": "^4.4.3",
     "swc-loader": "0.2.7",
     "tailwindcss": "^4.3.3",
