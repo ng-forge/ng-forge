@@ -384,7 +384,7 @@ jobs:
 
       - name: Upload docs artifacts
         if: ${{ !inputs.affected }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: docs-dist
           path: dist/apps/docs/
@@ -524,7 +524,7 @@ jobs:
         run: node scripts/playwright-job-summary.mjs ${{ matrix.app }} apps/e2e/${{ matrix.short }}/test-results
 
       - name: Upload test artifacts on failure
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: failure()
         with:
           name: playwright-results-${{ matrix.app }}${{ matrix.shardId && format('-{0}', matrix.shardId) || '' }}
