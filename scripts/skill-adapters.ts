@@ -71,12 +71,12 @@ Fields are registered with \`${adapter.providerFunction}\`.
 ## Validate against this adapter
 
 \`\`\`bash
-npx --yes @ng-forge/dynamic-forms-cli@next "path/to/your.form.ts" --ui ${adapter.library}
+npx --yes @ng-forge/dynamic-forms-cli@${version} "path/to/your.form.ts" --ui ${adapter.library}
 \`\`\`
 
 Passing the wrong \`--ui\` validates against a different adapter's properties, which
-can accept a config this project will not render. \`@next\` is where the published
-executable is; the \`latest\` tag is still a placeholder with no binary. Requires
+can accept a config this project will not render. The version is pinned to
+\`${version}\` so the validator matches the properties listed here. Requires
 Node 24 or newer.
 
 ## Reference
