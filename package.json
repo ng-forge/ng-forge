@@ -111,7 +111,7 @@
     "postcss-url": "~10.1.4",
     "prettier": "^3.9.10",
     "sass": "^1.104.1",
-    "satori": "^0.33.4",
+    "satori": "^0.33.5",
     "sharp": "^0.35.5",
     "shiki": "^4.4.3",
     "swc-loader": "0.2.7",
