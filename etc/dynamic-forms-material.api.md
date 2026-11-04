@@ -228,8 +228,6 @@ export interface MatInputProps extends InputProps {
     hint?: DynamicText;
     // (undocumented)
     subscriptSizing?: SubscriptSizing;
-    // (undocumented)
-    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
 }
 
 // @public

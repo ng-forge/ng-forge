@@ -196,7 +196,6 @@ export interface PrimeInputProps extends InputProps {
     hint?: DynamicText;
     size?: 'large' | 'small';
     styleClass?: string;
-    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
     variant?: 'filled' | 'outlined';
 }
 
