@@ -125,7 +125,7 @@ function mapSchemaToFieldsInternal(
   seen.add(schema);
 
   try {
-    const walked = walkSchema(schema, requiredFields);
+    const walked = walkSchema(schema, requiredFields, undefined, options.schemaName);
     const ambiguousFields: AmbiguousField[] = [];
     const warnings = [...walked.warnings];
 
@@ -242,10 +242,11 @@ function mapPropertyToField(
   const schemaPrefix = options.schemaName ?? '';
   const fieldPath = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
 
-  // Dictionary-style objects would otherwise map to an empty group (issue #644)
-  if (!ngForgeType && typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) {
+  // Dictionary-style objects, or arrays of them, would otherwise map to an empty group or template (issue #644)
+  const dynamicKeyItems = typeResult.fieldType === 'array' && propItems !== undefined && hasOnlyDynamicKeys(propItems);
+  if (!ngForgeType && ((typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) || dynamicKeyItems)) {
     warnings.push(
-      `Property '${prop.name}' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet`,
+      `Property '${fieldPath}' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet`,
     );
     return undefined;
   }
@@ -432,7 +433,7 @@ function mapPropertyToField(
   if (typeResult.isContainer) {
     const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
     const nestedOptions: MappingOptions = { ...options, schemaName: nestedSchemaName };
-    if (typeResult.fieldType === 'group' && prop.schema.properties) {
+    if (typeResult.fieldType === 'group' && (prop.schema.properties || prop.schema.allOf)) {
       const innerResult = mapSchemaToFieldsInternal(prop.schema, prop.schema.required ?? [], nestedOptions, seen);
       field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
