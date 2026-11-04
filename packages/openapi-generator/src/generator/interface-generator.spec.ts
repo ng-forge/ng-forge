@@ -537,6 +537,30 @@ describe('generateInterface', () => {
     expect(result).not.toContain('avatar');
   });
 
+  // Issue #644: dynamic-key objects are skipped by the field mapper, so the interface skips them too.
+  it('should skip dynamic-key object properties, including arrays of them and nested ones', () => {
+    const schema: OpenAPIV3.SchemaObject = {
+      type: 'object',
+      required: ['id', 'data'],
+      properties: {
+        id: { type: 'string' },
+        data: { type: 'object', additionalProperties: { type: 'string' } },
+        entries: { type: 'array', items: { type: 'object', additionalProperties: true } },
+        outer: {
+          type: 'object',
+          properties: { name: { type: 'string' }, extra: { type: 'object', additionalProperties: true } },
+        },
+      },
+    };
+
+    const result = generateInterface(schema, defaultOptions);
+
+    expect(result).toContain('  id: string;');
+    expect(result).not.toContain('data');
+    expect(result).not.toContain('entries');
+    expect(result).not.toContain('extra');
+  });
+
   it('should skip arrays of binary files', () => {
     const schema: OpenAPIV3.SchemaObject = {
       type: 'object',

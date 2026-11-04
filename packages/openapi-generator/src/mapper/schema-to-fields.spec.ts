@@ -336,6 +336,30 @@ describe('mapSchemaToFields', () => {
       );
     });
 
+    it('should honor an explicit decision for a dynamic-key property instead of skipping it', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: { data: { type: 'object', additionalProperties: { type: 'string' } } },
+      };
+
+      const result = mapSchemaToFields(schema, [], { decisions: { data: 'key-value' } });
+      expect(result.fields).toEqual([expect.objectContaining({ key: 'data', type: 'key-value' })]);
+    });
+
+    it('should skip a group left empty after its dynamic-key children were skipped', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          meta: { type: 'object', properties: { data: { type: 'object', additionalProperties: true } } },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields.map((f) => f.key)).toEqual(['id']);
+      expect(result.warnings).toContain("Property 'meta' has no supported fields left and was skipped");
+    });
+
     it('should map the children of an allOf object property instead of emitting an empty group', () => {
       const schema: SchemaObject = {
         type: 'object',

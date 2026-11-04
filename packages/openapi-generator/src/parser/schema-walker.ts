@@ -36,7 +36,7 @@ export function walkSchema(
   try {
     // Handle allOf — merge all schemas
     if (schema.allOf) {
-      return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen);
+      return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen, path);
     }
 
     // Handle oneOf with discriminator
@@ -93,14 +93,20 @@ export function walkSchema(
   }
 }
 
-function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[], seen: WeakSet<SchemaObject>): WalkedSchema {
+function walkAllOf(
+  schemas: SchemaObject[],
+  requiredFields: string[],
+  warnings: string[],
+  seen: WeakSet<SchemaObject>,
+  path?: string,
+): WalkedSchema {
   const mergedProperties = new Map<string, WalkedProperty>();
   const allRequired = new Set<string>(requiredFields);
 
   for (const schema of schemas) {
     if (isReferenceObject(schema)) continue;
 
-    const walked = walkSchema(schema, [], seen);
+    const walked = walkSchema(schema, [], seen, path);
     warnings.push(...walked.warnings);
 
     for (const prop of walked.properties) {

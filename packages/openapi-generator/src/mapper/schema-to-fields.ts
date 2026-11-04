@@ -5,7 +5,7 @@ import type { ValidatorConfig } from './validator-mapping.js';
 import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
-import { isBinarySchema } from '../utils/openapi-utils.js';
+import { hasOnlyDynamicKeys, isBinarySchema } from '../utils/openapi-utils.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -40,17 +40,6 @@ function singularize(label: string): string {
     return label.slice(0, -1);
   }
   return label;
-}
-
-/** Object schema whose keys are all dynamic: no fixed `properties`, only additionalProperties/patternProperties. */
-function hasOnlyDynamicKeys(schema: SchemaObject): boolean {
-  const s = schema as Record<string, unknown>;
-  if (Object.keys(schema.properties ?? {}).length > 0 || s['allOf'] || s['oneOf'] || s['anyOf']) {
-    return false;
-  }
-  const patternProperties = s['patternProperties'] as Record<string, unknown> | undefined;
-  const additionalProperties = s['additionalProperties'];
-  return Object.keys(patternProperties ?? {}).length > 0 || (additionalProperties !== undefined && additionalProperties !== false);
 }
 
 export interface LogicConfig {
@@ -244,7 +233,8 @@ function mapPropertyToField(
 
   // Dictionary-style objects, or arrays of them, would otherwise map to an empty group or template (issue #644)
   const dynamicKeyItems = typeResult.fieldType === 'array' && propItems !== undefined && hasOnlyDynamicKeys(propItems);
-  if (!ngForgeType && ((typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) || dynamicKeyItems)) {
+  const hasDecision = options.decisions?.[fieldPath] !== undefined;
+  if (!ngForgeType && !hasDecision && ((typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) || dynamicKeyItems)) {
     warnings.push(
       `Property '${fieldPath}' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet`,
     );
@@ -435,9 +425,13 @@ function mapPropertyToField(
     const nestedOptions: MappingOptions = { ...options, schemaName: nestedSchemaName };
     if (typeResult.fieldType === 'group' && (prop.schema.properties || prop.schema.allOf)) {
       const innerResult = mapSchemaToFieldsInternal(prop.schema, prop.schema.required ?? [], nestedOptions, seen);
-      field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
       warnings.push(...innerResult.warnings);
+      if (innerResult.fields.length === 0) {
+        warnings.push(`Property '${fieldPath}' has no supported fields left and was skipped`);
+        return undefined;
+      }
+      field.fields = innerResult.fields;
       // SchemaObject is a union; use bracket access for `items` on array schemas
     } else if (typeResult.fieldType === 'array' && (prop.schema as Record<string, unknown>)['items']) {
       const items = (prop.schema as Record<string, unknown>)['items'] as SchemaObject;
