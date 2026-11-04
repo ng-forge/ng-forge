@@ -20,7 +20,7 @@ Text-based input with HTML5 type support.
   email: true,
   placeholder: 'user@example.com',
   props: {
-    type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
+    type: 'email',              // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'
   }
 }
 ```
@@ -31,7 +31,7 @@ Text-based input with HTML5 type support.
 
 **Core Props:**
 
-- `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'`)
+- `type`: HTML input type (`'text'` | `'email'` | `'password'` | `'number'` | `'tel'` | `'url'` | `'search'`)
 
 #### Adapter Props
 

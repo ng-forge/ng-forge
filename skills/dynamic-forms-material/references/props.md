@@ -81,7 +81,7 @@ what the types actually declare rather than a copy maintained beside them.
 | `hideRequiredMarker` | `boolean` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `subscriptSizing` | `'dynamic' \| 'fixed'` | no |  |
-| `type` | `'email' \| 'number' \| 'password' \| 'tel' \| 'text' \| 'url'` | no |  |
+| `type` | `'email' \| 'number' \| 'password' \| 'search' \| 'tel' \| 'text' \| 'url'` | no |  |
 
 ## `insert-array-item`
 
