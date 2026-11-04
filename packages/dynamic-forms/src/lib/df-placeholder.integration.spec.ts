@@ -19,6 +19,22 @@ const TEST_FIELD_TYPES: FieldTypeDefinition[] = ['input', 'textarea'].map((name)
 
 // eager: 2 → f0/f1 mount; bio (textarea), plain (input), special (input) are all
 // windowed and, below the 30000px spacer, stay as placeholders.
+const PAGED_CONFIG: FormConfig = {
+  fields: [
+    {
+      key: 'page1',
+      type: 'page',
+      fields: [
+        { key: 'f0', type: 'input', value: 'a' },
+        { key: 'f1', type: 'input', value: 'b' },
+        { key: 'bio', type: 'textarea', label: 'Biography', value: '' },
+        { key: 'plain', type: 'input', label: 'Plain', value: '' },
+      ],
+    },
+    { key: 'page2', type: 'page', fields: [{ key: 'last', type: 'input', value: '' }] },
+  ],
+} as FormConfig;
+
 const CONFIG: FormConfig = {
   fields: [
     { key: 'f0', type: 'input', value: 'a' },
@@ -36,7 +52,9 @@ const CONFIG: FormConfig = {
   template: `<div style="height: 30000px"></div>
     <form [dynamic-form]="config()">
       <ng-template dfPlaceholder let-field>
-        <span class="ph-default" [attr.data-ph-key]="field.key" [attr.data-ph-type]="field.type">default</span>
+        <span class="ph-default" [attr.data-ph-key]="field.key" [attr.data-ph-type]="field.type" [attr.data-ph-label]="field.label"
+          >default</span
+        >
       </ng-template>
       <ng-template dfPlaceholder="textarea"><span class="ph-textarea">textarea skeleton</span></ng-template>
       <ng-template dfPlaceholderKey="special"><span class="ph-key">key skeleton</span></ng-template>
@@ -135,6 +153,38 @@ describe('Field windowing — projected placeholders', () => {
     expect(bare).toBeTruthy();
     expect(bare?.children.length).toBe(0);
   });
+
+  it('renders projected placeholders for windowed fields inside a page', async () => {
+    const fixture = TestBed.createComponent(PlaceholderHost);
+    fixture.componentRef.setInput('config', PAGED_CONFIG);
+    await settle(fixture);
+
+    expect(ph(fixture, 'bio')?.querySelector('.ph-textarea')).toBeTruthy();
+    expect(ph(fixture, 'plain')?.querySelector('.ph-default')?.getAttribute('data-ph-key')).toBe('plain');
+  });
+
+  for (const [name, config] of [
+    ['flat', CONFIG],
+    ['paged', PAGED_CONFIG],
+  ] as const) {
+    it(`refreshes the placeholder context when a field keeps its key but its label changes (${name})`, async () => {
+      const fixture = TestBed.createComponent(PlaceholderHost);
+      fixture.componentRef.setInput('config', config);
+      await settle(fixture);
+      expect(ph(fixture, 'plain')?.querySelector('.ph-default')?.getAttribute('data-ph-label')).toBe('Plain');
+
+      const relabel = (fields: readonly unknown[]): unknown[] =>
+        fields.map((f) => {
+          const field = f as { key: string; label?: string; fields?: readonly unknown[] };
+          if (field.fields) return { ...field, fields: relabel(field.fields) };
+          return field.key === 'plain' ? { ...field, label: 'Renamed' } : field;
+        });
+      fixture.componentRef.setInput('config', { ...config, fields: relabel(config.fields) } as FormConfig);
+      await settle(fixture);
+
+      expect(ph(fixture, 'plain')?.querySelector('.ph-default')?.getAttribute('data-ph-label')).toBe('Renamed');
+    });
+  }
 
   it('still mounts the real field when its placeholder scrolls into view', async () => {
     const fixture = TestBed.createComponent(PlaceholderHost);
