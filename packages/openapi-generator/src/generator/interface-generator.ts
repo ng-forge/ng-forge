@@ -1,6 +1,6 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { toInterfaceName, toPascalCase } from '../utils/naming.js';
-import { isBinarySchema, isReferenceObject } from '../utils/openapi-utils.js';
+import { hasOnlyDynamicKeys, isBinarySchema, isReferenceObject } from '../utils/openapi-utils.js';
 
 type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject;
 
@@ -9,6 +9,16 @@ type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject;
 // them too — otherwise it would describe a property the form can never produce.
 function isSkippedBinaryProperty(schema: SchemaObject): boolean {
   return isBinarySchema(schema) || isBinarySchema((schema as Record<string, unknown>)['items']);
+}
+
+// Dynamic-key objects (and arrays of them) are skipped by the field mapper too (issue #644).
+function isSkippedDynamicKeyProperty(schema: SchemaObject): boolean {
+  const s = schema as Record<string, unknown>;
+  if (s['x-ng-forge-type']) return false;
+  const items = s['items'] as SchemaObject | undefined;
+  const isObject = (x: SchemaObject) =>
+    (x as Record<string, unknown>)['type'] === 'object' || (x as Record<string, unknown>)['type'] === undefined;
+  return (isObject(schema) && hasOnlyDynamicKeys(schema)) || (items !== undefined && isObject(items) && hasOnlyDynamicKeys(items));
 }
 
 export interface InterfaceGeneratorOptions {
@@ -162,7 +172,7 @@ function resolveSchemaProperties(
 
   for (const [name, propSchema] of Object.entries(schema.properties ?? {})) {
     if (isReferenceObject(propSchema)) continue;
-    if (isSkippedBinaryProperty(propSchema)) continue;
+    if (isSkippedBinaryProperty(propSchema) || isSkippedDynamicKeyProperty(propSchema)) continue;
     properties.push([name, propSchema]);
   }
 
@@ -303,7 +313,7 @@ function generateNestedInterface(name: string, schema: SchemaObject, seen: WeakS
 
   for (const [propName, propSchema] of Object.entries(schema.properties ?? {})) {
     if (isReferenceObject(propSchema)) continue;
-    if (isSkippedBinaryProperty(propSchema)) continue;
+    if (isSkippedBinaryProperty(propSchema) || isSkippedDynamicKeyProperty(propSchema)) continue;
     const optional = required.has(propName) ? '' : '?';
     const tsType = schemaToTsType(propName, propSchema, name, nestedInterfaces, seen);
     lines.push(`  ${propName}${optional}: ${tsType};`);

@@ -104,7 +104,7 @@ export function mapSchemaToFieldType(schema: SchemaObject): FieldTypeResult {
   }
 
   // object → group container
-  if (type === 'object' || schema.properties) {
+  if (type === 'object' || schema.properties || 'patternProperties' in schema) {
     return { fieldType: 'group', isContainer: true, isAmbiguous: false };
   }
 

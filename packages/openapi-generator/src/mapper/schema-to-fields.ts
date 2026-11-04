@@ -5,7 +5,7 @@ import type { ValidatorConfig } from './validator-mapping.js';
 import { mapSchemaToValidators } from './validator-mapping.js';
 import { mapDiscriminator } from './discriminator-mapping.js';
 import { toLabel, toEnumLabel } from '../utils/naming.js';
-import { isBinarySchema } from '../utils/openapi-utils.js';
+import { hasOnlyDynamicKeys, isBinarySchema } from '../utils/openapi-utils.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -114,7 +114,7 @@ function mapSchemaToFieldsInternal(
   seen.add(schema);
 
   try {
-    const walked = walkSchema(schema, requiredFields);
+    const walked = walkSchema(schema, requiredFields, undefined, options.schemaName);
     const ambiguousFields: AmbiguousField[] = [];
     const warnings = [...walked.warnings];
 
@@ -230,6 +230,16 @@ function mapPropertyToField(
   const typeResult = mapSchemaToFieldType(prop.schema);
   const schemaPrefix = options.schemaName ?? '';
   const fieldPath = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
+
+  // Dictionary-style objects, or arrays of them, would otherwise map to an empty group or template (issue #644)
+  const dynamicKeyItems = typeResult.fieldType === 'array' && propItems !== undefined && hasOnlyDynamicKeys(propItems);
+  const hasDecision = options.decisions?.[fieldPath] !== undefined;
+  if (!ngForgeType && !hasDecision && ((typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) || dynamicKeyItems)) {
+    warnings.push(
+      `Property '${fieldPath}' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet`,
+    );
+    return undefined;
+  }
 
   let finalType: string;
 
@@ -413,10 +423,15 @@ function mapPropertyToField(
   if (typeResult.isContainer) {
     const nestedSchemaName = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
     const nestedOptions: MappingOptions = { ...options, schemaName: nestedSchemaName };
-    if (typeResult.fieldType === 'group' && prop.schema.properties) {
+    if (typeResult.fieldType === 'group' && (prop.schema.properties || prop.schema.allOf)) {
       const innerResult = mapSchemaToFieldsInternal(prop.schema, prop.schema.required ?? [], nestedOptions, seen);
-      field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
+      warnings.push(...innerResult.warnings);
+      if (innerResult.fields.length === 0) {
+        warnings.push(`Property '${fieldPath}' has no supported fields left and was skipped`);
+        return undefined;
+      }
+      field.fields = innerResult.fields;
       // SchemaObject is a union; use bracket access for `items` on array schemas
     } else if (typeResult.fieldType === 'array' && (prop.schema as Record<string, unknown>)['items']) {
       const items = (prop.schema as Record<string, unknown>)['items'] as SchemaObject;

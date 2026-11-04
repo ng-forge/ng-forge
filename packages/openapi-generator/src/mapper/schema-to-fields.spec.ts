@@ -278,6 +278,156 @@ describe('mapSchemaToFields', () => {
     expect(result.warnings).toContain('additionalProperties are not supported and were skipped');
   });
 
+  describe('object properties with only dynamic keys (#644)', () => {
+    const dynamicKeySchemas: Record<string, SchemaObject> = {
+      'patternProperties with additionalProperties: false': {
+        type: 'object',
+        patternProperties: { '^[a-zA-Z0-9_-]+$': { type: 'string' } },
+        additionalProperties: false,
+      } as SchemaObject,
+      'additionalProperties: true': { type: 'object', additionalProperties: true },
+      'additionalProperties schema': { type: 'object', additionalProperties: { type: 'string' } },
+    };
+
+    for (const [name, data] of Object.entries(dynamicKeySchemas)) {
+      it(`should skip the property with a warning instead of emitting an empty group (${name})`, () => {
+        const schema: SchemaObject = {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            data,
+          },
+        };
+
+        const result = mapSchemaToFields(schema, []);
+        expect(result.fields.map((f) => f.key)).toEqual(['id']);
+        expect(result.warnings).toContain(
+          "Property 'data' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+        );
+      });
+    }
+
+    it('should skip a dynamic-key object without an explicit type', () => {
+      const schema = {
+        type: 'object',
+        properties: { id: { type: 'string' }, data: { patternProperties: { '^x-': { type: 'string' } } } },
+      } as SchemaObject;
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields.map((f) => f.key)).toEqual(['id']);
+      expect(result.warnings).toContain(
+        "Property 'data' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+      );
+    });
+
+    it('should skip an array whose items only have dynamic keys', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          entries: { type: 'array', items: { type: 'object', additionalProperties: { type: 'string' } } },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields.map((f) => f.key)).toEqual(['id']);
+      expect(result.warnings).toContain(
+        "Property 'entries' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+      );
+    });
+
+    it('should honor an explicit decision for a dynamic-key property instead of skipping it', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: { data: { type: 'object', additionalProperties: { type: 'string' } } },
+      };
+
+      const result = mapSchemaToFields(schema, [], { decisions: { data: 'key-value' } });
+      expect(result.fields).toEqual([expect.objectContaining({ key: 'data', type: 'key-value' })]);
+    });
+
+    it('should skip a group left empty after its dynamic-key children were skipped', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          meta: { type: 'object', properties: { data: { type: 'object', additionalProperties: true } } },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields.map((f) => f.key)).toEqual(['id']);
+      expect(result.warnings).toContain("Property 'meta' has no supported fields left and was skipped");
+    });
+
+    it('should map the children of an allOf object property instead of emitting an empty group', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          period: {
+            type: 'object',
+            allOf: [
+              { type: 'object', properties: { from: { type: 'string' } } },
+              { type: 'object', properties: { to: { type: 'string' } } },
+            ],
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].fields?.map((f) => f.key)).toEqual(['from', 'to']);
+    });
+
+    it('should skip dynamic-key objects nested inside groups and surface the warning', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          outer: {
+            type: 'object',
+            properties: {
+              inner: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  data: { type: 'object', additionalProperties: { type: 'string' } },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      const inner = result.fields[0].fields?.[0];
+      expect(inner?.fields?.map((f) => f.key)).toEqual(['name']);
+      expect(result.warnings).toContain(
+        "Property 'outer.inner.data' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+      );
+    });
+
+    it('should surface the additionalProperties warning from nested groups at any depth', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          outer: {
+            type: 'object',
+            properties: {
+              inner: {
+                type: 'object',
+                properties: { name: { type: 'string' } },
+                additionalProperties: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].fields?.[0]).toMatchObject({ key: 'inner', type: 'group' });
+      expect(result.warnings).toContain("additionalProperties at 'outer.inner' are not supported and were skipped");
+    });
+  });
+
   it('should set disabled when readOnly is true', () => {
     const schema: SchemaObject = {
       type: 'object',

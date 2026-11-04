@@ -253,7 +253,7 @@ export interface WalkedSchema {
 }
 
 // @public (undocumented)
-export function walkSchema(schema: SchemaObject, requiredFields?: string[], seen?: WeakSet<SchemaObject>): WalkedSchema;
+export function walkSchema(schema: SchemaObject, requiredFields?: string[], seen?: WeakSet<SchemaObject>, path?: string): WalkedSchema;
 
 // @public (undocumented)
 export function writeGeneratedFiles(outputDir: string, files: GeneratedFile[], options?: WriteOptions): Promise<WriteResult>;

@@ -18,7 +18,12 @@ export interface WalkedSchema {
   warnings: string[];
 }
 
-export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], seen: WeakSet<SchemaObject> = new WeakSet()): WalkedSchema {
+export function walkSchema(
+  schema: SchemaObject,
+  requiredFields: string[] = [],
+  seen: WeakSet<SchemaObject> = new WeakSet(),
+  path?: string,
+): WalkedSchema {
   const warnings: string[] = [];
 
   // Cycle break: a hand-crafted spec like `A.allOf: [A]` would otherwise blow
@@ -31,7 +36,7 @@ export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], 
   try {
     // Handle allOf — merge all schemas
     if (schema.allOf) {
-      return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen);
+      return walkAllOf(schema.allOf as SchemaObject[], requiredFields, warnings, seen, path);
     }
 
     // Handle oneOf with discriminator
@@ -64,7 +69,7 @@ export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], 
 
     // Handle additionalProperties warning
     if (schema.additionalProperties && (schema.additionalProperties as unknown) !== false) {
-      warnings.push('additionalProperties are not supported and were skipped');
+      warnings.push(`additionalProperties${path ? ` at '${path}'` : ''} are not supported and were skipped`);
     }
 
     // Standard object with properties
@@ -88,14 +93,20 @@ export function walkSchema(schema: SchemaObject, requiredFields: string[] = [], 
   }
 }
 
-function walkAllOf(schemas: SchemaObject[], requiredFields: string[], warnings: string[], seen: WeakSet<SchemaObject>): WalkedSchema {
+function walkAllOf(
+  schemas: SchemaObject[],
+  requiredFields: string[],
+  warnings: string[],
+  seen: WeakSet<SchemaObject>,
+  path?: string,
+): WalkedSchema {
   const mergedProperties = new Map<string, WalkedProperty>();
   const allRequired = new Set<string>(requiredFields);
 
   for (const schema of schemas) {
     if (isReferenceObject(schema)) continue;
 
-    const walked = walkSchema(schema, [], seen);
+    const walked = walkSchema(schema, [], seen, path);
     warnings.push(...walked.warnings);
 
     for (const prop of walked.properties) {
