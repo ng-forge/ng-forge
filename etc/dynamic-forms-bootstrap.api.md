@@ -230,8 +230,6 @@ export interface BsInputProps extends InputProps {
     // (undocumented)
     size?: 'lg' | 'sm';
     // (undocumented)
-    type?: 'email' | 'number' | 'password' | 'tel' | 'text' | 'url';
-    // (undocumented)
     validFeedback?: DynamicText;
 }
 

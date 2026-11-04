@@ -90,7 +90,7 @@ what the types actually declare rather than a copy maintained beside them.
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `size` | `'large' \| 'small'` | no |  |
 | `styleClass` | `string` | no |  |
-| `type` | `'email' \| 'number' \| 'password' \| 'tel' \| 'text' \| 'url'` | no |  |
+| `type` | `'email' \| 'number' \| 'password' \| 'search' \| 'tel' \| 'text' \| 'url'` | no |  |
 | `variant` | `'filled' \| 'outlined'` | no |  |
 
 ## `insert-array-item`

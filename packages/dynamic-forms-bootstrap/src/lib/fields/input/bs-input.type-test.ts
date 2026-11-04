@@ -49,7 +49,12 @@ describe('BsInputProps - Exhaustive Whitelist', () => {
     });
 
     it('type', () => {
-      expectTypeOf<BsInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
+      expectTypeOf<BsInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined>();
+    });
+
+    it('type accepts core InputType values and rejects others', () => {
+      expectTypeOf<'search'>().toMatchTypeOf<NonNullable<BsInputProps['type']>>();
+      expectTypeOf<'color'>().not.toMatchTypeOf<NonNullable<BsInputProps['type']>>();
     });
   });
 });
@@ -101,7 +106,7 @@ describe('BsInputField (String) - Exhaustive Whitelist', () => {
     | 'webMcp';
 
   // String input field (without props.type: 'number')
-  type StringInputField = Extract<BsInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
+  type StringInputField = Extract<BsInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' } }>;
   type ActualKeys = keyof StringInputField;
 
   it('should have exactly the expected keys', () => {

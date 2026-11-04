@@ -336,6 +336,7 @@
               "email",
               "number",
               "password",
+              "search",
               "tel",
               "text",
               "url"

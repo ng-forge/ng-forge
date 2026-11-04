@@ -21,7 +21,7 @@ Text-based input field with HTML5 type support (text, email, password, number, t
 
 | Prop | Type | Required | Default | Description |
 | ---- | ---- | -------- | ------- | ----------- |
-| `type` | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url'` | no | `text` | HTML input type |
+| `type` | `'text' \| 'email' \| 'password' \| 'number' \| 'tel' \| 'url' \| 'search'` | no | `text` | HTML input type |
 
 ```typescript
 {

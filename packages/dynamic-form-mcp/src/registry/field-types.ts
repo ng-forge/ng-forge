@@ -12,7 +12,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
     props: {
       type: {
         name: 'type',
-        type: "'text' | 'email' | 'password' | 'number' | 'tel' | 'url'",
+        type: "'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'",
         description: 'HTML input type',
         required: false,
         default: 'text',

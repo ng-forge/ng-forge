@@ -89,7 +89,7 @@ what the types actually declare rather than a copy maintained beside them.
 | `invalidFeedback` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `plaintext` | `boolean` | no |  |
 | `size` | `'lg' \| 'sm'` | no |  |
-| `type` | `'email' \| 'number' \| 'password' \| 'tel' \| 'text' \| 'url'` | no |  |
+| `type` | `'email' \| 'number' \| 'password' \| 'search' \| 'tel' \| 'text' \| 'url'` | no |  |
 | `validFeedback` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 
 ## `insert-array-item`
