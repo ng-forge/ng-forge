@@ -278,6 +278,85 @@ describe('mapSchemaToFields', () => {
     expect(result.warnings).toContain('additionalProperties are not supported and were skipped');
   });
 
+  describe('object properties with only dynamic keys (#644)', () => {
+    const dynamicKeySchemas: Record<string, SchemaObject> = {
+      'patternProperties with additionalProperties: false': {
+        type: 'object',
+        patternProperties: { '^[a-zA-Z0-9_-]+$': { type: 'string' } },
+        additionalProperties: false,
+      } as SchemaObject,
+      'additionalProperties: true': { type: 'object', additionalProperties: true },
+      'additionalProperties schema': { type: 'object', additionalProperties: { type: 'string' } },
+    };
+
+    for (const [name, data] of Object.entries(dynamicKeySchemas)) {
+      it(`should skip the property with a warning instead of emitting an empty group (${name})`, () => {
+        const schema: SchemaObject = {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            data,
+          },
+        };
+
+        const result = mapSchemaToFields(schema, []);
+        expect(result.fields.map((f) => f.key)).toEqual(['id']);
+        expect(result.warnings).toContain(
+          "Property 'data' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+        );
+      });
+    }
+
+    it('should skip dynamic-key objects nested inside groups and surface the warning', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          outer: {
+            type: 'object',
+            properties: {
+              inner: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  data: { type: 'object', additionalProperties: { type: 'string' } },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      const inner = result.fields[0].fields?.[0];
+      expect(inner?.fields?.map((f) => f.key)).toEqual(['name']);
+      expect(result.warnings).toContain(
+        "Property 'data' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet",
+      );
+    });
+
+    it('should surface the additionalProperties warning from nested groups at any depth', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          outer: {
+            type: 'object',
+            properties: {
+              inner: {
+                type: 'object',
+                properties: { name: { type: 'string' } },
+                additionalProperties: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const result = mapSchemaToFields(schema, []);
+      expect(result.fields[0].fields?.[0]).toMatchObject({ key: 'inner', type: 'group' });
+      expect(result.warnings).toContain('additionalProperties are not supported and were skipped');
+    });
+  });
+
   it('should set disabled when readOnly is true', () => {
     const schema: SchemaObject = {
       type: 'object',

@@ -42,6 +42,17 @@ function singularize(label: string): string {
   return label;
 }
 
+/** Object schema whose keys are all dynamic: no fixed `properties`, only additionalProperties/patternProperties. */
+function hasOnlyDynamicKeys(schema: SchemaObject): boolean {
+  const s = schema as Record<string, unknown>;
+  if (Object.keys(schema.properties ?? {}).length > 0 || s['allOf'] || s['oneOf'] || s['anyOf']) {
+    return false;
+  }
+  const patternProperties = s['patternProperties'] as Record<string, unknown> | undefined;
+  const additionalProperties = s['additionalProperties'];
+  return Object.keys(patternProperties ?? {}).length > 0 || (additionalProperties !== undefined && additionalProperties !== false);
+}
+
 export interface LogicConfig {
   type: string;
   condition: Record<string, unknown>;
@@ -231,6 +242,14 @@ function mapPropertyToField(
   const schemaPrefix = options.schemaName ?? '';
   const fieldPath = schemaPrefix ? `${schemaPrefix}.${prop.name}` : prop.name;
 
+  // Dictionary-style objects would otherwise map to an empty group (issue #644)
+  if (!ngForgeType && typeResult.fieldType === 'group' && hasOnlyDynamicKeys(prop.schema)) {
+    warnings.push(
+      `Property '${prop.name}' only has dynamic keys (additionalProperties/patternProperties) and was skipped; key/value fields are not supported yet`,
+    );
+    return undefined;
+  }
+
   let finalType: string;
 
   if (ngForgeType) {
@@ -417,6 +436,7 @@ function mapPropertyToField(
       const innerResult = mapSchemaToFieldsInternal(prop.schema, prop.schema.required ?? [], nestedOptions, seen);
       field.fields = innerResult.fields;
       ambiguousFields.push(...innerResult.ambiguousFields);
+      warnings.push(...innerResult.warnings);
       // SchemaObject is a union; use bracket access for `items` on array schemas
     } else if (typeResult.fieldType === 'array' && (prop.schema as Record<string, unknown>)['items']) {
       const items = (prop.schema as Record<string, unknown>)['items'] as SchemaObject;
