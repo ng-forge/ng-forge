@@ -9,7 +9,6 @@ export interface BsInputProps extends InputProps {
   validFeedback?: DynamicText;
   invalidFeedback?: DynamicText;
   plaintext?: boolean;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
 /**

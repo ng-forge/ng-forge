@@ -63,6 +63,11 @@ describe('IonicInputProps - Exhaustive Whitelist', () => {
         'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined
       >();
     });
+
+    it('type accepts core InputType values and rejects others', () => {
+      expectTypeOf<'search'>().toMatchTypeOf<NonNullable<IonicInputProps['type']>>();
+      expectTypeOf<'color'>().not.toMatchTypeOf<NonNullable<IonicInputProps['type']>>();
+    });
   });
 });
 

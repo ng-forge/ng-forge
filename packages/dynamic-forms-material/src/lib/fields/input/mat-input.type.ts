@@ -9,7 +9,6 @@ export interface MatInputProps extends InputProps {
   subscriptSizing?: SubscriptSizing;
   floatLabel?: FloatLabelType;
   hideRequiredMarker?: boolean;
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
   hint?: DynamicText;
 }
 

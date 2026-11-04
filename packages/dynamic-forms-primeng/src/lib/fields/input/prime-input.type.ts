@@ -12,7 +12,6 @@ export interface PrimeInputProps extends InputProps {
   /** Visual variant of the input. */
   variant?: 'outlined' | 'filled';
   /** Type of the input element. */
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
 }
 
 /**

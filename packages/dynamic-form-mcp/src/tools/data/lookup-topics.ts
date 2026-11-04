@@ -22,7 +22,7 @@ export const TOPICS: Record<string, { brief: string; full: string }> = {
   email: true,
   placeholder: 'you@example.com',
   props: {
-    type: 'email',           // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
+    type: 'email',           // 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'
     appearance: 'outline'    // Material: 'outline' | 'fill'
   }
 }

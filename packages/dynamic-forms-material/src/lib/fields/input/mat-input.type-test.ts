@@ -51,7 +51,14 @@ describe('MatInputProps - Exhaustive Whitelist', () => {
     });
 
     it('type', () => {
-      expectTypeOf<MatInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
+      expectTypeOf<MatInputProps['type']>().toEqualTypeOf<
+        'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined
+      >();
+    });
+
+    it('type accepts core InputType values and rejects others', () => {
+      expectTypeOf<'search'>().toMatchTypeOf<NonNullable<MatInputProps['type']>>();
+      expectTypeOf<'color'>().not.toMatchTypeOf<NonNullable<MatInputProps['type']>>();
     });
 
     it('hint', () => {
@@ -66,7 +73,7 @@ describe('MatInputProps - Exhaustive Whitelist', () => {
 
 describe('MatInputField (String) - Exhaustive Whitelist', () => {
   // Extract the string variant from the union
-  type StringInputField = Extract<MatInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
+  type StringInputField = Extract<MatInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' } }>;
 
   // Expected keys from FieldDef + FieldWithValidation + BaseValueField + InputField
   type ExpectedKeys =

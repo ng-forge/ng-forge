@@ -41,7 +41,14 @@ describe('PrimeInputProps - Exhaustive Whitelist', () => {
     });
 
     it('type', () => {
-      expectTypeOf<PrimeInputProps['type']>().toEqualTypeOf<'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | undefined>();
+      expectTypeOf<PrimeInputProps['type']>().toEqualTypeOf<
+        'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined
+      >();
+    });
+
+    it('type accepts core InputType values and rejects others', () => {
+      expectTypeOf<'search'>().toMatchTypeOf<NonNullable<PrimeInputProps['type']>>();
+      expectTypeOf<'color'>().not.toMatchTypeOf<NonNullable<PrimeInputProps['type']>>();
     });
   });
 });
@@ -93,7 +100,7 @@ describe('PrimeInputField (String) - Exhaustive Whitelist', () => {
     | 'webMcp';
 
   // String input field (without props.type: 'number')
-  type StringInputField = Extract<PrimeInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' } }>;
+  type StringInputField = Extract<PrimeInputField, { props?: { type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'search' } }>;
   type ActualKeys = keyof StringInputField;
 
   it('should have exactly the expected keys', () => {
