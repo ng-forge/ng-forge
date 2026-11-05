@@ -364,7 +364,6 @@ export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, Templ
 
 // @public
 export class DfPlaceholder {
-    readonly descriptor: Signal<PlaceholderDescriptor>;
     readonly dfPlaceholder: _angular_core.InputSignal<string>;
     readonly dfPlaceholderKey: _angular_core.InputSignal<string>;
     static ngTemplateContextGuard(_dir: DfPlaceholder, ctx: unknown): ctx is FieldPlaceholderContext;

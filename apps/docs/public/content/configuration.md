@@ -60,7 +60,7 @@ A deferred field shows an empty box until it mounts. To show a skeleton instead,
 ```html
 <form [dynamic-form]="config">
   <ng-template dfPlaceholder let-field>
-    <div class="skeleton" [attr.aria-label]="field.label"></div>
+    <div class="skeleton">{{ field.label }}</div>
   </ng-template>
   <ng-template dfPlaceholder="textarea">
     <div class="skeleton skeleton--tall"></div>
@@ -71,7 +71,7 @@ A deferred field shows an empty box until it mounts. To show a skeleton instead,
 </form>
 ```
 
-For each deferred field, the form picks the template whose `dfPlaceholderKey` matches the field key. If there is none, it uses the template whose `dfPlaceholder` matches the field type, then a template with an empty `dfPlaceholder`. If nothing matches, the box stays empty. `let-field` gives the template the field's `key`, `type`, `label` and `col`. Placeholders work in flat forms and inside pages. They render inside the box that already reserves `placeholderHeight`.
+For each deferred field, the form picks the template whose `dfPlaceholderKey` matches the field key. If there is none, it uses the template whose `dfPlaceholder` matches the field type, then a template with an empty `dfPlaceholder`. If nothing matches, the box stays empty. `let-field` gives the template the field's `key`, `type`, `label` and `col`. `label` is only set when the field label is a plain string. Placeholders work in flat forms and inside pages, and render inside the box that already reserves `placeholderHeight`. The box is hidden from assistive technology and is inert, so nothing inside it can receive focus. Templates must be direct children of the form element.
 
 ---
 

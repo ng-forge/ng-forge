@@ -10,7 +10,7 @@ export interface FieldPlaceholderInfo {
   readonly key: string;
   /** The field's type (e.g. `input`, `textarea`, `select`). */
   readonly type: string;
-  /** The field's label, if any. */
+  /** The field's label when it is a plain string; translated (Observable or Signal) labels are not resolved. */
   readonly label?: string;
   /** The field's grid column span, if any. */
   readonly col?: number;
@@ -22,17 +22,6 @@ export interface FieldPlaceholderContext {
   readonly field: FieldPlaceholderInfo;
 }
 
-/** How a projected placeholder template is matched to fields. */
-export type PlaceholderKind = 'key' | 'type' | 'default';
-
-/** A projected placeholder template plus how it should be matched. */
-export interface PlaceholderDescriptor {
-  readonly kind: PlaceholderKind;
-  /** Field key (kind `key`) or field type (kind `type`); empty for `default`. */
-  readonly value: string;
-  readonly templateRef: TemplateRef<FieldPlaceholderContext>;
-}
-
 /**
  * Resolved placeholder templates, indexed for the resolution cascade
  * (key → type → default). Empty maps + no default means "use the built-in
@@ -42,11 +31,6 @@ export interface ResolvedPlaceholders {
   readonly byKey: ReadonlyMap<string, TemplateRef<FieldPlaceholderContext>>;
   readonly byType: ReadonlyMap<string, TemplateRef<FieldPlaceholderContext>>;
   readonly default?: TemplateRef<FieldPlaceholderContext>;
-}
-
-// A factory, not a shared constant: module-scoped Maps would be shared across SSR requests.
-function emptyPlaceholders(): ResolvedPlaceholders {
-  return { byKey: new Map(), byType: new Map() };
 }
 
 /**
@@ -71,15 +55,6 @@ export class DfPlaceholder {
 
   readonly templateRef = inject(TemplateRef) as TemplateRef<FieldPlaceholderContext>;
 
-  /** Which cascade bucket this template registers under. Key beats type beats default. */
-  readonly descriptor: Signal<PlaceholderDescriptor> = computed(() => {
-    const key = this.dfPlaceholderKey();
-    if (key) return { kind: 'key', value: key, templateRef: this.templateRef };
-    const type = this.dfPlaceholder();
-    if (type) return { kind: 'type', value: type, templateRef: this.templateRef };
-    return { kind: 'default', value: '', templateRef: this.templateRef };
-  });
-
   /** Types `let-field` in `<ng-template dfPlaceholder let-field>`. */
   static ngTemplateContextGuard(_dir: DfPlaceholder, ctx: unknown): ctx is FieldPlaceholderContext {
     return true;
@@ -96,23 +71,30 @@ export class DfPlaceholder {
  */
 @Injectable()
 export class DfPlaceholderRegistry {
-  private readonly _placeholders = signal<ResolvedPlaceholders>(emptyPlaceholders());
+  private readonly source = signal<Signal<readonly DfPlaceholder[]> | undefined>(undefined);
 
-  /** Reactive view consumed via {@link DF_FIELD_PLACEHOLDERS}. */
-  readonly placeholders: Signal<ResolvedPlaceholders> = this._placeholders.asReadonly();
+  /** Reactive view consumed via {@link DF_FIELD_PLACEHOLDERS}; follows bound inputs on the projected templates. */
+  readonly placeholders: Signal<ResolvedPlaceholders> = computed(() => foldPlaceholders(this.source()?.() ?? []));
 
-  /** Fold projected descriptors into the cascade structure (last wins per bucket). */
-  set(descriptors: readonly PlaceholderDescriptor[]): void {
-    const byKey = new Map<string, TemplateRef<FieldPlaceholderContext>>();
-    const byType = new Map<string, TemplateRef<FieldPlaceholderContext>>();
-    let fallback: TemplateRef<FieldPlaceholderContext> | undefined;
-    for (const d of descriptors) {
-      if (d.kind === 'key') byKey.set(d.value, d.templateRef);
-      else if (d.kind === 'type') byType.set(d.value, d.templateRef);
-      else fallback = d.templateRef;
-    }
-    this._placeholders.set({ byKey, byType, default: fallback });
+  /** Connects the form's `contentChildren(DfPlaceholder)` query. */
+  bind(projected: Signal<readonly DfPlaceholder[]>): void {
+    this.source.set(projected);
   }
+}
+
+/** Folds projected templates into the cascade structure (last wins per bucket). Key beats type beats default. */
+function foldPlaceholders(placeholders: readonly DfPlaceholder[]): ResolvedPlaceholders {
+  const byKey = new Map<string, TemplateRef<FieldPlaceholderContext>>();
+  const byType = new Map<string, TemplateRef<FieldPlaceholderContext>>();
+  let fallback: TemplateRef<FieldPlaceholderContext> | undefined;
+  for (const p of placeholders) {
+    const key = p.dfPlaceholderKey();
+    const type = p.dfPlaceholder();
+    if (key) byKey.set(key, p.templateRef);
+    else if (type) byType.set(type, p.templateRef);
+    else fallback = p.templateRef;
+  }
+  return { byKey, byType, default: fallback };
 }
 
 /** Reactive resolved placeholders, provided at the DynamicForm scope. */

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { ComponentFixture, DeferBlockBehavior, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { delay } from '@ng-forge/utils';
@@ -72,6 +72,19 @@ class PlaceholderHost {
 })
 class BareHost {
   config = input.required<FormConfig>();
+}
+
+@Component({
+  selector: 'bound-placeholder-host',
+  imports: [DynamicForm, DfPlaceholder],
+  template: `<div style="height: 30000px"></div>
+    <form [dynamic-form]="config()">
+      <ng-template [dfPlaceholderKey]="boundKey()"><span class="ph-bound">bound</span></ng-template>
+    </form>`,
+})
+class BoundHost {
+  config = input.required<FormConfig>();
+  boundKey = signal('none');
 }
 
 async function settle(fixture: ComponentFixture<unknown>, cycles = 4): Promise<void> {
@@ -193,6 +206,30 @@ describe('Field windowing — projected placeholders', () => {
       expect(ph(fixture, 'plain')?.querySelector('.ph-default')?.getAttribute('data-ph-label')).toBe('Renamed');
     });
   }
+
+  it('follows a bound dfPlaceholderKey that changes after render', async () => {
+    const fixture = TestBed.createComponent(BoundHost);
+    fixture.componentRef.setInput('config', CONFIG);
+    await settle(fixture);
+    expect(ph(fixture, 'plain')?.querySelector('.ph-bound')).toBeNull();
+
+    fixture.componentInstance.boundKey.set('plain');
+    await settle(fixture);
+
+    expect(ph(fixture, 'plain')?.querySelector('.ph-bound')).toBeTruthy();
+  });
+
+  it('marks the placeholder wrapper inert so projected content is not focusable', async () => {
+    const fixture = TestBed.createComponent(PlaceholderHost);
+    fixture.componentRef.setInput('config', PAGED_CONFIG);
+    await settle(fixture);
+    expect(ph(fixture, 'plain')?.hasAttribute('inert')).toBe(true);
+
+    const flat = TestBed.createComponent(PlaceholderHost);
+    flat.componentRef.setInput('config', CONFIG);
+    await settle(flat);
+    expect(ph(flat, 'plain')?.hasAttribute('inert')).toBe(true);
+  });
 
   it('still mounts the real field when its placeholder scrolls into view', async () => {
     const fixture = TestBed.createComponent(PlaceholderHost);

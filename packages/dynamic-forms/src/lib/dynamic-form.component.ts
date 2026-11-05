@@ -110,6 +110,7 @@ import { collectInitializingContainerKeys, initializationComponentKey } from './
                     [style.min-height]="fieldWindowing().placeholderHeight"
                     [attr.data-field-key]="field.key"
                     aria-hidden="true"
+                    inert
                   >
                     @if (placeholderTemplate(field); as tpl) {
                       <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="placeholderContext(field)" />
@@ -506,9 +507,7 @@ export class DynamicForm<
 
     // Mirror projected `<ng-template dfPlaceholder>` into the placeholder registry
     // so windowed pages/fields (including dynamically-rendered ones) can resolve them.
-    explicitEffect([this._projectedPlaceholders], ([placeholders]) => {
-      this.placeholderRegistry.set(placeholders.map((p) => p.descriptor()));
-    });
+    this.placeholderRegistry.bind(this._projectedPlaceholders);
   }
 
   /**

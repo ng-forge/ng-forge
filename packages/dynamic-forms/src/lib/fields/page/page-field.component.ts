@@ -55,6 +55,7 @@ import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
               [style.min-height]="fieldWindowing().placeholderHeight"
               [attr.data-field-key]="field.key"
               aria-hidden="true"
+              inert
             >
               @if (placeholderTemplate(field); as tpl) {
                 <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="placeholderContext(field)" />

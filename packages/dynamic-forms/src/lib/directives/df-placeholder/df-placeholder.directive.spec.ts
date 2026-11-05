@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Component, TemplateRef, viewChildren, type Signal } from '@angular/core';
+import { Component, TemplateRef, signal, viewChildren, type Signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { DfPlaceholder, DfPlaceholderRegistry, type FieldPlaceholderContext, type PlaceholderDescriptor } from './df-placeholder.directive';
+import { DfPlaceholder, DfPlaceholderRegistry, type FieldPlaceholderContext } from './df-placeholder.directive';
 
 @Component({
   imports: [DfPlaceholder],
@@ -18,20 +18,9 @@ class HostComponent {
 
 const tpl = (name: string) => ({ __name: name }) as unknown as TemplateRef<FieldPlaceholderContext>;
 
-describe('DfPlaceholder directive', () => {
-  it('classifies each projected template by descriptor kind (key beats type beats default)', () => {
-    const fixture = TestBed.createComponent(HostComponent);
-    fixture.detectChanges();
-
-    const kinds = fixture.componentInstance.placeholders().map((p) => p.descriptor());
-
-    expect(kinds[0]).toMatchObject({ kind: 'default', value: '' });
-    expect(kinds[1]).toMatchObject({ kind: 'type', value: 'textarea' });
-    expect(kinds[2]).toMatchObject({ kind: 'key', value: 'username' });
-    // Both inputs set → key wins.
-    expect(kinds[3]).toMatchObject({ kind: 'key', value: 'special' });
-  });
-});
+// Minimal stand-in for a projected directive: only the inputs and templateRef the registry reads.
+const fake = (templateRef: TemplateRef<FieldPlaceholderContext>, type = '', key = '') =>
+  ({ dfPlaceholder: () => type, dfPlaceholderKey: () => key, templateRef }) as unknown as DfPlaceholder;
 
 describe('DfPlaceholderRegistry', () => {
   let registry: DfPlaceholderRegistry;
@@ -48,32 +37,38 @@ describe('DfPlaceholderRegistry', () => {
     expect(p.default).toBeUndefined();
   });
 
-  it('folds descriptors into the cascade buckets', () => {
-    const keyTpl = tpl('key');
-    const typeTpl = tpl('type');
-    const defaultTpl = tpl('default');
-    const descriptors: PlaceholderDescriptor[] = [
-      { kind: 'key', value: 'username', templateRef: keyTpl },
-      { kind: 'type', value: 'textarea', templateRef: typeTpl },
-      { kind: 'default', value: '', templateRef: defaultTpl },
-    ];
+  it('classifies projected templates by cascade bucket (key beats type beats default)', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const [defaultDir, typeDir, keyDir, bothDir] = fixture.componentInstance.placeholders();
 
-    registry.set(descriptors);
+    registry.bind(fixture.componentInstance.placeholders);
     const p = registry.placeholders();
 
-    expect(p.byKey.get('username')).toBe(keyTpl);
-    expect(p.byType.get('textarea')).toBe(typeTpl);
-    expect(p.default).toBe(defaultTpl);
+    expect(p.default).toBe(defaultDir.templateRef);
+    expect(p.byType.get('textarea')).toBe(typeDir.templateRef);
+    expect(p.byKey.get('username')).toBe(keyDir.templateRef);
+    // Both inputs set → key wins.
+    expect(p.byKey.get('special')).toBe(bothDir.templateRef);
+    expect(p.byType.has('input')).toBe(false);
   });
 
   it('last wins when two templates register under the same bucket entry', () => {
     const first = tpl('first');
     const second = tpl('second');
-    registry.set([
-      { kind: 'type', value: 'input', templateRef: first },
-      { kind: 'type', value: 'input', templateRef: second },
-    ]);
+    registry.bind(signal([fake(first, 'input'), fake(second, 'input')]));
 
     expect(registry.placeholders().byType.get('input')).toBe(second);
+  });
+
+  it('recomputes when the projected list changes', () => {
+    const list = signal<readonly DfPlaceholder[]>([]);
+    registry.bind(list);
+    expect(registry.placeholders().default).toBeUndefined();
+
+    const defaultTpl = tpl('default');
+    list.set([fake(defaultTpl)]);
+
+    expect(registry.placeholders().default).toBe(defaultTpl);
   });
 });
