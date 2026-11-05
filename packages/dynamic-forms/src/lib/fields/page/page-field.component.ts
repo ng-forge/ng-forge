@@ -14,7 +14,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
 import { DF_FIELD_PLACEHOLDERS, type FieldPlaceholderContext } from '../../directives/df-placeholder/df-placeholder.directive';
-import { resolvePlaceholderTemplate } from '../../directives/df-placeholder/resolve-placeholder-template';
+import { createPlaceholderContextCache, resolvePlaceholderTemplate } from '../../directives/df-placeholder/resolve-placeholder-template';
 import { outputFromObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -94,7 +94,7 @@ export default class PageFieldComponent {
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
   private readonly fieldPlaceholders = inject(DF_FIELD_PLACEHOLDERS, { optional: true });
-  private readonly placeholderCtx = new Map<string, FieldPlaceholderContext>();
+  private readonly placeholderContextFor = createPlaceholderContextCache();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -225,14 +225,7 @@ export default class PageFieldComponent {
 
   /** Memoised template context for a windowed field's projected placeholder. */
   protected placeholderContext(field: ResolvedField): FieldPlaceholderContext {
-    let ctx = this.placeholderCtx.get(field.key);
-    if (!ctx) {
-      const label = typeof field.fieldDef.label === 'string' ? field.fieldDef.label : undefined;
-      const info = { key: field.key, type: field.fieldDef.type, label, col: field.fieldDef.col };
-      ctx = { $implicit: info, field: info };
-      this.placeholderCtx.set(field.key, ctx);
-    }
-    return ctx;
+    return this.placeholderContextFor(field);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

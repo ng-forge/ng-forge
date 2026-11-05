@@ -44,7 +44,10 @@ export interface ResolvedPlaceholders {
   readonly default?: TemplateRef<FieldPlaceholderContext>;
 }
 
-const EMPTY_PLACEHOLDERS: ResolvedPlaceholders = { byKey: new Map(), byType: new Map() };
+// A factory, not a shared constant: module-scoped Maps would be shared across SSR requests.
+function emptyPlaceholders(): ResolvedPlaceholders {
+  return { byKey: new Map(), byType: new Map() };
+}
 
 /**
  * Marks an `<ng-template>` projected into `<form dynamic-form>` content as a
@@ -93,7 +96,7 @@ export class DfPlaceholder {
  */
 @Injectable()
 export class DfPlaceholderRegistry {
-  private readonly _placeholders = signal<ResolvedPlaceholders>(EMPTY_PLACEHOLDERS);
+  private readonly _placeholders = signal<ResolvedPlaceholders>(emptyPlaceholders());
 
   /** Reactive view consumed via {@link DF_FIELD_PLACEHOLDERS}. */
   readonly placeholders: Signal<ResolvedPlaceholders> = this._placeholders.asReadonly();

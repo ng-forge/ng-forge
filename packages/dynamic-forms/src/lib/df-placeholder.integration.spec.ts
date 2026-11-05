@@ -105,7 +105,15 @@ describe('Field windowing — projected placeholders', () => {
             return registry;
           },
         },
-        { provide: FIELD_WINDOWING, useValue: { enabled: true, eager: 2, placeholderHeight: '40px' } satisfies FieldWindowingConfig },
+        {
+          provide: FIELD_WINDOWING,
+          useValue: {
+            enabled: true,
+            eager: 2,
+            placeholderHeight: '40px',
+            park: { enabled: false, margin: '100%' },
+          } satisfies FieldWindowingConfig,
+        },
       ],
     });
   });

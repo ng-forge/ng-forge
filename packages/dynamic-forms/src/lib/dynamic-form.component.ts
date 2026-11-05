@@ -51,7 +51,7 @@ import {
   DF_FIELD_PLACEHOLDERS,
   type FieldPlaceholderContext,
 } from './directives/df-placeholder/df-placeholder.directive';
-import { resolvePlaceholderTemplate } from './directives/df-placeholder/resolve-placeholder-template';
+import { createPlaceholderContextCache, resolvePlaceholderTemplate } from './directives/df-placeholder/resolve-placeholder-template';
 import { DF_FIELD_TEMPLATES } from '@ng-forge/dynamic-forms/internal';
 import { getGridClassString } from '@ng-forge/dynamic-forms/internal';
 import { ResolvedField } from './utils/resolve-field/resolve-field';
@@ -200,8 +200,7 @@ export class DynamicForm<
   /** All `<ng-template dfPlaceholder>` instances projected into this form. */
   private readonly _projectedPlaceholders = contentChildren(DfPlaceholder);
 
-  /** Per-field placeholder template context, memoised by key to avoid re-allocating each CD. */
-  private readonly _placeholderCtx = new Map<string, FieldPlaceholderContext>();
+  private readonly placeholderContextFor = createPlaceholderContextCache();
 
   private readonly stateManager = this.connectDeps();
 
@@ -468,14 +467,7 @@ export class DynamicForm<
 
   /** Memoised template context for a windowed field's projected placeholder. */
   protected placeholderContext(field: ResolvedField): FieldPlaceholderContext {
-    let ctx = this._placeholderCtx.get(field.key);
-    if (!ctx) {
-      const label = typeof field.fieldDef.label === 'string' ? field.fieldDef.label : undefined;
-      const info = { key: field.key, type: field.fieldDef.type, label, col: field.fieldDef.col };
-      ctx = { $implicit: info, field: info };
-      this._placeholderCtx.set(field.key, ctx);
-    }
-    return ctx;
+    return this.placeholderContextFor(field);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -516,7 +508,6 @@ export class DynamicForm<
     // so windowed pages/fields (including dynamically-rendered ones) can resolve them.
     explicitEffect([this._projectedPlaceholders], ([placeholders]) => {
       this.placeholderRegistry.set(placeholders.map((p) => p.descriptor()));
-      this._placeholderCtx.clear();
     });
   }
 
