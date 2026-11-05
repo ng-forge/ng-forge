@@ -53,6 +53,26 @@ const config = {
 
 Use `withFieldWindowing()` at provider level when the same defaults should apply to every form. Per-form options take precedence.
 
+### Placeholder templates
+
+A deferred field shows an empty box until it mounts. To show a skeleton instead, put `<ng-template>` elements with `dfPlaceholder` inside the form and import `DfPlaceholder` in your component:
+
+```html
+<form [dynamic-form]="config">
+  <ng-template dfPlaceholder let-field>
+    <div class="skeleton">{{ field.label }}</div>
+  </ng-template>
+  <ng-template dfPlaceholder="textarea">
+    <div class="skeleton skeleton--tall"></div>
+  </ng-template>
+  <ng-template dfPlaceholderKey="avatar">
+    <div class="skeleton skeleton--circle"></div>
+  </ng-template>
+</form>
+```
+
+For each deferred field, the form picks the template whose `dfPlaceholderKey` matches the field key. If there is none, it uses the template whose `dfPlaceholder` matches the field type, then a template with an empty `dfPlaceholder`. If nothing matches, the box stays empty. `let-field` gives the template the field's `key`, `type`, `label` and `col`. `label` is only set when the field label is a plain string. Placeholders work in flat forms and inside pages, and render inside the box that already reserves `placeholderHeight`. The box is hidden from assistive technology and is inert, so nothing inside it can receive focus. Templates must be direct children of the form element.
+
 ---
 
 ## Field-level Props

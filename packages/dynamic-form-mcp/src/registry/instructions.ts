@@ -224,6 +224,7 @@ Use \`options.fieldWindowing\` for large flat forms:
 - \`park.margin\` follows \`IntersectionObserver.rootMargin\`: use one to four \`px\` or \`%\` values. Unsupported units fall back to the inherited margin.
 - \`fieldWindowing: false\` disables inherited deferred mounting for that form.
 - A park-only object changes parking without changing the inherited mounting mode. Use \`{ park: false }\` to opt out or \`{ park: true }\` to opt in.
+- Deferred fields show an empty box. To show a skeleton, project \`<ng-template dfPlaceholder let-field>\` into the form template (import \`DfPlaceholder\`). \`dfPlaceholderKey="key"\` beats \`dfPlaceholder="type"\`, which beats an empty \`dfPlaceholder\`. This is template-only, not part of the config.
 
 ## Validation
 
