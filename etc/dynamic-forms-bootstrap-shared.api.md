@@ -7,11 +7,12 @@
 import { AddonActionContext } from '@ng-forge/dynamic-forms';
 import { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { AddonActionPreset } from '@ng-forge/dynamic-forms';
-import * as _angular_core from '@angular/core';
 import { BaseAddon } from '@ng-forge/dynamic-forms';
 import { DynamicText } from '@ng-forge/dynamic-forms';
 import { DynamicValue } from '@ng-forge/dynamic-forms';
+import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
+import { InputSignal } from '@angular/core';
 import { PresetCollaborators } from '@ng-forge/dynamic-forms/integration';
 import { RegisteredActionRef } from '@ng-forge/dynamic-forms';
 import { WritableSignal } from '@angular/core';
@@ -48,15 +49,31 @@ export interface BsIconAddon extends BaseAddon {
 // @public
 export class InputConstraintsDirective {
     // (undocumented)
-    readonly dfMax: _angular_core.InputSignal<null | number | string | undefined>;
+    readonly dfMax: InputSignal<null | number | string | undefined>;
     // (undocumented)
-    readonly dfMin: _angular_core.InputSignal<null | number | string | undefined>;
+    readonly dfMin: InputSignal<null | number | string | undefined>;
     // (undocumented)
-    readonly dfStep: _angular_core.InputSignal<null | number | string | undefined>;
+    readonly dfStep: InputSignal<null | number | string | undefined>;
     // (undocumented)
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<InputConstraintsDirective, "[dfBsInputConstraints]", never, { "dfMin": { "alias": "dfMin"; "required": false; "isSignal": true; }; "dfMax": { "alias": "dfMax"; "required": false; "isSignal": true; }; "dfStep": { "alias": "dfStep"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<InputConstraintsDirective, "[dfBsInputConstraints]", never, {
+        "dfMin": {
+            "alias": "dfMin";
+            "required": false;
+            "isSignal": true;
+        };
+        "dfMax": {
+            "alias": "dfMax";
+            "required": false;
+            "isSignal": true;
+        };
+        "dfStep": {
+            "alias": "dfStep";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<InputConstraintsDirective, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<InputConstraintsDirective, never>;
 }
 
 export { PresetCollaborators }

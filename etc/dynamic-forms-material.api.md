@@ -6,8 +6,7 @@
 
 import { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { AddonActionPreset } from '@ng-forge/dynamic-forms';
-import * as _angular_core from '@angular/core';
-import * as _angular_material_form_field from '@angular/material/form-field';
+import { AnyAddon } from '@ng-forge/dynamic-forms';
 import { AppendArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms';
 import { BaseAddon } from '@ng-forge/dynamic-forms';
@@ -23,17 +22,19 @@ import { FloatLabelType } from '@angular/material/form-field';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
+import * as i0 from '@angular/core';
+import * as i1 from '@ng-forge/dynamic-forms/integration';
 import { InferFormValue } from '@ng-forge/dynamic-forms';
 import { InjectionToken } from '@angular/core';
 import { InputField } from '@ng-forge/dynamic-forms/integration';
 import { InputProps } from '@ng-forge/dynamic-forms/integration';
+import { InputSignal } from '@angular/core';
 import { InsertArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { NarrowFields } from '@ng-forge/dynamic-forms';
 import { NextPageEvent } from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms_integration from '@ng-forge/dynamic-forms/integration';
+import { NgForgeAction } from '@ng-forge/dynamic-forms/integration';
 import { PopArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PrependArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PreviousPageEvent } from '@ng-forge/dynamic-forms';
@@ -45,6 +46,7 @@ import { RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
 import { SelectField } from '@ng-forge/dynamic-forms/integration';
 import { SelectProps } from '@ng-forge/dynamic-forms/integration';
 import { ShiftArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { Signal } from '@angular/core';
 import { SliderField } from '@ng-forge/dynamic-forms/integration';
 import { SubscriptSizing } from '@angular/material/form-field';
 import { TemplateAddon } from '@ng-forge/dynamic-forms';
@@ -53,6 +55,9 @@ import { TextareaField } from '@ng-forge/dynamic-forms/integration';
 import { TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { ThemePalette } from '@angular/material/core';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeAddons } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
@@ -72,8 +77,7 @@ export type MatAddArrayItemButtonField = Omit<MatButtonField<AppendArrayItemEven
 export type MatAddon = MatButtonAddon | MatIconAddon;
 
 // @public
-export interface MatAddonExtensions {
-}
+export interface MatAddonExtensions {}
 
 // @public
 export type MatButtonAddon = MatButtonBase & MatButtonContent & MatButtonClick;
@@ -204,7 +208,7 @@ export interface MatIconAddon extends BaseAddon {
 export type MatIconAddonComponent = MatIconAddonComponent_2;
 
 // @public
-export type MatInputAddon = MatAddonExtension | MatButtonAddon | MatIconAddon | TemplateAddon | TextAddon;
+export type MatInputAddon = MatAddonExtension_2 | MatButtonAddon | MatIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type MatInputField = InputField<MatInputProps> & {
