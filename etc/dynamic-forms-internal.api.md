@@ -737,7 +737,7 @@ export class EventBus {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<EventBus, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<EventBus>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
@@ -818,7 +818,7 @@ export class FieldContextRegistryService {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<FieldContextRegistryService, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<FieldContextRegistryService>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
@@ -1173,7 +1173,7 @@ export class FunctionRegistryService {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<FunctionRegistryService, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<FunctionRegistryService>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public

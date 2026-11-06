@@ -408,7 +408,7 @@ export class EventBus {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<EventBus, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<EventBus>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
