@@ -1,11 +1,11 @@
 # Playwright image with pnpm support
-# Extends official Playwright image and enables corepack for pnpm
+# Extends official Playwright image and installs pnpm
 
 ARG PLAYWRIGHT_VERSION=1.59.1
 FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
 
-# Enable corepack and install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Newer Playwright images ship a Node without corepack; install the repo's pnpm version directly
+RUN npm install -g pnpm@10.28.0
 
 # Verify installation
 RUN pnpm --version
