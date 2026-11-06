@@ -9,6 +9,7 @@ import { FieldTree } from '@angular/forms/signals';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
+import { InputSignal } from '@angular/core';
 import { LogicFn } from '@angular/forms/signals';
 import { Observable } from 'rxjs';
 import { OperatorFunction } from 'rxjs';
@@ -38,7 +39,7 @@ export const ADDON_ACTION_REGISTRY: InjectionToken<ReadonlyMap<string, AddonActi
 export const ADDON_TYPE_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<_ng_forge_dynamic_forms_internal.BaseAddon<_ng_forge_dynamic_forms_internal.AddonSlot>>[]>;
+export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<BaseAddon<AddonSlot>>[]>;
 
 // @public
 export const ADDON_TYPE_REGISTRY: InjectionToken<Map<string, AddonTypeDefinition<BaseAddon<AddonSlot>>>>;
@@ -601,31 +602,45 @@ export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, Templ
 export class DfAddonSlot {
     constructor();
     // (undocumented)
-    readonly addon: i0.InputSignal<AnyAddon>;
+    readonly addon: InputSignal<AnyAddon>;
     // (undocumented)
     protected readonly className: Signal<null | string>;
-    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
-    readonly hidden: i0.InputSignal<Signal<boolean> | undefined>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
+    readonly hidden: InputSignal<Signal<boolean> | undefined>;
     protected readonly isHidden: Signal<boolean>;
     protected readonly resolvedComponent: Signal<Type<unknown> | undefined>;
-    protected readonly slotAttr: Signal<_ng_forge_dynamic_forms_internal.AddonSlot>;
+    protected readonly slotAttr: Signal<AddonSlot>;
     protected readonly typeInputs: Signal<{
         addon: AnyAddon;
         fieldInputs: WrapperFieldInputs | undefined;
     }>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<DfAddonSlot, "df-addon-slot", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; "hidden": { "alias": "hidden"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<DfAddonSlot, "df-addon-slot", never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+        "hidden": {
+            "alias": "hidden";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<DfAddonSlot, never>;
 }
 
 // @public
-export interface DynamicFormActionRegistry {
-}
+export interface DynamicFormActionRegistry {}
 
 // @public
-export interface DynamicFormAddonActionPresetRegistry {
-}
+export interface DynamicFormAddonActionPresetRegistry {}
 
 // @public
 export interface DynamicFormAddonRegistry {
@@ -638,8 +653,7 @@ export interface DynamicFormAddonRegistry {
 }
 
 // @public
-export interface DynamicFormAddonSlotRegistry {
-}
+export interface DynamicFormAddonSlotRegistry {}
 
 // @public
 export class DynamicFormError extends Error {
@@ -860,15 +874,26 @@ export interface FieldErrorsWrapper {
 
 // @public
 export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
-    readonly claimedKey: i0.Signal<string | undefined>;
+    readonly claimedKey: Signal<string | undefined>;
     // (undocumented)
-    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    readonly fieldComponent: Signal<ViewContainerRef>;
     // (undocumented)
-    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
-    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
-    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: FieldErrors;
+    readonly validationMessages: InputSignal<ValidationMessages | undefined>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, {
+        "validationMessages": {
+            "alias": "validationMessages";
+            "required": false;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
 }
@@ -893,9 +918,7 @@ export interface FieldOption<T = unknown> {
 }
 
 // @public
-export type FieldPathAccess<TValue> = {
-    [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
-};
+export type FieldPathAccess<TValue> = { [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>; };
 
 // @public
 export interface FieldRegistryContainers {
@@ -1625,9 +1648,7 @@ export interface PresetCollaborators {
 }
 
 // @public (undocumented)
-export type Prettify<T> = {
-    [K in keyof T]: T[K];
-} & {};
+export type Prettify<T> = { [K in keyof T]: T[K]; } & {};
 
 // @public
 export function provideFieldErrorDisplay(wrapper: () => Type<FieldErrorDisplayClaim>): Provider;
@@ -2033,9 +2054,7 @@ export interface WebMcpToolOptions {
 }
 
 // @public (undocumented)
-export type WithInputSignals<T> = {
-    readonly [K in keyof T]-?: Signal<T[K]>;
-};
+export type WithInputSignals<T> = { readonly [K in keyof T]-?: Signal<T[K]>; };
 
 // @public
 export function withPreviousValue<T>(input: Resource<T>): Resource<T>;
@@ -2050,7 +2069,7 @@ export const WRAPPER_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>
 export const WRAPPER_COMPONENT_LOAD_CACHE: InjectionToken<Map<string, Promise<Type<unknown> | undefined>>>;
 
 // @public
-export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<_ng_forge_dynamic_forms_internal.CssWrapper | _ng_forge_dynamic_forms_internal.FieldErrorsWrapper | _ng_forge_dynamic_forms_internal.RowWrapper>>>;
+export const WRAPPER_REGISTRY: InjectionToken<Map<string, WrapperTypeDefinition<CssWrapper | FieldErrorsWrapper | RowWrapper>>>;
 
 // @public
 export type WrapperAutoAssociations = ReadonlyMap<string, readonly WrapperConfig[]>;
