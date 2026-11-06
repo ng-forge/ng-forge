@@ -559,7 +559,7 @@ export class EventDispatcher {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<EventDispatcher, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<EventDispatcher>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
