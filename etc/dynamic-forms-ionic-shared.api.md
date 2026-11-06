@@ -11,11 +11,12 @@ import { BaseAddon } from '@ng-forge/dynamic-forms';
 import { DynamicText } from '@ng-forge/dynamic-forms';
 import { DynamicValue } from '@ng-forge/dynamic-forms';
 import * as i0 from '@angular/core';
+import * as i1 from '@ng-forge/dynamic-forms/integration';
 import { InjectionToken } from '@angular/core';
-import * as _ng_forge_dynamic_forms_integration from '@ng-forge/dynamic-forms/integration';
 import { PresetCollaborators } from '@ng-forge/dynamic-forms/integration';
 import { RegisteredActionRef } from '@ng-forge/dynamic-forms';
 import { Signal } from '@angular/core';
+import { TypedNgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
 import { WritableSignal } from '@angular/core';
 
 // @public
@@ -54,7 +55,7 @@ export interface IonicIconAddon extends BaseAddon {
 export class IonicInlineButtonAddonComponent {
     constructor();
     // (undocumented)
-    protected readonly action: _ng_forge_dynamic_forms_integration.TypedNgForgeAddonAction<IonicButtonAddon>;
+    protected readonly action: TypedNgForgeAddonAction<IonicButtonAddon>;
     // (undocumented)
     protected readonly addon: Signal<IonicButtonAddon>;
     // (undocumented)
@@ -72,7 +73,11 @@ export class IonicInlineButtonAddonComponent {
     // (undocumented)
     protected readonly resolvedAriaLabel: Signal<string | undefined>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<IonicInlineButtonAddonComponent, "ion-button[df-ion-button-addon]", never, {}, {}, never, never, true, [{ directive: typeof _ng_forge_dynamic_forms_integration.NgForgeAddonAction; inputs: {}; outputs: {}; }]>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<IonicInlineButtonAddonComponent, "ion-button[df-ion-button-addon]", never, {}, {}, never, never, true, [{
+        directive: typeof i1.NgForgeAddonAction;
+        inputs: {};
+        outputs: {};
+    }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<IonicInlineButtonAddonComponent, never>;
 }
