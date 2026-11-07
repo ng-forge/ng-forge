@@ -9,7 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); [ -n \"$f\" ] && pnpm prettier --write \"$f\" 2>/dev/null || true"
           }
         ]
       }
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ \"$CLAUDE_FILE_PATH\" == *\".env\"* ]]; then echo 'Blocked: Cannot edit .env files'; exit 1; fi"
+            "command": ".claude/hooks/block-env-edits.sh"
           }
         ]
       },
