@@ -319,6 +319,9 @@ importers:
       autoprefixer:
         specifier: ^10.6.2
         version: 10.6.2(postcss@8.5.32)
+      browserslist:
+        specifier: ^4.29.5
+        version: 4.29.5
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
