@@ -17,12 +17,15 @@ expect 2 "$env_guard" '{"tool_input":{"file_path":"apps/demo/.env.local"}}'
 expect 0 "$env_guard" '{"tool_input":{"file_path":"packages/dynamic-forms/src/index.ts"}}'
 
 push_guard=.claude/hooks/block-push-to-main.sh
+cmd_json() { jq -cn --arg c "$1" '{tool_input:{command:$c}}'; }
 for c in 'git push origin main' 'git push origin HEAD:main' 'git -C . push origin main' \
-  'git -c core.x=y push origin main' 'git --no-pager push origin main' 'git --git-dir=.git push origin main'; do
-  expect 2 "$push_guard" "{\"tool_input\":{\"command\":\"$c\"}}"
+  'git -c core.x=y push origin main' 'git --no-pager push origin main' 'git --git-dir=.git push origin main' \
+  "git -C 'other tree' push origin main" 'git -C "other tree" push origin main' 'git -C ../sibling push'; do
+  expect 2 "$push_guard" "$(cmd_json "$c")"
 done
-for c in 'git push origin feat/x' 'git -C . push origin feat/main-menu' 'git log --oneline main'; do
-  expect 0 "$push_guard" "{\"tool_input\":{\"command\":\"$c\"}}"
+for c in 'git push origin feat/x' 'git -C . push origin feat/main-menu' 'git log --oneline main' \
+  'git commit -m "push to main later"'; do
+  expect 0 "$push_guard" "$(cmd_json "$c")"
 done
 
 [ "$fail" = 0 ] && echo "all hook checks passed"
