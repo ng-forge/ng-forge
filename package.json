@@ -246,7 +246,8 @@
       "launch-editor@<2.14.2": "^2.14.2",
       "vite@>=8.0.0 <8.1.6": "~8.1.6",
       "webpack-dev-middleware@>=8.0.0 <8.3.0": "^8.3.0",
-      "@modelcontextprotocol/sdk@>=1.12.0 <1.32.0": "^1.32.0"
+      "@modelcontextprotocol/sdk@>=1.12.0 <1.32.0": "^1.32.0",
+      "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
     }
   }
 }
