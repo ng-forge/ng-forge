@@ -226,6 +226,26 @@ function iconFontsPlugin(): Plugin {
  * e.g., 'getting-started.md' → 'getting-started'
  *       'validation/basics.md' → 'validation/basics'
  */
+/**
+ * Compiles `ngServerMode` to `true` in Angular's server code. Analog's own
+ * server-mode plugin only matches files named core.mjs/platform-server.mjs and
+ * misses Angular's chunked fesm files, so the production define leaves it
+ * `false` there and SSR registers browser-only `@defer (on viewport)` triggers
+ * ("IntersectionObserver is not defined" during prerender).
+ */
+function angularServerModePlugin(): Plugin {
+  return {
+    name: 'docs-angular-server-mode',
+    enforce: 'pre',
+    transform(code, id, options) {
+      if (options?.ssr && /[\\/]@angular[\\/][^\\/]+[\\/]fesm2022[\\/].+\.mjs$/.test(id) && code.includes('ngServerMode')) {
+        return { code: code.replaceAll('ngServerMode', 'true'), map: null };
+      }
+      return undefined;
+    },
+  };
+}
+
 function collectContentSlugs(dir: string, base: string = dir): string[] {
   const slugs: string[] = [];
   try {
@@ -306,6 +326,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      angularServerModePlugin(),
       // When a non-route request (e.g., /.well-known/foo.json from Chrome DevTools)
       // hits the Analog SSR fallback, Vite serves index.html and extracts inline
       // <style> tags as proxy modules. The proxy module ID retains the original URL,
