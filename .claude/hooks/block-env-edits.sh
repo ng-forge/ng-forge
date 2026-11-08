@@ -13,13 +13,19 @@ input=$(cat)
 
 if [ "$(printf '%s' "$input" | jq -r '.tool_name // ""')" = "Bash" ]; then
   cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
-  q="['\"]?"
-  env="${q}[^[:space:];&|<>'\"]*\.env[^[:space:];&|<>'\"]*${q}"
+  # A .env path: unquoted, or quoted (spaces allowed inside the quotes).
+  env="(\"[^\"]*\\.env[^\"]*\"|'[^']*\\.env[^']*'|[^[:space:];&|<>'\"]*\\.env[^[:space:];&|<>'\"]*)"
+  # Command position: line start (indent allowed) or after a shell separator.
+  start='(^|[;&|])[[:space:]]*'
   end='([[:space:]]|$|[;&|])'
-  if printf '%s' "$cmd" | grep -qE ">>?[[:space:]]*${env}${end}" ||
-    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)tee([[:space:]]+[^;&|]*)?[[:space:]]${env}${end}" ||
-    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)(sed|perl)[[:space:]][^;&|]*-i[^;&|]*[[:space:]]${env}${end}" ||
-    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)(cp|mv|install)[[:space:]][^;&|]*[[:space:]]${env}[[:space:]]*($|[;&|])"; then
+  # Trailing redirections (`2>/dev/null`, `>&2`) after a cp/mv destination.
+  redir='([[:space:]]+[0-9]*[<>]+&?[^[:space:];&|]*)*'
+  # Here-strings rather than pipes: under pipefail an early `grep -q` exit can
+  # fail the pipeline and turn a match into a pass.
+  if grep -qE ">>?[[:space:]]*${env}${end}" <<<"$cmd" ||
+    grep -qE "${start}tee([[:space:]]+[^;&|]*)?[[:space:]]${env}${end}" <<<"$cmd" ||
+    grep -qE "${start}(sed|perl)[[:space:]]([^;&|]*[[:space:]])?-[[:alpha:]]*i[^;&|]*[[:space:]]${env}${end}" <<<"$cmd" ||
+    grep -qE "${start}(cp|mv|install)[[:space:]][^;&|]*[[:space:]]${env}${redir}[[:space:]]*($|[;&|#])" <<<"$cmd"; then
     echo "Blocked: Cannot write .env files" >&2
     exit 2
   fi

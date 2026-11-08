@@ -18,7 +18,9 @@ expect 0 "$env_guard" '{"tool_input":{"file_path":"packages/dynamic-forms/src/in
 
 bash_json() { jq -cn --arg c "$1" '{tool_name:"Bash",tool_input:{command:$c}}'; }
 for c in 'echo SECRET=x >> .env' 'echo A=1 > apps/demo/.env.local' 'printf x | tee .env' 'printf x | tee -a config/.env' \
-  "sed -i 's/a/b/' .env" 'cp .env.example .env' 'mv /tmp/x apps/demo/.env.production'; do
+  "sed -i 's/a/b/' .env" 'cp .env.example .env' 'mv /tmp/x apps/demo/.env.production' \
+  'echo A=1 > "apps/my app/.env.local"' "perl -pi -e 's/a/b/' .env" 'cp /tmp/x .env 2>/dev/null' \
+  $'echo ready\n  cp /tmp/x .env' "sed -Ei 's/a/b/' .env"; do
   expect 2 "$env_guard" "$(bash_json "$c")"
 done
 for c in 'cat .env.example' 'grep KEY .env.example' 'cp .env.example /tmp/check' 'pnpm test > out.log'; do
@@ -36,6 +38,11 @@ for c in 'git push origin feat/x' 'git -C . push origin feat/main-menu' 'git log
   'git commit -m "push to main later"'; do
   expect 0 "$push_guard" "$(cmd_json "$c")"
 done
+
+# A long command must not slip through when grep -q exits early under pipefail.
+long="cp /tmp/x .env; $(printf 'echo %.0s' $(seq 1 20000))"
+expect 2 "$env_guard" "$(bash_json "$long")"
+expect 2 "$push_guard" "$(cmd_json "git push origin main; $(printf 'echo %.0s' $(seq 1 20000))")"
 
 [ "$fail" = 0 ] && echo "all hook checks passed"
 exit "$fail"
