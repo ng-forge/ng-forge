@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -92,7 +92,7 @@ const DISPLAY_FORMATS = {
             [showDefaultTimeLabel]="props()?.showDefaultTimeLabel ?? true"
             [showClearButton]="props()?.showClearButton ?? false"
             [color]="props()?.color"
-            [locale]="props()?.locale ?? 'default'"
+            [locale]="locale() ?? 'default'"
             [min]="dateToIsoString(minDate())"
             [max]="dateToIsoString(maxDate())"
             (ionChange)="onDateChange($event)"
@@ -126,6 +126,16 @@ export default class IonicDatepickerFieldComponent {
 
   readonly isModalOpen = signal(false);
 
+  /** Canonical locale tag, or undefined (browser locale) when unset or malformed. */
+  protected readonly locale = computed(() => {
+    const locale = this.props()?.locale;
+    try {
+      return locale ? Intl.getCanonicalLocales(locale)[0] : undefined;
+    } catch {
+      return undefined;
+    }
+  });
+
   openModal() {
     this.isModalOpen.set(true);
   }
@@ -155,6 +165,6 @@ export default class IonicDatepickerFieldComponent {
   formatDisplayDate(date: Date | null | undefined): string {
     if (!date) return '';
     const options = DISPLAY_FORMATS[this.props()?.presentation ?? 'date'];
-    return new Intl.DateTimeFormat(this.props()?.locale, options).format(date);
+    return new Intl.DateTimeFormat(this.locale(), options).format(date);
   }
 }

@@ -35,4 +35,9 @@ describe('IonicDatepickerFieldComponent — locale', () => {
   ])('displays date and time in the configured locale (%s)', async (locale, expected) => {
     expect(await displayedValue({ locale, presentation: 'date-time' })).toBe(expected);
   });
+
+  it('falls back to the browser locale for a malformed locale', async () => {
+    const expected = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(2026, 11, 15));
+    expect(await displayedValue({ locale: 'en_US' })).toBe(expected.replace(/\s/g, ' '));
+  });
 });
