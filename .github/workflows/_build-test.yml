@@ -110,6 +110,9 @@ jobs:
           }
           echo "✅ Dependency graph is valid"
 
+      - name: Test Claude Code guard hooks
+        run: bash .claude/hooks/test-hooks.sh
+
       - name: Show affected projects
         if: inputs.affected
         run: |

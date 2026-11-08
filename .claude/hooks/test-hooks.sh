@@ -16,6 +16,15 @@ expect 2 "$env_guard" '{"tool_input":{"file_path":".env"}}'
 expect 2 "$env_guard" '{"tool_input":{"file_path":"apps/demo/.env.local"}}'
 expect 0 "$env_guard" '{"tool_input":{"file_path":"packages/dynamic-forms/src/index.ts"}}'
 
+bash_json() { jq -cn --arg c "$1" '{tool_name:"Bash",tool_input:{command:$c}}'; }
+for c in 'echo SECRET=x >> .env' 'echo A=1 > apps/demo/.env.local' 'printf x | tee .env' 'printf x | tee -a config/.env' \
+  "sed -i 's/a/b/' .env" 'cp .env.example .env' 'mv /tmp/x apps/demo/.env.production'; do
+  expect 2 "$env_guard" "$(bash_json "$c")"
+done
+for c in 'cat .env.example' 'grep KEY .env.example' 'cp .env.example /tmp/check' 'pnpm test > out.log'; do
+  expect 0 "$env_guard" "$(bash_json "$c")"
+done
+
 push_guard=.claude/hooks/block-push-to-main.sh
 cmd_json() { jq -cn --arg c "$1" '{tool_input:{command:$c}}'; }
 for c in 'git push origin main' 'git push origin HEAD:main' 'git -C . push origin main' \

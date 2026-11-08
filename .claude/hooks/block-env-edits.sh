@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Block Edit/Write on .env files. Claude Code passes the tool call as JSON on
-# stdin; exit 2 blocks the call and shows stderr to Claude.
+# Block writes to .env files: Edit/Write by path, and Bash by redirect, tee,
+# in-place sed/perl or a cp/mv destination. Claude Code passes the tool call as
+# JSON on stdin; exit 2 blocks the call and shows stderr to Claude.
 set -uo pipefail
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -8,7 +9,24 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 2
 fi
 
-file=$(jq -r '.tool_input.file_path // ""')
+input=$(cat)
+
+if [ "$(printf '%s' "$input" | jq -r '.tool_name // ""')" = "Bash" ]; then
+  cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
+  q="['\"]?"
+  env="${q}[^[:space:];&|<>'\"]*\.env[^[:space:];&|<>'\"]*${q}"
+  end='([[:space:]]|$|[;&|])'
+  if printf '%s' "$cmd" | grep -qE ">>?[[:space:]]*${env}${end}" ||
+    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)tee([[:space:]]+[^;&|]*)?[[:space:]]${env}${end}" ||
+    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)(sed|perl)[[:space:]][^;&|]*-i[^;&|]*[[:space:]]${env}${end}" ||
+    printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)(cp|mv|install)[[:space:]][^;&|]*[[:space:]]${env}[[:space:]]*($|[;&|])"; then
+    echo "Blocked: Cannot write .env files" >&2
+    exit 2
+  fi
+  exit 0
+fi
+
+file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // ""')
 case "$file" in
   *.env*)
     echo "Blocked: Cannot edit .env files" >&2
