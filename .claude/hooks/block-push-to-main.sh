@@ -26,7 +26,7 @@ cmd=$(printf '%s' "$input" | jq -r '.tool_input.command // ""')
 # Only fire when the command actually invokes `git push` at a command position
 # (start of line or after a shell separator). Prevents false positives when
 # "git push" appears inside argument strings (heredocs, PR bodies, etc).
-if ! printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)${GIT}[[:space:]]+push\\b"; then
+if ! grep -qE "(^|[;&|][[:space:]]*)${GIT}[[:space:]]+push\\b" <<<"$cmd"; then
   exit 0
 fi
 
@@ -37,16 +37,16 @@ cmd=$(printf '%s' "$cmd" | sed -E 's/[[:space:]]+#.*$//')
 # Case 1: explicit `main` as a refspec destination. The prefix must be
 # whitespace, `:`, or `+` so we do not match slashed/hyphenated/dotted branch
 # names (`release/main`, `feature-main`, `topic.main`, `user/main`).
-if printf '%s' "$cmd" | grep -qE "${GIT}[[:space:]]+push[^;&|]*([[:space:]]|:)\\+?main([[:space:]]|\$|[;&|])"; then
+if grep -qE "${GIT}[[:space:]]+push[^;&|]*([[:space:]]|:)\\+?main([[:space:]]|\$|[;&|])" <<<"$cmd"; then
   echo "BLOCKED: direct push to main. Create a feature branch (or worktree) first." >&2
   exit 2
 fi
 
 # Case 2: bare `git push` (only flags, no refspec) while on main branch.
-if printf '%s' "$cmd" | grep -qE "(^|[;&|][[:space:]]*)${GIT}[[:space:]]+push([[:space:]]+-[^[:space:]]+)*([[:space:]]*\$|[[:space:]]*[;&|])"; then
+if grep -qE "(^|[;&|][[:space:]]*)${GIT}[[:space:]]+push([[:space:]]+-[^[:space:]]+)*([[:space:]]*\$|[[:space:]]*[;&|])" <<<"$cmd"; then
   # With -C/--git-dir/--work-tree the push targets another repository, whose
   # branch this hook cannot see from here, so require an explicit refspec.
-  if printf '%s' "$cmd" | grep -qE 'git[^;&|]*[[:space:]](-C|--git-dir|--work-tree)'; then
+  if grep -qE 'git[^;&|]*[[:space:]](-C|--git-dir|--work-tree)' <<<"$cmd"; then
     echo "BLOCKED: bare 'git push' into another repository (-C/--git-dir/--work-tree). Name the branch explicitly." >&2
     exit 2
   fi
