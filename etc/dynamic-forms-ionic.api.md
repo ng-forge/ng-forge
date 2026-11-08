@@ -158,6 +158,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
     doneText?: string;
     // (undocumented)
     hint?: DynamicText;
+    locale?: string;
     // (undocumented)
     multiple?: boolean;
     // (undocumented)

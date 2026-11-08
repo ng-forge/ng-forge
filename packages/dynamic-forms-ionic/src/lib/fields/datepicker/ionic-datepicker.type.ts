@@ -14,5 +14,7 @@ export interface IonicDatepickerProps extends DatepickerProps {
   size?: 'cover' | 'fixed';
   color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
   hint?: DynamicText;
+  /** BCP 47 locale for the picker and the displayed value. Defaults to the browser locale. */
+  locale?: string;
 }
 export type IonicDatepickerField = DatepickerField<IonicDatepickerProps>;

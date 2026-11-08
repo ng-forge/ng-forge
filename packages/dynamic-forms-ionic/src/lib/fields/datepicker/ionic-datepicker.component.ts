@@ -15,7 +15,19 @@ import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
 import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/dynamic-forms/integration';
 import { IonicDatepickerProps } from './ionic-datepicker.type';
 import { AsyncPipe } from '@angular/common';
-import { format } from 'date-fns';
+
+const TIME = { hour: 'numeric', minute: '2-digit' } as const;
+const DATE = { month: 'short', day: 'numeric', year: 'numeric' } as const;
+
+const DISPLAY_FORMATS = {
+  date: DATE,
+  'date-time': { ...DATE, ...TIME },
+  'time-date': { ...DATE, ...TIME },
+  time: TIME,
+  month: { month: 'long', year: 'numeric' },
+  'month-year': { month: 'short', year: 'numeric' },
+  year: { year: 'numeric' },
+} as const satisfies Record<NonNullable<IonicDatepickerProps['presentation']>, Intl.DateTimeFormatOptions>;
 
 @Component({
   selector: 'df-ion-datepicker',
@@ -80,6 +92,7 @@ import { format } from 'date-fns';
             [showDefaultTimeLabel]="props()?.showDefaultTimeLabel ?? true"
             [showClearButton]="props()?.showClearButton ?? false"
             [color]="props()?.color"
+            [locale]="props()?.locale ?? 'default'"
             [min]="dateToIsoString(minDate())"
             [max]="dateToIsoString(maxDate())"
             (ionChange)="onDateChange($event)"
@@ -141,25 +154,7 @@ export default class IonicDatepickerFieldComponent {
 
   formatDisplayDate(date: Date | null | undefined): string {
     if (!date) return '';
-
-    const presentation = this.props()?.presentation ?? 'date';
-
-    switch (presentation) {
-      case 'date':
-        return format(date, 'MMM d, yyyy');
-      case 'date-time':
-      case 'time-date':
-        return format(date, 'MMM d, yyyy, h:mm a');
-      case 'time':
-        return format(date, 'h:mm a');
-      case 'month':
-        return format(date, 'MMMM yyyy');
-      case 'month-year':
-        return format(date, 'MMM yyyy');
-      case 'year':
-        return format(date, 'yyyy');
-      default:
-        return format(date, 'MMM d, yyyy');
-    }
+    const options = DISPLAY_FORMATS[this.props()?.presentation ?? 'date'];
+    return new Intl.DateTimeFormat(this.props()?.locale, options).format(date);
   }
 }

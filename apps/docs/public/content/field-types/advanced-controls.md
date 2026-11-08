@@ -62,4 +62,13 @@ Date selection control.
 
 <docs-adapter-props field="datepicker"></docs-adapter-props>
 
+#### Date formats and locale
+
+Each adapter follows its UI library's locale setup:
+
+- **Material** uses the app's `DateAdapter`, `MAT_DATE_FORMATS` and `MAT_DATE_LOCALE` when provided, and falls back to the native adapter otherwise. The native adapter only parses typed dates in US order or ISO format, so apps that expect input like `15.12.2026` should provide a parsing adapter such as `provideDateFnsAdapter()`.
+- **Bootstrap** renders a native `<input type="date">`, which uses the browser's locale.
+- **PrimeNG** parses and displays dates with the `dateFormat` prop, for example `'dd.mm.yy'`. Month and day names come from PrimeNG's translation config.
+- **Ionic** passes the `locale` prop to `ion-datetime` and uses it for the displayed value. It defaults to the browser locale.
+
 <docs-live-example scenario="examples/datepicker" hideForCustom="true" showHeading="true"></docs-live-example>

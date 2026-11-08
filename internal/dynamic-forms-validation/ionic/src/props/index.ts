@@ -89,6 +89,7 @@ export const IonicDatepickerPropsSchema = z.object({
   size: z.enum(['cover', 'fixed']).optional(),
   color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
   hint: DynamicTextSchema.optional(),
+  locale: z.string().optional(),
   placeholder: DynamicTextSchema.optional(),
 });
 
