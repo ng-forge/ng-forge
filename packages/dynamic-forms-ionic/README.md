@@ -33,8 +33,6 @@ Ionic's official support policy for @ionic/angular 8 lists Angular versions up t
 npm install @ng-forge/dynamic-forms @ng-forge/dynamic-forms-ionic @ionic/angular
 ```
 
-> **Note:** This package includes [date-fns](https://date-fns.org/) as a dependency for datepicker formatting.
-
 ## Setup
 
 ```scss

@@ -14,7 +14,7 @@ import {
   WrapperFieldInputs,
 } from '@ng-forge/dynamic-forms/integration';
 import { MatDatepickerProps } from './mat-datepicker.type';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter } from '@angular/material/core';
 import { AsyncPipe } from '@angular/common';
 import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
@@ -99,7 +99,14 @@ import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
       }
     `,
   ],
-  providers: [provideNativeDateAdapter()],
+  // Native adapter only as a fallback, so an app-provided DateAdapter and formats win.
+  providers: [
+    { provide: DateAdapter, useFactory: () => inject(DateAdapter, { optional: true, skipSelf: true }) ?? new NativeDateAdapter() },
+    {
+      provide: MAT_DATE_FORMATS,
+      useFactory: () => inject(MAT_DATE_FORMATS, { optional: true, skipSelf: true }) ?? MAT_NATIVE_DATE_FORMATS,
+    },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class MatDatepickerFieldComponent {

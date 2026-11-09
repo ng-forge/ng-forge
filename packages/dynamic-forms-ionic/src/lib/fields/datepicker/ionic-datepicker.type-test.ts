@@ -24,7 +24,8 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
     | 'cancelText'
     | 'size'
     | 'color'
-    | 'hint';
+    | 'hint'
+    | 'locale';
   type ActualKeys = keyof IonicDatepickerProps;
 
   it('should have exactly the expected keys', () => {
@@ -52,6 +53,10 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
 
     it('showDefaultButtons', () => {
       expectTypeOf<IonicDatepickerProps['showDefaultButtons']>().toEqualTypeOf<boolean | undefined>();
+    });
+
+    it('locale', () => {
+      expectTypeOf<IonicDatepickerProps['locale']>().toEqualTypeOf<string | undefined>();
     });
 
     it('showDefaultTitle', () => {
