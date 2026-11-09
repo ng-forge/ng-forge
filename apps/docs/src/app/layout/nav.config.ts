@@ -15,7 +15,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
-  { label: 'Configuration', path: 'configuration' },
+  { label: 'Configuration', path: 'configuration', badge: 'NEW' },
   { label: 'Feature Overview', path: 'feature-overview' },
   { label: 'API-Driven Forms', path: 'api-driven-forms' },
   {
