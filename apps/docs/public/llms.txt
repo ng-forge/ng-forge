@@ -102,6 +102,7 @@ Dynamic Forms is a configuration-driven way to build forms in Angular applicatio
 - /recipes/expression-parser: Expression syntax for validators and conditions
 - /recipes/custom-fields: Adding custom field types
 - /recipes/value-exclusion: Controlling which fields are included in submitted form values
+- /recipes/large-forms: Page preloading, field windowing and placeholder templates for large forms
 
 ### Migration
 - /migrating-from-ngx-formly: Concept-by-concept migration guide from ngx-formly to ng-forge

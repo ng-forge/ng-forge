@@ -15,7 +15,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
-  { label: 'Configuration', path: 'configuration', badge: 'NEW' },
+  { label: 'Configuration', path: 'configuration' },
   { label: 'Feature Overview', path: 'feature-overview' },
   { label: 'API-Driven Forms', path: 'api-driven-forms' },
   {
@@ -117,6 +117,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: 'Type Safety', path: 'recipes/type-safety' },
       { label: 'Events', path: 'recipes/events' },
       { label: 'Value Exclusion', path: 'recipes/value-exclusion' },
+      { label: 'Large Forms', path: 'recipes/large-forms', badge: 'NEW' },
     ],
   },
   { label: 'Migrating from ngx-formly', path: 'migrating-from-ngx-formly' },
