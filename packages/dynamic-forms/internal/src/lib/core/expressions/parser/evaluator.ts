@@ -100,6 +100,9 @@ const SAFE_METHODS: Record<string, ReadonlySet<string>> = {
   date: new Set(DATE_SAFE_METHODS as readonly string[]),
 };
 
+/** Every method name callable on some receiver type. A name outside this set can never be called. */
+export const ALLOWED_METHOD_NAMES: ReadonlySet<string> = new Set(Object.values(SAFE_METHODS).flatMap((methods) => [...methods]));
+
 /**
  * Blacklist of property names that should not be accessible
  * These properties can leak information about object structure or enable attacks

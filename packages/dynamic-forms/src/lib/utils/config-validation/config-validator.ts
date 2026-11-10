@@ -5,7 +5,7 @@ import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { ExpressionParser } from '@ng-forge/dynamic-forms/internal';
+import { CONDITION_SCOPE_VARIABLES, ExpressionParser, findStaticExpressionProblems } from '@ng-forge/dynamic-forms/internal';
 import { DEV_MODE } from '../dev-mode';
 
 /** Data collected during a single config traversal. */
@@ -26,7 +26,7 @@ interface ConfigTraversalData {
   regexErrors: string[];
   /** Own keys of value-bearing fields containing a dot (unsupported — nest via group fields). */
   dottedKeys: string[];
-  /** Dev-only: javascript expressions the parser rejects. */
+  /** Dev-only: javascript expressions that can't work, and empty and/or groups. */
   expressionErrors: string[];
 }
 
@@ -117,11 +117,16 @@ function collectExpressionErrors(node: unknown, fieldKey: string, errors: string
 
   const record = node as Record<string, unknown>;
   if (record['type'] === 'javascript' && typeof record['expression'] === 'string') {
+    const expression = record['expression'];
     try {
-      ExpressionParser.parse(record['expression']);
+      const problems = findStaticExpressionProblems(ExpressionParser.parse(expression), CONDITION_SCOPE_VARIABLES);
+      if (problems.length > 0) errors.push(`Field '${fieldKey}': expression '${expression}' — ${problems.join('; ')}`);
     } catch (e) {
-      errors.push(`Field '${fieldKey}': expression '${record['expression']}' — ${e instanceof Error ? e.message : String(e)}`);
+      errors.push(`Field '${fieldKey}': expression '${expression}' — ${e instanceof Error ? e.message : String(e)}`);
     }
+  }
+  if ((record['type'] === 'and' || record['type'] === 'or') && Array.isArray(record['conditions']) && record['conditions'].length === 0) {
+    errors.push(`Field '${fieldKey}': an empty '${record['type']}' group never fires`);
   }
 
   for (const [key, value] of Object.entries(record)) {
@@ -265,9 +270,9 @@ export function validateFormConfig(fields: FieldDef<unknown>[], registry: Map<st
   validateNoDomIdCollisions(data.domIds);
   // Warn-only diagnostic — unknown types already degrade gracefully at render time.
   if (DEV_MODE) validateFieldTypesRegistered(data.types, registry, logger);
-  // Warn-only: an expression the parser rejects makes its rule evaluate to false at runtime.
+  // Warn-only: each of these makes its rule evaluate to false (or wrongly) at runtime.
   for (const error of data.expressionErrors) {
-    logger.warn(`Unsupported or invalid expression. ${error}. The rule using it will evaluate to false.`);
+    logger.warn(`Condition problem. ${error}.`);
   }
 
   if (data.regexErrors.length > 0) {

@@ -32,6 +32,18 @@ describe('condition-evaluator', () => {
   });
 
   describe('evaluateCondition', () => {
+    describe('empty groups', () => {
+      // Deliberate: a group with no conditions never fires, so a half-built rule
+      // doesn't hide, disable or require a field unconditionally.
+      it('evaluates an empty and group as false', () => {
+        expect(evaluateCondition({ type: 'and', conditions: [] }, mockContext)).toBe(false);
+      });
+
+      it('evaluates an empty or group as false', () => {
+        expect(evaluateCondition({ type: 'or', conditions: [] }, mockContext)).toBe(false);
+      });
+    });
+
     describe('fieldValue type', () => {
       it('should evaluate fieldValue conditions correctly', () => {
         const expression: ConditionalExpression = {

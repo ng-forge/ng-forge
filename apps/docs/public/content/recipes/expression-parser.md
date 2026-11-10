@@ -346,7 +346,7 @@ As in JavaScript, `??` can't be mixed with `&&` or `||` without parentheses: wri
 
 **Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, global objects and functions (`String(x)`, `Number(x)`, `Array.isArray(x)`, `Math`, `JSON`), function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only; arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
 
-An expression the parser can't read makes its rule evaluate to `false`. In development builds, the form logs a warning at startup that names the field, the expression and the reason.
+An expression the parser can't read makes its rule evaluate to `false`. In development builds, the form checks every condition expression at startup and logs a warning that names the field, the expression and the reason. Besides syntax errors, it flags direct function calls (`String(x)`), methods outside the whitelist, and names that aren't context variables (`Math`), which would otherwise read as `undefined`.
 
 ## Summary
 

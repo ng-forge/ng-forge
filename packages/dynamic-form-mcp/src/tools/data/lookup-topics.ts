@@ -2137,6 +2137,8 @@ For \`matches\`, the value is a pattern string. Use the \`/pattern/flags\` form 
 
 ## Combining Conditions
 
+An \`and\` or \`or\` group with no conditions never fires.
+
 **AND (all must be true):**
 \`\`\`typescript
 condition: {

@@ -284,6 +284,47 @@ describe('validateFormConfig', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
+    function hiddenWhen(expression: string): FieldDef<unknown>[] {
+      return [
+        { key: 'f', type: 'input', logic: [{ type: 'hidden', condition: { type: 'javascript', expression } }] },
+      ] as FieldDef<unknown>[];
+    }
+
+    it.each([
+      ['Math.round(formValue.total) > 1', "'Math'"],
+      ['String(formValue.age) === "1"', 'String'],
+      ['Array.isArray(formValue.items)', "'Array'"],
+      ['formValue.name.toLocaleUpperCaseX() === "A"', 'toLocaleUpperCaseX'],
+    ])('warns about %s, which can never work at runtime', (expression, mention) => {
+      const logger = mockLogger();
+      validateFormConfig(hiddenWhen(expression), emptyRegistry(), logger);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(mention));
+    });
+
+    it.each([
+      'formValue.items.filter(item => item.active).length > 0',
+      'externalData.flags.beta && fieldState.touched',
+      'formFieldState.email?.valid && rootFormValue.a === groupValue.b',
+      'formValue.name.trim().toUpperCase() === "A"',
+      '(formValue.price ?? 0).toFixed(2) === "1.00"',
+    ])('does not warn about %s', (expression) => {
+      const logger = mockLogger();
+      validateFormConfig(hiddenWhen(expression), emptyRegistry(), logger);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('warns about empty and/or groups', () => {
+      const logger = mockLogger();
+      const fields = [
+        { key: 'f', type: 'input', logic: [{ type: 'required', condition: { type: 'and', conditions: [] } }] },
+      ] as FieldDef<unknown>[];
+      validateFormConfig(fields, emptyRegistry(), logger);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'f'"));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('never'));
+    });
+
     it('does not throw for an invalid expression', () => {
       const fields = [
         { key: 'x', type: 'input', logic: [{ type: 'hidden', condition: { type: 'javascript', expression: 'a ?? b || c' } }] },

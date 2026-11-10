@@ -797,6 +797,8 @@ Regular expression match.
 
 **Note:** `and`/`or` composites accept only synchronous sub-conditions. Nesting `http` or `async` conditions inside them throws an error; declare async conditions as separate `logic` entries on the field.
 
+An `and` or `or` group with no conditions never fires, so a rule you haven't finished doesn't hide, disable or require the field. Development builds log a warning for empty groups.
+
 ### AND Logic
 
 All conditions must be true.

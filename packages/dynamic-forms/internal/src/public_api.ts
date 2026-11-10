@@ -28,6 +28,7 @@ export * from './lib/core/expressions/index';
 export * from './lib/core/expressions/logic-function-cache.service';
 export * from './lib/core/expressions/logic-function-factory';
 export * from './lib/core/expressions/parser/expression-parser';
+export * from './lib/core/expressions/parser/static-check';
 export * from './lib/core/expressions/parser/types';
 export * from './lib/core/expressions/value-utils';
 export * from './lib/core/field-tree-utils';
