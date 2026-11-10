@@ -346,6 +346,19 @@ export const UI_ADAPTERS: UIAdapterInfo[] = [
           },
         },
       },
+      {
+        type: 'datepicker',
+        componentName: 'IonicDatepickerFieldComponent',
+        additionalProps: {
+          locale: {
+            name: 'locale',
+            type: 'string',
+            description: 'BCP 47 locale for the picker and the displayed value',
+            required: false,
+            default: 'browser locale',
+          },
+        },
+      },
     ],
   },
 ];

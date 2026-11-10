@@ -1083,14 +1083,7 @@ derivation: 'formValue.discount ?? 0'                   // Nullish coalescing
 derivation: 'formValue.price * (1 - externalData.discountRate)'  // External data
 \`\`\`
 
-**Complex logic (IIFE):**
-\`\`\`typescript
-derivation: \`(() => {
-  const qty = formValue.quantity || 0;
-  const price = formValue.unitPrice || 0;
-  return qty * price;
-})()\`
-\`\`\`
+**Expressions only:** no statements (\`const\`, \`if\`, \`return\`), no \`new\`, and no globals (\`Math\`, \`String()\`, \`Array.isArray\`). Use a ternary for branching and a custom derivation function for anything longer.
 
 **See also:** \`property-derivation\` topic for deriving component properties (minDate, options, label, etc.)`,
   },
@@ -2140,9 +2133,13 @@ const config = { fields: [...] } as const satisfies FormConfig;
 | \`endsWith\` | String ends with | \`'hello'.endsWith('lo')\` |
 | \`matches\` | Regex match | \`/^[0-9]+$/.test(value)\` |
 
+An empty field value (\`null\`, \`undefined\` or \`''\`) never satisfies \`greater\`, \`less\`, \`greaterOrEqual\`, \`lessOrEqual\`, \`contains\`, \`startsWith\` or \`endsWith\`. \`matches\` tests it as \`''\`, so \`'^$'\` matches an empty field. \`0\` and \`false\` are not empty.
+
 For \`matches\`, the value is a pattern string. Use the \`/pattern/flags\` form to pass regex flags, e.g. \`"/john/i"\` for case-insensitive matching. A plain pattern (no \`/.../\` delimiters) is matched case-sensitively with no flags.
 
 ## Combining Conditions
+
+An \`and\` or \`or\` group with no conditions never fires.
 
 **AND (all must be true):**
 \`\`\`typescript
@@ -2324,7 +2321,7 @@ expression: '(formValue.contacts?.length || 0) + " contacts"'
 expression: '(formValue.firstName || "") + " " + (formValue.lastName || "")'
 
 // Address formatting
-expression: \`[formValue.street, formValue.city, formValue.state, formValue.zip].filter(Boolean).join(", ")\`
+expression: \`[formValue.street, formValue.city, formValue.state, formValue.zip].filter(x => x).join(", ")\`
 \`\`\`
 
 ## Math Calculations
@@ -2333,7 +2330,7 @@ expression: \`[formValue.street, formValue.city, formValue.state, formValue.zip]
 expression: '(formValue.quantity || 0) * (formValue.unitPrice || 0)'
 
 // Percentage
-expression: 'Math.round((formValue.completed / formValue.total) * 100) + "%"'
+expression: '((formValue.completed / formValue.total) * 100).toFixed(0) + "%"'
 
 // Sum of array
 expression: '(formValue.items || []).reduce((sum, item) => sum + (item.price || 0), 0)'
@@ -2344,13 +2341,8 @@ expression: '(formValue.items || []).reduce((sum, item) => sum + (item.price || 
 // Ternary
 expression: 'formValue.isPremium ? "Premium Member" : "Standard Member"'
 
-// Multiple conditions
-expression: \`(() => {
-  if (formValue.score >= 90) return 'A';
-  if (formValue.score >= 80) return 'B';
-  if (formValue.score >= 70) return 'C';
-  return 'D';
-})()\`
+// Multiple conditions (nested ternary)
+expression: 'formValue.score >= 90 ? "A" : formValue.score >= 80 ? "B" : formValue.score >= 70 ? "C" : "D"'
 \`\`\``,
   },
 

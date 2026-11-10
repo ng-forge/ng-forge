@@ -11,19 +11,15 @@ import { FieldTree } from '@angular/forms/signals';
 import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
-import { LogicFn } from '@angular/forms/signals';
+import { InputSignal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { OperatorFunction } from 'rxjs';
 import { PipeTransform } from '@angular/core';
 import { Provider } from '@angular/core';
-import { ReadonlyFieldState } from '@angular/forms/signals';
 import { Resource } from '@angular/core';
 import { ResourceRef } from '@angular/core';
 import { SchemaPath } from '@angular/forms/signals';
 import { SchemaPathTree } from '@angular/forms/signals';
 import { Signal } from '@angular/core';
-import { StandardSchemaV1 } from '@standard-schema/spec';
-import { TemplateRef } from '@angular/core';
 import { TreeValidationResult } from '@angular/forms/signals';
 import { Type } from '@angular/core';
 import { ValidationError as ValidationError_2 } from '@angular/forms/signals';
@@ -43,7 +39,7 @@ export const ADDON_PRESET_HANDLER: InjectionToken<AddonPresetHandler>;
 export const ADDON_TYPE_COMPONENT_CACHE: InjectionToken<Map<string, Type<unknown>>>;
 
 // @public
-export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<_ng_forge_dynamic_forms_internal.BaseAddon<_ng_forge_dynamic_forms_internal.AddonSlot>>[]>;
+export const ADDON_TYPE_DEFINITIONS: InjectionToken<readonly AddonTypeDefinition<BaseAddon<AddonSlot>>[]>;
 
 // @public
 export const ADDON_TYPE_REGISTRY: InjectionToken<Map<string, AddonTypeDefinition<BaseAddon<AddonSlot>>>>;
@@ -344,20 +340,36 @@ export const DEFAULT_WRAPPERS: InjectionToken<Signal<readonly WrapperConfig[] | 
 export class DfAddonSlot {
     constructor();
     // (undocumented)
-    readonly addon: i0.InputSignal<AnyAddon>;
+    readonly addon: InputSignal<AnyAddon>;
     // (undocumented)
     protected readonly className: Signal<null | string>;
-    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
-    readonly hidden: i0.InputSignal<Signal<boolean> | undefined>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
+    readonly hidden: InputSignal<Signal<boolean> | undefined>;
     protected readonly isHidden: Signal<boolean>;
     protected readonly resolvedComponent: Signal<Type<unknown> | undefined>;
-    protected readonly slotAttr: Signal<_ng_forge_dynamic_forms_internal.AddonSlot>;
+    protected readonly slotAttr: Signal<AddonSlot>;
     protected readonly typeInputs: Signal<{
         addon: AnyAddon;
         fieldInputs: WrapperFieldInputs | undefined;
     }>;
     // (undocumented)
-    static ɵcmp: i0.ɵɵComponentDeclaration<DfAddonSlot, "df-addon-slot", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; "hidden": { "alias": "hidden"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<DfAddonSlot, "df-addon-slot", never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+        "hidden": {
+            "alias": "hidden";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<DfAddonSlot, never>;
 }
@@ -396,7 +408,7 @@ export class EventBus {
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<EventBus, never>;
     // (undocumented)
-    static ɵprov: i0.ɵɵInjectableDeclaration<EventBus>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
@@ -446,15 +458,26 @@ export interface FieldErrorsOptions {
 
 // @public
 export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldErrorDisplayClaim {
-    readonly claimedKey: i0.Signal<string | undefined>;
+    readonly claimedKey: Signal<string | undefined>;
     // (undocumented)
-    readonly fieldComponent: i0.Signal<ViewContainerRef>;
+    readonly fieldComponent: Signal<ViewContainerRef>;
     // (undocumented)
-    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
-    protected readonly ngf: _ng_forge_dynamic_forms_internal.FieldErrors;
-    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly ngf: FieldErrors;
+    readonly validationMessages: InputSignal<ValidationMessages | undefined>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, { "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<FieldErrorsWrapperBase, never, never, {
+        "validationMessages": {
+            "alias": "validationMessages";
+            "required": false;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<FieldErrorsWrapperBase, never>;
 }
@@ -551,13 +574,11 @@ export interface HttpResourceRequest {
 export type InferInputValue<T extends HtmlInputType> = T extends 'number' ? number : string;
 
 // @public
-export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
-    [Reg in R[number] as Reg['wrapperName']]: Reg extends {
+export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? { [Reg in R[number] as Reg['wrapperName']]: Reg extends {
         props: infer P;
     } ? Exclude<P, undefined> : {
         readonly type: Reg['wrapperName'];
-    };
-} : never;
+    }; } : never;
 
 // @public
 export const INITIALIZATION_TIMEOUT_MS: InjectionToken<number>;
@@ -676,26 +697,67 @@ export class NgForgeAction<TEvent extends FormEvent = FormEvent> {
     // (undocumented)
     readonly className: Signal<string>;
     // (undocumented)
-    readonly disabled: i0.InputSignal<boolean>;
+    readonly disabled: InputSignal<boolean>;
     dispatch(): void;
     // (undocumented)
-    readonly event: i0.InputSignal<FormEventConstructor<TEvent> | undefined>;
+    readonly event: InputSignal<FormEventConstructor<TEvent> | undefined>;
     // (undocumented)
-    readonly eventArgs: i0.InputSignal<EventArgs | undefined>;
+    readonly eventArgs: InputSignal<EventArgs | undefined>;
     // (undocumented)
-    readonly eventContext: i0.InputSignal<ArrayItemContext | undefined>;
+    readonly eventContext: InputSignal<ArrayItemContext | undefined>;
     // (undocumented)
-    readonly hidden: i0.InputSignal<boolean>;
+    readonly hidden: InputSignal<boolean>;
     // (undocumented)
     readonly key: Signal<string>;
     // (undocumented)
-    readonly label: i0.InputSignal<DynamicText>;
+    readonly label: InputSignal<DynamicText>;
     // (undocumented)
-    readonly props: i0.InputSignal<unknown>;
+    readonly props: InputSignal<unknown>;
     // (undocumented)
-    readonly tabIndex: i0.InputSignal<number | undefined>;
+    readonly tabIndex: InputSignal<number | undefined>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAction<any>, never, never, { "label": { "alias": "label"; "required": true; "isSignal": true; }; "disabled": { "alias": "disabled"; "required": false; "isSignal": true; }; "hidden": { "alias": "hidden"; "required": false; "isSignal": true; }; "tabIndex": { "alias": "tabIndex"; "required": false; "isSignal": true; }; "event": { "alias": "event"; "required": false; "isSignal": true; }; "eventArgs": { "alias": "eventArgs"; "required": false; "isSignal": true; }; "eventContext": { "alias": "eventContext"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAction<any>, never, never, {
+        "label": {
+            "alias": "label";
+            "required": true;
+            "isSignal": true;
+        };
+        "disabled": {
+            "alias": "disabled";
+            "required": false;
+            "isSignal": true;
+        };
+        "hidden": {
+            "alias": "hidden";
+            "required": false;
+            "isSignal": true;
+        };
+        "tabIndex": {
+            "alias": "tabIndex";
+            "required": false;
+            "isSignal": true;
+        };
+        "event": {
+            "alias": "event";
+            "required": false;
+            "isSignal": true;
+        };
+        "eventArgs": {
+            "alias": "eventArgs";
+            "required": false;
+            "isSignal": true;
+        };
+        "eventContext": {
+            "alias": "eventContext";
+            "required": false;
+            "isSignal": true;
+        };
+        "props": {
+            "alias": "props";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeAction<any>, never>;
 }
@@ -711,7 +773,27 @@ export interface NgForgeActionFixture<C> {
 // @public
 export class NgForgeActionHost {
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeActionHost, never, never, {}, {}, never, never, true, [{ directive: typeof NgForgeFieldShell; inputs: { "key": "key"; "className": "className"; }; outputs: {}; }, { directive: typeof NgForgeAction; inputs: { "label": "label"; "disabled": "disabled"; "hidden": "hidden"; "tabIndex": "tabIndex"; "event": "event"; "eventArgs": "eventArgs"; "eventContext": "eventContext"; "props": "props"; }; outputs: {}; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeActionHost, never, never, {}, {}, never, never, true, [{
+        directive: typeof NgForgeFieldShell;
+        inputs: {
+            "key": "key";
+            "className": "className";
+        };
+        outputs: {};
+    }, {
+        directive: typeof NgForgeAction;
+        inputs: {
+            "label": "label";
+            "disabled": "disabled";
+            "hidden": "hidden";
+            "tabIndex": "tabIndex";
+            "event": "event";
+            "eventArgs": "eventArgs";
+            "eventContext": "eventContext";
+            "props": "props";
+        };
+        outputs: {};
+    }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeActionHost, never>;
 }
@@ -719,7 +801,14 @@ export class NgForgeActionHost {
 // @public
 export class NgForgeAddonAction {
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonAction, never, never, {}, {}, never, never, true, [{ directive: typeof NgForgeAddonActionBase; inputs: { "addon": "addon"; "fieldInputs": "fieldInputs"; }; outputs: {}; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonAction, never, never, {}, {}, never, never, true, [{
+        directive: typeof NgForgeAddonActionBase;
+        inputs: {
+            "addon": "addon";
+            "fieldInputs": "fieldInputs";
+        };
+        outputs: {};
+    }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeAddonAction, never>;
 }
@@ -728,17 +817,28 @@ export class NgForgeAddonAction {
 export class NgForgeAddonActionBase {
     constructor();
     // (undocumented)
-    readonly addon: i0.InputSignal<ActionAddonShape>;
+    readonly addon: InputSignal<ActionAddonShape>;
     buildActionContext(): AddonActionContext;
     // (undocumented)
     readonly disabled: Signal<boolean>;
     dispatch(): void;
     // (undocumented)
-    readonly fieldInputs: i0.InputSignal<WrapperFieldInputs | undefined>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
     readonly loading: Signal<boolean>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonActionBase, never, never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonActionBase, never, never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeAddonActionBase, never>;
 }
@@ -746,7 +846,13 @@ export class NgForgeAddonActionBase {
 // @public
 export class NgForgeAddons {
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddons, never, never, {}, {}, never, never, true, [{ directive: typeof NgForgeAddonsBase; inputs: { "addons": "addons"; }; outputs: {}; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddons, never, never, {}, {}, never, never, true, [{
+        directive: typeof NgForgeAddonsBase;
+        inputs: {
+            "addons": "addons";
+        };
+        outputs: {};
+    }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeAddons, never>;
 }
@@ -754,7 +860,7 @@ export class NgForgeAddons {
 // @public
 export class NgForgeAddonsBase {
     constructor();
-    readonly addons: i0.InputSignal<readonly AnyAddon[] | undefined>;
+    readonly addons: InputSignal<readonly AnyAddon[] | undefined>;
     readonly addonsBySlot: Signal<ReadonlyMap<string, ReadonlyArray<AnyAddon>>>;
     // (undocumented)
     readonly hasAddons: Signal<boolean>;
@@ -767,7 +873,13 @@ export class NgForgeAddonsBase {
     // (undocumented)
     readonly visibleAddons: Signal<ReadonlyArray<AnyAddon>>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonsBase, never, never, { "addons": { "alias": "addons"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeAddonsBase, never, never, {
+        "addons": {
+            "alias": "addons";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeAddonsBase, never>;
 }
@@ -776,9 +888,15 @@ export class NgForgeAddonsBase {
 export class NgForgeControl {
     constructor();
     // (undocumented)
-    readonly target: i0.InputSignal<string | undefined>;
+    readonly target: InputSignal<string | undefined>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeControl, "[ngForgeControl]", never, { "target": { "alias": "ngForgeControl"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeControl, "[ngForgeControl]", never, {
+        "target": {
+            "alias": "ngForgeControl";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeControl, never>;
 }
@@ -800,28 +918,64 @@ export class NgForgeField {
     // (undocumented)
     readonly errorsToDisplay: Signal<ResolvedError[]>;
     // (undocumented)
-    readonly field: i0.InputSignal<FieldTree<unknown>>;
+    readonly field: InputSignal<FieldTree<unknown>>;
     // (undocumented)
     readonly hintId: Signal<string>;
     readonly key: Signal<string>;
     // (undocumented)
-    readonly label: i0.InputSignal<DynamicText | undefined>;
+    readonly label: InputSignal<DynamicText | undefined>;
     // @internal
     markClaimed(): void;
     // (undocumented)
-    readonly meta: i0.InputSignal<FieldMeta | undefined>;
+    readonly meta: InputSignal<FieldMeta | undefined>;
     // (undocumented)
-    readonly placeholder: i0.InputSignal<DynamicText | undefined>;
+    readonly placeholder: InputSignal<DynamicText | undefined>;
     // (undocumented)
-    readonly props: i0.InputSignal<unknown>;
+    readonly props: InputSignal<unknown>;
     // (undocumented)
     readonly showErrors: Signal<boolean>;
     // (undocumented)
-    readonly tabIndex: i0.InputSignal<number | undefined>;
+    readonly tabIndex: InputSignal<number | undefined>;
     // (undocumented)
-    readonly validationMessages: i0.InputSignal<ValidationMessages | undefined>;
+    readonly validationMessages: InputSignal<ValidationMessages | undefined>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeField, never, never, { "field": { "alias": "field"; "required": true; "isSignal": true; }; "label": { "alias": "label"; "required": false; "isSignal": true; }; "placeholder": { "alias": "placeholder"; "required": false; "isSignal": true; }; "tabIndex": { "alias": "tabIndex"; "required": false; "isSignal": true; }; "props": { "alias": "props"; "required": false; "isSignal": true; }; "meta": { "alias": "meta"; "required": false; "isSignal": true; }; "validationMessages": { "alias": "validationMessages"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeField, never, never, {
+        "field": {
+            "alias": "field";
+            "required": true;
+            "isSignal": true;
+        };
+        "label": {
+            "alias": "label";
+            "required": false;
+            "isSignal": true;
+        };
+        "placeholder": {
+            "alias": "placeholder";
+            "required": false;
+            "isSignal": true;
+        };
+        "tabIndex": {
+            "alias": "tabIndex";
+            "required": false;
+            "isSignal": true;
+        };
+        "props": {
+            "alias": "props";
+            "required": false;
+            "isSignal": true;
+        };
+        "meta": {
+            "alias": "meta";
+            "required": false;
+            "isSignal": true;
+        };
+        "validationMessages": {
+            "alias": "validationMessages";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeField, never>;
 }
@@ -839,7 +993,26 @@ export interface NgForgeFieldFixture<C, TValue = unknown> {
 // @public
 export class NgForgeFieldHost {
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeFieldHost, never, never, {}, {}, never, never, true, [{ directive: typeof NgForgeFieldShell; inputs: { "key": "key"; "className": "className"; }; outputs: {}; }, { directive: typeof NgForgeField; inputs: { "field": "field"; "label": "label"; "placeholder": "placeholder"; "tabIndex": "tabIndex"; "props": "props"; "meta": "meta"; "validationMessages": "validationMessages"; }; outputs: {}; }]>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeFieldHost, never, never, {}, {}, never, never, true, [{
+        directive: typeof NgForgeFieldShell;
+        inputs: {
+            "key": "key";
+            "className": "className";
+        };
+        outputs: {};
+    }, {
+        directive: typeof NgForgeField;
+        inputs: {
+            "field": "field";
+            "label": "label";
+            "placeholder": "placeholder";
+            "tabIndex": "tabIndex";
+            "props": "props";
+            "meta": "meta";
+            "validationMessages": "validationMessages";
+        };
+        outputs: {};
+    }]>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeFieldHost, never>;
 }
@@ -847,11 +1020,22 @@ export class NgForgeFieldHost {
 // @public
 export class NgForgeFieldShell {
     // (undocumented)
-    readonly className: i0.InputSignal<string>;
+    readonly className: InputSignal<string>;
     // (undocumented)
-    readonly key: i0.InputSignal<string>;
+    readonly key: InputSignal<string>;
     // (undocumented)
-    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeFieldShell, never, never, { "key": { "alias": "key"; "required": true; "isSignal": true; }; "className": { "alias": "className"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<NgForgeFieldShell, never, never, {
+        "key": {
+            "alias": "key";
+            "required": true;
+            "isSignal": true;
+        };
+        "className": {
+            "alias": "className";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<NgForgeFieldShell, never>;
 }

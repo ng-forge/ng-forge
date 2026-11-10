@@ -4,23 +4,19 @@
 
 ```ts
 
-import * as _angular_core from '@angular/core';
-import * as _angular_forms_signals from '@angular/forms/signals';
 import { EnvironmentInjector } from '@angular/core';
 import { EnvironmentProviders } from '@angular/core';
 import { FieldContext } from '@angular/forms/signals';
 import { FieldTree } from '@angular/forms/signals';
+import * as i0 from '@angular/core';
 import { InjectionToken } from '@angular/core';
 import { Injector } from '@angular/core';
-import { LogicFn } from '@angular/forms/signals';
+import { InputSignal } from '@angular/core';
+import { ModelSignal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { OperatorFunction } from 'rxjs';
-import { PipeTransform } from '@angular/core';
+import { OutputRef } from '@angular/core';
 import { Provider } from '@angular/core';
-import { ReadonlyFieldState } from '@angular/forms/signals';
-import { Resource } from '@angular/core';
 import { ResourceRef } from '@angular/core';
-import * as rxjs from 'rxjs';
 import { SchemaPath } from '@angular/forms/signals';
 import { SchemaPathTree } from '@angular/forms/signals';
 import { Signal } from '@angular/core';
@@ -270,16 +266,27 @@ export interface ComponentAddon extends BaseAddon {
 export class ComponentAddonComponent {
     constructor();
     // (undocumented)
-    readonly addon: _angular_core.InputSignal<ComponentAddon>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
+    readonly addon: InputSignal<ComponentAddon>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
-    protected readonly inputs: _angular_core.Signal<Record<string, unknown>>;
+    protected readonly inputs: Signal<Record<string, unknown>>;
     // (undocumented)
-    protected readonly resolvedComponent: _angular_core.Signal<Type<unknown> | undefined>;
+    protected readonly resolvedComponent: Signal<Type<unknown> | undefined>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<ComponentAddonComponent, "df-component-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<ComponentAddonComponent, "df-component-addon", never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<ComponentAddonComponent, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<ComponentAddonComponent, never>;
 }
 
 // @public
@@ -364,45 +371,62 @@ export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, Templ
 
 // @public
 export class DfPlaceholder {
-    readonly dfPlaceholder: _angular_core.InputSignal<string>;
-    readonly dfPlaceholderKey: _angular_core.InputSignal<string>;
+    readonly dfPlaceholder: InputSignal<string>;
+    readonly dfPlaceholderKey: InputSignal<string>;
     static ngTemplateContextGuard(_dir: DfPlaceholder, ctx: unknown): ctx is FieldPlaceholderContext;
     // (undocumented)
     readonly templateRef: TemplateRef<FieldPlaceholderContext>;
     // (undocumented)
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DfPlaceholder, "ng-template[dfPlaceholder], ng-template[dfPlaceholderKey]", ["dfPlaceholder"], { "dfPlaceholder": { "alias": "dfPlaceholder"; "required": false; "isSignal": true; }; "dfPlaceholderKey": { "alias": "dfPlaceholderKey"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<DfPlaceholder, "ng-template[dfPlaceholder], ng-template[dfPlaceholderKey]", ["dfPlaceholder"], {
+        "dfPlaceholder": {
+            "alias": "dfPlaceholder";
+            "required": false;
+            "isSignal": true;
+        };
+        "dfPlaceholderKey": {
+            "alias": "dfPlaceholderKey";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<DfPlaceholder, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<DfPlaceholder, never>;
 }
 
 // @public
 export class DfTemplate {
-    readonly dfTemplate: _angular_core.InputSignal<string>;
+    readonly dfTemplate: InputSignal<string>;
     readonly templateRef: TemplateRef<unknown>;
     // (undocumented)
-    static ɵdir: _angular_core.ɵɵDirectiveDeclaration<DfTemplate, "ng-template[dfTemplate]", ["dfTemplate"], { "dfTemplate": { "alias": "dfTemplate"; "required": true; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<DfTemplate, "ng-template[dfTemplate]", ["dfTemplate"], {
+        "dfTemplate": {
+            "alias": "dfTemplate";
+            "required": true;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<DfTemplate, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<DfTemplate, never>;
 }
 
 // @public
 export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFieldTypes[], TModel extends Record<string, unknown> = InferFormModel<TFields>> {
     constructor();
-    activeConfig: Signal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
-    activePageInitialized: _angular_core.OutputRef<ActivePageInitializedEvent>;
-    cleared: _angular_core.OutputRef<FormClearEvent>;
-    config: _angular_core.InputSignal<FormConfig<TFields, _ng_forge_dynamic_forms.InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
+    activeConfig: Signal<FormConfig<TFields, InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown> | undefined>;
+    activePageInitialized: OutputRef<ActivePageInitializedEvent>;
+    cleared: OutputRef<FormClearEvent>;
+    config: InputSignal<FormConfig<TFields, InferFormValue<TFields extends readonly RegisteredFieldTypes[] ? TFields : RegisteredFieldTypes[]>, Record<string, unknown>, unknown>>;
     defaultValues: WritableSignal<TModel>;
     dirty: Signal<boolean>;
-    dirtyChange: _angular_core.OutputRef<boolean>;
+    dirtyChange: OutputRef<boolean>;
     disabled: Signal<boolean>;
     effectiveFormOptions: Signal<{
         disabled?: boolean;
         idPrefix?: string;
         maxDerivationIterations?: number;
-        submitButton?: _ng_forge_dynamic_forms.SubmitButtonOptions;
-        nextButton?: _ng_forge_dynamic_forms.NextButtonOptions;
-        initialPage?: _ng_forge_dynamic_forms.InitialPageConfig | number;
+        submitButton?: SubmitButtonOptions;
+        nextButton?: NextButtonOptions;
+        initialPage?: InitialPageConfig | number;
         pagePreloadWindow?: number;
         fieldWindowing?: boolean | {
             eager?: number;
@@ -416,57 +440,88 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         excludeValueIfReadonly?: boolean;
         validateWhenHidden?: boolean;
         emitFormValueOnEvents?: boolean;
-        webMcp?: _ng_forge_dynamic_forms.WebMcpToolOptions;
+        webMcp?: WebMcpToolOptions;
     }>;
     // (undocumented)
     protected environmentInjector: EnvironmentInjector;
-    errors: Signal<_angular_forms_signals.ValidationError.WithFieldTree[]>;
-    events: _angular_core.OutputRef<_ng_forge_dynamic_forms.FormEvent>;
+    errors: Signal<ValidationError_2[]>;
+    events: OutputRef<FormEvent>;
     fieldLoadingErrors: WritableSignal<FieldLoadingError[]>;
-    fieldSignalContext: Signal<_ng_forge_dynamic_forms_internal.FieldSignalContext<TModel>>;
+    fieldSignalContext: Signal<FieldSignalContext<TModel>>;
     protected readonly fieldWindowing: Signal<FieldWindowingConfig>;
     form: Signal<FieldTree<TModel, number | string, "writable">>;
-    formModeDetection: Signal<_ng_forge_dynamic_forms.FormModeDetectionResult>;
-    formOptions: _angular_core.InputSignal<FormOptions | undefined>;
+    formModeDetection: Signal<FormModeDetectionResult>;
+    formOptions: InputSignal<FormOptions | undefined>;
     formValue: Signal<TModel>;
     protected readonly idPrefix: Signal<string>;
-    initialized$: rxjs.Observable<boolean>;
-    initialized: _angular_core.OutputRef<boolean>;
+    initialized$: Observable<boolean>;
+    initialized: OutputRef<boolean>;
     invalid: Signal<boolean>;
     protected onNativeSubmit(event: Event): void;
-    onPageChange: _angular_core.OutputRef<PageChangeEvent>;
-    onPageNavigationStateChange: _angular_core.OutputRef<PagerStateEvent>;
-    pageFieldDefinitions: Signal<_ng_forge_dynamic_forms.PageField<_ng_forge_dynamic_forms.PageAllowedChildren[]>[]>;
+    onPageChange: OutputRef<PageChangeEvent>;
+    onPageNavigationStateChange: OutputRef<PagerStateEvent>;
+    pageFieldDefinitions: Signal<PageField<PageAllowedChildren[]>[]>;
     protected placeholderContext(field: ResolvedField): FieldPlaceholderContext;
     protected placeholderGridClass(field: ResolvedField): string;
     protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null;
     renderPhase: Signal<"render" | "teardown">;
-    reset: _angular_core.OutputRef<FormResetEvent>;
+    reset: OutputRef<FormResetEvent>;
     protected resolvedFields: Signal<ResolvedField[]>;
     // (undocumented)
     shouldRender: Signal<boolean>;
-    source: _angular_core.InputSignal<"inline" | "json">;
-    submitted: _angular_core.OutputRef<TModel>;
+    source: InputSignal<"inline" | "json">;
+    submitted: OutputRef<TModel>;
     submitting: Signal<boolean>;
     touched: Signal<boolean>;
     valid: Signal<boolean>;
-    validityChange: _angular_core.OutputRef<boolean>;
-    value: _angular_core.ModelSignal<Partial<TModel> | undefined>;
-    readonly webMcpStatus: Signal<_ng_forge_dynamic_forms.WebMcpStatus>;
+    validityChange: OutputRef<boolean>;
+    value: ModelSignal<Partial<TModel> | undefined>;
+    readonly webMcpStatus: Signal<WebMcpStatus>;
     protected windowsField(field: ResolvedField, index: number): boolean;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, { "config": { "alias": "dynamic-form"; "required": true; "isSignal": true; }; "formOptions": { "alias": "formOptions"; "required": false; "isSignal": true; }; "value": { "alias": "value"; "required": false; "isSignal": true; }; "source": { "alias": "source"; "required": false; "isSignal": true; }; }, { "value": "valueChange"; "validityChange": "validityChange"; "dirtyChange": "dirtyChange"; "submitted": "submitted"; "reset": "reset"; "cleared": "cleared"; "events": "events"; "initialized": "initialized"; "activePageInitialized": "activePageInitialized"; "onPageChange": "onPageChange"; "onPageNavigationStateChange": "onPageNavigationStateChange"; }, ["_projectedTemplates", "_projectedPlaceholders"], never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<DynamicForm<any, any>, "form[dynamic-form]", never, {
+        "config": {
+            "alias": "dynamic-form";
+            "required": true;
+            "isSignal": true;
+        };
+        "formOptions": {
+            "alias": "formOptions";
+            "required": false;
+            "isSignal": true;
+        };
+        "value": {
+            "alias": "value";
+            "required": false;
+            "isSignal": true;
+        };
+        "source": {
+            "alias": "source";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {
+        "value": "valueChange";
+        "validityChange": "validityChange";
+        "dirtyChange": "dirtyChange";
+        "submitted": "submitted";
+        "reset": "reset";
+        "cleared": "cleared";
+        "events": "events";
+        "initialized": "initialized";
+        "activePageInitialized": "activePageInitialized";
+        "onPageChange": "onPageChange";
+        "onPageNavigationStateChange": "onPageNavigationStateChange";
+    }, ["_projectedTemplates", "_projectedPlaceholders"], never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }
 
 // @public
-export interface DynamicFormActionRegistry {
-}
+export interface DynamicFormActionRegistry {}
 
 // @public
-export interface DynamicFormAddonActionPresetRegistry {
-}
+export interface DynamicFormAddonActionPresetRegistry {}
 
 // @public
 export interface DynamicFormAddonRegistry {
@@ -479,8 +534,7 @@ export interface DynamicFormAddonRegistry {
 }
 
 // @public
-export interface DynamicFormAddonSlotRegistry {
-}
+export interface DynamicFormAddonSlotRegistry {}
 
 // @public
 export class DynamicFormError extends Error {
@@ -529,9 +583,9 @@ export class EventDispatcher {
     disconnect(): void;
     dispatch(event: FormEvent): void;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<EventDispatcher, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<EventDispatcher, never>;
     // (undocumented)
-    static ɵprov: _angular_core.ɵɵInjectableDeclaration<EventDispatcher>;
+    static ɵprov: i0.ɵɵInjectableDeclaration<any>;
 }
 
 // @public
@@ -605,9 +659,7 @@ export type FieldParkingOption = boolean | {
 };
 
 // @public
-export type FieldPathAccess<TValue> = {
-    [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>;
-};
+export type FieldPathAccess<TValue> = { [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>; };
 
 // @public
 export interface FieldPlaceholderContext {
@@ -854,13 +906,11 @@ export interface HttpValidationResponseMapping {
 export type InferFormValue<T> = ExtractFields<T> extends readonly RegisteredFieldTypes[] ? InferFormValueWithDepth<ExtractFields<T> extends RegisteredFieldTypes[] ? ExtractFields<T> : [...ExtractFields<T>], 5> : never;
 
 // @public
-export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? {
-    [Reg in R[number] as Reg['wrapperName']]: Reg extends {
+export type InferWrapperRegistry<T> = T extends WrappersBundle<infer R> ? { [Reg in R[number] as Reg['wrapperName']]: Reg extends {
         props: infer P;
     } ? Exclude<P, undefined> : {
         readonly type: Reg['wrapperName'];
-    };
-} : never;
+    }; } : never;
 
 // @public
 export interface InitialPageConfig {
@@ -1233,17 +1283,28 @@ export interface TemplateAddon extends BaseAddon {
 export class TemplateAddonComponent {
     constructor();
     // (undocumented)
-    readonly addon: _angular_core.InputSignal<TemplateAddon>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
-    protected readonly outletContext: _angular_core.Signal<{
-        $implicit: WrapperFieldInputs | undefined;
+    readonly addon: InputSignal<TemplateAddon>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
+    protected readonly outletContext: Signal<    {
+    $implicit: WrapperFieldInputs | undefined;
     }>;
     // (undocumented)
-    protected readonly template: _angular_core.Signal<_angular_core.TemplateRef<unknown> | null>;
+    protected readonly template: Signal<TemplateRef<unknown> | null>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<TemplateAddonComponent, "df-template-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<TemplateAddonComponent, "df-template-addon", never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<TemplateAddonComponent, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<TemplateAddonComponent, never>;
 }
 
 // @public
@@ -1257,12 +1318,23 @@ export interface TextAddon extends BaseAddon {
 // @public
 export class TextAddonComponent {
     // (undocumented)
-    readonly addon: _angular_core.InputSignal<TextAddon>;
-    readonly fieldInputs: _angular_core.InputSignal<WrapperFieldInputs | undefined>;
+    readonly addon: InputSignal<TextAddon>;
+    readonly fieldInputs: InputSignal<WrapperFieldInputs | undefined>;
     // (undocumented)
-    static ɵcmp: _angular_core.ɵɵComponentDeclaration<TextAddonComponent, "df-text-addon", never, { "addon": { "alias": "addon"; "required": true; "isSignal": true; }; "fieldInputs": { "alias": "fieldInputs"; "required": false; "isSignal": true; }; }, {}, never, never, true, never>;
+    static ɵcmp: i0.ɵɵComponentDeclaration<TextAddonComponent, "df-text-addon", never, {
+        "addon": {
+            "alias": "addon";
+            "required": true;
+            "isSignal": true;
+        };
+        "fieldInputs": {
+            "alias": "fieldInputs";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
     // (undocumented)
-    static ɵfac: _angular_core.ɵɵFactoryDeclaration<TextAddonComponent, never>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<TextAddonComponent, never>;
 }
 
 // @public
@@ -1372,9 +1444,7 @@ export function withFieldWindowing(config?: {
 }): DynamicFormFeature<'field-windowing'>;
 
 // @public (undocumented)
-export type WithInputSignals<T> = {
-    readonly [K in keyof T]-?: Signal<T[K]>;
-};
+export type WithInputSignals<T> = { readonly [K in keyof T]-?: Signal<T[K]>; };
 
 // @public
 export function withLegacyStatusClasses(): DynamicFormFeature<'legacy-status-classes'>;

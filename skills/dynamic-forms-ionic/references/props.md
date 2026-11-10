@@ -75,6 +75,7 @@ what the types actually declare rather than a copy maintained beside them.
 | `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `doneText` | `string` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `locale` | `string` | no |  |
 | `multiple` | `boolean` | no |  |
 | `preferWheel` | `boolean` | no |  |
 | `presentation` | `'date' \| 'date-time' \| 'month' \| 'month-year' \| 'time' \| 'time-date' \| 'year'` | no |  |

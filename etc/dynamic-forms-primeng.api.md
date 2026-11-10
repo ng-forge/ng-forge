@@ -6,7 +6,6 @@
 
 import { AddonActionHandler } from '@ng-forge/dynamic-forms/integration';
 import { AddonActionPreset } from '@ng-forge/dynamic-forms';
-import * as _angular_core from '@angular/core';
 import { AppendArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { ArrayAllowedChildren } from '@ng-forge/dynamic-forms';
 import { BaseAddon } from '@ng-forge/dynamic-forms';
@@ -22,16 +21,18 @@ import { FieldTypeDefinition } from '@ng-forge/dynamic-forms/integration';
 import { FormConfig } from '@ng-forge/dynamic-forms';
 import { FormEvent } from '@ng-forge/dynamic-forms';
 import { FormSubmitEvent } from '@ng-forge/dynamic-forms';
+import * as i0 from '@angular/core';
+import * as i1 from '@ng-forge/dynamic-forms/integration';
 import { InferFormValue } from '@ng-forge/dynamic-forms';
 import { InjectionToken } from '@angular/core';
 import { InputField } from '@ng-forge/dynamic-forms/integration';
 import { InputProps } from '@ng-forge/dynamic-forms/integration';
+import { InputSignal } from '@angular/core';
 import { InsertArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { MultiCheckboxField } from '@ng-forge/dynamic-forms/integration';
 import { NarrowFields } from '@ng-forge/dynamic-forms';
 import { NextPageEvent } from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms from '@ng-forge/dynamic-forms';
-import * as _ng_forge_dynamic_forms_integration from '@ng-forge/dynamic-forms/integration';
+import { NgForgeAction } from '@ng-forge/dynamic-forms/integration';
 import { PopArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PrependArrayItemEvent } from '@ng-forge/dynamic-forms';
 import { PreviousPageEvent } from '@ng-forge/dynamic-forms';
@@ -43,12 +44,16 @@ import { RemoveAtIndexEvent } from '@ng-forge/dynamic-forms';
 import { SelectField } from '@ng-forge/dynamic-forms/integration';
 import { SelectProps } from '@ng-forge/dynamic-forms/integration';
 import { ShiftArrayItemEvent } from '@ng-forge/dynamic-forms';
+import { Signal } from '@angular/core';
 import { SliderField } from '@ng-forge/dynamic-forms/integration';
 import { TemplateAddon } from '@ng-forge/dynamic-forms';
 import { TextAddon } from '@ng-forge/dynamic-forms';
 import { TextareaField } from '@ng-forge/dynamic-forms/integration';
 import { TextareaProps } from '@ng-forge/dynamic-forms/integration';
 import { ToggleField } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeAddonAction } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeAddons } from '@ng-forge/dynamic-forms/integration';
+import { TypedNgForgeField } from '@ng-forge/dynamic-forms/integration';
 import { ValueType } from '@ng-forge/dynamic-forms';
 import { WrapperFieldInputs } from '@ng-forge/dynamic-forms/integration';
 import { WrapperTypeDefinition } from '@ng-forge/dynamic-forms/integration';
@@ -68,8 +73,7 @@ export type PrimeAddArrayItemButtonField = Omit<PrimeButtonField<AppendArrayItem
 export type PrimeAddon = PrimeButtonAddon | PrimeIconAddon;
 
 // @public
-export interface PrimeAddonExtensions {
-}
+export interface PrimeAddonExtensions {}
 
 // @public
 export type PrimeButtonAddon = PiButtonBase & PiButtonContent & PiButtonClick;
@@ -181,7 +185,7 @@ export interface PrimeIconAddon extends BaseAddon {
 export type PrimeIconAddonComponent = PrimeIconAddonComponent_2;
 
 // @public
-export type PrimeInputAddon = PrimeAddonExtension | PrimeButtonAddon | PrimeIconAddon | TemplateAddon | TextAddon;
+export type PrimeInputAddon = PrimeAddonExtension_2 | PrimeButtonAddon | PrimeIconAddon | TemplateAddon | TextAddon;
 
 // @public (undocumented)
 export type PrimeInputField = InputField<PrimeInputProps> & {

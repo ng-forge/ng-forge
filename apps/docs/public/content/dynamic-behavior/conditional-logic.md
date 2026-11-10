@@ -657,6 +657,8 @@ The right `pendingValue` depends on the logic type and desired UX:
 
 ## All Operators
 
+An empty field value (`null`, `undefined` or `''`) never satisfies the numeric operators (`greater`, `less`, `greaterOrEqual`, `lessOrEqual`) or the string operators (`contains`, `startsWith`, `endsWith`), so an empty number field doesn't count as `>= 0`. `matches` tests an empty value as `''`, so `'^$'` matches it. `0` and `false` are values, not empty. `equals` and `notEquals` compare strictly and are unaffected.
+
 ### Equality Operators
 
 #### equals
@@ -796,6 +798,8 @@ Regular expression match.
 ## Combining Conditions
 
 **Note:** `and`/`or` composites accept only synchronous sub-conditions. Nesting `http` or `async` conditions inside them throws an error; declare async conditions as separate `logic` entries on the field.
+
+An `and` or `or` group with no conditions never fires, so a rule you haven't finished doesn't hide, disable or require the field. Development builds log a warning for empty groups.
 
 ### AND Logic
 

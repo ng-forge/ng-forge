@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 
+function isLocaleTag(value: string): boolean {
+  try {
+    return Intl.getCanonicalLocales(value).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Ionic color palette.
  */
@@ -89,6 +97,7 @@ export const IonicDatepickerPropsSchema = z.object({
   size: z.enum(['cover', 'fixed']).optional(),
   color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
   hint: DynamicTextSchema.optional(),
+  locale: z.string().refine(isLocaleTag, { message: 'Expected a BCP 47 locale tag such as "de-DE"' }).optional(),
   placeholder: DynamicTextSchema.optional(),
 });
 

@@ -204,6 +204,9 @@ export class Tokenizer {
       case '=>':
         this.position += 2;
         return { type: TokenType.ARROW, value: '=>', position: start };
+      case '??':
+        this.position += 2;
+        return { type: TokenType.NULLISH, value: '??', position: start };
       case '?.':
         this.position += 2;
         return { type: TokenType.OPTIONAL_DOT, value: '?.', position: start };

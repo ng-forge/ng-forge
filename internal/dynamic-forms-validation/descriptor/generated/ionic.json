@@ -278,6 +278,12 @@
             "kind": "string"
           }
         },
+        "locale": {
+          "required": false,
+          "type": {
+            "kind": "string"
+          }
+        },
         "multiple": {
           "required": false,
           "type": {

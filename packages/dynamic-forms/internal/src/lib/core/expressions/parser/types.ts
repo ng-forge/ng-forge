@@ -31,6 +31,7 @@ export enum TokenType {
   // Logical
   AND = 'AND',
   OR = 'OR',
+  NULLISH = 'NULLISH',
   NOT = 'NOT',
 
   // Punctuation

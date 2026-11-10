@@ -51,7 +51,7 @@ export class Parser {
    * the arrow-function check and logical-or in precedence.
    */
   private parseConditional(): ASTNode {
-    const test = this.parseLogicalOr();
+    const test = this.parseShortCircuit();
     if (!this.match(TokenType.QUESTION)) return test;
 
     const consequent = this.parseExpression();
@@ -120,8 +120,33 @@ export class Parser {
     return this.tokens[index].type === type;
   }
 
-  private parseLogicalOr(): ASTNode {
-    let node = this.parseLogicalAnd();
+  /**
+   * `a ?? b` or an `||`/`&&` chain. As in JavaScript, `??` can't be mixed with
+   * `&&` or `||` without parentheses.
+   */
+  private parseShortCircuit(): ASTNode {
+    // The first operand is parsed once and handed on: re-parsing it would double the work at every nesting level.
+    const first = this.parseEquality();
+    if (!this.check(TokenType.NULLISH)) {
+      const node = this.parseLogicalOr(first);
+      if (this.check(TokenType.NULLISH)) this.throwMixedNullish();
+      return node;
+    }
+
+    let node = first;
+    while (this.match(TokenType.NULLISH)) {
+      node = { type: 'BinaryOp', operator: '??', left: node, right: this.parseEquality() };
+    }
+    if (this.check(TokenType.AND) || this.check(TokenType.OR)) this.throwMixedNullish();
+    return node;
+  }
+
+  private throwMixedNullish(): never {
+    throw new ExpressionParserError('Cannot mix "??" with "&&" or "||" without parentheses', this.peek().position, this.expression);
+  }
+
+  private parseLogicalOr(first?: ASTNode): ASTNode {
+    let node = this.parseLogicalAnd(first);
 
     while (this.match(TokenType.OR)) {
       const operator = this.previous().value;
@@ -132,8 +157,8 @@ export class Parser {
     return node;
   }
 
-  private parseLogicalAnd(): ASTNode {
-    let node = this.parseEquality();
+  private parseLogicalAnd(first?: ASTNode): ASTNode {
+    let node = first ?? this.parseEquality();
 
     while (this.match(TokenType.AND)) {
       const operator = this.previous().value;
