@@ -228,6 +228,10 @@ export class Evaluator {
       const left = this.evaluate(node.left);
       return left ? left : this.evaluate(node.right);
     }
+    if (node.operator === '??') {
+      const left = this.evaluate(node.left);
+      return left ?? this.evaluate(node.right);
+    }
 
     // For all other operators, evaluate both sides
     const left = this.evaluate(node.left);

@@ -321,19 +321,20 @@ customFnConfig: {
 
 In JavaScript expressions (`type: 'javascript'`), you can use:
 
-| Feature               | Examples                                                           |
-| --------------------- | ------------------------------------------------------------------ |
-| **Property access**   | `formValue.name`, `formValue.user.profile.email`                   |
-| **Computed access**   | `items[0]`, `obj["key"]`, `response.items[0].value`                |
-| **Optional chaining** | `formValue.user?.name`, `formValue.items?.[0]`, `arr?.map(x => x)` |
-| **Ternary**           | `formValue.kind === 'a' ? formValue.x : formValue.y`               |
-| **Object literals**   | `{ value: d.id, label: d.name }` (handy inside arrow bodies)       |
-| **Arrow functions**   | `arr.map(x => x * 2)`, `arr.filter(x => x.active)`                 |
-| **Comparisons**       | `===`, `!==`, `>`, `<`, `>=`, `<=`                                 |
-| **Logical operators** | `&&`, `\|\|`, `!`                                                  |
-| **Arithmetic**        | `+`, `-`, `*`, `/`, `%`                                            |
-| **String methods**    | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
-| **Array methods**     | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
+| Feature                | Examples                                                           |
+| ---------------------- | ------------------------------------------------------------------ |
+| **Property access**    | `formValue.name`, `formValue.user.profile.email`                   |
+| **Computed access**    | `items[0]`, `obj["key"]`, `response.items[0].value`                |
+| **Optional chaining**  | `formValue.user?.name`, `formValue.items?.[0]`, `arr?.map(x => x)` |
+| **Ternary**            | `formValue.kind === 'a' ? formValue.x : formValue.y`               |
+| **Object literals**    | `{ value: d.id, label: d.name }` (handy inside arrow bodies)       |
+| **Arrow functions**    | `arr.map(x => x * 2)`, `arr.filter(x => x.active)`                 |
+| **Comparisons**        | `===`, `!==`, `>`, `<`, `>=`, `<=`                                 |
+| **Logical operators**  | `&&`, `\|\|`, `!`                                                  |
+| **Nullish coalescing** | `formValue.age ?? 0`, `formValue.user?.name ?? 'anonymous'`        |
+| **Arithmetic**         | `+`, `-`, `*`, `/`, `%`                                            |
+| **String methods**     | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
+| **Array methods**      | See [Whitelisted Methods](#whitelisted-methods-reference) above    |
 
 **Example**:
 
@@ -341,7 +342,11 @@ In JavaScript expressions (`type: 'javascript'`), you can use:
 expression: 'formValue.age >= 18 && formValue.email.includes("@example.com")';
 ```
 
-**Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only; arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
+As in JavaScript, `??` can't be mixed with `&&` or `||` without parentheses: write `(a ?? b) || c`.
+
+**Not Supported**: assignment (`x = 5`, `x++`), `new` keyword, global objects and functions (`String(x)`, `Number(x)`, `Array.isArray(x)`, `Math`, `JSON`), function declarations, class declarations, spread (`[...arr]`), destructuring, template literals, regex literals. Method calls remain whitelist-only; arrow functions can only invoke methods that pass the whitelist (e.g., `.map`, `.filter`, `.reduce`), and the same blocklist (`constructor`, `__proto__`, etc.) applies to both dotted and computed member access.
+
+An expression the parser can't read makes its rule evaluate to `false`. In development builds, the form logs a warning at startup that names the field, the expression and the reason.
 
 ## Summary
 

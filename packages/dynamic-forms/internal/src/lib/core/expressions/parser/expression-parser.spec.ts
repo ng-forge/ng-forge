@@ -472,6 +472,45 @@ describe('ExpressionParser', () => {
     });
   });
 
+  describe('nullish coalescing', () => {
+    it('falls back only for null and undefined', () => {
+      expect(ExpressionParser.evaluate('a ?? "fallback"', { a: null })).toBe('fallback');
+      expect(ExpressionParser.evaluate('a ?? "fallback"', { a: undefined })).toBe('fallback');
+      expect(ExpressionParser.evaluate('a ?? "fallback"', {})).toBe('fallback');
+      expect(ExpressionParser.evaluate('a ?? "fallback"', { a: 0 })).toBe(0);
+      expect(ExpressionParser.evaluate('a ?? "fallback"', { a: '' })).toBe('');
+      expect(ExpressionParser.evaluate('a ?? "fallback"', { a: false })).toBe(false);
+    });
+
+    it('does not evaluate the right side when the left side is defined', () => {
+      expect(ExpressionParser.evaluate('a ?? b.c.d', { a: 1, b: null })).toBe(1);
+    });
+
+    it('chains left to right', () => {
+      expect(ExpressionParser.evaluate('a ?? b ?? 3', { a: null, b: null })).toBe(3);
+      expect(ExpressionParser.evaluate('a ?? b ?? 3', { a: null, b: 2 })).toBe(2);
+    });
+
+    it('works with optional chaining and comparisons', () => {
+      expect(ExpressionParser.evaluate('(formValue.age ?? 0) >= 18', { formValue: {} })).toBe(false);
+      expect(ExpressionParser.evaluate('(formValue.age ?? 0) >= 18', { formValue: { age: 20 } })).toBe(true);
+      expect(ExpressionParser.evaluate('formValue?.user?.name ?? "anon"', { formValue: {} })).toBe('anon');
+    });
+
+    it('binds looser than comparison and tighter than the ternary', () => {
+      expect(ExpressionParser.evaluate('a ?? 1 + 1', { a: null })).toBe(2);
+      expect(ExpressionParser.evaluate('a ?? b ? "yes" : "no"', { a: null, b: true })).toBe('yes');
+    });
+
+    it('rejects mixing with && or || without parentheses, as JavaScript does', () => {
+      expect(() => ExpressionParser.evaluate('a ?? b || c', { a: 1 })).toThrow(ExpressionParserError);
+      expect(() => ExpressionParser.evaluate('a || b ?? c', { a: 1 })).toThrow(ExpressionParserError);
+      expect(() => ExpressionParser.evaluate('a && b ?? c', { a: 1 })).toThrow(ExpressionParserError);
+      expect(ExpressionParser.evaluate('(a ?? b) || c', { a: null, b: 0, c: 'c' })).toBe('c');
+      expect(ExpressionParser.evaluate('a ?? (b || c)', { a: null, b: 0, c: 'c' })).toBe('c');
+    });
+  });
+
   describe('unary operations', () => {
     it('should negate numbers', () => {
       expect(ExpressionParser.evaluate('-5', {})).toBe(-5);

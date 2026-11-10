@@ -224,6 +224,74 @@ describe('validateFormConfig', () => {
     });
   });
 
+  describe('expression syntax warnings', () => {
+    it('warns once per invalid javascript expression, naming the field and the expression', () => {
+      const logger = mockLogger();
+      const fields = [
+        {
+          key: 'email',
+          type: 'input',
+          logic: [{ type: 'hidden', condition: { type: 'javascript', expression: 'new Date() > 0' } }],
+        },
+      ] as FieldDef<unknown>[];
+      validateFormConfig(fields, emptyRegistry(), logger);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'email'"));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('new Date() > 0'));
+    });
+
+    it('finds expressions nested in and/or conditions and inside containers', () => {
+      const logger = mockLogger();
+      const fields = [
+        {
+          key: 'section',
+          type: 'group',
+          fields: [
+            {
+              key: 'city',
+              type: 'input',
+              logic: [
+                {
+                  type: 'disabled',
+                  condition: {
+                    type: 'and',
+                    conditions: [
+                      { type: 'javascript', expression: 'formValue.a ==' },
+                      { type: 'fieldValue', fieldPath: 'b', operator: 'equals', value: 1 },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ] as FieldDef<unknown>[];
+      validateFormConfig(fields, emptyRegistry(), logger);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'city'"));
+    });
+
+    it('does not warn for valid expressions, including ??', () => {
+      const logger = mockLogger();
+      const fields = [
+        {
+          key: 'age',
+          type: 'input',
+          logic: [{ type: 'hidden', condition: { type: 'javascript', expression: '(formValue.age ?? 0) < 18' } }],
+        },
+      ] as FieldDef<unknown>[];
+      validateFormConfig(fields, emptyRegistry(), logger);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not throw for an invalid expression', () => {
+      const fields = [
+        { key: 'x', type: 'input', logic: [{ type: 'hidden', condition: { type: 'javascript', expression: 'a ?? b || c' } }] },
+      ] as FieldDef<unknown>[];
+      expect(() => validateFormConfig(fields, emptyRegistry(), mockLogger())).not.toThrow();
+    });
+  });
+
   describe('unregistered field type warnings', () => {
     it('should not warn when registry is empty (no adapter registered)', () => {
       const logger = mockLogger();

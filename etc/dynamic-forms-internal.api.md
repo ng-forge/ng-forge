@@ -1941,6 +1941,8 @@ export enum TokenType {
     // (undocumented)
     NULL = "NULL",
     // (undocumented)
+    NULLISH = "NULLISH",
+    // (undocumented)
     NUMBER = "NUMBER",
     // (undocumented)
     OPTIONAL_DOT = "OPTIONAL_DOT",
