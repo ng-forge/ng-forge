@@ -9,8 +9,12 @@ import {
   Injector,
   input,
   signal,
+  TemplateRef,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { DfFieldOutlet } from '../../directives/df-field-outlet/df-field-outlet.directive';
+import { DF_FIELD_PLACEHOLDERS, type FieldPlaceholderContext } from '../../directives/df-placeholder/df-placeholder.directive';
+import { createPlaceholderContextCache, resolvePlaceholderTemplate } from '../../directives/df-placeholder/resolve-placeholder-template';
 import { outputFromObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { derivedFromDeferred } from '@ng-forge/dynamic-forms/internal';
@@ -38,7 +42,7 @@ import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
 /** Renders a single page in multi-page (wizard) forms. */
 @Component({
   selector: 'section[page-field]',
-  imports: [DfFieldOutlet],
+  imports: [DfFieldOutlet, NgTemplateOutlet],
   template: `
     @for (field of resolvedFields(); track field.key; let i = $index) {
       @if (windowsField(field, i)) {
@@ -51,7 +55,12 @@ import { ComponentInitializedEvent } from '@ng-forge/dynamic-forms/internal';
               [style.min-height]="fieldWindowing().placeholderHeight"
               [attr.data-field-key]="field.key"
               aria-hidden="true"
-            ></div>
+              inert
+            >
+              @if (placeholderTemplate(field); as tpl) {
+                <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="placeholderContext(field)" />
+              }
+            </div>
           }
         }
       } @else {
@@ -85,6 +94,8 @@ export default class PageFieldComponent {
   private readonly logger = inject(DynamicFormLogger);
   private readonly formOptions = inject(FORM_OPTIONS, { optional: true });
   private readonly globalFieldWindowing = inject(FIELD_WINDOWING);
+  private readonly fieldPlaceholders = inject(DF_FIELD_PLACEHOLDERS, { optional: true });
+  private readonly placeholderContextFor = createPlaceholderContextCache();
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Inputs
@@ -205,6 +216,17 @@ export default class PageFieldComponent {
   protected placeholderGridClass(field: ResolvedField): string {
     const grid = getGridClassString(field.fieldDef);
     return grid ? `df-field-placeholder ${grid}` : 'df-field-placeholder';
+  }
+
+  /** Projected placeholder template for a windowed field, or null for the built-in bare div. */
+  protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null {
+    const placeholders = this.fieldPlaceholders?.();
+    return placeholders ? resolvePlaceholderTemplate(placeholders, { key: field.key, type: field.fieldDef.type }) : null;
+  }
+
+  /** Memoised template context for a windowed field's projected placeholder. */
+  protected placeholderContext(field: ResolvedField): FieldPlaceholderContext {
+    return this.placeholderContextFor(field);
   }
 
   // ─────────────────────────────────────────────────────────────────────────────

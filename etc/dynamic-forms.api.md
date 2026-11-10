@@ -370,6 +370,30 @@ export interface DeclarativeHttpValidatorConfig extends BaseValidatorConfig {
 export const DF_FIELD_TEMPLATES: InjectionToken<Signal<ReadonlyMap<string, TemplateRef<unknown>>>>;
 
 // @public
+export class DfPlaceholder {
+    readonly dfPlaceholder: InputSignal<string>;
+    readonly dfPlaceholderKey: InputSignal<string>;
+    static ngTemplateContextGuard(_dir: DfPlaceholder, ctx: unknown): ctx is FieldPlaceholderContext;
+    // (undocumented)
+    readonly templateRef: TemplateRef<FieldPlaceholderContext>;
+    // (undocumented)
+    static ɵdir: i0.ɵɵDirectiveDeclaration<DfPlaceholder, "ng-template[dfPlaceholder], ng-template[dfPlaceholderKey]", ["dfPlaceholder"], {
+        "dfPlaceholder": {
+            "alias": "dfPlaceholder";
+            "required": false;
+            "isSignal": true;
+        };
+        "dfPlaceholderKey": {
+            "alias": "dfPlaceholderKey";
+            "required": false;
+            "isSignal": true;
+        };
+    }, {}, never, never, true, never>;
+    // (undocumented)
+    static ɵfac: i0.ɵɵFactoryDeclaration<DfPlaceholder, never>;
+}
+
+// @public
 export class DfTemplate {
     readonly dfTemplate: InputSignal<string>;
     readonly templateRef: TemplateRef<unknown>;
@@ -437,7 +461,9 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
     onPageChange: OutputRef<PageChangeEvent>;
     onPageNavigationStateChange: OutputRef<PagerStateEvent>;
     pageFieldDefinitions: Signal<PageField<PageAllowedChildren[]>[]>;
+    protected placeholderContext(field: ResolvedField): FieldPlaceholderContext;
     protected placeholderGridClass(field: ResolvedField): string;
+    protected placeholderTemplate(field: ResolvedField): TemplateRef<FieldPlaceholderContext> | null;
     renderPhase: Signal<"render" | "teardown">;
     reset: OutputRef<FormResetEvent>;
     protected resolvedFields: Signal<ResolvedField[]>;
@@ -486,7 +512,7 @@ export class DynamicForm<TFields extends RegisteredFieldTypes[] = RegisteredFiel
         "activePageInitialized": "activePageInitialized";
         "onPageChange": "onPageChange";
         "onPageNavigationStateChange": "onPageNavigationStateChange";
-    }, ["_projectedTemplates"], never, true, never>;
+    }, ["_projectedTemplates", "_projectedPlaceholders"], never, true, never>;
     // (undocumented)
     static ɵfac: i0.ɵɵFactoryDeclaration<DynamicForm<any, any>, never>;
 }
@@ -634,6 +660,22 @@ export type FieldParkingOption = boolean | {
 
 // @public
 export type FieldPathAccess<TValue> = { [K in keyof TValue]: SchemaPath<TValue[K]> | SchemaPathTree<TValue[K]>; };
+
+// @public
+export interface FieldPlaceholderContext {
+    // (undocumented)
+    readonly $implicit: FieldPlaceholderInfo;
+    // (undocumented)
+    readonly field: FieldPlaceholderInfo;
+}
+
+// @public
+export interface FieldPlaceholderInfo {
+    readonly col?: number;
+    readonly key: string;
+    readonly label?: string;
+    readonly type: string;
+}
 
 // @public
 export interface FieldRegistryContainers {

@@ -9,7 +9,7 @@ import { ThemeService } from '../services/theme.service';
 import { Logo } from '../components/logo/logo.component';
 import { AdapterSubBarComponent } from '../components/adapter-sub-bar/adapter-sub-bar.component';
 import { SearchComponent } from '../components/search/search.component';
-import { NAV_ITEMS, type NavItem } from './nav.config';
+import { NAV_ITEMS, type NavBadgeTone, type NavItem } from './nav.config';
 @Component({
   selector: 'app-docs-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, Logo, AdapterSubBarComponent, SearchComponent],
@@ -154,6 +154,20 @@ export class DocsLayoutComponent {
     walk(this.navItems());
     return result;
   });
+
+  protected badgeTone(item: NavItem): NavBadgeTone {
+    return item.badgeTone ?? 'success';
+  }
+
+  /** Tone of the first badged page inside a category, or null when none has a badge. */
+  protected childBadgeTone(item: NavItem): NavBadgeTone | null {
+    for (const child of item.children ?? []) {
+      if (child.badge) return this.badgeTone(child);
+      const nested = this.childBadgeTone(child);
+      if (nested) return nested;
+    }
+    return null;
+  }
 
   protected isCategoryExpanded(item: NavItem): boolean {
     return this.expandedState().get(item.path) ?? false;

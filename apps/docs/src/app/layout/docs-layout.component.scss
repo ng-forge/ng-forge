@@ -199,9 +199,32 @@ $mobile-bp: 1024px;
   letter-spacing: 0.05em;
   line-height: 16px;
   border-radius: 4px;
-  background: rgba(34, 197, 94, 0.18);
-  color: #22c55e;
+  background: color-mix(in srgb, var(--nav-badge-color) 18%, transparent);
+  color: var(--nav-badge-color);
   margin-left: 8px;
+}
+
+// Badge tones, shared by badges and the category dots that echo them.
+.nav-badge,
+.nav-badge-dot {
+  --nav-badge-color: #22c55e;
+
+  &[data-tone='warning'] {
+    --nav-badge-color: #f59e0b;
+  }
+
+  &[data-tone='danger'] {
+    --nav-badge-color: #ef4444;
+  }
+}
+
+// Marks a category that contains a badged page, in that badge's tone.
+.nav-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nav-badge-color);
+  flex-shrink: 0;
 }
 
 // ============================================

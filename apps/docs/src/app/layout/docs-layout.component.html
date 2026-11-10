@@ -54,7 +54,9 @@
             <button class="nav-category-btn" (click)="toggleCategory(item.path)" [attr.aria-expanded]="isCategoryExpanded(item)">
               <span>{{ item.label }}</span>
               @if (item.badge) {
-                <span class="nav-badge">{{ item.badge }}</span>
+                <span class="nav-badge" [attr.data-tone]="badgeTone(item)">{{ item.badge }}</span>
+              } @else if (childBadgeTone(item); as tone) {
+                <span class="nav-badge-dot" [attr.data-tone]="tone" aria-hidden="true"></span>
               }
               <svg
                 class="chevron"
@@ -127,7 +129,7 @@
                       </svg>
                       {{ child.label }}
                       @if (child.badge) {
-                        <span class="nav-badge">{{ child.badge }}</span>
+                        <span class="nav-badge" [attr.data-tone]="badgeTone(child)">{{ child.badge }}</span>
                       }
                     </a>
                   }
@@ -146,7 +148,7 @@
             <svg class="nav-bullet" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4.5" fill="currentColor" /></svg>
             <span class="nav-label">{{ item.label }}</span>
             @if (item.badge) {
-              <span class="nav-badge">{{ item.badge }}</span>
+              <span class="nav-badge" [attr.data-tone]="badgeTone(item)">{{ item.badge }}</span>
             }
           </a>
         }
