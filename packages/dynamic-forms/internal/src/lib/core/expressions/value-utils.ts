@@ -7,28 +7,31 @@
  * @returns True if the comparison succeeds, false otherwise
  */
 export function compareValues(actual: unknown, expected: unknown, operator: string): boolean {
+  // An empty field (null, undefined or '') never satisfies an ordered or text operator,
+  // so `null >= 0` and `undefined contains 'def'` don't fire. `matches` tests it as ''.
+  const empty = actual === null || actual === undefined || actual === '';
   switch (operator) {
     case 'equals':
       return actual === expected;
     case 'notEquals':
       return actual !== expected;
     case 'greater':
-      return Number(actual) > Number(expected);
+      return !empty && Number(actual) > Number(expected);
     case 'less':
-      return Number(actual) < Number(expected);
+      return !empty && Number(actual) < Number(expected);
     case 'greaterOrEqual':
-      return Number(actual) >= Number(expected);
+      return !empty && Number(actual) >= Number(expected);
     case 'lessOrEqual':
-      return Number(actual) <= Number(expected);
+      return !empty && Number(actual) <= Number(expected);
     case 'contains':
-      return String(actual).includes(String(expected));
+      return !empty && String(actual).includes(String(expected));
     case 'startsWith':
-      return String(actual).startsWith(String(expected));
+      return !empty && String(actual).startsWith(String(expected));
     case 'endsWith':
-      return String(actual).endsWith(String(expected));
+      return !empty && String(actual).endsWith(String(expected));
     case 'matches':
       try {
-        return toRegExp(String(expected)).test(String(actual));
+        return toRegExp(String(expected)).test(empty ? '' : String(actual));
       } catch {
         return false;
       }

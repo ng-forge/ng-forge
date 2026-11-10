@@ -3,6 +3,57 @@ import { compareValues, getNestedValue, hasNestedProperty } from './value-utils'
 
 describe('value-utils', () => {
   describe('compareValues', () => {
+    describe('empty actual values', () => {
+      const empties = [null, undefined, ''];
+      const ordered = ['greater', 'less', 'greaterOrEqual', 'lessOrEqual'];
+      const text = ['contains', 'startsWith', 'endsWith'];
+
+      it.each(ordered.flatMap((op) => empties.map((actual) => [op, actual])))(
+        'never satisfies %s when the actual is %j',
+        (operator, actual) => {
+          expect(compareValues(actual, 0, operator as string)).toBe(false);
+          expect(compareValues(actual, -1, operator as string)).toBe(false);
+          expect(compareValues(actual, 1, operator as string)).toBe(false);
+        },
+      );
+
+      it.each(text.flatMap((op) => empties.map((actual) => [op, actual])))(
+        'never satisfies %s when the actual is %j',
+        (operator, actual) => {
+          expect(compareValues(actual, 'def', operator as string)).toBe(false);
+          expect(compareValues(actual, 'null', operator as string)).toBe(false);
+          expect(compareValues(actual, '', operator as string)).toBe(false);
+        },
+      );
+
+      it.each(empties)('tests %j as an empty string for matches', (actual) => {
+        expect(compareValues(actual, '^$', 'matches')).toBe(true);
+        expect(compareValues(actual, 'def', 'matches')).toBe(false);
+        expect(compareValues(actual, 'null', 'matches')).toBe(false);
+        expect(compareValues(actual, '.*', 'matches')).toBe(true);
+      });
+
+      it('treats 0 as a value, not as empty', () => {
+        expect(compareValues(0, 0, 'greaterOrEqual')).toBe(true);
+        expect(compareValues(0, -1, 'greater')).toBe(true);
+        expect(compareValues(0, 1, 'less')).toBe(true);
+        expect(compareValues(0, '0', 'contains')).toBe(true);
+        expect(compareValues(0, '^0$', 'matches')).toBe(true);
+      });
+
+      it('treats false as a value, not as empty', () => {
+        expect(compareValues(false, 'fal', 'startsWith')).toBe(true);
+        expect(compareValues(false, '^false$', 'matches')).toBe(true);
+        expect(compareValues(false, 0, 'lessOrEqual')).toBe(true);
+      });
+
+      it('leaves equals and notEquals strict', () => {
+        expect(compareValues(null, null, 'equals')).toBe(true);
+        expect(compareValues(undefined, null, 'equals')).toBe(false);
+        expect(compareValues('', null, 'notEquals')).toBe(true);
+      });
+    });
+
     describe('equals operator', () => {
       it('should return true for identical primitive values', () => {
         expect(compareValues('test', 'test', 'equals')).toBe(true);
@@ -115,9 +166,9 @@ describe('value-utils', () => {
           expect(compareValues(true, 'ru', 'contains')).toBe(true);
         });
 
-        it('should handle null and undefined', () => {
-          expect(compareValues(null, 'null', 'contains')).toBe(true);
-          expect(compareValues(undefined, 'undefined', 'contains')).toBe(true);
+        it('should not stringify null and undefined', () => {
+          expect(compareValues(null, 'null', 'contains')).toBe(false);
+          expect(compareValues(undefined, 'undefined', 'contains')).toBe(false);
         });
       });
 

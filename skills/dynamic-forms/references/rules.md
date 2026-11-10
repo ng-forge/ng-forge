@@ -372,6 +372,7 @@ Compares a specific field's value:
 - `equals`, `notEquals`
 - `greater`, `less`, `greaterOrEqual`, `lessOrEqual`
 - `contains`, `startsWith`, `endsWith`, `matches`
+- An empty value (null, undefined or '') never satisfies the ordered or string operators. `matches` tests it as '', and 0 and false are not empty.
 
 #### JavaScript Condition
 
