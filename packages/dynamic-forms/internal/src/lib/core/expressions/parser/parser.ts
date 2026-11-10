@@ -125,11 +125,10 @@ export class Parser {
    * `&&` or `||` without parentheses.
    */
   private parseShortCircuit(): ASTNode {
-    const start = this.current;
+    // The first operand is parsed once and handed on: re-parsing it would double the work at every nesting level.
     const first = this.parseEquality();
     if (!this.check(TokenType.NULLISH)) {
-      this.current = start;
-      const node = this.parseLogicalOr();
+      const node = this.parseLogicalOr(first);
       if (this.check(TokenType.NULLISH)) this.throwMixedNullish();
       return node;
     }
@@ -146,8 +145,8 @@ export class Parser {
     throw new ExpressionParserError('Cannot mix "??" with "&&" or "||" without parentheses', this.peek().position, this.expression);
   }
 
-  private parseLogicalOr(): ASTNode {
-    let node = this.parseLogicalAnd();
+  private parseLogicalOr(first?: ASTNode): ASTNode {
+    let node = this.parseLogicalAnd(first);
 
     while (this.match(TokenType.OR)) {
       const operator = this.previous().value;
@@ -158,8 +157,8 @@ export class Parser {
     return node;
   }
 
-  private parseLogicalAnd(): ASTNode {
-    let node = this.parseEquality();
+  private parseLogicalAnd(first?: ASTNode): ASTNode {
+    let node = first ?? this.parseEquality();
 
     while (this.match(TokenType.AND)) {
       const operator = this.previous().value;

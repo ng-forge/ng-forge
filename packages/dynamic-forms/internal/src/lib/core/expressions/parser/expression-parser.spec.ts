@@ -502,6 +502,12 @@ describe('ExpressionParser', () => {
       expect(ExpressionParser.evaluate('a ?? b ? "yes" : "no"', { a: null, b: true })).toBe('yes');
     });
 
+    it('parses deeply nested groups in linear time', () => {
+      const depth = 40;
+      const expression = '('.repeat(depth) + 'a' + ')'.repeat(depth) + ' ?? 1';
+      expect(ExpressionParser.evaluate(expression, { a: 2 })).toBe(2);
+    }, 1000);
+
     it('rejects mixing with && or || without parentheses, as JavaScript does', () => {
       expect(() => ExpressionParser.evaluate('a ?? b || c', { a: 1 })).toThrow(ExpressionParserError);
       expect(() => ExpressionParser.evaluate('a || b ?? c', { a: 1 })).toThrow(ExpressionParserError);
