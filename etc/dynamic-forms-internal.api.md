@@ -400,6 +400,9 @@ export interface ComputedMemberAccessNode {
 }
 
 // @public
+export const CONDITION_SCOPE_VARIABLES: ReadonlySet<string>;
+
+// @public
 export type ConditionalExpression = AndCondition | AsyncCondition | CustomCondition | FieldValueCondition | HttpCondition | JavascriptCondition | OrCondition;
 
 // @public (undocumented)
@@ -1054,6 +1057,9 @@ export interface FieldWithValidation {
 export interface FieldWrapper {
     readonly fieldComponent: Signal<ViewContainerRef>;
 }
+
+// @public
+export function findStaticExpressionProblems(ast: ASTNode, scope: ReadonlySet<string>): string[];
 
 // @public
 export const FORM_ID_PREFIX: InjectionToken<Signal<string>>;
@@ -1940,6 +1946,8 @@ export enum TokenType {
     NOT_EQUAL = "NOT_EQUAL",
     // (undocumented)
     NULL = "NULL",
+    // (undocumented)
+    NULLISH = "NULLISH",
     // (undocumented)
     NUMBER = "NUMBER",
     // (undocumented)

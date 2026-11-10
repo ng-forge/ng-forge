@@ -100,6 +100,9 @@ const SAFE_METHODS: Record<string, ReadonlySet<string>> = {
   date: new Set(DATE_SAFE_METHODS as readonly string[]),
 };
 
+/** Every method name callable on some receiver type. A name outside this set can never be called. */
+export const ALLOWED_METHOD_NAMES: ReadonlySet<string> = new Set(Object.values(SAFE_METHODS).flatMap((methods) => [...methods]));
+
 /**
  * Blacklist of property names that should not be accessible
  * These properties can leak information about object structure or enable attacks
@@ -227,6 +230,10 @@ export class Evaluator {
     if (node.operator === '||') {
       const left = this.evaluate(node.left);
       return left ? left : this.evaluate(node.right);
+    }
+    if (node.operator === '??') {
+      const left = this.evaluate(node.left);
+      return left ?? this.evaluate(node.right);
     }
 
     // For all other operators, evaluate both sides
