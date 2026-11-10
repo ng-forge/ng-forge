@@ -2140,6 +2140,8 @@ const config = { fields: [...] } as const satisfies FormConfig;
 | \`endsWith\` | String ends with | \`'hello'.endsWith('lo')\` |
 | \`matches\` | Regex match | \`/^[0-9]+$/.test(value)\` |
 
+An empty field value (\`null\`, \`undefined\` or \`''\`) never satisfies \`greater\`, \`less\`, \`greaterOrEqual\`, \`lessOrEqual\`, \`contains\`, \`startsWith\` or \`endsWith\`. \`matches\` tests it as \`''\`, so \`'^$'\` matches an empty field. \`0\` and \`false\` are not empty.
+
 For \`matches\`, the value is a pattern string. Use the \`/pattern/flags\` form to pass regex flags, e.g. \`"/john/i"\` for case-insensitive matching. A plain pattern (no \`/.../\` delimiters) is matched case-sensitively with no flags.
 
 ## Combining Conditions

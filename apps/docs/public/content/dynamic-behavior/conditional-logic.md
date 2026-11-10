@@ -657,6 +657,8 @@ The right `pendingValue` depends on the logic type and desired UX:
 
 ## All Operators
 
+An empty field value (`null`, `undefined` or `''`) never satisfies the numeric operators (`greater`, `less`, `greaterOrEqual`, `lessOrEqual`) or the string operators (`contains`, `startsWith`, `endsWith`), so an empty number field doesn't count as `>= 0`. `matches` tests an empty value as `''`, so `'^$'` matches it. `0` and `false` are values, not empty. `equals` and `notEquals` compare strictly and are unaffected.
+
 ### Equality Operators
 
 #### equals
