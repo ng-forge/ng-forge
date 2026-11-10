@@ -11,7 +11,11 @@ export interface NavItem {
   cssClass?: string;
   /** Optional badge text (e.g. 'NEW'). */
   badge?: string;
+  /** Badge colour. Defaults to 'success'. A collapsed parent category shows a dot in this colour. */
+  badgeTone?: NavBadgeTone;
 }
+
+export type NavBadgeTone = 'success' | 'warning' | 'danger';
 
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Getting Started', path: 'getting-started' },
@@ -89,7 +93,6 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: 'Wrappers',
         path: 'wrappers',
-        badge: 'NEW',
         children: [
           { label: 'Overview', path: 'wrappers/overview' },
           { label: 'Writing a Wrapper', path: 'wrappers/writing-a-wrapper' },
@@ -99,7 +102,6 @@ export const NAV_ITEMS: NavItem[] = [
       {
         label: 'Addons',
         path: 'addons',
-        badge: 'NEW',
         children: [
           { label: 'Overview', path: 'addons/overview' },
           { label: 'Presets and Actions', path: 'addons/presets-and-actions' },
@@ -128,7 +130,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'IDE Usage (MCP)', path: 'ai-integration/mcp-server' },
       { label: 'Agent Skill', path: 'ai-integration/skills' },
-      { label: 'WebMCP', path: 'ai-integration/webmcp', badge: 'NEW' },
+      { label: 'WebMCP', path: 'ai-integration/webmcp' },
     ],
   },
   {
