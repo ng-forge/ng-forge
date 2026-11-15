@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and uses [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [1.3.0](https://github.com/ng-forge/ng-forge/compare/v1.2.0...v1.3.0) (2026-11-15)
+
+### Behaviour changes
+
+- **adapters:** the root entry of each adapter exports field and addon component classes as types only. Code that uses a class as a value from the root entry (in `imports`, a custom `loadComponent`, or `typeof`) must import it from the matching lazy entry, for example `@ng-forge/dynamic-forms-material/lazy/input`. Type annotations keep working. This removes the duplicate classes that logged NG0912 in dev mode ([#626](https://github.com/ng-forge/ng-forge/pull/626)).
+- **dynamic-forms:** an empty value (`null`, `undefined` or `''`) no longer satisfies the ordered operators (`greater`, `less`, `greaterOrEqual`, `lessOrEqual`) or the string operators (`contains`, `startsWith`, `endsWith`). `matches` tests it as `''`, and `0` and `false` are not empty ([#667](https://github.com/ng-forge/ng-forge/pull/667)).
+- **dynamic-forms:** multi-value fields are typed by their props. `select` and `datepicker` with `multiple`, PrimeNG datepicker `selectionMode: 'multiple' | 'range'`, PrimeNG slider `range` and Ionic slider `dualKnobs` infer array or `{ lower, upper }` values, and those values are kept instead of being reduced to one ([#668](https://github.com/ng-forge/ng-forge/pull/668)).
+- **cli, mcp:** `ng-forge validate` now fails on condition and derivation expressions that can never work, under the rule `core/expression-syntax`. It also accepts a number `value` on inputs with `props.type: 'number'` and the slider and datepicker values allowed by the types ([#673](https://github.com/ng-forge/ng-forge/pull/673)).
+
+### Features
+
+- **dynamic-forms:** support `??` in expressions, and warn in dev mode about expressions that can never work: direct function calls, methods outside the allow-list, unknown names such as `Math`, and empty `and`/`or` groups ([#666](https://github.com/ng-forge/ng-forge/pull/666)).
+- **dynamic-forms:** customise placeholders for windowed fields with projected `dfPlaceholder` and `dfPlaceholderKey` templates ([#543](https://github.com/ng-forge/ng-forge/pull/543)).
+
+### Fixes
+
+- **adapters:** honour the app's date adapter, date formats and locale in datepickers ([#662](https://github.com/ng-forge/ng-forge/pull/662)).
+- **material, bootstrap, primeng:** accept every core input type in the input field ([#653](https://github.com/ng-forge/ng-forge/pull/653)).
+- **material:** honour `disableRipple` on radio and multi-checkbox, and deprecate the unused `appearance` on slider and toggle ([#669](https://github.com/ng-forge/ng-forge/pull/669)).
+- **bootstrap:** show `invalidFeedback` when a field is invalid without a message, and support valid feedback and floating labels on select. Deprecate the unused datepicker props ([#670](https://github.com/ng-forge/ng-forge/pull/670)).
+- **ionic:** bind the datepicker `doneText`, `cancelText` and `size`, the select `okText` and `cancelText`, and `errorText` on input and textarea, and accept every Ionic color ([#671](https://github.com/ng-forge/ng-forge/pull/671)).
+- **primeng:** honour `icon` and `iconPos` on buttons, and deprecate the unused select `compareWith` ([#672](https://github.com/ng-forge/ng-forge/pull/672)).
+- **openapi-generator:** skip objects with dynamic keys instead of emitting empty groups ([#652](https://github.com/ng-forge/ng-forge/pull/652)).
+- **docs:** compile `ngServerMode` to true in Angular's server chunks ([#660](https://github.com/ng-forge/ng-forge/pull/660)).
+
+### Tooling and Maintenance
+
+- **mcp:** document the supported expression syntax in the MCP instructions and the agent skill, and pin the skill's validator command to the released version ([#673](https://github.com/ng-forge/ng-forge/pull/673), [#607](https://github.com/ng-forge/ng-forge/pull/607)).
+- **config:** fix the repository guard hooks and run their tests in CI, and declare browserslist for the Vercel build ([#661](https://github.com/ng-forge/ng-forge/pull/661), [#659](https://github.com/ng-forge/ng-forge/pull/659), [#658](https://github.com/ng-forge/ng-forge/pull/658)).
+- **deps:** update dependencies.
+
 ## [1.2.0](https://github.com/ng-forge/ng-forge/compare/v1.1.0...v1.2.0) (2026-09-05)
 
 ### Features
