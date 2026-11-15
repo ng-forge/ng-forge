@@ -303,21 +303,22 @@ const megaFormConfig = {
           key: 'sourceA',
           type: 'input',
           label: 'Source A',
-          value: '10'
+          props: { type: 'number' }
         },
         {
           key: 'sourceB',
           type: 'input',
           label: 'Source B',
-          value: '20'
+          props: { type: 'number' }
         },
         {
           key: 'derived',
           type: 'input',
           label: 'Derived (A + B)',
           readonly: true,
+          props: { type: 'number' },
           // Self-targeting derivation - no targetField needed
-          derivation: 'parseInt(formValue.sourceA || 0) + parseInt(formValue.sourceB || 0)'
+          derivation: '(formValue.sourceA ?? 0) + (formValue.sourceB ?? 0)'
         },
 
         // CONDITIONAL VISIBILITY
