@@ -27,8 +27,11 @@ type Widen<T, D extends number = 5> = [D] extends [never]
             ? { -readonly [K in keyof T]: Widen<T[K], Depth[D]> }
             : T;
 
-/** An explicit array `value` keeps its widened item type; otherwise the kit's default item type. */
-type MultiItems<V, TItem> = V extends readonly unknown[] ? Widen<V> : TItem[];
+/**
+ * An explicit non-empty array `value` keeps its widened item type. An empty one (`[]`, whose
+ * items are `never`) or no array at all falls back to the kit's default item type.
+ */
+type MultiItems<V, TItem> = V extends readonly unknown[] ? ([V[number]] extends [never] ? TItem[] : Widen<V>) : TItem[];
 
 /**
  * Value shape for fields whose props switch them to several values: `select` / `datepicker` with

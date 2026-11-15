@@ -82,6 +82,8 @@ describe('InferFormValue - multi-value props', () => {
         { key: 'many', type: 'select', value: ['a'], props: { multiple: true } },
         { key: 'manyNull', type: 'select', value: null, props: { multiple: true } },
         { key: 'manyNoValue', type: 'select', props: { multiple: true } },
+        { key: 'manyEmpty', type: 'select', value: [], props: { multiple: true } },
+        { key: 'rangeEmpty', type: 'datepicker', value: [], props: { selectionMode: 'range' } },
       ],
     } as const satisfies FormConfig;
     type V = InferFormValue<typeof config>;
@@ -89,6 +91,9 @@ describe('InferFormValue - multi-value props', () => {
     expectTypeOf<V['many']>().toEqualTypeOf<string[] | undefined>();
     expectTypeOf<V['manyNull']>().toEqualTypeOf<string[] | undefined>();
     expectTypeOf<V['manyNoValue']>().toEqualTypeOf<string[] | undefined>();
+    // An empty seed falls back to the default item type instead of never[].
+    expectTypeOf<V['manyEmpty']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['rangeEmpty']>().toEqualTypeOf<string[] | undefined>();
   });
 
   it('types range sliders by the shape each kit emits', () => {
