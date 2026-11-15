@@ -59,6 +59,13 @@ describe('Ionic fields — previously unused props', () => {
     expect(select.okText).toBe('Fertig');
   });
 
+  it('keeps the default select texts when none are set', async () => {
+    const fixture = await render(IonicSelectFieldComponent, { options: [{ value: 'a', label: 'A' }], props: {} });
+    const select = fixture.nativeElement.querySelector('ion-select') as HTMLElement & { cancelText?: string; okText?: string };
+    expect(select.cancelText).toBe('Cancel');
+    expect(select.okText).toBe('OK');
+  });
+
   it('passes doneText, cancelText and size to ion-datetime', async () => {
     const fixture = await render(
       IonicDatepickerFieldComponent,
