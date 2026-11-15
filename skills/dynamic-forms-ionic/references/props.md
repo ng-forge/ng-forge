@@ -61,7 +61,7 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `indeterminate` | `boolean` | no |  |
 | `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
@@ -71,9 +71,9 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `cancelText` | `string` | no |  |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
-| `doneText` | `string` | no |  |
+| `cancelText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `doneText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `locale` | `string` | no |  |
 | `multiple` | `boolean` | no |  |
@@ -115,7 +115,7 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
 | `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
@@ -172,7 +172,7 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `compareWith` | `unknown` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `justify` | `'end' \| 'space-between' \| 'start'` | no |  |
@@ -194,8 +194,8 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `cancelText` | `string` | no |  |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `cancelText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `compareWith` | `unknown` | no |  |
 | `fill` | `'outline' \| 'solid'` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
@@ -203,7 +203,7 @@ what the types actually declare rather than a copy maintained beside them.
 | `interfaceOptions` | `{}` | no |  |
 | `labelPlacement` | `'end' \| 'fixed' \| 'floating' \| 'stacked' \| 'start'` | no |  |
 | `multiple` | `boolean` | no |  |
-| `okText` | `string` | no |  |
+| `okText` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `shape` | `'round'` | no |  |
 
 ## `shift-array-item`
@@ -222,7 +222,7 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `dualKnobs` | `boolean` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `labelPlacement` | `'end' \| 'fixed' \| 'stacked' \| 'start'` | no |  |
@@ -271,7 +271,7 @@ what the types actually declare rather than a copy maintained beside them.
 
 | Prop | Type | Required | Notes |
 | ---- | ---- | -------- | ----- |
-| `color` | `'danger' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
+| `color` | `'danger' \| 'dark' \| 'light' \| 'medium' \| 'primary' \| 'secondary' \| 'success' \| 'tertiary' \| 'warning'` | no |  |
 | `enableOnOffLabels` | `boolean` | no |  |
 | `hint` | `string` | no | Written as a string in a config; the DynamicText type also allows values that cannot be serialised. |
 | `justify` | `'end' \| 'space-between' \| 'start'` | no |  |

@@ -42,7 +42,7 @@ describe('IonicRadioProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicRadioProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
 

@@ -4,7 +4,7 @@ import { CheckboxField } from '@ng-forge/dynamic-forms/integration';
 export interface IonicCheckboxProps {
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   justify?: 'start' | 'end' | 'space-between';
-  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
   indeterminate?: boolean;
   hint?: DynamicText;
 }

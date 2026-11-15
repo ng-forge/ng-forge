@@ -22,7 +22,7 @@ export interface IonicSliderProps {
   pinFormatter?: (value: number) => string | number;
   ticks?: boolean;
   snaps?: boolean;
-  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked';
   hint?: DynamicText;
 }

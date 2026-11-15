@@ -184,6 +184,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -242,6 +245,11 @@
     "datepicker": {
       "keys": {
         "cancelText": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
             "kind": "string"
@@ -253,6 +261,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -262,6 +273,11 @@
           }
         },
         "doneText": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
             "kind": "string"
@@ -548,6 +564,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -929,6 +948,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -1068,6 +1090,11 @@
     "select": {
       "keys": {
         "cancelText": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
             "kind": "string"
@@ -1079,6 +1106,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -1152,6 +1182,11 @@
           }
         },
         "okText": {
+          "droppedArms": [
+            "Observable<string>",
+            "Signal<string>"
+          ],
+          "narrowedFrom": "DynamicText",
           "required": false,
           "type": {
             "kind": "string"
@@ -1258,6 +1293,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
@@ -1550,6 +1588,9 @@
             "kind": "enum",
             "values": [
               "danger",
+              "dark",
+              "light",
+              "medium",
               "primary",
               "secondary",
               "success",
