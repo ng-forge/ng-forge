@@ -347,7 +347,7 @@ export type MatSliderFieldComponent = MatSliderFieldComponent_2;
 
 // @public (undocumented)
 export interface MatSliderProps {
-    // (undocumented)
+    // @deprecated (undocumented)
     appearance?: MatFormFieldAppearance;
     // (undocumented)
     color?: 'accent' | 'primary' | 'warn';
@@ -398,7 +398,7 @@ export type MatToggleFieldComponent = MatToggleFieldComponent_2;
 
 // @public (undocumented)
 export interface MatToggleProps {
-    // (undocumented)
+    // @deprecated (undocumented)
     appearance?: MatFormFieldAppearance;
     // (undocumented)
     color?: ThemePalette;

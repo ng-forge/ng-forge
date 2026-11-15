@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
 import { DynamicTextPipe } from '@ng-forge/dynamic-forms/integration';
@@ -7,6 +7,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { MatMultiCheckboxProps } from './mat-multi-checkbox.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
 @Component({
   selector: 'df-mat-multi-checkbox',
@@ -36,6 +37,7 @@ import { AsyncPipe } from '@angular/common';
           [disabled]="f().disabled() || option.disabled"
           [color]="props()?.color || 'primary'"
           [labelPosition]="props()?.labelPosition || 'after'"
+          [disableRipple]="disableRipple()"
           (change)="onCheckboxChange(option, $event.checked)"
         >
           {{ option.label | dynamicText | async }}
@@ -54,9 +56,12 @@ import { AsyncPipe } from '@angular/common';
 })
 export default class MatMultiCheckboxFieldComponent {
   protected readonly ngf = injectNgForgeField<ValueType[]>();
+  private readonly materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatMultiCheckboxProps>();
+
+  readonly disableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 
   valueViewModel = linkedSignal<FieldOption<ValueType>[]>(
     () => {

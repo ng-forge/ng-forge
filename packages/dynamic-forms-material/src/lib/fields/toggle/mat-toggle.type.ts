@@ -5,6 +5,7 @@ import { ThemePalette } from '@angular/material/core';
 
 export interface MatToggleProps {
   hint?: DynamicText;
+  /** @deprecated Has no effect: this Material control has no form-field appearance. It will be removed in 2.0. */
   appearance?: MatFormFieldAppearance;
   color?: ThemePalette;
   labelPosition?: 'before' | 'after';
