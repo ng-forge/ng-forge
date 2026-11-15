@@ -145,7 +145,7 @@ export type BsDatepickerFieldComponent = BsDatepickerFieldComponent_2;
 
 // @public (undocumented)
 export interface BsDatepickerProps extends DatepickerProps {
-    // (undocumented)
+    // @deprecated (undocumented)
     displayMonths?: number;
     // (undocumented)
     floatingLabel?: boolean;
@@ -153,15 +153,15 @@ export interface BsDatepickerProps extends DatepickerProps {
     hint?: DynamicText;
     // (undocumented)
     invalidFeedback?: DynamicText;
-    // (undocumented)
+    // @deprecated (undocumented)
     navigation?: 'arrows' | 'none' | 'select';
-    // (undocumented)
+    // @deprecated (undocumented)
     outsideDays?: 'collapsed' | 'hidden' | 'visible';
-    // (undocumented)
+    // @deprecated (undocumented)
     showWeekNumbers?: boolean;
     // (undocumented)
     size?: 'lg' | 'sm';
-    // (undocumented)
+    // @deprecated (undocumented)
     useNgBootstrap?: boolean;
     // (undocumented)
     validFeedback?: DynamicText;

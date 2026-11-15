@@ -86,6 +86,8 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         }
         @if (ngf.errorsToDisplay()[0]; as error) {
           <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
+        } @else if (p?.invalidFeedback && f().invalid() && f().touched()) {
+          <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ p?.invalidFeedback | dynamicText | async }}</div>
         }
       </div>
     } @else {
@@ -143,6 +145,8 @@ import { BsInputAddon, BsInputProps } from './bs-input.type';
         }
         @if (ngf.errorsToDisplay()[0]; as error) {
           <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ error.message }}</div>
+        } @else if (p?.invalidFeedback && f().invalid() && f().touched()) {
+          <div class="invalid-feedback d-block" [id]="ngf.errorId()" role="alert">{{ p?.invalidFeedback | dynamicText | async }}</div>
         } @else if (p?.hint) {
           <div class="form-text" [id]="ngf.hintId()">{{ p?.hint | dynamicText | async }}</div>
         }
