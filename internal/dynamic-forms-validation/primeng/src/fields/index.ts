@@ -18,6 +18,7 @@ import {
   PrimeButtonPropsSchema,
 } from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
@@ -39,7 +40,7 @@ const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 const PrimeInputFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
-  value: z.string().nullable().optional(),
+  value: InputValueSchema,
   placeholder: DynamicTextSchema.optional(),
   props: PrimeInputPropsSchema.optional(),
 });
@@ -49,7 +50,7 @@ const PrimeInputFieldSchemaObject = PrimeValueFieldBase.extend({
  * \`value: null\` is only valid when \`nullable: true\`.
  * The raw \`PrimeInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
  */
-export const PrimeInputFieldSchema = PrimeInputFieldSchemaObject.superRefine(nullableValueRefine);
+export const PrimeInputFieldSchema = PrimeInputFieldSchemaObject.superRefine(nullableValueRefine).superRefine(inputValueTypeRefine);
 export { PrimeInputFieldSchemaObject };
 
 // Checkbox field

@@ -18,6 +18,7 @@ import {
   IonicButtonPropsSchema,
 } from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 const IonicValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
@@ -39,7 +40,7 @@ const IonicValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 const IonicInputFieldSchemaObject = IonicValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
-  value: z.string().nullable().optional(),
+  value: InputValueSchema,
   placeholder: DynamicTextSchema.optional(),
   props: IonicInputPropsSchema.optional(),
 });
@@ -49,7 +50,7 @@ const IonicInputFieldSchemaObject = IonicValueFieldBase.extend({
  * \`value: null\` is only valid when \`nullable: true\`.
  * The raw \`IonicInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
  */
-export const IonicInputFieldSchema = IonicInputFieldSchemaObject.superRefine(nullableValueRefine);
+export const IonicInputFieldSchema = IonicInputFieldSchemaObject.superRefine(nullableValueRefine).superRefine(inputValueTypeRefine);
 export { IonicInputFieldSchemaObject };
 
 // Checkbox field

@@ -902,6 +902,13 @@ export abstract class FieldErrorsWrapperBase implements FieldWrapper, FieldError
 }
 
 // @public
+export interface FieldExpressionProblem {
+    expression?: string;
+    message: string;
+    path: string;
+}
+
+// @public
 export interface FieldMeta {
     [key: `data-${string}`]: string | undefined;
     [key: `aria-${string}`]: boolean | string | undefined;
@@ -1057,6 +1064,9 @@ export interface FieldWithValidation {
 export interface FieldWrapper {
     readonly fieldComponent: Signal<ViewContainerRef>;
 }
+
+// @public
+export function findFieldExpressionProblems(field: unknown): FieldExpressionProblem[];
 
 // @public
 export function findStaticExpressionProblems(ast: ASTNode, scope: ReadonlySet<string>): string[];

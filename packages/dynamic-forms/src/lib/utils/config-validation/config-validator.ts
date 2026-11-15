@@ -5,7 +5,7 @@ import { hasChildFields, isGroupField } from '@ng-forge/dynamic-forms/internal';
 import { normalizeFieldsArray } from '@ng-forge/dynamic-forms/internal';
 import { DynamicFormError } from '@ng-forge/dynamic-forms/internal';
 import { Logger } from '@ng-forge/dynamic-forms/internal';
-import { CONDITION_SCOPE_VARIABLES, ExpressionParser, findStaticExpressionProblems } from '@ng-forge/dynamic-forms/internal';
+import { findFieldExpressionProblems } from '@ng-forge/dynamic-forms/internal';
 import { DEV_MODE } from '../dev-mode';
 
 /** Data collected during a single config traversal. */
@@ -80,7 +80,7 @@ function collectFieldData(
       }
     }
 
-    if (DEV_MODE) collectExpressionErrors(field, field.key || '<unknown>', data.expressionErrors, new WeakSet());
+    if (DEV_MODE) collectExpressionErrors(field, field.key || '<unknown>', data.expressionErrors);
 
     if (hasChildFields(field)) {
       // Array item fields share template keys across items by design — stop collecting keys
@@ -102,35 +102,16 @@ function collectFieldData(
 }
 
 /**
- * Parses every `{ type: 'javascript', expression }` node in a field's own config (child fields
- * are visited separately), so syntax the parser doesn't support is reported at bootstrap instead
- * of the rule silently evaluating to false at runtime.
+ * Reports expressions in a field's own config that can never work (child fields are visited
+ * separately), so they surface at bootstrap instead of silently evaluating to false at runtime.
  */
-function collectExpressionErrors(node: unknown, fieldKey: string, errors: string[], seen: WeakSet<object>): void {
-  if (node === null || typeof node !== 'object' || seen.has(node)) return;
-  seen.add(node);
-
-  if (Array.isArray(node)) {
-    for (const item of node) collectExpressionErrors(item, fieldKey, errors, seen);
-    return;
-  }
-
-  const record = node as Record<string, unknown>;
-  if (record['type'] === 'javascript' && typeof record['expression'] === 'string') {
-    const expression = record['expression'];
-    try {
-      const problems = findStaticExpressionProblems(ExpressionParser.parse(expression), CONDITION_SCOPE_VARIABLES);
-      if (problems.length > 0) errors.push(`Field '${fieldKey}': expression '${expression}' — ${problems.join('; ')}`);
-    } catch (e) {
-      errors.push(`Field '${fieldKey}': expression '${expression}' — ${e instanceof Error ? e.message : String(e)}`);
-    }
-  }
-  if ((record['type'] === 'and' || record['type'] === 'or') && Array.isArray(record['conditions']) && record['conditions'].length === 0) {
-    errors.push(`Field '${fieldKey}': an empty '${record['type']}' group never fires`);
-  }
-
-  for (const [key, value] of Object.entries(record)) {
-    if (key !== 'fields') collectExpressionErrors(value, fieldKey, errors, seen);
+function collectExpressionErrors(field: unknown, fieldKey: string, errors: string[]): void {
+  for (const problem of findFieldExpressionProblems(field)) {
+    errors.push(
+      problem.expression === undefined
+        ? `Field '${fieldKey}': ${problem.message}`
+        : `Field '${fieldKey}': expression '${problem.expression}' — ${problem.message}`,
+    );
   }
 }
 

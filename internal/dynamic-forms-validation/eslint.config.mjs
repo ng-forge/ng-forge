@@ -13,7 +13,11 @@ export default [
             '{projectRoot}/vite.config.{js,ts,mjs,mts}',
             '{projectRoot}/vitest.config.{js,ts,mjs,mts}',
           ],
-          ignoredDependencies: ['zod', 'vitest'],
+          ignoredDependencies: [
+            'zod',
+            'vitest',
+            '@ng-forge/dynamic-forms', // Only its expression parser, bundled from source via @ng-forge/dynamic-forms-expressions
+          ],
         },
       ],
     },

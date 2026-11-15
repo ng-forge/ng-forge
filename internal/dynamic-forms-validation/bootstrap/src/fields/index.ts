@@ -18,6 +18,7 @@ import {
   BsButtonPropsSchema,
 } from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 // Value field base (extends BaseFieldDef with validation)
 const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
@@ -40,7 +41,7 @@ const BsValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 const BsInputFieldSchemaObject = BsValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
-  value: z.string().nullable().optional(),
+  value: InputValueSchema,
   placeholder: DynamicTextSchema.optional(),
   props: BsInputPropsSchema.optional(),
 });
@@ -50,7 +51,7 @@ const BsInputFieldSchemaObject = BsValueFieldBase.extend({
  * \`value: null\` is only valid when \`nullable: true\`.
  * The raw \`BsInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
  */
-export const BsInputFieldSchema = BsInputFieldSchemaObject.superRefine(nullableValueRefine);
+export const BsInputFieldSchema = BsInputFieldSchemaObject.superRefine(nullableValueRefine).superRefine(inputValueTypeRefine);
 export { BsInputFieldSchemaObject };
 
 // Textarea field

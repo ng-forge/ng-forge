@@ -303,12 +303,14 @@ const megaFormConfig = {
           key: 'sourceA',
           type: 'input',
           label: 'Source A',
+          value: 10,
           props: { type: 'number' }
         },
         {
           key: 'sourceB',
           type: 'input',
           label: 'Source B',
+          value: 20,
           props: { type: 'number' }
         },
         {

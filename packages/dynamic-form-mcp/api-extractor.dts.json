@@ -15,8 +15,10 @@
         "types": [],
         "baseUrl": "../..",
         "paths": {
-          "@ng-forge/dynamic-forms-validation": ["./dist/internal/dynamic-forms-validation/index.d.ts"],
-          "@ng-forge/dynamic-forms-validation/schema-only": ["./dist/internal/dynamic-forms-validation/validate/src/index.d.ts"]
+          "@ng-forge/dynamic-forms-validation": ["./dist/internal/dynamic-forms-validation/internal/dynamic-forms-validation/index.d.ts"],
+          "@ng-forge/dynamic-forms-validation/schema-only": [
+            "./dist/internal/dynamic-forms-validation/internal/dynamic-forms-validation/validate/src/index.d.ts"
+          ]
         }
       }
     }

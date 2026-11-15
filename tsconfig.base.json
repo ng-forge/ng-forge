@@ -66,6 +66,7 @@
       "@ng-forge/dynamic-forms/testing": ["./packages/dynamic-forms/testing/src/public_api.ts"],
       "@ng-forge/utils": ["./internal/utils/src/index.ts"],
       "@ng-forge/dynamic-forms-validation": ["./internal/dynamic-forms-validation/index.ts"],
+      "@ng-forge/dynamic-forms-expressions": ["./packages/dynamic-forms/internal/src/lib/core/expressions/parser/static-check.ts"],
       "@ng-forge/dynamic-forms-validation/schema-only": ["./internal/dynamic-forms-validation/validate/src/index.ts"],
       "@ng-forge/dynamic-forms-cli": ["./packages/dynamic-forms-cli/src/index.ts"]
     }

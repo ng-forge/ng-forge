@@ -18,6 +18,7 @@ const hiddenWithLabel = { fields: [{ key: 'ref', type: 'hidden', value: 'web', l
  * can be switched off, which is the failure this table exists to prevent.
  */
 const violations: Readonly<Record<string, unknown>> = {
+  'core/expression-syntax': { fields: [{ key: 'total', type: 'input', label: 'Total', derivation: 'Math.round(formValue.a)' }] },
   'core/hidden-minimal': hiddenWithLabel,
   'core/nesting': {
     fields: [{ key: 'row', type: 'row', fields: [{ key: 'page', type: 'page', fields: [{ key: 'a', type: 'input', label: 'A' }] }] }],

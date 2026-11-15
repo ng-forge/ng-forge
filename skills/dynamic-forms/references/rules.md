@@ -386,7 +386,7 @@ Evaluates a JavaScript expression with access to `formValue`, `fieldValue`, `ext
 }
 ```
 
-**Expression syntax** (javascript conditions and derivations): property access with `?.`, arithmetic, comparisons, `&&`, `||`, `!`, `??`, ternaries, array and object literals, and arrow functions as method arguments (`formValue.items.some(i => i.done)`). Mixing `??` with `&&` or `||` needs parentheses, as in JavaScript. Methods are limited to safe string, number, array and date methods (`toFixed`, `includes`, `map`, `getFullYear`, ...). There are no statements, no `new`, no direct function calls (`parseInt(x)`, `String(x)`) and no globals (`Math`, `Date`, `JSON`): an unknown name reads as `undefined`. Use a number input (`props: { type: 'number' }`) instead of parsing, and a custom function for anything else. In dev mode the library warns at startup about javascript conditions that break these rules. The validator (MCP or CLI) does not check expressions.
+**Expression syntax** (javascript conditions and derivations): property access with `?.`, arithmetic, comparisons, `&&`, `||`, `!`, `??`, ternaries, array and object literals, and arrow functions as method arguments (`formValue.items.some(i => i.done)`). Mixing `??` with `&&` or `||` needs parentheses, as in JavaScript. Methods are limited to safe string, number, array and date methods (`toFixed`, `includes`, `map`, `getFullYear`, ...). There are no statements, no `new`, no direct function calls (`parseInt(x)`, `String(x)`) and no globals (`Math`, `Date`, `JSON`): an unknown name reads as `undefined`. Use a number input (`props: { type: 'number' }`) instead of parsing, and a custom function for anything else. The validator (MCP or CLI) reports an expression that breaks these rules, with its path, under `core/expression-syntax`, and in dev mode the library warns about it at startup.
 
 **Condition scoping:** in logic conditions, `formValue` is the whole form value regardless of where the field sits, except inside array items where it is scoped to the current item (use `rootFormValue` for the rest of the form). Reference group-nested fields by their full path, e.g. `formValue.person.firstName`. Note that `derivation` expressions scope differently: there `formValue` is also scoped to the parent group for group-nested fields.
 
@@ -648,10 +648,6 @@ rather than rejecting them, so an invented or misplaced property passes
 validation and is silently dropped at runtime. Measured examples that pass today:
 `hideWhen` on a field and `targetProperty` inside a derivation.
 
-It also does not parse expression strings. A derivation or javascript condition
-that uses unsupported syntax passes validation; see the expression syntax rules
-under Conditional Logic.
-
 `as const satisfies FormConfig` is what catches those, because TypeScript checks
 the property names. Use both: the type annotation for what exists, the validator
 for what is structurally correct.
@@ -674,6 +670,7 @@ identifier to switch off.
 
 | Rule | What it asks | Why |
 | ---- | ------------ | --- |
+| `core/expression-syntax` | Write conditions and derivations the expression parser can run | An expression is a string, so the compiler never sees it. One using a global, a direct call or unparseable syntax evaluates to false or undefined at runtime instead of failing. |
 | `core/hidden-minimal` | Keep hidden fields to `key`, `type`, `value` and `className` | Hidden fields render nothing, so labels, validation and layout properties on them have no effect and mislead the next reader. |
 | `core/nesting` | Respect which field types may nest inside which | A page inside a row, or an array inside an array, has no rendering path and fails at runtime rather than at build time. |
 | `core/slider-range-properties` | Use `minValue`, `maxValue` and `step` for a slider range | `min` and `max` are validation shorthands. They typecheck and validate clean, and the slider still renders its default range, so nothing catches the mistake. |

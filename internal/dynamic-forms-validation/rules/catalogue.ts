@@ -61,6 +61,11 @@ export const RULES: Readonly<Record<string, Rule>> = Object.freeze(
   Object.fromEntries(
     [
       rule(
+        'core/expression-syntax',
+        'Write conditions and derivations the expression parser can run',
+        'An expression is a string, so the compiler never sees it. One using a global, a direct call or unparseable syntax evaluates to false or undefined at runtime instead of failing.',
+      ),
+      rule(
         'core/hidden-minimal',
         'Keep hidden fields to `key`, `type`, `value` and `className`',
         'Hidden fields render nothing, so labels, validation and layout properties on them have no effect and mislead the next reader.',

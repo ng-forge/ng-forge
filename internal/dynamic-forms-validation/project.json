@@ -12,6 +12,7 @@
         "outputPath": "dist/internal/dynamic-forms-validation",
         "main": "internal/dynamic-forms-validation/index.ts",
         "tsConfig": "internal/dynamic-forms-validation/tsconfig.lib.json",
+        "rootDir": ".",
         "assets": []
       }
     },

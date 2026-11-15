@@ -325,6 +325,19 @@ describe('validateFormConfig', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('never'));
     });
 
+    it('warns about derivation expressions, in logic and in the shorthand', () => {
+      const logger = mockLogger();
+      const fields = [
+        { key: 'sum', type: 'input', derivation: 'parseInt(formValue.a)' },
+        { key: 'label', type: 'input', logic: [{ type: 'derivation', expression: 'String(formValue.b)' }] },
+        { key: 'ok', type: 'input', derivation: '(formValue.a ?? 0) + 1' },
+      ] as FieldDef<unknown>[];
+      validateFormConfig(fields, emptyRegistry(), logger);
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'sum'"));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'label'"));
+    });
+
     it('does not throw for an invalid expression', () => {
       const fields = [
         { key: 'x', type: 'input', logic: [{ type: 'hidden', condition: { type: 'javascript', expression: 'a ?? b || c' } }] },
