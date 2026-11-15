@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { FormField } from '@angular/forms/signals';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { FieldOption, ValueType } from '@ng-forge/dynamic-forms';
@@ -7,6 +7,7 @@ import { NgForgeControl, injectNgForgeField, NgForgeFieldHost } from '@ng-forge/
 import { MatRadioProps } from './mat-radio.type';
 import { MatError } from '@angular/material/input';
 import { AsyncPipe } from '@angular/common';
+import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
 
 @Component({
   selector: 'df-mat-radio',
@@ -34,6 +35,7 @@ import { AsyncPipe } from '@angular/common';
           [disabled]="option.disabled || false"
           [color]="props()?.color || 'primary'"
           [labelPosition]="props()?.labelPosition || 'after'"
+          [disableRipple]="disableRipple()"
         >
           {{ option.label | dynamicText | async }}
         </mat-radio-button>
@@ -51,7 +53,10 @@ import { AsyncPipe } from '@angular/common';
 })
 export default class MatRadioFieldComponent {
   protected readonly ngf = injectNgForgeField<ValueType>();
+  private readonly materialConfig = inject(MATERIAL_CONFIG, { optional: true });
 
   readonly options = input<FieldOption<ValueType>[]>([]);
   readonly props = input<MatRadioProps>();
+
+  readonly disableRipple = computed(() => this.props()?.disableRipple ?? this.materialConfig?.disableRipple ?? false);
 }
