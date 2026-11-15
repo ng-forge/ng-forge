@@ -19,6 +19,8 @@ import { PrimeButtonProps } from './prime-button.type';
       [outlined]="props()?.outlined || false"
       [raised]="props()?.raised || false"
       [rounded]="props()?.rounded || false"
+      [icon]="props()?.icon ?? ''"
+      [iconPos]="props()?.iconPos ?? 'left'"
       [disabled]="action.disabled()"
       [attr.tabindex]="action.tabIndex()"
       [attr.data-testid]="buttonTestId()"

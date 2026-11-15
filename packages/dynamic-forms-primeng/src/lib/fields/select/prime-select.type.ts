@@ -14,6 +14,7 @@ export interface PrimeSelectProps extends SelectProps {
   /** Hint text displayed below the select. */
   hint?: DynamicText;
   /** Custom comparison function for determining equality of option values. */
+  /** @deprecated Has no effect: PrimeNG's select has no compareWith. It will be removed in 2.0. */
   compareWith?: (o1: ValueType, o2: ValueType) => boolean;
 }
 
