@@ -186,8 +186,8 @@ describe('PrimeDatepickerField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is Date or string', () => {
-      expectTypeOf<PrimeDatepickerField['value']>().toEqualTypeOf<Date | string | null | undefined>();
+    it('value is a date, or an array of dates in multiple and range modes', () => {
+      expectTypeOf<PrimeDatepickerField['value']>().toEqualTypeOf<Date | string | readonly (Date | string)[] | null | undefined>();
     });
 
     it('placeholder', () => {

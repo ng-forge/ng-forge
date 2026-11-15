@@ -4,6 +4,9 @@ import { FormValueControl } from '@angular/forms/signals';
 import { NgForgeField, setupMetaTracking, InputMeta } from '@ng-forge/dynamic-forms/integration';
 import { DatePicker } from 'primeng/datepicker';
 
+/** ISO string, or an array of them in `multiple` and `range` modes. */
+type PrimeDatepickerValue = string | readonly string[] | null;
+
 /**
  * PrimeNG DatePicker wrapper implementing FormValueControl. Value is stored
  * as an ISO date string. Rendered inside `df-prime-datepicker` — picks up
@@ -43,7 +46,7 @@ import { DatePicker } from 'primeng/datepicker';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PrimeDatepickerControlComponent implements FormValueControl<string | null> {
+export class PrimeDatepickerControlComponent implements FormValueControl<PrimeDatepickerValue> {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly parentField = inject(NgForgeField, { optional: true });
 
@@ -52,7 +55,7 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   // ─────────────────────────────────────────────────────────────────────────────
 
   /** The value of the datepicker as ISO string - required by FormValueControl */
-  readonly value = model<string | null>(null);
+  readonly value = model<PrimeDatepickerValue>(null);
 
   /** Tracks whether the field has been touched - used by FormField directive */
   readonly touched = model<boolean>(false);
@@ -103,31 +106,28 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
   // Date conversion
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /** Converts the string value to Date for PrimeNG's ngModel */
+  /** Converts the stored ISO string(s) to Date(s) for PrimeNG's ngModel */
   protected readonly dateValue = computed(() => {
     const val = this.value();
     if (!val) return null;
-    const date = new Date(val);
-    return isNaN(date.getTime()) ? null : date;
+    return Array.isArray(val) ? val.map(toDate).filter((date) => date !== null) : toDate(val as string);
   });
 
   /** Handles ngModel changes (from typing or calendar selection) */
-  onModelChange(date: Date | null): void {
-    if (date instanceof Date && !isNaN(date.getTime())) {
-      this.value.set(date.toISOString());
+  onModelChange(date: Date | readonly (Date | null)[] | null): void {
+    if (Array.isArray(date)) {
+      // A range being picked arrives as [start, null]; keep the start.
+      this.value.set(date.filter(isValidDate).map((d) => d.toISOString()));
     } else {
-      this.value.set(null);
+      this.value.set(isValidDate(date) ? date.toISOString() : null);
     }
   }
 
   /** Handles date selection from DatePicker calendar - converts Date to ISO string */
   onSelect(event: Date): void {
-    // onSelect is redundant with onModelChange but kept for explicit calendar selection handling
-    if (event instanceof Date && !isNaN(event.getTime())) {
-      this.value.set(event.toISOString());
-    } else {
-      this.value.set(null);
-    }
+    // In multiple and range modes onSelect reports one date; ngModelChange carries the full selection.
+    if (this.selectionMode() !== 'single') return;
+    this.value.set(isValidDate(event) ? event.toISOString() : null);
   }
 
   /** Handles clear action from DatePicker */
@@ -140,4 +140,13 @@ export class PrimeDatepickerControlComponent implements FormValueControl<string 
     this.touched.set(true);
     this.parentField?.field()().markAsTouched();
   }
+}
+
+function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !isNaN(value.getTime());
+}
+
+function toDate(value: string): Date | null {
+  const date = new Date(value);
+  return isValidDate(date) ? date : null;
 }

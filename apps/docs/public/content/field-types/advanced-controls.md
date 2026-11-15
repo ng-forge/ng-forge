@@ -28,6 +28,8 @@ Numeric range selection.
 - `maxValue`: Maximum slider value
 - `step`: Step increment value
 
+The value is a number. Two kits have a range mode that changes it: PrimeNG `props.range: true` gives `number[]`, and Ionic `props.dualKnobs: true` gives `{ lower, upper }`. The inferred form value type follows these props.
+
 #### Adapter Props
 
 <docs-adapter-props field="slider"></docs-adapter-props>
@@ -61,6 +63,10 @@ Date selection control.
 #### Adapter Props
 
 <docs-adapter-props field="datepicker"></docs-adapter-props>
+
+#### Selecting several dates
+
+PrimeNG `props.selectionMode: 'multiple' | 'range'` stores an array of ISO strings, and Ionic `props.multiple: true` stores an array of `Date`s. While a range is being picked, the value holds just its start. The inferred form value type follows these props.
 
 #### Date formats and locale
 

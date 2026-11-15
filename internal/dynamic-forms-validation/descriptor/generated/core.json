@@ -959,10 +959,10 @@
           "droppedArms": [
             "Date"
           ],
-          "narrowedFrom": "string | Date | null | undefined",
+          "narrowedFrom": "string | Date | readonly (string | Date)[] | null | undefined",
           "required": false,
           "type": {
-            "kind": "string"
+            "kind": "unknown"
           }
         },
         "wrappers": {
@@ -3343,7 +3343,22 @@
         "value": {
           "required": false,
           "type": {
-            "kind": "number"
+            "kind": "union",
+            "of": [
+              {
+                "kind": "number"
+              },
+              {
+                "kind": "array",
+                "of": {
+                  "kind": "number"
+                }
+              },
+              {
+                "kind": "ref",
+                "name": "{ lower: number; upper: number; }"
+              }
+            ]
           }
         },
         "wrappers": {
@@ -7656,6 +7671,23 @@
             "values": [
               "row"
             ]
+          }
+        }
+      },
+      "policy": "strip"
+    },
+    "{ lower: number; upper: number; }": {
+      "keys": {
+        "lower": {
+          "required": true,
+          "type": {
+            "kind": "number"
+          }
+        },
+        "upper": {
+          "required": true,
+          "type": {
+            "kind": "number"
           }
         }
       },

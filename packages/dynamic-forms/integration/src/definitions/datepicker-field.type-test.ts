@@ -79,10 +79,14 @@ describe('DatepickerField - Exhaustive Whitelist', () => {
     expectTypeOf<DatepickerField<DatepickerProps>['type']>().toEqualTypeOf<'datepicker'>();
   });
 
-  it('value type is Date | string (default TNullable = boolean distributes to | null)', () => {
-    expectTypeOf<DatepickerField<DatepickerProps>['value']>().toEqualTypeOf<Date | string | null | undefined>();
+  it('value type is a date or an array of dates (default TNullable = boolean distributes to | null)', () => {
+    expectTypeOf<DatepickerField<DatepickerProps>['value']>().toEqualTypeOf<
+      Date | string | readonly (Date | string)[] | null | undefined
+    >();
     // Pinning nullable: false removes null from the value union.
-    expectTypeOf<DatepickerField<DatepickerProps, false>['value']>().toEqualTypeOf<Date | string | undefined>();
+    expectTypeOf<DatepickerField<DatepickerProps, false>['value']>().toEqualTypeOf<
+      Date | string | readonly (Date | string)[] | undefined
+    >();
   });
 
   it('minDate accepts Date | string | null', () => {

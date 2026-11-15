@@ -310,7 +310,7 @@ export function createResolvedErrorsSignal<T>(field: Signal<FieldTree<T> | undef
 export function createWrappers<const T extends readonly WrapperRegistration[]>(...registrations: T): WrappersBundle<T>;
 
 // @public (undocumented)
-export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, Date | string, FieldMeta, TNullable> {
+export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, Date | readonly (Date | string)[] | string, FieldMeta, TNullable> {
     // (undocumented)
     maxDate?: Date | null | string;
     // (undocumented)
@@ -1198,7 +1198,7 @@ export function shiftArrayItemButtonMapper<TProps>(fieldDef: BaseArrayRemoveButt
 export function shouldShowErrors<T>(field: Signal<FieldTree<T> | undefined>): Signal<boolean>;
 
 // @public (undocumented)
-export interface SliderField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, number, FieldMeta, TNullable> {
+export interface SliderField<TProps, TNullable extends boolean = boolean> extends BaseValueField<TProps, SliderValue, FieldMeta, TNullable> {
     // (undocumented)
     maxValue?: number;
     // (undocumented)

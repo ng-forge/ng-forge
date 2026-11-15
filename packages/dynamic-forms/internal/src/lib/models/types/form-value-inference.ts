@@ -27,13 +27,35 @@ type Widen<T, D extends number = 5> = [D] extends [never]
             ? { -readonly [K in keyof T]: Widen<T[K], Depth[D]> }
             : T;
 
+/** An explicit array `value` keeps its widened item type; otherwise the kit's default item type. */
+type MultiItems<V, TItem> = V extends readonly unknown[] ? Widen<V> : TItem[];
+
+/**
+ * Value shape for fields whose props switch them to several values: `select` / `datepicker` with
+ * `multiple`, a PrimeNG datepicker in `multiple`/`range` mode (ISO strings), a PrimeNG `range`
+ * slider (number[]) and an Ionic `dualKnobs` slider ({ lower, upper }). `never` for single-value fields.
+ */
+type MultiValueType<T, V> = T extends { type: 'select'; props: { multiple: true } }
+  ? MultiItems<V, string>
+  : T extends { type: 'datepicker'; props: { multiple: true } }
+    ? MultiItems<V, Date>
+    : T extends { type: 'datepicker'; props: { selectionMode: 'multiple' | 'range' } }
+      ? MultiItems<V, string>
+      : T extends { type: 'slider'; props: { range: true } }
+        ? number[]
+        : T extends { type: 'slider'; props: { dualKnobs: true } }
+          ? { lower: number; upper: number }
+          : never;
+
 /**
  * Resolves the "underlying" non-null value type for a field, based on its `type`
  * discriminator and (where it matters) its `value` literal. Used when we need a
  * base type independent of whether the literal happens to be `null` — i.e., when
  * computing the nullable widening for `value: null, nullable: true`.
  */
-type ResolveBaseValueType<T, V> = T extends { type: 'slider' }
+type ResolveBaseValueType<T, V> = [MultiValueType<T, V>] extends [never] ? ResolveSingleValueType<T, V> : MultiValueType<T, V>;
+
+type ResolveSingleValueType<T, V> = T extends { type: 'slider' }
   ? number
   : T extends { type: 'input'; props: { type: 'number' } }
     ? number
@@ -166,9 +188,18 @@ type ProcessField<T, D extends number = 5> = [D] extends [never]
                 // inject an abstract `FormConfig` (see demo-scenario.component.ts in adapter sandboxes).
                 T extends { key: infer K }
                 ? K extends string
-                  ? { [P in K]: MaybeOptional<T, T extends { nullable: true } ? string | null : string> }
+                  ? { [P in K]: MaybeOptional<T, InferUnvaluedType<T>> }
                   : never
                 : never;
+
+/** Value fields without `value`: string, unless props switch the field to several values. */
+type InferUnvaluedType<T> = [MultiValueType<T, null>] extends [never]
+  ? T extends { nullable: true }
+    ? string | null
+    : string
+  : T extends { nullable: true }
+    ? MultiValueType<T, null> | null
+    : MultiValueType<T, null>;
 
 /** Internal helper with depth tracking */
 type InferFormValueWithDepth<T extends RegisteredFieldTypes[], D extends number = 5> = UnionToIntersection<ProcessField<T[number], D>>;

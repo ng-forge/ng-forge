@@ -70,7 +70,7 @@ Dropdown selection field with single or multiple selection
 | Prop | Type | Required | Default | Description |
 | ---- | ---- | -------- | ------- | ----------- |
 | `options` | `FieldOption[]` | yes |  | Array of selectable options with label and value. IMPORTANT: options goes at FIELD level, NOT inside props |
-| `multiple` | `boolean` | no | `false` | Allow multiple selections |
+| `multiple` | `boolean` | no | `false` | Allow multiple selections. The value becomes an array of the selected values |
 
 ```typescript
 {
