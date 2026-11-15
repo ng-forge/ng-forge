@@ -72,11 +72,11 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
     });
 
     it('doneText', () => {
-      expectTypeOf<IonicDatepickerProps['doneText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicDatepickerProps['doneText']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('cancelText', () => {
-      expectTypeOf<IonicDatepickerProps['cancelText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicDatepickerProps['cancelText']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('size', () => {
@@ -85,7 +85,7 @@ describe('IonicDatepickerProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicDatepickerProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
   });

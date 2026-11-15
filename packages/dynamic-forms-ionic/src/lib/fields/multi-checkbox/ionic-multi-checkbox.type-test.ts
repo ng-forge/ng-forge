@@ -41,7 +41,7 @@ describe('IonicMultiCheckboxProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicMultiCheckboxProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
   });

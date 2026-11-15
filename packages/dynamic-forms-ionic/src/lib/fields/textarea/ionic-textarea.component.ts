@@ -36,6 +36,10 @@ import { AsyncPipe } from '@angular/common';
     />
     @if (ngf.errorsToDisplay()[0]; as error) {
       <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{ error.message }}</ion-note>
+    } @else if (props()?.errorText && f().invalid() && f().touched()) {
+      <ion-note color="danger" class="df-ion-error" [id]="ngf.errorId()" role="alert">{{
+        props()?.errorText | dynamicText | async
+      }}</ion-note>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

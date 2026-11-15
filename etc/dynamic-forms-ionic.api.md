@@ -119,7 +119,7 @@ export type IonicCheckboxFieldComponent = IonicCheckboxFieldComponent_2;
 // @public (undocumented)
 export interface IonicCheckboxProps {
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
@@ -151,11 +151,11 @@ export type IonicDatepickerFieldComponent = IonicDatepickerFieldComponent_2;
 // @public (undocumented)
 export interface IonicDatepickerProps extends DatepickerProps {
     // (undocumented)
-    cancelText?: string;
+    cancelText?: DynamicText;
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
-    doneText?: string;
+    doneText?: DynamicText;
     // (undocumented)
     hint?: DynamicText;
     locale?: string;
@@ -268,7 +268,7 @@ export type IonicMultiCheckboxFieldComponent = IonicMultiCheckboxFieldComponent_
 // @public (undocumented)
 export interface IonicMultiCheckboxProps {
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     hint?: DynamicText;
     // (undocumented)
@@ -309,7 +309,7 @@ export type IonicRadioFieldComponent = IonicRadioFieldComponent_2;
 // @public (undocumented)
 export interface IonicRadioProps {
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     compareWith?: (o1: ValueType, o2: ValueType) => boolean;
     // (undocumented)
@@ -335,9 +335,9 @@ export type IonicSelectFieldComponent = IonicSelectFieldComponent_2;
 // @public (undocumented)
 export interface IonicSelectProps extends SelectProps {
     // (undocumented)
-    cancelText?: string;
+    cancelText?: DynamicText;
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     compareWith?: (o1: ValueType, o2: ValueType) => boolean;
     // (undocumented)
@@ -353,7 +353,7 @@ export interface IonicSelectProps extends SelectProps {
     // (undocumented)
     multiple?: boolean;
     // (undocumented)
-    okText?: string;
+    okText?: DynamicText;
     // (undocumented)
     shape?: 'round';
 }
@@ -373,7 +373,7 @@ export type IonicSliderFieldComponent = IonicSliderFieldComponent_2;
 // @public (undocumented)
 export interface IonicSliderProps {
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     dualKnobs?: boolean;
     // (undocumented)
@@ -433,7 +433,7 @@ export type IonicToggleFieldComponent = IonicToggleFieldComponent_2;
 // @public (undocumented)
 export interface IonicToggleProps {
     // (undocumented)
-    color?: 'danger' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
+    color?: 'danger' | 'dark' | 'light' | 'medium' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
     // (undocumented)
     enableOnOffLabels?: boolean;
     // (undocumented)

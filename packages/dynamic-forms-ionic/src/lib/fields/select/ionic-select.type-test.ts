@@ -56,11 +56,11 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
     });
 
     it('cancelText', () => {
-      expectTypeOf<IonicSelectProps['cancelText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicSelectProps['cancelText']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('okText', () => {
-      expectTypeOf<IonicSelectProps['okText']>().toEqualTypeOf<string | undefined>();
+      expectTypeOf<IonicSelectProps['okText']>().toEqualTypeOf<DynamicText | undefined>();
     });
 
     it('fill', () => {
@@ -77,7 +77,7 @@ describe('IonicSelectProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicSelectProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
 

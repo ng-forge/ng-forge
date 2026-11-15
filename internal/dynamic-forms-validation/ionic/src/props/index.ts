@@ -47,7 +47,7 @@ export const IonicInputPropsSchema = z.object({
 export const IonicCheckboxPropsSchema = z.object({
   labelPlacement: z.enum(['start', 'end', 'fixed', 'stacked']).optional(),
   justify: IonicJustifySchema.optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   indeterminate: z.boolean().optional(),
   hint: DynamicTextSchema.optional(),
 });
@@ -56,7 +56,7 @@ export const IonicCheckboxPropsSchema = z.object({
 export const IonicRadioPropsSchema = z.object({
   labelPlacement: z.enum(['start', 'end', 'fixed', 'stacked']).optional(),
   justify: IonicJustifySchema.optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   hint: DynamicTextSchema.optional(),
 });
 
@@ -64,7 +64,7 @@ export const IonicRadioPropsSchema = z.object({
 export const IonicTogglePropsSchema = z.object({
   labelPlacement: z.enum(['start', 'end', 'fixed', 'stacked']).optional(),
   justify: IonicJustifySchema.optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   enableOnOffLabels: z.boolean().optional(),
   hint: DynamicTextSchema.optional(),
 });
@@ -78,7 +78,7 @@ export const IonicSliderPropsSchema = z.object({
   pin: z.boolean().optional(),
   ticks: z.boolean().optional(),
   snaps: z.boolean().optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   labelPlacement: z.enum(['start', 'end', 'fixed', 'stacked']).optional(),
   hint: DynamicTextSchema.optional(),
 });
@@ -92,10 +92,10 @@ export const IonicDatepickerPropsSchema = z.object({
   showDefaultTitle: z.boolean().optional(),
   showDefaultTimeLabel: z.boolean().optional(),
   showClearButton: z.boolean().optional(),
-  doneText: z.string().optional(),
-  cancelText: z.string().optional(),
+  doneText: DynamicTextSchema.optional(),
+  cancelText: DynamicTextSchema.optional(),
   size: z.enum(['cover', 'fixed']).optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   hint: DynamicTextSchema.optional(),
   locale: z.string().refine(isLocaleTag, { message: 'Expected a BCP 47 locale tag such as "de-DE"' }).optional(),
   placeholder: DynamicTextSchema.optional(),
@@ -105,13 +105,13 @@ export const IonicDatepickerPropsSchema = z.object({
 export const IonicSelectPropsSchema = z.object({
   multiple: z.boolean().optional(),
   interface: z.enum(['action-sheet', 'popover', 'alert']).optional(),
-  cancelText: z.string().optional(),
-  okText: z.string().optional(),
+  cancelText: DynamicTextSchema.optional(),
+  okText: DynamicTextSchema.optional(),
   placeholder: DynamicTextSchema.optional(),
   fill: z.enum(['solid', 'outline']).optional(),
   shape: z.literal('round').optional(),
   labelPlacement: IonicLabelPlacementSchema.optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   hint: DynamicTextSchema.optional(),
 });
 
@@ -133,7 +133,7 @@ export const IonicTextareaPropsSchema = z.object({
 export const IonicMultiCheckboxPropsSchema = z.object({
   labelPlacement: z.enum(['start', 'end', 'fixed', 'stacked']).optional(),
   justify: IonicJustifySchema.optional(),
-  color: z.enum(['primary', 'secondary', 'tertiary', 'success', 'warning', 'danger']).optional(),
+  color: IonicColorSchema.optional(),
   hint: DynamicTextSchema.optional(),
 });
 

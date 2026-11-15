@@ -60,7 +60,7 @@ describe('IonicSliderProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicSliderProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
 

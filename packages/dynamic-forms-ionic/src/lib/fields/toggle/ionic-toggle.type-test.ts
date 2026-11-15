@@ -34,7 +34,7 @@ describe('IonicToggleProps - Exhaustive Whitelist', () => {
 
     it('color', () => {
       expectTypeOf<IonicToggleProps['color']>().toEqualTypeOf<
-        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | undefined
+        'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark' | undefined
       >();
     });
 

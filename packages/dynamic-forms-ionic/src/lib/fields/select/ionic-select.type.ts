@@ -5,12 +5,12 @@ export interface IonicSelectProps extends SelectProps {
   multiple?: boolean;
   interface?: 'action-sheet' | 'popover' | 'alert';
   interfaceOptions?: unknown;
-  cancelText?: string;
-  okText?: string;
+  cancelText?: DynamicText;
+  okText?: DynamicText;
   fill?: 'solid' | 'outline';
   shape?: 'round';
   labelPlacement?: 'start' | 'end' | 'fixed' | 'stacked' | 'floating';
-  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger';
+  color?: 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'light' | 'medium' | 'dark';
   compareWith?: (o1: ValueType, o2: ValueType) => boolean;
   hint?: DynamicText;
 }
