@@ -290,6 +290,7 @@ export type PrimeSelectFieldComponent = PrimeSelectFieldComponent_2;
 
 // @public
 export interface PrimeSelectProps extends SelectProps {
+    // @deprecated (undocumented)
     compareWith?: (o1: ValueType, o2: ValueType) => boolean;
     filter?: boolean;
     hint?: DynamicText;
