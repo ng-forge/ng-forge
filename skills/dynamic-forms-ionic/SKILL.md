@@ -9,7 +9,7 @@ description: Ionic specific field properties for @ng-forge/dynamic-forms. Use al
 
 Adapter specific `props` for `@ng-forge/dynamic-forms-ionic`.
 
-This skill documents version **1.2.0**.
+This skill documents version **1.3.0**.
 
 ## Use with the core skill
 
@@ -32,12 +32,12 @@ Fields are registered with `withIonicFields()`.
 ## Validate against this adapter
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli@1.2.0 "path/to/your.form.ts" --ui ionic
+npx --yes @ng-forge/dynamic-forms-cli@1.3.0 "path/to/your.form.ts" --ui ionic
 ```
 
 Passing the wrong `--ui` validates against a different adapter's properties, which
 can accept a config this project will not render. The version is pinned to
-`1.2.0` so the validator matches the properties listed here. Requires
+`1.3.0` so the validator matches the properties listed here. Requires
 Node 24 or newer.
 
 ## Reference

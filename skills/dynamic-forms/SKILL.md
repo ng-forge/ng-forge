@@ -9,7 +9,7 @@ description: Write and validate @ng-forge/dynamic-forms FormConfig objects for A
 
 Authoring guidance for `@ng-forge/dynamic-forms` FormConfig objects.
 
-This skill documents version **1.2.0**.
+This skill documents version **1.3.0**.
 
 ## Before you start
 
@@ -24,19 +24,19 @@ is a dev dependency. Reading `dependencies` from the nearest package.json
 reports a range like `^1.2.0` rather than what is installed, and misses both
 cases.
 
-If it does not match 1.2.0, say so before generating a config. The rules
-below track 1.2.0 and some of them have changed between releases.
+If it does not match 1.3.0, say so before generating a config. The rules
+below track 1.3.0 and some of them have changed between releases.
 
 ## The loop
 
 Do not hand back a config you have not checked. The library ships a validator:
 
 ```bash
-npx --yes @ng-forge/dynamic-forms-cli@1.2.0 "path/to/your.form.ts" --ui material
+npx --yes @ng-forge/dynamic-forms-cli@1.3.0 "path/to/your.form.ts" --ui material
 ```
 
 `--yes` matters: without it npx prompts before its first install and waits for
-an answer that will never come. The pinned `@1.2.0` matters too: it is the
+an answer that will never come. The pinned `@1.3.0` matters too: it is the
 validator built from the rules below, and unlike a floating tag it cannot change
 under you between runs. Requires Node 24 or newer.
 
