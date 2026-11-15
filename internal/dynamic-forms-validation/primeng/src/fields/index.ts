@@ -18,6 +18,7 @@ import {
   PrimeButtonPropsSchema,
 } from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { SliderValueSchema, DatepickerValueSchema } from '../../../src/lib/schemas/field/multi-value.schema';
 import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
@@ -119,7 +120,7 @@ export { PrimeMultiCheckboxFieldSchemaObject };
 const PrimeDatepickerFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('datepicker'),
   nullable: z.boolean().optional(),
-  value: z.union([z.string(), z.null()]).optional(),
+  value: DatepickerValueSchema,
   minDate: z.union([z.string(), z.null()]).optional(),
   maxDate: z.union([z.string(), z.null()]).optional(),
   startAt: z.union([z.string(), z.null()]).optional(),
@@ -156,7 +157,7 @@ export { PrimeTextareaFieldSchemaObject };
 const PrimeSliderFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('slider'),
   nullable: z.boolean().optional(),
-  value: z.number().nullable().optional(),
+  value: SliderValueSchema,
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   step: z.number().positive().optional(),

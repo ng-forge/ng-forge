@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { MatSliderPropsSchema } from '../props/mat-slider-props.schema';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { SliderValueSchema } from '../../../src/lib/schemas/field/multi-value.schema';
 
 /**
  * Schema for Material slider field.
@@ -37,7 +38,7 @@ const MatSliderFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationS
   /**
    * Initial slider value.
    */
-  value: z.number().nullable().optional(),
+  value: SliderValueSchema,
 
   /**
    * Minimum slider value.
