@@ -2,6 +2,9 @@
 
 import type { FormattedValidationError } from '../validate/src';
 
+const EXPRESSION_SYNTAX_SUGGESTION =
+  'Rewrite with property access, operators, `??`, ternaries and allowed methods, for example `(formValue.a ?? 0) + 1` instead of `parseInt(formValue.a)`, or move the logic into a custom function.';
+
 /**
  * Maps a config property (or a substring of an error message) to a
  * copy-paste-ready correction. Keyed by the property that is wrong, so the
@@ -76,6 +79,9 @@ function pathSegments(path: string): string[] {
  * suggestion, which is the honest answer.
  */
 export function getFixSuggestion(error: FormattedValidationError): string | undefined {
+  // Its path ends in `derivation` or `condition`, whose hints are about placement, not syntax.
+  if (error.ruleId === 'core/expression-syntax') return EXPRESSION_SYNTAX_SUGGESTION;
+
   // Last segment first: it is the most specific property in the path.
   for (const segment of pathSegments(error.path).reverse()) {
     if (FIX_SUGGESTIONS[segment]) {

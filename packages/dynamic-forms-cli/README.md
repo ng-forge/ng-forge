@@ -45,6 +45,7 @@ It finds every FormConfig in the matched files, validates each against the schem
 A config written as `as const satisfies FormConfig` is already type-checked. This CLI covers what the compiler does not:
 
 - Rules that are structural rather than type-level, such as containers accepting only `hidden` logic, or hidden fields requiring a `value`
+- Expressions in conditions and derivations, which are strings the compiler never reads. The CLI parses each one with the library's own parser and reports syntax it can't run, such as a direct call (`parseInt(x)`), a global (`Math`) or an empty `and`/`or` group, with the field path
 - Configs that reach your app as JSON at runtime
 - A gate in CI, and a ground-truth check for AI-generated configs where the model's own confidence is not evidence
 

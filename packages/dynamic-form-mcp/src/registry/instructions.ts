@@ -371,6 +371,8 @@ Evaluates a JavaScript expression with access to \`formValue\`, \`fieldValue\`, 
 }
 \`\`\`
 
+**Expression syntax** (javascript conditions and derivations): property access with \`?.\`, arithmetic, comparisons, \`&&\`, \`||\`, \`!\`, \`??\`, ternaries, array and object literals, and arrow functions as method arguments (\`formValue.items.some(i => i.done)\`). Mixing \`??\` with \`&&\` or \`||\` needs parentheses, as in JavaScript. Methods are limited to safe string, number, array and date methods (\`toFixed\`, \`includes\`, \`map\`, \`getFullYear\`, ...). There are no statements, no \`new\`, no direct function calls (\`parseInt(x)\`, \`String(x)\`) and no globals (\`Math\`, \`Date\`, \`JSON\`): an unknown name reads as \`undefined\`. Use a number input (\`props: { type: 'number' }\`) instead of parsing, and a custom function for anything else. The validator (MCP or CLI) reports an expression that breaks these rules, with its path, under \`core/expression-syntax\`, and in dev mode the library warns about it at startup.
+
 **Condition scoping:** in logic conditions, \`formValue\` is the whole form value regardless of where the field sits, except inside array items where it is scoped to the current item (use \`rootFormValue\` for the rest of the form). Reference group-nested fields by their full path, e.g. \`formValue.person.firstName\`. Note that \`derivation\` expressions scope differently: there \`formValue\` is also scoped to the parent group for group-nested fields.
 
 #### Custom Condition
@@ -440,6 +442,8 @@ Combine conditions with \`and\` (all must be true) or \`or\` (at least one must 
   ]
 }
 \`\`\`
+
+An empty \`conditions\` array evaluates to false, so an empty group never fires. Dev mode warns about it at startup.
 
 ## UI Library Integration
 

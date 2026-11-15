@@ -18,6 +18,8 @@ import {
   PrimeButtonPropsSchema,
 } from '../props';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { SliderValueSchema, DatepickerValueSchema } from '../../../src/lib/schemas/field/multi-value.schema';
+import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 
@@ -39,7 +41,7 @@ const PrimeValueFieldBase = BaseFieldDefSchema.merge(FieldWithValidationSchema);
 const PrimeInputFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('input'),
   nullable: z.boolean().optional(),
-  value: z.string().nullable().optional(),
+  value: InputValueSchema,
   placeholder: DynamicTextSchema.optional(),
   props: PrimeInputPropsSchema.optional(),
 });
@@ -49,7 +51,7 @@ const PrimeInputFieldSchemaObject = PrimeValueFieldBase.extend({
  * \`value: null\` is only valid when \`nullable: true\`.
  * The raw \`PrimeInputFieldSchemaObject\` is used internally for discriminatedUnion composition.
  */
-export const PrimeInputFieldSchema = PrimeInputFieldSchemaObject.superRefine(nullableValueRefine);
+export const PrimeInputFieldSchema = PrimeInputFieldSchemaObject.superRefine(nullableValueRefine).superRefine(inputValueTypeRefine);
 export { PrimeInputFieldSchemaObject };
 
 // Checkbox field
@@ -118,7 +120,7 @@ export { PrimeMultiCheckboxFieldSchemaObject };
 const PrimeDatepickerFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('datepicker'),
   nullable: z.boolean().optional(),
-  value: z.union([z.string(), z.null()]).optional(),
+  value: DatepickerValueSchema,
   minDate: z.union([z.string(), z.null()]).optional(),
   maxDate: z.union([z.string(), z.null()]).optional(),
   startAt: z.union([z.string(), z.null()]).optional(),
@@ -155,7 +157,7 @@ export { PrimeTextareaFieldSchemaObject };
 const PrimeSliderFieldSchemaObject = PrimeValueFieldBase.extend({
   type: z.literal('slider'),
   nullable: z.boolean().optional(),
-  value: z.number().nullable().optional(),
+  value: SliderValueSchema,
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   step: z.number().positive().optional(),

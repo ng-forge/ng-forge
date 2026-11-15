@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { MatInputPropsSchema } from '../props/mat-input-props.schema';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { InputValueSchema, inputValueTypeRefine } from '../../../src/lib/schemas/field/input-value.schema';
 
 /**
  * Schema for Material input field.
@@ -12,7 +13,7 @@ import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-val
  * ```typescript
  * interface MatInputField extends BaseValueField<MatInputProps, string> {
  *   type: 'input';
- *   value?: string;
+ *   value?: string | number; // number with props.type: 'number'
  *   placeholder?: DynamicText;
  * }
  * ```
@@ -34,7 +35,7 @@ const MatInputFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSc
   /**
    * Initial value for the input.
    */
-  value: z.string().nullable().optional(),
+  value: InputValueSchema,
 
   /**
    * Placeholder text (can also be in props).
@@ -52,7 +53,7 @@ const MatInputFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidationSc
  * `value: null` is only valid when `nullable: true`.
  * The raw `MatInputFieldSchemaObject` is used internally for discriminatedUnion composition.
  */
-export const MatInputFieldSchema = MatInputFieldSchemaObject.superRefine(nullableValueRefine);
+export const MatInputFieldSchema = MatInputFieldSchemaObject.superRefine(nullableValueRefine).superRefine(inputValueTypeRefine);
 export { MatInputFieldSchemaObject };
 
 export type MatInputFieldSchemaType = z.infer<typeof MatInputFieldSchema>;

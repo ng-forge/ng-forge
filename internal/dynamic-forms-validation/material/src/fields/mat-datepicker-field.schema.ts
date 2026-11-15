@@ -4,6 +4,7 @@ import { FieldWithValidationSchema } from '../../../src/lib/schemas/field/field-
 import { DynamicTextSchema } from '../../../src/lib/schemas/common/dynamic-text.schema';
 import { MatDatepickerPropsSchema } from '../props/mat-datepicker-props.schema';
 import { nullableValueRefine } from '../../../src/lib/schemas/field/nullable-value.refinement';
+import { DatepickerValueSchema } from '../../../src/lib/schemas/field/multi-value.schema';
 
 /**
  * Schema for date values - can be ISO string or Date serialization.
@@ -45,7 +46,7 @@ const MatDatepickerFieldSchemaObject = BaseFieldDefSchema.merge(FieldWithValidat
   /**
    * Initial date value (ISO string in JSON configs).
    */
-  value: DateValueSchema.nullable().optional(),
+  value: DatepickerValueSchema,
 
   /**
    * Minimum selectable date.

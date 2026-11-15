@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { TextFieldSchema } from '../../src/lib/schemas/leaves/text-field.schema';
 import { HiddenFieldSchema } from '../../src/lib/schemas/leaves/hidden-field.schema';
 import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
+import { inputValueTypeRefine } from '../../src/lib/schemas/field/input-value.schema';
 
 // Import Material-specific fields.
 // For value-bearing fields, we import the raw `<X>FieldSchemaObject` variants —
@@ -67,7 +68,8 @@ export const MatLeafFieldSchema = z
     MatPopArrayItemButtonFieldSchema,
     MatShiftArrayItemButtonFieldSchema,
   ])
-  .superRefine(nullableValueRefine);
+  .superRefine(nullableValueRefine)
+  .superRefine(inputValueTypeRefine);
 
 /**
  * Inferred type for Material leaf fields.

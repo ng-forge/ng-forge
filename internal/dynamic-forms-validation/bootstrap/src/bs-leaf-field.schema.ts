@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TextFieldSchema, HiddenFieldSchema } from '../../src/lib/schemas/leaves';
 import { nullableValueRefine } from '../../src/lib/schemas/field/nullable-value.refinement';
+import { inputValueTypeRefine } from '../../src/lib/schemas/field/input-value.schema';
 import {
   BsInputFieldSchemaObject,
   BsTextareaFieldSchemaObject,
@@ -50,6 +51,7 @@ export const BsLeafFieldSchema = z
     BsPopArrayItemButtonFieldSchema,
     BsShiftArrayItemButtonFieldSchema,
   ])
-  .superRefine(nullableValueRefine);
+  .superRefine(nullableValueRefine)
+  .superRefine(inputValueTypeRefine);
 
 export type BsLeafFieldSchemaType = z.infer<typeof BsLeafFieldSchema>;

@@ -6,6 +6,7 @@ import { BsFormConfigSchema, BsFieldSchema } from '../../../bootstrap/src';
 import { PrimeFormConfigSchema, PrimeFieldSchema } from '../../../primeng/src';
 import { IonicFormConfigSchema, IonicFieldSchema } from '../../../ionic/src';
 import { collectFieldTypeNames } from '../../../src/lib/schemas/field-type-names';
+import { findFieldExpressionProblems } from '@ng-forge/dynamic-forms-expressions';
 
 import type { UiIntegration } from '../json-schema/form-config-json-schema';
 
@@ -509,12 +510,29 @@ function preValidateConfig(config: unknown): FormattedValidationError[] {
     });
   }
 
+  // An array field's own walk reaches its template, which is checked again as a child field.
+  const reportedExpressions = new Set<string>();
+
   function checkField(field: unknown, path: string, parentType?: string): void {
     if (!field || typeof field !== 'object') return;
 
     const f = field as Record<string, unknown>;
     const fieldType = f['type'] as string | undefined;
     const fieldKey = f['key'] as string | undefined;
+
+    for (const problem of findFieldExpressionProblems(field)) {
+      const problemPath = `${path}.${problem.path}`;
+      if (reportedExpressions.has(problemPath)) continue;
+      reportedExpressions.add(problemPath);
+      errors.push({
+        path: problemPath,
+        ruleId: 'core/expression-syntax',
+        message:
+          problem.expression === undefined
+            ? `${problem.message[0].toUpperCase()}${problem.message.slice(1)}: an empty group evaluates to false.`
+            : `Expression '${problem.expression}' can never work: ${problem.message}. Expressions support property access, operators, ternaries and allowed methods only; use a custom function for anything else.`,
+      });
+    }
 
     // Check for invalid properties on validators
     const validators = f['validators'];
