@@ -180,7 +180,9 @@ describe('MatSliderField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is number', () => {
-      expectTypeOf<MatSliderField['value']>().toEqualTypeOf<number | null | undefined>();
+      expectTypeOf<MatSliderField['value']>().toEqualTypeOf<
+        number | readonly number[] | { lower: number; upper: number } | null | undefined
+      >();
     });
 
     it('placeholder', () => {

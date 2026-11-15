@@ -239,8 +239,8 @@ describe('IonicDatepickerField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys from BaseValueField', () => {
-    it('value can be Date or string', () => {
-      expectTypeOf<IonicDatepickerField['value']>().toEqualTypeOf<Date | string | null | undefined>();
+    it('value is a date, or an array of dates in multiple mode', () => {
+      expectTypeOf<IonicDatepickerField['value']>().toEqualTypeOf<Date | string | readonly (Date | string)[] | null | undefined>();
     });
 
     it('placeholder', () => {

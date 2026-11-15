@@ -74,6 +74,59 @@ describe('InferFormValue - leaf value types', () => {
 // be in ProcessField's button-exclusion union, or they leak phantom keys.
 // ============================================================================
 
+describe('InferFormValue - multi-value props', () => {
+  it('types a multiple select as an array', () => {
+    const config = {
+      fields: [
+        { key: 'one', type: 'select', value: 'a' },
+        { key: 'many', type: 'select', value: ['a'], props: { multiple: true } },
+        { key: 'manyNull', type: 'select', value: null, props: { multiple: true } },
+        { key: 'manyNoValue', type: 'select', props: { multiple: true } },
+        { key: 'manyEmpty', type: 'select', value: [], props: { multiple: true } },
+        { key: 'rangeEmpty', type: 'datepicker', value: [], props: { selectionMode: 'range' } },
+      ],
+    } as const satisfies FormConfig;
+    type V = InferFormValue<typeof config>;
+    expectTypeOf<V['one']>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<V['many']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['manyNull']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['manyNoValue']>().toEqualTypeOf<string[] | undefined>();
+    // An empty seed falls back to the default item type instead of never[].
+    expectTypeOf<V['manyEmpty']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['rangeEmpty']>().toEqualTypeOf<string[] | undefined>();
+  });
+
+  it('types range sliders by the shape each kit emits', () => {
+    const config = {
+      fields: [
+        { key: 'range', type: 'slider', value: [10, 50], props: { range: true } },
+        { key: 'knobs', type: 'slider', value: { lower: 10, upper: 50 }, props: { dualKnobs: true } },
+        { key: 'single', type: 'slider', value: 5, props: { range: false } },
+      ],
+    } as const satisfies FormConfig;
+    type V = InferFormValue<typeof config>;
+    expectTypeOf<V['range']>().toEqualTypeOf<number[] | undefined>();
+    expectTypeOf<V['knobs']>().toEqualTypeOf<{ lower: number; upper: number } | undefined>();
+    expectTypeOf<V['single']>().toEqualTypeOf<number | undefined>();
+  });
+
+  it('types multiple and range datepickers as arrays', () => {
+    const config = {
+      fields: [
+        { key: 'range', type: 'datepicker', value: null, props: { selectionMode: 'range' } },
+        { key: 'multi', type: 'datepicker', value: null, props: { selectionMode: 'multiple' } },
+        { key: 'ionMulti', type: 'datepicker', value: null, props: { multiple: true } },
+        { key: 'single', type: 'datepicker', value: null, props: { selectionMode: 'single' } },
+      ],
+    } as const satisfies FormConfig;
+    type V = InferFormValue<typeof config>;
+    expectTypeOf<V['range']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['multi']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<V['ionMulti']>().toEqualTypeOf<Date[] | undefined>();
+    expectTypeOf<V['single']>().toEqualTypeOf<string | undefined>();
+  });
+});
+
 describe('InferFormValue - array-action buttons are excluded', () => {
   it('does not leak keys for any of the 6 array-action button types', () => {
     const config = {

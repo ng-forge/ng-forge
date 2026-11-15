@@ -178,8 +178,10 @@ describe('PrimeSliderField - Exhaustive Whitelist', () => {
   });
 
   describe('value field keys', () => {
-    it('value is number', () => {
-      expectTypeOf<PrimeSliderField['value']>().toEqualTypeOf<number | null | undefined>();
+    it('value is a number, or a number array in range mode', () => {
+      expectTypeOf<PrimeSliderField['value']>().toEqualTypeOf<
+        number | readonly number[] | { lower: number; upper: number } | null | undefined
+      >();
     });
 
     it('placeholder', () => {

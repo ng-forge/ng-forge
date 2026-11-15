@@ -38,8 +38,16 @@ export interface TestCheckboxLeaf {
 export interface TestSliderLeaf {
   key: string;
   type: 'slider';
-  value?: number;
+  value?: number | readonly number[] | { lower: number; upper: number };
   required?: boolean;
+  props?: { range?: boolean; dualKnobs?: boolean };
+}
+export interface TestSelectLeaf {
+  key: string;
+  type: 'select';
+  value?: unknown;
+  required?: boolean;
+  props?: { multiple?: boolean };
 }
 export interface TestToggleLeaf {
   key: string;
@@ -50,8 +58,9 @@ export interface TestToggleLeaf {
 export interface TestDatepickerLeaf {
   key: string;
   type: 'datepicker';
-  value?: Date | string | null;
+  value?: Date | string | readonly (Date | string)[] | null;
   required?: boolean;
+  props?: { multiple?: boolean; selectionMode?: 'single' | 'multiple' | 'range' };
 }
 export interface TestMultiCheckboxLeaf {
   key: string;
@@ -78,6 +87,7 @@ declare module '@ng-forge/dynamic-forms/internal' {
     input: TestInputLeaf;
     checkbox: TestCheckboxLeaf;
     slider: TestSliderLeaf;
+    select: TestSelectLeaf;
     toggle: TestToggleLeaf;
     datepicker: TestDatepickerLeaf;
     'multi-checkbox': TestMultiCheckboxLeaf;

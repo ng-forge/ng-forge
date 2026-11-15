@@ -8,7 +8,8 @@ export type DatepickerProps = object;
 
 export interface DatepickerField<TProps, TNullable extends boolean = boolean> extends BaseValueField<
   TProps,
-  Date | string,
+  // A date, or several from kits with multiple or range selection (PrimeNG, Ionic).
+  Date | string | readonly (Date | string)[],
   FieldMeta,
   TNullable
 > {

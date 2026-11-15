@@ -34,6 +34,8 @@ Single or multi-select dropdown.
 
 <docs-adapter-props field="select"></docs-adapter-props>
 
+With `props.multiple: true`, every adapter stores an array of the selected values, and the inferred form value type is an array too.
+
 <docs-live-example scenario="examples/select" hideForCustom="true" showHeading="true"></docs-live-example>
 
 ## radio

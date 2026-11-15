@@ -82,7 +82,7 @@ export const FIELD_TYPES: FieldTypeInfo[] = [
       multiple: {
         name: 'multiple',
         type: 'boolean',
-        description: 'Allow multiple selections',
+        description: 'Allow multiple selections. The value becomes an array of the selected values',
         required: false,
         default: false,
       },

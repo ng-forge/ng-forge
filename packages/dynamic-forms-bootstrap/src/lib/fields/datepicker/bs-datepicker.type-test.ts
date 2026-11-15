@@ -201,7 +201,7 @@ describe('BsDatepickerField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is Date or string', () => {
-      expectTypeOf<BsDatepickerField['value']>().toEqualTypeOf<Date | string | null | undefined>();
+      expectTypeOf<BsDatepickerField['value']>().toEqualTypeOf<Date | string | readonly (Date | string)[] | null | undefined>();
     });
 
     it('placeholder', () => {

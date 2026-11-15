@@ -84,7 +84,7 @@ const DISPLAY_FORMATS = {
         <ion-content>
           <ion-datetime
             [presentation]="props()?.presentation ?? 'date'"
-            [value]="dateToIsoString(dateValue)"
+            [value]="valueToIso(dateValue)"
             [multiple]="props()?.multiple ?? false"
             [preferWheel]="props()?.preferWheel ?? false"
             [showDefaultButtons]="props()?.showDefaultButtons ?? false"
@@ -117,7 +117,7 @@ const DISPLAY_FORMATS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class IonicDatepickerFieldComponent {
-  protected readonly ngf = injectNgForgeField<Date | null>();
+  protected readonly ngf = injectNgForgeField<Date | readonly Date[] | null>();
 
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
@@ -145,26 +145,39 @@ export default class IonicDatepickerFieldComponent {
   }
 
   onDateChange(event: CustomEvent) {
-    const value = event.detail.value;
-    // ion-datetime emits ISO 8601 strings internally; convert to Date | null
-    // to match the field tree's value type.
-    if (value && typeof value === 'string' && value.length > 0) {
-      const date = new Date(value);
-      this.ngf.field()().value.set(date);
-    } else {
-      this.ngf.field()().value.set(null);
+    // ion-datetime emits ISO 8601 strings (an array in multiple mode); store Date values.
+    const value: unknown = event.detail.value;
+    if (Array.isArray(value)) {
+      this.ngf
+        .field()()
+        .value.set(value.map((iso: string) => new Date(iso)));
+      // Keep the picker open so more dates can be chosen.
+      return;
     }
+    this.ngf
+      .field()()
+      .value.set(typeof value === 'string' && value.length > 0 ? new Date(value) : null);
     this.closeModal();
   }
 
-  dateToIsoString(date: Date | null | undefined): string | undefined {
-    if (!date) return undefined;
-    return date.toISOString();
+  /** The field value as ion-datetime expects it: an ISO string, or an array of them in multiple mode. */
+  valueToIso(value: Date | readonly Date[] | null | undefined): string | string[] | undefined {
+    if (!value) return undefined;
+    return isDateArray(value) ? value.map((d) => d.toISOString()) : value.toISOString();
   }
 
-  formatDisplayDate(date: Date | null | undefined): string {
+  dateToIsoString(date: Date | null | undefined): string | undefined {
+    return date ? date.toISOString() : undefined;
+  }
+
+  formatDisplayDate(date: Date | readonly Date[] | null | undefined): string {
     if (!date) return '';
     const options = DISPLAY_FORMATS[this.props()?.presentation ?? 'date'];
-    return new Intl.DateTimeFormat(this.locale(), options).format(date);
+    const format = new Intl.DateTimeFormat(this.locale(), options);
+    return isDateArray(date) ? date.map((d) => format.format(d)).join(', ') : format.format(date);
   }
+}
+
+function isDateArray(value: Date | readonly Date[]): value is readonly Date[] {
+  return Array.isArray(value);
 }

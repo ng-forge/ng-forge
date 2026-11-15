@@ -179,7 +179,9 @@ describe('BsSliderField - Exhaustive Whitelist', () => {
 
   describe('value field keys', () => {
     it('value is number', () => {
-      expectTypeOf<BsSliderField['value']>().toEqualTypeOf<number | null | undefined>();
+      expectTypeOf<BsSliderField['value']>().toEqualTypeOf<
+        number | readonly number[] | { lower: number; upper: number } | null | undefined
+      >();
     });
 
     it('placeholder', () => {

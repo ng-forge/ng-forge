@@ -7,7 +7,7 @@ export type { InputMeta, AutocompleteValue, InputMode, EnterKeyHint, Autocapital
 export type { MultiCheckboxField } from './multi-checkbox-field';
 export type { RadioField } from './radio-field';
 export type { SelectField, SelectProps } from './select-field';
-export type { SliderField } from './slider-field';
+export type { SliderField, SliderValue } from './slider-field';
 export type { TextareaField, TextareaProps } from './textarea-field';
 export type { TextareaMeta, TextareaWrap } from './textarea-meta';
 export type { ToggleField } from './toggle-field';
