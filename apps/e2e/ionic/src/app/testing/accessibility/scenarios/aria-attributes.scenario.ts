@@ -40,6 +40,18 @@ const config = {
       },
     },
     {
+      key: 'choiceField',
+      type: 'radio',
+      label: 'Pick One',
+      options: [
+        { value: 'a', label: 'Option A' },
+        { value: 'b', label: 'Option B' },
+      ],
+      props: {
+        hint: 'Choose one option',
+      },
+    },
+    {
       key: 'submit',
       type: 'submit',
       label: 'Submit',

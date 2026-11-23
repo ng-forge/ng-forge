@@ -17,7 +17,7 @@ import { BsRadioGroupComponent } from './bs-radio-group.component';
 
     <div class="mb-3">
       @if (ngf.label(); as label) {
-        <div class="form-label">{{ label | dynamicText | async }}</div>
+        <div class="form-label" [id]="ngf.key() + '-label'">{{ label | dynamicText | async }}</div>
       }
 
       <df-bs-radio-group [formField]="f" [label]="ngf.label()" [options]="options()" [properties]="props()" />

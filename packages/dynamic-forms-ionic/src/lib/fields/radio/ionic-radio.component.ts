@@ -18,10 +18,12 @@ import { AsyncPipe } from '@angular/common';
       <div class="radio-label">{{ label | dynamicText | async }}</div>
     }
 
+    <!-- aria-label, not aria-labelledby: ion-radio-group overwrites aria-labelledby on render -->
     <ion-radio-group
       [id]="radioGroupId"
       [formField]="f"
       [compareWith]="props()?.compareWith || defaultCompare"
+      [attr.aria-label]="(ngf.label() | dynamicText | async) || null"
       [attr.aria-invalid]="ngf.ariaInvalid()"
       [attr.aria-required]="ngf.ariaRequired()"
       [attr.aria-describedby]="ngf.ariaDescribedBy()"
