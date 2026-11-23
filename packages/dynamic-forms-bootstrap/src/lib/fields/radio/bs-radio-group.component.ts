@@ -28,6 +28,7 @@ export interface BsRadioGroupProps {
   imports: [DynamicTextPipe, AsyncPipe, NgForgeControl],
   host: {
     role: 'radiogroup',
+    '[attr.aria-labelledby]': 'parentField?.label() ? parentField.key() + "-label" : null',
     '[attr.aria-invalid]': 'parentField?.ariaInvalid() || null',
     '[attr.aria-required]': 'parentField?.ariaRequired()',
     '[attr.aria-describedby]': 'parentField?.ariaDescribedBy()',

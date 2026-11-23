@@ -18,12 +18,13 @@ import { MATERIAL_CONFIG } from '@ng-forge/dynamic-forms-material/shared';
     @let radioGroupId = ngf.key() + '-radio-group';
 
     @if (ngf.label()) {
-      <div class="radio-label">{{ ngf.label() | dynamicText | async }}</div>
+      <div class="radio-label" [id]="ngf.key() + '-label'">{{ ngf.label() | dynamicText | async }}</div>
     }
 
     <mat-radio-group
       [id]="radioGroupId"
       [formField]="f"
+      [attr.aria-labelledby]="ngf.label() ? ngf.key() + '-label' : null"
       [attr.aria-invalid]="ngf.ariaInvalid()"
       [attr.aria-required]="ngf.ariaRequired()"
       [attr.aria-describedby]="ngf.ariaDescribedBy()"

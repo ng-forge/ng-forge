@@ -15,7 +15,7 @@ import { PrimeRadioGroupComponent } from './prime-radio-group.component';
   template: `
     @let f = ngf.field();
     @if (ngf.label()) {
-      <div class="radio-label">{{ ngf.label() | dynamicText | async }}</div>
+      <div class="radio-label" [id]="ngf.key() + '-label'">{{ ngf.label() | dynamicText | async }}</div>
     }
 
     <df-prime-radio-group [formField]="f" [options]="options()" [properties]="props()" />
