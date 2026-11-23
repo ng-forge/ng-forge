@@ -77,6 +77,22 @@ test.describe('Accessibility Tests', () => {
       // (aria-invalid may not be set to "false" - absence of true is valid per ARIA spec)
       await expect(requiredIonInput).not.toHaveClass(/ion-invalid/, { timeout: 5000 });
     });
+
+    test('radio group is named by its label and keeps its hint after a value change', async ({ helpers }) => {
+      const scenario = helpers.getScenario('aria-attributes');
+      const group = scenario.locator('#choiceField ion-radio-group');
+      await expect(group).toBeVisible({ timeout: 10000 });
+
+      const expectNameAndHint = async () => {
+        await expect(group).toHaveAccessibleName('Pick One');
+        await expect(group).toHaveAttribute('aria-describedby', 'choiceField-hint');
+      };
+
+      await expectNameAndHint();
+      await scenario.locator('#choiceField ion-radio').first().click();
+      await expect(group).toHaveJSProperty('value', 'a');
+      await expectNameAndHint();
+    });
   });
 
   test.describe('Error Announcements', () => {

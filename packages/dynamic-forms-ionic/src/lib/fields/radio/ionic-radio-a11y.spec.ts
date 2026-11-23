@@ -20,19 +20,18 @@ async function render(label?: string): Promise<HTMLElement> {
   return fixture.nativeElement as HTMLElement;
 }
 
+// ion-radio-group overwrites aria-labelledby when it renders, so the group is named with aria-label.
+// The e2e accessibility suite checks the name survives hydration.
 describe('IonicRadioFieldComponent accessible name', () => {
   it('names the radio group with its visible label', async () => {
     const host = await render('Pick one');
-    const group = host.querySelector('ion-radio-group') as HTMLElement;
-    const labelId = group.getAttribute('aria-labelledby');
 
-    expect(labelId).toBeTruthy();
-    expect(host.querySelector(`#${labelId}`)?.textContent?.trim()).toBe('Pick one');
+    expect(host.querySelector('ion-radio-group')?.getAttribute('aria-label')).toBe('Pick one');
   });
 
-  it('sets no aria-labelledby without a label', async () => {
+  it('sets no aria-label without a label', async () => {
     const host = await render();
 
-    expect(host.querySelector('ion-radio-group')?.hasAttribute('aria-labelledby')).toBe(false);
+    expect(host.querySelector('ion-radio-group')?.hasAttribute('aria-label')).toBe(false);
   });
 });
