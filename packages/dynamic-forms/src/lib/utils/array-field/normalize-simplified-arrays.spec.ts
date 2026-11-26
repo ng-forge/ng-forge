@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeSimplifiedArrays } from './normalize-simplified-arrays';
 import { getNormalizedArrayMetadata } from './normalized-array-metadata';
-import { FieldDef } from '@ng-forge/dynamic-forms/internal';
+import { evaluateNonFieldHidden, FieldDef, LogicConfig } from '@ng-forge/dynamic-forms/internal';
 
 // Helper to cast field literals to FieldDef<unknown>
 const fields = (...defs: Record<string, unknown>[]) => defs as FieldDef<unknown>[];
@@ -507,6 +507,23 @@ describe('normalizeSimplifiedArrays', () => {
       expect((result[0] as Record<string, unknown>).hidden).toBe(true);
       // The add button hides together with the array, as it does for hidden logic.
       expect((result[1] as Record<string, unknown>).hidden).toBe(true);
+    });
+
+    it('should let static hidden win over a visible hidden-logic condition on the array and its add button', () => {
+      const logic = [{ type: 'hidden', condition: false }];
+      const result = normalizeSimplifiedArrays(fields({ key: 'tags', type: 'array', template: primitiveTemplate, hidden: true, logic }));
+
+      for (const field of result.slice(0, 2) as Record<string, unknown>[]) {
+        expect(field.hidden).toBe(true);
+        expect(field.logic).toEqual(logic);
+        // The explicit flag short-circuits before the form is read, so no form is needed.
+        const hiddenState = evaluateNonFieldHidden({
+          form: undefined as never,
+          fieldLogic: field.logic as LogicConfig[],
+          explicitValue: field.hidden as boolean,
+        });
+        expect(hiddenState).toBe(true);
+      }
     });
 
     it('should keep disabled and readonly on the expanded array field only', () => {
