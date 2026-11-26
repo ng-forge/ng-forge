@@ -500,6 +500,41 @@ describe('normalizeSimplifiedArrays', () => {
     });
   });
 
+  describe('static state flag preservation', () => {
+    it('should keep hidden on the expanded array field and its add button', () => {
+      const result = normalizeSimplifiedArrays(fields({ key: 'tags', type: 'array', template: primitiveTemplate, hidden: true }));
+
+      expect((result[0] as Record<string, unknown>).hidden).toBe(true);
+      // The add button hides together with the array, as it does for hidden logic.
+      expect((result[1] as Record<string, unknown>).hidden).toBe(true);
+    });
+
+    it('should keep disabled and readonly on the expanded array field only', () => {
+      const result = normalizeSimplifiedArrays(
+        fields({ key: 'tags', type: 'array', template: primitiveTemplate, disabled: true, readonly: true }),
+      );
+
+      const arrayField = result[0] as Record<string, unknown>;
+      expect(arrayField.disabled).toBe(true);
+      expect(arrayField.readonly).toBe(true);
+
+      // A full-API array never disables its add button, so the generated one does not either.
+      const addButton = result[1] as Record<string, unknown>;
+      expect(addButton).not.toHaveProperty('disabled');
+      expect(addButton).not.toHaveProperty('readonly');
+    });
+
+    it('should not add state flags when not specified', () => {
+      const result = normalizeSimplifiedArrays(fields({ key: 'tags', type: 'array', template: primitiveTemplate }));
+
+      for (const field of result) {
+        expect(field).not.toHaveProperty('hidden');
+        expect(field).not.toHaveProperty('disabled');
+        expect(field).not.toHaveProperty('readonly');
+      }
+    });
+  });
+
   describe('container validator preservation', () => {
     it('should preserve validators on the expanded array field', () => {
       const input = fields({

@@ -100,6 +100,9 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
     validationMessages,
     required,
     validateWhenHidden,
+    hidden,
+    disabled,
+    readonly,
   } = field;
   const isObjectTemplate = Array.isArray(template);
   const values = value as unknown[];
@@ -165,6 +168,16 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
   if (validateWhenHidden !== undefined) {
     arrayFieldObj['validateWhenHidden'] = validateWhenHidden;
   }
+  // Static state flags mean the same on the expanded array as on a full-API array.
+  if (hidden !== undefined) {
+    arrayFieldObj['hidden'] = hidden;
+  }
+  if (disabled !== undefined) {
+    arrayFieldObj['disabled'] = disabled;
+  }
+  if (readonly !== undefined) {
+    arrayFieldObj['readonly'] = readonly;
+  }
 
   // Safe cast: we're constructing a valid ArrayField shape with key, type, and fields
   const arrayField = arrayFieldObj as unknown as FieldDef<unknown>;
@@ -204,6 +217,9 @@ function expandSimplifiedArray(field: SimplifiedArrayField): ExpandedArray {
       // Logic is intentionally shared with the array field so the add button
       // hides/shows together with the array (e.g., when a hidden condition applies).
       ...(logic && { logic }),
+      // Static `hidden` is shared for the same reason. `disabled` and `readonly` stay on the
+      // array: a full-API array never disables its add button either.
+      ...(hidden !== undefined && { hidden }),
     } as unknown as FieldDef<unknown>;
   }
 
