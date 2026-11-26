@@ -7,13 +7,13 @@ import TestInputHarnessComponent from '../../test-utils/src/harnesses/test-input
 import TestCheckboxHarnessComponent from '../../test-utils/src/harnesses/test-checkbox.harness';
 import TestSelectHarnessComponent from '../../test-utils/src/harnesses/test-select.harness';
 import { FIELD_REGISTRY, FieldTypeDefinition } from '@ng-forge/dynamic-forms/internal';
-import { checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
+import { addArrayItemButtonMapper, checkboxFieldMapper, optionsFieldMapper, valueFieldMapper } from '@ng-forge/dynamic-forms/integration';
 import { BUILT_IN_FIELDS, BUILT_IN_WRAPPERS } from './providers/built-in-fields';
 import { FieldWrapper, WRAPPER_REGISTRY, WrapperTypeDefinition } from '@ng-forge/dynamic-forms/internal';
 import { ARRAY_CONTEXT } from '@ng-forge/dynamic-forms/internal';
 import { ArrayContext } from '@ng-forge/dynamic-forms/internal';
 import { BaseCheckedField, BaseValueField } from '@ng-forge/dynamic-forms/internal';
-import { ChangeDetectionStrategy, Component, DebugElement, inject, viewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DebugElement, inject, input, viewChild, ViewContainerRef } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
 import { FormResetEvent } from './events/constants/form-reset.event';
 import { FormClearEvent } from './events/constants/form-clear.event';
@@ -68,6 +68,26 @@ class TestChildWrapperComponent implements FieldWrapper {
 class TestArrayContextWrapperComponent implements FieldWrapper {
   readonly fieldComponent = viewChild.required('fieldComponent', { read: ViewContainerRef });
   readonly arrayContext = inject(ARRAY_CONTEXT, { optional: true }) as ArrayContext | null;
+}
+
+/** Minimal add-array-item button: renders nothing while hidden, like the adapter buttons. */
+@Component({
+  selector: 'test-add-array-item-button',
+  template: `@if (!hidden()) {
+    <button type="button" data-testid="add-array-item-button">{{ label() }}</button>
+  }`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestAddArrayItemButtonComponent {
+  readonly key = input<string>('');
+  readonly label = input<string>('');
+  readonly className = input<string>('');
+  readonly props = input<unknown>();
+  readonly hidden = input(false);
+  readonly disabled = input(false);
+  readonly event = input<unknown>();
+  readonly eventArgs = input<unknown>();
+  readonly eventContext = input<unknown>();
 }
 
 const TEST_WRAPPER_TYPES: WrapperTypeDefinition[] = [
@@ -3513,6 +3533,56 @@ describe('DynamicFormComponent', () => {
 
       const wrapperEls2 = fixture.nativeElement.querySelectorAll('.dynamic-item-wrapper');
       expect(wrapperEls2.length).toBe(2);
+    });
+  });
+
+  describe('Hidden simplified arrays', () => {
+    const registerAddButton = () => {
+      TestBed.inject(FIELD_REGISTRY).set('add-array-item', {
+        name: 'add-array-item',
+        loadComponent: () => Promise.resolve(TestAddArrayItemButtonComponent),
+        mapper: addArrayItemButtonMapper as FieldTypeDefinition['mapper'],
+        // Same as the adapters' button types: no form value, ready without a `field` input.
+        renderReadyWhen: [],
+        valueHandling: 'exclude',
+      });
+    };
+
+    const renderTags = async (overrides: Record<string, unknown>) => {
+      registerAddButton();
+      const config = {
+        fields: [
+          {
+            type: 'array',
+            key: 'tags',
+            template: { key: 'value', type: 'input', label: 'Tag' },
+            value: ['angular'],
+            removeButton: false,
+            ...overrides,
+          },
+        ],
+      } as TestFormConfig;
+
+      const { fixture } = createComponent(config);
+      await waitForDynamicComponents(fixture);
+      return fixture.nativeElement as HTMLElement;
+    };
+
+    it('should display a visible simplified array and its add button', async () => {
+      const root = await renderTags({});
+
+      const arrayEl = root.querySelector('[data-testid="tags"]');
+      expect(arrayEl).toBeTruthy();
+      expect(arrayEl!.classList.contains('df-container-hidden')).toBe(false);
+      expect(root.querySelector('[data-testid="add-array-item-button"]')).toBeTruthy();
+    });
+
+    it('should not display a simplified array with hidden: true or its add button', async () => {
+      const root = await renderTags({ hidden: true });
+
+      const arrayEl = root.querySelector('[data-testid="tags"]');
+      expect(arrayEl === null || arrayEl.classList.contains('df-container-hidden')).toBe(true);
+      expect(root.querySelector('[data-testid="add-array-item-button"]')).toBeNull();
     });
   });
 
