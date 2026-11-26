@@ -738,6 +738,48 @@ describe('FormStateManager', () => {
       expect(pages[0].key).toBe('page1');
       expect(pages[1].key).toBe('page2');
     });
+
+    it('should expand simplified arrays nested in pages into array + add button', () => {
+      const { stateManager } = initManager({
+        fields: [
+          {
+            type: 'page',
+            key: 'page1',
+            fields: [
+              {
+                type: 'row',
+                key: 'row1',
+                fields: [
+                  {
+                    type: 'array',
+                    key: 'people',
+                    template: [{ type: 'input', key: 'name', label: 'Name' }],
+                    addButton: { label: 'Add person' },
+                  },
+                ],
+              },
+              {
+                type: 'array',
+                key: 'tags',
+                template: { type: 'input', key: 'tag', label: 'Tag' },
+              },
+            ],
+          },
+        ],
+      } as TestFormConfig);
+
+      const [page] = stateManager.pageFieldDefinitions();
+      const pageChildren = page.fields as { key: string; type: string; fields?: { key: string; type: string; label?: string }[] }[];
+      expect(pageChildren.map((f) => [f.key, f.type])).toEqual([
+        ['row1', 'row'],
+        ['tags', 'array'],
+        ['tags__add', 'add-array-item'],
+      ]);
+      expect(pageChildren[0].fields?.map((f) => [f.key, f.type, f.label])).toEqual([
+        ['people', 'array', undefined],
+        ['people__add', 'add-array-item', 'Add person'],
+      ]);
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────

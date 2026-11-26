@@ -332,7 +332,9 @@ export class FormStateManager<
     const mode = this.formModeDetection().mode;
 
     if (mode === 'paged' && config?.fields) {
-      return config.fields.filter(isPageField);
+      // Pages render their own children, so simplified arrays inside them must be
+      // expanded here too (array + generated add button), like the non-paged path.
+      return normalizeSimplifiedArrays(config.fields as FieldDef<unknown>[]).filter(isPageField);
     }
 
     return [] as PageField[];
